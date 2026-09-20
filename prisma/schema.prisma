@@ -1,0 +1,847 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Profile {
+  id          String   @id @default(uuid()) @db.Uuid
+  email       String   @unique
+  displayName String   @map("display_name")
+  avatarUrl   String?  @map("avatar_url")
+  bio         String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  actors      Actor[]
+
+  @@map("profiles")
+}
+
+model Actor {
+  id           String      @id @default(uuid()) @db.Uuid
+  ownerUserId  String      @map("owner_user_id") @db.Uuid
+  name         String
+  actorType    ActorType   @default(INDIVIDUAL) @map("actor_type")
+  sector       String
+  description  String?
+  location     String?
+  contactEmail String?     @map("contact_email")
+  contactPhone String?     @map("contact_phone")
+  websiteUrl   String?     @map("website_url")
+  status       ActorStatus @default(DRAFT)
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  archivedAt   DateTime?   @map("archived_at")
+  owner        Profile     @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+
+  assets      Asset[]
+  goals       Goal[]
+  needs       Need[]
+  constraints Constraint[]
+
+  createdOpportunities         Opportunity[]                 @relation("CreatedOpportunities")
+  opportunityParticipations    OpportunityParticipant[]
+  sourceComplementarities      ComplementarityEvaluation[]   @relation("SourceActorComplementarities")
+  targetComplementarities      ComplementarityEvaluation[]   @relation("TargetActorComplementarities")
+
+  collaborationPlansCreated     CollaborationPlan[]           @relation("PlanCreator")
+  collaborationRoles            CollaborationRole[]
+  collaborationParticipations   CollaborationParticipant[]
+  tasksAssigned                 Task[]
+  feedbacks                     Feedback[]
+
+  createdProjectBriefs         ProjectBrief[]                @relation("CreatedProjectBriefs")
+  collaborationInterests       CollaborationInterest[]
+
+  @@index([ownerUserId])
+  @@index([status])
+  @@index([sector])
+  @@map("actors")
+}
+
+model Asset {
+  id             String        @id @default(uuid()) @db.Uuid
+  actorId        String        @map("actor_id") @db.Uuid
+  category       AssetCategory
+  subtype        String
+  name           String
+  description    String?
+  roles          AssetRole[]
+  attributes     Json          @default("{}")
+  sourceType     SourceType    @default(SELF_REPORTED) @map("source_type")
+  confidenceLevel ConfidenceLevel @default(MEDIUM) @map("confidence_level")
+  status         AssetStatus   @default(ACTIVE)
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  archivedAt     DateTime?     @map("archived_at")
+
+  actor          Actor         @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  opportunityAssets            OpportunityAsset[]
+  sourceAssetComplementarities ComplementarityEvaluation[]   @relation("SourceAssetComplementarities")
+  targetAssetComplementarities ComplementarityEvaluation[]   @relation("TargetAssetComplementarities")
+
+  @@index([actorId])
+  @@index([category])
+  @@index([status])
+  @@map("assets")
+}
+
+model Goal {
+  id          String       @id @default(uuid()) @db.Uuid
+  actorId     String       @map("actor_id") @db.Uuid
+  category    GoalCategory
+  title       String
+  description String?
+  priority    Int          @default(3)
+  target      Json?
+  status      GoalStatus   @default(ACTIVE)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  actor       Actor        @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  needs       Need[]
+
+  opportunityGoals OpportunityGoal[]
+
+  @@index([actorId])
+  @@index([category])
+  @@map("goals")
+}
+
+model Need {
+  id            String       @id @default(uuid()) @db.Uuid
+  actorId       String       @map("actor_id") @db.Uuid
+  relatedGoalId String?      @map("related_goal_id") @db.Uuid
+  category      NeedCategory
+  title         String
+  description   String?
+  priority      Int          @default(3)
+  status        NeedStatus   @default(ACTIVE)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  actor         Actor        @relation(fields: [actorId], references: [id], onDelete: Cascade)
+  relatedGoal   Goal?        @relation(fields: [relatedGoalId], references: [id], onDelete: SetNull)
+
+  opportunityNeeds OpportunityNeed[]
+
+  @@index([actorId])
+  @@index([category])
+  @@map("needs")
+}
+
+model Constraint {
+  id             String           @id @default(uuid()) @db.Uuid
+  actorId        String           @map("actor_id") @db.Uuid
+  type           ConstraintType
+  value          Json
+  unit           String?
+  operator       ConstraintOperator? @default(LTE)
+  severity       ConstraintSeverity @default(SOFT)
+  negotiability  Negotiability    @default(NEGOTIABLE)
+  sourceType     SourceType       @default(SELF_REPORTED) @map("source_type")
+  confidenceLevel ConfidenceLevel @default(MEDIUM) @map("confidence_level")
+  notes          String?
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  actor          Actor            @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  constraintEvaluations ConstraintEvaluation[]
+
+  @@index([actorId])
+  @@index([type])
+  @@map("constraints")
+}
+
+enum ActorStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum ActorType {
+  INDIVIDUAL
+  STUDIO
+  COLLECTIVE
+  MSME
+}
+
+enum AssetCategory {
+  PRODUCT
+  MATERIAL
+  CAPABILITY
+  RESOURCE
+  PRODUCTION
+  MARKET
+  AUDIENCE
+  CREATIVE_ASSET
+}
+
+enum AssetRole {
+  INPUT
+  CAPABILITY
+  COMPONENT
+  ENABLER
+  CHANNEL
+  MARKET_ACCESS
+  CREATIVE_ELEMENT
+  RESOURCE
+  OUTPUT
+}
+
+enum AssetStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum GoalCategory {
+  MARKET_EXPANSION
+  PRODUCT_DEVELOPMENT
+  BRAND_GROWTH
+  REVENUE_GROWTH
+  CAPABILITY_EXPANSION
+  NETWORK_EXPANSION
+  MARKET_ACCESS
+  CREATIVE_EXPERIMENTATION
+  CULTURAL_PRESERVATION
+  OPERATIONAL_IMPROVEMENT
+}
+
+enum GoalStatus {
+  ACTIVE
+  ACHIEVED
+  PAUSED
+  CANCELLED
+}
+
+enum NeedCategory {
+  CAPABILITY_NEED
+  RESOURCE_NEED
+  MATERIAL_NEED
+  PRODUCTION_NEED
+  MARKET_NEED
+  DISTRIBUTION_NEED
+  CREATIVE_NEED
+  TECHNOLOGY_NEED
+  FUNDING_NEED
+  SPACE_NEED
+}
+
+enum NeedStatus {
+  ACTIVE
+  FULFILLED
+  CANCELLED
+}
+
+enum ConstraintType {
+  BUDGET
+  CAPACITY
+  TIME
+  AVAILABILITY
+  LOCATION
+  LEAD_TIME
+  MINIMUM_ORDER
+  EQUIPMENT
+  CAPABILITY
+  LEGAL
+  IP
+  MARKET
+}
+
+enum ConstraintSeverity {
+  HARD
+  SOFT
+  UNKNOWN
+}
+
+enum ConstraintOperator {
+  LTE
+  GTE
+  EQ
+  BETWEEN
+  IN
+  NOT_IN
+}
+
+enum Negotiability {
+  FIXED
+  NEGOTIABLE
+  FLEXIBLE
+}
+
+enum SourceType {
+  SELF_REPORTED
+  VERIFIED
+  INFERRED
+}
+
+enum ConfidenceLevel {
+  HIGH
+  MEDIUM
+  LOW
+  UNKNOWN
+}
+
+model OpportunityPattern {
+  id              String        @id @default(uuid()) @db.Uuid
+  code            String        @unique
+  name            String
+  description     String
+  category        String?
+  version         Int           @default(1)
+  status          PatternStatus @default(ACTIVE)
+  requiredRoles   Json          @default("[]") @map("required_roles")
+  optionalRoles   Json          @default("[]") @map("optional_roles")
+  expectedOutputs Json          @default("[]") @map("expected_outputs")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  opportunities   Opportunity[]
+
+  @@map("opportunity_patterns")
+}
+
+model Opportunity {
+  id                 String             @id @default(uuid()) @db.Uuid
+  createdByActorId   String?            @map("created_by_actor_id") @db.Uuid
+  patternId          String?            @map("pattern_id") @db.Uuid
+  patternCode        String             @map("pattern_code")
+  patternVersion     Int                @default(1) @map("pattern_version")
+  title              String
+  description        String
+  targetMarket       Json?              @map("target_market")
+  expectedOutputs    Json               @default("[]") @map("expected_outputs")
+  status             OpportunityStatus  @default(GENERATED)
+  feasibilityStatus  FeasibilityStatus  @default(FEASIBLE) @map("feasibility_status")
+  freshnessStatus    FreshnessStatus    @default(CURRENT) @map("freshness_status")
+  explanation        Json               @default("{}")
+  inputSnapshot      Json               @default("{}") @map("input_snapshot")
+  resultSnapshot     Json               @default("{}") @map("result_snapshot")
+  engineVersion      String             @default("1.0.0") @map("engine_version")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+  archivedAt         DateTime?          @map("archived_at")
+
+  createdByActor     Actor?             @relation("CreatedOpportunities", fields: [createdByActorId], references: [id], onDelete: SetNull)
+  pattern            OpportunityPattern? @relation(fields: [patternId], references: [id], onDelete: SetNull)
+
+  participants       OpportunityParticipant[]
+  assets             OpportunityAsset[]
+  goals              OpportunityGoal[]
+  needs              OpportunityNeed[]
+  scores             OpportunityScore[]
+  constraintEvaluations ConstraintEvaluation[]
+
+  collaborationPlans CollaborationPlan[]
+  feedbacks          Feedback[]
+
+  @@index([createdByActorId])
+  @@index([status])
+  @@index([feasibilityStatus])
+  @@map("opportunities")
+}
+
+model OpportunityParticipant {
+  id            String      @id @default(uuid()) @db.Uuid
+  opportunityId String      @map("opportunity_id") @db.Uuid
+  actorId       String      @map("actor_id") @db.Uuid
+  roleCode      String      @map("role_code")
+  roleLabel     String?     @map("role_label")
+  contribution  String?
+  status        String      @default("CONFIRMED")
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  actor         Actor       @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, actorId])
+  @@index([actorId])
+  @@map("opportunity_participants")
+}
+
+model OpportunityAsset {
+  id            String      @id @default(uuid()) @db.Uuid
+  opportunityId String      @map("opportunity_id") @db.Uuid
+  assetId       String      @map("asset_id") @db.Uuid
+  roleCode      String?     @map("role_code")
+  contribution  String?
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  asset         Asset       @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, assetId])
+  @@index([assetId])
+  @@map("opportunity_assets")
+}
+
+model OpportunityGoal {
+  opportunityId String      @map("opportunity_id") @db.Uuid
+  goalId        String      @map("goal_id") @db.Uuid
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  goal          Goal        @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@id([opportunityId, goalId])
+  @@map("opportunity_goals")
+}
+
+model OpportunityNeed {
+  opportunityId String      @map("opportunity_id") @db.Uuid
+  needId        String      @map("need_id") @db.Uuid
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  need          Need        @relation(fields: [needId], references: [id], onDelete: Cascade)
+
+  @@id([opportunityId, needId])
+  @@map("opportunity_needs")
+}
+
+model OpportunityScore {
+  id                     String      @id @default(uuid()) @db.Uuid
+  opportunityId          String      @map("opportunity_id") @db.Uuid
+  complementarityScore   Float       @default(0) @map("complementarity_score")
+  goalAlignmentScore     Float       @default(0) @map("goal_alignment_score")
+  needCoverageScore      Float       @default(0) @map("need_coverage_score")
+  assetUtilizationScore  Float       @default(0) @map("asset_utilization_score")
+  feasibilityScore       Float       @default(0) @map("feasibility_score")
+  actionabilityScore     Float       @default(0) @map("actionability_score")
+  overallScore           Float       @default(0) @map("overall_score")
+  scoreExplanation       Json        @default("{}") @map("score_explanation")
+  scoringVersion         String      @default("1.0.0") @map("scoring_version")
+  createdAt              DateTime    @default(now()) @map("created_at")
+
+  opportunity            Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@index([opportunityId])
+  @@map("opportunity_scores")
+}
+
+model ComplementarityEvaluation {
+  id               String                      @id @default(uuid()) @db.Uuid
+  sourceActorId    String                      @map("source_actor_id") @db.Uuid
+  targetActorId    String                      @map("target_actor_id") @db.Uuid
+  sourceAssetId    String?                     @map("source_asset_id") @db.Uuid
+  targetAssetId    String?                     @map("target_asset_id") @db.Uuid
+  relationshipType ComplementarityRelationship @map("relationship_type")
+  strength         ComplementarityStrength     @default(MEDIUM)
+  reasons          Json                        @default("[]")
+  evidence         Json                        @default("{}")
+  createdAt        DateTime                    @default(now()) @map("created_at")
+
+  sourceActor      Actor                       @relation("SourceActorComplementarities", fields: [sourceActorId], references: [id], onDelete: Cascade)
+  targetActor      Actor                       @relation("TargetActorComplementarities", fields: [targetActorId], references: [id], onDelete: Cascade)
+  sourceAsset      Asset?                      @relation("SourceAssetComplementarities", fields: [sourceAssetId], references: [id], onDelete: SetNull)
+  targetAsset      Asset?                      @relation("TargetAssetComplementarities", fields: [targetAssetId], references: [id], onDelete: SetNull)
+
+  @@index([sourceActorId, targetActorId])
+  @@map("complementarity_evaluations")
+}
+
+model ConstraintEvaluation {
+  id                 String             @id @default(uuid()) @db.Uuid
+  opportunityId      String             @map("opportunity_id") @db.Uuid
+  constraintId       String?            @map("constraint_id") @db.Uuid
+  status             EvaluationStatus   @default(PASSED)
+  severity           ConstraintSeverity @default(SOFT)
+  reason             String
+  affectedActors     Json               @default("[]") @map("affected_actors")
+  possibleResolution String?            @map("possible_resolution")
+  createdAt          DateTime           @default(now()) @map("created_at")
+
+  opportunity        Opportunity        @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  constraint         Constraint?        @relation(fields: [constraintId], references: [id], onDelete: SetNull)
+
+  @@index([opportunityId])
+  @@map("constraint_evaluations")
+}
+
+enum PatternStatus {
+  DRAFT
+  ACTIVE
+  DEPRECATED
+  ARCHIVED
+}
+
+enum OpportunityStatus {
+  GENERATED
+  REVIEWED
+  SAVED
+  PROPOSED
+  ACCEPTED
+  IN_PLANNING
+  IN_COLLABORATION
+  COMPLETED
+  CANCELLED
+  ARCHIVED
+}
+
+enum FeasibilityStatus {
+  FEASIBLE
+  PROMISING
+  PARTIAL
+  BLOCKED
+  UNKNOWN
+}
+
+enum FreshnessStatus {
+  CURRENT
+  STALE
+  UNKNOWN
+}
+
+enum ComplementarityRelationship {
+  DIRECT_NEED_MATCH
+  CAPABILITY_GAP
+  PRODUCT_COMBINATION
+  RESOURCE_COMBINATION
+  MARKET_ACCESS
+  PRODUCTION_CHAIN
+  CREATIVE_COMBINATION
+  CULTURAL_COMBINATION
+  REDUNDANT
+  INCOMPATIBLE
+}
+
+enum ComplementarityStrength {
+  STRONG
+  MEDIUM
+  WEAK
+  NONE
+  UNKNOWN
+}
+
+enum EvaluationStatus {
+  PASSED
+  FAILED
+  WARNING
+  UNKNOWN
+}
+
+model CollaborationPlan {
+  id                 String                  @id @default(uuid()) @db.Uuid
+  opportunityId      String?                 @map("opportunity_id") @db.Uuid
+  createdByActorId   String                  @map("created_by_actor_id") @db.Uuid
+  title              String
+  objective          String
+  expectedOutputs    Json                    @default("[]") @map("expected_outputs")
+  budget             Json?                   @default("{}")
+  timeline           Json?                   @default("{}")
+  revenueModel       Json?                   @default("{}") @map("revenue_model")
+  ownershipRules     Json?                   @default("{}") @map("ownership_rules")
+  ipRules            Json?                   @default("{}") @map("ip_rules")
+  status             CollaborationPlanStatus @default(DRAFT)
+  createdAt          DateTime                @default(now()) @map("created_at")
+  updatedAt          DateTime                @updatedAt @map("updated_at")
+
+  opportunity        Opportunity?            @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  createdByActor     Actor                   @relation("PlanCreator", fields: [createdByActorId], references: [id], onDelete: Cascade)
+
+  roles              CollaborationRole[]
+  collaboration      Collaboration?
+
+  @@index([opportunityId])
+  @@index([createdByActorId])
+  @@index([status])
+  @@map("collaboration_plans")
+}
+
+model CollaborationRole {
+  id                  String            @id @default(uuid()) @db.Uuid
+  collaborationPlanId String            @map("collaboration_plan_id") @db.Uuid
+  actorId             String            @map("actor_id") @db.Uuid
+  roleCode            String            @map("role_code")
+  responsibility      String
+  contribution        String
+  status              String            @default("ACCEPTED")
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  plan                CollaborationPlan @relation(fields: [collaborationPlanId], references: [id], onDelete: Cascade)
+  actor               Actor             @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([collaborationPlanId])
+  @@index([actorId])
+  @@map("collaboration_roles")
+}
+
+model Collaboration {
+  id                  String                     @id @default(uuid()) @db.Uuid
+  collaborationPlanId String                     @unique @map("collaboration_plan_id") @db.Uuid
+  title               String
+  description         String?
+  status              CollaborationStatus        @default(ACTIVE)
+  startedAt           DateTime?                  @default(now()) @map("started_at")
+  targetEndAt         DateTime?                  @map("target_end_at")
+  completedAt         DateTime?                  @map("completed_at")
+  createdAt           DateTime                   @default(now()) @map("created_at")
+  updatedAt           DateTime                   @updatedAt @map("updated_at")
+
+  plan                CollaborationPlan          @relation(fields: [collaborationPlanId], references: [id], onDelete: Cascade)
+
+  participants        CollaborationParticipant[]
+  tasks               Task[]
+  milestones          Milestone[]
+  decisions           Decision[]
+  outcomes            Outcome[]
+  feedbacks           Feedback[]
+
+  projectBriefs       ProjectBrief[]
+
+  @@index([status])
+  @@map("collaborations")
+}
+
+model CollaborationParticipant {
+  id              String                         @id @default(uuid()) @db.Uuid
+  collaborationId String                         @map("collaboration_id") @db.Uuid
+  actorId         String                         @map("actor_id") @db.Uuid
+  roleCode        String                         @map("role_code")
+  status          ParticipantCollaborationStatus @default(ACTIVE)
+  joinedAt        DateTime                       @default(now()) @map("joined_at")
+  leftAt          DateTime?                      @map("left_at")
+
+  collaboration   Collaboration                  @relation(fields: [collaborationId], references: [id], onDelete: Cascade)
+  actor           Actor                          @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@unique([collaborationId, actorId])
+  @@index([actorId])
+  @@map("collaboration_participants")
+}
+
+model Task {
+  id              String        @id @default(uuid()) @db.Uuid
+  collaborationId String        @map("collaboration_id") @db.Uuid
+  assignedActorId String?       @map("assigned_actor_id") @db.Uuid
+  title           String
+  description     String?
+  status          TaskStatus    @default(TODO)
+  priority        TaskPriority  @default(MEDIUM)
+  dueDate         DateTime?     @map("due_date")
+  completedAt     DateTime?     @map("completed_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  collaboration   Collaboration @relation(fields: [collaborationId], references: [id], onDelete: Cascade)
+  assignedActor   Actor?        @relation(fields: [assignedActorId], references: [id], onDelete: SetNull)
+
+  @@index([collaborationId])
+  @@index([assignedActorId])
+  @@index([status])
+  @@map("tasks")
+}
+
+model Milestone {
+  id              String          @id @default(uuid()) @db.Uuid
+  collaborationId String          @map("collaboration_id") @db.Uuid
+  title           String
+  description     String?
+  targetDate      DateTime?       @map("target_date")
+  status          MilestoneStatus @default(PENDING)
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  collaboration   Collaboration   @relation(fields: [collaborationId], references: [id], onDelete: Cascade)
+
+  @@index([collaborationId])
+  @@map("milestones")
+}
+
+model Decision {
+  id              String        @id @default(uuid()) @db.Uuid
+  collaborationId String        @map("collaboration_id") @db.Uuid
+  title           String
+  decision        String
+  reason          String?
+  agreedByActors  Json          @default("[]") @map("agreed_by_actors")
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  collaboration   Collaboration @relation(fields: [collaborationId], references: [id], onDelete: Cascade)
+
+  @@index([collaborationId])
+  @@map("decisions")
+}
+
+model Outcome {
+  id              String        @id @default(uuid()) @db.Uuid
+  collaborationId String        @map("collaboration_id") @db.Uuid
+  title           String
+  description     String
+  outcomeType     OutcomeType   @default(PRODUCT) @map("outcome_type")
+  metrics         Json          @default("{}")
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  collaboration   Collaboration @relation(fields: [collaborationId], references: [id], onDelete: Cascade)
+
+  @@index([collaborationId])
+  @@map("outcomes")
+}
+
+model Feedback {
+  id               String         @id @default(uuid()) @db.Uuid
+  collaborationId  String?        @map("collaboration_id") @db.Uuid
+  opportunityId    String?        @map("opportunity_id") @db.Uuid
+  actorId          String         @map("actor_id") @db.Uuid
+  relevanceScore   Int?           @map("relevance_score")
+  feasibilityScore Int?           @map("feasibility_score")
+  noveltyScore     Int?           @map("novelty_score")
+  usefulnessScore  Int?           @map("usefulness_score")
+  comments         String?
+  createdAt        DateTime       @default(now()) @map("created_at")
+
+  collaboration    Collaboration? @relation(fields: [collaborationId], references: [id], onDelete: SetNull)
+  opportunity      Opportunity?   @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  actor            Actor          @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([collaborationId])
+  @@index([opportunityId])
+  @@index([actorId])
+  @@map("feedback")
+}
+
+enum CollaborationPlanStatus {
+  DRAFT
+  PROPOSED
+  NEGOTIATING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum CollaborationStatus {
+  NOT_STARTED
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum ParticipantCollaborationStatus {
+  INVITED
+  ACCEPTED
+  DECLINED
+  ACTIVE
+  LEFT
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  BLOCKED
+  DONE
+  CANCELLED
+}
+
+enum TaskPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum MilestoneStatus {
+  PENDING
+  IN_PROGRESS
+  ACHIEVED
+  MISSED
+}
+
+enum OutcomeType {
+  PRODUCT
+  CAMPAIGN
+  SERVICE
+  MARKET_ACCESS
+  REVENUE
+  AUDIENCE_GROWTH
+  CREATIVE_ASSET
+  OTHER
+}
+
+model ProjectBrief {
+  id               String             @id @default(uuid()) @db.Uuid
+  creatorActorId   String             @map("creator_actor_id") @db.Uuid
+  title            String
+  description      String
+  projectType      String             @map("project_type")
+  targetOutput     String             @map("target_output")
+  location         String?
+  timeline         Json?              @default("{}")
+  budget           Json?              @default("{}")
+  status           ProjectBriefStatus @default(OPEN)
+  collaborationId  String?            @map("collaboration_id") @db.Uuid
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+  closedAt         DateTime?          @map("closed_at")
+
+  creatorActor     Actor              @relation("CreatedProjectBriefs", fields: [creatorActorId], references: [id], onDelete: Cascade)
+  collaboration    Collaboration?     @relation(fields: [collaborationId], references: [id], onDelete: SetNull)
+  neededRoles      ProjectBriefRole[]
+  interests        CollaborationInterest[]
+
+  @@index([creatorActorId])
+  @@index([status])
+  @@map("project_briefs")
+}
+
+model ProjectBriefRole {
+  id               String        @id @default(uuid()) @db.Uuid
+  briefId          String        @map("brief_id") @db.Uuid
+  roleLabel        String        @map("role_label")
+  assetCategory    AssetCategory @map("asset_category")
+  description      String?
+  maxCollaborators Int           @default(1) @map("max_collaborators")
+  isFilled         Boolean       @default(false) @map("is_filled")
+  createdAt        DateTime      @default(now()) @map("created_at")
+
+  brief            ProjectBrief  @relation(fields: [briefId], references: [id], onDelete: Cascade)
+  interests        CollaborationInterest[]
+
+  @@index([briefId])
+  @@map("project_brief_roles")
+}
+
+model CollaborationInterest {
+  id             String           @id @default(uuid()) @db.Uuid
+  briefId        String           @map("brief_id") @db.Uuid
+  roleId         String           @map("role_id") @db.Uuid
+  actorId        String           @map("actor_id") @db.Uuid
+  message        String?
+  proposedAssets Json             @default("[]") @map("proposed_assets")
+  status         InterestStatus   @default(PENDING)
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  brief          ProjectBrief     @relation(fields: [briefId], references: [id], onDelete: Cascade)
+  role           ProjectBriefRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  actor          Actor            @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@unique([briefId, actorId, roleId])
+  @@index([briefId])
+  @@index([actorId])
+  @@map("collaboration_interests")
+}
+
+enum ProjectBriefStatus {
+  OPEN
+  IN_REVIEW
+  FILLED
+  CLOSED
+  CANCELLED
+}
+
+enum InterestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  WITHDRAWN
+}
