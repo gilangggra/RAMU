@@ -30,8 +30,8 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
   const [step, setStep] = useState<1 | 2>(1);
 
   const [displayName, setDisplayName] = useState("");
-  const [selectedFunction, setSelectedFunction] = useState("Brand / Studio Owner");
-  const [location, setLocation] = useState("Jakarta, Indonesia");
+  const [selectedFunction, setSelectedFunction] = useState("Fashion Designer / Label");
+  const [location, setLocation] = useState("Jakarta Selatan, Indonesia");
   const [customLocation, setCustomLocation] = useState("");
   const [isCustomLocation, setIsCustomLocation] = useState(false);
   const [email, setEmail] = useState("");
@@ -41,7 +41,7 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
 
   const [bio, setBio] = useState("");
   const [address, setAddress] = useState("");
-  const [skills, setSkills] = useState<string[]>(["Lookbook Editorial", "Kriya Terstruktur"]);
+  const [skills, setSkills] = useState<string[]>(["Editorial High-Fashion", "Lookbook & E-Commerce"]);
   const [skillInput, setSkillInput] = useState("");
   const [website, setWebsite] = useState("");
   const [phone, setPhone] = useState("");
@@ -49,43 +49,40 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const functions = [
-    "Brand / Studio Owner",
-    "Pengrajin Kriya",
-    "Fashion Designer",
-    "Fotografer",
-    "Videografer",
-    "Desain Produk",
-    "Kriya Logam & Perhiasan",
-    "Creative Director",
-    "Stylist & Lookbook",
-    "Supplier Bahan Baku",
-    "Kuliner Kreatif",
+    "Fashion Designer / Label",
+    "Creative & Art Director",
+    "Fashion Photographer",
+    "Fashion Stylist",
+    "Model / Visual Talent",
+    "Videographer / Fashion Film",
+    "Makeup & Hair Artist (MUA)",
+    "Set Designer / Props",
+    "Fashion Agency / Producer",
     "Lainnya",
   ];
 
   const popularLocations = [
-    "Jakarta, Indonesia",
-    "DI Yogyakarta, Indonesia",
+    "Jakarta Selatan, Indonesia",
+    "Jakarta Pusat, Indonesia",
     "Bandung, Jawa Barat",
-    "Pekalongan, Jawa Tengah",
-    "Surakarta (Solo), Jawa Tengah",
-    "Denpasar, Bali",
+    "DI Yogyakarta, Indonesia",
+    "Denpasar & Canggu, Bali",
     "Surabaya, Jawa Timur",
-    "Jepara, Jawa Tengah",
+    "Surakarta (Solo), Jawa Tengah",
     "Semarang, Jawa Tengah",
     "Medan, Sumatera Utara",
-    "Padang, Sumatera Barat",
-    "Makassar, Sulawesi Selatan",
     "Ketik kota lainnya...",
   ];
 
   const suggestedSkills = [
-    "Tenun Ikat Wastra",
-    "Kulit Samak Nabati",
-    "Pengecoran Logam",
-    "Keramik Stoneware",
-    "Identitas Visual & Risograf",
-    "Produksi Daylight Studio",
+    "Editorial High-Fashion",
+    "Lookbook & E-Commerce",
+    "Analog 35mm & Medium Format",
+    "Creative Direction & Moodboard",
+    "Runway & Catwalk",
+    "Wardrobe & Prop Styling",
+    "Studio Lighting & Strobe",
+    "Color Grading & Retouching",
   ];
 
   const handleLocationChange = (val: string) => {
@@ -152,7 +149,7 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
       <div className="flex items-center justify-between mb-3">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold uppercase tracking-wider text-[#27213D] shadow-xs">
           <Sparkles className="w-3.5 h-3.5 text-[#E59F00]" />
-          <span>Registrasi Akun Kreatif</span>
+          <span>Registrasi Akun Kreatif Fashion & Visual</span>
         </div>
         <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-[#FAF8F5] border border-stone-200 text-[#27213D]">
           Tahap {step} / 2
@@ -160,12 +157,12 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
       </div>
 
       <h1 className="text-2xl sm:text-3xl font-extrabold text-[#27213D] tracking-tight mb-1.5">
-        {step === 1 ? "Lengkapi Identitas Akun" : "Lengkapi Profil & Kapasitas Kreatif"}
+        {step === 1 ? "Identitas & Peran Fashion Visual" : "Profil Studio & Kapasitas Produksi"}
       </h1>
       <p className="text-xs sm:text-sm text-[#716B7E] mb-6 leading-relaxed">
         {step === 1
-          ? "Tentukan kredensial akun dan sektor kriya Anda untuk memulai pencocokan sinergi peluang kolaborasi."
-          : "Informasi bio, workshop, dan keahlian spesifik Anda diselaraskan oleh Engine RAMU untuk meramu formula bisnis bilateral."}
+          ? "Tentukan kredensial akun dan peran spesifik Anda untuk memulai pencocokan tim kampanye lookbook & editorial."
+          : "Informasi atelier, ketersediaan studio, dan spesialisasi visual Anda diselaraskan oleh Engine RAMU untuk meramu tim kolaborasi."}
       </p>
 
       {(initialError || step1Error) && (
@@ -199,7 +196,7 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
                 htmlFor="displayNameInput"
                 className="block text-xs font-bold uppercase tracking-wider text-[#27213D]"
               >
-                Nama Profil / Studio *
+                Nama Profil / Label / Studio *
               </label>
               <input
                 id="displayNameInput"
@@ -207,7 +204,7 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
                 required
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="misal: Studio Kriya Nusantara / Budi Santoso"
+                placeholder="misal: Maison Nusantara / Studio Visual Arkha / Nadia Kirana"
                 className="w-full px-4 py-3.5 rounded-2xl bg-[#FAF8F5] border border-stone-200/80 text-sm text-[#27213D] placeholder-[#716B7E]/60 focus:outline-none focus:border-[#FFB800] focus:ring-2 focus:ring-[#FFB800]/20 focus:bg-white transition-all font-medium"
               />
             </div>
@@ -380,14 +377,14 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
                 >
                   Bio / Deskripsi Kreatif
                 </label>
-                <span className="text-[10px] font-medium text-[#716B7E]">Membantu kurasi sinergi</span>
+                <span className="text-[10px] font-medium text-[#716B7E]">Membantu kurasi sinergi tim</span>
               </div>
               <textarea
                 id="bio"
                 rows={3}
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                placeholder="Ceritakan tentang karya, material yang biasa Anda gunakan, fasilitas studio, atau fokus kolaborasi yang Anda cari..."
+                placeholder="Ceritakan estetika desain, fokus koleksi busana, ketersediaan kamera/studio, atau konsep visual yang biasa Anda garap..."
                 className="w-full px-4 py-3 rounded-2xl bg-[#FAF8F5] border border-stone-200/80 text-sm text-[#27213D] placeholder-[#716B7E]/60 focus:outline-none focus:border-[#FFB800] focus:ring-2 focus:ring-[#FFB800]/20 focus:bg-white transition-all font-medium resize-none leading-relaxed"
               />
             </div>
@@ -397,7 +394,7 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
                 htmlFor="address"
                 className="block text-xs font-bold uppercase tracking-wider text-[#27213D]"
               >
-                Alamat Workshop / Studio
+                Alamat Studio / Atelier / Basecamp Produksi
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#716B7E]">
@@ -408,7 +405,7 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Nama jalan, sentra industri kriya, kompleks studio, atau kecamatan..."
+                  placeholder="Nama jalan, gedung, atelier, kompleks studio foto, atau kecamatan..."
                   className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-[#FAF8F5] border border-stone-200/80 text-sm text-[#27213D] placeholder-[#716B7E]/60 focus:outline-none focus:border-[#FFB800] focus:ring-2 focus:ring-[#FFB800]/20 focus:bg-white transition-all font-medium"
                 />
               </div>
@@ -420,7 +417,7 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
                   htmlFor="skillInput"
                   className="block text-xs font-bold uppercase tracking-wider text-[#27213D]"
                 >
-                  Keahlian & Spesialisasi Kriya (Skills & Expertise)
+                  Keahlian & Spesialisasi Visual (Skills & Expertise)
                 </label>
                 <span className="text-[10px] text-[#716B7E]">Tekan Enter untuk menambah</span>
               </div>
@@ -432,7 +429,7 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
                   value={skillInput}
                   onChange={(e) => setSkillInput(e.target.value)}
                   onKeyDown={handleAddSkill}
-                  placeholder="e.g. Pewarnaan Alami, Olah Kulit, Risograf — tekan Enter untuk menambahkan"
+                  placeholder="e.g. Editorial, Analog 35mm, Runway, Retouching — tekan Enter untuk menambah"
                   className="w-full pl-4 pr-12 py-3 rounded-2xl bg-[#FAF8F5] border border-stone-200/80 text-sm text-[#27213D] placeholder-[#716B7E]/60 focus:outline-none focus:border-[#FFB800] focus:ring-2 focus:ring-[#FFB800]/20 focus:bg-white transition-all font-medium"
                 />
                 <button

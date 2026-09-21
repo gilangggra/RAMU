@@ -212,42 +212,42 @@ export function HowItWorks() {
   const steps = [
     {
       num: "01",
-      title: "ASET KREATIF ANDA",
+      title: "ASET & KAPASITAS ANDA",
       subtitle: "Petakan Yang Dimiliki",
-      desc: "Daftarkan bahan baku, keterampilan kriya, fasilitas studio, aset digital, atau keahlian spesifik ke dalam vault aset Anda.",
+      desc: "Daftarkan koleksi busana, keahlian fotografi/styling, fasilitas studio, kamera pro, atau portofolio model ke dalam vault aset Anda.",
       tag: "Input & Pemetaan",
       bgClass: "bg-[#FFF0EB]",
       borderClass: "border-[#FCDCD4]",
       hoverBorder: "hover:border-[#F9C3B0]",
       stageTag: "TAHAP 01 // VAULT ASET",
       vectorArt: <AssetsVaultVectorArt />,
-      chips: ["Material & Bahan", "Peralatan Studio", "Audiens", "Keahlian"],
+      chips: ["Koleksi Busana", "Peralatan Studio", "Portofolio Model", "Keahlian Lensa"],
     },
     {
       num: "02",
       title: "TEMUKAN KOMPLEMENTARITAS",
       subtitle: "Matriks Deterministik",
-      desc: "RAMU menganalisis sinergi bilateral di 6 pola kreatif, memeriksa keselarasan sasaran dan batasan operasional nyata tanpa halusinasi.",
+      desc: "RAMU menganalisis kecocokan estetika, ketersediaan jadwal, lokasi studio, dan sinergi peran editorial tanpa proses manual yang melelahkan.",
       tag: "Analisis Mesin",
       bgClass: "bg-[#F3EFFF]",
       borderClass: "border-[#DDD5FA]",
       hoverBorder: "hover:border-[#CBBEF8]",
       stageTag: "TAHAP 02 // MATRIKS SINTESIS",
       vectorArt: <SynergyMatrixVectorArt />,
-      chips: ["Lintas Sektor", "Kelayakan Teruji", "Bebas Redudansi", "12 Tahap"],
+      chips: ["Kecocokan Gaya", "Kelayakan Jadwal", "Sinergi Peran", "Pencocokan Cerdas"],
     },
     {
       num: "03",
-      title: "CETAK BIRU PELUANG NYATA",
+      title: "CETAK BIRU KAMPANYE NYATA",
       subtitle: "Cetak Biru Siap Produksi",
-      desc: "Dapatkan formula kolaborasi konkret dengan pembagian peran, ruang lingkup kerja, konsensus HKI, dan skema bagi hasil yang adil.",
+      desc: "Dapatkan cetak biru kampanye terstruktur lengkap dengan moodboard, shot list, pembagian kredit publikasi, dan hak komersial yang adil.",
       tag: "Hasil Sintesis",
       bgClass: "bg-[#FFF9E6]",
       borderClass: "border-[#FDE68A]",
       hoverBorder: "hover:border-[#FCD34D]",
       stageTag: "TAHAP 03 // SPESIFIKASI PROYEK",
       vectorArt: <BlueprintVectorArt />,
-      chips: ["Koleksi Kapsul", "Sesi Produksi", "Bagi Hasil Adil", "Konsensus HKI"],
+      chips: ["Lookbook Kampanye", "Shot List Produksi", "Hak Cipta Jelas", "Ruang Kolaborasi"],
     },
   ];
 
@@ -272,12 +272,12 @@ export function HowItWorks() {
           </div>
 
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#27213D] tracking-tight">
-            Dari apa yang Anda miliki, menjadi karya yang diciptakan bersama.
+            Dari aset yang Anda miliki, menjadi kampanye visual yang diciptakan bersama.
           </h2>
 
           <p className="text-base sm:text-lg text-[#716B7E] font-normal leading-relaxed">
-            RAMU menggantikan jejaring tanpa arah dengan mesin sintesis terstruktur yang
-            mengubah aset kreatif pasif menjadi kolaborasi bisnis aktif.
+            RAMU menggantikan pencarian acak lewat DM dan grup chat dengan mesin sintesis terstruktur yang
+            meramu tim produksi fashion & visual secara otomatis.
           </p>
         </div>
 

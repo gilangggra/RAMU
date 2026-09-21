@@ -104,11 +104,9 @@ export async function signup(formData: FormData) {
   }
 
   if (data.user) {
-    // Buat/sinkron profil pengguna awal di database aplikasi
     try {
       await syncUserProfile(data.user.id, data.user.email ?? email, displayName);
 
-      // Update bio di profil jika ada
       if (bio) {
         await prisma.profile.update({
           where: { id: data.user.id },
@@ -116,10 +114,8 @@ export async function signup(formData: FormData) {
         }).catch(() => {});
       }
 
-      // Gabungkan lokasi kota dan detail alamat jika ada
       const fullLocation = address ? `${address}, ${location}` : location;
 
-      // Buat profil aktor utama
       const existingActor = await prisma.actor.findFirst({
         where: { ownerUserId: data.user.id },
       });
@@ -132,7 +128,7 @@ export async function signup(formData: FormData) {
             ownerUserId: data.user.id,
             name: displayName,
             actorType: "STUDIO",
-            sector: role || "Kriya & Kreatif",
+            sector: role || "Fashion & Visual Production",
             location: fullLocation || "Indonesia",
             description: bio || null,
             websiteUrl: website || null,
@@ -155,7 +151,6 @@ export async function signup(formData: FormData) {
         });
       }
 
-      // Jika ada keahlian/spesialisasi yang diinput, daftarkan otomatis sebagai Asset berkategori CAPABILITY
       if (actorId && parsedSkills.length > 0) {
         for (const skill of parsedSkills) {
           const existingAsset = await prisma.asset.findFirst({
@@ -189,7 +184,6 @@ export async function signup(formData: FormData) {
       revalidatePath("/", "layout");
       redirect("/dashboard");
     } catch (e: any) {
-      // Jika ini adalah redirect Next.js, biarkan melempar
       if (e?.message?.includes("NEXT_REDIRECT")) {
         throw e;
       }

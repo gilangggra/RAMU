@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
-import { logout } from "@/app/(auth)/actions";
 import { getOpportunities } from "@/application/opportunityService";
 import { RunEngineButton } from "./RunEngineButton";
 import { OpportunityCard } from "./OpportunityCard";
@@ -51,17 +50,18 @@ export default async function OpportunitiesPage({
 
   return (
     <AppShell actor={actor} activeRoute="/opportunities">
-      <section className="p-8 rounded-3xl bg-neutral-900/90 border border-neutral-800 relative overflow-hidden space-y-6">
+      <div className="space-y-8">
+        <section className="p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] relative overflow-hidden space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-amber-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-semibold text-[#E66A48]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#E66A48] animate-pulse" />
                 Phase 3: Opportunity Engine Aktif
               </div>
-              <h1 className="text-3xl font-extrabold text-white tracking-tight">
+              <h1 className="text-3xl font-extrabold text-[#27213D] tracking-tight">
                 Katalog Peluang Kolaborasi Kreatif
               </h1>
-              <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
+              <p className="text-sm text-[#716B7E] max-w-2xl leading-relaxed">
                 Hasil sintesis deterministik 12 tahap dari perpaduan aset, sasaran bisnis, dan kapabilitas perajin kriya nusantara. Setiap peluang dilengkapi evaluasi kelayakan dan alasan terukur.
               </p>
             </div>
@@ -71,27 +71,27 @@ export default async function OpportunitiesPage({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-800/80">
-            <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800">
-              <div className="text-xs text-slate-400">Total Peluang</div>
-              <div className="text-xl font-black text-white">{totalCount}</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-stone-100">
+            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
+              <div className="text-xs font-semibold text-[#716B7E]">Total Peluang</div>
+              <div className="text-2xl font-black text-[#27213D] mt-0.5">{totalCount}</div>
             </div>
-            <div className="p-3 rounded-2xl bg-slate-950/60 border border-emerald-500/20">
-              <div className="text-xs text-emerald-400 font-medium">Layak (Feasible)</div>
-              <div className="text-xl font-black text-emerald-300">{feasibleCount}</div>
+            <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80">
+              <div className="text-xs text-emerald-800 font-semibold">Layak (Feasible)</div>
+              <div className="text-2xl font-black text-emerald-950 mt-0.5">{feasibleCount}</div>
             </div>
-            <div className="p-3 rounded-2xl bg-slate-950/60 border border-amber-500/20">
-              <div className="text-xs text-amber-400 font-medium">Menjanjikan</div>
-              <div className="text-xl font-black text-amber-300">{promisingCount}</div>
+            <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80">
+              <div className="text-xs text-amber-800 font-semibold">Menjanjikan</div>
+              <div className="text-2xl font-black text-amber-950 mt-0.5">{promisingCount}</div>
             </div>
-            <div className="p-3 rounded-2xl bg-slate-950/60 border border-sky-500/20">
-              <div className="text-xs text-sky-400 font-medium">Perlu Pelengkap</div>
-              <div className="text-xl font-black text-sky-300">{partialCount}</div>
+            <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-200/80">
+              <div className="text-xs text-sky-800 font-semibold">Perlu Pelengkap</div>
+              <div className="text-2xl font-black text-sky-950 mt-0.5">{partialCount}</div>
             </div>
           </div>
         </section>
 
-        <div className="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-3">
+        <div className="flex flex-wrap items-center gap-2 border-b border-stone-200/80 pb-3">
           {[
             { key: "ALL", label: "Semua Peluang" },
             { key: "FEASIBLE", label: "Layak Dijalankan (Feasible)" },
@@ -103,10 +103,10 @@ export default async function OpportunitiesPage({
               <Link
                 key={tab.key}
                 href={tab.key === "ALL" ? "/opportunities" : `/opportunities?feasibility=${tab.key}`}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
+                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                   isActive
-                    ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20"
-                    : "bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800"
+                    ? "bg-[#27213D] text-white shadow-md shadow-[#27213D]/10"
+                    : "bg-white border border-stone-200/80 text-[#716B7E] hover:text-[#27213D] hover:bg-stone-50"
                 }`}
               >
                 {tab.label}
@@ -116,12 +116,14 @@ export default async function OpportunitiesPage({
         </div>
 
         {opportunities.length === 0 ? (
-          <div className="p-12 text-center rounded-3xl bg-slate-900/40 border border-slate-800 space-y-4">
+          <div className="p-12 text-center rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-4">
             <div className="flex justify-center">
-              <Sparkles className="w-12 h-12 text-amber-400" />
+              <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200/60 flex items-center justify-center">
+                <Sparkles className="w-7 h-7 text-amber-500" />
+              </div>
             </div>
-            <h3 className="text-lg font-bold text-white">Belum Ada Peluang yang Cocok</h3>
-            <p className="text-sm text-slate-400 max-w-md mx-auto">
+            <h3 className="text-lg font-bold text-[#27213D]">Belum Ada Peluang yang Cocok</h3>
+            <p className="text-sm text-[#716B7E] max-w-md mx-auto">
               Klik tombol &quot;Jalankan Opportunity Engine&quot; di atas untuk mensintesis kombinasi aset dan kebutuhan antar-aktor yang tersedia.
             </p>
           </div>
@@ -166,6 +168,7 @@ export default async function OpportunitiesPage({
             })}
           </div>
         )}
+      </div>
     </AppShell>
   );
 }

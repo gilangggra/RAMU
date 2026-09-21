@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
-import { logout } from "@/app/(auth)/actions";
 import { getCollaborationsForActor } from "@/application/collaborationService";
 import { AppShell } from "@/components/layout/AppShell";
 import { Handshake, ArrowRight } from "lucide-react";
@@ -29,48 +28,51 @@ export default async function CollaborationsPage() {
 
   return (
     <AppShell actor={actor} activeRoute="/collaborations">
-      <section className="p-8 rounded-3xl bg-neutral-900/90 border border-neutral-800 relative overflow-hidden space-y-6">
+      <div className="space-y-8 max-w-6xl mx-auto">
+        <section className="p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] relative overflow-hidden space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs font-semibold text-purple-300">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold text-[#E66A48]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#E66A48] animate-pulse" />
                 Phase 4: Collaboration Space & Negotiation
               </div>
-              <h1 className="text-3xl font-extrabold text-white tracking-tight">
+              <h1 className="text-3xl font-extrabold text-[#27213D] tracking-tight">
                 Ruang Proyek Kolaborasi Aktif
               </h1>
-              <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
+              <p className="text-sm text-[#716B7E] max-w-2xl leading-relaxed">
                 Kelola pembagian peran, negosiasikan kesepakatan pembagian hasil & aturan hak cipta, pantau penugasan tugas operasional, dan catat keputusan bersama mitra kriya Anda.
               </p>
             </div>
 
             <div className="flex items-center gap-3 shrink-0">
-              <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 text-center min-w-[100px]">
-                <div className="text-[11px] text-slate-400 font-semibold uppercase">Aktif</div>
-                <div className="text-2xl font-black text-amber-400">{activeCount}</div>
+              <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70 text-center min-w-[100px]">
+                <div className="text-[11px] text-[#716B7E] font-bold uppercase tracking-wider">Aktif</div>
+                <div className="text-2xl font-black text-amber-800 mt-0.5">{activeCount}</div>
               </div>
-              <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 text-center min-w-[100px]">
-                <div className="text-[11px] text-slate-400 font-semibold uppercase">Selesai</div>
-                <div className="text-2xl font-black text-emerald-400">{completedCount}</div>
+              <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70 text-center min-w-[100px]">
+                <div className="text-[11px] text-[#716B7E] font-bold uppercase tracking-wider">Selesai</div>
+                <div className="text-2xl font-black text-emerald-800 mt-0.5">{completedCount}</div>
               </div>
             </div>
           </div>
         </section>
 
         {collaborations.length === 0 ? (
-          <div className="p-12 text-center rounded-3xl bg-slate-900/40 border border-slate-800 space-y-5">
+          <div className="p-12 text-center rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-5">
             <div className="flex justify-center">
-              <Handshake className="w-12 h-12 text-primary-400" />
+              <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200/60 flex items-center justify-center">
+                <Handshake className="w-7 h-7 text-amber-600" />
+              </div>
             </div>
             <div className="space-y-2">
-              <h3 className="text-xl font-bold text-white">Belum Ada Proyek Kolaborasi yang Berjalan</h3>
-              <p className="text-sm text-slate-400 max-w-md mx-auto">
+              <h3 className="text-xl font-bold text-[#27213D]">Belum Ada Proyek Kolaborasi yang Berjalan</h3>
+              <p className="text-sm text-[#716B7E] max-w-md mx-auto">
                 Pilih salah satu peluang yang direkomendasikan oleh Opportunity Engine, lalu klik &quot;Inisiasi Rencana Kolaborasi&quot; untuk membuka ruang kerja proyek bersama mitra.
               </p>
             </div>
             <Link
               href="/opportunities"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white font-bold text-sm shadow-md shadow-[#E66A48]/20 transition-all cursor-pointer"
             >
               <span>Jelajahi Katalog Peluang</span>
               <ArrowRight className="w-4 h-4" />
@@ -91,69 +93,69 @@ export default async function CollaborationsPage() {
               return (
                 <div
                   key={collab.id}
-                  className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 hover:border-amber-500/30 transition-all duration-300 backdrop-blur-md space-y-6 flex flex-col justify-between group"
+                  className="p-6 sm:p-8 rounded-[28px] bg-white/95 border border-stone-200/80 hover:border-amber-300 shadow-[0_10px_30px_rgba(39,33,61,0.03)] hover:shadow-[0_15px_35px_rgba(39,33,61,0.07)] transition-all duration-300 space-y-6 flex flex-col justify-between group"
                 >
                   <div className="space-y-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                      <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4]">
                         {oppPatternName || "Proyek Kolaboratif"}
                       </span>
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         {collab.status}
                       </span>
                     </div>
 
                     <div className="space-y-1.5">
-                      <h3 className="text-xl font-bold text-white tracking-tight group-hover:text-amber-300 transition-colors">
+                      <h3 className="text-xl font-bold text-[#27213D] tracking-tight group-hover:text-[#E66A48] transition-colors">
                         {collab.title}
                       </h3>
-                      <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-[#716B7E] line-clamp-2 leading-relaxed">
                         {collab.description || collab.plan?.objective}
                       </p>
                     </div>
 
-                    <div className="space-y-2 pt-2 border-t border-slate-800/80">
-                      <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    <div className="space-y-2 pt-2 border-t border-stone-100">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-[#716B7E]">
                         Mitra Partisipan ({collab.participants.length})
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {collab.participants.map((p) => (
                           <div
                             key={p.id}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-200"
+                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-stone-50 border border-stone-200 text-xs text-[#27213D]"
                           >
-                            <span className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center font-bold text-[10px] text-amber-400">
+                            <span className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center font-bold text-[10px] text-amber-800">
                               {p.actor.name.charAt(0)}
                             </span>
-                            <span className="font-medium truncate max-w-[140px]">{p.actor.name}</span>
+                            <span className="font-semibold truncate max-w-[140px]">{p.actor.name}</span>
                           </div>
                         ))}
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 pt-2">
-                      <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-1.5">
-                        <div className="flex items-center justify-between text-[11px] text-slate-400">
-                          <span>Tugas Kerja</span>
-                          <span className="text-amber-400 font-bold">{doneTasks}/{totalTasks}</span>
+                      <div className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/70 space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px] text-[#716B7E]">
+                          <span className="font-bold">Tugas Kerja</span>
+                          <span className="text-amber-800 font-black">{doneTasks}/{totalTasks}</span>
                         </div>
-                        <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                        <div className="w-full h-1.5 rounded-full bg-stone-200 overflow-hidden">
                           <div
-                            className="h-full bg-amber-500 rounded-full"
+                            className="h-full bg-gradient-to-r from-amber-500 to-[#E66A48] rounded-full"
                             style={{ width: `${taskProgress}%` }}
                           />
                         </div>
                       </div>
 
-                      <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-1.5">
-                        <div className="flex items-center justify-between text-[11px] text-slate-400">
-                          <span>Milestone</span>
-                          <span className="text-emerald-400 font-bold">{doneMilestones}/{totalMilestones}</span>
+                      <div className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/70 space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px] text-[#716B7E]">
+                          <span className="font-bold">Milestone</span>
+                          <span className="text-emerald-800 font-black">{doneMilestones}/{totalMilestones}</span>
                         </div>
-                        <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                        <div className="w-full h-1.5 rounded-full bg-stone-200 overflow-hidden">
                           <div
-                            className="h-full bg-emerald-500 rounded-full"
+                            className="h-full bg-emerald-600 rounded-full"
                             style={{
                               width: `${totalMilestones > 0 ? (doneMilestones / totalMilestones) * 100 : 0}%`,
                             }}
@@ -163,10 +165,10 @@ export default async function CollaborationsPage() {
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-800/80">
+                  <div className="pt-4 border-t border-stone-100">
                     <Link
                       href={`/collaborations/${collab.id}`}
-                      className="inline-flex items-center justify-center w-full gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-amber-500 text-white hover:text-slate-950 font-bold text-xs transition-colors cursor-pointer"
+                      className="inline-flex items-center justify-center w-full gap-2 px-5 py-3 rounded-xl bg-stone-100 hover:bg-[#27213D] text-[#27213D] hover:text-white font-bold text-xs transition-colors cursor-pointer"
                     >
                       <span>Buka Ruang Kerja Proyek</span>
                       <ArrowRight className="w-4 h-4" />
@@ -177,6 +179,7 @@ export default async function CollaborationsPage() {
             })}
           </div>
         )}
+      </div>
     </AppShell>
   );
 }

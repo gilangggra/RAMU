@@ -40,19 +40,19 @@ function IsolatedSilosVectorDiagram() {
         <g>
           <circle cx="35" cy="35" r="14" fill="#F4F0FF" stroke="#27213D" strokeWidth="1.2" />
           <path d="M29 35H41M35 29V41" stroke="#27213D" strokeWidth="1" strokeOpacity="0.4" />
-          <text x="35" y="58" fontSize="6.5" fontWeight="bold" fill="#716B7E" textAnchor="middle">WASTRA</text>
+          <text x="35" y="58" fontSize="6.5" fontWeight="bold" fill="#716B7E" textAnchor="middle">LABEL</text>
         </g>
 
         <g>
           <circle cx="115" cy="35" r="14" fill="#FFF3EB" stroke="#27213D" strokeWidth="1.2" />
           <rect x="110" y="30" width="10" height="10" rx="2" fill="#F9D8C4" />
-          <text x="115" y="58" fontSize="6.5" fontWeight="bold" fill="#716B7E" textAnchor="middle">KULIT</text>
+          <text x="115" y="58" fontSize="6.5" fontWeight="bold" fill="#716B7E" textAnchor="middle">FOTO</text>
         </g>
 
         <g>
           <circle cx="195" cy="35" r="14" fill="#EDFAF5" stroke="#27213D" strokeWidth="1.2" />
           <polygon points="195,29 201,39 189,39" fill="#BFE9DD" />
-          <text x="195" y="58" fontSize="6.5" fontWeight="bold" fill="#716B7E" textAnchor="middle">KUNINGAN</text>
+          <text x="195" y="58" fontSize="6.5" fontWeight="bold" fill="#716B7E" textAnchor="middle">STYLIST</text>
         </g>
 
         <g>
@@ -282,8 +282,8 @@ export function Differentiator() {
                     <Layers className="w-4 h-4 text-[#27213D]" />
                   </div>
                   <div>
-                    <div className="font-bold">Batik Pekalongan</div>
-                    <div className="text-[10px] text-[#716B7E]">Motif wastra warisan nusantara</div>
+                    <div className="font-bold">Label Busana & Desainer</div>
+                    <div className="text-[10px] text-[#716B7E]">Koleksi kapsul 12 looks siap rilis</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-2.5 rounded-xl bg-[#FFF3EB] text-xs font-semibold text-[#27213D]">
@@ -291,8 +291,8 @@ export function Differentiator() {
                     <Briefcase className="w-4 h-4 text-[#27213D]" />
                   </div>
                   <div>
-                    <div className="font-bold">Kulit Samak Nabati</div>
-                    <div className="text-[10px] text-[#716B7E]">Pemotongan & jahitan kriya artisan</div>
+                    <div className="font-bold">Fotografer Editorial</div>
+                    <div className="text-[10px] text-[#716B7E]">Analog 35mm, medium format & lensa prime</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-2.5 rounded-xl bg-[#EDFAF5] text-xs font-semibold text-[#27213D]">
@@ -300,8 +300,8 @@ export function Differentiator() {
                     <Gem className="w-4 h-4 text-[#134e40]" />
                   </div>
                   <div>
-                    <div className="font-bold">Perhiasan Perak & Kuningan</div>
-                    <div className="text-[10px] text-[#716B7E]">Finishing logam cor artisan</div>
+                    <div className="font-bold">Fashion Stylist & Wardrobe</div>
+                    <div className="text-[10px] text-[#716B7E]">Kurasi aksesori & penataan tema busana</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-2.5 rounded-xl bg-[#EEF5FD] text-xs font-semibold text-[#27213D]">
@@ -309,8 +309,8 @@ export function Differentiator() {
                     <Camera className="w-4 h-4 text-[#27213D]" />
                   </div>
                   <div>
-                    <div className="font-bold">Penceritaan Visual</div>
-                    <div className="text-[10px] text-[#716B7E]">Lookbook editorial berkualitas komersial</div>
+                    <div className="font-bold">Daylight Loft Studio</div>
+                    <div className="text-[10px] text-[#716B7E]">Space 120m² & pencahayaan Profoto</div>
                   </div>
                 </div>
               </div>
@@ -376,26 +376,26 @@ export function Differentiator() {
                   </span>
                 </div>
                 <div className="text-base font-bold text-[#27213D]">
-                  Modern Heritage Capsule Collection
+                  Autumn/Winter Editorial Lookbook Campaign
                 </div>
                 <ul className="text-xs text-[#716B7E] space-y-1.5">
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-[#134e40]" />
-                    <span>3 pelaku kreatif komplementer selaras</span>
+                    <span>4 peran produksi fashion komplementer selaras</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-[#134e40]" />
-                    <span>Model pembagian hasil yang adil terpetakan</span>
+                    <span>Pembagian hak pakai komersial & kredit publikasi jelas</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-[#134e40]" />
-                    <span>Paket lookbook promosi bersama disertakan</span>
+                    <span>Paket foto editorial, lookbook e-commerce & video gerak</span>
                   </li>
                 </ul>
               </div>
 
               <div className="text-[11px] text-[#716B7E] italic text-center">
-                &ldquo;Dari bahan kriya menganggur menjadi rilis kreatif skala nasional.&rdquo;
+                &ldquo;Dari konsep busana terisolasi menjadi produksi kampanye visual berkelas internasional.&rdquo;
               </div>
             </div>
           </div>

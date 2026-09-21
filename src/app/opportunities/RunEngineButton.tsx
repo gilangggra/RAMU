@@ -35,12 +35,12 @@ export function RunEngineButton({ actorName }: { actorName?: string }) {
       <button
         onClick={handleRunEngine}
         disabled={isRunning}
-        className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
+        className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#FFD45A] via-[#FFAF94] to-[#E66A48] hover:from-[#FFB800] hover:to-[#D45938] text-[#27213D] font-bold text-xs sm:text-sm shadow-xs hover:shadow-md transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
       >
         {isRunning ? (
           <>
             <svg
-              className="animate-spin h-4 w-4 text-slate-950"
+              className="animate-spin h-4 w-4 text-[#27213D]"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -63,14 +63,14 @@ export function RunEngineButton({ actorName }: { actorName?: string }) {
           </>
         ) : (
           <>
-            <Zap className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+            <Zap className="w-4 h-4 text-[#27213D] group-hover:rotate-12 transition-transform" />
             <span>Jalankan Opportunity Engine</span>
           </>
         )}
       </button>
 
       {statusMessage && (
-        <span className="text-xs text-amber-400/90 font-medium px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 animate-fade-in">
+        <span className="text-xs text-[#0D9488] font-bold px-3 py-1 rounded-xl bg-[#E0F7F0] border border-[#99F6E4] animate-fade-in shadow-2xs">
           {statusMessage}
         </span>
       )}

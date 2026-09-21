@@ -40,47 +40,47 @@ async function main() {
   }
 
   const existingBrief = await prisma.projectBrief.findFirst({
-    where: { title: { contains: "Iklan & Kampanye Visual Minuman" } },
+    where: { title: { contains: "Kampanye Editorial & Lookbook" } },
   });
 
   if (!existingBrief) {
     const brief = await prisma.projectBrief.create({
       data: {
         creatorActorId: creator.id,
-        title: "Iklan & Kampanye Visual Minuman Botanical Herbal Nusantara",
+        title: "Kampanye Editorial & Lookbook Koleksi Resor 2026",
         description:
-          "Kami sedang mengembangkan lini produk minuman ready-to-drink (RTD) botanical cold-pressed berbahan dasar rempah dan buah tropis lokal. Membutuhkan kolaborator kreatif profesional lintas disiplin untuk memproduksi seluruh materi peluncuran produk: video commercial cinematic, foto produk still-life dan lifestyle, serta desain label kemasan premium bernuansa kontemporer.",
-        projectType: "Campaign & Branding Komersial",
-        targetOutput: "1 Video Iklan 60s, Katalog 15 Foto Editorial Produk, dan Desain Identitas Kemasan Botol",
-        location: "Bandung / Hybrid",
+          "Kami sedang mempersiapkan peluncuran koleksi kapsul busana Resor 2026 yang terinspirasi siluet modern dan material wastra kontemporer. Membutuhkan kolaborator profesional di bidang fotografi fashion editorial, penataan gaya (stylist), dan talenta model untuk memproduksi kampanye visual berkualitas majalah mode internasional.",
+        projectType: "Fashion Editorial & Campaign Launch",
+        targetOutput: "1 Video Fashion Film 60s, Katalog 20 Foto Editorial On-Model, dan Lookbook Digital High-Res",
+        location: "Jakarta Selatan / Daylight Studio",
         timeline: {
-          estimatedDuration: "4 Minggu",
-          targetLaunch: "Bulan Depan",
+          estimatedDuration: "3 Minggu",
+          targetLaunch: "Musim Depan",
         },
         budget: {
-          estimatedTotal: "Rp 15.000.000 - Gotong Royong / Bagi Hasil",
+          estimatedTotal: "Rp 20.000.000 - Model Kolaboratif / Bagi Hasil",
           notes: "Model kolaborasi setara dengan skema pembagian hasil dari penjualan awal serta hak guna portfolio bersama.",
         },
         status: ProjectBriefStatus.OPEN,
         neededRoles: {
           create: [
             {
-              roleLabel: "Videographer & Motion Director",
+              roleLabel: "Fotografer Editorial & Lighting Specialist",
               assetCategory: AssetCategory.CAPABILITY,
-              description: "Menggarap video komersial 60 detik bergaya cinematic dan motion storytelling.",
+              description: "Sesi pemotretan lookbook on-model menggunakan teknik pencahayaan daylight dan strobe studio.",
               maxCollaborators: 1,
             },
             {
-              roleLabel: "Fotografer Produk & Editorial",
+              roleLabel: "Fashion Stylist & Wardrobe Curator",
               assetCategory: AssetCategory.CAPABILITY,
-              description: "Foto katalog botol still-life dengan teknik lighting studio dan staging gaya hidup.",
+              description: "Kurasi padu padan aksesori, styling busana di set, dan arahan visual tema kampanye.",
               maxCollaborators: 1,
             },
             {
-              roleLabel: "Graphic Designer & Kemasan",
+              roleLabel: "Talenta Model On-Camera & Catwalk",
               assetCategory: AssetCategory.CAPABILITY,
-              description: "Pengembangan label kemasan botol kaca dan digital branding assets untuk social media.",
-              maxCollaborators: 1,
+              description: "Model profesional dengan karakter visual editorial untuk katalog busana dan fashion film.",
+              maxCollaborators: 2,
             },
           ],
         },
@@ -105,7 +105,7 @@ async function main() {
             roleId: photoRole.id,
             actorId: photographer.id,
             message:
-              "Halo! Kami dari Lensa Kreatif Studio sangat antusias dengan konsep botanical drink ini. Kami memiliki studio lighting profesional khusus beverage splash photography dan kamera medium format untuk detail tetesan air dingin yang tajam.",
+              "Halo! Kami dari Lensa Kreatif Studio sangat tertarik dengan konsep kampanye editorial koleksi resor ini. Kami memiliki akses ke daylight loft studio 120m² di Jakarta serta lensa prime portrait dan lighting Profoto yang siap dipakai untuk lookbook on-model.",
             proposedAssets: [photoAsset.id],
             status: InterestStatus.PENDING,
           },

@@ -17,8 +17,6 @@ import {
   TaskStatus,
   TaskPriority,
   MilestoneStatus,
-  CollaborationStatus,
-  OutcomeType,
 } from "@prisma/client";
 import {
   FileText,
@@ -170,14 +168,14 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
     string,
     { label: string; icon: React.ComponentType<{ className?: string }>; badge: string }
   > = {
-    PRODUCT: { label: "Produk Fisik / Digital", icon: Package, badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
-    CAMPAIGN: { label: "Kampanye / Pameran", icon: Megaphone, badge: "bg-purple-500/10 text-purple-400 border-purple-500/20" },
-    SERVICE: { label: "Layanan Kolaboratif", icon: Handshake, badge: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
-    MARKET_ACCESS: { label: "Akses Pasar / Ritel", icon: Globe, badge: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" },
-    REVENUE: { label: "Realisasi Omzet / Finansial", icon: CircleDollarSign, badge: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
-    AUDIENCE_GROWTH: { label: "Pertumbuhan Audiens", icon: TrendingUp, badge: "bg-pink-500/10 text-pink-400 border-pink-500/20" },
-    CREATIVE_ASSET: { label: "Aset Kreatif / Desain", icon: Palette, badge: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20" },
-    OTHER: { label: "Luaran Lainnya", icon: Sparkles, badge: "bg-slate-500/10 text-slate-400 border-slate-500/20" },
+    PRODUCT: { label: "Produk Fisik / Digital", icon: Package, badge: "bg-emerald-50 text-emerald-800 border-emerald-200" },
+    CAMPAIGN: { label: "Kampanye / Pameran", icon: Megaphone, badge: "bg-purple-50 text-purple-800 border-purple-200" },
+    SERVICE: { label: "Layanan Kolaboratif", icon: Handshake, badge: "bg-blue-50 text-blue-800 border-blue-200" },
+    MARKET_ACCESS: { label: "Akses Pasar / Ritel", icon: Globe, badge: "bg-teal-50 text-teal-800 border-teal-200" },
+    REVENUE: { label: "Realisasi Omzet / Finansial", icon: CircleDollarSign, badge: "bg-amber-50 text-amber-800 border-amber-200" },
+    AUDIENCE_GROWTH: { label: "Pertumbuhan Audiens", icon: TrendingUp, badge: "bg-rose-50 text-rose-800 border-rose-200" },
+    CREATIVE_ASSET: { label: "Aset Kreatif / Desain", icon: Palette, badge: "bg-indigo-50 text-indigo-800 border-indigo-200" },
+    OTHER: { label: "Luaran Lainnya", icon: Sparkles, badge: "bg-stone-100 text-stone-700 border-stone-200" },
   };
 
   async function handleRecordOutcome(e: React.FormEvent<HTMLFormElement>) {
@@ -242,43 +240,44 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
   return (
     <div className="space-y-8">
-      <section className="p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-slate-950 border border-slate-800 relative overflow-hidden space-y-6">
+      {/* Hero Card */}
+      <section className="p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] relative overflow-hidden space-y-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/20">
+              <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4]">
                 Phase 4: Ruang Kolaborasi Aktif
               </span>
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 Status: {collaboration.status}
               </span>
             </div>
 
-            <h1 className="text-3xl font-extrabold text-white tracking-tight leading-tight">
+            <h1 className="text-3xl font-extrabold text-[#27213D] tracking-tight leading-tight">
               {collaboration.title}
             </h1>
-            <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
+            <p className="text-sm text-[#716B7E] max-w-2xl leading-relaxed">
               {collaboration.description || plan?.objective}
             </p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 shrink-0 min-w-[280px]">
-            <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800">
-              <div className="text-[11px] text-slate-400 uppercase font-semibold">Tugas Selesai</div>
-              <div className="text-xl font-black text-amber-400">
+            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
+              <div className="text-[11px] text-[#716B7E] uppercase font-bold tracking-wider">Tugas Selesai</div>
+              <div className="text-2xl font-black text-[#27213D] mt-0.5">
                 {completedTasks} / {tasks.length}
               </div>
             </div>
-            <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800">
-              <div className="text-[11px] text-slate-400 uppercase font-semibold">Milestone</div>
-              <div className="text-xl font-black text-emerald-400">
+            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
+              <div className="text-[11px] text-[#716B7E] uppercase font-bold tracking-wider">Milestone</div>
+              <div className="text-2xl font-black text-emerald-800 mt-0.5">
                 {achievedMilestones} / {milestones.length}
               </div>
             </div>
-            <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 col-span-2 sm:col-span-1">
-              <div className="text-[11px] text-slate-400 uppercase font-semibold">Luaran Nyata</div>
-              <div className="text-xl font-black text-cyan-400">
+            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70 col-span-2 sm:col-span-1">
+              <div className="text-[11px] text-[#716B7E] uppercase font-bold tracking-wider">Luaran Nyata</div>
+              <div className="text-2xl font-black text-teal-800 mt-0.5">
                 {outcomes.length} Hasil
               </div>
             </div>
@@ -286,7 +285,8 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         </div>
       </section>
 
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-3">
+      {/* Tabs */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-stone-200/80 pb-3">
         {[
           { key: "overview", label: "Ringkasan Proyek", icon: FileText, count: participants.length },
           { key: "plan", label: "Negosiasi & Kesepakatan", icon: Handshake },
@@ -303,8 +303,8 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
               onClick={() => setActiveTab(tab.key as any)}
               className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
                 isActive
-                  ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20"
-                  : "bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800"
+                  ? "bg-[#27213D] text-white shadow-md shadow-[#27213D]/10"
+                  : "bg-white border border-stone-200/80 text-[#716B7E] hover:text-[#27213D] hover:bg-stone-50"
               }`}
             >
               <TabIcon className="w-3.5 h-3.5 shrink-0" />
@@ -312,7 +312,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
               {typeof tab.count === "number" && (
                 <span
                   className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                    isActive ? "bg-slate-950/30 text-slate-950" : "bg-slate-800 text-slate-300"
+                    isActive ? "bg-white/20 text-white" : "bg-stone-100 text-[#716B7E]"
                   }`}
                 >
                   {tab.count}
@@ -323,11 +323,12 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         })}
       </div>
 
+      {/* TAB 1: OVERVIEW */}
       {activeTab === "overview" && (
         <div className="space-y-8 animate-fade-in">
           <section className="space-y-4">
-            <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-              <Users className="w-5 h-5 text-amber-400" />
+            <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
+              <Users className="w-5 h-5 text-amber-500" />
               <span>Partisipan & Alokasi Peran ({participants.length})</span>
             </h2>
 
@@ -339,36 +340,36 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                 return (
                   <div
                     key={p.id}
-                    className="p-5 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-3"
+                    className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center font-black text-amber-400">
+                        <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center font-black text-amber-800">
                           {p.actor.name.charAt(0)}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-white text-sm">{p.actor.name}</span>
+                            <span className="font-bold text-[#27213D] text-sm">{p.actor.name}</span>
                             {isYou && (
-                              <span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 text-[10px] font-bold">
+                              <span className="px-2 py-0.5 rounded-md bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4] text-[10px] font-bold">
                                 Anda
                               </span>
                             )}
                           </div>
-                          <div className="text-xs text-slate-400">{p.actor.sector}</div>
+                          <div className="text-xs text-[#716B7E]">{p.actor.sector}</div>
                         </div>
                       </div>
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4]">
                         {p.roleCode}
                       </span>
                     </div>
 
                     {roleDef && (
-                      <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-1">
-                        <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                      <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200/70 space-y-1">
+                        <div className="text-[11px] font-bold text-[#716B7E] uppercase tracking-wider">
                           Tanggung Jawab:
                         </div>
-                        <div className="text-xs text-slate-200">{roleDef.contribution}</div>
+                        <div className="text-xs text-[#27213D] leading-relaxed">{roleDef.contribution}</div>
                       </div>
                     )}
                   </div>
@@ -378,15 +379,15 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
           </section>
 
           {plan?.expectedOutputs && (
-            <section className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-3">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">Target Luaran Nyata (Deliverables)</h3>
+            <section className="p-6 sm:p-8 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-3">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-[#716B7E]">Target Luaran Nyata (Deliverables)</h3>
               <div className="flex flex-wrap gap-2">
                 {(plan.expectedOutputs as string[]).map((out: string, idx: number) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-950 text-amber-300 border border-amber-500/20"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-200/80"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                     <span>{out}</span>
                   </span>
                 ))}
@@ -396,133 +397,134 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         </div>
       )}
 
+      {/* TAB 2: PLAN */}
       {activeTab === "plan" && (
         <form onSubmit={handleSaveTerms} className="space-y-6 animate-fade-in">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-              <Handshake className="w-5 h-5 text-amber-400" />
+            <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
+              <Handshake className="w-5 h-5 text-amber-500" />
               <span>Lembar Negosiasi & Ketentuan Kolaborasi</span>
             </h2>
             {termsMessage && (
-              <span className="text-xs font-medium text-amber-400 bg-amber-500/10 px-3 py-1 rounded-lg border border-amber-500/20">
+              <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-3.5 py-1 rounded-xl border border-emerald-200">
                 {termsMessage}
               </span>
             )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <CircleDollarSign className="w-4 h-4 text-amber-400" />
+            <div className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-4">
+              <h3 className="text-sm font-bold text-[#27213D] flex items-center gap-2">
+                <CircleDollarSign className="w-4 h-4 text-[#E66A48]" />
                 <span>Anggaran & Pembagian Biaya</span>
               </h3>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Estimasi Total Kebutuhan Biaya
                 </label>
                 <input
                   type="text"
                   name="estimatedTotal"
                   defaultValue={budget.estimatedTotal || "Rp 15.000.000"}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Skema Pembagian Biaya
                 </label>
                 <input
                   type="text"
                   name="costSharingModel"
                   defaultValue={budget.costSharingModel || "Proporsional sesuai porsi produksi"}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Clock className="w-4 h-4 text-amber-400" />
+            <div className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-4">
+              <h3 className="text-sm font-bold text-[#27213D] flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[#E66A48]" />
                 <span>Linimasa & Durasi Kerja</span>
               </h3>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Estimasi Durasi Proyek
                 </label>
                 <input
                   type="text"
                   name="estimatedDuration"
                   defaultValue={timeline.estimatedDuration || "6 Minggu"}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Target Peluncuran
                 </label>
                 <input
                   type="text"
                   name="targetLaunch"
                   defaultValue={timeline.targetLaunch || "Bulan Depan"}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-amber-400" />
+            <div className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-4">
+              <h3 className="text-sm font-bold text-[#27213D] flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-[#E66A48]" />
                 <span>Model Pendapatan & Bagi Hasil</span>
               </h3>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Proporsi Bagi Hasil Penjualan Bersih
                 </label>
                 <input
                   type="text"
                   name="proposedSplit"
                   defaultValue={revenueModel.proposedSplit || "50% : 50%"}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Format Brand Kolaborasi
                 </label>
                 <input
                   type="text"
                   name="brandModel"
                   defaultValue={ownershipRules.brandModel || "Co-Branding Bersama"}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-amber-400" />
+            <div className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-4">
+              <h3 className="text-sm font-bold text-[#27213D] flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#E66A48]" />
                 <span>Hak Kekayaan Intelektual (HAKI / IP)</span>
               </h3>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Kepemilikan Motif/Desain Asli
                 </label>
                 <input
                   type="text"
                   name="originalIp"
                   defaultValue={ipRules.originalIp || "Hak cipta tetap milik pencipta asli"}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Hak Pakai Produk Turunan
                 </label>
                 <input
                   type="text"
                   name="derivativeWorks"
                   defaultValue={ipRules.derivativeWorks || "Hak pakai bersama selama proyek aktif"}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
             </div>
@@ -532,7 +534,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
             <button
               type="submit"
               disabled={isSavingTerms}
-              className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm shadow-md shadow-amber-500/20 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white font-bold text-sm shadow-md shadow-[#E66A48]/20 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
             >
               <Save className="w-4 h-4" />
               <span>{isSavingTerms ? "Menyimpan..." : "Simpan Kesepakatan & Ketentuan"}</span>
@@ -541,6 +543,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         </form>
       )}
 
+      {/* TAB 3: TASKS */}
       {activeTab === "tasks" && (
         <div className="space-y-6 animate-fade-in">
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -549,10 +552,10 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                 <button
                   key={st}
                   onClick={() => setTaskFilter(st)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     taskFilter === st
-                      ? "bg-amber-500 text-slate-950 font-bold"
-                      : "bg-slate-900 text-slate-400 hover:text-white"
+                      ? "bg-[#27213D] text-white shadow-xs"
+                      : "bg-white text-[#716B7E] hover:text-[#27213D] border border-stone-200/80"
                   }`}
                 >
                   {st === "ALL" ? "Semua" : st}
@@ -560,7 +563,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
               ))}
             </div>
 
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-[#716B7E]">
               Menampilkan {filteredTasks.length} dari {tasks.length} tugas
             </span>
           </div>
@@ -573,19 +576,19 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
               return (
                 <div
                   key={t.id}
-                  className={`p-4 rounded-2xl border transition-all duration-200 flex flex-col justify-between gap-3 ${
+                  className={`p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between gap-3 ${
                     isDone
-                      ? "bg-slate-950/40 border-slate-800/50 opacity-70"
+                      ? "bg-stone-50/70 border-stone-200/60 opacity-75"
                       : inProgress
-                      ? "bg-slate-900/80 border-amber-500/30"
-                      : "bg-slate-900/60 border-slate-800"
+                      ? "bg-amber-50/40 border-amber-300 shadow-2xs"
+                      : "bg-white/95 border-stone-200/80 shadow-2xs"
                   }`}
                 >
                   <div className="space-y-1.5">
                     <div className="flex items-start justify-between gap-2">
                       <h4
                         className={`text-sm font-bold tracking-tight ${
-                          isDone ? "line-through text-slate-400" : "text-white"
+                          isDone ? "line-through text-stone-400" : "text-[#27213D]"
                         }`}
                       >
                         {t.title}
@@ -593,31 +596,31 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                       <span
                         className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                           t.priority === "HIGH"
-                            ? "bg-rose-500/20 text-rose-300"
-                            : "bg-slate-800 text-slate-400"
+                            ? "bg-rose-50 text-rose-800 border border-rose-200"
+                            : "bg-stone-100 text-[#716B7E] border border-stone-200"
                         }`}
                       >
                         {t.priority}
                       </span>
                     </div>
                     {t.description && (
-                      <p className="text-xs text-slate-400 line-clamp-2">{t.description}</p>
+                      <p className="text-xs text-[#716B7E] line-clamp-2">{t.description}</p>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-xs">
-                    <div className="text-slate-400 text-[11px]">
-                      PIC: <span className="text-slate-200 font-medium">{t.assignedActor?.name || "Semua"}</span>
+                  <div className="flex items-center justify-between pt-2 border-t border-stone-100 text-xs">
+                    <div className="text-[#716B7E] text-[11px]">
+                      PIC: <span className="text-[#27213D] font-bold">{t.assignedActor?.name || "Semua"}</span>
                     </div>
 
                     <button
                       onClick={() => handleToggleTask(t.id, t.status)}
                       className={`px-3 py-1 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
                         isDone
-                          ? "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30"
+                          ? "bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100"
                           : inProgress
-                          ? "bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
-                          : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                          ? "bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100"
+                          : "bg-stone-100 text-[#716B7E] hover:bg-stone-200 border border-stone-200"
                       }`}
                     >
                       {isDone ? (
@@ -645,21 +648,21 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
           <form
             onSubmit={handleCreateTask}
-            className="p-6 rounded-3xl bg-slate-900/40 border border-slate-800 space-y-4"
+            className="p-6 sm:p-8 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-4"
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                <Plus className="w-4 h-4 text-amber-400" />
+              <h3 className="text-sm font-bold text-[#27213D] uppercase tracking-wider flex items-center gap-2">
+                <Plus className="w-4 h-4 text-[#E66A48]" />
                 <span>Tambah Tugas Baru</span>
               </h3>
               {taskMessage && (
-                <span className="text-xs text-emerald-400 font-medium">{taskMessage}</span>
+                <span className="text-xs text-emerald-800 font-bold bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200">{taskMessage}</span>
               )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="sm:col-span-2 space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Judul Tugas *
                 </label>
                 <input
@@ -667,17 +670,17 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   name="title"
                   required
                   placeholder="Contoh: Menyiapkan 5 meter kain batik pola garuda"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Penanggung Jawab (Assignee)
                 </label>
                 <select
                   name="assignedActorId"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white cursor-pointer"
                 >
                   {participants.map((p: any) => (
                     <option key={p.actorId} value={p.actorId}>
@@ -688,25 +691,25 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
               </div>
 
               <div className="sm:col-span-2 space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Deskripsi / Rincian
                 </label>
                 <input
                   type="text"
                   name="description"
                   placeholder="Catatan tambahan spesifikasi atau instruksi kerja"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Prioritas
                 </label>
                 <select
                   name="priority"
                   defaultValue={TaskPriority.MEDIUM}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white cursor-pointer"
                 >
                   <option value={TaskPriority.HIGH}>Tinggi (High)</option>
                   <option value={TaskPriority.MEDIUM}>Sedang (Medium)</option>
@@ -718,7 +721,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
             <button
               type="submit"
               disabled={isCreatingTask}
-              className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition-colors cursor-pointer disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white font-bold text-xs shadow-md shadow-[#E66A48]/20 transition-colors cursor-pointer disabled:opacity-50"
             >
               {isCreatingTask ? "Menambahkan..." : "Simpan Tugas"}
             </button>
@@ -726,10 +729,11 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         </div>
       )}
 
+      {/* TAB 4: MILESTONES */}
       {activeTab === "milestones" && (
         <div className="space-y-6 animate-fade-in">
-          <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-            <Target className="w-5 h-5 text-amber-400" />
+          <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
+            <Target className="w-5 h-5 text-amber-500" />
             <span>Tahapan & Tonggak Pencapaian (Milestones)</span>
           </h2>
 
@@ -741,24 +745,24 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
               return (
                 <div
                   key={m.id}
-                  className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-start justify-between gap-4"
+                  className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.02)] flex items-start justify-between gap-4"
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-3.5">
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
+                      className={`w-9 h-9 rounded-2xl flex items-center justify-center font-black text-xs shrink-0 ${
                         isAchieved
-                          ? "bg-emerald-500 text-slate-950"
+                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
                           : inProgress
-                          ? "bg-amber-500 text-slate-950"
-                          : "bg-slate-800 text-slate-400"
+                          ? "bg-amber-100 text-amber-800 border border-amber-300"
+                          : "bg-stone-100 text-stone-500 border border-stone-200"
                       }`}
                     >
-                      {isAchieved ? <Check className="w-4 h-4 text-slate-950" /> : idx + 1}
+                      {isAchieved ? <Check className="w-4 h-4 text-emerald-700" /> : idx + 1}
                     </div>
 
                     <div className="space-y-1">
-                      <h4 className="text-base font-bold text-white">{m.title}</h4>
-                      {m.description && <p className="text-xs text-slate-400">{m.description}</p>}
+                      <h4 className="text-base font-bold text-[#27213D]">{m.title}</h4>
+                      {m.description && <p className="text-xs text-[#716B7E]">{m.description}</p>}
                     </div>
                   </div>
 
@@ -770,10 +774,10 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                           isAchieved ? MilestoneStatus.PENDING : MilestoneStatus.ACHIEVED
                         )
                       }
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
                         isAchieved
-                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                          : "bg-slate-800 hover:bg-slate-700 text-slate-300"
+                          ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                          : "bg-stone-100 hover:bg-stone-200 text-[#27213D] border border-stone-200"
                       }`}
                     >
                       {isAchieved ? (
@@ -793,33 +797,34 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         </div>
       )}
 
+      {/* TAB 5: DECISIONS */}
       {activeTab === "decisions" && (
         <div className="space-y-6 animate-fade-in">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-              <Scroll className="w-5 h-5 text-amber-400" />
+            <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
+              <Scroll className="w-5 h-5 text-amber-500" />
               <span>Buku Log Keputusan Bersama (Decision Log)</span>
             </h2>
             {decisionMessage && (
-              <span className="text-xs text-emerald-400 font-medium">{decisionMessage}</span>
+              <span className="text-xs text-emerald-800 font-bold bg-emerald-50 px-3.5 py-1 rounded-xl border border-emerald-200">{decisionMessage}</span>
             )}
           </div>
 
           <div className="space-y-3">
             {decisions.map((d: any) => (
-              <div key={d.id} className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2">
+              <div key={d.id} className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.02)] space-y-3">
                 <div className="flex items-start justify-between gap-3">
-                  <h4 className="text-base font-bold text-white">{d.title}</h4>
-                  <span className="text-[11px] text-slate-400">
+                  <h4 className="text-base font-bold text-[#27213D]">{d.title}</h4>
+                  <span className="text-[11px] text-[#716B7E]">
                     {new Date(d.createdAt).toLocaleDateString("id-ID")}
                   </span>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-xs text-slate-200">
+                <div className="p-4 rounded-xl bg-stone-50 border border-stone-200/70 text-xs text-[#27213D] leading-relaxed">
                   {d.decision}
                 </div>
                 {d.reason && (
-                  <div className="text-xs text-slate-400">
-                    <span className="font-semibold text-slate-300">Alasan:</span> {d.reason}
+                  <div className="text-xs text-[#716B7E]">
+                    <span className="font-bold text-[#27213D]">Alasan:</span> {d.reason}
                   </div>
                 )}
               </div>
@@ -828,16 +833,16 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
           <form
             onSubmit={handleRecordDecision}
-            className="p-6 rounded-3xl bg-slate-900/40 border border-slate-800 space-y-4"
+            className="p-6 sm:p-8 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-4"
           >
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <Plus className="w-4 h-4 text-amber-400" />
+            <h3 className="text-sm font-bold text-[#27213D] uppercase tracking-wider flex items-center gap-2">
+              <Plus className="w-4 h-4 text-[#E66A48]" />
               <span>Catat Keputusan Baru</span>
             </h3>
 
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Judul Keputusan *
                 </label>
                 <input
@@ -845,12 +850,12 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   name="title"
                   required
                   placeholder="Contoh: Kesepakatan Warna & Dimensi Tas Koleksi"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Bunyi Keputusan *
                 </label>
                 <textarea
@@ -858,19 +863,19 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   required
                   rows={2}
                   placeholder="Rincian hasil permufakatan bersama yang disetujui seluruh pihak..."
-                  className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white resize-none"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Dasar Pertimbangan / Alasan
                 </label>
                 <input
                   type="text"
                   name="reason"
                   placeholder="Mengapa keputusan ini diambil (opsional)"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
             </div>
@@ -878,7 +883,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
             <button
               type="submit"
               disabled={isRecordingDecision}
-              className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition-colors cursor-pointer disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white font-bold text-xs shadow-md shadow-[#E66A48]/20 transition-colors cursor-pointer disabled:opacity-50"
             >
               {isRecordingDecision ? "Menyimpan..." : "Catat ke Buku Log"}
             </button>
@@ -886,26 +891,27 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         </div>
       )}
 
+      {/* TAB 6: OUTCOMES & EVALUATION */}
       {activeTab === "outcomes" && (
         <div className="space-y-8 animate-fade-in">
-          <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-4">
+          <div className="p-6 sm:p-8 rounded-[32px] bg-amber-50/50 border border-amber-200/80 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <Trophy className="w-5 h-5 text-amber-400" />
-                  <h2 className="text-lg font-bold text-white tracking-tight">
+                  <Trophy className="w-5 h-5 text-amber-500" />
+                  <h2 className="text-lg font-bold text-[#27213D] tracking-tight">
                     Status Proyek & Siklus Hasil Kolaborasi
                   </h2>
                 </div>
-                <p className="text-xs text-slate-400 max-w-xl leading-relaxed">
+                <p className="text-xs text-[#716B7E] max-w-xl leading-relaxed">
                   Phase 5 menutup siklus peluang dengan merekam pencapaian nyata (produk, omzet, kampanye) serta umpan balik evaluasi 4-dimensi untuk melatih kecerdasan engine.
                 </p>
               </div>
 
               <div>
                 {collaboration.status === "COMPLETED" ? (
-                  <div className="px-4 py-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <div className="px-4 py-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     <Check className="w-4 h-4" />
                     <span>Kolaborasi Selesai (COMPLETED)</span>
                   </div>
@@ -913,7 +919,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   <button
                     onClick={handleCompleteCollaboration}
                     disabled={isCompletingCollab}
-                    className="px-5 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold shadow-md shadow-emerald-500/20 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                    className="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
                   >
                     <Check className="w-4 h-4" />
                     <span>{isCompletingCollab ? "Memproses..." : "Tandai Kolaborasi Selesai"}</span>
@@ -923,7 +929,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
             </div>
 
             {collabCompleteMessage && (
-              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 font-semibold animate-fade-in">
+              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-bold animate-fade-in">
                 {collabCompleteMessage}
               </div>
             )}
@@ -931,19 +937,19 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
           <section className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                <Package className="w-4 h-4 text-amber-400" />
+              <h3 className="text-sm font-bold text-[#27213D] uppercase tracking-wider flex items-center gap-2">
+                <Package className="w-4 h-4 text-amber-500" />
                 <span>Daftar Luaran Nyata ({outcomes.length})</span>
               </h3>
             </div>
 
             {outcomes.length === 0 ? (
-              <div className="p-8 rounded-3xl bg-slate-900/30 border border-slate-800/80 text-center space-y-3">
-                <div className="w-12 h-12 mx-auto rounded-2xl bg-slate-800/60 flex items-center justify-center text-emerald-400">
+              <div className="p-10 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] text-center space-y-3">
+                <div className="w-12 h-12 mx-auto rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
                   <Sparkles className="w-6 h-6" />
                 </div>
-                <h4 className="text-sm font-bold text-slate-300">Belum Ada Luaran yang Dicatat</h4>
-                <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+                <h4 className="text-sm font-bold text-[#27213D]">Belum Ada Luaran yang Dicatat</h4>
+                <p className="text-xs text-[#716B7E] max-w-md mx-auto leading-relaxed">
                   Ketika batch sampel pertama selesai, produk diluncurkan, atau pameran diselenggarakan, catat hasilnya melalui formulir di bawah ini untuk menutup siklus kolaborasi.
                 </p>
               </div>
@@ -957,14 +963,14 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   return (
                     <div
                       key={item.id}
-                      className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all space-y-4"
+                      className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-4"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <span className={`px-3 py-1 rounded-full text-[11px] font-bold border flex items-center gap-1.5 ${typeInfo.badge}`}>
                           <TypeIcon className="w-3.5 h-3.5" />
                           <span>{typeInfo.label}</span>
                         </span>
-                        <span className="text-[11px] text-slate-400">
+                        <span className="text-[11px] text-[#716B7E]">
                           {new Date(item.createdAt).toLocaleDateString("id-ID", {
                             day: "numeric",
                             month: "short",
@@ -974,50 +980,50 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                       </div>
 
                       <div className="space-y-1">
-                        <h4 className="text-base font-bold text-white leading-snug">{item.title}</h4>
-                        <p className="text-xs text-slate-300 leading-relaxed">{item.description}</p>
+                        <h4 className="text-base font-bold text-[#27213D] leading-snug">{item.title}</h4>
+                        <p className="text-xs text-[#716B7E] leading-relaxed">{item.description}</p>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/80 text-xs">
-                        <div className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
-                          <span className="text-[10px] text-slate-400 uppercase font-semibold block">Unit Produksi</span>
-                          <span className="font-bold text-white">
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-stone-100 text-xs">
+                        <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70">
+                          <span className="text-[10px] text-[#716B7E] uppercase font-bold block">Unit Produksi</span>
+                          <span className="font-bold text-[#27213D] mt-0.5 block">
                             {metrics.unitsProduced ? `${metrics.unitsProduced} Unit` : "Belum dicatat"}
                           </span>
                         </div>
-                        <div className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
-                          <span className="text-[10px] text-slate-400 uppercase font-semibold block">Nilai Finansial</span>
-                          <span className="font-bold text-amber-400">
+                        <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70">
+                          <span className="text-[10px] text-[#716B7E] uppercase font-bold block">Nilai Finansial</span>
+                          <span className="font-bold text-amber-800 mt-0.5 block">
                             {metrics.revenueAmount || "Belum dicatat"}
                           </span>
                         </div>
-                        <div className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
-                          <span className="text-[10px] text-slate-400 uppercase font-semibold block">Jangkauan Audiens</span>
-                          <span className="font-bold text-purple-300">
+                        <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70">
+                          <span className="text-[10px] text-[#716B7E] uppercase font-bold block">Jangkauan Audiens</span>
+                          <span className="font-bold text-purple-800 mt-0.5 block">
                             {metrics.audienceReached || "Belum dicatat"}
                           </span>
                         </div>
-                        <div className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
-                          <span className="text-[10px] text-slate-400 uppercase font-semibold block">Bukti Dokumentasi</span>
+                        <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70">
+                          <span className="text-[10px] text-[#716B7E] uppercase font-bold block">Bukti Dokumentasi</span>
                           {metrics.evidenceUrl ? (
                             <a
                               href={metrics.evidenceUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="font-bold text-sky-400 hover:underline flex items-center gap-1 truncate"
+                              className="font-bold text-[#E66A48] hover:underline flex items-center gap-1 truncate mt-0.5"
                             >
                               <span>Buka Tautan</span>
                               <ArrowUpRight className="w-3.5 h-3.5" />
                             </a>
                           ) : (
-                            <span className="text-slate-400">Belum dicatat</span>
+                            <span className="text-[#9E98A8] mt-0.5 block">Belum dicatat</span>
                           )}
                         </div>
                       </div>
 
                       {metrics.notes && (
-                        <div className="text-[11px] text-slate-400 bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60 italic">
-                          "{metrics.notes}"
+                        <div className="text-[11px] text-[#716B7E] bg-stone-50 p-3 rounded-xl border border-stone-200/60 italic">
+                          &quot;{metrics.notes}&quot;
                         </div>
                       )}
                     </div>
@@ -1029,24 +1035,24 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
           <form
             onSubmit={handleRecordOutcome}
-            className="p-6 sm:p-8 rounded-3xl bg-slate-900/40 border border-slate-800 space-y-5"
+            className="p-6 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-5"
           >
             <div className="space-y-1">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                <Plus className="w-4 h-4 text-amber-400" />
+              <h3 className="text-sm font-bold text-[#27213D] uppercase tracking-wider flex items-center gap-2">
+                <Plus className="w-4 h-4 text-[#E66A48]" />
                 <span>Catat Luaran Nyata (Outcome Baru)</span>
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-[#716B7E]">
                 Catat hasil riil yang terwujud dari kolaborasi ini sesuai fakta lapangan (tanpa mengarang angka).
               </p>
             </div>
 
             {outcomeMessage && (
               <div
-                className={`p-3 rounded-xl text-xs font-semibold animate-fade-in ${
+                className={`p-3.5 rounded-xl text-xs font-bold ${
                   outcomeMessage.includes("berhasil")
-                    ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
-                    : "bg-rose-500/10 border border-rose-500/20 text-rose-400"
+                    ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
+                    : "bg-rose-50 border border-rose-200 text-rose-800"
                 }`}
               >
                 {outcomeMessage}
@@ -1055,7 +1061,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Judul Luaran Nyata *
                 </label>
                 <input
@@ -1063,18 +1069,18 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   name="title"
                   required
                   placeholder="Contoh: Batch Perdana 50 Tas Heritage Batik-Kulit Terjual Habis"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Kategori Luaran *
                 </label>
                 <select
                   name="outcomeType"
                   defaultValue="PRODUCT"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white cursor-pointer"
                 >
                   <option value="PRODUCT">Produk Fisik / Digital</option>
                   <option value="CAMPAIGN">Kampanye / Pameran Bersama</option>
@@ -1088,7 +1094,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Jumlah Unit Diproduksi
                 </label>
                 <input
@@ -1096,48 +1102,48 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   name="unitsProduced"
                   min="0"
                   placeholder="Contoh: 50 (opsional)"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Nilai Finansial / Omzet Riil
                 </label>
                 <input
                   type="text"
                   name="revenueAmount"
                   placeholder="Contoh: Rp 17.500.000 (opsional)"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Jangkauan Audiens / Pembeli
                 </label>
                 <input
                   type="text"
                   name="audienceReached"
                   placeholder="Contoh: 1.200 pengunjung pameran (opsional)"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
 
               <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Tautan Bukti Dokumentasi / Katalog
                 </label>
                 <input
                   type="url"
                   name="evidenceUrl"
                   placeholder="https://instagram.com/... atau https://katalog-produk.com"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
 
               <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Deskripsi Hasil Capaian *
                 </label>
                 <textarea
@@ -1145,19 +1151,19 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   required
                   rows={2}
                   placeholder="Rincian proses realisasi, respons pasar, atau keberhasilan karya bersama..."
-                  className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white resize-none"
                 />
               </div>
 
               <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Catatan Pembelajaran Tambahan
                 </label>
                 <input
                   type="text"
                   name="notes"
                   placeholder="Kendala produksi yang teratasi, efisiensi bahan, dsb. (opsional)"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
             </div>
@@ -1165,33 +1171,33 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
             <button
               type="submit"
               disabled={isRecordingOutcome}
-              className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs shadow-md transition-all cursor-pointer disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white font-bold text-xs shadow-md shadow-[#E66A48]/20 transition-all cursor-pointer disabled:opacity-50"
             >
               {isRecordingOutcome ? "Menyimpan Luaran..." : "Simpan Luaran Nyata"}
             </button>
           </form>
 
-          <section className="space-y-6 pt-6 border-t border-slate-800">
+          <section className="space-y-6 pt-6 border-t border-stone-200/80">
             <div className="space-y-1">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                <Star className="w-4 h-4 text-amber-400 fill-current" />
+              <h3 className="text-sm font-bold text-[#27213D] uppercase tracking-wider flex items-center gap-2">
+                <Star className="w-4 h-4 text-amber-500 fill-current" />
                 <span>Evaluasi Kualitas Kolaborasi & Sinyal Pembelajaran Engine</span>
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-[#716B7E]">
                 Berikan penilaian 4-dimensi terhadap kolaborasi ini. Penilaian Anda menjadi sinyal validasi nyata untuk menyempurnakan engine peluang bagi seluruh ekosistem.
               </p>
             </div>
 
             <form
               onSubmit={handleSubmitFeedback}
-              className="p-6 sm:p-8 rounded-3xl bg-slate-900/40 border border-slate-800 space-y-6"
+              className="p-6 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-6"
             >
               {feedbackMessage && (
                 <div
-                  className={`p-3 rounded-xl text-xs font-semibold animate-fade-in ${
+                  className={`p-3.5 rounded-xl text-xs font-bold ${
                     feedbackMessage.includes("berhasil")
-                      ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
-                      : "bg-rose-500/10 border border-rose-500/20 text-rose-400"
+                      ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
+                      : "bg-rose-50 border border-rose-200 text-rose-800"
                   }`}
                 >
                   {feedbackMessage}
@@ -1199,10 +1205,10 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
+                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/70 space-y-2">
                   <div className="space-y-0.5">
-                    <label className="text-xs font-bold text-white block">1. Relevansi Peluang</label>
-                    <span className="text-[11px] text-slate-400 block">Kesesuaian dengan visi & identitas brand</span>
+                    <label className="text-xs font-bold text-[#27213D] block">1. Relevansi Peluang</label>
+                    <span className="text-[11px] text-[#716B7E] block">Kesesuaian visi & identitas brand</span>
                   </div>
                   <div className="flex items-center gap-1.5 pt-1">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -1212,8 +1218,8 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                         onClick={() => setSelectedRatings((prev) => ({ ...prev, relevanceScore: star }))}
                         className={`w-8 h-8 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-0.5 ${
                           selectedRatings.relevanceScore >= star
-                            ? "bg-amber-500 text-slate-950 shadow-sm shadow-amber-500/20"
-                            : "bg-slate-900 text-slate-400 hover:bg-slate-800"
+                            ? "bg-amber-500 text-white shadow-xs"
+                            : "bg-white text-stone-400 hover:bg-stone-100 border border-stone-200"
                         }`}
                       >
                         <span>{star}</span>
@@ -1223,10 +1229,10 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
+                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/70 space-y-2">
                   <div className="space-y-0.5">
-                    <label className="text-xs font-bold text-white block">2. Kelayakan Eksekusi</label>
-                    <span className="text-[11px] text-slate-400 block">Kemudahan peran & koordinasi kerja</span>
+                    <label className="text-xs font-bold text-[#27213D] block">2. Kelayakan Eksekusi</label>
+                    <span className="text-[11px] text-[#716B7E] block">Kemudahan peran & koordinasi</span>
                   </div>
                   <div className="flex items-center gap-1.5 pt-1">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -1236,8 +1242,8 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                         onClick={() => setSelectedRatings((prev) => ({ ...prev, feasibilityScore: star }))}
                         className={`w-8 h-8 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-0.5 ${
                           selectedRatings.feasibilityScore >= star
-                            ? "bg-emerald-500 text-slate-950 shadow-sm shadow-emerald-500/20"
-                            : "bg-slate-900 text-slate-400 hover:bg-slate-800"
+                            ? "bg-emerald-600 text-white shadow-xs"
+                            : "bg-white text-stone-400 hover:bg-stone-100 border border-stone-200"
                         }`}
                       >
                         <span>{star}</span>
@@ -1247,10 +1253,10 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
+                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/70 space-y-2">
                   <div className="space-y-0.5">
-                    <label className="text-xs font-bold text-white block">3. Kebaruan / Inovasi</label>
-                    <span className="text-[11px] text-slate-400 block">Ide orisinal yang belum terpikirkan</span>
+                    <label className="text-xs font-bold text-[#27213D] block">3. Kebaruan / Inovasi</label>
+                    <span className="text-[11px] text-[#716B7E] block">Ide orisinal yang segar</span>
                   </div>
                   <div className="flex items-center gap-1.5 pt-1">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -1260,8 +1266,8 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                         onClick={() => setSelectedRatings((prev) => ({ ...prev, noveltyScore: star }))}
                         className={`w-8 h-8 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-0.5 ${
                           selectedRatings.noveltyScore >= star
-                            ? "bg-purple-500 text-slate-950 shadow-sm shadow-purple-500/20"
-                            : "bg-slate-900 text-slate-400 hover:bg-slate-800"
+                            ? "bg-purple-600 text-white shadow-xs"
+                            : "bg-white text-stone-400 hover:bg-stone-100 border border-stone-200"
                         }`}
                       >
                         <span>{star}</span>
@@ -1271,10 +1277,10 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
+                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/70 space-y-2">
                   <div className="space-y-0.5">
-                    <label className="text-xs font-bold text-white block">4. Nilai Manfaat Nyata</label>
-                    <span className="text-[11px] text-slate-400 block">Dampak positif bagi pertumbuhan usaha</span>
+                    <label className="text-xs font-bold text-[#27213D] block">4. Nilai Manfaat Nyata</label>
+                    <span className="text-[11px] text-[#716B7E] block">Dampak positif pada usaha</span>
                   </div>
                   <div className="flex items-center gap-1.5 pt-1">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -1284,8 +1290,8 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                         onClick={() => setSelectedRatings((prev) => ({ ...prev, usefulnessScore: star }))}
                         className={`w-8 h-8 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-0.5 ${
                           selectedRatings.usefulnessScore >= star
-                            ? "bg-cyan-500 text-slate-950 shadow-sm shadow-cyan-500/20"
-                            : "bg-slate-900 text-slate-400 hover:bg-slate-800"
+                            ? "bg-teal-600 text-white shadow-xs"
+                            : "bg-white text-stone-400 hover:bg-stone-100 border border-stone-200"
                         }`}
                       >
                         <span>{star}</span>
@@ -1297,21 +1303,21 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Ulasan Kualitatif / Catatan Evaluasi Kolaborasi
                 </label>
                 <textarea
                   name="comments"
                   rows={2}
                   placeholder="Ceritakan pengalaman kolaborasi Anda, apa yang berjalan efektif, dan apa yang dapat diperbaiki..."
-                  className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white resize-none"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmittingFeedback}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition-all cursor-pointer disabled:opacity-50"
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white font-bold text-xs shadow-md shadow-[#E66A48]/20 transition-all cursor-pointer disabled:opacity-50"
               >
                 {isSubmittingFeedback ? "Menyimpan Evaluasi..." : "Kirim Ulasan Evaluasi"}
               </button>
@@ -1319,18 +1325,18 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
             {feedbacks.length > 0 && (
               <div className="space-y-3 pt-4">
-                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                <h4 className="text-xs font-bold text-[#27213D] uppercase tracking-wider">
                   Ulasan dari Rekan Kolaborator ({feedbacks.length})
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {feedbacks.map((f: any) => (
                     <div
                       key={f.id}
-                      className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2.5 text-xs"
+                      className="p-5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs space-y-2.5 text-xs"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-white">{f.actor?.name || "Aktor"}</span>
-                        <span className="text-[11px] text-slate-400">
+                        <span className="font-bold text-[#27213D]">{f.actor?.name || "Aktor"}</span>
+                        <span className="text-[11px] text-[#716B7E]">
                           {new Date(f.createdAt).toLocaleDateString("id-ID", {
                             day: "numeric",
                             month: "short",
@@ -1341,25 +1347,25 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
                       <div className="flex flex-wrap items-center gap-2 text-[10px]">
                         {f.relevanceScore && (
-                          <span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20 font-bold flex items-center gap-1">
+                          <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-bold flex items-center gap-1">
                             <span>Relevansi: {f.relevanceScore}</span>
                             <Star className="w-2.5 h-2.5 fill-current" />
                           </span>
                         )}
                         {f.feasibilityScore && (
-                          <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-bold flex items-center gap-1">
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold flex items-center gap-1">
                             <span>Kelayakan: {f.feasibilityScore}</span>
                             <Star className="w-2.5 h-2.5 fill-current" />
                           </span>
                         )}
                         {f.noveltyScore && (
-                          <span className="px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20 font-bold flex items-center gap-1">
+                          <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-800 border border-purple-200 font-bold flex items-center gap-1">
                             <span>Kebaruan: {f.noveltyScore}</span>
                             <Star className="w-2.5 h-2.5 fill-current" />
                           </span>
                         )}
                         {f.usefulnessScore && (
-                          <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold flex items-center gap-1">
+                          <span className="px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 border border-teal-200 font-bold flex items-center gap-1">
                             <span>Manfaat: {f.usefulnessScore}</span>
                             <Star className="w-2.5 h-2.5 fill-current" />
                           </span>
@@ -1367,8 +1373,8 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                       </div>
 
                       {f.comments && (
-                        <p className="text-slate-300 leading-relaxed italic bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60">
-                          "{f.comments}"
+                        <p className="text-[#27213D] leading-relaxed italic bg-stone-50 p-3 rounded-xl border border-stone-200/60">
+                          &quot;{f.comments}&quot;
                         </p>
                       )}
                     </div>

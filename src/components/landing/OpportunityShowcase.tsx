@@ -17,50 +17,50 @@ export function OpportunityShowcase() {
   const opportunities = [
     {
       id: "opp_capsule_01",
-      title: "Modern Heritage Capsule",
-      pattern: "Kombinasi Produk Fashion",
-      badge: "● Potensial (88%)",
+      title: "Autumn/Winter Editorial Campaign",
+      pattern: "Editorial Fashion Campaign",
+      badge: "● Potensial Tinggi (94%)",
       badgeClass: "bg-[#EDFAF5] text-[#134e40] border-[#BFE9DD]",
       bgVisualClass: "from-[#F7C8D0]/30 via-[#FFF7ED] to-[#FFD45A]/25",
       roles: [
-        { role: "Produsen Batik", asset: "Motif Wastra Nusantara" },
-        { role: "Pengrajin Kulit", asset: "Kulit Nabati Handmade" },
-        { role: "Kriya Perhiasan", asset: "Aksen Kuningan & Logam" },
+        { role: "Fashion Designer", asset: "Koleksi Kapsul 12 Looks" },
+        { role: "Fotografer Editorial", asset: "Analog 35mm & Medium Format" },
+        { role: "Fashion Stylist", asset: "Kurasi Wardrobe & Aksesori" },
       ],
-      desc: "Menyatukan warisan wastra tradisional dengan produk kulit berstruktur menjadi koleksi aksesori uniseks bernilai premium.",
-      synergyPoints: ["Komplementaritas Bahan", "Workshop Bersama", "Zero Stok Pasif"],
-      visualType: "heritage",
-    },
-    {
-      id: "opp_shoot_02",
-      title: "Creative Product Shoot",
-      pattern: "Kombinasi Aset Kreatif",
-      badge: "● Keselarasan Tinggi (92%)",
-      badgeClass: "bg-[#F4F0FF] text-[#3e2794] border-[#D9D2FF]",
-      bgVisualClass: "from-[#D9D2FF]/30 via-[#FFFDFC] to-[#C9DDF8]/30",
-      roles: [
-        { role: "Brand Fashion", asset: "Koleksi Musim Terbaru" },
-        { role: "Fotografer", asset: "Arahan Editorial Komersial" },
-        { role: "Studio Foto", asset: "Daylight Loft & Alat Lengkap" },
-      ],
-      desc: "Menyatukan peralatan kreatif, ruang studio pencahayaan alami, dan tim pengarah gaya untuk produksi kampanye lookbook nasional secara efisien.",
-      synergyPoints: ["Utilisasi Fasilitas", "Portofolio Bersama", "Kru Kolaboratif"],
+      desc: "Menyatukan label busana dengan fotografer editorial analog dan penata gaya untuk kampanye lookbook majalah dan rilis digital.",
+      synergyPoints: ["Moodboard Selaras", "Hak Cipta Jelas", "Kredit Publikasi"],
       visualType: "shoot",
     },
     {
+      id: "opp_shoot_02",
+      title: "Commercial Daylight Studio Shoot",
+      pattern: "E-Commerce & Lookbook Production",
+      badge: "● Keselarasan Optimal (96%)",
+      badgeClass: "bg-[#F4F0FF] text-[#3e2794] border-[#D9D2FF]",
+      bgVisualClass: "from-[#D9D2FF]/30 via-[#FFFDFC] to-[#C9DDF8]/30",
+      roles: [
+        { role: "Label Streetwear", asset: "Koleksi 24 SKU Musim Panas" },
+        { role: "Daylight Studio", asset: "Loft 120m² & Lighting Profoto" },
+        { role: "Model & MUA", asset: "Karakter Visual & Editorial Glow" },
+      ],
+      desc: "Produksi katalog e-commerce dan konten video gerak dalam satu hari dengan integrasi fasilitas studio lengkap dan talenta profesional.",
+      synergyPoints: ["Efisiensi Waktu", "Alat Studio Lengkap", "Deliverables Terstruktur"],
+      visualType: "heritage",
+    },
+    {
       id: "opp_collection_03",
-      title: "Limited Edition Artisan Series",
-      pattern: "Ekspansi Pasar Bersama",
-      badge: "● Terverifikasi Layak (85%)",
+      title: "Haute Couture Fashion Film",
+      pattern: "Visual Arts & Runway Showcase",
+      badge: "● Terverifikasi Layak (89%)",
       badgeClass: "bg-[#FFF3EB] text-[#85390c] border-[#F9D8C4]",
       bgVisualClass: "from-[#BFE9DD]/30 via-[#FFFDFC] to-[#F9D8C4]/35",
       roles: [
-        { role: "Perajin Keramik", asset: "Wadah Stoneware Handmade" },
-        { role: "Desainer Grafis", asset: "Identitas Visual & Kemasan" },
-        { role: "Kreator Konten", asset: "Audiens Pecinta Desain" },
+        { role: "Atelier Busana", asset: "Koleksi Gaun Eksklusif" },
+        { role: "Creative Director", asset: "Arahan Sinematik & Storyboard" },
+        { role: "Videografer Film", asset: "Kamera Sinema 4K & Sound Scoring" },
       ],
-      desc: "Menciptakan seri keramik bernomor edisi 100 buah dengan kemasan risograf khusus dan peluncuran langsung ke audiens kreator.",
-      synergyPoints: ["Sinergi Audiens", "Kemasan Khusus", "Bagi Hasil Adil"],
+      desc: "Menciptakan karya film pendek mode (fashion film) untuk aktivasi peluncuran koleksi dan submisi kurasi internasional.",
+      synergyPoints: ["Portofolio Global", "Kurasi Artistik", "Bagi Hasil Adil"],
       visualType: "craft",
     },
   ];
@@ -83,14 +83,14 @@ export function OpportunityShowcase() {
           <div className="max-w-2xl space-y-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold uppercase tracking-wider text-[#27213D] shadow-xs">
               <span className="w-2 h-2 rounded-full bg-[#FFB800]" />
-              <span>Portofolio Peluang • Formula Kolaborasi</span>
+              <span>Portofolio Kampanye • Formula Tim Produksi</span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#27213D] tracking-tight">
-              Peluang nyata dari potensi yang saling melengkapi.
+              Peluang nyata dari tim produksi fashion yang saling melengkapi.
             </h2>
             <p className="text-base sm:text-lg text-[#716B7E] font-normal leading-relaxed">
-              Jelajahi cetak biru kolaboratif konkret yang dihasilkan oleh engine RAMU
-              berdasarkan aset kreatif nyata dan batasan yang terverifikasi.
+              Jelajahi cetak biru kolaborasi konkret yang diramu oleh Engine RAMU
+              berdasarkan ketersediaan alat, gaya visual, dan kapasitas studio nyata.
             </p>
           </div>
 

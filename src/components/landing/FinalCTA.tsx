@@ -40,8 +40,8 @@ export function FinalCTA() {
           </h2>
 
           <p className="text-base sm:text-lg text-[#554F65] font-normal leading-relaxed max-w-2xl mx-auto">
-            Mulai jelajahi peluang kolaborasi atau daftarkan aset kreatif Anda untuk menemukan
-            mitra yang saling melengkapi dan membangun karya kreatif bernilai tinggi.
+            Mulai jelajahi peluang kolaborasi atau daftarkan kapasitas studio dan koleksi Anda untuk menemukan
+            tim produksi visual yang saling melengkapi dan membangun karya kampanye bernilai tinggi.
           </p>
 
           <div className="pt-3 flex flex-wrap items-center justify-center gap-4">
@@ -61,7 +61,7 @@ export function FinalCTA() {
           </div>
 
           <div className="pt-3 text-xs text-[#716B7E]">
-            Tanpa biaya awal • Analisis komplementaritas deterministik • Dibangun untuk Ekonomi Kreatif Indonesia
+            Tanpa biaya awal • Analisis kecocokan deterministik • Didedikasikan untuk Ekosistem Fashion & Visual Arts Indonesia
           </div>
         </div>
       </div>

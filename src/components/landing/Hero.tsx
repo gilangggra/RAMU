@@ -87,7 +87,7 @@ function IsometricStudioShowcase() {
                     </div>
                     <div>
                       <div className="text-[11px] font-bold text-[#27213D] leading-none">
-                        Modern Heritage Capsule
+                        Editorial Lookbook Campaign
                       </div>
                       <div className="text-[9px] text-[#716B7E] font-medium">
                         3 Mitra Komplementer • Terverifikasi
@@ -102,34 +102,34 @@ function IsometricStudioShowcase() {
                 <div className="grid grid-cols-3 gap-2">
                   <div className="p-2 rounded-xl bg-[#F5F0FF] border border-[#DDD6FE] text-center">
                     <div className="w-7 h-7 mx-auto rounded-lg bg-[#D9D2FF] text-[#27213D] font-bold text-[10px] flex items-center justify-center">
-                      BT
+                      FD
                     </div>
                     <div className="text-[10px] font-bold text-[#27213D] mt-1 truncate">
-                      Batik Atelier
+                      Maison Label
                     </div>
-                    <div className="text-[8px] text-[#716B7E]">Bahan Wastra</div>
+                    <div className="text-[8px] text-[#716B7E]">Busana & Wardrobe</div>
                     <div className="text-[9px] font-mono font-bold text-[#27213D] mt-0.5">35%</div>
                   </div>
 
                   <div className="p-2 rounded-xl bg-[#FFF2EB] border border-[#FCDCD4] text-center">
                     <div className="w-7 h-7 mx-auto rounded-lg bg-[#F9D8C4] text-[#27213D] font-bold text-[10px] flex items-center justify-center">
-                      LT
+                      FP
                     </div>
                     <div className="text-[10px] font-bold text-[#27213D] mt-1 truncate">
-                      Leather Guild
+                      Fashion Lens
                     </div>
-                    <div className="text-[8px] text-[#716B7E]">Artisan Kulit</div>
+                    <div className="text-[8px] text-[#716B7E]">Foto & Strobe</div>
                     <div className="text-[9px] font-mono font-bold text-[#27213D] mt-0.5">35%</div>
                   </div>
 
                   <div className="p-2 rounded-xl bg-[#EDFAF5] border border-[#BFE9DD] text-center">
                     <div className="w-7 h-7 mx-auto rounded-lg bg-[#BFE9DD] text-[#134e40] font-bold text-[10px] flex items-center justify-center">
-                      VS
+                      DS
                     </div>
                     <div className="text-[10px] font-bold text-[#27213D] mt-1 truncate">
-                      Visual Studio
+                      Daylight Studio
                     </div>
-                    <div className="text-[8px] text-[#716B7E]">Lookbook</div>
+                    <div className="text-[8px] text-[#716B7E]">Space & Retouch</div>
                     <div className="text-[9px] font-mono font-bold text-[#27213D] mt-0.5">30%</div>
                   </div>
                 </div>
@@ -242,13 +242,13 @@ export function Hero() {
           <div className="lg:col-span-6 space-y-7 text-left">
             <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white shadow-xs text-xs font-bold uppercase tracking-wider text-[#27213D]">
               <Sparkles className="w-3.5 h-3.5 text-[#E59F00]" />
-              <span>Creative Opportunity Engine</span>
+              <span>Fashion & Visual Production Engine</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-[58px] font-extrabold text-[#27213D] tracking-tight leading-[1.1]">
-              Ramu apa yang Anda miliki menjadi karya yang{" "}
+              Ramu tim produksi fashion & visual terbaik Anda{" "}
               <span className="relative whitespace-nowrap">
-                <span className="relative z-10">diciptakan bersama.</span>
+                <span className="relative z-10">dalam sekejap.</span>
                 <span
                   className="absolute bottom-1.5 left-0 right-0 h-3.5 -z-0 rounded-full opacity-70"
                   style={{ backgroundColor: "#FFB800" }}
@@ -257,7 +257,7 @@ export function Hero() {
             </h1>
 
             <p className="text-base sm:text-lg text-[#554F65] font-normal leading-relaxed max-w-xl">
-              RAMU menghubungkan aset, keahlian kriya, dan kapasitas studio para pelaku ekonomi kreatif menjadi formula kolaborasi bilateral yang nyata dan siap eksekusi.
+              Dari desainer busana, fotografer editorial, stylist, hingga model. RAMU bukan sekadar direktori pasif—kami meramu tim kolaborasi kampanye lookbook yang terstruktur, transparan, dan siap eksekusi.
             </p>
 
             <div className="pt-2 flex flex-wrap items-center gap-4">
@@ -279,20 +279,20 @@ export function Hero() {
             <div className="pt-5 border-t border-[#27213D]/10 flex items-center gap-4">
               <div className="flex -space-x-2.5">
                 <div className="h-9 w-9 rounded-full ring-2 ring-white bg-[#D9D2FF] flex items-center justify-center text-[10px] font-bold text-[#27213D] shadow-xs">
-                  BT
+                  FD
                 </div>
                 <div className="h-9 w-9 rounded-full ring-2 ring-white bg-[#F9D8C4] flex items-center justify-center text-[10px] font-bold text-[#27213D] shadow-xs">
-                  LT
+                  FP
                 </div>
                 <div className="h-9 w-9 rounded-full ring-2 ring-white bg-[#BFE9DD] flex items-center justify-center text-[10px] font-bold text-[#134e40] shadow-xs">
-                  VS
+                  MD
                 </div>
                 <div className="h-9 w-9 rounded-full ring-2 ring-white bg-[#FFD45A] flex items-center justify-center text-[10px] font-bold text-[#27213D] shadow-xs">
-                  +120
+                  +140
                 </div>
               </div>
               <p className="text-xs text-[#554F65]">
-                <strong className="font-bold text-[#27213D]">120+ kreator & studio</strong> aktif membangun kolaborasi lintas sektor
+                <strong className="font-bold text-[#27213D]">140+ label busana, fotografer & model</strong> aktif berkolaborasi editorial
               </p>
             </div>
           </div>

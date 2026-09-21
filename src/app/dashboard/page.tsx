@@ -71,111 +71,119 @@ export default async function DashboardPage() {
   const inputModules = [
     {
       href: "/assets",
-      icon: <Package className="w-6 h-6 text-primary-400" />,
+      icon: <Package className="w-6 h-6 text-[#E66A48]" />,
       label: "Aset",
       sublabel: "Kontribusi ke kolaborasi",
       count: assetCount,
       unit: "aset aktif",
       required: true,
+      color: "from-[#FFE9DE] to-[#FFF4ED]",
     },
     {
       href: "/goals",
-      icon: <Target className="w-6 h-6 text-primary-400" />,
+      icon: <Target className="w-6 h-6 text-[#7C3AED]" />,
       label: "Goal",
       sublabel: "Tujuan yang ingin dicapai",
       count: goalCount,
       unit: "goal aktif",
       required: true,
+      color: "from-[#EDE8FF] to-[#F3EDFF]",
     },
     {
       href: "/needs",
-      icon: <Search className="w-6 h-6 text-primary-400" />,
+      icon: <Search className="w-6 h-6 text-[#0D9488]" />,
       label: "Kebutuhan",
       sublabel: "Yang dibutuhkan dari rekan",
       count: needCount,
       unit: "kebutuhan aktif",
       required: false,
+      color: "from-[#E0F7F0] to-[#F0FDF9]",
     },
     {
       href: "/constraints",
-      icon: <ShieldAlert className="w-6 h-6 text-primary-400" />,
+      icon: <ShieldAlert className="w-6 h-6 text-[#E59F00]" />,
       label: "Batasan",
       sublabel: "Constraint operasional & kapasitas",
       count: constraintCount,
       unit: "constraint",
       required: false,
+      color: "from-[#FFFDE6] to-[#FFF7ED]",
     },
   ];
 
   return (
     <AppShell actor={primaryActor} activeRoute="/dashboard">
-      <section className="p-8 rounded-3xl bg-neutral-900/90 border border-neutral-800 relative overflow-hidden space-y-5">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary-700/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+      {/* Welcome Hero Banner */}
+      <section className="p-8 sm:p-10 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_12px_36px_rgba(39,33,61,0.04)] relative overflow-hidden space-y-6">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-[#FFE4D6]/40 via-[#EDE8FF]/30 to-transparent rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-950 border border-primary-700/50 text-xs font-semibold text-primary-300">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-pulse" />
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold text-[#E66A48] shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-[#E66A48] animate-pulse" />
               Creative Ecosystem Hub
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-neutral-100 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#27213D] tracking-tight">
               Selamat Datang, {primaryActor.name}!
             </h1>
-            <p className="text-xs sm:text-sm text-neutral-400 max-w-xl leading-relaxed">
-              Dua mode kolaborasi aktif: <strong>Opportunity Engine</strong> (penemuan berbasis komplementaritas aset) dan <strong>Project Briefs</strong> (inisiasi proyek terbuka lintas profesi).
+            <p className="text-xs sm:text-sm text-[#716B7E] max-w-xl leading-relaxed">
+              Dua mode kolaborasi aktif di RAMU: <strong>Opportunity Engine</strong> (penemuan berbasis komplementaritas aset) dan <strong>Project Briefs</strong> (inisiasi proyek terbuka lintas talenta).
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            <div className="p-4 rounded-2xl bg-neutral-950 border border-primary-800/40 space-y-2 min-w-[180px]">
+          <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+            {/* Project Briefs module */}
+            <div className="p-4 rounded-2xl bg-[#FFF7ED]/70 border border-[#F9D8C4] space-y-2 min-w-[190px] w-full sm:w-auto shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-primary-400 uppercase tracking-wider">Project Briefs</span>
+                <span className="text-[11px] font-bold text-[#E66A48] uppercase tracking-wider">Project Briefs</span>
                 <div className="flex items-center gap-1.5">
                   {briefStats.pendingInterestCount > 0 && (
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-neutral-950">
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[#FFB800] text-[#27213D]">
                       {briefStats.pendingInterestCount} Minat
                     </span>
                   )}
-                  <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-primary-700 text-white">
+                  <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-[#E66A48] text-white">
                     {briefStats.openBriefCount}
                   </span>
                 </div>
               </div>
               <Link
                 href="/projects"
-                className="inline-flex items-center justify-center w-full gap-1.5 px-3 py-1.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white font-bold text-xs transition-colors"
+                className="inline-flex items-center justify-center w-full gap-1.5 px-3 py-2 rounded-xl bg-[#E66A48] hover:bg-[#D45938] text-white font-bold text-xs transition-colors shadow-xs"
               >
                 <span>Galeri Proyek</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
-            <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-2 min-w-[180px]">
+            {/* Opportunities module */}
+            <div className="p-4 rounded-2xl bg-[#EDE8FF]/70 border border-[#DDD6FE] space-y-2 min-w-[190px] w-full sm:w-auto shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">Peluang Engine</span>
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-neutral-800 text-neutral-200 border border-neutral-700">
+                <span className="text-[11px] font-bold text-[#7C3AED] uppercase tracking-wider">Peluang Engine</span>
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-[#7C3AED] text-white">
                   {opportunityCount}
                 </span>
               </div>
               <Link
                 href="/opportunities"
-                className="inline-flex items-center justify-center w-full gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold text-xs transition-colors"
+                className="inline-flex items-center justify-center w-full gap-1.5 px-3 py-2 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold text-xs transition-colors shadow-xs"
               >
                 <span>Katalog Peluang</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
-            <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-2 min-w-[180px]">
+            {/* Collaborations module */}
+            <div className="p-4 rounded-2xl bg-[#E0F7F0]/70 border border-[#99F6E4] space-y-2 min-w-[190px] w-full sm:w-auto shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">Kolaborasi Aktif</span>
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-neutral-800 text-neutral-200 border border-neutral-700">
+                <span className="text-[11px] font-bold text-[#0D9488] uppercase tracking-wider">Kolaborasi Aktif</span>
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-[#0D9488] text-white">
                   {collaborationCount}
                 </span>
               </div>
               <Link
                 href="/collaborations"
-                className="inline-flex items-center justify-center w-full gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold text-xs transition-colors"
+                className="inline-flex items-center justify-center w-full gap-1.5 px-3 py-2 rounded-xl bg-[#0D9488] hover:bg-[#0F766E] text-white font-bold text-xs transition-colors shadow-xs"
               >
                 <span>Workspace</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -185,17 +193,18 @@ export default async function DashboardPage() {
         </div>
       </section>
 
+      {/* Project Briefs Terbuka */}
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <Megaphone className="w-4 h-4 text-primary-400" />
-              <h2 className="text-lg font-bold text-neutral-100 tracking-tight">Project Briefs Terbuka</h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary-950 text-primary-300 border border-primary-700/50">
+              <Megaphone className="w-4 h-4 text-[#E66A48]" />
+              <h2 className="text-lg font-bold text-[#27213D] tracking-tight">Project Briefs Terbuka</h2>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4]">
                 Mode Kolaboratif
               </span>
             </div>
-            <p className="text-xs text-neutral-400 mt-0.5">
+            <p className="text-xs text-[#716B7E] mt-0.5">
               Inisiasi proyek baru atau bergabung ke proyek yang sedang mencari peran dan kapabilitas Anda.
             </p>
           </div>
@@ -203,14 +212,14 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/projects/new"
-              className="px-3.5 py-1.5 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-xl bg-[#E66A48] hover:bg-[#D45938] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Inisiasi Brief Baru</span>
             </Link>
             <Link
               href="/projects"
-              className="px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-xs font-semibold text-neutral-300 hover:text-white transition-colors inline-flex items-center gap-1.5"
+              className="px-3 py-2 rounded-xl bg-white hover:bg-stone-50 border border-stone-200 text-xs font-semibold text-[#27213D] transition-colors inline-flex items-center gap-1.5 shadow-2xs"
             >
               <span>Lihat Semua ({briefStats.openBriefCount})</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -219,19 +228,19 @@ export default async function DashboardPage() {
         </div>
 
         {briefStats.recentOpenBriefs.length === 0 ? (
-          <div className="p-8 rounded-2xl bg-neutral-900/40 border border-dashed border-neutral-800 text-center space-y-3">
+          <div className="p-10 rounded-3xl bg-white/95 border border-dashed border-stone-300 text-center space-y-3 shadow-xs">
             <div className="flex justify-center">
-              <Lightbulb className="w-8 h-8 text-neutral-500" />
+              <Lightbulb className="w-8 h-8 text-[#FFB800]" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-neutral-200">Belum ada brief terbuka dari pelaku kreatif lain</p>
-              <p className="text-xs text-neutral-400 mt-1 max-w-md mx-auto">
+              <p className="text-sm font-semibold text-[#27213D]">Belum ada brief terbuka dari pelaku kreatif lain</p>
+              <p className="text-xs text-[#716B7E] mt-1 max-w-md mx-auto">
                 Mulai inisiasi project brief Anda sendiri untuk mengundang kolaborator seperti videografer, fotografer, atau desainer grafis.
               </p>
             </div>
             <Link
               href="/projects/new"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-xs font-bold transition-all"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#E66A48] hover:bg-[#D45938] text-white text-xs font-bold transition-all shadow-xs"
             >
               <span>Buat Project Brief Pertama Anda</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -243,19 +252,19 @@ export default async function DashboardPage() {
               <Link
                 key={brief.id}
                 href={`/projects/${brief.id}`}
-                className="group p-5 rounded-2xl bg-neutral-900/80 hover:bg-neutral-900 border border-neutral-800 hover:border-primary-700/60 transition-all space-y-4 flex flex-col justify-between"
+                className="group p-5 rounded-2xl bg-white/95 hover:bg-white border border-stone-200/80 hover:border-[#E66A48]/50 transition-all shadow-xs hover:shadow-md space-y-4 flex flex-col justify-between"
               >
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-bold text-neutral-400 bg-neutral-950 px-2 py-0.5 rounded-md border border-neutral-800">
+                    <span className="text-[10px] font-bold text-[#716B7E] bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200">
                       {brief.creatorActor.name}
                     </span>
-                    <span className="text-[10px] text-primary-300 font-semibold">
+                    <span className="text-[10px] text-[#E66A48] font-bold">
                       {brief.neededRoles.filter((r: any) => !r.isFilled).length} peran dibuka
                     </span>
                   </div>
 
-                  <h3 className="font-bold text-sm text-neutral-100 group-hover:text-primary-300 transition-colors line-clamp-1">
+                  <h3 className="font-bold text-sm text-[#27213D] group-hover:text-[#E66A48] transition-colors line-clamp-1">
                     {brief.title}
                   </h3>
 
@@ -265,8 +274,8 @@ export default async function DashboardPage() {
                         key={role.id}
                         className={`text-[10px] px-2 py-0.5 rounded-md font-medium border ${
                           role.isFilled
-                            ? "bg-neutral-950 text-neutral-500 line-through border-neutral-900"
-                            : "bg-primary-950/60 text-primary-300 border-primary-700/40"
+                            ? "bg-stone-100 text-stone-400 line-through border-stone-200"
+                            : "bg-[#FFF7ED] text-[#E66A48] border-[#F9D8C4]"
                         }`}
                       >
                         {role.roleLabel}
@@ -275,9 +284,9 @@ export default async function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-neutral-800/80 flex items-center justify-between text-xs text-neutral-400">
+                <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-[#716B7E]">
                   <span className="text-[11px] truncate max-w-[150px]">{brief.creatorActor.sector}</span>
-                  <span className="text-primary-400 font-semibold group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
+                  <span className="text-[#E66A48] font-semibold group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
                     <span>Detail</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </span>
@@ -288,13 +297,14 @@ export default async function DashboardPage() {
         )}
       </section>
 
+      {/* Input Layer — Data Profil Kreatif */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-neutral-100 tracking-tight">Input Layer — Data Profil Kreatif</h2>
-            <p className="text-xs text-neutral-400">Fondasi data yang digunakan Opportunity Engine untuk menghitung komplementaritas.</p>
+            <h2 className="text-lg font-bold text-[#27213D] tracking-tight">Input Layer — Data Profil Kreatif</h2>
+            <p className="text-xs text-[#716B7E]">Fondasi data yang digunakan Opportunity Engine untuk menghitung komplementaritas.</p>
           </div>
-          <span className="text-xs text-primary-400 font-mono">DATA_MODEL.md</span>
+          <span className="text-xs text-[#E66A48] font-mono font-medium">DATA_MODEL.md</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -302,26 +312,28 @@ export default async function DashboardPage() {
             <Link
               key={mod.href}
               href={mod.href}
-              className="group p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800 hover:border-primary-700/60 hover:bg-neutral-900 transition-all duration-200 space-y-4 block"
+              className="group p-5 rounded-2xl bg-white/95 border border-stone-200/80 hover:border-stone-300 hover:shadow-md transition-all duration-200 space-y-4 block shadow-xs"
             >
               <div className="flex items-start justify-between">
-                <div className="text-2xl">{mod.icon}</div>
+                <div className="p-2 rounded-xl bg-stone-50 border border-stone-100 group-hover:scale-105 transition-transform">
+                  {mod.icon}
+                </div>
                 {mod.required && (
-                  <span className="text-[10px] font-bold text-primary-400 uppercase tracking-wider bg-primary-950 px-2 py-0.5 rounded border border-primary-800/40">
+                  <span className="text-[10px] font-bold text-[#E66A48] uppercase tracking-wider bg-[#FFF7ED] px-2 py-0.5 rounded-md border border-[#F9D8C4]">
                     Utama
                   </span>
                 )}
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-neutral-100 text-sm">{mod.label}</span>
-                  <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-neutral-950 text-neutral-300 border border-neutral-800">
+                  <span className="font-bold text-[#27213D] text-sm">{mod.label}</span>
+                  <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-stone-100 text-[#27213D] border border-stone-200">
                     {mod.count}
                   </span>
                 </div>
-                <p className="text-xs text-neutral-400 leading-relaxed line-clamp-1">{mod.sublabel}</p>
+                <p className="text-xs text-[#716B7E] leading-relaxed line-clamp-1">{mod.sublabel}</p>
               </div>
-              <div className="text-[11px] text-neutral-500 group-hover:text-primary-300 transition-colors font-medium">
+              <div className="text-[11px] text-[#9E98A8] group-hover:text-[#E66A48] transition-colors font-medium">
                 {mod.count === 0 ? (
                   <span className="inline-flex items-center gap-1">
                     <span>Klik untuk menambahkan</span>
@@ -336,28 +348,29 @@ export default async function DashboardPage() {
         </div>
       </section>
 
+      {/* Profil Aktor Terdaftar */}
       <section className="space-y-4">
-        <h2 className="text-lg font-bold text-neutral-100 tracking-tight">Profil Aktor Terdaftar</h2>
+        <h2 className="text-lg font-bold text-[#27213D] tracking-tight">Profil Aktor Terdaftar</h2>
 
-        <div className="p-6 md:p-8 rounded-2xl bg-neutral-900/80 border border-neutral-800 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-neutral-800">
+        <div className="p-6 md:p-8 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-stone-100">
             <div className="space-y-1">
               <div className="flex items-center gap-3">
-                <h3 className="text-xl font-bold text-neutral-100">{primaryActor.name}</h3>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary-950 text-primary-300 border border-primary-700/50">
+                <h3 className="text-xl font-bold text-[#27213D]">{primaryActor.name}</h3>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#E0F7F0] text-[#0D9488] border border-[#99F6E4]">
                   {primaryActor.status}
                 </span>
               </div>
-              <p className="text-xs text-neutral-500 font-mono">ID: {primaryActor.id}</p>
+              <p className="text-xs text-[#9E98A8] font-mono">ID: {primaryActor.id}</p>
             </div>
 
             <div className="flex items-center gap-2 text-xs">
-              <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-950 border border-neutral-800 text-neutral-300">
-                <Building2 className="w-3.5 h-3.5 text-primary-400" />
+              <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-stone-50 border border-stone-200 text-[#27213D]">
+                <Building2 className="w-3.5 h-3.5 text-[#E66A48]" />
                 <span>{primaryActor.actorType}</span>
               </span>
-              <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-950 border border-neutral-800 text-neutral-300">
-                <MapPin className="w-3.5 h-3.5 text-primary-400" />
+              <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-stone-50 border border-stone-200 text-[#27213D]">
+                <MapPin className="w-3.5 h-3.5 text-[#E66A48]" />
                 <span>{primaryActor.location || "Lokasi belum diisi"}</span>
               </span>
             </div>
@@ -365,18 +378,18 @@ export default async function DashboardPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
             <div className="space-y-1">
-              <span className="text-xs font-semibold uppercase text-neutral-500">Subsektor Ekonomi Kreatif</span>
-              <p className="text-neutral-200 font-medium">{primaryActor.sector}</p>
+              <span className="text-xs font-semibold uppercase text-[#9E98A8]">Subsektor Ekonomi Kreatif</span>
+              <p className="text-[#27213D] font-medium">{primaryActor.sector}</p>
             </div>
 
             <div className="space-y-1">
-              <span className="text-xs font-semibold uppercase text-neutral-500">Kontak Bisnis</span>
-              <p className="text-neutral-200">{primaryActor.contactEmail || "-"}</p>
+              <span className="text-xs font-semibold uppercase text-[#9E98A8]">Kontak Bisnis</span>
+              <p className="text-[#27213D]">{primaryActor.contactEmail || "-"}</p>
             </div>
 
             <div className="md:col-span-2 space-y-1">
-              <span className="text-xs font-semibold uppercase text-neutral-500">Deskripsi Keahlian & Fokus</span>
-              <p className="text-neutral-300 leading-relaxed text-xs sm:text-sm">
+              <span className="text-xs font-semibold uppercase text-[#9E98A8]">Deskripsi Keahlian & Fokus</span>
+              <p className="text-[#716B7E] leading-relaxed text-xs sm:text-sm">
                 {primaryActor.description || "Belum ada deskripsi yang ditambahkan."}
               </p>
             </div>

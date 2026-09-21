@@ -16,7 +16,7 @@ export function Footer() {
                   RAMU
                 </span>
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-[#716B7E]">
-                  Creative Opportunity Engine
+                  Fashion & Visual Production Engine
                 </span>
               </div>
             </Link>
@@ -26,9 +26,9 @@ export function Footer() {
             </p>
 
             <p className="text-xs text-[#716B7E] leading-relaxed max-w-sm">
-              Platform sintesis peluang kolaboratif ekonomi kreatif Indonesia.
-              Menemukan sinergi komplementer antar aset, talenta, fasilitas, dan
-              sasaran bisnis melalui analisis bebas halusinasi.
+              Platform sintesis kolaboratif industri fashion, fotografi, dan seni visual.
+              Meramu sinergi komplementer antar desainer, talenta model, fotografer, dan studio
+              melalui analisis terstruktur dan deterministik.
             </p>
           </div>
 

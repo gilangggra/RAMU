@@ -67,10 +67,16 @@ export function Navbar() {
             Cara Kerja
           </Link>
           <Link
-            href="/#opportunities"
+            href="/opportunities"
             className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
           >
             Peluang
+          </Link>
+          <Link
+            href="/directory"
+            className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
+          >
+            Direktori
           </Link>
           <Link
             href="/#differentiator"
@@ -150,11 +156,18 @@ export function Navbar() {
               Cara Kerja
             </Link>
             <Link
-              href="/#opportunities"
+              href="/opportunities"
               onClick={() => setMobileOpen(false)}
               className="hover:text-[#27213D] py-1.5"
             >
               Peluang
+            </Link>
+            <Link
+              href="/directory"
+              onClick={() => setMobileOpen(false)}
+              className="hover:text-[#27213D] py-1.5"
+            >
+              Direktori
             </Link>
             <Link
               href="/#differentiator"

@@ -38,31 +38,34 @@ function checkDirectNeedMatch(
       let isMatch = false;
       let reason = '';
 
-      // Photography need matched with Capability asset
       if (
-        (needText.includes('foto') || needText.includes('fotografi') || needText.includes('visual') || needText.includes('katalog')) &&
-        (assetText.includes('foto') || assetText.includes('fotografi') || assetText.includes('kamera') || asset.category === 'CAPABILITY')
+        (needText.includes('foto') || needText.includes('fotografi') || needText.includes('visual') || needText.includes('katalog') || needText.includes('lookbook')) &&
+        (assetText.includes('foto') || assetText.includes('fotografi') || assetText.includes('kamera') || assetText.includes('lensa') || assetText.includes('studi') || asset.category === 'CAPABILITY')
       ) {
         isMatch = true;
         reason = `${provider.name} memiliki kapabilitas visual (${asset.name}) yang memenuhi kebutuhan langsung ${receiver.name} (${need.title}).`;
       }
-      // Leather / Material need
       else if (
-        (needText.includes('kulit') || needText.includes('material') || needText.includes('bahan')) &&
-        (assetText.includes('kulit') || asset.category === 'MATERIAL' || asset.roles.includes('INPUT'))
+        (needText.includes('model') || needText.includes('talent') || needText.includes('wajah')) &&
+        (assetText.includes('model') || assetText.includes('talent') || assetText.includes('catwalk') || assetText.includes('editorial'))
       ) {
         isMatch = true;
-        reason = `${provider.name} dapat menyuplai kebutuhan bahan/komponen (${asset.name}) untuk ${receiver.name}.`;
+        reason = `${provider.name} menyediakan talenta model terverifikasi (${asset.name}) untuk kebutuhan sesi kampanye ${receiver.name}.`;
       }
-      // Jewelry / Accessory / Silver need
       else if (
-        (needText.includes('perak') || needText.includes('aksesoris') || needText.includes('hiasan') || needText.includes('perhiasan')) &&
-        (assetText.includes('perak') || assetText.includes('aksesoris') || assetText.includes('perhiasan'))
+        (needText.includes('stylist') || needText.includes('wardrobe') || needText.includes('mua') || needText.includes('makeup')) &&
+        (assetText.includes('stylist') || assetText.includes('wardrobe') || assetText.includes('mua') || assetText.includes('makeup'))
       ) {
         isMatch = true;
-        reason = `${provider.name} menyediakan aksen perhiasan/perak (${asset.name}) yang dicari oleh ${receiver.name}.`;
+        reason = `${provider.name} memiliki keahlian styling & tata rias (${asset.name}) yang dicari oleh ${receiver.name}.`;
       }
-      // General category overlap: CAPABILITY_NEED -> CAPABILITY
+      else if (
+        (needText.includes('busana') || needText.includes('pakaian') || needText.includes('koleksi') || needText.includes('fashion') || needText.includes('bahan')) &&
+        (assetText.includes('busana') || assetText.includes('pakaian') || assetText.includes('koleksi') || asset.category === 'MATERIAL' || asset.category === 'PRODUCT' || asset.roles.includes('INPUT'))
+      ) {
+        isMatch = true;
+        reason = `${provider.name} dapat menyuplai kebutuhan koleksi busana/wardrobe (${asset.name}) untuk ${receiver.name}.`;
+      }
       else if (need.category === 'CAPABILITY_NEED' && asset.category === 'CAPABILITY') {
         isMatch = true;
         reason = `${provider.name} memiliki keahlian khusus (${asset.name}) yang menjawab kebutuhan kapabilitas ${receiver.name}.`;
@@ -204,7 +207,6 @@ function checkGeneralSynergy(
   actorB: EngineActor,
   results: PairwiseComplementarity[]
 ) {
-  // If in creative craft sector, consider as potential product/market collaboration
   results.push({
     sourceActorId: actorA.id,
     targetActorId: actorB.id,
@@ -212,7 +214,7 @@ function checkGeneralSynergy(
     strength: 'WEAK',
     numericStrength: 2.0,
     reasons: [
-      `Potensi sinergi lintas komunitas kriya antara ${actorA.name} dan ${actorB.name} untuk perluasan audiens bersama.`,
+      `Potensi sinergi ekosistem fashion dan visual antara ${actorA.name} dan ${actorB.name} untuk perluasan audiens bersama.`,
     ],
   });
 }

@@ -3,9 +3,9 @@ import { OpportunityPatternDef, TitleContext } from '../types';
 export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
   {
     code: 'FASHION_CAPSULE',
-    name: 'Koleksi Kapsul Kriya Busana',
+    name: 'Kampanye Koleksi Kapsul & Editorial Lookbook',
     description:
-      'Membentuk lini koleksi eksklusif terbatas dengan memadukan kain wastra, komponen kulit/kriya, serta perhiasan dan dokumentasi visual komersial.',
+      'Membentuk lini koleksi eksklusif terbatas dengan memadukan rancangan busana desainer, penata gaya (stylist), fotografer editorial, dan talenta model.',
     category: 'PRODUCT_DEVELOPMENT',
     version: 1,
     minParticipants: 2,
@@ -13,7 +13,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     requiredRoles: [
       {
         code: 'TEXTILE_MATERIAL',
-        label: 'Material Wastra / Tekstil',
+        label: 'Koleksi Busana / Desainer',
         required: true,
         minCount: 1,
         acceptedCategories: ['MATERIAL', 'PRODUCT'],
@@ -21,17 +21,17 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       },
       {
         code: 'CRAFT_COMPONENT',
-        label: 'Komponen Kriya / Kulit',
+        label: 'Stylist & Wardrobe / Aksesori',
         required: true,
         minCount: 1,
-        acceptedCategories: ['MATERIAL', 'PRODUCT', 'PRODUCTION'],
+        acceptedCategories: ['MATERIAL', 'PRODUCT', 'PRODUCTION', 'CAPABILITY'],
         acceptedRoles: ['COMPONENT', 'CAPABILITY', 'CREATIVE_ELEMENT'],
       },
     ],
     optionalRoles: [
       {
         code: 'ACCESSORY_ACCENT',
-        label: 'Aksen Perak / Perhiasan',
+        label: 'Aksen Perhiasan & Detail',
         required: false,
         minCount: 0,
         acceptedCategories: ['PRODUCT', 'CREATIVE_ASSET'],
@@ -39,7 +39,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       },
       {
         code: 'VISUAL_PRODUCTION',
-        label: 'Fotografi & Dokumentasi Visual',
+        label: 'Fotografi Editorial & Model',
         required: false,
         minCount: 0,
         acceptedCategories: ['CAPABILITY', 'RESOURCE'],
@@ -47,9 +47,9 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       },
     ],
     expectedOutputs: [
-      'Koleksi Kapsul Terbatas (Limited Edition)',
-      'Lookbook & Katalog Foto Komersial',
-      'Pemasaran Bersama Lintas Segmen',
+      'Koleksi Kapsul Editorial Terbatas',
+      'Lookbook & Katalog Foto High-Res',
+      'Hak Komersial & Kredit Publikasi Jelas',
     ],
     allowedRelationships: [
       'PRODUCT_COMBINATION',
@@ -64,12 +64,12 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       'CREATIVE_EXPERIMENTATION',
     ],
     generateTitle: (ctx: TitleContext) => {
-      const names = ctx.actors.map((a) => a.name.replace(/^(Sanggar|Kriya|Studio)\s+/i, '')).slice(0, 2);
-      return `Koleksi Kapsul Warisan Nusantara: ${names.join(' × ')}`;
+      const names = ctx.actors.map((a) => a.name.replace(/^(Maison|Studio|Label)\s+/i, '')).slice(0, 2);
+      return `Kampanye Koleksi Kapsul Editorial: ${names.join(' × ')}`;
     },
     generateDescription: (ctx: TitleContext) => {
       const actorNames = ctx.actors.map((a) => a.name).join(', ');
-      return `Kolaborasi penciptaan lini produk terpadu antara ${actorNames}. Menyatukan keunggulan material wastra dan ketrampilan kriya menjadi koleksi bernilai tambah tinggi yang siap dipasarkan ke segmen urban premium.`;
+      return `Kolaborasi penciptaan kampanye lookbook terpadu antara ${actorNames}. Menyatukan koleksi busana desainer dan kapabilitas visual editorial menjadi rilis berkelas internasional.`;
     },
   },
 
@@ -78,9 +78,9 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
   // --------------------------------------------------------------------------
   {
     code: 'PREMIUM_GIFT_SET',
-    name: 'Paket Suvenir & Bingkisan Premium',
+    name: 'Produksi Lookbook & E-Commerce Studio',
     description:
-      'Menggabungkan produk-produk kriya unggulan menjadi paket cenderamata eksklusif untuk korporasi, pariwisata, atau momentum istimewa.',
+      'Menghubungkan label busana dengan fasilitas studio daylight profesional, fotografer komersial, dan tim penata gaya untuk katalog e-commerce.',
     category: 'PRODUCT_DEVELOPMENT',
     version: 1,
     minParticipants: 2,
@@ -88,7 +88,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     requiredRoles: [
       {
         code: 'CORE_CRAFT',
-        label: 'Produk Kriya Utama',
+        label: 'Koleksi Busana Musim Terbaru',
         required: true,
         minCount: 1,
         acceptedCategories: ['PRODUCT', 'MATERIAL'],
@@ -96,17 +96,17 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       },
       {
         code: 'COMPLEMENTARY_ITEM',
-        label: 'Produk Pendamping / Aksesoris',
+        label: 'Fasilitas Studio & Lighting Kit',
         required: true,
         minCount: 1,
-        acceptedCategories: ['PRODUCT', 'CREATIVE_ASSET', 'MATERIAL'],
-        acceptedRoles: ['COMPONENT', 'CREATIVE_ELEMENT'],
+        acceptedCategories: ['PRODUCT', 'CREATIVE_ASSET', 'MATERIAL', 'RESOURCE'],
+        acceptedRoles: ['COMPONENT', 'CREATIVE_ELEMENT', 'ENABLER'],
       },
     ],
     optionalRoles: [
       {
         code: 'VISUAL_STYLING',
-        label: 'Katalog & Penataan Visual',
+        label: 'Pengarah Gaya & Model',
         required: false,
         minCount: 0,
         acceptedCategories: ['CAPABILITY', 'RESOURCE'],
@@ -114,9 +114,9 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       },
     ],
     expectedOutputs: [
-      'Bingkisan Eksklusif Kotak Hadiah (Gift Box)',
-      'Paket Suvenir Korporat Berkelanjutan',
-      'Katalog Presentasi Penawaran B2B',
+      'Paket Foto E-Commerce White-Background',
+      'Lookbook Editorial Daylight Studio',
+      'Video Gerak Media Sosial Siap Rilis',
     ],
     allowedRelationships: [
       'PRODUCT_COMBINATION',
@@ -129,11 +129,12 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       'PRODUCT_DEVELOPMENT',
     ],
     generateTitle: (ctx: TitleContext) => {
-      return `Exclusive Heritage Hamper & Souvenir Set`;
+      const names = ctx.actors.map((a) => a.name).slice(0, 2).join(' × ');
+      return `Sesi Studio Lookbook & E-Commerce: ${names}`;
     },
     generateDescription: (ctx: TitleContext) => {
       const actorNames = ctx.actors.map((a) => a.name).join(' dan ');
-      return `Kombinasi produk kriya pilihan dari ${actorNames} yang dikurasi dalam satu paket hadiah bernilai estetik tinggi, menyasar pasar korporat, cinderamata resmi pemerintahan, dan momen perayaan.`;
+      return `Integrasi fasilitas daylight studio dan tim produksi visual untuk katalog komersial ${actorNames}. Menghasilkan materi promosi e-commerce standar industri.`;
     },
   },
 
@@ -142,9 +143,9 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
   // --------------------------------------------------------------------------
   {
     code: 'CREATIVE_CAMPAIGN',
-    name: 'Kampanye Visual & Rebranding Kriya',
+    name: 'Fashion Film & Creative Direction',
     description:
-      'Meningkatkan daya tarik pasar dan citra brand kriya tradisional melalui kampanye visual profesional, foto editorial, dan video narasi budaya.',
+      'Meningkatkan daya tarik dan prestise brand fashion melalui video sinematik naratif, creative direction, dan editorial visual.',
     category: 'MARKETING',
     version: 1,
     minParticipants: 2,
@@ -152,7 +153,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     requiredRoles: [
       {
         code: 'PRODUCT_BRAND',
-        label: 'Produk Kriya / Brand',
+        label: 'Label Busana / Koleksi',
         required: true,
         minCount: 1,
         acceptedCategories: ['PRODUCT', 'MATERIAL', 'CREATIVE_ASSET'],
@@ -160,7 +161,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       },
       {
         code: 'VISUAL_CREATIVE',
-        label: 'Fotografi / Rumah Produksi Visual',
+        label: 'Creative Director & Videografer',
         required: true,
         minCount: 1,
         acceptedCategories: ['CAPABILITY', 'RESOURCE'],
@@ -170,7 +171,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     optionalRoles: [
       {
         code: 'COMPLEMENTARY_SUBJECT',
-        label: 'Produk Aksesori Pelengkap',
+        label: 'Aksesori & Wardrobe Pelengkap',
         required: false,
         minCount: 0,
         acceptedCategories: ['PRODUCT', 'MATERIAL'],
@@ -178,9 +179,9 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       },
     ],
     expectedOutputs: [
-      'Aset Foto Katalog Resolusi Tinggi',
-      'Video Narasi Kerajinan (Behind the Scenes)',
-      'Aset Kampanye Media Sosial Siap Publikasi',
+      'Film Pendek Mode (Fashion Film 4K)',
+      'Teaser Sinematik Media Sosial',
+      'Aset Kampanye Visual Editorial',
     ],
     allowedRelationships: [
       'DIRECT_NEED_MATCH',
@@ -194,23 +195,19 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     ],
     generateTitle: (ctx: TitleContext) => {
       const craftActor = ctx.actors.find((a) => a.assets.some((as) => as.category === 'PRODUCT' || as.category === 'MATERIAL')) || ctx.actors[0];
-      return `Kampanye Narasi Visual & Katalog: ${craftActor.name}`;
+      return `Kampanye Fashion Film & Arahan Visual: ${craftActor.name}`;
     },
     generateDescription: (ctx: TitleContext) => {
       const visualActor = ctx.actors.find((a) => a.assets.some((as) => as.category === 'CAPABILITY')) || ctx.actors[1];
       const craftActors = ctx.actors.filter((a) => a.id !== visualActor?.id).map((a) => a.name).join(', ');
-      return `Pemberdayaan aset visual untuk ${craftActors} melalui keahlian fotografi komersial dan penataan artistik ${visualActor ? visualActor.name : 'studio visual'} guna memperluas jangkauan pasar ke generasi muda dan kanal daring modern.`;
+      return `Produksi film pendek mode sinematik dan arahan artistik untuk ${craftActors} oleh ${visualActor ? visualActor.name : 'studio kreatif'} guna mengangkat narasi estetika ke panggung festival dan audiens internasional.`;
     },
   },
-
-  // --------------------------------------------------------------------------
-  // PATTERN 4: PRODUCT PHOTOSHOOT DIRECT MATCH
-  // --------------------------------------------------------------------------
   {
     code: 'PRODUCT_PHOTOSHOOT',
-    name: 'Sesi Pemotretan & Katalog Produk',
+    name: 'Sesi Foto Editorial & Casting Model',
     description:
-      'Menghubungkan langsung perajin kriya yang membutuhkan dokumentasi komersial dengan fotografer produk profesional.',
+      'Menghubungkan langsung desainer busana yang membutuhkan dokumentasi komersial dengan fotografer fashion dan talenta model.',
     category: 'CREATIVE_PRODUCTION',
     version: 1,
     minParticipants: 2,
@@ -218,7 +215,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     requiredRoles: [
       {
         code: 'PRODUCT_OWNER',
-        label: 'Pemilik Produk Kriya',
+        label: 'Desainer / Pemilik Koleksi Busana',
         required: true,
         minCount: 1,
         acceptedCategories: ['PRODUCT', 'MATERIAL'],
@@ -226,7 +223,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       },
       {
         code: 'PHOTOGRAPHER',
-        label: 'Fotografer Komersial',
+        label: 'Fotografer Fashion & Model',
         required: true,
         minCount: 1,
         acceptedCategories: ['CAPABILITY', 'RESOURCE'],
@@ -235,32 +232,28 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     ],
     optionalRoles: [],
     expectedOutputs: [
-      'Paket Foto Produk White-Background (E-Commerce)',
-      'Foto Lifestyle & Aplikasi Penggunaan',
-      'Materi Pemasaran Siap Pakai',
+      'Foto Katalog E-Commerce White-Background',
+      'Foto Editorial On-Model Kualitas Majalah',
+      'Aset Digital Siap Rilis Kampanye',
     ],
     allowedRelationships: ['DIRECT_NEED_MATCH', 'CAPABILITY_GAP'],
     preferredGoals: ['BRAND_GROWTH', 'MARKET_EXPANSION', 'REVENUE_GROWTH'],
     generateTitle: (ctx: TitleContext) => {
       const maker = ctx.actors[0];
       const studio = ctx.actors[1];
-      return `Sesi Katalog Komersial: ${maker.name} × ${studio ? studio.name : 'Studio'}`;
+      return `Sesi Editorial On-Model: ${maker.name} × ${studio ? studio.name : 'Studio'}`;
     },
     generateDescription: (ctx: TitleContext) => {
       const maker = ctx.actors[0];
       const studio = ctx.actors[1];
-      return `Penyelesaian kebutuhan langsung pemotretan produk ${maker.name} oleh ${studio ? studio.name : 'studio fotografi'}. Menghasilkan aset visual standar industri untuk menunjang penjualan e-commerce dan materi penawaran klien.`;
+      return `Penyelesaian kebutuhan langsung pemotretan lookbook ${maker.name} oleh ${studio ? studio.name : 'fotografer fashion'}. Menghasilkan aset visual standar industri untuk menunjang promosi editorial dan penjualan daring.`;
     },
   },
-
-  // --------------------------------------------------------------------------
-  // PATTERN 5: DESIGN TO PRODUCTION (Hilirisasi Desain ke Perajin)
-  // --------------------------------------------------------------------------
   {
     code: 'DESIGN_TO_PRODUCTION',
-    name: 'Hilirisasi Desain ke Sentra Produksi',
+    name: 'Hilirisasi Desain ke Atelier & Garmen',
     description:
-      'Menghubungkan perancang/kreator dengan sentra perajin untuk mewujudkan rancangan desain baru menjadi produk fisik bernilai jual tinggi.',
+      'Menghubungkan perancang busana dengan atelier jahit dan workshop garmen untuk memproduksi sampel desain menjadi koleksi siap pakai.',
     category: 'CREATIVE_PRODUCTION',
     version: 1,
     minParticipants: 2,
@@ -268,7 +261,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     requiredRoles: [
       {
         code: 'MAKER_CRAFT',
-        label: 'Sentra Produksi / Kriya',
+        label: 'Atelier Jahit & Workshop Garmen',
         required: true,
         minCount: 1,
         acceptedCategories: ['MATERIAL', 'PRODUCTION', 'CAPABILITY'],
@@ -276,7 +269,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       },
       {
         code: 'DESIGN_OR_COMPONENT',
-        label: 'Elemen Desain / Komponen Pelengkap',
+        label: 'Sketsa Desain & Pola Busana',
         required: true,
         minCount: 1,
         acceptedCategories: ['CREATIVE_ASSET', 'PRODUCT', 'MATERIAL'],
@@ -285,30 +278,26 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     ],
     optionalRoles: [],
     expectedOutputs: [
-      'Prototipe & Sampel Produk Baru',
-      'Standardisasi Mutu & Produksi Batch Kecil',
-      'Kemitraan Jangka Panjang Rantai Pasok',
+      'Prototipe & Sampel Koleksi Baru',
+      'Standardisasi Mutu & Jahitan Kualitas Tinggi',
+      'Produksi Batch Terbatas Siap Rilis',
     ],
     allowedRelationships: ['PRODUCTION_CHAIN', 'CAPABILITY_GAP', 'PRODUCT_COMBINATION'],
     preferredGoals: ['PRODUCT_DEVELOPMENT', 'CAPABILITY_EXPANSION', 'REVENUE_GROWTH'],
     generateTitle: (ctx: TitleContext) => {
       const names = ctx.actors.map((a) => a.name).join(' & ');
-      return `Pengembangan Lini Kriya Kolaboratif: ${names}`;
+      return `Produksi Lini Busana Kolaboratif: ${names}`;
     },
     generateDescription: (ctx: TitleContext) => {
       const names = ctx.actors.map((a) => a.name).join(' dan ');
-      return `Sinergi kemampuan manufaktur kriya dan rancang bangun antara ${names} untuk memproduksi varian produk kontemporer tanpa meninggalkan keaslian teknik tradisional.`;
+      return `Sinergi perancangan mode dan kapasitas produksi atelier antara ${names} untuk memproduksi lini busana berkualitas tinggi dengan presisi jahitan standar butik.`;
     },
   },
-
-  // --------------------------------------------------------------------------
-  // PATTERN 6: PRODUCT LAUNCH & CROSS MARKET ACCESS
-  // --------------------------------------------------------------------------
   {
     code: 'PRODUCT_LAUNCH',
-    name: 'Peluncuran Kolaboratif & Akses Lintas Pasar',
+    name: 'Runway Showcase & Peluncuran Koleksi Bersama',
     description:
-      'Dua atau lebih pelaku kriya menggabungkan basis pelanggan dan jaringan distribusi masing-masing dalam sebuah momentum peluncuran bersama.',
+      'Dua atau lebih label fashion dan studio kreatif menggabungkan basis audiens dalam sebuah peragaan busana atau peluncuran koleksi kolaboratif.',
     category: 'MARKET_ACCESS',
     version: 1,
     minParticipants: 2,
@@ -316,7 +305,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     requiredRoles: [
       {
         code: 'PRIMARY_PARTICIPANT',
-        label: 'Pelaku Kriya 1',
+        label: 'Label Fashion Kolaborator 1',
         required: true,
         minCount: 1,
         acceptedCategories: ['PRODUCT', 'MATERIAL'],
@@ -324,7 +313,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       },
       {
         code: 'CROSS_PARTICIPANT',
-        label: 'Pelaku Kriya 2',
+        label: 'Label Fashion Kolaborator 2',
         required: true,
         minCount: 1,
         acceptedCategories: ['PRODUCT', 'MATERIAL', 'CREATIVE_ASSET'],
@@ -334,7 +323,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     optionalRoles: [
       {
         code: 'VISUAL_ENABLER',
-        label: 'Dukungan Visual',
+        label: 'Dukungan Dokumentasi Runway',
         required: false,
         minCount: 0,
         acceptedCategories: ['CAPABILITY'],
@@ -342,19 +331,19 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       },
     ],
     expectedOutputs: [
-      'Event Peluncuran Bersama',
-      'Kampanye Cross-Promotion di Media Sosial',
-      'Paket Bundling Produk Lintas Brand',
+      'Event Runway / Trunk Show Bersama',
+      'Kampanye Cross-Promotion di Media Fashion',
+      'Rilis Koleksi Kolaboratif Terbatas',
     ],
     allowedRelationships: ['MARKET_ACCESS', 'PRODUCT_COMBINATION', 'CREATIVE_COMBINATION'],
     preferredGoals: ['MARKET_EXPANSION', 'REVENUE_GROWTH', 'NETWORK_EXPANSION'],
     generateTitle: (ctx: TitleContext) => {
       const names = ctx.actors.map((a) => a.name).join(' × ');
-      return `Peluncuran Bersama Pasar Premium: ${names}`;
+      return `Runway Showcase & Peluncuran Bersama: ${names}`;
     },
     generateDescription: (ctx: TitleContext) => {
       const names = ctx.actors.map((a) => a.name).join(', ');
-      return `Inisiatif perluasan pasar bersama antara ${names} untuk saling membuka akses ke audiens masing-masing melalui penawaran bundling dan kolaborasi kampanye.`;
+      return `Inisiatif peragaan busana dan aktivasi media bersama antara ${names} untuk saling membuka akses ke audiens pecinta mode dan pembeli komersial.`;
     },
   },
 ];

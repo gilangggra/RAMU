@@ -23,7 +23,7 @@ export function FormCollaborationButton({
     return (
       <button
         onClick={() => router.push(`/collaborations/${collaborationId}`)}
-        className="inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-sm shadow-xl shadow-emerald-500/20 transition-all cursor-pointer group"
+        className="inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all cursor-pointer group"
       >
         <Handshake className="w-4 h-4 group-hover:scale-110 transition-transform" />
         <span>Buka Ruang Kolaborasi Aktif</span>
@@ -55,10 +55,10 @@ export function FormCollaborationButton({
     <button
       onClick={handleForm}
       disabled={loading || !isFilled}
-      className={`inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all shadow-xl ${
+      className={`inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all shadow-md ${
         isFilled
-          ? "bg-gradient-to-r from-violet-600 to-amber-500 hover:from-violet-500 hover:to-amber-400 text-white shadow-violet-500/25 cursor-pointer group"
-          : "bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed opacity-75"
+          ? "bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white shadow-[#E66A48]/20 cursor-pointer group"
+          : "bg-stone-200 text-stone-500 border border-stone-300/50 cursor-not-allowed opacity-75"
       }`}
     >
       {loading ? (

@@ -4,7 +4,42 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createProjectBriefAction } from "@/app/projects/actions";
-import { Lightbulb, MapPin, Clock, CircleDollarSign, Send, Check, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
+import { Lightbulb, MapPin, Clock, CircleDollarSign, Send, Check, AlertCircle, CheckCircle2, ArrowRight, ArrowLeft, Camera, Palette, UserCircle, Building2, ChevronDown } from "lucide-react";
+
+const ROLE_BLUEPRINTS = [
+  { 
+    id: "FOTO", 
+    label: "Fotografer & Videografer", 
+    icon: Camera, 
+    category: "CAPABILITY", 
+    desc: "Pencipta visual untuk kampanye dan katalog.",
+    specializations: ["Fotografer Produk", "Fotografer Fesyen", "Videografer Komersial", "Art Director"]
+  },
+  { 
+    id: "DESAIN", 
+    label: "Desainer Kreatif", 
+    icon: Palette, 
+    category: "CAPABILITY", 
+    desc: "Perancang identitas visual dan aset grafis.",
+    specializations: ["Desainer Grafis (Branding)", "Desainer Kemasan", "UI/UX Designer", "Illustrator 2D/3D"]
+  },
+  { 
+    id: "MODEL", 
+    label: "Model & Talent", 
+    icon: UserCircle, 
+    category: "RESOURCE", 
+    desc: "Talenta profesional di depan layar atau mikrofon.",
+    specializations: ["Model Fesyen Utama", "Karakter Pendukung", "Aktor Iklan Komersial", "Voice Over Talent"]
+  },
+  { 
+    id: "STUDIO", 
+    label: "Infrastruktur & Ruang", 
+    icon: Building2, 
+    category: "RESOURCE", 
+    desc: "Fasilitas, ruang kerja, atau peralatan teknis.",
+    specializations: ["Studio Foto (Cyclorama)", "Studio Rekaman (Audio)", "Penyewaan Alat/Lighting", "Set Lokasi Shooting"]
+  },
+];
 
 const PROJECT_TYPES = [
   "Campaign Iklan",
@@ -30,6 +65,7 @@ const ASSET_CATEGORIES = [
 
 interface RoleInput {
   id: string;
+  blueprintId?: string;
   roleLabel: string;
   assetCategory: string;
   description: string;
@@ -48,7 +84,7 @@ export default function NewProjectBriefPage() {
   const [targetOutput, setTargetOutput] = useState("");
 
   const [roles, setRoles] = useState<RoleInput[]>([
-    { id: "1", roleLabel: "", assetCategory: "CAPABILITY", description: "", maxCollaborators: 1 },
+    { id: "1", blueprintId: undefined, roleLabel: "", assetCategory: "CAPABILITY", description: "", maxCollaborators: 1 },
   ]);
 
   const [location, setLocation] = useState("");
@@ -62,6 +98,7 @@ export default function NewProjectBriefPage() {
       ...prev,
       {
         id: String(Date.now()),
+        blueprintId: undefined,
         roleLabel: "",
         assetCategory: "CAPABILITY",
         description: "",
@@ -127,11 +164,15 @@ export default function NewProjectBriefPage() {
   const canProceedStep2 = roles.some((r) => r.roleLabel.trim().length > 0);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-violet-500/30 selection:text-violet-200 flex flex-col">
-      <nav className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-30">
-        <div className="max-w-3xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link href="/projects" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm">
-            ← Kembali ke Proyek
+    <div className="min-h-screen bg-[#FAF8F5] text-[#27213D] selection:bg-amber-500/30 selection:text-[#27213D] flex flex-col relative overflow-hidden">
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/3 -right-32 w-96 h-96 bg-rose-200/25 rounded-full blur-3xl pointer-events-none" />
+
+      <nav className="border-b border-stone-200/80 bg-[#FAF8F5]/80 backdrop-blur-md sticky top-0 z-30">
+        <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/projects" className="flex items-center gap-2 text-[#716B7E] hover:text-[#27213D] font-bold transition-colors text-xs">
+            <ArrowLeft className="w-4 h-4" />
+            <span>Kembali ke Proyek</span>
           </Link>
           <div className="flex items-center gap-2">
             {[1, 2, 3, 4].map((s) => (
@@ -139,10 +180,10 @@ export default function NewProjectBriefPage() {
                 key={s}
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                   s === step
-                    ? "bg-violet-500 text-white"
+                    ? "bg-[#27213D] text-white shadow-xs"
                     : s < step
-                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center"
-                    : "bg-slate-800 text-slate-500"
+                    ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                    : "bg-stone-200/80 text-stone-500"
                 }`}
               >
                 {s < step ? <Check className="w-3.5 h-3.5" /> : s}
@@ -155,16 +196,16 @@ export default function NewProjectBriefPage() {
       <main className="flex-1 flex items-start justify-center py-12 px-6">
         <div className="w-full max-w-2xl space-y-8">
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-xs font-semibold text-violet-300">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold text-[#E66A48]">
               Langkah {step} dari 4
             </div>
-            <h1 className="text-2xl font-extrabold text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#27213D] tracking-tight">
               {step === 1 && "Informasi Proyek"}
               {step === 2 && "Peran yang Dibutuhkan"}
               {step === 3 && "Detail Operasional"}
               {step === 4 && "Review & Publikasi"}
             </h1>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-[#716B7E]">
               {step === 1 && "Jelaskan proyek yang ingin Anda garap bersama kolaborator."}
               {step === 2 && "Tentukan peran apa saja yang dibutuhkan dalam proyek ini."}
               {step === 3 && "Isi detail timeline dan budget (opsional)."}
@@ -172,36 +213,36 @@ export default function NewProjectBriefPage() {
             </p>
           </div>
 
-          <div className="p-8 rounded-3xl bg-slate-900/70 border border-slate-800 shadow-2xl backdrop-blur-xl space-y-6">
+          <div className="p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.05)] space-y-6">
             {error && (
-              <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+              <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             {step === 1 && (
               <div className="space-y-5">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                     Judul Proyek *
                   </label>
                   <input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="misal: Campaign Video Minuman Lokal — Bali Vibes"
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                     Jenis Proyek *
                   </label>
                   <select
                     value={projectType}
                     onChange={(e) => setProjectType(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-sm text-white focus:outline-none focus:border-violet-500 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors cursor-pointer"
                   >
                     {PROJECT_TYPES.map((t) => (
                       <option key={t} value={t}>{t}</option>
@@ -209,20 +250,20 @@ export default function NewProjectBriefPage() {
                   </select>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                     Target Output *
                   </label>
                   <input
                     value={targetOutput}
                     onChange={(e) => setTargetOutput(e.target.value)}
                     placeholder="misal: Video iklan 60 detik + 10 foto produk berkualitas tinggi"
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                     Deskripsi Proyek *
                   </label>
                   <textarea
@@ -230,7 +271,7 @@ export default function NewProjectBriefPage() {
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Jelaskan konteks, tujuan, dan apa yang ingin dicapai dari proyek ini..."
                     rows={4}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 transition-colors resize-none"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors resize-none"
                   />
                 </div>
               </div>
@@ -238,136 +279,212 @@ export default function NewProjectBriefPage() {
 
             {step === 2 && (
               <div className="space-y-4">
-                <div className="p-3 rounded-xl bg-violet-500/5 border border-violet-500/20 text-xs text-violet-300 flex items-center gap-2">
-                  <Lightbulb className="w-4 h-4 text-violet-400 shrink-0" />
-                  <span>Tambahkan setiap peran yang Anda butuhkan. Kolaborator akan memilih peran yang sesuai dengan kapabilitas mereka.</span>
+                <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200/70 text-xs text-amber-900 flex items-center gap-2.5">
+                  <Lightbulb className="w-4 h-4 text-[#E66A48] shrink-0" />
+                  <span>Ikuti panduan dua langkah ini agar pencocokan spesifikasi dengan profil kolaborator 100% akurat.</span>
                 </div>
 
-                {roles.map((role, idx) => (
-                  <div key={role.id} className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
+                {roles.map((role, idx) => {
+                  const isBlueprintNotSelected = !role.blueprintId;
+                  const isRoleNotSelected = role.blueprintId && !role.roleLabel;
+                  const isFullySelected = role.blueprintId && role.roleLabel;
+                  
+                  const selectedBlueprint = ROLE_BLUEPRINTS.find(bp => bp.id === role.blueprintId);
+                  
+                  return (
+                  <div key={role.id} className={`p-5 rounded-3xl border transition-all duration-300 ${!isFullySelected ? 'bg-white border-[#E66A48]/30 shadow-md' : 'bg-stone-50/80 border-stone-200/70'} space-y-4`}>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                        Peran #{idx + 1}
+                      <span className="text-xs font-bold text-[#27213D] uppercase tracking-wider">
+                        Slot Kebutuhan #{idx + 1}
                       </span>
                       {roles.length > 1 && (
                         <button
                           onClick={() => removeRole(role.id)}
-                          className="text-xs text-rose-400 hover:text-rose-300 transition-colors cursor-pointer"
+                          className="text-xs text-rose-600 hover:text-rose-700 font-bold transition-colors cursor-pointer"
                         >
-                          Hapus
+                          Hapus Slot
                         </button>
                       )}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-semibold uppercase text-slate-500">
-                          Label Peran *
+                    {isBlueprintNotSelected && (
+                      <div className="space-y-3 animate-in fade-in duration-300">
+                        <label className="text-[10px] font-bold uppercase text-[#716B7E] flex items-center gap-1.5">
+                          <span className="w-4 h-4 rounded-full bg-[#E66A48] text-white flex items-center justify-center text-[8px]">1</span>
+                          Pilih Kategori Utama (Pilar)
                         </label>
-                        <input
-                          value={role.roleLabel}
-                          onChange={(e) => updateRole(role.id, "roleLabel", e.target.value)}
-                          placeholder="misal: Videographer"
-                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 transition-colors"
-                        />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {ROLE_BLUEPRINTS.map((bp) => {
+                            const Icon = bp.icon;
+                            return (
+                              <button
+                                key={bp.id}
+                                onClick={() => {
+                                  updateRole(role.id, "blueprintId", bp.id);
+                                  updateRole(role.id, "assetCategory", bp.category);
+                                }}
+                                className="text-left p-4 rounded-2xl border border-stone-200/80 bg-white hover:border-[#E66A48] hover:shadow-[0_4px_12px_rgba(230,106,72,0.1)] transition-all group flex flex-col justify-between"
+                              >
+                                <div className="flex items-center gap-3 mb-2">
+                                  <div className="w-8 h-8 rounded-full bg-stone-50 group-hover:bg-amber-50 flex items-center justify-center transition-colors">
+                                    <Icon className="w-4 h-4 text-[#27213D] group-hover:text-[#E66A48] transition-colors" />
+                                  </div>
+                                  <div className="font-bold text-sm text-[#27213D]">{bp.label}</div>
+                                </div>
+                                <div className="text-[10px] text-stone-500 leading-relaxed ml-11">{bp.desc}</div>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-semibold uppercase text-slate-500">
-                          Kategori Aset *
-                        </label>
-                        <select
-                          value={role.assetCategory}
-                          onChange={(e) => updateRole(role.id, "assetCategory", e.target.value)}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-violet-500 transition-colors"
-                        >
-                          {ASSET_CATEGORIES.map((c) => (
-                            <option key={c.value} value={c.value}>{c.label}</option>
-                          ))}
-                        </select>
+                    )}
+                    
+                    {isRoleNotSelected && selectedBlueprint && (
+                      <div className="space-y-4 animate-in fade-in slide-in-from-right-2 duration-300">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-stone-100 rounded-xl border border-stone-200/60">
+                           <div className="flex items-center gap-2 text-xs font-bold text-[#27213D]">
+                              <selectedBlueprint.icon className="w-3.5 h-3.5 text-stone-500" />
+                              {selectedBlueprint.label}
+                           </div>
+                           <button 
+                             onClick={() => updateRole(role.id, "blueprintId", "")}
+                             className="text-[10px] text-[#716B7E] hover:text-[#27213D] font-bold underline"
+                           >
+                             Ubah Kategori
+                           </button>
+                        </div>
+                        
+                        <div className="space-y-2.5">
+                          <label className="text-[10px] font-bold uppercase text-[#716B7E] flex items-center gap-1.5">
+                            <span className="w-4 h-4 rounded-full bg-[#E66A48] text-white flex items-center justify-center text-[8px]">2</span>
+                            Pilih Spesialisasi Spesifik (Job)
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedBlueprint.specializations.map(spec => (
+                              <button
+                                key={spec}
+                                onClick={() => updateRole(role.id, "roleLabel", spec)}
+                                className="px-4 py-2 rounded-xl border border-stone-200/80 bg-white hover:border-[#E66A48] hover:bg-amber-50/30 text-xs font-bold text-[#27213D] transition-all shadow-sm"
+                              >
+                                {spec}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-semibold uppercase text-slate-500">
-                        Deskripsi Peran (Opsional)
-                      </label>
-                      <input
-                        value={role.description}
-                        onChange={(e) => updateRole(role.id, "description", e.target.value)}
-                        placeholder="misal: Pengambilan video di outdoor, editing dinamis"
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 transition-colors"
-                      />
-                    </div>
+                    {isFullySelected && selectedBlueprint && (
+                      <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-2xl bg-[#27213D] text-white shadow-md relative overflow-hidden">
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+                          <div className="flex-1 space-y-1 relative z-10">
+                            <div className="text-[10px] font-bold uppercase text-stone-400 tracking-wider flex items-center gap-2">
+                                <selectedBlueprint.icon className="w-3 h-3" />
+                                {selectedBlueprint.label}
+                            </div>
+                            <div className="text-base font-black text-white">
+                                {role.roleLabel}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 shrink-0 relative z-10">
+                             <div className="px-3 py-1.5 rounded-lg bg-white/10 text-[10px] font-bold text-stone-300 border border-white/10">
+                               Kategori: {role.assetCategory}
+                             </div>
+                             <button 
+                               onClick={() => updateRole(role.id, "roleLabel", "")}
+                               className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                               title="Ubah Spesialisasi"
+                             >
+                               <ArrowLeft className="w-3.5 h-3.5 text-white" />
+                             </button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5 pt-2">
+                          <label className="text-[10px] font-bold uppercase text-[#716B7E]">
+                            Persyaratan / Konteks Khusus (Opsional)
+                          </label>
+                          <textarea
+                            value={role.description}
+                            onChange={(e) => updateRole(role.id, "description", e.target.value)}
+                            placeholder={`Contoh: Harus membawa perlengkapan sendiri, atau memiliki pengalaman spesifik...`}
+                            rows={2}
+                            className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors resize-none"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                ))}
+                )})}
 
                 <button
                   onClick={addRole}
-                  className="w-full py-2.5 rounded-2xl border border-dashed border-violet-500/30 hover:border-violet-500 text-violet-400 hover:text-violet-300 text-sm font-medium transition-all cursor-pointer"
+                  className="w-full py-4 rounded-2xl border border-dashed border-[#E66A48]/30 hover:border-[#E66A48] bg-white hover:bg-amber-50/40 text-[#E66A48] text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
-                  + Tambah Peran Lain
+                  <div className="w-5 h-5 rounded-full bg-[#E66A48] text-white flex items-center justify-center text-lg leading-none pb-0.5">+</div>
+                  <span>Tambah Slot Kebutuhan Lainnya</span>
                 </button>
               </div>
             )}
 
             {step === 3 && (
               <div className="space-y-5">
-                <div className="p-3 rounded-xl bg-slate-800/50 border border-slate-700 text-xs text-slate-400">
+                <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200/70 text-xs text-[#716B7E]">
                   Semua field di langkah ini opsional. Anda bisa mengisi, menentukan detail, atau membahasnya nanti bersama kolaborator.
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                     Lokasi Proyek
                   </label>
                   <input
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="misal: Bali, atau Remote"
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                       Estimasi Durasi
                     </label>
                     <input
                       value={estimatedDuration}
                       onChange={(e) => setEstimatedDuration(e.target.value)}
                       placeholder="misal: 3 Minggu"
-                      className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 transition-colors"
+                      className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                       Target Peluncuran
                     </label>
                     <input
                       value={targetLaunch}
                       onChange={(e) => setTargetLaunch(e.target.value)}
                       placeholder="misal: Oktober 2026"
-                      className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 transition-colors"
+                      className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                     Estimasi Anggaran Total
                   </label>
                   <input
                     value={estimatedTotal}
                     onChange={(e) => setEstimatedTotal(e.target.value)}
                     placeholder="misal: Rp 5.000.000 atau Revenue Share"
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                     Catatan Budget
                   </label>
                   <textarea
@@ -375,7 +492,7 @@ export default function NewProjectBriefPage() {
                     onChange={(e) => setBudgetNotes(e.target.value)}
                     placeholder="misal: Bagi hasil 50:50, biaya produksi ditanggung bersama..."
                     rows={2}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 transition-colors resize-none"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors resize-none"
                   />
                 </div>
               </div>
@@ -383,56 +500,56 @@ export default function NewProjectBriefPage() {
 
             {step === 4 && (
               <div className="space-y-4">
-                <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
-                  <div className="text-xs font-bold uppercase text-slate-400">Informasi Proyek</div>
+                <div className="p-5 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-3">
+                  <div className="text-xs font-bold uppercase text-[#716B7E]">Informasi Proyek</div>
                   <div className="space-y-1">
-                    <div className="text-sm font-bold text-white">{title}</div>
-                    <div className="text-xs text-violet-400">{projectType}</div>
-                    <div className="text-xs text-slate-400 leading-relaxed">{description}</div>
+                    <div className="text-base font-bold text-[#27213D]">{title}</div>
+                    <div className="text-xs font-bold text-[#E66A48]">{projectType}</div>
+                    <div className="text-xs text-[#716B7E] leading-relaxed">{description}</div>
                   </div>
-                  <div className="flex items-center gap-2 pt-1">
-                    <span className="text-[10px] font-bold text-slate-500">TARGET:</span>
-                    <span className="text-xs text-amber-300">{targetOutput}</span>
+                  <div className="flex items-center gap-2 pt-1 border-t border-stone-200/60">
+                    <span className="text-[10px] font-bold text-[#716B7E]">TARGET:</span>
+                    <span className="text-xs font-bold text-[#27213D]">{targetOutput}</span>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
-                  <div className="text-xs font-bold uppercase text-slate-400">Peran Dibutuhkan ({roles.filter(r => r.roleLabel).length})</div>
+                <div className="p-5 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-3">
+                  <div className="text-xs font-bold uppercase text-[#716B7E]">Peran Dibutuhkan ({roles.filter(r => r.roleLabel).length})</div>
                   <div className="space-y-2">
                     {roles
                       .filter((r) => r.roleLabel.trim())
                       .map((role, idx) => (
                         <div key={role.id} className="flex items-center gap-2 text-xs">
-                          <span className="w-5 h-5 rounded-full bg-violet-500/20 flex items-center justify-center text-[10px] font-bold text-violet-400">
+                          <span className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-[10px] font-bold text-amber-800">
                             {idx + 1}
                           </span>
-                          <span className="font-medium text-slate-200">{role.roleLabel}</span>
-                          <span className="text-slate-500">·</span>
-                          <span className="text-slate-400">{role.assetCategory}</span>
+                          <span className="font-bold text-[#27213D]">{role.roleLabel}</span>
+                          <span className="text-stone-300">·</span>
+                          <span className="text-[#716B7E]">{role.assetCategory}</span>
                         </div>
                       ))}
                   </div>
                 </div>
 
                 {(location || estimatedDuration || estimatedTotal) && (
-                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
-                    <div className="text-xs font-bold uppercase text-slate-400">Detail Operasional</div>
-                    <div className="text-xs text-slate-300 space-y-1.5">
+                  <div className="p-5 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-2">
+                    <div className="text-xs font-bold uppercase text-[#716B7E]">Detail Operasional</div>
+                    <div className="text-xs text-[#27213D] space-y-1.5">
                       {location && (
-                        <div className="flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-3.5 h-3.5 text-[#E66A48] shrink-0" />
                           <span>{location}</span>
                         </div>
                       )}
                       {estimatedDuration && (
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-3.5 h-3.5 text-[#E66A48] shrink-0" />
                           <span>{estimatedDuration}</span>
                         </div>
                       )}
                       {estimatedTotal && (
-                        <div className="flex items-center gap-1.5">
-                          <CircleDollarSign className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+                        <div className="flex items-center gap-2">
+                          <CircleDollarSign className="w-3.5 h-3.5 text-[#E66A48] shrink-0" />
                           <span>{estimatedTotal}</span>
                         </div>
                       )}
@@ -440,8 +557,8 @@ export default function NewProjectBriefPage() {
                   </div>
                 )}
 
-                <div className="p-3 rounded-xl bg-violet-500/5 border border-violet-500/20 text-xs text-violet-300 flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-violet-400 shrink-0" />
+                <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>Setelah dipublikasikan, proyek ini akan muncul di galeri publik dan dapat dilihat oleh semua kreator di RAMU.</span>
                 </div>
               </div>
@@ -452,7 +569,7 @@ export default function NewProjectBriefPage() {
                 <button
                   onClick={() => setStep((s) => s - 1)}
                   disabled={isPending}
-                  className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-sm transition-colors cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-[#27213D] font-bold text-sm transition-colors cursor-pointer"
                 >
                   ← Kembali
                 </button>
@@ -465,7 +582,7 @@ export default function NewProjectBriefPage() {
                     (step === 1 && !canProceedStep1) ||
                     (step === 2 && !canProceedStep2)
                   }
-                  className="flex-1 py-2.5 rounded-xl bg-violet-500 hover:bg-violet-400 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm transition-colors cursor-pointer inline-flex items-center justify-center gap-2"
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm shadow-md shadow-[#E66A48]/20 transition-all cursor-pointer inline-flex items-center justify-center gap-2"
                 >
                   <span>Lanjutkan</span>
                   <ArrowRight className="w-4 h-4" />
@@ -474,7 +591,7 @@ export default function NewProjectBriefPage() {
                 <button
                   onClick={handleSubmit}
                   disabled={isPending}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-400 hover:to-violet-500 disabled:opacity-50 text-white font-extrabold text-sm shadow-lg shadow-violet-500/20 transition-all cursor-pointer inline-flex items-center justify-center gap-2"
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] disabled:opacity-50 text-white font-black text-sm shadow-lg shadow-[#E66A48]/25 transition-all cursor-pointer inline-flex items-center justify-center gap-2"
                 >
                   <span>{isPending ? "Mempublikasikan..." : "Publikasikan Project Brief"}</span>
                   <Send className="w-4 h-4" />

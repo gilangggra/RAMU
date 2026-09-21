@@ -32,34 +32,31 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
   const error = params.error;
 
   const userInitialName = user.user_metadata?.display_name || "";
-  const userInitialRole = user.user_metadata?.role || "Kriya & Kerajinan";
-  const userInitialLocation = user.user_metadata?.location || "Jakarta, Indonesia";
+  const userInitialRole = user.user_metadata?.role || "Fashion Designer / Label";
+  const userInitialLocation = user.user_metadata?.location || "Jakarta Selatan, Indonesia";
 
   const sectors = [
-    "Kriya & Kerajinan",
-    "Fashion & Tekstil",
-    "Produksi Visual",
-    "Desain Komunikasi Visual",
-    "Desain Produk",
-    "Kriya Logam & Perhiasan",
-    "Kuliner Kreatif",
-    "Musik & Pertunjukan",
+    "Fashion Designer / Label",
+    "Creative & Art Director",
+    "Fotografi Editorial & Fashion",
+    "Stylist & Wardrobe",
+    "Model & Talent Visual",
+    "Videografi & Fashion Film",
+    "Makeup & Hair Artist (MUA)",
+    "Set Design & Props",
     "Lainnya",
   ];
 
   const popularLocations = [
-    "Jakarta, Indonesia",
-    "DI Yogyakarta, Indonesia",
+    "Jakarta Selatan, Indonesia",
+    "Jakarta Pusat, Indonesia",
     "Bandung, Jawa Barat",
-    "Pekalongan, Jawa Tengah",
-    "Surakarta (Solo), Jawa Tengah",
-    "Denpasar, Bali",
+    "DI Yogyakarta, Indonesia",
+    "Denpasar & Canggu, Bali",
     "Surabaya, Jawa Timur",
-    "Jepara, Jawa Tengah",
+    "Surakarta (Solo), Jawa Tengah",
     "Semarang, Jawa Tengah",
     "Medan, Sumatera Utara",
-    "Padang, Sumatera Barat",
-    "Makassar, Sulawesi Selatan",
   ];
 
   return (
@@ -108,10 +105,10 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#27213D] tracking-tight mb-1.5">
-            Lengkapi Profil Kreatif Anda
+            Lengkapi Profil Kreatif Fashion & Visual
           </h1>
           <p className="text-xs sm:text-sm text-[#716B7E] mb-6 leading-relaxed">
-            Identitas brand kreatif, keahlian, dan workshop Anda digunakan oleh Engine RAMU untuk merumuskan sinergi kolaborasi bisnis bilateral.
+            Identitas brand, keahlian, dan kapasitas studio Anda diselaraskan oleh Engine RAMU untuk meramu tim kolaborasi editorial dan lookbook.
           </p>
 
           {error && (
@@ -127,7 +124,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
                 htmlFor="name"
                 className="block text-xs font-bold uppercase tracking-wider text-[#27213D]"
               >
-                Nama Studio / Profil *
+                Nama Profil / Label / Studio *
               </label>
               <input
                 id="name"
@@ -135,14 +132,14 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
                 type="text"
                 required
                 defaultValue={userInitialName}
-                placeholder="misal: Studio Kriya Nusantara / Budi Santoso"
+                placeholder="misal: Maison Nusantara / Studio Visual Arkha / Nadia Kirana"
                 className="w-full px-4 py-3.5 rounded-2xl bg-[#FAF8F5] border border-stone-200/80 text-sm text-[#27213D] placeholder-[#716B7E]/60 focus:outline-none focus:border-[#FFB800] focus:ring-2 focus:ring-[#FFB800]/20 focus:bg-white transition-all font-medium"
               />
             </div>
 
             <div className="space-y-2.5">
               <label className="block text-xs font-bold uppercase tracking-wider text-[#27213D]">
-                Subsektor Kreatif Utama *
+                Peran & Keahlian Utama *
               </label>
               <div className="flex flex-wrap gap-2 pt-0.5">
                 {sectors.map((sec) => (
@@ -170,13 +167,13 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
                 htmlFor="bio"
                 className="block text-xs font-bold uppercase tracking-wider text-[#27213D]"
               >
-                Bio / Fokus Karya Studio
+                Bio / Fokus Estetika & Karya
               </label>
               <textarea
                 id="bio"
                 name="bio"
                 rows={3}
-                placeholder="Ceritakan tentang karya, material yang biasa Anda olah, atau fokus kolaborasi yang Anda cari..."
+                placeholder="Ceritakan estetika desain, fokus koleksi busana, ketersediaan kamera/studio, atau konsep visual yang biasa Anda garap..."
                 className="w-full px-4 py-3 rounded-2xl bg-[#FAF8F5] border border-stone-200/80 text-sm text-[#27213D] placeholder-[#716B7E]/60 focus:outline-none focus:border-[#FFB800] focus:ring-2 focus:ring-[#FFB800]/20 focus:bg-white transition-all font-medium resize-none leading-relaxed"
               />
             </div>
@@ -187,7 +184,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
                   htmlFor="location"
                   className="block text-xs font-bold uppercase tracking-wider text-[#27213D]"
                 >
-                  Kota / Sentra Kriya *
+                  Kota / Basis Studio *
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#716B7E]">
@@ -199,7 +196,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
                     type="text"
                     required
                     defaultValue={userInitialLocation}
-                    placeholder="misal: Jakarta, Indonesia atau DI Yogyakarta"
+                    placeholder="misal: Jakarta Selatan, Indonesia atau Denpasar, Bali"
                     list="locations-list"
                     className="w-full pl-10 pr-10 py-3.5 rounded-2xl bg-[#FAF8F5] border border-stone-200/80 text-sm text-[#27213D] placeholder-[#716B7E]/60 focus:outline-none focus:border-[#FFB800] focus:ring-2 focus:ring-[#FFB800]/20 focus:bg-white transition-all font-medium"
                   />
@@ -219,7 +216,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
                   htmlFor="address"
                   className="block text-xs font-bold uppercase tracking-wider text-[#27213D]"
                 >
-                  Alamat Workshop / Studio
+                  Alamat Studio / Atelier / Basecamp Produksi
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#716B7E]">
@@ -229,7 +226,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
                     id="address"
                     name="address"
                     type="text"
-                    placeholder="Nama jalan / kompleks studio..."
+                    placeholder="Nama jalan, gedung, kompleks studio..."
                     className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-[#FAF8F5] border border-stone-200/80 text-sm text-[#27213D] placeholder-[#716B7E]/60 focus:outline-none focus:border-[#FFB800] focus:ring-2 focus:ring-[#FFB800]/20 focus:bg-white transition-all font-medium"
                   />
                 </div>

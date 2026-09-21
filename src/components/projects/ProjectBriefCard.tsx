@@ -34,23 +34,23 @@ const STATUS_CONFIG: Record<
 > = {
   OPEN: {
     label: "Terbuka",
-    badge: "bg-primary-950 text-primary-300 border-primary-700/50",
-    dot: "bg-primary-400",
+    badge: "bg-emerald-50 text-emerald-800 border-emerald-200",
+    dot: "bg-emerald-500",
   },
   IN_REVIEW: {
     label: "Tahap Review",
-    badge: "bg-amber-950/60 text-amber-300 border-amber-600/40",
-    dot: "bg-amber-400",
+    badge: "bg-amber-50 text-amber-800 border-amber-200",
+    dot: "bg-amber-500",
   },
   FILLED: {
     label: "Peran Terisi",
-    badge: "bg-blue-950/60 text-blue-300 border-blue-600/40",
-    dot: "bg-blue-400",
+    badge: "bg-blue-50 text-blue-800 border-blue-200",
+    dot: "bg-blue-500",
   },
   CLOSED: {
     label: "Selesai",
-    badge: "bg-neutral-800 text-neutral-400 border-neutral-700",
-    dot: "bg-neutral-500",
+    badge: "bg-stone-100 text-stone-600 border-stone-200",
+    dot: "bg-stone-400",
   },
 };
 
@@ -82,49 +82,49 @@ export function ProjectBriefCard({
   return (
     <Link
       href={`/projects/${id}`}
-      className="group block p-6 rounded-2xl bg-neutral-900/90 border border-neutral-800 hover:border-primary-600/60 hover:shadow-xl hover:shadow-primary-950/20 transition-all duration-200 space-y-5"
+      className="group block p-6 rounded-[28px] bg-white/95 border border-stone-200/80 hover:border-amber-300/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] hover:shadow-[0_15px_35px_rgba(39,33,61,0.07)] transition-all duration-200 space-y-5"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${statusCfg.badge}`}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${statusCfg.badge}`}
             >
               <span
                 className={`w-1.5 h-1.5 rounded-full ${statusCfg.dot} ${status === "OPEN" ? "animate-pulse" : ""}`}
               />
               {statusCfg.label}
             </span>
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-neutral-800 text-neutral-300 border border-neutral-700">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-stone-100 text-stone-700 border border-stone-200">
               {projectType}
             </span>
             {isOwnBrief && (
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4]">
                 Brief Anda
               </span>
             )}
           </div>
 
-          <h3 className="text-base font-bold text-neutral-100 tracking-tight group-hover:text-primary-300 transition-colors line-clamp-2">
+          <h3 className="text-base font-bold text-[#27213D] tracking-tight group-hover:text-[#E66A48] transition-colors line-clamp-2">
             {title}
           </h3>
         </div>
       </div>
 
-      <p className="text-xs text-neutral-400 leading-relaxed line-clamp-2">{description}</p>
+      <p className="text-xs text-[#716B7E] leading-relaxed line-clamp-2">{description}</p>
 
-      <div className="flex items-start gap-2.5 p-3 rounded-xl bg-neutral-950 border border-neutral-800/80">
-        <Target className="w-4 h-4 text-primary-400 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-stone-50 border border-stone-200/70">
+        <Target className="w-4 h-4 text-[#E66A48] shrink-0 mt-0.5" />
         <div className="min-w-0">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-0.5">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-[#716B7E] mb-0.5">
             Target Luaran Kolektif
           </div>
-          <p className="text-xs text-neutral-200 font-medium line-clamp-1">{targetOutput}</p>
+          <p className="text-xs text-[#27213D] font-medium line-clamp-1">{targetOutput}</p>
         </div>
       </div>
 
       <div className="space-y-2">
-        <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+        <div className="text-[10px] font-bold uppercase tracking-wider text-[#716B7E]">
           Peran Kolaborator ({neededRoles.length})
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -133,54 +133,54 @@ export function ProjectBriefCard({
               key={role.id}
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border ${
                 role.isFilled
-                  ? "bg-primary-950/60 text-primary-300 border-primary-700/40 line-through opacity-75"
-                  : "bg-neutral-800/80 text-neutral-300 border-neutral-700/60"
+                  ? "bg-emerald-50 text-emerald-800 border-emerald-200 line-through opacity-75"
+                  : "bg-white text-[#27213D] border-stone-200/80 shadow-2xs"
               }`}
             >
               {role.isFilled ? (
-                <Check className="w-3 h-3 text-primary-300" />
+                <Check className="w-3 h-3 text-emerald-600" />
               ) : (
-                <Circle className="w-2.5 h-2.5 text-neutral-400" />
+                <Circle className="w-2.5 h-2.5 text-stone-400" />
               )}
               <span>{role.roleLabel}</span>
             </span>
           ))}
         </div>
         {openRoles.length > 0 && (
-          <p className="text-[11px] text-amber-400 font-medium">
+          <p className="text-[11px] text-amber-800 font-semibold">
             {openRoles.length} dari {neededRoles.length} peran terbuka
           </p>
         )}
         {filledRoles.length === neededRoles.length && (
-          <p className="text-[11px] text-primary-300 font-medium flex items-center gap-1.5">
+          <p className="text-[11px] text-emerald-800 font-semibold flex items-center gap-1.5">
             <Check className="w-3.5 h-3.5" />
             <span>Seluruh peran telah diterima</span>
           </p>
         )}
       </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-neutral-800">
+      <div className="flex items-center justify-between pt-3 border-t border-stone-100">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 rounded-xl bg-primary-900/60 border border-primary-700/50 flex items-center justify-center text-xs font-bold text-primary-200 shrink-0">
+          <div className="w-7 h-7 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-xs font-bold text-amber-800 shrink-0">
             {creatorActor.name.charAt(0)}
           </div>
           <div className="min-w-0">
-            <div className="text-xs font-semibold text-neutral-200 truncate">
+            <div className="text-xs font-bold text-[#27213D] truncate">
               {creatorActor.name}
             </div>
-            <div className="text-[10px] text-neutral-500 truncate">{creatorActor.sector}</div>
+            <div className="text-[10px] text-[#716B7E] truncate">{creatorActor.sector}</div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 text-[11px] text-neutral-400 shrink-0">
+        <div className="flex items-center gap-3 text-[11px] text-[#716B7E] shrink-0">
           {location && (
             <span className="flex items-center gap-1">
-              <MapPin className="w-3 h-3 text-neutral-400" />
+              <MapPin className="w-3 h-3 text-stone-400" />
               <span>{location}</span>
             </span>
           )}
           {totalInterests > 0 && (
-            <span className="text-primary-400 font-semibold">
+            <span className="text-[#E66A48] font-bold">
               {totalInterests} minat
             </span>
           )}
