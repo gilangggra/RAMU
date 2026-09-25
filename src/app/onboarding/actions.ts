@@ -27,6 +27,10 @@ export async function createActorProfile(formData: FormData) {
   const contactEmail = (formData.get("contactEmail") as string)?.trim() || user.email;
   const websiteUrl = (formData.get("websiteUrl") as string)?.trim();
   const contactPhone = (formData.get("contactPhone") as string)?.trim();
+  
+  const aestheticStyles = formData.getAll("aestheticStyles") as string[];
+  const compensationModels = formData.getAll("compensationModels") as string[];
+  const experienceLevel = formData.get("experienceLevel") as string;
 
   let parsedSkills: string[] = [];
   try {
@@ -86,6 +90,9 @@ export async function createActorProfile(formData: FormData) {
         contactPhone: contactPhone || null,
         websiteUrl: websiteUrl || null,
         status: ActorStatus.ACTIVE,
+        aestheticStyles,
+        experienceLevel,
+        compensationModels,
       },
     });
 
@@ -95,7 +102,7 @@ export async function createActorProfile(formData: FormData) {
         await prisma.asset.create({
           data: {
             actorId: newActor.id,
-            category: "CAPABILITY",
+            category: "SKILL_TALENT",
             subtype: "Keahlian Spesifik",
             name: skill,
             roles: ["CAPABILITY"],

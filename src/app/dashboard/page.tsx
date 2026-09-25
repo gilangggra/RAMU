@@ -9,12 +9,8 @@ import {
   Target,
   Search,
   ShieldAlert,
-  Megaphone,
-  Lightbulb,
-  Building2,
-  MapPin,
   ArrowRight,
-  Plus,
+  Sparkles,
 } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -53,6 +49,7 @@ export default async function DashboardPage() {
     collaborationCount,
     outcomeCount,
     briefStats,
+    pendingBookingCount,
   ] = await Promise.all([
     prisma.asset.count({ where: { actorId: primaryActor.id } }),
     prisma.goal.count({ where: { actorId: primaryActor.id } }),
@@ -66,336 +63,192 @@ export default async function DashboardPage() {
     }),
     prisma.outcome.count(),
     getProjectBriefDashboardStats(primaryActor.id),
+    prisma.bookingRequest.count({ where: { targetId: primaryActor.id, status: "PENDING" } }),
   ]);
 
-  const inputModules = [
-    {
-      href: "/assets",
-      icon: <Package className="w-6 h-6 text-[#E66A48]" />,
-      label: "Aset",
-      sublabel: "Kontribusi ke kolaborasi",
-      count: assetCount,
-      unit: "aset aktif",
-      required: true,
-      color: "from-[#FFE9DE] to-[#FFF4ED]",
-    },
-    {
-      href: "/goals",
-      icon: <Target className="w-6 h-6 text-[#7C3AED]" />,
-      label: "Goal",
-      sublabel: "Tujuan yang ingin dicapai",
-      count: goalCount,
-      unit: "goal aktif",
-      required: true,
-      color: "from-[#EDE8FF] to-[#F3EDFF]",
-    },
-    {
-      href: "/needs",
-      icon: <Search className="w-6 h-6 text-[#0D9488]" />,
-      label: "Kebutuhan",
-      sublabel: "Yang dibutuhkan dari rekan",
-      count: needCount,
-      unit: "kebutuhan aktif",
-      required: false,
-      color: "from-[#E0F7F0] to-[#F0FDF9]",
-    },
-    {
-      href: "/constraints",
-      icon: <ShieldAlert className="w-6 h-6 text-[#E59F00]" />,
-      label: "Batasan",
-      sublabel: "Constraint operasional & kapasitas",
-      count: constraintCount,
-      unit: "constraint",
-      required: false,
-      color: "from-[#FFFDE6] to-[#FFF7ED]",
-    },
-  ];
+
 
   return (
     <AppShell actor={primaryActor} activeRoute="/dashboard">
-      {/* Welcome Hero Banner */}
-      <section className="p-8 sm:p-10 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_12px_36px_rgba(39,33,61,0.04)] relative overflow-hidden space-y-6">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-[#FFE4D6]/40 via-[#EDE8FF]/30 to-transparent rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold text-[#E66A48] shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-[#E66A48] animate-pulse" />
-              Creative Ecosystem Hub
-            </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#27213D] tracking-tight">
-              Selamat Datang, {primaryActor.name}!
-            </h1>
-            <p className="text-xs sm:text-sm text-[#716B7E] max-w-xl leading-relaxed">
-              Dua mode kolaborasi aktif di RAMU: <strong>Opportunity Engine</strong> (penemuan berbasis komplementaritas aset) dan <strong>Project Briefs</strong> (inisiasi proyek terbuka lintas talenta).
-            </p>
+      <div className="space-y-10 pb-12">
+        {/* Welcome Hero Banner */}
+        <section className="relative p-8 md:p-12 rounded-[32px] overflow-hidden bg-[#1E1B2E] border border-stone-800 shadow-2xl group">
+          {/* Animated Background Mesh */}
+          <div className="absolute inset-0 opacity-40 mix-blend-screen pointer-events-none">
+            <div className="absolute -top-[40%] -left-[10%] w-[70%] h-[140%] rounded-full bg-gradient-to-tr from-amber-500/20 to-transparent blur-[120px] group-hover:opacity-60 transition-opacity duration-1000" />
+            <div className="absolute top-[20%] -right-[20%] w-[60%] h-[120%] rounded-full bg-gradient-to-bl from-purple-500/20 to-transparent blur-[120px] group-hover:opacity-60 transition-opacity duration-1000" />
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
-            {/* Project Briefs module */}
-            <div className="p-4 rounded-2xl bg-[#FFF7ED]/70 border border-[#F9D8C4] space-y-2 min-w-[190px] w-full sm:w-auto shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-[#E66A48] uppercase tracking-wider">Project Briefs</span>
+          <div className="relative z-10 max-w-2xl space-y-5">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-stone-300 backdrop-blur-md shadow-inner">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+              Creative Opportunity Engine
+            </div>
+            <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">
+              Selamat Datang,<br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-amber-200">
+                {primaryActor.name}
+              </span>
+            </h1>
+            <p className="text-sm md:text-base text-stone-400 leading-relaxed font-light">
+              Sistem RAMU secara deterministik mencocokkan gaya visual, ketersediaan jadwal, dan kapasitas teknis untuk merangkai kolaborasi tingkat tinggi.
+            </p>
+          </div>
+        </section>
+
+        {/* Action Modules Grid */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-widest">
+              Ruang Kendali
+            </h2>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+            
+            {/* Project Briefs */}
+            <Link href="/projects" className="group flex flex-col justify-between p-5 rounded-3xl bg-white border border-stone-200 hover:border-stone-300 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="space-y-4">
+                <div className="w-10 h-10 rounded-2xl bg-stone-50 flex items-center justify-center text-stone-500 group-hover:bg-stone-100 group-hover:text-[#1E1B2E] transition-colors">
+                  <Target className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-wider mb-1">Project Briefs</h3>
+                  <p className="text-[11px] text-stone-500 font-medium">Buka galeri brief proyek.</p>
+                </div>
+              </div>
+              <div className="mt-8 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
+                  <span className="px-2.5 py-1 rounded-full text-xs font-black bg-[#1E1B2E] text-white shadow-sm">
+                    {briefStats.openBriefCount}
+                  </span>
                   {briefStats.pendingInterestCount > 0 && (
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[#FFB800] text-[#27213D]">
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 animate-pulse">
                       {briefStats.pendingInterestCount} Minat
                     </span>
                   )}
-                  <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-[#E66A48] text-white">
-                    {briefStats.openBriefCount}
-                  </span>
+                </div>
+                <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-[#1E1B2E] transition-colors group-hover:translate-x-1" />
+              </div>
+            </Link>
+
+            {/* Opportunities */}
+            <Link href="/opportunities" className="group flex flex-col justify-between p-5 rounded-3xl bg-white border border-stone-200 hover:border-stone-300 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="space-y-4">
+                <div className="w-10 h-10 rounded-2xl bg-stone-50 flex items-center justify-center text-stone-500 group-hover:bg-[#1E1B2E] group-hover:text-white transition-colors">
+                  <Search className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-wider mb-1">Peluang Engine</h3>
+                  <p className="text-[11px] text-stone-500 font-medium">Cari kandidat & kolaborator.</p>
                 </div>
               </div>
-              <Link
-                href="/projects"
-                className="inline-flex items-center justify-center w-full gap-1.5 px-3 py-2 rounded-xl bg-[#E66A48] hover:bg-[#D45938] text-white font-bold text-xs transition-colors shadow-xs"
-              >
-                <span>Galeri Proyek</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-
-            {/* Opportunities module */}
-            <div className="p-4 rounded-2xl bg-[#EDE8FF]/70 border border-[#DDD6FE] space-y-2 min-w-[190px] w-full sm:w-auto shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-[#7C3AED] uppercase tracking-wider">Peluang Engine</span>
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-[#7C3AED] text-white">
-                  {opportunityCount}
+              <div className="mt-8 flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-full text-xs font-black bg-stone-100 text-stone-600">
+                  {opportunityCount} Matches
                 </span>
+                <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-[#1E1B2E] transition-colors group-hover:translate-x-1" />
               </div>
-              <Link
-                href="/opportunities"
-                className="inline-flex items-center justify-center w-full gap-1.5 px-3 py-2 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold text-xs transition-colors shadow-xs"
-              >
-                <span>Katalog Peluang</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
+            </Link>
 
-            {/* Collaborations module */}
-            <div className="p-4 rounded-2xl bg-[#E0F7F0]/70 border border-[#99F6E4] space-y-2 min-w-[190px] w-full sm:w-auto shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-[#0D9488] uppercase tracking-wider">Kolaborasi Aktif</span>
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-[#0D9488] text-white">
-                  {collaborationCount}
+            {/* Collaborations */}
+            <Link href="/collaborations" className="group flex flex-col justify-between p-5 rounded-3xl bg-white border border-stone-200 hover:border-stone-300 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="space-y-4">
+                <div className="w-10 h-10 rounded-2xl bg-stone-50 flex items-center justify-center text-stone-500 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                  <Package className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-wider mb-1">Kolaborasi</h3>
+                  <p className="text-[11px] text-stone-500 font-medium">Workspace kolaborasi aktif.</p>
+                </div>
+              </div>
+              <div className="mt-8 flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-full text-xs font-black bg-indigo-100 text-indigo-700">
+                  {collaborationCount} Aktif
                 </span>
+                <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-indigo-600 transition-colors group-hover:translate-x-1" />
               </div>
-              <Link
-                href="/collaborations"
-                className="inline-flex items-center justify-center w-full gap-1.5 px-3 py-2 rounded-xl bg-[#0D9488] hover:bg-[#0F766E] text-white font-bold text-xs transition-colors shadow-xs"
-              >
-                <span>Workspace</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Project Briefs Terbuka */}
-      <section className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <Megaphone className="w-4 h-4 text-[#E66A48]" />
-              <h2 className="text-lg font-bold text-[#27213D] tracking-tight">Project Briefs Terbuka</h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4]">
-                Mode Kolaboratif
-              </span>
-            </div>
-            <p className="text-xs text-[#716B7E] mt-0.5">
-              Inisiasi proyek baru atau bergabung ke proyek yang sedang mencari peran dan kapabilitas Anda.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Link
-              href="/projects/new"
-              className="px-3.5 py-2 rounded-xl bg-[#E66A48] hover:bg-[#D45938] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Inisiasi Brief Baru</span>
             </Link>
-            <Link
-              href="/projects"
-              className="px-3 py-2 rounded-xl bg-white hover:bg-stone-50 border border-stone-200 text-xs font-semibold text-[#27213D] transition-colors inline-flex items-center gap-1.5 shadow-2xs"
-            >
-              <span>Lihat Semua ({briefStats.openBriefCount})</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </div>
 
-        {briefStats.recentOpenBriefs.length === 0 ? (
-          <div className="p-10 rounded-3xl bg-white/95 border border-dashed border-stone-300 text-center space-y-3 shadow-xs">
-            <div className="flex justify-center">
-              <Lightbulb className="w-8 h-8 text-[#FFB800]" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-[#27213D]">Belum ada brief terbuka dari pelaku kreatif lain</p>
-              <p className="text-xs text-[#716B7E] mt-1 max-w-md mx-auto">
-                Mulai inisiasi project brief Anda sendiri untuk mengundang kolaborator seperti videografer, fotografer, atau desainer grafis.
-              </p>
-            </div>
-            <Link
-              href="/projects/new"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#E66A48] hover:bg-[#D45938] text-white text-xs font-bold transition-all shadow-xs"
-            >
-              <span>Buat Project Brief Pertama Anda</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {briefStats.recentOpenBriefs.map((brief: any) => (
-              <Link
-                key={brief.id}
-                href={`/projects/${brief.id}`}
-                className="group p-5 rounded-2xl bg-white/95 hover:bg-white border border-stone-200/80 hover:border-[#E66A48]/50 transition-all shadow-xs hover:shadow-md space-y-4 flex flex-col justify-between"
-              >
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-bold text-[#716B7E] bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200">
-                      {brief.creatorActor.name}
-                    </span>
-                    <span className="text-[10px] text-[#E66A48] font-bold">
-                      {brief.neededRoles.filter((r: any) => !r.isFilled).length} peran dibuka
-                    </span>
-                  </div>
-
-                  <h3 className="font-bold text-sm text-[#27213D] group-hover:text-[#E66A48] transition-colors line-clamp-1">
-                    {brief.title}
-                  </h3>
-
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {brief.neededRoles.map((role: any) => (
-                      <span
-                        key={role.id}
-                        className={`text-[10px] px-2 py-0.5 rounded-md font-medium border ${
-                          role.isFilled
-                            ? "bg-stone-100 text-stone-400 line-through border-stone-200"
-                            : "bg-[#FFF7ED] text-[#E66A48] border-[#F9D8C4]"
-                        }`}
-                      >
-                        {role.roleLabel}
-                      </span>
-                    ))}
-                  </div>
+            {/* Bookings */}
+            <Link href="/dashboard/bookings" className="group flex flex-col justify-between p-5 rounded-3xl bg-[#1E1B2E] border border-stone-800 shadow-sm hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-1 transition-all duration-300">
+              <div className="space-y-4">
+                <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-white/80 group-hover:bg-white/20 group-hover:text-white transition-colors">
+                  <ShieldAlert className="w-5 h-5" />
                 </div>
-
-                <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-[#716B7E]">
-                  <span className="text-[11px] truncate max-w-[150px]">{brief.creatorActor.sector}</span>
-                  <span className="text-[#E66A48] font-semibold group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
-                    <span>Detail</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </span>
+                <div>
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-1">Pesanan Masuk</h3>
+                  <p className="text-[11px] text-stone-400 font-medium">Booking layanan & studio.</p>
                 </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Input Layer — Data Profil Kreatif */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-[#27213D] tracking-tight">Input Layer — Data Profil Kreatif</h2>
-            <p className="text-xs text-[#716B7E]">Fondasi data yang digunakan Opportunity Engine untuk menghitung komplementaritas.</p>
-          </div>
-          <span className="text-xs text-[#E66A48] font-mono font-medium">DATA_MODEL.md</span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {inputModules.map((mod) => (
-            <Link
-              key={mod.href}
-              href={mod.href}
-              className="group p-5 rounded-2xl bg-white/95 border border-stone-200/80 hover:border-stone-300 hover:shadow-md transition-all duration-200 space-y-4 block shadow-xs"
-            >
-              <div className="flex items-start justify-between">
-                <div className="p-2 rounded-xl bg-stone-50 border border-stone-100 group-hover:scale-105 transition-transform">
-                  {mod.icon}
-                </div>
-                {mod.required && (
-                  <span className="text-[10px] font-bold text-[#E66A48] uppercase tracking-wider bg-[#FFF7ED] px-2 py-0.5 rounded-md border border-[#F9D8C4]">
-                    Utama
-                  </span>
-                )}
               </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-[#27213D] text-sm">{mod.label}</span>
-                  <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-stone-100 text-[#27213D] border border-stone-200">
-                    {mod.count}
-                  </span>
-                </div>
-                <p className="text-xs text-[#716B7E] leading-relaxed line-clamp-1">{mod.sublabel}</p>
-              </div>
-              <div className="text-[11px] text-[#9E98A8] group-hover:text-[#E66A48] transition-colors font-medium">
-                {mod.count === 0 ? (
-                  <span className="inline-flex items-center gap-1">
-                    <span>Klik untuk menambahkan</span>
-                    <ArrowRight className="w-3 h-3" />
+              <div className="mt-8 flex items-center justify-between">
+                {pendingBookingCount > 0 ? (
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-400 text-amber-950 animate-pulse shadow-[0_0_12px_rgba(251,191,36,0.3)]">
+                    {pendingBookingCount} Baru
                   </span>
                 ) : (
-                  `${mod.count} ${mod.unit}`
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/10 text-stone-400">
+                    Tidak ada
+                  </span>
                 )}
+                <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-white transition-colors group-hover:translate-x-1" />
               </div>
             </Link>
-          ))}
-        </div>
-      </section>
 
-      {/* Profil Aktor Terdaftar */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-bold text-[#27213D] tracking-tight">Profil Aktor Terdaftar</h2>
-
-        <div className="p-6 md:p-8 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-stone-100">
-            <div className="space-y-1">
-              <div className="flex items-center gap-3">
-                <h3 className="text-xl font-bold text-[#27213D]">{primaryActor.name}</h3>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#E0F7F0] text-[#0D9488] border border-[#99F6E4]">
-                  {primaryActor.status}
-                </span>
+            {/* Portfolio / Showcase */}
+            <Link href="/dashboard/showcase" className="group flex flex-col justify-between p-5 rounded-3xl bg-gradient-to-br from-amber-500 to-[#E66A48] border border-transparent shadow-md hover:shadow-[0_20px_40px_rgba(230,106,72,0.25)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-20 transform translate-x-4 -translate-y-4 group-hover:scale-150 transition-transform duration-700">
+                <Sparkles className="w-24 h-24 text-white" />
               </div>
-              <p className="text-xs text-[#9E98A8] font-mono">ID: {primaryActor.id}</p>
-            </div>
+              <div className="space-y-4 relative z-10">
+                <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-inner transition-colors">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-1">Portofolio</h3>
+                  <p className="text-[11px] text-white/80 font-medium">Manajemen showcase visual.</p>
+                </div>
+              </div>
+              <div className="mt-8 flex items-center justify-between relative z-10">
+                <span className="px-2.5 py-1 rounded-full text-xs font-black bg-white/20 backdrop-blur-md text-white border border-white/30">
+                  {assetCount} Karya
+                </span>
+                <ArrowRight className="w-4 h-4 text-white/80 group-hover:text-white transition-colors group-hover:translate-x-1" />
+              </div>
+            </Link>
 
-            <div className="flex items-center gap-2 text-xs">
-              <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-stone-50 border border-stone-200 text-[#27213D]">
-                <Building2 className="w-3.5 h-3.5 text-[#E66A48]" />
-                <span>{primaryActor.actorType}</span>
-              </span>
-              <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-stone-50 border border-stone-200 text-[#27213D]">
-                <MapPin className="w-3.5 h-3.5 text-[#E66A48]" />
-                <span>{primaryActor.location || "Lokasi belum diisi"}</span>
-              </span>
+          </div>
+        </section>
+
+        {/* Platform Stats */}
+        <section className="space-y-4 pt-4">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-widest">
+              Statistik Global Platform
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="p-6 rounded-[24px] bg-[#1E1B2E] border border-stone-800 flex flex-col justify-between group hover:border-stone-700 transition-colors">
+              <span className="text-xs font-bold text-stone-400 uppercase tracking-widest">Total Peluang Aktif</span>
+              <div className="mt-4 text-5xl font-light text-white tracking-tighter group-hover:scale-105 origin-left transition-transform duration-500">
+                {opportunityCount}
+              </div>
+            </div>
+            <div className="p-6 rounded-[24px] bg-stone-50 border border-stone-200 flex flex-col justify-between group hover:bg-white transition-colors hover:shadow-md">
+              <span className="text-xs font-bold text-stone-500 uppercase tracking-widest">Total Kolaborasi</span>
+              <div className="mt-4 text-5xl font-light text-[#1E1B2E] tracking-tighter group-hover:scale-105 origin-left transition-transform duration-500">
+                {collaborationCount}
+              </div>
+            </div>
+            <div className="p-6 rounded-[24px] bg-stone-50 border border-stone-200 flex flex-col justify-between group hover:bg-white transition-colors hover:shadow-md">
+              <span className="text-xs font-bold text-stone-500 uppercase tracking-widest">Karya Dihasilkan</span>
+              <div className="mt-4 text-5xl font-light text-[#1E1B2E] tracking-tighter group-hover:scale-105 origin-left transition-transform duration-500">
+                {outcomeCount}
+              </div>
             </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-            <div className="space-y-1">
-              <span className="text-xs font-semibold uppercase text-[#9E98A8]">Subsektor Ekonomi Kreatif</span>
-              <p className="text-[#27213D] font-medium">{primaryActor.sector}</p>
-            </div>
-
-            <div className="space-y-1">
-              <span className="text-xs font-semibold uppercase text-[#9E98A8]">Kontak Bisnis</span>
-              <p className="text-[#27213D]">{primaryActor.contactEmail || "-"}</p>
-            </div>
-
-            <div className="md:col-span-2 space-y-1">
-              <span className="text-xs font-semibold uppercase text-[#9E98A8]">Deskripsi Keahlian & Fokus</span>
-              <p className="text-[#716B7E] leading-relaxed text-xs sm:text-sm">
-                {primaryActor.description || "Belum ada deskripsi yang ditambahkan."}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </AppShell>
   );
 }

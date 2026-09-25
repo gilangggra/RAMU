@@ -104,7 +104,7 @@ export default async function OpportunityDetailPage({
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4]">
+                <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-stone-100 text-[#1E1B2E] border border-stone-200">
                   {opp.pattern?.name || opp.patternCode}
                 </span>
                 <span
@@ -138,10 +138,10 @@ export default async function OpportunityDetailPage({
             <div className="space-y-1.5">
               <div className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">Target Pasar & Audiens</div>
               <div className="text-xs font-semibold text-[#27213D]">
-                {targetMarket.audience || "Pasar Urban & Penggemar Kriya Kontemporer"}
+                {targetMarket.audience || "Pasar Urban & Penggemar Fashion Kontemporer"}
               </div>
               <div className="text-[11px] text-[#716B7E]">
-                {targetMarket.segment || "Segmen Konsumen Budaya Premium"}
+                {targetMarket.segment || "Segmen Konsumen Fashion & Editorial Premium"}
               </div>
             </div>
 
@@ -188,7 +188,7 @@ export default async function OpportunityDetailPage({
                         {p.actor.sector} • {p.actor.location || "Indonesia"}
                       </div>
                     </div>
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4]">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
                       {p.roleLabel || p.roleCode}
                     </span>
                   </div>
@@ -403,7 +403,7 @@ function DetailScoreCard({
       </div>
       <div className="w-full h-2 rounded-full bg-stone-200 overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-amber-500 to-[#E66A48] rounded-full"
+          className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full"
           style={{ width: `${percentage}%` }}
         />
       </div>

@@ -33,49 +33,49 @@ async function main() {
   console.log(`✓ Profile: ${demoProfile.displayName} (${demoProfile.id})`);
 
   // ─────────────────────────────────────
-  // 2. Actor: Sanggar Batik Sekar Wangi
+  // 2. Actor: Nala The Label
   // ─────────────────────────────────────
-  const batik = await prisma.actor.upsert({
+  const nala = await prisma.actor.upsert({
     where: { id: "00000000-0000-0000-0000-000000000001" },
     update: {},
     create: {
       id: "00000000-0000-0000-0000-000000000001",
       ownerUserId: demoProfile.id,
-      name: "Sanggar Batik Sekar Wangi",
+      name: "Nala The Label",
       actorType: ActorType.STUDIO,
-      sector: "Fashion / Kriya Tekstil",
-      location: "DI Yogyakarta",
+      sector: "Fashion Designer / Label",
+      location: "Jakarta Selatan",
       description:
-        "Produsen batik tulis dan cap tradisional dengan motif klasik Yogyakarta. Kapasitas workshop mandiri dan fokus ekspansi ke pasar generasi muda.",
-      contactEmail: "kontak@batiksekarwangi.id",
+        "Brand fashion lokal dengan gaya contemporary ready-to-wear, fokus pada siluet modern dan keberlanjutan.",
+      contactEmail: "hello@nalathelabel.com",
       status: ActorStatus.ACTIVE,
     },
   });
 
-  // Assets — Batik
+  // Assets — Nala The Label
   await prisma.asset.createMany({
     skipDuplicates: true,
     data: [
       {
-        actorId: batik.id,
-        category: AssetCategory.MATERIAL,
-        subtype: "Batik Tulis",
-        name: "Kain Batik Tulis Motif Parang & Kawung",
-        description: "Batik tulis premium motif klasik Yogyakarta dengan pewarna alam",
-        roles: [AssetRole.INPUT, AssetRole.COMPONENT, AssetRole.CREATIVE_ELEMENT],
-        attributes: { capacity: 300, unit: "lembar/bulan", minimum_order: 50, lead_time_days: 21 },
+        actorId: nala.id,
+        category: AssetCategory.WARDROBE_PROP,
+        subtype: "Sisa Kain & Material Deadstock",
+        name: "Sisa Kain Produksi & Material Deadstock Berkualitas",
+        description: "Sisa material dari koleksi sebelumnya yang masih bisa di-upcycle atau dijadikan aksen",
+        roles: [AssetRole.INPUT, AssetRole.COMPONENT],
+        attributes: { capacity: 50, unit: "kg/bulan" },
         sourceType: SourceType.SELF_REPORTED,
         confidenceLevel: ConfidenceLevel.HIGH,
         status: AssetStatus.ACTIVE,
       },
       {
-        actorId: batik.id,
-        category: AssetCategory.CAPABILITY,
-        subtype: "Keahlian Membatik",
-        name: "Keahlian Membatik Tulis & Cap Tradisional",
-        description: "Tim pengrajin berpengalaman 15+ tahun dalam teknik batik tulis dan cap",
+        actorId: nala.id,
+        category: AssetCategory.SKILL_TALENT,
+        subtype: "Desain Fashion",
+        name: "Desain Fashion & Pattern Making",
+        description: "Tim desainer berpengalaman dalam merancang pola siluet kontemporer",
         roles: [AssetRole.CAPABILITY, AssetRole.ENABLER],
-        attributes: { team_size: 8, experience_years: 15 },
+        attributes: { team_size: 4, experience_years: 5 },
         sourceType: SourceType.SELF_REPORTED,
         confidenceLevel: ConfidenceLevel.HIGH,
         status: AssetStatus.ACTIVE,
@@ -83,84 +83,85 @@ async function main() {
     ],
   });
 
-  // Goals — Batik
-  const batikGoal = await prisma.goal.create({
+  // Goals — Nala The Label
+  const nalaGoal = await prisma.goal.create({
     data: {
-      actorId: batik.id,
-      category: GoalCategory.MARKET_EXPANSION,
-      title: "Menjangkau pasar konsumen muda (Gen-Z & Millennial) via fashion kontemporer",
-      description: "Target: 30% peningkatan penjualan ke segmen 18–35 tahun dalam 12 bulan",
+      actorId: nala.id,
+      category: GoalCategory.BRAND_AWARENESS,
+      title: "Membangun kampanye lookbook visual yang kuat untuk peluncuran koleksi Summer 2027",
+      description: "Meningkatkan brand awareness melalui visual editorial yang estetis",
       priority: 5,
       status: GoalStatus.ACTIVE,
     },
   });
 
-  // Needs — Batik
+  // Needs — Nala The Label
   await prisma.need.createMany({
     data: [
       {
-        actorId: batik.id,
-        relatedGoalId: batikGoal.id,
-        category: NeedCategory.CREATIVE_NEED,
-        title: "Fotografer produk profesional untuk lookbook koleksi batik kontemporer",
-        description: "Dibutuhkan sesi pemotretan katalog 2x per tahun",
-        priority: 4,
+        actorId: nala.id,
+        relatedGoalId: nalaGoal.id,
+        category: NeedCategory.CREW_NEED,
+        title: "Fotografer editorial & studio cyclorama",
+        description: "Dibutuhkan sesi pemotretan katalog koleksi Summer 2027",
+        priority: 5,
         status: NeedStatus.ACTIVE,
       },
       {
-        actorId: batik.id,
-        category: NeedCategory.MARKET_NEED,
-        title: "Akses ke platform fashion digital dan marketplace premium",
-        priority: 3,
+        actorId: nala.id,
+        relatedGoalId: nalaGoal.id,
+        category: NeedCategory.CREW_NEED,
+        title: "Model profesional untuk lookbook",
+        priority: 5,
         status: NeedStatus.ACTIVE,
       },
     ],
   });
 
-  // Constraints — Batik
+  // Constraints — Nala The Label
   await prisma.constraint.createMany({
     data: [
       {
-        actorId: batik.id,
-        type: ConstraintType.CAPACITY,
-        value: 300,
-        unit: "lembar/bulan",
+        actorId: nala.id,
+        type: ConstraintType.BUDGET,
+        value: 15000000,
+        unit: "IDR",
         severity: ConstraintSeverity.HARD,
         negotiability: Negotiability.FIXED,
         sourceType: SourceType.SELF_REPORTED,
         confidenceLevel: ConfidenceLevel.HIGH,
-        notes: "Kapasitas workshop saat ini maksimum 300 lembar per bulan",
+        notes: "Kapasitas budget photoshoot maksimal Rp 15 juta",
       },
       {
-        actorId: batik.id,
+        actorId: nala.id,
         type: ConstraintType.LOCATION,
-        value: "DI Yogyakarta",
+        value: "Jakarta",
         severity: ConstraintSeverity.SOFT,
         negotiability: Negotiability.NEGOTIABLE,
         sourceType: SourceType.SELF_REPORTED,
         confidenceLevel: ConfidenceLevel.MEDIUM,
-        notes: "Produksi utama di Yogyakarta, pengiriman ke seluruh Jawa",
+        notes: "Lebih disukai pemotretan di area Jakarta",
       },
     ],
   });
-  console.log(`✓ Aktor selesai: ${batik.name}`);
+  console.log(`✓ Aktor selesai: ${nala.name}`);
 
   // ─────────────────────────────────────
-  // 3. Actor: Kriya Kulit Mandiri
+  // 3. Actor: Studio Imaji & Co.
   // ─────────────────────────────────────
-  const kulit = await prisma.actor.upsert({
+  const imaji = await prisma.actor.upsert({
     where: { id: "00000000-0000-0000-0000-000000000002" },
     update: {},
     create: {
       id: "00000000-0000-0000-0000-000000000002",
       ownerUserId: demoProfile.id,
-      name: "Kriya Kulit Mandiri",
-      actorType: ActorType.MSME,
-      sector: "Kriya / Fesyen Kulit",
-      location: "Magetan, Jawa Timur",
+      name: "Studio Imaji & Co.",
+      actorType: ActorType.STUDIO,
+      sector: "Creative & Art Director",
+      location: "Bandung, Jawa Barat",
       description:
-        "Pengrajin kulit sapi nabati spesialis aksesoris, tas, dan komponen fesyen berkualitas tinggi.",
-      contactEmail: "halo@kulitmandiri.co.id",
+        "Studio creative direction yang merancang konsep kampanye visual, set design, dan keseluruhan art direction untuk brand lifestyle.",
+      contactEmail: "hello@studioimaji.co",
       status: ActorStatus.ACTIVE,
     },
   });
@@ -169,25 +170,25 @@ async function main() {
     skipDuplicates: true,
     data: [
       {
-        actorId: kulit.id,
-        category: AssetCategory.MATERIAL,
-        subtype: "Kulit Sapi Nabati",
-        name: "Kulit Sapi Nabati Full-Grain Berkualitas Tinggi",
-        description: "Kulit nabati grade A dari hewan lokal, proses penyamakan tradisional",
-        roles: [AssetRole.INPUT, AssetRole.COMPONENT],
-        attributes: { capacity: 500, unit: "lembar/bulan", minimum_order: 20 },
+        actorId: imaji.id,
+        category: AssetCategory.SKILL_TALENT,
+        subtype: "Creative Direction",
+        name: "Creative Direction & Set Design",
+        description: "Konseptualisasi kampanye, perancangan set dekorasi, dan art direction pemotretan",
+        roles: [AssetRole.CAPABILITY, AssetRole.ENABLER],
+        attributes: { team_size: 5 },
         sourceType: SourceType.SELF_REPORTED,
         confidenceLevel: ConfidenceLevel.HIGH,
         status: AssetStatus.ACTIVE,
       },
       {
-        actorId: kulit.id,
-        category: AssetCategory.CAPABILITY,
-        subtype: "Keahlian Kriya Kulit",
-        name: "Keahlian Penjahitan & Pembentukan Kulit Manual",
-        description: "Pengerjaan custom komponen kulit: gesper, handle tas, detail aksesori",
-        roles: [AssetRole.CAPABILITY, AssetRole.ENABLER],
-        attributes: { team_size: 12 },
+        actorId: imaji.id,
+        category: AssetCategory.EQUIPMENT,
+        subtype: "Props Studio",
+        name: "Props Studio & Dekorasi Set",
+        description: "Koleksi props, background set, dan elemen dekoratif untuk editorial visual",
+        roles: [AssetRole.RESOURCE, AssetRole.ENABLER],
+        attributes: { capacity: 100, unit: "items" },
         sourceType: SourceType.SELF_REPORTED,
         confidenceLevel: ConfidenceLevel.HIGH,
         status: AssetStatus.ACTIVE,
@@ -195,11 +196,11 @@ async function main() {
     ],
   });
 
-  const kulitGoal = await prisma.goal.create({
+  const imajiGoal = await prisma.goal.create({
     data: {
-      actorId: kulit.id,
-      category: GoalCategory.PRODUCT_DEVELOPMENT,
-      title: "Mengembangkan lini produk kolaborasi fesyen batik-kulit premium",
+      actorId: imaji.id,
+      category: GoalCategory.BRAND_AWARENESS,
+      title: "Membangun portofolio kampanye fashion editorial dan video komersial",
       priority: 5,
       status: GoalStatus.ACTIVE,
     },
@@ -207,10 +208,10 @@ async function main() {
 
   await prisma.need.create({
     data: {
-      actorId: kulit.id,
-      relatedGoalId: kulitGoal.id,
-      category: NeedCategory.MATERIAL_NEED,
-      title: "Kain batik premium sebagai material kombinasi untuk produk fesyen kulit",
+      actorId: imaji.id,
+      relatedGoalId: imajiGoal.id,
+      category: NeedCategory.CREW_NEED,
+      title: "Kolaborasi dengan brand fashion untuk eksekusi kampanye visual",
       priority: 5,
       status: NeedStatus.ACTIVE,
     },
@@ -218,34 +219,34 @@ async function main() {
 
   await prisma.constraint.create({
     data: {
-      actorId: kulit.id,
-      type: ConstraintType.MINIMUM_ORDER,
-      value: 20,
-      unit: "pcs",
+      actorId: imaji.id,
+      type: ConstraintType.CAPACITY,
+      value: 2,
+      unit: "kolaborasi/bulan",
       severity: ConstraintSeverity.HARD,
       negotiability: Negotiability.FIXED,
       sourceType: SourceType.SELF_REPORTED,
       confidenceLevel: ConfidenceLevel.HIGH,
     },
   });
-  console.log(`✓ Aktor selesai: ${kulit.name}`);
+  console.log(`✓ Aktor selesai: ${imaji.name}`);
 
   // ─────────────────────────────────────
-  // 4. Actor: Nusantara Silver & Gem
+  // 4. Actor: Glow & Form Artistry
   // ─────────────────────────────────────
-  const silver = await prisma.actor.upsert({
+  const makeup = await prisma.actor.upsert({
     where: { id: "00000000-0000-0000-0000-000000000003" },
     update: {},
     create: {
       id: "00000000-0000-0000-0000-000000000003",
       ownerUserId: demoProfile.id,
-      name: "Nusantara Silver & Gem",
-      actorType: ActorType.INDIVIDUAL,
-      sector: "Kriya / Perhiasan Logam",
-      location: "Kotagede, DI Yogyakarta",
+      name: "Glow & Form Artistry",
+      actorType: ActorType.STUDIO,
+      sector: "Makeup & Hair Artist (MUA)",
+      location: "Jakarta Pusat",
       description:
-        "Studio perhiasan perak filigree dan perhiasan kontemporer berbasis teknik kriya logam tradisional.",
-      contactEmail: "info@nusantarasilver.id",
+        "Tim profesional MUA dan Hair Stylist spesialis pemotretan editorial, fashion show, dan kampanye komersial.",
+      contactEmail: "info@glowandform.id",
       status: ActorStatus.ACTIVE,
     },
   });
@@ -254,13 +255,13 @@ async function main() {
     skipDuplicates: true,
     data: [
       {
-        actorId: silver.id,
-        category: AssetCategory.PRODUCT,
-        subtype: "Perhiasan Perak Filigree",
-        name: "Perhiasan Perak Filigree Motif Nusantara",
-        description: "Aksesori perhiasan perak teknik filigree tradisional Kotagede",
-        roles: [AssetRole.OUTPUT, AssetRole.COMPONENT, AssetRole.CREATIVE_ELEMENT],
-        attributes: { capacity: 150, unit: "pcs/bulan" },
+        actorId: makeup.id,
+        category: AssetCategory.SKILL_TALENT,
+        subtype: "Editorial Makeup",
+        name: "Editorial Makeup & Avant-Garde Hair Styling",
+        description: "Layanan makeup artis dan penataan rambut untuk kebutuhan photoshoot fashion dan runway",
+        roles: [AssetRole.CAPABILITY, AssetRole.CREATIVE_ELEMENT],
+        attributes: { team_size: 3 },
         sourceType: SourceType.SELF_REPORTED,
         confidenceLevel: ConfidenceLevel.HIGH,
         status: AssetStatus.ACTIVE,
@@ -270,9 +271,9 @@ async function main() {
 
   await prisma.goal.create({
     data: {
-      actorId: silver.id,
-      category: GoalCategory.BRAND_GROWTH,
-      title: "Membangun brand perhiasan Nusantara sebagai aksesori koleksi fashion premium",
+      actorId: makeup.id,
+      category: GoalCategory.PORTFOLIO_BUILDING,
+      title: "Menjadi mitra tetap untuk pemotretan fashion editorial brand lokal premium",
       priority: 4,
       status: GoalStatus.ACTIVE,
     },
@@ -280,14 +281,14 @@ async function main() {
 
   await prisma.need.create({
     data: {
-      actorId: silver.id,
-      category: NeedCategory.MARKET_NEED,
-      title: "Akses ke desainer fashion dan brand pakaian premium untuk kolaborasi aksesori",
+      actorId: makeup.id,
+      category: NeedCategory.PUBLICATION_NEED,
+      title: "Akses ke fotografer fashion dan creative director untuk proyek kolaborasi",
       priority: 5,
       status: NeedStatus.ACTIVE,
     },
   });
-  console.log(`✓ Aktor selesai: ${silver.name}`);
+  console.log(`✓ Aktor selesai: ${makeup.name}`);
 
   // ─────────────────────────────────────
   // 5. Actor: Lensa Kreatif Studio
@@ -314,7 +315,7 @@ async function main() {
     data: [
       {
         actorId: lensa.id,
-        category: AssetCategory.CAPABILITY,
+        category: AssetCategory.SKILL_TALENT,
         subtype: "Fotografi Produk Komersial",
         name: "Kapabilitas Fotografi Produk Fashion & Lookbook",
         description: "Full-service: konsep, styling, shooting, retouching untuk katalog fashion",
@@ -326,7 +327,7 @@ async function main() {
       },
       {
         actorId: lensa.id,
-        category: AssetCategory.RESOURCE,
+        category: AssetCategory.EQUIPMENT,
         subtype: "Studio Foto",
         name: "Studio Foto Indoor Lengkap dengan Cyclorama",
         description: "Studio 120m² dengan cyclorama putih, lighting profesional, dan set area",
@@ -342,7 +343,7 @@ async function main() {
   await prisma.goal.create({
     data: {
       actorId: lensa.id,
-      category: GoalCategory.NETWORK_EXPANSION,
+      category: GoalCategory.PORTFOLIO_BUILDING,
       title: "Membangun portofolio klien fashion brand lokal dan ekraf untuk retainer jangka panjang",
       priority: 4,
       status: GoalStatus.ACTIVE,

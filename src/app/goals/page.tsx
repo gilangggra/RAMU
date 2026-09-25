@@ -25,24 +25,20 @@ interface GoalsPageProps {
 }
 
 const GOAL_LABELS: Record<GoalCategory, { label: string; desc: string; icon: React.ReactNode }> = {
-  MARKET_EXPANSION: { label: "Ekspansi Pasar", desc: "Menjangkau segmen atau wilayah baru", icon: <Globe className="w-5 h-5 text-[#7C3AED]" /> },
-  PRODUCT_DEVELOPMENT: { label: "Pengembangan Produk", desc: "Membuat atau memperbaiki produk baru", icon: <Wrench className="w-5 h-5 text-[#E66A48]" /> },
-  BRAND_GROWTH: { label: "Pertumbuhan Brand", desc: "Meningkatkan visibilitas dan reputasi", icon: <Sparkles className="w-5 h-5 text-[#FFB800]" /> },
-  REVENUE_GROWTH: { label: "Pertumbuhan Pendapatan", desc: "Meningkatkan omset dan profitabilitas", icon: <TrendingUp className="w-5 h-5 text-[#0D9488]" /> },
-  CAPABILITY_EXPANSION: { label: "Ekspansi Kapabilitas", desc: "Menambah skill atau kapasitas produksi", icon: <Zap className="w-5 h-5 text-[#7C3AED]" /> },
-  NETWORK_EXPANSION: { label: "Ekspansi Jaringan", desc: "Membangun koneksi strategis baru", icon: <Handshake className="w-5 h-5 text-[#2563EB]" /> },
-  MARKET_ACCESS: { label: "Akses Pasar Baru", desc: "Masuk ke kanal distribusi baru", icon: <DoorOpen className="w-5 h-5 text-[#0D9488]" /> },
-  CREATIVE_EXPERIMENTATION: { label: "Eksperimen Kreatif", desc: "Eksplorasi ide dan konsep inovatif", icon: <Palette className="w-5 h-5 text-[#E66A48]" /> },
-  CULTURAL_PRESERVATION: { label: "Pelestarian Budaya", desc: "Menjaga warisan budaya lokal", icon: <Landmark className="w-5 h-5 text-[#B45309]" /> },
-  OPERATIONAL_IMPROVEMENT: { label: "Perbaikan Operasional", desc: "Efisiensi proses dan alur kerja", icon: <Settings className="w-5 h-5 text-[#716B7E]" /> },
+  EDITORIAL_PUBLICATION: { label: "Publikasi Editorial", desc: "Tampil di majalah/media kreatif", icon: <Globe className="w-5 h-5 text-[#1E1B2E]" /> },
+  COMMERCIAL_CAMPAIGN: { label: "Kampanye Komersial", desc: "Kampanye promosi produk/brand", icon: <Wrench className="w-5 h-5 text-[#1E1B2E]" /> },
+  PORTFOLIO_BUILDING: { label: "Kolaborasi Portofolio (TFP)", desc: "Membangun karya portfolio bersama", icon: <Palette className="w-5 h-5 text-[#1E1B2E]" /> },
+  BRAND_AWARENESS: { label: "Brand Awareness", desc: "Meningkatkan eksposur dan reach", icon: <Sparkles className="w-5 h-5 text-[#1E1B2E]" /> },
+  REVENUE_GENERATION: { label: "Proyek Komersial Berbayar", desc: "Monetisasi dan profitabilitas", icon: <TrendingUp className="w-5 h-5 text-[#1E1B2E]" /> },
+  SKILL_DEVELOPMENT: { label: "Pengembangan Keahlian", desc: "Eksplorasi teknik dan skill baru", icon: <Zap className="w-5 h-5 text-[#1E1B2E]" /> },
 };
 
 const PRIORITY_LABELS: Record<number, { label: string; color: string; badge: string }> = {
   1: { label: "Sangat Rendah", color: "text-[#716B7E]", badge: "bg-stone-100 text-stone-600 border-stone-200" },
-  2: { label: "Rendah", color: "text-blue-600", badge: "bg-blue-50 text-blue-700 border-blue-200" },
-  3: { label: "Sedang", color: "text-amber-600", badge: "bg-amber-50 text-amber-700 border-amber-200" },
-  4: { label: "Tinggi", color: "text-orange-600", badge: "bg-orange-50 text-orange-700 border-orange-200" },
-  5: { label: "Sangat Tinggi", color: "text-rose-600", badge: "bg-rose-50 text-rose-700 border-rose-200" },
+  2: { label: "Rendah", color: "text-[#1E1B2E]", badge: "bg-stone-100 text-stone-600 border-stone-200" },
+  3: { label: "Sedang", color: "text-[#1E1B2E]", badge: "bg-stone-100 text-stone-600 border-stone-200" },
+  4: { label: "Tinggi", color: "text-[#1E1B2E]", badge: "bg-stone-100 text-stone-600 border-stone-200" },
+  5: { label: "Sangat Tinggi", color: "text-[#1E1B2E]", badge: "bg-[#1E1B2E] text-white border-[#1E1B2E]" },
 };
 
 export default async function GoalsPage({ searchParams }: GoalsPageProps) {
@@ -72,7 +68,7 @@ export default async function GoalsPage({ searchParams }: GoalsPageProps) {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-black text-[#27213D] tracking-tight">Tujuan Kolaborasi (Goals)</h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#EDE8FF] text-[#7C3AED] border border-[#DDD6FE]">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-stone-100 text-[#1E1B2E] border border-stone-200">
                 {goals.length} aktif
               </span>
             </div>
@@ -91,15 +87,15 @@ export default async function GoalsPage({ searchParams }: GoalsPageProps) {
 
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
           <div className="xl:col-span-2 space-y-4">
-            <h2 className="text-xs font-bold text-[#9E98A8] uppercase tracking-wider">+ Tambah Goal Baru</h2>
-            <div className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-xs space-y-5">
-              <form action={createGoal} className="space-y-4">
+            <h2 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-widest mb-6">+ Tambah Goal Baru</h2>
+            <div className="pt-2">
+              <form action={createGoal} className="space-y-6">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#9E98A8]">Kategori Goal *</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Kategori Goal *</label>
                   <select
                     name="category"
-                    defaultValue="MARKET_EXPANSION"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50/80 border border-stone-200 text-sm text-[#27213D] focus:outline-none focus:bg-white focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/15 transition-all"
+                    defaultValue="BRAND_AWARENESS"
+                    className="w-full px-0 py-3 bg-transparent border-b border-stone-300 text-sm font-light text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E] cursor-pointer appearance-none"
                   >
                     {Object.entries(GOAL_LABELS).map(([val, { label }]) => (
                       <option key={val} value={val}>{label}</option>
@@ -108,32 +104,32 @@ export default async function GoalsPage({ searchParams }: GoalsPageProps) {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#9E98A8]">Judul Goal *</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Judul Goal *</label>
                   <input
                     name="title"
                     type="text"
                     required
                     placeholder="misal: Masuk ke pasar Gen-Z via kampanye fashion film"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50/80 border border-stone-200 text-sm text-[#27213D] placeholder-stone-400 focus:outline-none focus:bg-white focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/15 transition-all"
+                    className="w-full px-0 py-3 bg-transparent border-b border-stone-300 text-sm font-light text-[#1E1B2E] placeholder:text-stone-400 focus:outline-none focus:border-[#1E1B2E] transition-colors"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#9E98A8]">Deskripsi (Opsional)</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Deskripsi (Opsional)</label>
                   <textarea
                     name="description"
                     rows={2}
                     placeholder="Konteks sasaran atau target kuantitatif..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50/80 border border-stone-200 text-sm text-[#27213D] placeholder-stone-400 focus:outline-none focus:bg-white focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/15 transition-all resize-none"
+                    className="w-full px-0 py-3 bg-transparent border-b border-stone-300 text-sm font-light text-[#1E1B2E] placeholder:text-stone-400 focus:outline-none focus:border-[#1E1B2E] transition-colors resize-none"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#9E98A8]">Prioritas (1–5)</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Prioritas (1–5)</label>
                   <select
                     name="priority"
                     defaultValue="3"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50/80 border border-stone-200 text-sm text-[#27213D] focus:outline-none focus:bg-white focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/15 transition-all"
+                    className="w-full px-0 py-3 bg-transparent border-b border-stone-300 text-sm font-light text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E] cursor-pointer appearance-none"
                   >
                     {[1, 2, 3, 4, 5].map((p) => (
                       <option key={p} value={p}>{p} — {PRIORITY_LABELS[p].label}</option>
@@ -143,10 +139,10 @@ export default async function GoalsPage({ searchParams }: GoalsPageProps) {
 
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold text-sm shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full mt-8 px-6 py-4 bg-[#1E1B2E] hover:bg-black text-white text-[11px] font-bold uppercase tracking-widest transition-colors flex justify-center items-center gap-2"
                 >
+                  <Target className="w-4 h-4" />
                   <span>Simpan Goal</span>
-                  <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
             </div>

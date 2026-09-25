@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   updateCollaborationTerms,
+  updateSharedProjectLinks,
   createTask,
   toggleTaskStatus,
+  deleteTask,
   updateMilestoneStatus,
   recordDecision,
 } from "../actions";
@@ -41,7 +44,14 @@ import {
   Star,
   ArrowUpRight,
   Plus,
+  Phone,
+  Mail,
+  Trash2,
+  User,
+  Folder,
+  ExternalLink,
 } from "lucide-react";
+import { SocialCreditGenerator } from "@/components/collaborations/SocialCreditGenerator";
 
 interface WorkspaceProps {
   collaboration: any;
@@ -49,7 +59,7 @@ interface WorkspaceProps {
 }
 
 export function CollaborationWorkspaceClient({ collaboration, currentActorId }: WorkspaceProps) {
-  const [activeTab, setActiveTab] = useState<"overview" | "plan" | "tasks" | "milestones" | "decisions" | "outcomes">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "plan" | "credits" | "outcomes">("overview");
 
   const plan = collaboration.plan;
   const participants = collaboration.participants || [];
@@ -82,6 +92,30 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
   const [isRecordingDecision, setIsRecordingDecision] = useState(false);
   const [decisionMessage, setDecisionMessage] = useState<string | null>(null);
+
+  const projectLinks = (timeline?.projectLinks as any) || {};
+  const [isEditingLinks, setIsEditingLinks] = useState(false);
+  const [isSavingLinks, setIsSavingLinks] = useState(false);
+  const [linksMessage, setLinksMessage] = useState<string | null>(null);
+
+  async function handleSaveLinks(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setIsSavingLinks(true);
+    setLinksMessage(null);
+    const formData = new FormData(e.currentTarget);
+    try {
+      const res = await updateSharedProjectLinks(plan.id, formData);
+      if (res.success) {
+        setLinksMessage("Tautan kerja kolaborasi berhasil diperbarui!");
+        setIsEditingLinks(false);
+      } else {
+        setLinksMessage(res.error || "Gagal menyimpan tautan.");
+      }
+    } finally {
+      setIsSavingLinks(false);
+      setTimeout(() => setLinksMessage(null), 4000);
+    }
+  }
 
   async function handleSaveTerms(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -123,6 +157,11 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
   async function handleToggleTask(taskId: string, currentStatus: TaskStatus) {
     await toggleTaskStatus(taskId, collaboration.id, currentStatus);
+  }
+
+  async function handleDeleteTask(taskId: string) {
+    if (!confirm("Hapus tugas ini dari checklist proyek?")) return;
+    await deleteTask(taskId, collaboration.id);
   }
 
   async function handleUpdateMilestone(milestoneId: string, status: MilestoneStatus) {
@@ -239,46 +278,53 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
   }
 
   return (
-    <div className="space-y-8">
-      {/* Hero Card */}
-      <section className="p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] relative overflow-hidden space-y-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4]">
-                Phase 4: Ruang Kolaborasi Aktif
+    <div className="space-y-12">
+      {/* Editorial Header */}
+      <section className="border-b border-stone-200 pb-10">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">
+                Workspace
               </span>
-              <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-stone-300">•</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#1E1B2E] flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#1E1B2E] animate-pulse" />
                 Status: {collaboration.status}
               </span>
             </div>
 
-            <h1 className="text-3xl font-extrabold text-[#27213D] tracking-tight leading-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light text-[#1E1B2E] tracking-tighter leading-[1.1] max-w-3xl">
               {collaboration.title}
             </h1>
-            <p className="text-sm text-[#716B7E] max-w-2xl leading-relaxed">
+            <p className="text-sm font-light text-stone-500 max-w-2xl leading-relaxed">
               {collaboration.description || plan?.objective}
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 shrink-0 min-w-[280px]">
-            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
-              <div className="text-[11px] text-[#716B7E] uppercase font-bold tracking-wider">Tugas Selesai</div>
-              <div className="text-2xl font-black text-[#27213D] mt-0.5">
-                {completedTasks} / {tasks.length}
+          <div className="flex flex-wrap gap-6 shrink-0 pt-4 lg:pt-0">
+            <div className="space-y-1">
+              <div className="text-[10px] text-stone-400 uppercase font-bold tracking-[0.2em]">Tim Kreatif</div>
+              <div className="text-2xl font-light text-[#1E1B2E]">
+                {participants.length} <span className="text-stone-300 text-lg">Kreator</span>
               </div>
             </div>
-            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
-              <div className="text-[11px] text-[#716B7E] uppercase font-bold tracking-wider">Milestone</div>
-              <div className="text-2xl font-black text-emerald-800 mt-0.5">
-                {achievedMilestones} / {milestones.length}
+            <div className="w-px h-10 bg-stone-200 hidden sm:block"></div>
+            <div className="space-y-1">
+              <div className="text-[10px] text-stone-400 uppercase font-bold tracking-[0.2em]">Status Proyek</div>
+              <div className="text-xl font-light">
+                {collaboration.status === "COMPLETED" ? (
+                  <span className="text-emerald-700 font-medium">Selesai</span>
+                ) : (
+                  <span className="text-[#E66A48] font-medium">Aktif Berjalan</span>
+                )}
               </div>
             </div>
-            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70 col-span-2 sm:col-span-1">
-              <div className="text-[11px] text-[#716B7E] uppercase font-bold tracking-wider">Luaran Nyata</div>
-              <div className="text-2xl font-black text-teal-800 mt-0.5">
-                {outcomes.length} Hasil
+            <div className="w-px h-10 bg-stone-200 hidden sm:block"></div>
+            <div className="space-y-1">
+              <div className="text-[10px] text-stone-400 uppercase font-bold tracking-[0.2em]">Karya Rilis</div>
+              <div className="text-2xl font-light text-[#1E1B2E]">
+                {outcomes.length} <span className="text-stone-300 text-lg">Luaran</span>
               </div>
             </div>
           </div>
@@ -286,36 +332,30 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
       </section>
 
       {/* Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-stone-200/80 pb-3">
+      <div className="flex items-center gap-8 overflow-x-auto no-scrollbar border-b border-stone-200">
         {[
-          { key: "overview", label: "Ringkasan Proyek", icon: FileText, count: participants.length },
-          { key: "plan", label: "Negosiasi & Kesepakatan", icon: Handshake },
-          { key: "tasks", label: "Tugas Kerja (Tasks)", icon: CheckSquare, count: tasks.length },
-          { key: "milestones", label: "Milestone", icon: Target, count: milestones.length },
-          { key: "decisions", label: "Log Keputusan", icon: Scroll, count: decisions.length },
-          { key: "outcomes", label: "Luaran & Evaluasi (Phase 5)", icon: Trophy, count: outcomes.length },
+          { key: "overview", label: "Ringkasan", badge: null },
+          { key: "plan", label: "Ketentuan & Hak", badge: null },
+          { key: "credits", label: "Kredit & Tag", badge: "Baru" },
+          { key: "outcomes", label: "Luaran & Ulasan", badge: `${outcomes.length}` },
         ].map((tab) => {
           const isActive = activeTab === tab.key;
-          const TabIcon = tab.icon;
           return (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key as any)}
-              className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              className={`pb-4 whitespace-nowrap text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2 cursor-pointer ${
                 isActive
-                  ? "bg-[#27213D] text-white shadow-md shadow-[#27213D]/10"
-                  : "bg-white border border-stone-200/80 text-[#716B7E] hover:text-[#27213D] hover:bg-stone-50"
+                  ? "text-[#1E1B2E] border-b-2 border-[#1E1B2E]"
+                  : "text-stone-400 hover:text-stone-600 border-b-2 border-transparent"
               }`}
             >
-              <TabIcon className="w-3.5 h-3.5 shrink-0" />
               <span>{tab.label}</span>
-              {typeof tab.count === "number" && (
-                <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                    isActive ? "bg-white/20 text-white" : "bg-stone-100 text-[#716B7E]"
-                  }`}
-                >
-                  {tab.count}
+              {tab.badge && (
+                <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
+                  isActive ? "bg-[#1E1B2E] text-white" : "bg-stone-100 text-stone-500"
+                }`}>
+                  {tab.badge}
                 </span>
               )}
             </button>
@@ -326,6 +366,192 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
       {/* TAB 1: OVERVIEW */}
       {activeTab === "overview" && (
         <div className="space-y-8 animate-fade-in">
+          {/* SHARED PROJECT HUB (LINKS) */}
+          <section className="p-6 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Folder className="w-5 h-5 text-amber-500" />
+                  <h2 className="text-base font-bold text-[#1E1B2E] tracking-tight">
+                    Tautan Kerja & Dokumen Kolaborasi
+                  </h2>
+                </div>
+                <p className="text-xs text-stone-500 font-light">
+                  Akses bersama untuk moodboard visual (Pinterest/Canva), folder foto mentah & final (Google Drive/Dropbox), serta catatan produksi.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsEditingLinks(!isEditingLinks)}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-[#1E1B2E] text-xs font-bold transition-all shrink-0 cursor-pointer"
+              >
+                <span>{isEditingLinks ? "Tutup Editor" : "Kelola Tautan"}</span>
+              </button>
+            </div>
+
+            {linksMessage && (
+              <div className="p-3 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200 animate-fade-in">
+                {linksMessage}
+              </div>
+            )}
+
+            {isEditingLinks ? (
+              <form onSubmit={handleSaveLinks} className="space-y-4 p-5 rounded-2xl bg-stone-50 border border-stone-200/80 animate-fade-in">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-600 block">
+                      🎨 Moodboard / Arah Gaya
+                    </label>
+                    <input
+                      type="url"
+                      name="moodboardUrl"
+                      defaultValue={projectLinks.moodboardUrl || ""}
+                      placeholder="https://pinterest.com/... atau Canva"
+                      className="w-full px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-xs text-[#1E1B2E] focus:outline-none focus:border-[#E66A48]"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-600 block">
+                      📸 Folder Foto / Video Aset
+                    </label>
+                    <input
+                      type="url"
+                      name="assetsFolderUrl"
+                      defaultValue={projectLinks.assetsFolderUrl || ""}
+                      placeholder="https://drive.google.com/... atau Dropbox"
+                      className="w-full px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-xs text-[#1E1B2E] focus:outline-none focus:border-[#E66A48]"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-600 block">
+                      📝 Dokumen / Call Sheet
+                    </label>
+                    <input
+                      type="url"
+                      name="notesUrl"
+                      defaultValue={projectLinks.notesUrl || ""}
+                      placeholder="https://docs.google.com/... atau Notion"
+                      className="w-full px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-xs text-[#1E1B2E] focus:outline-none focus:border-[#E66A48]"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="submit"
+                    disabled={isSavingLinks}
+                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                  >
+                    {isSavingLinks ? "Menyimpan..." : "Simpan Tautan Kerja"}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Moodboard Card */}
+                <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/80 flex flex-col justify-between space-y-3 hover:bg-stone-50 transition-colors">
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">
+                      Konsep Visual
+                    </div>
+                    <div className="font-bold text-sm text-[#1E1B2E]">
+                      Moodboard & Lookbook
+                    </div>
+                    <p className="text-[11px] text-stone-500 truncate font-light">
+                      {projectLinks.moodboardUrl ? projectLinks.moodboardUrl : "Belum ditautkan"}
+                    </p>
+                  </div>
+                  {projectLinks.moodboardUrl ? (
+                    <a
+                      href={projectLinks.moodboardUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-stone-100 text-[#1E1B2E] border border-stone-200 text-xs font-bold transition-colors"
+                    >
+                      <span>Buka Moodboard</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-[#E66A48]" />
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingLinks(true)}
+                      className="text-xs font-bold text-[#E66A48] hover:underline text-left cursor-pointer"
+                    >
+                      + Tautkan Pinterest/Canva
+                    </button>
+                  )}
+                </div>
+
+                {/* Asset Folder Card */}
+                <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/80 flex flex-col justify-between space-y-3 hover:bg-stone-50 transition-colors">
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">
+                      Aset & Foto
+                    </div>
+                    <div className="font-bold text-sm text-[#1E1B2E]">
+                      Folder Drive / Dropbox
+                    </div>
+                    <p className="text-[11px] text-stone-500 truncate font-light">
+                      {projectLinks.assetsFolderUrl ? projectLinks.assetsFolderUrl : "Belum ditautkan"}
+                    </p>
+                  </div>
+                  {projectLinks.assetsFolderUrl ? (
+                    <a
+                      href={projectLinks.assetsFolderUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-stone-100 text-[#1E1B2E] border border-stone-200 text-xs font-bold transition-colors"
+                    >
+                      <span>Buka Folder Drive</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-emerald-600" />
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingLinks(true)}
+                      className="text-xs font-bold text-[#E66A48] hover:underline text-left cursor-pointer"
+                    >
+                      + Tautkan Google Drive
+                    </button>
+                  )}
+                </div>
+
+                {/* Production Notes / Call Sheet Card */}
+                <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/80 flex flex-col justify-between space-y-3 hover:bg-stone-50 transition-colors">
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-bold text-purple-700 uppercase tracking-wider">
+                      Dokumen Produksi
+                    </div>
+                    <div className="font-bold text-sm text-[#1E1B2E]">
+                      Call Sheet & Catatan
+                    </div>
+                    <p className="text-[11px] text-stone-500 truncate font-light">
+                      {projectLinks.notesUrl ? projectLinks.notesUrl : "Belum ditautkan"}
+                    </p>
+                  </div>
+                  {projectLinks.notesUrl ? (
+                    <a
+                      href={projectLinks.notesUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-stone-100 text-[#1E1B2E] border border-stone-200 text-xs font-bold transition-colors"
+                    >
+                      <span>Buka Catatan</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-purple-600" />
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingLinks(true)}
+                      className="text-xs font-bold text-[#E66A48] hover:underline text-left cursor-pointer"
+                    >
+                      + Tautkan Docs / Notion
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </section>
+
           <section className="space-y-4">
             <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
               <Users className="w-5 h-5 text-amber-500" />
@@ -372,11 +598,67 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                         <div className="text-xs text-[#27213D] leading-relaxed">{roleDef.contribution}</div>
                       </div>
                     )}
+
+                    {/* Action Links */}
+                    <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-stone-100">
+                      <Link
+                        href={`/directory/${p.actorId}`}
+                        target="_blank"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-[#1E1B2E] text-[11px] font-bold transition-colors"
+                      >
+                        <User className="w-3 h-3 text-stone-500" />
+                        <span>Profil</span>
+                      </Link>
+
+                      {!isYou && p.actor?.contactPhone && (
+                        <a
+                          href={`https://wa.me/${p.actor.contactPhone.replace(/\D/g, "").replace(/^0/, "62")}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-bold transition-colors"
+                        >
+                          <Phone className="w-3 h-3 text-emerald-600" />
+                          <span>WhatsApp</span>
+                        </a>
+                      )}
+
+                      {!isYou && p.actor?.contactEmail && (
+                        <a
+                          href={`mailto:${p.actor.contactEmail}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-[#1E1B2E] text-[11px] font-bold transition-colors"
+                        >
+                          <Mail className="w-3 h-3 text-stone-500" />
+                          <span>Email</span>
+                        </a>
+                      )}
+                    </div>
                   </div>
                 );
               })}
             </div>
           </section>
+
+          {/* Quick Social Media Credits Banner */}
+          <div className="p-6 rounded-[28px] bg-gradient-to-r from-amber-500/10 via-[#E66A48]/10 to-transparent border border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#E66A48]" />
+                <h3 className="text-sm font-bold text-[#1E1B2E]">Format Kredit Publikasi & Media Sosial Satu-Klik</h3>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E66A48] text-white">Baru</span>
+              </div>
+              <p className="text-xs text-stone-600 font-light">
+                Siap rilis hasil photoshoot, lookbook, atau video campaign? Generate format kredit Instagram Feed, TikTok BTS, Story mention sticker, dan call sheet roster tanpa perlu tanya manual.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab("credits")}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1E1B2E] hover:bg-stone-800 text-white text-xs font-bold transition-all shrink-0 cursor-pointer shadow-sm"
+            >
+              <span>Buka Generator Kredit</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
           {plan?.expectedOutputs && (
             <section className="p-6 sm:p-8 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-3">
@@ -399,7 +681,8 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
       {/* TAB 2: PLAN */}
       {activeTab === "plan" && (
-        <form onSubmit={handleSaveTerms} className="space-y-6 animate-fade-in">
+        <div className="space-y-8 animate-fade-in">
+          <form onSubmit={handleSaveTerms} className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
               <Handshake className="w-5 h-5 text-amber-500" />
@@ -541,353 +824,125 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
             </button>
           </div>
         </form>
-      )}
 
-      {/* TAB 3: TASKS */}
-      {activeTab === "tasks" && (
-        <div className="space-y-6 animate-fade-in">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              {["ALL", "TODO", "IN_PROGRESS", "DONE"].map((st) => (
-                <button
-                  key={st}
-                  onClick={() => setTaskFilter(st)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    taskFilter === st
-                      ? "bg-[#27213D] text-white shadow-xs"
-                      : "bg-white text-[#716B7E] hover:text-[#27213D] border border-stone-200/80"
-                  }`}
-                >
-                  {st === "ALL" ? "Semua" : st}
-                </button>
-              ))}
-            </div>
-
-            <span className="text-xs text-[#716B7E]">
-              Menampilkan {filteredTasks.length} dari {tasks.length} tugas
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredTasks.map((t: any) => {
-              const isDone = t.status === "DONE";
-              const inProgress = t.status === "IN_PROGRESS";
-
-              return (
-                <div
-                  key={t.id}
-                  className={`p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between gap-3 ${
-                    isDone
-                      ? "bg-stone-50/70 border-stone-200/60 opacity-75"
-                      : inProgress
-                      ? "bg-amber-50/40 border-amber-300 shadow-2xs"
-                      : "bg-white/95 border-stone-200/80 shadow-2xs"
-                  }`}
-                >
-                  <div className="space-y-1.5">
-                    <div className="flex items-start justify-between gap-2">
-                      <h4
-                        className={`text-sm font-bold tracking-tight ${
-                          isDone ? "line-through text-stone-400" : "text-[#27213D]"
-                        }`}
-                      >
-                        {t.title}
-                      </h4>
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          t.priority === "HIGH"
-                            ? "bg-rose-50 text-rose-800 border border-rose-200"
-                            : "bg-stone-100 text-[#716B7E] border border-stone-200"
-                        }`}
-                      >
-                        {t.priority}
-                      </span>
-                    </div>
-                    {t.description && (
-                      <p className="text-xs text-[#716B7E] line-clamp-2">{t.description}</p>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2 border-t border-stone-100 text-xs">
-                    <div className="text-[#716B7E] text-[11px]">
-                      PIC: <span className="text-[#27213D] font-bold">{t.assignedActor?.name || "Semua"}</span>
-                    </div>
-
-                    <button
-                      onClick={() => handleToggleTask(t.id, t.status)}
-                      className={`px-3 py-1 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-                        isDone
-                          ? "bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100"
-                          : inProgress
-                          ? "bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100"
-                          : "bg-stone-100 text-[#716B7E] hover:bg-stone-200 border border-stone-200"
-                      }`}
-                    >
-                      {isDone ? (
-                        <span className="inline-flex items-center gap-1">
-                          <Check className="w-3.5 h-3.5" />
-                          <span>Selesai</span>
-                        </span>
-                      ) : inProgress ? (
-                        <span className="inline-flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
-                          <span>Berjalan</span>
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1">
-                          <Circle className="w-3 h-3" />
-                          <span>Belum</span>
-                        </span>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <form
-            onSubmit={handleCreateTask}
-            className="p-6 sm:p-8 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-4"
-          >
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-[#27213D] uppercase tracking-wider flex items-center gap-2">
-                <Plus className="w-4 h-4 text-[#E66A48]" />
-                <span>Tambah Tugas Baru</span>
+        {/* Sub-seksi: Buku Log Kesepakatan & Adendum Bersama */}
+        <section className="pt-8 border-t border-stone-200/80 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-[#1E1B2E] tracking-tight flex items-center gap-2">
+                <Scroll className="w-4 h-4 text-amber-500" />
+                <span>Buku Log Kesepakatan & Adendum Bersama ({decisions.length})</span>
               </h3>
-              {taskMessage && (
-                <span className="text-xs text-emerald-800 font-bold bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200">{taskMessage}</span>
-              )}
+              <p className="text-xs text-stone-500 font-light">
+                Catatan resmi jika ada penyesuaian kesepakatan tim di tengah kolaborasi (misal: penambahan look foto, pembagian biaya tambahan).
+              </p>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="sm:col-span-2 space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
-                  Judul Tugas *
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  required
-                  placeholder="Contoh: Menyiapkan 5 meter kain batik pola garuda"
-                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
-                  Penanggung Jawab (Assignee)
-                </label>
-                <select
-                  name="assignedActorId"
-                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white cursor-pointer"
-                >
-                  {participants.map((p: any) => (
-                    <option key={p.actorId} value={p.actorId}>
-                      {p.actor.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="sm:col-span-2 space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
-                  Deskripsi / Rincian
-                </label>
-                <input
-                  type="text"
-                  name="description"
-                  placeholder="Catatan tambahan spesifikasi atau instruksi kerja"
-                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
-                  Prioritas
-                </label>
-                <select
-                  name="priority"
-                  defaultValue={TaskPriority.MEDIUM}
-                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white cursor-pointer"
-                >
-                  <option value={TaskPriority.HIGH}>Tinggi (High)</option>
-                  <option value={TaskPriority.MEDIUM}>Sedang (Medium)</option>
-                  <option value={TaskPriority.LOW}>Rendah (Low)</option>
-                </select>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isCreatingTask}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white font-bold text-xs shadow-md shadow-[#E66A48]/20 transition-colors cursor-pointer disabled:opacity-50"
-            >
-              {isCreatingTask ? "Menambahkan..." : "Simpan Tugas"}
-            </button>
-          </form>
-        </div>
-      )}
-
-      {/* TAB 4: MILESTONES */}
-      {activeTab === "milestones" && (
-        <div className="space-y-6 animate-fade-in">
-          <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
-            <Target className="w-5 h-5 text-amber-500" />
-            <span>Tahapan & Tonggak Pencapaian (Milestones)</span>
-          </h2>
-
-          <div className="space-y-4">
-            {milestones.map((m: any, idx: number) => {
-              const isAchieved = m.status === "ACHIEVED";
-              const inProgress = m.status === "IN_PROGRESS";
-
-              return (
-                <div
-                  key={m.id}
-                  className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.02)] flex items-start justify-between gap-4"
-                >
-                  <div className="flex items-start gap-3.5">
-                    <div
-                      className={`w-9 h-9 rounded-2xl flex items-center justify-center font-black text-xs shrink-0 ${
-                        isAchieved
-                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                          : inProgress
-                          ? "bg-amber-100 text-amber-800 border border-amber-300"
-                          : "bg-stone-100 text-stone-500 border border-stone-200"
-                      }`}
-                    >
-                      {isAchieved ? <Check className="w-4 h-4 text-emerald-700" /> : idx + 1}
-                    </div>
-
-                    <div className="space-y-1">
-                      <h4 className="text-base font-bold text-[#27213D]">{m.title}</h4>
-                      {m.description && <p className="text-xs text-[#716B7E]">{m.description}</p>}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      onClick={() =>
-                        handleUpdateMilestone(
-                          m.id,
-                          isAchieved ? MilestoneStatus.PENDING : MilestoneStatus.ACHIEVED
-                        )
-                      }
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-                        isAchieved
-                          ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                          : "bg-stone-100 hover:bg-stone-200 text-[#27213D] border border-stone-200"
-                      }`}
-                    >
-                      {isAchieved ? (
-                        <span className="inline-flex items-center gap-1">
-                          <Check className="w-3.5 h-3.5" />
-                          <span>Tercapai</span>
-                        </span>
-                      ) : (
-                        "Tandai Tercapai"
-                      )}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 5: DECISIONS */}
-      {activeTab === "decisions" && (
-        <div className="space-y-6 animate-fade-in">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
-              <Scroll className="w-5 h-5 text-amber-500" />
-              <span>Buku Log Keputusan Bersama (Decision Log)</span>
-            </h2>
             {decisionMessage && (
-              <span className="text-xs text-emerald-800 font-bold bg-emerald-50 px-3.5 py-1 rounded-xl border border-emerald-200">{decisionMessage}</span>
+              <span className="text-xs text-emerald-800 font-bold bg-emerald-50 px-3.5 py-1 rounded-xl border border-emerald-200">
+                {decisionMessage}
+              </span>
             )}
           </div>
 
           <div className="space-y-3">
-            {decisions.map((d: any) => (
-              <div key={d.id} className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.02)] space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <h4 className="text-base font-bold text-[#27213D]">{d.title}</h4>
-                  <span className="text-[11px] text-[#716B7E]">
-                    {new Date(d.createdAt).toLocaleDateString("id-ID")}
-                  </span>
-                </div>
-                <div className="p-4 rounded-xl bg-stone-50 border border-stone-200/70 text-xs text-[#27213D] leading-relaxed">
-                  {d.decision}
-                </div>
-                {d.reason && (
-                  <div className="text-xs text-[#716B7E]">
-                    <span className="font-bold text-[#27213D]">Alasan:</span> {d.reason}
-                  </div>
-                )}
+            {decisions.length === 0 ? (
+              <div className="p-6 text-center rounded-[24px] bg-white border border-stone-200/80 text-xs text-stone-500 font-light">
+                Belum ada adendum atau keputusan tambahan yang dicatat. Gunakan formulir di bawah jika ada perubahan kesepakatan tim.
               </div>
-            ))}
+            ) : (
+              decisions.map((d: any) => (
+                <div key={d.id} className="p-5 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <h4 className="text-sm font-bold text-[#1E1B2E]">{d.title}</h4>
+                    <span className="text-[10px] text-stone-400 font-medium">
+                      {new Date(d.createdAt).toLocaleDateString("id-ID")}
+                    </span>
+                  </div>
+                  <div className="text-xs text-[#1E1B2E] leading-relaxed p-3 rounded-xl bg-stone-50 border border-stone-200/60">
+                    {d.decision}
+                  </div>
+                  {d.reason && (
+                    <div className="text-[11px] text-stone-500 font-light">
+                      <span className="font-semibold text-stone-600">Alasan:</span> {d.reason}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
 
           <form
             onSubmit={handleRecordDecision}
-            className="p-6 sm:p-8 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-4"
+            className="p-6 rounded-[28px] bg-white border border-stone-200/80 shadow-sm space-y-4"
           >
-            <h3 className="text-sm font-bold text-[#27213D] uppercase tracking-wider flex items-center gap-2">
-              <Plus className="w-4 h-4 text-[#E66A48]" />
-              <span>Catat Keputusan Baru</span>
-            </h3>
-
-            <div className="space-y-3">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
-                  Judul Keputusan *
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E] flex items-center gap-1.5">
+              <Plus className="w-3.5 h-3.5 text-[#E66A48]" />
+              <span>Catat Kesepakatan / Adendum Baru</span>
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                  Judul Kesepakatan *
                 </label>
                 <input
                   type="text"
                   name="title"
                   required
-                  placeholder="Contoh: Kesepakatan Warna & Dimensi Tas Koleksi"
-                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
+                  placeholder="Contoh: Penambahan 2 Look Foto Sutra"
+                  className="w-full px-3.5 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs text-[#1E1B2E] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
-                  Bunyi Keputusan *
-                </label>
-                <textarea
-                  name="decision"
-                  required
-                  rows={2}
-                  placeholder="Rincian hasil permufakatan bersama yang disetujui seluruh pihak..."
-                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white resize-none"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
-                  Dasar Pertimbangan / Alasan
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                  Dasar Pertimbangan (Opsional)
                 </label>
                 <input
                   type="text"
                   name="reason"
-                  placeholder="Mengapa keputusan ini diambil (opsional)"
-                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
+                  placeholder="Contoh: Kesepakatan bersama saat sesi fitting"
+                  className="w-full px-3.5 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs text-[#1E1B2E] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
             </div>
-
-            <button
-              type="submit"
-              disabled={isRecordingDecision}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white font-bold text-xs shadow-md shadow-[#E66A48]/20 transition-colors cursor-pointer disabled:opacity-50"
-            >
-              {isRecordingDecision ? "Menyimpan..." : "Catat ke Buku Log"}
-            </button>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                Isi Kesepakatan / Perubahan *
+              </label>
+              <textarea
+                name="decision"
+                required
+                rows={2}
+                placeholder="Rincian hasil mufakat yang disepakati seluruh pihak kolaborasi..."
+                className="w-full px-3.5 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs text-[#1E1B2E] focus:outline-none focus:border-[#E66A48] focus:bg-white resize-none"
+              />
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={isRecordingDecision}
+                className="px-5 py-2 rounded-xl bg-[#1E1B2E] hover:bg-stone-800 text-white font-bold text-xs shadow-sm transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isRecordingDecision ? "Menyimpan..." : "Simpan Catatan Kesepakatan"}
+              </button>
+            </div>
           </form>
+        </section>
+      </div>
+      )}
+
+
+
+
+
+
+      {/* TAB: CREDITS & SOCIAL TAGS */}
+      {activeTab === "credits" && (
+        <div className="space-y-8 animate-fade-in">
+          <SocialCreditGenerator
+            collaborationTitle={collaboration.title}
+            participants={participants}
+            plan={plan}
+          />
         </div>
       )}
 
@@ -1033,6 +1088,29 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
             )}
           </section>
 
+          {/* Social Media Publication Credit Banner */}
+          <div className="p-6 sm:p-8 rounded-[32px] bg-gradient-to-r from-[#1E1B2E] via-[#2A243D] to-[#1E1B2E] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl shadow-[#1E1B2E]/5">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <h4 className="text-base font-bold text-white tracking-tight">
+                  Publikasikan Karya Kolaborasi ke Media Sosial?
+                </h4>
+              </div>
+              <p className="text-xs text-stone-300 font-light max-w-xl leading-relaxed">
+                Gunakan format kredit satu-klik untuk memastikan seluruh tim kreatif (Wardrobe & Busana, Fotografer, Stylist, MUA, Model) ter-tag dan diapresiasi secara profesional di Instagram, TikTok, dan Press Release.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab("credits")}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white text-xs font-bold transition-all shrink-0 cursor-pointer shadow-md"
+            >
+              <span>Buka Generator Kredit</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
           <form
             onSubmit={handleRecordOutcome}
             className="p-6 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-5"
@@ -1068,7 +1146,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   type="text"
                   name="title"
                   required
-                  placeholder="Contoh: Batch Perdana 50 Tas Heritage Batik-Kulit Terjual Habis"
+                  placeholder="Contoh: Rilis Lookbook 12 Look Selesai & Terdistribusi ke Media"
                   className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
@@ -1085,7 +1163,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   <option value="PRODUCT">Produk Fisik / Digital</option>
                   <option value="CAMPAIGN">Kampanye / Pameran Bersama</option>
                   <option value="SERVICE">Layanan Kolaboratif</option>
-                  <option value="MARKET_ACCESS">Akses Pasar / Toko Baru</option>
+                  <option value="MARKET_ACCESS">Akses Pasar / Ritel</option>
                   <option value="REVENUE">Realisasi Omzet / Penjualan</option>
                   <option value="AUDIENCE_GROWTH">Pertumbuhan Pengikut / Audiens</option>
                   <option value="CREATIVE_ASSET">Aset Desain / HKI Bersama</option>

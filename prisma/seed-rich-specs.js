@@ -87,7 +87,7 @@ async function main() {
       await prisma.asset.create({
         data: {
           actorId: modelActor.id,
-          category: AssetCategory.CAPABILITY,
+          category: AssetCategory.SKILL_TALENT,
           subtype: "Model Lookbook & Commercial",
           name: "Kapabilitas Modeling Editorial & Pose Katalog Fashion",
           description: "Pengalaman modeling busana siap pakai, wastra tradisional, dan high-fashion lookbook",
@@ -111,7 +111,7 @@ async function main() {
     const studioAsset = await prisma.asset.findFirst({
       where: {
         actorId: studioActor.id,
-        OR: [{ category: "RESOURCE" }, { subtype: { contains: "Studio" } }, { name: { contains: "Studio" } }],
+        OR: [{ category: "EQUIPMENT" }, { subtype: { contains: "Studio" } }, { name: { contains: "Studio" } }],
       },
     });
 
@@ -173,7 +173,7 @@ async function main() {
       await prisma.asset.create({
         data: {
           actorId: studioActor.id,
-          category: AssetCategory.RESOURCE,
+          category: AssetCategory.EQUIPMENT,
           subtype: "Studio Foto Cyclorama",
           name: "Studio Foto Indoor Lengkap dengan Cyclorama 120m²",
           description: "Studio 120m² dengan cyclorama putih, lighting profesional, makeup station, dan set area",
@@ -213,7 +213,7 @@ async function main() {
         {
           title: "Detail Canting Tulis Motif Kawung Halus",
           url: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1000&q=80",
-          caption: "Pengerjaan presisi handmade oleh pengrajin berpengalaman 15+ tahun.",
+          caption: "Pengerjaan presisi handmade oleh artisan atelier berpengalaman 15+ tahun.",
         },
         {
           title: "Kimono Outerwear Etnik Urban",
@@ -341,11 +341,11 @@ async function main() {
           caption: "Desain identitas visual menyeluruh termasuk label botol kaca, kardus kemasan, dan panduan palet merek.",
         },
         {
-          title: "Key Visual Festival Kriya Nusantara",
+          title: "Key Visual Jakarta Fashion Week Editorial",
           url: "https://images.unsplash.com/photo-1628102491629-77858ab5721d?auto=format&fit=crop&w=1000&q=80",
           role: "Graphic Designer",
-          client: "Yayasan Kriya Budaya",
-          caption: "Desain poster, tiket, dan identitas digital untuk acara festival kerajinan tangan nasional.",
+          client: "Maison Creative Network",
+          caption: "Desain poster, lookbook digital, dan identitas visual untuk peragaan busana kontemporer.",
         },
       ],
     };

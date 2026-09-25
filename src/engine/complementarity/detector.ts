@@ -40,7 +40,7 @@ function checkDirectNeedMatch(
 
       if (
         (needText.includes('foto') || needText.includes('fotografi') || needText.includes('visual') || needText.includes('katalog') || needText.includes('lookbook')) &&
-        (assetText.includes('foto') || assetText.includes('fotografi') || assetText.includes('kamera') || assetText.includes('lensa') || assetText.includes('studi') || asset.category === 'CAPABILITY')
+        (assetText.includes('foto') || assetText.includes('fotografi') || assetText.includes('kamera') || assetText.includes('lensa') || assetText.includes('studi') || asset.category === 'SKILL_TALENT')
       ) {
         isMatch = true;
         reason = `${provider.name} memiliki kapabilitas visual (${asset.name}) yang memenuhi kebutuhan langsung ${receiver.name} (${need.title}).`;
@@ -61,12 +61,12 @@ function checkDirectNeedMatch(
       }
       else if (
         (needText.includes('busana') || needText.includes('pakaian') || needText.includes('koleksi') || needText.includes('fashion') || needText.includes('bahan')) &&
-        (assetText.includes('busana') || assetText.includes('pakaian') || assetText.includes('koleksi') || asset.category === 'MATERIAL' || asset.category === 'PRODUCT' || asset.roles.includes('INPUT'))
+        (assetText.includes('busana') || assetText.includes('pakaian') || assetText.includes('koleksi') || asset.category === 'WARDROBE_PROP' || asset.category === 'PORTFOLIO_WORK' || asset.roles.includes('INPUT'))
       ) {
         isMatch = true;
         reason = `${provider.name} dapat menyuplai kebutuhan koleksi busana/wardrobe (${asset.name}) untuk ${receiver.name}.`;
       }
-      else if (need.category === 'CAPABILITY_NEED' && asset.category === 'CAPABILITY') {
+      else if (need.category === 'TALENT_NEED' && asset.category === 'SKILL_TALENT') {
         isMatch = true;
         reason = `${provider.name} memiliki keahlian khusus (${asset.name}) yang menjawab kebutuhan kapabilitas ${receiver.name}.`;
       }
@@ -91,25 +91,27 @@ function checkProductCombination(
   actorB: EngineActor,
   results: PairwiseComplementarity[]
 ) {
-  const materialsA = actorA.assets.filter((a) => a.category === 'MATERIAL' || a.category === 'PRODUCT');
-  const materialsB = actorB.assets.filter((a) => a.category === 'MATERIAL' || a.category === 'PRODUCT' || a.category === 'CREATIVE_ASSET');
+  const materialsA = actorA.assets.filter((a) => a.category === 'WARDROBE_PROP' || a.category === 'PORTFOLIO_WORK');
+  const materialsB = actorB.assets.filter((a) => a.category === 'WARDROBE_PROP' || a.category === 'PORTFOLIO_WORK' || a.category === 'PORTFOLIO_WORK');
 
   for (const a of materialsA) {
     for (const b of materialsB) {
       const textA = `${a.name} ${a.subtype || ''}`.toLowerCase();
       const textB = `${b.name} ${b.subtype || ''}`.toLowerCase();
 
-      // Batik + Leather
-      const isBatikAndLeather =
-        (textA.includes('batik') && textB.includes('kulit')) ||
-        (textA.includes('kulit') && textB.includes('batik'));
+      // Fashion Apparel + Accessories / Leather / Shoes
+      const isApparelAndAccessory =
+        ((textA.includes('busana') || textA.includes('pakaian') || textA.includes('koleksi') || textA.includes('dress') || textA.includes('batik') || textA.includes('kain')) &&
+         (textB.includes('aksesori') || textB.includes('perhiasan') || textB.includes('tas') || textB.includes('sepatu') || textB.includes('kulit') || textB.includes('perak'))) ||
+        ((textB.includes('busana') || textB.includes('pakaian') || textB.includes('koleksi') || textB.includes('dress') || textB.includes('batik') || textB.includes('kain')) &&
+         (textA.includes('aksesori') || textA.includes('perhiasan') || textA.includes('tas') || textA.includes('sepatu') || textA.includes('kulit') || textA.includes('perak')));
 
-      // Batik/Leather + Silver/Jewelry
-      const isCraftAndSilver =
-        ((textA.includes('batik') || textA.includes('kulit')) && (textB.includes('perak') || textB.includes('perhiasan'))) ||
-        ((textA.includes('perak') || textA.includes('perhiasan')) && (textB.includes('batik') || textB.includes('kulit')));
+      // Wardrobe + Jewelry Accent
+      const isWardrobeAndJewelry =
+        ((textA.includes('busana') || textA.includes('wardrobe')) && (textB.includes('perak') || textB.includes('perhiasan') || textB.includes('jewelry'))) ||
+        ((textA.includes('perak') || textA.includes('perhiasan') || textA.includes('jewelry')) && (textB.includes('busana') || textB.includes('wardrobe')));
 
-      if (isBatikAndLeather) {
+      if (isApparelAndAccessory) {
         results.push({
           sourceActorId: actorA.id,
           targetActorId: actorB.id,
@@ -119,10 +121,10 @@ function checkProductCombination(
           strength: 'STRONG',
           numericStrength: 3.8,
           reasons: [
-            `Material ${a.name} (${actorA.name}) dan ${b.name} (${actorB.name}) dapat dikombinasikan menjadi produk kriya bernilai tinggi (wastra-kulit).`,
+            `${a.name} (${actorA.name}) dan ${b.name} (${actorB.name}) dapat dipadukan menjadi lookbook koleksi busana & aksesori terpadu.`,
           ],
         });
-      } else if (isCraftAndSilver) {
+      } else if (isWardrobeAndJewelry) {
         results.push({
           sourceActorId: actorA.id,
           targetActorId: actorB.id,
@@ -132,7 +134,7 @@ function checkProductCombination(
           strength: 'STRONG',
           numericStrength: 3.6,
           reasons: [
-            `${b.name} (${actorB.name}) dapat menjadi aksen/ornamen logam mulia eksklusif bagi produk ${a.name} (${actorA.name}).`,
+            `${b.name} (${actorB.name}) dapat menjadi aksen perhiasan eksklusif bagi koleksi busana ${a.name} (${actorA.name}).`,
           ],
         });
       }
@@ -145,10 +147,10 @@ function checkCreativeCombination(
   actorB: EngineActor,
   results: PairwiseComplementarity[]
 ) {
-  const isACraft = actorA.assets.some((a) => a.category === 'PRODUCT' || a.category === 'MATERIAL');
-  const visualB = actorB.assets.find((a) => a.category === 'CAPABILITY' && a.roles.includes('CAPABILITY'));
+  const isAFashion = actorA.assets.some((a) => a.category === 'PORTFOLIO_WORK' || a.category === 'WARDROBE_PROP');
+  const visualB = actorB.assets.find((a) => a.category === 'SKILL_TALENT' && a.roles.includes('SKILL_TALENT'));
 
-  if (isACraft && visualB) {
+  if (isAFashion && visualB) {
     results.push({
       sourceActorId: actorB.id,
       targetActorId: actorA.id,
@@ -162,10 +164,10 @@ function checkCreativeCombination(
     });
   }
 
-  const isBCraft = actorB.assets.some((a) => a.category === 'PRODUCT' || a.category === 'MATERIAL');
-  const visualA = actorA.assets.find((a) => a.category === 'CAPABILITY' && a.roles.includes('CAPABILITY'));
+  const isBFashion = actorB.assets.some((a) => a.category === 'PORTFOLIO_WORK' || a.category === 'WARDROBE_PROP');
+  const visualA = actorA.assets.find((a) => a.category === 'SKILL_TALENT' && a.roles.includes('SKILL_TALENT'));
 
-  if (isBCraft && visualA) {
+  if (isBFashion && visualA) {
     results.push({
       sourceActorId: actorA.id,
       targetActorId: actorB.id,
@@ -185,8 +187,8 @@ function checkProductionChain(
   actorB: EngineActor,
   results: PairwiseComplementarity[]
 ) {
-  const hasInputA = actorA.assets.some((a) => a.category === 'MATERIAL' || a.roles.includes('INPUT'));
-  const hasWorkshopB = actorB.assets.some((a) => a.category === 'PRODUCTION' || a.category === 'CAPABILITY');
+  const hasInputA = actorA.assets.some((a) => a.category === 'WARDROBE_PROP' || a.roles.includes('INPUT'));
+  const hasWorkshopB = actorB.assets.some((a) => a.category === 'STUDIO_SPACE' || a.category === 'SKILL_TALENT');
 
   if (hasInputA && hasWorkshopB) {
     results.push({
@@ -210,7 +212,7 @@ function checkGeneralSynergy(
   results.push({
     sourceActorId: actorA.id,
     targetActorId: actorB.id,
-    relationshipType: 'MARKET_ACCESS',
+    relationshipType: 'EDITORIAL_PUBLICATION',
     strength: 'WEAK',
     numericStrength: 2.0,
     reasons: [

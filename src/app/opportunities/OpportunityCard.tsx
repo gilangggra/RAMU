@@ -93,8 +93,8 @@ export function OpportunityCard({
     },
     PROMISING: {
       label: "Menjanjikan",
-      color: "bg-[#FFF7ED] text-[#E66A48] border-[#F9D8C4]",
-      dot: "bg-[#E66A48]",
+      color: "bg-amber-50 text-amber-800 border-amber-200",
+      dot: "bg-amber-500",
     },
     PARTIAL: {
       label: "Perlu Pelengkap",
@@ -131,11 +131,11 @@ export function OpportunityCard({
   }
 
   return (
-    <div className="p-6 sm:p-7 rounded-[28px] bg-white/95 border border-stone-200/80 hover:border-[#E66A48]/50 shadow-xs hover:shadow-md transition-all duration-300 space-y-6 group flex flex-col justify-between">
+    <div className="p-6 sm:p-7 rounded-[28px] bg-white/95 border border-stone-200/80 hover:border-amber-400/60 shadow-xs hover:shadow-md transition-all duration-300 space-y-6 group flex flex-col justify-between">
       <div className="space-y-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4]">
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-stone-100 text-[#1E1B2E] border border-stone-200">
               {patternName || patternCode}
             </span>
             <span
@@ -145,29 +145,29 @@ export function OpportunityCard({
               {feasibilityBadge.label}
             </span>
             {isCurrentUserParticipant && (
-              <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#EDE8FF] text-[#7C3AED] border border-[#DDD6FE]">
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200">
                 Melibatkan Aset Anda
               </span>
             )}
           </div>
 
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-stone-50 border border-stone-200 shadow-2xs">
-            <div className="text-[10px] uppercase tracking-wider text-[#9E98A8] font-bold">Skor Keselarasan</div>
-            <div className="text-base font-black text-[#E66A48]">
+            <div className="text-[10px] uppercase tracking-wider text-stone-500 font-bold">Skor Keselarasan</div>
+            <div className="text-base font-black text-amber-700">
               {displayScore}%
             </div>
           </div>
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-lg sm:text-xl font-bold text-[#27213D] tracking-tight group-hover:text-[#E66A48] transition-colors">
+          <h3 className="text-lg sm:text-xl font-bold text-[#1E1B2E] tracking-tight group-hover:text-amber-700 transition-colors">
             {title}
           </h3>
-          <p className="text-xs sm:text-sm text-[#716B7E] leading-relaxed">{description}</p>
+          <p className="text-xs sm:text-sm text-stone-500 leading-relaxed">{description}</p>
         </div>
 
         <div className="space-y-2.5 pt-2 border-t border-stone-100">
-          <div className="text-xs font-bold uppercase tracking-wider text-[#9E98A8]">
+          <div className="text-xs font-bold uppercase tracking-wider text-stone-400">
             Partisipan Kolaborasi ({participants.length})
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -176,16 +176,16 @@ export function OpportunityCard({
                 key={idx}
                 className="p-3 rounded-2xl bg-stone-50/80 border border-stone-200/80 flex items-start gap-3"
               >
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] flex items-center justify-center font-bold text-xs text-[#E66A48] shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center font-bold text-xs text-[#1E1B2E] shrink-0">
                   {p.actor.name.charAt(0)}
                 </div>
                 <div className="min-w-0 flex-1 space-y-0.5">
-                  <div className="text-xs font-bold text-[#27213D] truncate">{p.actor.name}</div>
-                  <div className="text-[11px] text-[#E66A48] font-bold">
+                  <div className="text-xs font-bold text-[#1E1B2E] truncate">{p.actor.name}</div>
+                  <div className="text-[11px] text-amber-700 font-bold">
                     {p.roleLabel || p.roleCode}
                   </div>
                   {p.contribution && (
-                    <div className="text-[11px] text-[#716B7E] line-clamp-1">{p.contribution}</div>
+                    <div className="text-[11px] text-stone-500 line-clamp-1">{p.contribution}</div>
                   )}
                 </div>
               </div>
@@ -273,18 +273,18 @@ export function OpportunityCard({
           disabled={isUpdating}
           className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
             currentStatus === OpportunityStatus.SAVED
-              ? "bg-[#FFF7ED] text-[#E66A48] border-[#F9D8C4] font-bold"
-              : "bg-white hover:bg-stone-50 text-[#716B7E] hover:text-[#27213D] border-stone-200"
+              ? "bg-amber-50 text-amber-800 border-amber-200 font-bold"
+              : "bg-white hover:bg-stone-50 text-stone-500 hover:text-stone-900 border-stone-200"
           }`}
         >
           {currentStatus === OpportunityStatus.SAVED ? (
             <span className="inline-flex items-center gap-1.5">
-              <BookmarkCheck className="w-3.5 h-3.5 text-[#E66A48]" />
+              <BookmarkCheck className="w-3.5 h-3.5 text-amber-600" />
               <span>Tersimpan</span>
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5">
-              <Bookmark className="w-3.5 h-3.5 text-[#716B7E]" />
+              <Bookmark className="w-3.5 h-3.5 text-stone-400" />
               <span>Simpan Peluang</span>
             </span>
           )}
@@ -292,10 +292,10 @@ export function OpportunityCard({
 
         <Link
           href={`/opportunities/${id}`}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#E66A48] hover:bg-[#D45938] text-white font-bold text-xs shadow-xs hover:shadow-md transition-all cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1E1B2E] hover:bg-stone-800 text-white font-bold text-xs shadow-xs hover:shadow-md transition-all cursor-pointer"
         >
           <span>Rincian & Rencana Kolaborasi</span>
-          <ArrowRight className="w-3.5 h-3.5" />
+          <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
         </Link>
       </div>
     </div>
@@ -316,17 +316,17 @@ function ScoreBar({
   const percentage = Math.min(100, Math.round((score / max) * 100));
   return (
     <div className="p-2.5 rounded-xl bg-stone-50 border border-stone-200 space-y-1">
-      <div className="flex items-center justify-between text-[10px] text-[#716B7E]">
+      <div className="flex items-center justify-between text-[10px] text-stone-600">
         <span className="truncate">{label}</span>
-        <span className="text-[#E66A48] font-bold">{percentage}%</span>
+        <span className="text-amber-700 font-bold">{percentage}%</span>
       </div>
       <div className="w-full h-1.5 rounded-full bg-stone-200 overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-[#FFB800] to-[#E66A48] rounded-full transition-all duration-500"
+          className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-500"
           style={{ width: `${percentage}%` }}
         />
       </div>
-      <div className="text-[9px] text-[#9E98A8] text-right">Bobot: {weight}</div>
+      <div className="text-[9px] text-stone-400 text-right">Bobot: {weight}</div>
     </div>
   );
 }

@@ -33,6 +33,9 @@ model Actor {
   contactPhone String?     @map("contact_phone")
   websiteUrl   String?     @map("website_url")
   status       ActorStatus @default(DRAFT)
+  aestheticStyles    String[]    @default([]) @map("aesthetic_styles")
+  experienceLevel    String?     @map("experience_level")
+  compensationModels String[]    @default([]) @map("compensation_models")
   createdAt    DateTime    @default(now()) @map("created_at")
   updatedAt    DateTime    @updatedAt @map("updated_at")
   archivedAt   DateTime?   @map("archived_at")
@@ -56,6 +59,9 @@ model Actor {
 
   createdProjectBriefs         ProjectBrief[]                @relation("CreatedProjectBriefs")
   collaborationInterests       CollaborationInterest[]
+
+  bookingRequestsSent          BookingRequest[]              @relation("BookingRequester")
+  bookingRequestsReceived      BookingRequest[]              @relation("BookingTarget")
 
   @@index([ownerUserId])
   @@index([status])
@@ -175,14 +181,12 @@ enum ActorType {
 }
 
 enum AssetCategory {
-  PRODUCT
-  MATERIAL
-  CAPABILITY
-  RESOURCE
-  PRODUCTION
-  MARKET
-  AUDIENCE
-  CREATIVE_ASSET
+  PORTFOLIO_WORK
+  EQUIPMENT
+  STUDIO_SPACE
+  SKILL_TALENT
+  WARDROBE_PROP
+  AUDIENCE_REACH
 }
 
 enum AssetRole {
@@ -204,16 +208,12 @@ enum AssetStatus {
 }
 
 enum GoalCategory {
-  MARKET_EXPANSION
-  PRODUCT_DEVELOPMENT
-  BRAND_GROWTH
-  REVENUE_GROWTH
-  CAPABILITY_EXPANSION
-  NETWORK_EXPANSION
-  MARKET_ACCESS
-  CREATIVE_EXPERIMENTATION
-  CULTURAL_PRESERVATION
-  OPERATIONAL_IMPROVEMENT
+  EDITORIAL_PUBLICATION
+  COMMERCIAL_CAMPAIGN
+  PORTFOLIO_BUILDING
+  BRAND_AWARENESS
+  REVENUE_GENERATION
+  SKILL_DEVELOPMENT
 }
 
 enum GoalStatus {
@@ -224,16 +224,13 @@ enum GoalStatus {
 }
 
 enum NeedCategory {
-  CAPABILITY_NEED
-  RESOURCE_NEED
-  MATERIAL_NEED
-  PRODUCTION_NEED
-  MARKET_NEED
-  DISTRIBUTION_NEED
-  CREATIVE_NEED
-  TECHNOLOGY_NEED
+  TALENT_NEED
+  CREW_NEED
+  LOCATION_NEED
+  EQUIPMENT_NEED
+  WARDROBE_NEED
   FUNDING_NEED
-  SPACE_NEED
+  PUBLICATION_NEED
 }
 
 enum NeedStatus {
@@ -777,6 +774,8 @@ model ProjectBrief {
   location         String?
   timeline         Json?              @default("{}")
   budget           Json?              @default("{}")
+  aestheticStyle   String?            @map("aesthetic_style")
+  compensationModel String?           @map("compensation_model")
   status           ProjectBriefStatus @default(OPEN)
   collaborationId  String?            @map("collaboration_id") @db.Uuid
   createdAt        DateTime           @default(now()) @map("created_at")
@@ -844,4 +843,29 @@ enum InterestStatus {
   ACCEPTED
   DECLINED
   WITHDRAWN
+}
+
+model BookingRequest {
+  id          String   @id @default(uuid()) @db.Uuid
+  requesterId String   @map("requester_id") @db.Uuid
+  targetId    String   @map("target_id") @db.Uuid
+  
+  status      String   @default("PENDING") // PENDING, ACCEPTED, DECLINED, NEGOTIATING
+  
+  startDate   DateTime @map("start_date")
+  endDate     DateTime? @map("end_date")
+  budget      String?
+  
+  details     Json     
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  requester   Actor    @relation("BookingRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  target      Actor    @relation("BookingTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@index([requesterId])
+  @@index([targetId])
+  @@index([status])
+  @@map("booking_requests")
 }

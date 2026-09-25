@@ -27,7 +27,7 @@ async function main() {
         data: {
           actorId: photographer.id,
           name: "Produksi Video Sinematik & Color Grading 4K",
-          category: AssetCategory.CAPABILITY,
+          category: AssetCategory.SKILL_TALENT,
           subtype: "Videografi Sinematik",
           roles: [AssetRole.CAPABILITY],
           status: AssetStatus.ACTIVE,
@@ -66,19 +66,19 @@ async function main() {
           create: [
             {
               roleLabel: "Fotografer Editorial & Lighting Specialist",
-              assetCategory: AssetCategory.CAPABILITY,
+              assetCategory: AssetCategory.SKILL_TALENT,
               description: "Sesi pemotretan lookbook on-model menggunakan teknik pencahayaan daylight dan strobe studio.",
               maxCollaborators: 1,
             },
             {
               roleLabel: "Fashion Stylist & Wardrobe Curator",
-              assetCategory: AssetCategory.CAPABILITY,
+              assetCategory: AssetCategory.SKILL_TALENT,
               description: "Kurasi padu padan aksesori, styling busana di set, dan arahan visual tema kampanye.",
               maxCollaborators: 1,
             },
             {
               roleLabel: "Talenta Model On-Camera & Catwalk",
-              assetCategory: AssetCategory.CAPABILITY,
+              assetCategory: AssetCategory.SKILL_TALENT,
               description: "Model profesional dengan karakter visual editorial untuk katalog busana dan fashion film.",
               maxCollaborators: 2,
             },
@@ -95,7 +95,7 @@ async function main() {
     if (photographer) {
       const photoRole = brief.neededRoles.find((r) => r.roleLabel.includes("Fotografer"));
       const photoAsset = await prisma.asset.findFirst({
-        where: { actorId: photographer.id, category: AssetCategory.CAPABILITY },
+        where: { actorId: photographer.id, category: AssetCategory.SKILL_TALENT },
       });
 
       if (photoRole && photoAsset) {

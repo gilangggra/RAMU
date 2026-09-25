@@ -8,7 +8,7 @@ import { prisma } from "@/infrastructure/database/prisma";
 import { syncUserProfile } from "@/lib/profileSync";
 
 export async function login(formData: FormData) {
-  const email = formData.get("email") as string;
+  const email = (formData.get("email") as string)?.trim();
   const password = formData.get("password") as string;
   const redirectTo = (formData.get("redirectTo") as string) || "/dashboard";
 
@@ -23,25 +23,38 @@ export async function login(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
+    let errorMsg = error.message;
+    if (error.message.includes("Invalid login credentials")) {
+      errorMsg = "Email atau kata sandi tidak cocok. Silakan periksa kembali.";
+    } else if (error.message.includes("Email not confirmed")) {
+      errorMsg = "Email belum dikonfirmasi. Silakan cek kotak masuk email Anda.";
+    }
+    redirect(`/login?error=${encodeURIComponent(errorMsg)}`);
   }
 
   if (data.user) {
-    // Pastikan profile sinkron di database Prisma (migrasikan kepemilikan aktor jika dari seeding)
-    await syncUserProfile(
-      data.user.id,
-      data.user.email ?? email,
-      data.user.user_metadata?.display_name
-    );
+    try {
+      // Pastikan profile sinkron di database Prisma (migrasikan kepemilikan aktor jika dari seeding)
+      await syncUserProfile(
+        data.user.id,
+        data.user.email ?? email,
+        data.user.user_metadata?.display_name
+      );
 
-    // Cek apakah user sudah memiliki Actor profile
-    const existingActor = await prisma.actor.findFirst({
-      where: { ownerUserId: data.user.id },
-    });
+      // Cek apakah user sudah memiliki Actor profile
+      const existingActor = await prisma.actor.findFirst({
+        where: { ownerUserId: data.user.id },
+      });
 
-    if (!existingActor) {
-      revalidatePath("/", "layout");
-      redirect("/onboarding");
+      if (!existingActor) {
+        revalidatePath("/", "layout");
+        redirect("/onboarding");
+      }
+    } catch (e: any) {
+      if (e?.message?.includes("NEXT_REDIRECT")) {
+        throw e;
+      }
+      console.error("Gagal sinkronisasi profil saat login:", e);
     }
   }
 
@@ -55,6 +68,7 @@ export async function signup(formData: FormData) {
   const displayName = (formData.get("displayName") as string)?.trim();
   const role = ((formData.get("role") as string) || (formData.get("sector") as string))?.trim();
   const location = (formData.get("location") as string)?.trim();
+  const actorType = (formData.get("actorType") as string)?.trim() || "STUDIO";
 
   // Extended onboarding inputs
   const bio = (formData.get("bio") as string)?.trim();
@@ -71,6 +85,11 @@ export async function signup(formData: FormData) {
     }
   } catch {
     parsedSkills = skillsRaw ? skillsRaw.split(",").map((s) => s.trim()).filter(Boolean) : [];
+  }
+
+  const specialization = (formData.get("specialization") as string)?.trim();
+  if (specialization && !parsedSkills.includes(specialization)) {
+    parsedSkills.unshift(specialization); // Add specialization as the first skill
   }
 
   if (!email || !password || !displayName) {
@@ -122,12 +141,14 @@ export async function signup(formData: FormData) {
 
       let actorId = existingActor?.id;
 
+      const validActorType = (["INDIVIDUAL", "STUDIO", "MSME", "COLLECTIVE"].includes(actorType) ? actorType : "STUDIO") as any;
+
       if (!existingActor) {
         const newActor = await prisma.actor.create({
           data: {
             ownerUserId: data.user.id,
             name: displayName,
-            actorType: "STUDIO",
+            actorType: validActorType,
             sector: role || "Fashion & Visual Production",
             location: fullLocation || "Indonesia",
             description: bio || null,
@@ -142,6 +163,7 @@ export async function signup(formData: FormData) {
         await prisma.actor.update({
           where: { id: existingActor.id },
           data: {
+            actorType: validActorType,
             sector: role || existingActor.sector,
             location: fullLocation || existingActor.location,
             description: bio || existingActor.description,
@@ -164,7 +186,7 @@ export async function signup(formData: FormData) {
             await prisma.asset.create({
               data: {
                 actorId: actorId,
-                category: "CAPABILITY",
+                category: "SKILL_TALENT",
                 subtype: "Keahlian Spesifik",
                 name: skill,
                 roles: ["CAPABILITY"],

@@ -11,37 +11,33 @@ interface AssetsPageProps {
 }
 
 const CATEGORY_LABELS: Record<AssetCategory, string> = {
-  PRODUCT: "Produk",
-  MATERIAL: "Material / Bahan Baku",
-  CAPABILITY: "Kapabilitas / Keahlian",
-  RESOURCE: "Sumber Daya",
-  PRODUCTION: "Fasilitas Produksi",
-  MARKET: "Akses Pasar",
-  AUDIENCE: "Basis Audiens",
-  CREATIVE_ASSET: "Aset Kreatif / IP",
+  PORTFOLIO_WORK: "Karya / Portofolio",
+  EQUIPMENT: "Peralatan (Kamera/Lighting)",
+  STUDIO_SPACE: "Ruang Studio / Lokasi",
+  SKILL_TALENT: "Keahlian / Modeling",
+  WARDROBE_PROP: "Wardrobe / Properti",
+  AUDIENCE_REACH: "Jangkauan Audiens",
 };
 
 const ROLE_LABELS: Record<AssetRole, string> = {
-  INPUT: "Input / Bahan",
-  CAPABILITY: "Kapabilitas",
-  COMPONENT: "Komponen",
-  ENABLER: "Enabler / Pendukung",
-  CHANNEL: "Kanal Distribusi",
+  INPUT: "Input Produksi",
+  CAPABILITY: "Keahlian Eksekusi",
+  COMPONENT: "Komponen Pendukung",
+  ENABLER: "Enabler",
+  CHANNEL: "Distribusi",
   MARKET_ACCESS: "Akses Pasar",
-  CREATIVE_ELEMENT: "Elemen Kreatif",
-  RESOURCE: "Sumber Daya",
-  OUTPUT: "Output / Produk Jadi",
+  CREATIVE_ELEMENT: "Elemen Kreatif Visual",
+  RESOURCE: "Sumber Daya Fisik",
+  OUTPUT: "Produk Akhir",
 };
 
 const CATEGORY_BADGE_COLORS: Record<AssetCategory, string> = {
-  PRODUCT: "bg-blue-50 text-blue-700 border-blue-200",
-  MATERIAL: "bg-orange-50 text-orange-700 border-orange-200",
-  CAPABILITY: "bg-purple-50 text-purple-700 border-purple-200",
-  RESOURCE: "bg-teal-50 text-teal-700 border-teal-200",
-  PRODUCTION: "bg-cyan-50 text-cyan-700 border-cyan-200",
-  MARKET: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  AUDIENCE: "bg-pink-50 text-pink-700 border-pink-200",
-  CREATIVE_ASSET: "bg-amber-50 text-amber-700 border-amber-200",
+  PORTFOLIO_WORK: "text-[#1E1B2E] border-[#1E1B2E]",
+  EQUIPMENT: "text-stone-600 border-stone-300",
+  STUDIO_SPACE: "text-[#1E1B2E] border-[#1E1B2E]",
+  SKILL_TALENT: "text-stone-600 border-stone-300",
+  WARDROBE_PROP: "text-[#1E1B2E] border-[#1E1B2E]",
+  AUDIENCE_REACH: "text-stone-600 border-stone-300",
 };
 
 export default async function AssetsPage({ searchParams }: AssetsPageProps) {
@@ -90,26 +86,26 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
 
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
           <div className="xl:col-span-2 space-y-4">
-            <h2 className="text-xs font-bold text-[#9E98A8] uppercase tracking-wider">+ Tambah Aset Baru</h2>
-            <div className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-xs space-y-5">
-              <form action={createAsset} className="space-y-4">
+            <h2 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-widest mb-6">+ Tambah Aset Baru</h2>
+            <div className="pt-2">
+              <form action={createAsset} className="space-y-6">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#9E98A8]">Nama Aset *</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Nama Aset *</label>
                   <input
                     name="name"
                     type="text"
                     required
-                    placeholder="misal: Kain Batik Tulis Motif Parang"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50/80 border border-stone-200 text-sm text-[#27213D] placeholder-stone-400 focus:outline-none focus:bg-white focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/15 transition-all"
+                    placeholder="misal: Studio Foto Indoor 50m2"
+                    className="w-full px-0 py-3 bg-transparent border-b border-stone-300 text-sm font-light text-[#1E1B2E] placeholder:text-stone-400 focus:outline-none focus:border-[#1E1B2E] transition-colors"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#9E98A8]">Kategori *</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Kategori *</label>
                   <select
                     name="category"
-                    defaultValue="PRODUCT"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50/80 border border-stone-200 text-sm text-[#27213D] focus:outline-none focus:bg-white focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/15 transition-all"
+                    defaultValue="PORTFOLIO_WORK"
+                    className="w-full px-0 py-3 bg-transparent border-b border-stone-300 text-sm font-light text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E] cursor-pointer appearance-none"
                   >
                     {Object.entries(CATEGORY_LABELS).map(([val, label]) => (
                       <option key={val} value={val}>{label}</option>
@@ -118,55 +114,58 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#9E98A8]">Subtipe / Spesifikasi *</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Subtipe / Spesifikasi *</label>
                   <input
                     name="subtype"
                     type="text"
                     required
-                    placeholder="misal: Batik Tulis, Logam Filigree, Fotografi Produk"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50/80 border border-stone-200 text-sm text-[#27213D] placeholder-stone-400 focus:outline-none focus:bg-white focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/15 transition-all"
+                    placeholder="misal: Lensa Prime, Fashion Stylist"
+                    className="w-full px-0 py-3 bg-transparent border-b border-stone-300 text-sm font-light text-[#1E1B2E] placeholder:text-stone-400 focus:outline-none focus:border-[#1E1B2E] transition-colors"
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#9E98A8]">Peran dalam Kolaborasi</label>
-                  <div className="grid grid-cols-2 gap-1.5">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Peran dalam Kolaborasi</label>
+                  <div className="grid grid-cols-2 gap-3">
                     {Object.entries(ROLE_LABELS).map(([val, label]) => (
-                      <label key={val} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-stone-50 border border-stone-200 cursor-pointer hover:border-[#E66A48]/50 transition-colors text-xs text-[#27213D]">
-                        <input type="checkbox" name="roles" value={val} className="accent-[#E66A48] w-3 h-3" />
-                        <span className="truncate">{label}</span>
+                      <label key={val} className="flex items-center gap-3 cursor-pointer group">
+                        <div className="relative flex items-center justify-center w-4 h-4 border border-stone-300 group-hover:border-[#1E1B2E] transition-colors">
+                          <input type="checkbox" name="roles" value={val} className="peer absolute opacity-0 w-full h-full cursor-pointer" />
+                          <div className="hidden peer-checked:block w-2 h-2 bg-[#1E1B2E]"></div>
+                        </div>
+                        <span className="text-xs font-light text-stone-600 group-hover:text-[#1E1B2E] transition-colors truncate">{label}</span>
                       </label>
                     ))}
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#9E98A8]">Deskripsi (Opsional)</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Deskripsi (Opsional)</label>
                   <textarea
                     name="description"
                     rows={2}
                     placeholder="Jelaskan spesifikasi, kualitas, atau keunikan aset ini..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50/80 border border-stone-200 text-sm text-[#27213D] placeholder-stone-400 focus:outline-none focus:bg-white focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/15 transition-all resize-none"
+                    className="w-full px-0 py-3 bg-transparent border-b border-stone-300 text-sm font-light text-[#1E1B2E] placeholder:text-stone-400 focus:outline-none focus:border-[#1E1B2E] transition-colors resize-none"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-6 pt-2">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-[#9E98A8]">Kapasitas</label>
-                    <input name="capacity" type="number" min="1" placeholder="300" className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50/80 border border-stone-200 text-sm text-[#27213D] placeholder-stone-400 focus:outline-none focus:bg-white focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/15 transition-all" />
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Kapasitas / Kuantitas</label>
+                    <input name="capacity" type="number" min="1" placeholder="misal: 1, 5, 100" className="w-full px-0 py-3 bg-transparent border-b border-stone-300 text-sm font-light text-[#1E1B2E] placeholder:text-stone-400 focus:outline-none focus:border-[#1E1B2E] transition-colors" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-[#9E98A8]">Satuan</label>
-                    <input name="unit" type="text" placeholder="pcs/bulan" className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50/80 border border-stone-200 text-sm text-[#27213D] placeholder-stone-400 focus:outline-none focus:bg-white focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/15 transition-all" />
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Satuan</label>
+                    <input name="unit" type="text" placeholder="misal: Jam, Baju, Orang" className="w-full px-0 py-3 bg-transparent border-b border-stone-300 text-sm font-light text-[#1E1B2E] placeholder:text-stone-400 focus:outline-none focus:border-[#1E1B2E] transition-colors" />
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xl bg-[#E66A48] hover:bg-[#D45938] text-white font-bold text-sm shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full mt-8 px-6 py-4 bg-[#1E1B2E] hover:bg-black text-white text-[11px] font-bold uppercase tracking-widest transition-colors flex justify-center items-center gap-2"
                 >
-                  <span>Simpan Aset</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <Package className="w-4 h-4" />
+                  <span>Simpan ke Inventori</span>
                 </button>
               </form>
             </div>

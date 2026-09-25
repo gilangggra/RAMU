@@ -39,8 +39,8 @@ const STATUS_CONFIG: Record<
   },
   IN_REVIEW: {
     label: "Tahap Review",
-    badge: "bg-amber-50 text-amber-800 border-amber-200",
-    dot: "bg-amber-500",
+    badge: "bg-stone-50 text-amber-800 border-stone-200",
+    dot: "bg-[#1E1B2E]",
   },
   FILLED: {
     label: "Peran Terisi",
@@ -99,32 +99,32 @@ export function ProjectBriefCard({
               {projectType}
             </span>
             {isOwnBrief && (
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4]">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-stone-50 text-[#1E1B2E] border border-stone-200">
                 Brief Anda
               </span>
             )}
           </div>
 
-          <h3 className="text-base font-bold text-[#27213D] tracking-tight group-hover:text-[#E66A48] transition-colors line-clamp-2">
+          <h3 className="text-base font-bold text-[#1E1B2E] tracking-tight group-hover:text-[#1E1B2E] transition-colors line-clamp-2">
             {title}
           </h3>
         </div>
       </div>
 
-      <p className="text-xs text-[#716B7E] leading-relaxed line-clamp-2">{description}</p>
+      <p className="text-xs text-stone-500 leading-relaxed line-clamp-2">{description}</p>
 
       <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-stone-50 border border-stone-200/70">
-        <Target className="w-4 h-4 text-[#E66A48] shrink-0 mt-0.5" />
+        <Target className="w-4 h-4 text-[#1E1B2E] shrink-0 mt-0.5" />
         <div className="min-w-0">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-[#716B7E] mb-0.5">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-0.5">
             Target Luaran Kolektif
           </div>
-          <p className="text-xs text-[#27213D] font-medium line-clamp-1">{targetOutput}</p>
+          <p className="text-xs text-[#1E1B2E] font-medium line-clamp-1">{targetOutput}</p>
         </div>
       </div>
 
       <div className="space-y-2">
-        <div className="text-[10px] font-bold uppercase tracking-wider text-[#716B7E]">
+        <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
           Peran Kolaborator ({neededRoles.length})
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -134,7 +134,7 @@ export function ProjectBriefCard({
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border ${
                 role.isFilled
                   ? "bg-emerald-50 text-emerald-800 border-emerald-200 line-through opacity-75"
-                  : "bg-white text-[#27213D] border-stone-200/80 shadow-2xs"
+                  : "bg-white text-[#1E1B2E] border-stone-200/80 shadow-2xs"
               }`}
             >
               {role.isFilled ? (
@@ -161,18 +161,18 @@ export function ProjectBriefCard({
 
       <div className="flex items-center justify-between pt-3 border-t border-stone-100">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-xs font-bold text-amber-800 shrink-0">
+          <div className="w-7 h-7 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-center text-xs font-bold text-amber-800 shrink-0">
             {creatorActor.name.charAt(0)}
           </div>
           <div className="min-w-0">
-            <div className="text-xs font-bold text-[#27213D] truncate">
+            <div className="text-xs font-bold text-[#1E1B2E] truncate">
               {creatorActor.name}
             </div>
-            <div className="text-[10px] text-[#716B7E] truncate">{creatorActor.sector}</div>
+            <div className="text-[10px] text-stone-500 truncate">{creatorActor.sector}</div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 text-[11px] text-[#716B7E] shrink-0">
+        <div className="flex items-center gap-3 text-[11px] text-stone-500 shrink-0">
           {location && (
             <span className="flex items-center gap-1">
               <MapPin className="w-3 h-3 text-stone-400" />
@@ -180,7 +180,7 @@ export function ProjectBriefCard({
             </span>
           )}
           {totalInterests > 0 && (
-            <span className="text-[#E66A48] font-bold">
+            <span className="text-[#1E1B2E] font-bold">
               {totalInterests} minat
             </span>
           )}

@@ -40,7 +40,7 @@ const CONSTRAINT_LABELS: Record<
   EQUIPMENT: { label: "Peralatan", desc: "Keterbatasan alat atau mesin", icon: Wrench, placeholder: "Mesin jahit industri" },
   CAPABILITY: { label: "Kapabilitas", desc: "Keahlian yang tidak dimiliki", icon: Brain, placeholder: "Desain 3D" },
   LEGAL: { label: "Hukum / Regulasi", desc: "Batasan peraturan atau izin", icon: Scale, placeholder: "Harus bersertifikat SNI" },
-  IP: { label: "Kekayaan Intelektual", desc: "Batasan hak cipta atau merk", icon: ShieldCheck, placeholder: "Motif batik terdaftar" },
+  IP: { label: "Kekayaan Intelektual", desc: "Batasan hak cipta atau merk", icon: ShieldCheck, placeholder: "Merek dagang / Desain terdaftar HKI" },
   MARKET: { label: "Pasar", desc: "Batasan segmen atau geografi pasar", icon: Globe, placeholder: "Pasar domestik saja" },
 };
 

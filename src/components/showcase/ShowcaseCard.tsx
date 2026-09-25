@@ -1,60 +1,126 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { ShowcaseItem } from "@/application/showcaseService";
+import { MapPin, Heart, ArrowUpRight, Sparkles } from "lucide-react";
 
 interface ShowcaseCardProps {
   item: ShowcaseItem;
 }
 
+const COMP_LABEL: Record<string, string> = {
+  PAID: "Paid",
+  TFP: "TFP",
+  REVENUE_SHARE: "Bagi Hasil",
+};
+
 export function ShowcaseCard({ item }: ShowcaseCardProps) {
-  // We extract the real actor ID (ignoring the -copy- suffix if it's a duplicate)
   const realActorId = item.actor.id.split("-copy-")[0];
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+
+  // Pick first compensation model label
+  const compLabel = item.actor.compensationModels?.[0]
+    ? COMP_LABEL[item.actor.compensationModels[0]] ?? item.actor.compensationModels[0]
+    : "Negosiasi";
+
+  const city = item.actor.location?.split(",")?.[0]?.trim() ?? "Indonesia";
 
   return (
-    <div className="group relative w-full mb-6 break-inside-avoid rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-2xl transition-all duration-500 bg-stone-100">
-      
-      {/* Image */}
+    <Link 
+      href={`/directory/${realActorId}`}
+      className="group break-inside-avoid mb-5 w-full relative block overflow-hidden bg-[#1a1721] shadow-sm hover:shadow-xl transition-all duration-500"
+    >
+      {/* ── IMAGE WITH NATURAL HEIGHT ── */}
+      {!imgLoaded && (
+        <div className="absolute inset-0 bg-[#27213D]/20 animate-pulse" />
+      )}
       <img
         src={item.imageUrl}
         alt={item.title}
-        className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105"
+        onLoad={() => setImgLoaded(true)}
+        className={`w-full h-auto min-h-[280px] object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05] ${
+          imgLoaded ? "opacity-100" : "opacity-0"
+        }`}
         loading="lazy"
       />
 
-      {/* Gradient Overlay (Visible on Hover) */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#27213D]/90 via-[#27213D]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none flex flex-col justify-end p-5">
+      {/* ── TOP FLOATING ELEMENTS ── */}
+      <div className="absolute top-4 inset-x-4 z-20 flex items-start justify-between">
         
-        {/* Content appearing from bottom */}
-        <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-75">
-          <span className="inline-block px-2 py-1 mb-2 rounded-md bg-white/20 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider">
-            {item.category}
+        {/* Creator Pill */}
+        <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md border border-white/10 p-1 pr-3.5 rounded-full text-white shadow-sm transition-transform group-hover:-translate-y-1">
+          <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${item.actor.avatarBg} flex items-center justify-center font-bold text-[10px] shrink-0`}>
+            {item.actor.initials}
+          </div>
+          <span className="text-xs font-bold tracking-tight truncate max-w-[120px]">
+            {item.actor.name}
           </span>
-          <h3 className="text-lg font-extrabold text-white leading-snug mb-3">
-            {item.title}
-          </h3>
-
-          <Link 
-            href={`/directory/${realActorId}`}
-            className="flex items-center gap-2.5 group/author pointer-events-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${item.actor.avatarBg} flex items-center justify-center font-bold text-xs text-white shadow-md border border-white/20`}>
-              {item.actor.initials}
-            </div>
-            <div>
-              <p className="text-sm font-bold text-white group-hover/author:text-amber-300 transition-colors">
-                {item.actor.name}
-              </p>
-              <p className="text-[10px] text-stone-300">
-                {item.actor.sector}
-              </p>
-            </div>
-          </Link>
         </div>
 
+        {/* Heart Button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            setIsLiked(!isLiked);
+          }}
+          className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-all duration-300 ${
+            isLiked 
+              ? "bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.4)]" 
+              : "bg-black/40 backdrop-blur-md border border-white/10 text-white/90 hover:bg-black/60"
+          }`}
+        >
+          <Heart className={`w-4 h-4 ${isLiked ? "fill-white" : ""}`} />
+        </button>
       </div>
-    </div>
+
+      {/* ── GRADIENT OVERLAY ── */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#15111E]/95 via-[#15111E]/40 to-transparent pointer-events-none opacity-90 group-hover:opacity-100 transition-opacity duration-500" />
+
+      {/* ── BOTTOM INFO SECTION ── */}
+      <div className="absolute bottom-0 inset-x-0 p-5 z-10 flex flex-col justify-end">
+        
+        {/* Hover Reveal: Bio Description */}
+        <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-out">
+          <div className="overflow-hidden">
+            <p className="text-stone-300 text-[11px] leading-relaxed line-clamp-2 mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
+              {item.title || "Karya visual dari kreator RAMU."}
+            </p>
+          </div>
+        </div>
+
+        {/* Core Info */}
+        <div className="flex items-end justify-between gap-4">
+          
+          <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+            {/* Sector / Role */}
+            <h3 className="text-white font-extrabold text-[15px] leading-tight truncate">
+              {item.category}
+            </h3>
+            
+            {/* Meta Tags (Location & Comp) */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="flex items-center gap-1 text-[10px] text-stone-400">
+                <MapPin className="w-3 h-3 text-stone-500" />
+                {city}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-white/20" />
+              <span className="flex items-center gap-1 text-[10px] font-bold text-amber-400">
+                <Sparkles className="w-3 h-3" />
+                {compLabel}
+              </span>
+            </div>
+          </div>
+
+          {/* Action Circular Button */}
+          <div className="w-10 h-10 shrink-0 rounded-full bg-white text-[#15111E] flex items-center justify-center transform group-hover:bg-amber-400 group-hover:scale-110 transition-all duration-300 shadow-lg">
+            <ArrowUpRight className="w-5 h-5" />
+          </div>
+
+        </div>
+      </div>
+    </Link>
   );
 }

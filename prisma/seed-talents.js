@@ -33,7 +33,7 @@ async function main() {
     data: [
       {
         actorId: modelActor.id,
-        category: AssetCategory.CAPABILITY,
+        category: AssetCategory.SKILL_TALENT,
         subtype: 'Model Lookbook & Commercial',
         name: 'Kapabilitas Modeling Editorial & Pose Katalog Fashion',
         description: 'Pengalaman modeling busana siap pakai, wastra tradisional, dan high-fashion lookbook',
@@ -49,7 +49,7 @@ async function main() {
   await prisma.goal.create({
     data: {
       actorId: modelActor.id,
-      category: GoalCategory.BRAND_GROWTH,
+      category: GoalCategory.BRAND_AWARENESS,
       title: 'Menjadi muse & model utama untuk kampanye wastra kontemporer nasional',
       description: 'Menargetkan 10 kolaborasi lookbook wastra berkualitas tinggi per tahun',
       priority: 5,
@@ -60,7 +60,7 @@ async function main() {
   await prisma.need.create({
     data: {
       actorId: modelActor.id,
-      category: NeedCategory.CREATIVE_NEED,
+      category: NeedCategory.CREW_NEED,
       title: 'Kolaborasi dengan desainer busana & fotografer studio cyclorama',
       description: 'Sesi pemotretan lookbook tematik dengan arahan kreatif profesional',
       priority: 5,
@@ -90,7 +90,7 @@ async function main() {
     data: [
       {
         actorId: stylistActor.id,
-        category: AssetCategory.CAPABILITY,
+        category: AssetCategory.SKILL_TALENT,
         subtype: 'Fashion Styling & Wardrobe Direction',
         name: 'Layanan Wardrobe Styling & Moodboard Konsep Visual',
         description: 'Kurasi busana, pencocokan aksesoris, dan pengarahan gaya on-set selama pemotretan',
@@ -102,7 +102,7 @@ async function main() {
       },
       {
         actorId: stylistActor.id,
-        category: AssetCategory.RESOURCE,
+        category: AssetCategory.EQUIPMENT,
         subtype: 'Koleksi Wardrobe & Aksesoris',
         name: 'Koleksi Wardrobe & Aksesoris Vintage / Etnik Kontemporer',
         description: 'Inventori pakaian dan pelengkap styling siap pakai untuk sesi pemotretan lookbook',
@@ -118,7 +118,7 @@ async function main() {
   await prisma.goal.create({
     data: {
       actorId: stylistActor.id,
-      category: GoalCategory.NETWORK_EXPANSION,
+      category: GoalCategory.PORTFOLIO_BUILDING,
       title: 'Membangun jejaring dengan 20+ studio foto dan desainer wastra di Jawa & Bali',
       description: 'Menjadi partner styling terpercaya untuk produksi lookbook profesional',
       priority: 4,
@@ -129,7 +129,7 @@ async function main() {
   await prisma.need.create({
     data: {
       actorId: stylistActor.id,
-      category: NeedCategory.SPACE_NEED,
+      category: NeedCategory.LOCATION_NEED,
       title: 'Akses ke studio foto cyclorama indoor dengan tata cahaya profesional',
       description: 'Kebutuhan studio foto berukuran minimal 80m² untuk sesi styling lookbook',
       priority: 4,
@@ -159,7 +159,7 @@ async function main() {
     data: [
       {
         actorId: photogActor.id,
-        category: AssetCategory.CAPABILITY,
+        category: AssetCategory.SKILL_TALENT,
         subtype: 'Commercial Photography & Videography',
         name: 'Produksi Visual Resolusi Tinggi',
         description: 'Fotografi produk, lookbook fashion, dan produksi video iklan dengan standar industri',
@@ -175,7 +175,7 @@ async function main() {
   await prisma.goal.create({
     data: {
       actorId: photogActor.id,
-      category: GoalCategory.REVENUE_GROWTH,
+      category: GoalCategory.REVENUE_GENERATION,
       title: 'Mendapatkan 5 klien korporat / brand besar di Q4',
       description: 'Fokus pada proyek kampanye komersial dengan budget premium',
       priority: 4,
@@ -186,7 +186,7 @@ async function main() {
   await prisma.need.create({
     data: {
       actorId: photogActor.id,
-      category: NeedCategory.CREATIVE_NEED,
+      category: NeedCategory.CREW_NEED,
       title: 'Talenta Model & Fashion Stylist untuk portfolio in-house',
       description: 'Mencari model berkarakter dan stylist berpengalaman untuk pemotretan tes',
       priority: 3,
@@ -216,7 +216,7 @@ async function main() {
     data: [
       {
         actorId: designerActor.id,
-        category: AssetCategory.CAPABILITY,
+        category: AssetCategory.SKILL_TALENT,
         subtype: 'Brand Identity & Packaging Design',
         name: 'Layanan Desain Grafis & Identitas Merek',
         description: 'Pembuatan logo, buku panduan merek, dan desain kemasan produk',
@@ -232,9 +232,9 @@ async function main() {
   await prisma.goal.create({
     data: {
       actorId: designerActor.id,
-      category: GoalCategory.MARKET_EXPANSION,
-      title: 'Ekspansi layanan ke sektor F&B dan Kriya premium',
-      description: 'Menargetkan brand artisan yang membutuhkan penyegaran visual kemasan',
+      category: GoalCategory.BRAND_AWARENESS,
+      title: 'Ekspansi layanan ke sektor Fashion & Lifestyle premium',
+      description: 'Menargetkan brand fesyen independen yang membutuhkan penyegaran visual identitas',
       priority: 5,
       status: GoalStatus.ACTIVE
     }
@@ -243,15 +243,72 @@ async function main() {
   await prisma.need.create({
     data: {
       actorId: designerActor.id,
-      category: NeedCategory.MARKET_NEED,
-      title: 'Klien UMKM F&B / Kriya yang siap rebranding',
-      description: 'Membutuhkan akses langsung ke pemilik usaha untuk menawarkan jasa desain',
+      category: NeedCategory.PUBLICATION_NEED,
+      title: 'Klien Label Fashion & Studio yang siap rebranding',
+      description: 'Membutuhkan akses langsung ke desainer dan pemilik label untuk menawarkan jasa identitas visual',
       priority: 4,
       status: NeedStatus.ACTIVE
     }
   });
 
-  console.log('✓ Sukses menambahkan Talenta & Studio (Model, Stylist, Fotografer, Desainer)!');
+  // 5. Videographer & Fashion Film Director: Sinema Visual
+  const videographerActor = await prisma.actor.upsert({
+    where: { id: '00000000-0000-0000-0000-000000000009' },
+    update: {},
+    create: {
+      id: '00000000-0000-0000-0000-000000000009',
+      ownerUserId: demoProfile.id,
+      name: 'Sinema Visual',
+      actorType: ActorType.STUDIO,
+      sector: 'Videografi & Fashion Film',
+      location: 'Jakarta Selatan',
+      description: 'Production house butik spesialis fashion film, music video, dan kampanye digital sinematik untuk brand fashion dan kecantikan.',
+      contactEmail: 'contact@sinemavisual.id',
+      status: 'ACTIVE'
+    }
+  });
+
+  await prisma.asset.createMany({
+    skipDuplicates: true,
+    data: [
+      {
+        actorId: videographerActor.id,
+        category: AssetCategory.SKILL_TALENT,
+        subtype: 'Cinematography & Directing',
+        name: 'Produksi Fashion Film & Video Komersial',
+        description: 'Penyutradaraan, sinematografi dengan kamera RED/ARRI, dan post-production color grading',
+        roles: [AssetRole.CAPABILITY, AssetRole.ENABLER],
+        attributes: { team_size: 4 },
+        sourceType: SourceType.SELF_REPORTED,
+        confidenceLevel: ConfidenceLevel.HIGH,
+        status: AssetStatus.ACTIVE
+      }
+    ]
+  });
+
+  await prisma.goal.create({
+    data: {
+      actorId: videographerActor.id,
+      category: GoalCategory.BRAND_AWARENESS,
+      title: 'Berkolaborasi dengan brand streetwear dan high-fashion lokal untuk membuat fashion film',
+      description: 'Menciptakan karya portfolio fashion film yang bisa diikutsertakan ke festival film pendek/fashion internasional',
+      priority: 5,
+      status: GoalStatus.ACTIVE
+    }
+  });
+
+  await prisma.need.create({
+    data: {
+      actorId: videographerActor.id,
+      category: NeedCategory.CREW_NEED,
+      title: 'Fashion Brand & Creative Director untuk proyek kolaborasi',
+      description: 'Mencari brand yang bersedia menyediakan wardrobe penuh untuk fashion film eksklusif',
+      priority: 5,
+      status: NeedStatus.ACTIVE
+    }
+  });
+
+  console.log('✓ Sukses menambahkan Talenta & Studio (Model, Stylist, Fotografer, Desainer, Videografer)!');
 }
 
 main()

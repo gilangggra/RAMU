@@ -19,6 +19,8 @@ export interface CreateProjectBriefInput {
   location?: string;
   timeline?: { estimatedDuration?: string; targetLaunch?: string };
   budget?: { estimatedTotal?: string; notes?: string };
+  aestheticStyle?: string;
+  compensationModel?: string;
   neededRoles: {
     roleLabel: string;
     assetCategory: string;
@@ -41,6 +43,8 @@ export async function createProjectBrief(
       location: input.location || null,
       timeline: (input.timeline || {}) as unknown as Prisma.InputJsonValue,
       budget: (input.budget || {}) as unknown as Prisma.InputJsonValue,
+      aestheticStyle: input.aestheticStyle || null,
+      compensationModel: input.compensationModel || null,
       status: ProjectBriefStatus.OPEN,
       neededRoles: {
         create: input.neededRoles.map((r) => ({
@@ -494,4 +498,80 @@ export async function getProjectBriefDashboardStats(actorId: string) {
   });
 
   return { openBriefCount, pendingInterestCount, myBriefCount, recentOpenBriefs };
+}
+
+// ----------------------------------------------------------------------------
+// SMART MATCHING ALGORITHM
+// ----------------------------------------------------------------------------
+
+export async function getRecommendedActorsForBrief(briefId: string) {
+  const brief = await getProjectBriefById(briefId);
+  if (!brief) return [];
+
+  const neededCategories = brief.neededRoles.map(r => r.assetCategory);
+  
+  // Ambil semua aktor aktif kecuali kreator brief
+  const actors = await prisma.actor.findMany({
+    where: { 
+      status: 'ACTIVE',
+      id: { not: brief.creatorActorId }
+    },
+    include: {
+      assets: {
+        select: { category: true }
+      }
+    }
+  });
+
+  const scoredActors = actors.map(actor => {
+    let score = 0;
+    const matchReasons: string[] = [];
+
+    // 1. Role Match (40% - up to 40 points)
+    const actorCategories = actor.assets.map(a => a.category);
+    let roleMatches = 0;
+    for (const cat of neededCategories) {
+      if (actorCategories.includes(cat)) {
+        roleMatches++;
+      }
+    }
+    if (neededCategories.length > 0 && roleMatches > 0) {
+      const roleScore = Math.round((roleMatches / neededCategories.length) * 40);
+      score += roleScore;
+      if (roleScore > 0) matchReasons.push("Kategori Aset Sesuai");
+    }
+
+    // 2. Aesthetic Match (25% - 25 points)
+    if (brief.aestheticStyle && actor.aestheticStyles.includes(brief.aestheticStyle)) {
+      score += 25;
+      matchReasons.push("Gaya Visual Sesuai");
+    }
+
+    // 3. Location Match (20% - 20 points)
+    if (brief.location && actor.location) {
+      if (actor.location.toLowerCase().includes(brief.location.toLowerCase()) || 
+          brief.location.toLowerCase().includes(actor.location.toLowerCase()) ||
+          brief.location.toLowerCase().includes('remote')) {
+        score += 20;
+        matchReasons.push("Lokasi Sesuai");
+      }
+    }
+
+    // 4. Compensation Match (15% - 15 points)
+    if (brief.compensationModel && actor.compensationModels.includes(brief.compensationModel)) {
+      score += 15;
+      matchReasons.push("Model Kompensasi Sesuai");
+    }
+
+    return {
+      actor,
+      matchScore: score,
+      matchReasons
+    };
+  });
+
+  return scoredActors
+    .filter(a => a.matchScore >= 20) // Minimum threshold
+    .sort((a, b) => b.matchScore - a.matchScore)
+    .slice(0, 5); // Return top 5
 }

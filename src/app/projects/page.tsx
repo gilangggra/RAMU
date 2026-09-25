@@ -72,43 +72,43 @@ export default async function ProjectsPage({
   return (
     <AppShell actor={actor} activeRoute="/projects">
       <div className="space-y-8">
-        <section className="p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] relative overflow-hidden space-y-6">
+        <section className="p-8 sm:p-10 rounded-[28px] bg-white border border-stone-200 shadow-xs relative overflow-hidden space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold text-[#E66A48]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#E66A48] animate-pulse" />
-                Collaborative Project Formation — Mode 2
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-stone-100 border border-stone-200 text-xs font-bold text-[#1E1B2E] shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#1E1B2E] animate-pulse" />
+                Open Collaboration Hub
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#27213D] tracking-tight">
-                Proyek Kolaboratif Terbuka
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1E1B2E] tracking-tight">
+                Project Briefs Terbuka
               </h1>
-              <p className="text-xs sm:text-sm text-[#716B7E] max-w-2xl leading-relaxed">
+              <p className="text-xs sm:text-sm text-stone-500 max-w-2xl leading-relaxed">
                 Inisiasi proyek kreatif baru dan undang rekan kolaborator yang memiliki aset komplementer, atau bergabunglah ke proyek terbuka dengan menawarkan aset dan kapabilitas Anda.
               </p>
             </div>
 
             <Link
               href="/projects/new"
-              className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white font-bold text-xs sm:text-sm shadow-md shadow-[#E66A48]/20 transition-all cursor-pointer"
+              className="shrink-0 inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#1E1B2E] hover:bg-black text-white font-bold text-[11px] uppercase tracking-widest transition-colors cursor-pointer"
             >
               <span>+ Inisiasi Project Brief</span>
             </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-stone-100">
-            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
-              <div className="text-[11px] font-bold text-[#716B7E] uppercase tracking-wider">Proyek Terbuka</div>
-              <div className="text-2xl font-black text-[#27213D] mt-1">{allBriefs.length}</div>
+            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200">
+              <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Proyek Terbuka</div>
+              <div className="text-2xl font-black text-[#1E1B2E] mt-1">{allBriefs.length}</div>
             </div>
-            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
-              <div className="text-[11px] font-bold text-[#716B7E] uppercase tracking-wider">Brief Anda</div>
-              <div className="text-2xl font-black text-[#E66A48] mt-1">
+            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200">
+              <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Brief Anda</div>
+              <div className="text-2xl font-black text-[#1E1B2E] mt-1">
                 {myBriefs.length || "0"}
               </div>
             </div>
-            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
-              <div className="text-[11px] font-bold text-[#716B7E] uppercase tracking-wider">Minat Menunggu Review</div>
-              <div className="text-2xl font-black text-amber-800 mt-1">{pendingInterestCount}</div>
+            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200">
+              <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Minat Pending</div>
+              <div className="text-2xl font-black text-[#1E1B2E] mt-1">{pendingInterestCount}</div>
             </div>
           </div>
         </section>
@@ -122,15 +122,15 @@ export default async function ProjectsPage({
                 href={`/projects?tab=${tab.key}`}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                   isActive
-                    ? "bg-[#27213D] text-white shadow-md shadow-[#27213D]/10"
-                    : "bg-white text-[#716B7E] hover:text-[#27213D] hover:bg-stone-50 border border-stone-200/80"
+                    ? "bg-[#1E1B2E] text-white shadow-sm"
+                    : "bg-white text-stone-500 hover:text-[#1E1B2E] hover:bg-stone-50 border border-stone-200/80"
                 }`}
               >
                 <span>{tab.label}</span>
                 {tab.count > 0 && (
                   <span
                     className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                      isActive ? "bg-white/20 text-white" : "bg-stone-100 text-[#716B7E]"
+                      isActive ? "bg-white/20 text-white" : "bg-stone-100 text-stone-500"
                     }`}
                   >
                     {tab.count}
@@ -146,23 +146,23 @@ export default async function ProjectsPage({
             {briefsToShow.length === 0 ? (
               <div className="p-12 text-center rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-4">
                 <div className="flex justify-center">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200/60 flex items-center justify-center">
-                    <Palette className="w-7 h-7 text-amber-600" />
+                  <div className="w-14 h-14 rounded-2xl bg-stone-50 border border-stone-200 flex items-center justify-center">
+                    <Palette className="w-7 h-7 text-[#1E1B2E]" />
                   </div>
                 </div>
-                <h3 className="text-base font-bold text-[#27213D]">
+                <h3 className="text-base font-bold text-[#1E1B2E]">
                   {activeTab === "mine"
                     ? "Belum Ada Project Brief yang Anda Buat"
                     : "Belum Ada Proyek Terbuka"}
                 </h3>
-                <p className="text-xs text-[#716B7E] max-w-md mx-auto leading-relaxed">
+                <p className="text-xs text-stone-500 max-w-md mx-auto leading-relaxed">
                   {activeTab === "mine"
                     ? "Klik tombol \"Inisiasi Project Brief\" untuk membuat proyek kolaborasi pertama Anda."
                     : "Jadilah yang pertama menginisiasi project brief dan undang kolaborator dari ekosistem kreatif."}
                 </p>
                 <Link
                   href="/projects/new"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white font-bold text-xs shadow-md shadow-[#E66A48]/20 transition-all cursor-pointer"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#1E1B2E] hover:bg-black text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
                 >
                   + Buat Project Brief Baru
                 </Link>
@@ -195,19 +195,19 @@ export default async function ProjectsPage({
             {myInterests.length === 0 ? (
               <div className="p-12 text-center rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-4">
                 <div className="flex justify-center">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200/60 flex items-center justify-center">
-                    <Inbox className="w-7 h-7 text-amber-600" />
+                  <div className="w-14 h-14 rounded-2xl bg-stone-50 border border-stone-200 flex items-center justify-center">
+                    <Inbox className="w-7 h-7 text-[#1E1B2E]" />
                   </div>
                 </div>
-                <h3 className="text-base font-bold text-[#27213D]">
+                <h3 className="text-base font-bold text-[#1E1B2E]">
                   Belum Ada Minat yang Dinyatakan
                 </h3>
-                <p className="text-xs text-[#716B7E] max-w-md mx-auto leading-relaxed">
+                <p className="text-xs text-stone-500 max-w-md mx-auto leading-relaxed">
                   Jelajahi proyek terbuka dan ajukan aset Anda untuk bergabung sebagai rekan kolaborator setara.
                 </p>
                 <Link
                   href="/projects?tab=browse"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white font-bold text-xs shadow-md shadow-[#E66A48]/20 transition-all cursor-pointer"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#1E1B2E] hover:bg-black text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
                 >
                   <span>Jelajahi Proyek Terbuka</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -231,11 +231,11 @@ export default async function ProjectsPage({
                       className="flex items-center justify-between gap-4 p-5 rounded-2xl bg-white/95 border border-stone-200/80 hover:border-amber-300 shadow-2xs transition-all group"
                     >
                       <div className="min-w-0 space-y-1">
-                        <div className="font-bold text-[#27213D] text-sm group-hover:text-[#E66A48] transition-colors truncate">
+                        <div className="font-bold text-[#1E1B2E] text-sm group-hover:text-[#1E1B2E] transition-colors truncate">
                           {interest.brief.title}
                         </div>
-                        <div className="text-xs text-[#716B7E]">
-                          Peran: <span className="text-[#27213D] font-semibold">{interest.role.roleLabel}</span>
+                        <div className="text-xs text-stone-500">
+                          Peran: <span className="text-[#1E1B2E] font-semibold">{interest.role.roleLabel}</span>
                           {" · "}
                           Inisiator: {interest.brief.creatorActor.name}
                         </div>

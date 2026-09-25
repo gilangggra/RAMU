@@ -75,9 +75,9 @@ async function main() {
     const outcome1 = await prisma.outcome.create({
       data: {
         collaborationId: targetCollab.id,
-        title: "Peluncuran Batch Perdana 50 Pcs Koleksi Kapsul Wastra-Kulit",
+        title: "Peluncuran Koleksi Kapsul Editorial Ready-to-Wear",
         description:
-          "Selesai diproduksi bersama dan diperkenalkan pada pameran kriya kreatif di Yogyakarta. Perpaduan material wastra batik tulis dengan finishing kulit nabati premium dan aksesoris logam perak lokal.",
+          "Selesai diproduksi dan dirilis pada showcase kolaboratif di Jakarta. Perpaduan rancangan busana desainer dengan styling aksesori modern dan tata visual studio berstandar internasional.",
         outcomeType: OutcomeType.PRODUCT,
         metrics: {
           unitsProduced: 50,
@@ -124,7 +124,7 @@ async function main() {
           usefulnessScore: 5,
           comments:
             i === 0
-              ? "Peluang yang diramu oleh engine sangat membuka cakrawala baru. Sinergi antara motif batik kami dengan kerajinan kulit dan fotografi studio terbukti melipatgandakan nilai jual produk."
+              ? "Peluang yang diramu oleh engine sangat membuka cakrawala baru. Sinergi antara rancangan busana kami dengan tim visual dan fotografi studio terbukti melipatgandakan nilai jual dan prestise koleksi."
               : "Kerja sama berjalan sangat teratur berkat kejelasan pembagian kontribusi dan batasan kapasitas sejak awal di ruang kerja kolaborasi.",
         },
       });

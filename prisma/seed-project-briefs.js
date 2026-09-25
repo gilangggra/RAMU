@@ -76,21 +76,21 @@ async function main() {
         create: [
           {
             roleLabel: "Fotografer Produk/Fesyen",
-            assetCategory: "CAPABILITY",
+            assetCategory: "SKILL_TALENT",
             description: "Berpengalaman menangani photoshoot pakaian. Menguasai strobe lighting (flash).",
             maxCollaborators: 1,
             isFilled: false,
           },
           {
             roleLabel: "Studio Foto (Cyclorama)",
-            assetCategory: "RESOURCE",
+            assetCategory: "EQUIPMENT",
             description: "Studio dengan latar putih bersih (cyclorama) berukuran minimal 5x5 meter. Tersedia ruang ganti yang nyaman.",
             maxCollaborators: 1,
             isFilled: false,
           },
           {
             roleLabel: "Model Pria Utama",
-            assetCategory: "RESOURCE",
+            assetCategory: "EQUIPMENT",
             description: "Memiliki karakteristik wajah lokal/pan-asian. Tinggi minimal 175cm. Luwes bergerak di depan kamera.",
             maxCollaborators: 1,
             isFilled: false,
@@ -118,7 +118,7 @@ async function main() {
         create: [
           {
             roleLabel: "Brand Designer",
-            assetCategory: "CAPABILITY",
+            assetCategory: "SKILL_TALENT",
             description: "Mampu merancang identitas visual yang solid. Memiliki portofolio desain kemasan F&B. Penguasaan ilustrasi adalah nilai plus.",
             maxCollaborators: 1,
             isFilled: false,

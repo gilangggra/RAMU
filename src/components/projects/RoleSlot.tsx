@@ -2,16 +2,22 @@
 
 import { useState, useTransition } from "react";
 import { expressInterestAction } from "@/app/projects/actions";
-import { Clock, Send, Check, Circle } from "lucide-react";
+import { Clock, Send, Check, Circle, Sparkles } from "lucide-react";
 
 const CATEGORY_LABELS: Record<string, string> = {
-  PRODUCT: "Produk",
-  MATERIAL: "Material",
-  CAPABILITY: "Kapabilitas",
-  RESOURCE: "Sumber Daya",
-  PRODUCTION: "Produksi",
+  PORTFOLIO_WORK: "Karya / Portofolio",
+  EQUIPMENT: "Peralatan & Gear",
+  STUDIO_SPACE: "Studio & Ruang",
+  SKILL_TALENT: "Keahlian & Talenta",
+  WARDROBE_PROP: "Wardrobe & Properti",
+  AUDIENCE_REACH: "Jangkauan Audiens",
+  PRODUCT: "Karya / Portofolio",
+  MATERIAL: "Wardrobe & Properti",
+  CAPABILITY: "Keahlian & Talenta",
+  RESOURCE: "Peralatan & Gear",
+  PRODUCTION: "Studio & Ruang",
   MARKET: "Akses Pasar",
-  AUDIENCE: "Audiens",
+  AUDIENCE: "Jangkauan Audiens",
   CREATIVE_ASSET: "Aset Kreatif",
 };
 
@@ -89,7 +95,7 @@ export function RoleSlot({
       className={`p-5 rounded-2xl border transition-all space-y-4 ${
         isFilled
           ? "bg-emerald-50/40 border-emerald-200/80"
-          : "bg-white/95 border-stone-200/80 hover:border-amber-300/80 shadow-2xs"
+          : "bg-white/95 border-stone-200/80 hover:border-amber-400/60 shadow-2xs"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -105,13 +111,13 @@ export function RoleSlot({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h4 className="font-bold text-[#27213D] text-sm">{roleLabel}</h4>
-              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-stone-100 text-[#716B7E] border border-stone-200">
+              <h4 className="font-bold text-[#1E1B2E] text-sm">{roleLabel}</h4>
+              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-stone-100 text-stone-600 border border-stone-200">
                 {CATEGORY_LABELS[assetCategory] || assetCategory}
               </span>
             </div>
             {description && (
-              <p className="text-xs text-[#716B7E] mt-1 line-clamp-2 leading-relaxed">
+              <p className="text-xs text-stone-500 mt-1 line-clamp-2 leading-relaxed">
                 {description}
               </p>
             )}
@@ -133,52 +139,53 @@ export function RoleSlot({
       </div>
 
       <div className="flex items-center justify-between pt-2 border-t border-stone-100 text-xs">
-        <div className="text-[#716B7E] text-[11px]">
-          Kebutuhan: 1 Kolaborator • Kontribusi Berbasis Aset
+        <div className="text-stone-500 text-[11px]">
+          Kebutuhan: 1 Kolaborator • Sinergi Berbasis Aset & Portofolio
         </div>
 
         <div>
           {canApply && (
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white font-bold text-xs shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-extrabold text-xs shadow-[0_4px_16px_rgba(251,191,36,0.25)] transition-all cursor-pointer flex items-center gap-1.5"
             >
-              <span>Bergabung sebagai Kolaborator</span>
-              <span>{isOpen ? "▲" : "▼"}</span>
+              <Sparkles className="w-3.5 h-3.5 text-stone-950" />
+              <span>Ajukan Kolaborasi</span>
+              <span className="text-[10px]">{isOpen ? "▲" : "▼"}</span>
             </button>
           )}
 
           {alreadyApplied && (
-            <span className="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1.5">
+            <span className="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200 flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-amber-600" />
               <span>Minat Anda Terkirim ({localStatus})</span>
             </span>
           )}
 
           {isInitiator && (
-            <span className="text-[11px] font-bold text-[#E66A48]">
-              Peran dari Proyek Anda
+            <span className="text-[11px] font-bold text-stone-500 bg-stone-100 px-2.5 py-1 rounded-lg border border-stone-200">
+              Peran Proyek Anda
             </span>
           )}
         </div>
       </div>
 
       {isOpen && (
-        <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-4 mt-3">
+        <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-4 mt-3 animate-in fade-in duration-200">
           <div>
-            <h5 className="font-bold text-xs text-[#27213D]">
+            <h5 className="font-bold text-xs text-[#1E1B2E]">
               Tawarkan Aset & Kapabilitas Anda untuk Peran: {roleLabel}
             </h5>
-            <p className="text-[11px] text-[#716B7E] mt-0.5">
-              Pilih aset atau keahlian dari profil Anda yang akan Anda kontribusikan pada proyek ini.
+            <p className="text-[11px] text-stone-500 mt-0.5">
+              Pilih aset atau keahlian dari portofolio Anda yang akan dikontribusikan pada proyek bersama ini.
             </p>
           </div>
 
           <div className="space-y-2">
-            <p className="text-[11px] font-bold text-[#27213D]">Pilih Aset yang Ditawarkan:</p>
+            <p className="text-[11px] font-bold text-[#1E1B2E]">Pilih Aset yang Ditawarkan:</p>
             {actorAssets.length === 0 ? (
-              <p className="text-xs text-[#716B7E] italic">
-                Anda belum memiliki aset aktif. Anda tetap dapat mengirimkan pesan perkenalan di bawah.
+              <p className="text-xs text-stone-500 italic">
+                Anda belum memiliki aset aktif di profil Anda. Anda tetap dapat mengirimkan pesan perkenalan & visi kolaborasi di bawah.
               </p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -190,19 +197,19 @@ export function RoleSlot({
                       onClick={() => toggleAsset(asset.id)}
                       className={`p-3 rounded-xl border text-xs cursor-pointer transition-all flex items-start gap-2.5 ${
                         isChecked
-                          ? "bg-amber-50/80 border-[#E66A48] text-[#27213D]"
-                          : "bg-white border-stone-200 text-[#716B7E] hover:border-stone-300"
+                          ? "bg-amber-50/80 border-amber-400 text-[#1E1B2E] shadow-2xs"
+                          : "bg-white border-stone-200 text-stone-600 hover:border-stone-300"
                       }`}
                     >
                       <input
                         type="checkbox"
                         checked={isChecked}
                         onChange={() => {}}
-                        className="mt-0.5 rounded accent-[#E66A48]"
+                        className="mt-0.5 rounded accent-amber-500"
                       />
                       <div className="min-w-0">
-                        <p className="font-bold text-[#27213D] truncate">{asset.name}</p>
-                        <p className="text-[10px] text-[#716B7E]">{asset.subtype || asset.category}</p>
+                        <p className="font-bold text-[#1E1B2E] truncate">{asset.name}</p>
+                        <p className="text-[10px] text-stone-500">{asset.subtype || asset.category}</p>
                       </div>
                     </div>
                   );
@@ -212,15 +219,15 @@ export function RoleSlot({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[11px] font-bold text-[#27213D]">
-              Catatan / Visi Kolaborasi (Opsional)
+            <label className="text-[11px] font-bold text-[#1E1B2E]">
+              Catatan & Pendekatan Kreatif (Opsional)
             </label>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Ceritakan pengalaman relevan atau ide pendekatan Anda untuk proyek ini..."
+              placeholder="Ceritakan gaya visual, portfolio relevan, atau konsep pendekatan Anda untuk proyek ini..."
               rows={3}
-              className="w-full px-3 py-2 rounded-xl bg-white border border-stone-200/80 text-xs text-[#27213D] focus:outline-none focus:border-[#E66A48] placeholder-[#9E98A8] resize-none"
+              className="w-full px-3 py-2 rounded-xl bg-white border border-stone-200/80 text-xs text-[#1E1B2E] focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/20 placeholder-stone-400 resize-none font-medium"
             />
           </div>
 
@@ -231,17 +238,17 @@ export function RoleSlot({
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200/60">
             <button
               onClick={() => setIsOpen(false)}
-              className="px-3 py-1.5 rounded-lg text-[#716B7E] hover:text-[#27213D] text-xs font-bold"
+              className="px-3.5 py-1.5 rounded-lg text-stone-500 hover:text-stone-900 text-xs font-bold transition-colors cursor-pointer"
             >
               Batal
             </button>
             <button
               onClick={handleSubmit}
               disabled={isPending}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] disabled:opacity-50 text-white font-bold text-xs shadow transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-stone-950 font-extrabold text-xs shadow-[0_4px_16px_rgba(251,191,36,0.25)] transition-all cursor-pointer"
             >
               <span>{isPending ? "Mengirim Minat..." : "Kirim Pernyataan Minat"}</span>
-              <Send className="w-3.5 h-3.5" />
+              <Send className="w-3.5 h-3.5 text-stone-950" />
             </button>
           </div>
         </div>

@@ -5,13 +5,19 @@ import { acceptCollaboratorAction, declineCollaboratorAction } from "@/app/proje
 import { MapPin, AlertCircle, Check } from "lucide-react";
 
 const CATEGORY_LABELS: Record<string, string> = {
-  PRODUCT: "Produk",
-  MATERIAL: "Material",
-  CAPABILITY: "Kapabilitas",
-  RESOURCE: "Sumber Daya",
-  PRODUCTION: "Produksi",
+  PORTFOLIO_WORK: "Karya / Portofolio",
+  EQUIPMENT: "Peralatan & Gear",
+  STUDIO_SPACE: "Studio & Ruang",
+  SKILL_TALENT: "Keahlian & Talenta",
+  WARDROBE_PROP: "Wardrobe & Properti",
+  AUDIENCE_REACH: "Jangkauan Audiens",
+  PRODUCT: "Karya / Portofolio",
+  MATERIAL: "Wardrobe & Properti",
+  CAPABILITY: "Keahlian & Talenta",
+  RESOURCE: "Peralatan & Gear",
+  PRODUCTION: "Studio & Ruang",
   MARKET: "Akses Pasar",
-  AUDIENCE: "Audiens",
+  AUDIENCE: "Jangkauan Audiens",
   CREATIVE_ASSET: "Aset Kreatif",
 };
 
@@ -149,7 +155,7 @@ export function InterestCard({
                 key={asset.id}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] bg-white text-[#27213D] border border-stone-200 font-medium shadow-2xs"
               >
-                <span className="text-[#E66A48] font-bold">
+                <span className="text-amber-600 font-bold">
                   {CATEGORY_LABELS[asset.category] || asset.category}
                 </span>
                 <span>·</span>

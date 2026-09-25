@@ -11,7 +11,7 @@ const ROLE_BLUEPRINTS = [
     id: "FOTO", 
     label: "Fotografer & Videografer", 
     icon: Camera, 
-    category: "CAPABILITY", 
+    category: "SKILL_TALENT", 
     desc: "Pencipta visual untuk kampanye dan katalog.",
     specializations: ["Fotografer Produk", "Fotografer Fesyen", "Videografer Komersial", "Art Director"]
   },
@@ -19,7 +19,7 @@ const ROLE_BLUEPRINTS = [
     id: "DESAIN", 
     label: "Desainer Kreatif", 
     icon: Palette, 
-    category: "CAPABILITY", 
+    category: "SKILL_TALENT", 
     desc: "Perancang identitas visual dan aset grafis.",
     specializations: ["Desainer Grafis (Branding)", "Desainer Kemasan", "UI/UX Designer", "Illustrator 2D/3D"]
   },
@@ -27,7 +27,7 @@ const ROLE_BLUEPRINTS = [
     id: "MODEL", 
     label: "Model & Talent", 
     icon: UserCircle, 
-    category: "RESOURCE", 
+    category: "SKILL_TALENT", 
     desc: "Talenta profesional di depan layar atau mikrofon.",
     specializations: ["Model Fesyen Utama", "Karakter Pendukung", "Aktor Iklan Komersial", "Voice Over Talent"]
   },
@@ -35,7 +35,7 @@ const ROLE_BLUEPRINTS = [
     id: "STUDIO", 
     label: "Infrastruktur & Ruang", 
     icon: Building2, 
-    category: "RESOURCE", 
+    category: "STUDIO_SPACE", 
     desc: "Fasilitas, ruang kerja, atau peralatan teknis.",
     specializations: ["Studio Foto (Cyclorama)", "Studio Rekaman (Audio)", "Penyewaan Alat/Lighting", "Set Lokasi Shooting"]
   },
@@ -53,14 +53,12 @@ const PROJECT_TYPES = [
 ];
 
 const ASSET_CATEGORIES = [
-  { value: "CAPABILITY", label: "Kapabilitas / Keahlian" },
-  { value: "PRODUCTION", label: "Kapasitas Produksi" },
-  { value: "CREATIVE_ASSET", label: "Aset Kreatif" },
-  { value: "PRODUCT", label: "Produk" },
-  { value: "MATERIAL", label: "Material" },
-  { value: "RESOURCE", label: "Sumber Daya / Peralatan" },
-  { value: "MARKET", label: "Akses Pasar / Distribusi" },
-  { value: "AUDIENCE", label: "Audiens / Network" },
+  { value: "PORTFOLIO_WORK", label: "Karya & Portofolio (Portfolio Work)" },
+  { value: "EQUIPMENT", label: "Peralatan (Equipment)" },
+  { value: "STUDIO_SPACE", label: "Fasilitas & Studio (Studio Space)" },
+  { value: "SKILL_TALENT", label: "Keahlian & Talenta (Skill Talent)" },
+  { value: "WARDROBE_PROP", label: "Pakaian & Properti (Wardrobe & Prop)" },
+  { value: "AUDIENCE_REACH", label: "Akses Audiens & Pasar (Audience Reach)" },
 ];
 
 interface RoleInput {
@@ -81,6 +79,7 @@ export default function NewProjectBriefPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [projectType, setProjectType] = useState(PROJECT_TYPES[0]);
+  const [aestheticStyle, setAestheticStyle] = useState("Minimalist");
   const [targetOutput, setTargetOutput] = useState("");
 
   const [roles, setRoles] = useState<RoleInput[]>([
@@ -90,6 +89,7 @@ export default function NewProjectBriefPage() {
   const [location, setLocation] = useState("");
   const [estimatedDuration, setEstimatedDuration] = useState("");
   const [targetLaunch, setTargetLaunch] = useState("");
+  const [compensationModel, setCompensationModel] = useState("PAID");
   const [estimatedTotal, setEstimatedTotal] = useState("");
   const [budgetNotes, setBudgetNotes] = useState("");
 
@@ -129,8 +129,10 @@ export default function NewProjectBriefPage() {
     formData.set("location", location);
     formData.set("estimatedDuration", estimatedDuration);
     formData.set("targetLaunch", targetLaunch);
+    formData.set("compensationModel", compensationModel);
     formData.set("estimatedTotal", estimatedTotal);
     formData.set("budgetNotes", budgetNotes);
+    formData.set("aestheticStyle", aestheticStyle);
     formData.set(
       "neededRoles",
       JSON.stringify(
@@ -164,13 +166,13 @@ export default function NewProjectBriefPage() {
   const canProceedStep2 = roles.some((r) => r.roleLabel.trim().length > 0);
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#27213D] selection:bg-amber-500/30 selection:text-[#27213D] flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-[#FAF8F5] text-[#1E1B2E] selection:bg-[#1E1B2E]/30 selection:text-[#1E1B2E] flex flex-col relative overflow-hidden">
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-1/3 -right-32 w-96 h-96 bg-rose-200/25 rounded-full blur-3xl pointer-events-none" />
 
       <nav className="border-b border-stone-200/80 bg-[#FAF8F5]/80 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/projects" className="flex items-center gap-2 text-[#716B7E] hover:text-[#27213D] font-bold transition-colors text-xs">
+          <Link href="/projects" className="flex items-center gap-2 text-stone-500 hover:text-[#1E1B2E] font-bold transition-colors text-xs">
             <ArrowLeft className="w-4 h-4" />
             <span>Kembali ke Proyek</span>
           </Link>
@@ -180,7 +182,7 @@ export default function NewProjectBriefPage() {
                 key={s}
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                   s === step
-                    ? "bg-[#27213D] text-white shadow-xs"
+                    ? "bg-[#1E1B2E] text-white shadow-xs"
                     : s < step
                     ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
                     : "bg-stone-200/80 text-stone-500"
@@ -196,16 +198,16 @@ export default function NewProjectBriefPage() {
       <main className="flex-1 flex items-start justify-center py-12 px-6">
         <div className="w-full max-w-2xl space-y-8">
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold text-[#E66A48]">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E]">
               Langkah {step} dari 4
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-[#27213D] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#1E1B2E] tracking-tight">
               {step === 1 && "Informasi Proyek"}
               {step === 2 && "Peran yang Dibutuhkan"}
               {step === 3 && "Detail Operasional"}
               {step === 4 && "Review & Publikasi"}
             </h1>
-            <p className="text-sm text-[#716B7E]">
+            <p className="text-sm text-stone-500">
               {step === 1 && "Jelaskan proyek yang ingin Anda garap bersama kolaborator."}
               {step === 2 && "Tentukan peran apa saja yang dibutuhkan dalam proyek ini."}
               {step === 3 && "Isi detail timeline dan budget (opsional)."}
@@ -224,25 +226,25 @@ export default function NewProjectBriefPage() {
             {step === 1 && (
               <div className="space-y-5">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
                     Judul Proyek *
                   </label>
                   <input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="misal: Campaign Video Minuman Lokal — Bali Vibes"
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
                     Jenis Proyek *
                   </label>
                   <select
                     value={projectType}
                     onChange={(e) => setProjectType(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors cursor-pointer"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors cursor-pointer"
                   >
                     {PROJECT_TYPES.map((t) => (
                       <option key={t} value={t}>{t}</option>
@@ -251,19 +253,34 @@ export default function NewProjectBriefPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                    Tema / Gaya Visual
+                  </label>
+                  <select
+                    value={aestheticStyle}
+                    onChange={(e) => setAestheticStyle(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors cursor-pointer"
+                  >
+                    {["Minimalist", "Streetwear", "Luxury", "Cinematic", "Y2K", "High-Fashion", "Edgy", "Vintage", "Editorial", "Lainnya"].map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
                     Target Output *
                   </label>
                   <input
                     value={targetOutput}
                     onChange={(e) => setTargetOutput(e.target.value)}
                     placeholder="misal: Video iklan 60 detik + 10 foto produk berkualitas tinggi"
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
                     Deskripsi Proyek *
                   </label>
                   <textarea
@@ -271,7 +288,7 @@ export default function NewProjectBriefPage() {
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Jelaskan konteks, tujuan, dan apa yang ingin dicapai dari proyek ini..."
                     rows={4}
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors resize-none"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors resize-none"
                   />
                 </div>
               </div>
@@ -279,8 +296,8 @@ export default function NewProjectBriefPage() {
 
             {step === 2 && (
               <div className="space-y-4">
-                <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200/70 text-xs text-amber-900 flex items-center gap-2.5">
-                  <Lightbulb className="w-4 h-4 text-[#E66A48] shrink-0" />
+                <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200/70 text-xs text-amber-900 flex items-center gap-2.5">
+                  <Lightbulb className="w-4 h-4 text-[#1E1B2E] shrink-0" />
                   <span>Ikuti panduan dua langkah ini agar pencocokan spesifikasi dengan profil kolaborator 100% akurat.</span>
                 </div>
 
@@ -294,7 +311,7 @@ export default function NewProjectBriefPage() {
                   return (
                   <div key={role.id} className={`p-5 rounded-3xl border transition-all duration-300 ${!isFullySelected ? 'bg-white border-[#E66A48]/30 shadow-md' : 'bg-stone-50/80 border-stone-200/70'} space-y-4`}>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#27213D] uppercase tracking-wider">
+                      <span className="text-xs font-bold text-[#1E1B2E] uppercase tracking-wider">
                         Slot Kebutuhan #{idx + 1}
                       </span>
                       {roles.length > 1 && (
@@ -309,8 +326,8 @@ export default function NewProjectBriefPage() {
 
                     {isBlueprintNotSelected && (
                       <div className="space-y-3 animate-in fade-in duration-300">
-                        <label className="text-[10px] font-bold uppercase text-[#716B7E] flex items-center gap-1.5">
-                          <span className="w-4 h-4 rounded-full bg-[#E66A48] text-white flex items-center justify-center text-[8px]">1</span>
+                        <label className="text-[10px] font-bold uppercase text-stone-500 flex items-center gap-1.5">
+                          <span className="w-4 h-4 rounded-full bg-[#1E1B2E] text-white flex items-center justify-center text-[8px]">1</span>
                           Pilih Kategori Utama (Pilar)
                         </label>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -326,10 +343,10 @@ export default function NewProjectBriefPage() {
                                 className="text-left p-4 rounded-2xl border border-stone-200/80 bg-white hover:border-[#E66A48] hover:shadow-[0_4px_12px_rgba(230,106,72,0.1)] transition-all group flex flex-col justify-between"
                               >
                                 <div className="flex items-center gap-3 mb-2">
-                                  <div className="w-8 h-8 rounded-full bg-stone-50 group-hover:bg-amber-50 flex items-center justify-center transition-colors">
-                                    <Icon className="w-4 h-4 text-[#27213D] group-hover:text-[#E66A48] transition-colors" />
+                                  <div className="w-8 h-8 rounded-full bg-stone-50 group-hover:bg-stone-50 flex items-center justify-center transition-colors">
+                                    <Icon className="w-4 h-4 text-[#1E1B2E] group-hover:text-[#1E1B2E] transition-colors" />
                                   </div>
-                                  <div className="font-bold text-sm text-[#27213D]">{bp.label}</div>
+                                  <div className="font-bold text-sm text-[#1E1B2E]">{bp.label}</div>
                                 </div>
                                 <div className="text-[10px] text-stone-500 leading-relaxed ml-11">{bp.desc}</div>
                               </button>
@@ -342,21 +359,21 @@ export default function NewProjectBriefPage() {
                     {isRoleNotSelected && selectedBlueprint && (
                       <div className="space-y-4 animate-in fade-in slide-in-from-right-2 duration-300">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-stone-100 rounded-xl border border-stone-200/60">
-                           <div className="flex items-center gap-2 text-xs font-bold text-[#27213D]">
+                           <div className="flex items-center gap-2 text-xs font-bold text-[#1E1B2E]">
                               <selectedBlueprint.icon className="w-3.5 h-3.5 text-stone-500" />
                               {selectedBlueprint.label}
                            </div>
                            <button 
                              onClick={() => updateRole(role.id, "blueprintId", "")}
-                             className="text-[10px] text-[#716B7E] hover:text-[#27213D] font-bold underline"
+                             className="text-[10px] text-stone-500 hover:text-[#1E1B2E] font-bold underline"
                            >
                              Ubah Kategori
                            </button>
                         </div>
                         
                         <div className="space-y-2.5">
-                          <label className="text-[10px] font-bold uppercase text-[#716B7E] flex items-center gap-1.5">
-                            <span className="w-4 h-4 rounded-full bg-[#E66A48] text-white flex items-center justify-center text-[8px]">2</span>
+                          <label className="text-[10px] font-bold uppercase text-stone-500 flex items-center gap-1.5">
+                            <span className="w-4 h-4 rounded-full bg-[#1E1B2E] text-white flex items-center justify-center text-[8px]">2</span>
                             Pilih Spesialisasi Spesifik (Job)
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -364,7 +381,7 @@ export default function NewProjectBriefPage() {
                               <button
                                 key={spec}
                                 onClick={() => updateRole(role.id, "roleLabel", spec)}
-                                className="px-4 py-2 rounded-xl border border-stone-200/80 bg-white hover:border-[#E66A48] hover:bg-amber-50/30 text-xs font-bold text-[#27213D] transition-all shadow-sm"
+                                className="px-4 py-2 rounded-xl border border-stone-200/80 bg-white hover:border-[#E66A48] hover:bg-stone-50/30 text-xs font-bold text-[#1E1B2E] transition-all shadow-sm"
                               >
                                 {spec}
                               </button>
@@ -376,7 +393,7 @@ export default function NewProjectBriefPage() {
 
                     {isFullySelected && selectedBlueprint && (
                       <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-2xl bg-[#27213D] text-white shadow-md relative overflow-hidden">
+                        <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-2xl bg-[#1E1B2E] text-white shadow-md relative overflow-hidden">
                           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
                           <div className="flex-1 space-y-1 relative z-10">
                             <div className="text-[10px] font-bold uppercase text-stone-400 tracking-wider flex items-center gap-2">
@@ -402,7 +419,7 @@ export default function NewProjectBriefPage() {
                         </div>
 
                         <div className="space-y-1.5 pt-2">
-                          <label className="text-[10px] font-bold uppercase text-[#716B7E]">
+                          <label className="text-[10px] font-bold uppercase text-stone-500">
                             Persyaratan / Konteks Khusus (Opsional)
                           </label>
                           <textarea
@@ -410,7 +427,7 @@ export default function NewProjectBriefPage() {
                             onChange={(e) => updateRole(role.id, "description", e.target.value)}
                             placeholder={`Contoh: Harus membawa perlengkapan sendiri, atau memiliki pengalaman spesifik...`}
                             rows={2}
-                            className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors resize-none"
+                            className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors resize-none"
                           />
                         </div>
                       </div>
@@ -420,9 +437,9 @@ export default function NewProjectBriefPage() {
 
                 <button
                   onClick={addRole}
-                  className="w-full py-4 rounded-2xl border border-dashed border-[#E66A48]/30 hover:border-[#E66A48] bg-white hover:bg-amber-50/40 text-[#E66A48] text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full py-4 rounded-2xl border border-dashed border-[#E66A48]/30 hover:border-[#E66A48] bg-white hover:bg-stone-50/40 text-[#1E1B2E] text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <div className="w-5 h-5 rounded-full bg-[#E66A48] text-white flex items-center justify-center text-lg leading-none pb-0.5">+</div>
+                  <div className="w-5 h-5 rounded-full bg-[#1E1B2E] text-white flex items-center justify-center text-lg leading-none pb-0.5">+</div>
                   <span>Tambah Slot Kebutuhan Lainnya</span>
                 </button>
               </div>
@@ -430,61 +447,76 @@ export default function NewProjectBriefPage() {
 
             {step === 3 && (
               <div className="space-y-5">
-                <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200/70 text-xs text-[#716B7E]">
+                <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200/70 text-xs text-stone-500">
                   Semua field di langkah ini opsional. Anda bisa mengisi, menentukan detail, atau membahasnya nanti bersama kolaborator.
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
                     Lokasi Proyek
                   </label>
                   <input
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="misal: Bali, atau Remote"
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
                       Estimasi Durasi
                     </label>
                     <input
                       value={estimatedDuration}
                       onChange={(e) => setEstimatedDuration(e.target.value)}
                       placeholder="misal: 3 Minggu"
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors"
+                      className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
                       Target Peluncuran
                     </label>
                     <input
                       value={targetLaunch}
                       onChange={(e) => setTargetLaunch(e.target.value)}
                       placeholder="misal: Oktober 2026"
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors"
+                      className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
-                    Estimasi Anggaran Total
-                  </label>
-                  <input
-                    value={estimatedTotal}
-                    onChange={(e) => setEstimatedTotal(e.target.value)}
-                    placeholder="misal: Rp 5.000.000 atau Revenue Share"
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                      Model Kompensasi
+                    </label>
+                    <select
+                      value={compensationModel}
+                      onChange={(e) => setCompensationModel(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] focus:outline-none focus:border-[#E66A48] transition-colors cursor-pointer"
+                    >
+                      <option value="PAID">Paid (Berbayar)</option>
+                      <option value="TFP">TFP / Barter Portofolio</option>
+                      <option value="REVENUE_SHARE">Bagi Hasil (Revenue Share)</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                      Estimasi Anggaran Total
+                    </label>
+                    <input
+                      value={estimatedTotal}
+                      onChange={(e) => setEstimatedTotal(e.target.value)}
+                      placeholder="misal: Rp 5.000.000 (jika paid)"
+                      className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
+                <div className="space-y-1.5">                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
                     Catatan Budget
                   </label>
                   <textarea
@@ -492,7 +524,7 @@ export default function NewProjectBriefPage() {
                     onChange={(e) => setBudgetNotes(e.target.value)}
                     placeholder="misal: Bagi hasil 50:50, biaya produksi ditanggung bersama..."
                     rows={2}
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#27213D] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors resize-none"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors resize-none"
                   />
                 </div>
               </div>
@@ -501,20 +533,20 @@ export default function NewProjectBriefPage() {
             {step === 4 && (
               <div className="space-y-4">
                 <div className="p-5 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-3">
-                  <div className="text-xs font-bold uppercase text-[#716B7E]">Informasi Proyek</div>
+                  <div className="text-xs font-bold uppercase text-stone-500">Informasi Proyek</div>
                   <div className="space-y-1">
-                    <div className="text-base font-bold text-[#27213D]">{title}</div>
-                    <div className="text-xs font-bold text-[#E66A48]">{projectType}</div>
-                    <div className="text-xs text-[#716B7E] leading-relaxed">{description}</div>
+                    <div className="text-base font-bold text-[#1E1B2E]">{title}</div>
+                    <div className="text-xs font-bold text-[#1E1B2E]">{projectType}</div>
+                    <div className="text-xs text-stone-500 leading-relaxed">{description}</div>
                   </div>
                   <div className="flex items-center gap-2 pt-1 border-t border-stone-200/60">
-                    <span className="text-[10px] font-bold text-[#716B7E]">TARGET:</span>
-                    <span className="text-xs font-bold text-[#27213D]">{targetOutput}</span>
+                    <span className="text-[10px] font-bold text-stone-500">TARGET:</span>
+                    <span className="text-xs font-bold text-[#1E1B2E]">{targetOutput}</span>
                   </div>
                 </div>
 
                 <div className="p-5 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-3">
-                  <div className="text-xs font-bold uppercase text-[#716B7E]">Peran Dibutuhkan ({roles.filter(r => r.roleLabel).length})</div>
+                  <div className="text-xs font-bold uppercase text-stone-500">Peran Dibutuhkan ({roles.filter(r => r.roleLabel).length})</div>
                   <div className="space-y-2">
                     {roles
                       .filter((r) => r.roleLabel.trim())
@@ -523,9 +555,9 @@ export default function NewProjectBriefPage() {
                           <span className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-[10px] font-bold text-amber-800">
                             {idx + 1}
                           </span>
-                          <span className="font-bold text-[#27213D]">{role.roleLabel}</span>
+                          <span className="font-bold text-[#1E1B2E]">{role.roleLabel}</span>
                           <span className="text-stone-300">·</span>
-                          <span className="text-[#716B7E]">{role.assetCategory}</span>
+                          <span className="text-stone-500">{role.assetCategory}</span>
                         </div>
                       ))}
                   </div>
@@ -533,23 +565,23 @@ export default function NewProjectBriefPage() {
 
                 {(location || estimatedDuration || estimatedTotal) && (
                   <div className="p-5 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-2">
-                    <div className="text-xs font-bold uppercase text-[#716B7E]">Detail Operasional</div>
-                    <div className="text-xs text-[#27213D] space-y-1.5">
+                    <div className="text-xs font-bold uppercase text-stone-500">Detail Operasional</div>
+                    <div className="text-xs text-[#1E1B2E] space-y-1.5">
                       {location && (
                         <div className="flex items-center gap-2">
-                          <MapPin className="w-3.5 h-3.5 text-[#E66A48] shrink-0" />
+                          <MapPin className="w-3.5 h-3.5 text-[#1E1B2E] shrink-0" />
                           <span>{location}</span>
                         </div>
                       )}
                       {estimatedDuration && (
                         <div className="flex items-center gap-2">
-                          <Clock className="w-3.5 h-3.5 text-[#E66A48] shrink-0" />
+                          <Clock className="w-3.5 h-3.5 text-[#1E1B2E] shrink-0" />
                           <span>{estimatedDuration}</span>
                         </div>
                       )}
                       {estimatedTotal && (
                         <div className="flex items-center gap-2">
-                          <CircleDollarSign className="w-3.5 h-3.5 text-[#E66A48] shrink-0" />
+                          <CircleDollarSign className="w-3.5 h-3.5 text-[#1E1B2E] shrink-0" />
                           <span>{estimatedTotal}</span>
                         </div>
                       )}
@@ -569,7 +601,7 @@ export default function NewProjectBriefPage() {
                 <button
                   onClick={() => setStep((s) => s - 1)}
                   disabled={isPending}
-                  className="px-5 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-[#27213D] font-bold text-sm transition-colors cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-[#1E1B2E] font-bold text-sm transition-colors cursor-pointer"
                 >
                   ← Kembali
                 </button>
@@ -582,7 +614,7 @@ export default function NewProjectBriefPage() {
                     (step === 1 && !canProceedStep1) ||
                     (step === 2 && !canProceedStep2)
                   }
-                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm shadow-md shadow-[#E66A48]/20 transition-all cursor-pointer inline-flex items-center justify-center gap-2"
+                  className="flex-1 py-3 rounded-xl bg-[#1E1B2E] hover:bg-black disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm shadow-xs transition-all cursor-pointer inline-flex items-center justify-center gap-2"
                 >
                   <span>Lanjutkan</span>
                   <ArrowRight className="w-4 h-4" />
@@ -591,7 +623,7 @@ export default function NewProjectBriefPage() {
                 <button
                   onClick={handleSubmit}
                   disabled={isPending}
-                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] disabled:opacity-50 text-white font-black text-sm shadow-lg shadow-[#E66A48]/25 transition-all cursor-pointer inline-flex items-center justify-center gap-2"
+                  className="flex-1 py-3 rounded-xl bg-[#1E1B2E] hover:bg-black disabled:opacity-50 text-white font-black text-sm shadow-lg shadow-[#E66A48]/25 transition-all cursor-pointer inline-flex items-center justify-center gap-2"
                 >
                   <span>{isPending ? "Mempublikasikan..." : "Publikasikan Project Brief"}</span>
                   <Send className="w-4 h-4" />

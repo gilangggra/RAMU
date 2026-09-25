@@ -14,9 +14,11 @@ import {
   ShieldAlert,
   Zap,
   Menu,
+  X,
   LogOut,
   Users,
   Sparkles,
+  Settings,
 } from "lucide-react";
 
 interface ActorInfo {
@@ -43,22 +45,14 @@ interface NavItem {
 const PRIMARY_NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" /> },
   { href: "/opportunities", label: "Peluang Kolaborasi", icon: <Lightbulb className="w-4 h-4" /> },
-  { href: "/projects", label: "Project Briefs", icon: <Megaphone className="w-4 h-4" />, badge: "Baru" },
+  { href: "/projects", label: "Project Briefs", icon: <Megaphone className="w-4 h-4" /> },
   { href: "/directory", label: "Profil Pelaku", icon: <Users className="w-4 h-4" /> },
   { href: "/showcase", label: "Karya & Inspirasi", icon: <Sparkles className="w-4 h-4" /> },
   { href: "/collaborations", label: "Ruang Kolaborasi", icon: <Handshake className="w-4 h-4" /> },
+  { href: "/settings", label: "Pengaturan", icon: <Settings className="w-4 h-4" /> },
 ];
 
-const INPUT_LAYER_NAV: NavItem[] = [
-  { href: "/assets", label: "Aset Saya", icon: <Package className="w-4 h-4" /> },
-  { href: "/goals", label: "Goal (Tujuan)", icon: <Target className="w-4 h-4" /> },
-  { href: "/needs", label: "Kebutuhan", icon: <Search className="w-4 h-4" /> },
-  { href: "/constraints", label: "Batasan Operasional", icon: <ShieldAlert className="w-4 h-4" /> },
-];
 
-const SYSTEM_NAV: NavItem[] = [
-  { href: "/engine-insights", label: "Engine Insights", icon: <Zap className="w-4 h-4" /> },
-];
 
 export function AppShell({ actor, activeRoute, children }: AppShellProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -79,14 +73,14 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
               onClick={() => setMobileMenuOpen(false)}
               className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all group ${
                 active
-                  ? "bg-[#FFF4ED] text-[#E66A48] border border-[#FCD9C8] font-bold shadow-xs"
-                  : "text-[#716B7E] hover:text-[#27213D] hover:bg-stone-100/70 border border-transparent"
+                  ? "bg-[#1E1B2E] text-white font-bold shadow-xs"
+                  : "text-stone-500 hover:text-[#1E1B2E] hover:bg-stone-100/70 border border-transparent"
               }`}
             >
               <div className="flex items-center gap-3 min-w-0">
                 <span
                   className={`text-base shrink-0 transition-transform ${
-                    active ? "scale-110 text-[#E66A48]" : "group-hover:scale-110 text-[#9E98A8] group-hover:text-[#27213D]"
+                    active ? "scale-110 text-white" : "group-hover:scale-110 text-stone-400 group-hover:text-[#1E1B2E]"
                   }`}
                 >
                   {item.icon}
@@ -94,7 +88,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                 <span className="truncate">{item.label}</span>
               </div>
               {item.badge && (
-                <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-md bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4] shrink-0">
+                <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-md bg-stone-100 text-[#1E1B2E] border border-stone-200 shrink-0">
                   {item.badge}
                 </span>
               )}
@@ -118,19 +112,19 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
       <aside className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-white/85 border-r border-stone-200/80 z-40 backdrop-blur-xl shadow-[4px_0_24px_rgba(39,33,61,0.02)]">
         <div className="p-5 border-b border-stone-200/80">
           <Link href="/dashboard" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#FFD45A] via-[#FFAF94] to-[#E66A48] flex items-center justify-center font-black text-[#27213D] text-base shadow-sm group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-2xl bg-amber-400 flex items-center justify-center font-black text-stone-950 text-base shadow-[0_4px_16px_rgba(251,191,36,0.3)] group-hover:scale-105 transition-transform">
               R
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-base tracking-tight text-[#27213D] group-hover:text-[#E66A48] transition-colors">
+                <span className="font-extrabold text-base tracking-tight text-[#1E1B2E] group-hover:text-amber-600 transition-colors">
                   RAMU
                 </span>
-                <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-md bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4]">
+                <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-md bg-amber-50 text-amber-800 border border-amber-200">
                   Engine
                 </span>
               </div>
-              <p className="text-[10px] text-[#716B7E] font-medium">Creative Opportunity Engine</p>
+              <p className="text-[10px] text-[#716B7E] font-medium hidden lg:block">Creative Opportunity</p>
             </div>
           </Link>
         </div>
@@ -143,19 +137,6 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
             {renderNavLinks(PRIMARY_NAV)}
           </div>
 
-          <div>
-            <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-[#9E98A8] mb-2">
-              Input Layer
-            </p>
-            {renderNavLinks(INPUT_LAYER_NAV)}
-          </div>
-
-          <div>
-            <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-[#9E98A8] mb-2">
-              Sistem Analisis
-            </p>
-            {renderNavLinks(SYSTEM_NAV)}
-          </div>
         </div>
 
         <div className="p-3.5 border-t border-stone-200/80 bg-stone-50/50">
@@ -186,7 +167,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
       {/* Mobile Top Header */}
       <header className="md:hidden sticky top-0 bg-white/90 backdrop-blur-md border-b border-stone-200/80 px-4 py-3 flex items-center justify-between z-30 shadow-xs">
         <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#FFD45A] via-[#FFAF94] to-[#E66A48] flex items-center justify-center font-bold text-[#27213D] text-xs shadow-xs">
+          <div className="w-8 h-8 rounded-xl bg-amber-400 flex items-center justify-center font-black text-stone-950 text-xs shadow-xs">
             R
           </div>
           <span className="font-extrabold text-sm tracking-tight text-[#27213D]">RAMU</span>
@@ -222,14 +203,6 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
               <p className="text-[10px] font-bold uppercase text-[#9E98A8] mb-2">Utama</p>
               {renderNavLinks(PRIMARY_NAV)}
             </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase text-[#9E98A8] mb-2">Input Layer</p>
-              {renderNavLinks(INPUT_LAYER_NAV)}
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase text-[#9E98A8] mb-2">Sistem</p>
-              {renderNavLinks(SYSTEM_NAV)}
-            </div>
             <div className="pt-3 border-t border-stone-200">
               <form action={logout}>
                 <button
@@ -258,8 +231,8 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
           { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
           { href: "/opportunities", label: "Peluang", icon: <Lightbulb className="w-5 h-5" /> },
           { href: "/projects", label: "Proyek", icon: <Megaphone className="w-5 h-5" /> },
+          { href: "/showcase", label: "Karya", icon: <Sparkles className="w-5 h-5" /> },
           { href: "/collaborations", label: "Kolaborasi", icon: <Handshake className="w-5 h-5" /> },
-          { href: "/assets", label: "Aset", icon: <Package className="w-5 h-5" /> },
         ].map((item) => {
           const active = isItemActive(item.href);
           return (
@@ -267,7 +240,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-all ${
-                active ? "text-[#E66A48] font-bold" : "text-[#716B7E] hover:text-[#27213D]"
+                active ? "text-amber-600 font-bold" : "text-stone-500 hover:text-stone-900"
               }`}
             >
               <span>{item.icon}</span>

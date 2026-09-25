@@ -40,8 +40,10 @@ export async function createProjectBriefAction(formData: FormData) {
   const location = (formData.get("location") as string)?.trim() || undefined;
   const estimatedDuration = (formData.get("estimatedDuration") as string)?.trim();
   const targetLaunch = (formData.get("targetLaunch") as string)?.trim();
+  const compensationModel = (formData.get("compensationModel") as string)?.trim();
   const estimatedTotal = (formData.get("estimatedTotal") as string)?.trim();
   const budgetNotes = (formData.get("budgetNotes") as string)?.trim();
+  const aestheticStyle = (formData.get("aestheticStyle") as string)?.trim();
 
   if (!title || !description || !projectType || !targetOutput) {
     return { success: false, error: "Judul, deskripsi, jenis proyek, dan target output wajib diisi." };
@@ -76,6 +78,8 @@ export async function createProjectBriefAction(formData: FormData) {
       location,
       timeline: { estimatedDuration, targetLaunch },
       budget: { estimatedTotal, notes: budgetNotes },
+      aestheticStyle,
+      compensationModel,
       neededRoles,
     });
 

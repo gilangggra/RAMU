@@ -5,7 +5,7 @@ import { getDirectoryActors } from "@/application/directoryService";
 import { AppShell } from "@/components/layout/AppShell";
 import { DirectoryFilterBar } from "@/components/directory/DirectoryFilterBar";
 import { ActorCard } from "@/components/directory/ActorCard";
-import { Users, Building2, UserCheck, Sparkles, Inbox } from "lucide-react";
+import { Inbox } from "lucide-react";
 
 export const metadata = {
   title: "Direktori Talenta & Studio Fashion | RAMU",
@@ -58,56 +58,44 @@ export default async function DirectoryPage({
 
   return (
     <AppShell actor={actor} activeRoute="/directory">
-      <div className="space-y-8">
-        {/* Hero Section */}
-        <section className="p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] relative overflow-hidden space-y-6">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative">
-            <div className="space-y-2 max-w-3xl">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold text-[#E66A48]">
-                <Users className="w-3.5 h-3.5 text-[#E66A48]" />
-                <span>Direktori Ekosistem Kreatif RAMU</span>
+      <div className="space-y-12 pb-24">
+        
+        {/* Editorial Hero Section */}
+        <section className="pt-12 pb-8 border-b border-stone-200">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-3 mb-6">
+                 <span className="w-8 h-px bg-stone-300"></span>
+                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
+                   Eksplorasi Ekosistem
+                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#27213D] tracking-tight">
-                Direktori Talenta & Studio Fashion
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light text-[#1E1B2E] tracking-tight leading-[1.1] mb-6">
+                Temukan rekan <br className="hidden sm:block" />
+                <span className="font-serif italic text-stone-500">kolaborasi ideal</span> Anda.
               </h1>
-              <p className="text-xs sm:text-sm text-[#716B7E] leading-relaxed">
-                Temukan studio foto cyclorama, fotografer komersial, model lookbook, desainer busana, dan pengrajin wastra terdaftar. Lihat aset nyata yang mereka miliki dan inisiasi peluang kolaborasi berbasis komplementaritas.
+              <p className="text-base text-stone-500 font-light leading-relaxed max-w-lg">
+                Jelajahi kurasi portofolio dari studio foto, talenta kreatif, dan desainer terverifikasi. 
+                Temukan kecocokan gaya visual dan inisiasi kolaborasi produksi bernilai tinggi.
               </p>
             </div>
-          </div>
-
-          {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-stone-100">
-            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
-              <div className="flex items-center justify-between text-stone-400">
-                <span className="text-[11px] font-bold uppercase tracking-wider">Total Ekosistem</span>
-                <Users className="w-4 h-4 text-[#27213D]" />
+            
+            {/* Minimalist Metrics */}
+            <div className="flex flex-wrap items-center gap-8 lg:gap-12 pb-2">
+              <div className="space-y-1">
+                <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{totalActors}</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Total Entitas</div>
               </div>
-              <div className="text-2xl font-black text-[#27213D] mt-1">{totalActors}</div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
-              <div className="flex items-center justify-between text-stone-400">
-                <span className="text-[11px] font-bold uppercase tracking-wider">Studio Foto & Visual</span>
-                <Building2 className="w-4 h-4 text-[#E66A48]" />
+              <div className="w-px h-10 bg-stone-200 hidden sm:block"></div>
+              <div className="space-y-1">
+                <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{totalStudios}</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Studio Visual</div>
               </div>
-              <div className="text-2xl font-black text-[#E66A48] mt-1">{totalStudios}</div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
-              <div className="flex items-center justify-between text-stone-400">
-                <span className="text-[11px] font-bold uppercase tracking-wider">Talenta Individual</span>
-                <UserCheck className="w-4 h-4 text-purple-600" />
+              <div className="w-px h-10 bg-stone-200 hidden sm:block"></div>
+              <div className="space-y-1">
+                <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{totalIndividuals}</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Kreator</div>
               </div>
-              <div className="text-2xl font-black text-purple-700 mt-1">{totalIndividuals}</div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
-              <div className="flex items-center justify-between text-stone-400">
-                <span className="text-[11px] font-bold uppercase tracking-wider">Brand & Kriya Fesyen</span>
-                <Sparkles className="w-4 h-4 text-amber-600" />
-              </div>
-              <div className="text-2xl font-black text-amber-800 mt-1">{totalBrands}</div>
             </div>
           </div>
         </section>
@@ -121,31 +109,31 @@ export default async function DirectoryPage({
         />
 
         {/* Actors Grid */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between text-xs text-stone-500 font-semibold px-1">
+        <div className="space-y-6">
+          <div className="flex items-center justify-between text-[11px] uppercase tracking-widest text-stone-400 font-semibold px-2">
             <span>
-              Menampilkan <span className="text-[#27213D] font-bold">{actors.length}</span> pelaku kreatif
-              {search && <span> untuk kata kunci &ldquo;{search}&rdquo;</span>}
+              Menampilkan <span className="text-[#1E1B2E]">{actors.length}</span> Portofolio
+              {search && <span className="lowercase"> untuk <span className="text-[#1E1B2E] font-medium">&ldquo;{search}&rdquo;</span></span>}
             </span>
           </div>
 
           {actors.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
               {actors.map((item) => (
                 <ActorCard key={item.id} actor={item} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 px-6 rounded-3xl bg-white/80 border border-stone-200/80 space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
-                <Inbox className="w-7 h-7" />
+            <div className="text-center py-24 px-6 border-y border-stone-200 space-y-4">
+              <div className="w-16 h-16 bg-stone-50 flex items-center justify-center mx-auto rounded-full text-stone-300">
+                <Inbox className="w-6 h-6" />
               </div>
-              <div className="space-y-1 max-w-md mx-auto">
-                <h3 className="text-base font-extrabold text-[#27213D]">
-                  Tidak Ada Talenta atau Studio Ditemukan
+              <div className="space-y-2 max-w-md mx-auto">
+                <h3 className="text-lg font-medium text-[#1E1B2E]">
+                  Tidak Ada Hasil Ditemukan
                 </h3>
-                <p className="text-xs text-stone-500">
-                  Coba sesuaikan kata kunci pencarian atau ubah filter tipe aktor dan domisili Anda.
+                <p className="text-sm text-stone-500 font-light">
+                  Coba sesuaikan kata kunci pencarian atau ubah kriteria filter untuk melihat portofolio lainnya.
                 </p>
               </div>
             </div>

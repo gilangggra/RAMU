@@ -6,7 +6,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     name: 'Kampanye Koleksi Kapsul & Editorial Lookbook',
     description:
       'Membentuk lini koleksi eksklusif terbatas dengan memadukan rancangan busana desainer, penata gaya (stylist), fotografer editorial, dan talenta model.',
-    category: 'PRODUCT_DEVELOPMENT',
+    category: 'COMMERCIAL_CAMPAIGN',
     version: 1,
     minParticipants: 2,
     maxParticipants: 4,
@@ -16,16 +16,16 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
         label: 'Koleksi Busana / Desainer',
         required: true,
         minCount: 1,
-        acceptedCategories: ['MATERIAL', 'PRODUCT'],
+        acceptedCategories: ['WARDROBE_PROP', 'PORTFOLIO_WORK'],
         acceptedRoles: ['INPUT', 'COMPONENT', 'CREATIVE_ELEMENT'],
       },
       {
-        code: 'CRAFT_COMPONENT',
+        code: 'STYLING_COMPONENT',
         label: 'Stylist & Wardrobe / Aksesori',
         required: true,
         minCount: 1,
-        acceptedCategories: ['MATERIAL', 'PRODUCT', 'PRODUCTION', 'CAPABILITY'],
-        acceptedRoles: ['COMPONENT', 'CAPABILITY', 'CREATIVE_ELEMENT'],
+        acceptedCategories: ['WARDROBE_PROP', 'PORTFOLIO_WORK', 'STUDIO_SPACE', 'SKILL_TALENT'],
+        acceptedRoles: ['COMPONENT', 'SKILL_TALENT', 'CREATIVE_ELEMENT'],
       },
     ],
     optionalRoles: [
@@ -34,7 +34,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
         label: 'Aksen Perhiasan & Detail',
         required: false,
         minCount: 0,
-        acceptedCategories: ['PRODUCT', 'CREATIVE_ASSET'],
+        acceptedCategories: ['PORTFOLIO_WORK', 'PORTFOLIO_WORK'],
         acceptedRoles: ['COMPONENT', 'CREATIVE_ELEMENT'],
       },
       {
@@ -42,8 +42,8 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
         label: 'Fotografi Editorial & Model',
         required: false,
         minCount: 0,
-        acceptedCategories: ['CAPABILITY', 'RESOURCE'],
-        acceptedRoles: ['CAPABILITY', 'ENABLER'],
+        acceptedCategories: ['SKILL_TALENT', 'EQUIPMENT'],
+        acceptedRoles: ['SKILL_TALENT', 'ENABLER'],
       },
     ],
     expectedOutputs: [
@@ -58,10 +58,10 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       'DIRECT_NEED_MATCH',
     ],
     preferredGoals: [
-      'PRODUCT_DEVELOPMENT',
-      'MARKET_EXPANSION',
-      'BRAND_GROWTH',
-      'CREATIVE_EXPERIMENTATION',
+      'COMMERCIAL_CAMPAIGN',
+      'BRAND_AWARENESS',
+      'BRAND_AWARENESS',
+      'SKILL_DEVELOPMENT',
     ],
     generateTitle: (ctx: TitleContext) => {
       const names = ctx.actors.map((a) => a.name.replace(/^(Maison|Studio|Label)\s+/i, '')).slice(0, 2);
@@ -81,17 +81,17 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     name: 'Produksi Lookbook & E-Commerce Studio',
     description:
       'Menghubungkan label busana dengan fasilitas studio daylight profesional, fotografer komersial, dan tim penata gaya untuk katalog e-commerce.',
-    category: 'PRODUCT_DEVELOPMENT',
+    category: 'COMMERCIAL_CAMPAIGN',
     version: 1,
     minParticipants: 2,
     maxParticipants: 4,
     requiredRoles: [
       {
-        code: 'CORE_CRAFT',
+        code: 'CORE_COLLECTION',
         label: 'Koleksi Busana Musim Terbaru',
         required: true,
         minCount: 1,
-        acceptedCategories: ['PRODUCT', 'MATERIAL'],
+        acceptedCategories: ['PORTFOLIO_WORK', 'WARDROBE_PROP'],
         acceptedRoles: ['OUTPUT', 'COMPONENT', 'CREATIVE_ELEMENT'],
       },
       {
@@ -99,7 +99,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
         label: 'Fasilitas Studio & Lighting Kit',
         required: true,
         minCount: 1,
-        acceptedCategories: ['PRODUCT', 'CREATIVE_ASSET', 'MATERIAL', 'RESOURCE'],
+        acceptedCategories: ['PORTFOLIO_WORK', 'PORTFOLIO_WORK', 'WARDROBE_PROP', 'EQUIPMENT'],
         acceptedRoles: ['COMPONENT', 'CREATIVE_ELEMENT', 'ENABLER'],
       },
     ],
@@ -109,8 +109,8 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
         label: 'Pengarah Gaya & Model',
         required: false,
         minCount: 0,
-        acceptedCategories: ['CAPABILITY', 'RESOURCE'],
-        acceptedRoles: ['CAPABILITY', 'ENABLER'],
+        acceptedCategories: ['SKILL_TALENT', 'EQUIPMENT'],
+        acceptedRoles: ['SKILL_TALENT', 'ENABLER'],
       },
     ],
     expectedOutputs: [
@@ -124,9 +124,9 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       'DIRECT_NEED_MATCH',
     ],
     preferredGoals: [
-      'REVENUE_GROWTH',
-      'MARKET_EXPANSION',
-      'PRODUCT_DEVELOPMENT',
+      'REVENUE_GENERATION',
+      'BRAND_AWARENESS',
+      'COMMERCIAL_CAMPAIGN',
     ],
     generateTitle: (ctx: TitleContext) => {
       const names = ctx.actors.map((a) => a.name).slice(0, 2).join(' × ');
@@ -156,7 +156,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
         label: 'Label Busana / Koleksi',
         required: true,
         minCount: 1,
-        acceptedCategories: ['PRODUCT', 'MATERIAL', 'CREATIVE_ASSET'],
+        acceptedCategories: ['PORTFOLIO_WORK', 'WARDROBE_PROP', 'PORTFOLIO_WORK'],
         acceptedRoles: ['OUTPUT', 'CREATIVE_ELEMENT'],
       },
       {
@@ -164,8 +164,8 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
         label: 'Creative Director & Videografer',
         required: true,
         minCount: 1,
-        acceptedCategories: ['CAPABILITY', 'RESOURCE'],
-        acceptedRoles: ['CAPABILITY', 'ENABLER'],
+        acceptedCategories: ['SKILL_TALENT', 'EQUIPMENT'],
+        acceptedRoles: ['SKILL_TALENT', 'ENABLER'],
       },
     ],
     optionalRoles: [
@@ -174,7 +174,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
         label: 'Aksesori & Wardrobe Pelengkap',
         required: false,
         minCount: 0,
-        acceptedCategories: ['PRODUCT', 'MATERIAL'],
+        acceptedCategories: ['PORTFOLIO_WORK', 'WARDROBE_PROP'],
         acceptedRoles: ['COMPONENT', 'CREATIVE_ELEMENT'],
       },
     ],
@@ -189,18 +189,18 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       'CAPABILITY_GAP',
     ],
     preferredGoals: [
-      'BRAND_GROWTH',
-      'MARKET_EXPANSION',
-      'CREATIVE_EXPERIMENTATION',
+      'BRAND_AWARENESS',
+      'BRAND_AWARENESS',
+      'SKILL_DEVELOPMENT',
     ],
     generateTitle: (ctx: TitleContext) => {
-      const craftActor = ctx.actors.find((a) => a.assets.some((as) => as.category === 'PRODUCT' || as.category === 'MATERIAL')) || ctx.actors[0];
-      return `Kampanye Fashion Film & Arahan Visual: ${craftActor.name}`;
+      const fashionActor = ctx.actors.find((a) => a.assets.some((as) => as.category === 'PORTFOLIO_WORK' || as.category === 'WARDROBE_PROP')) || ctx.actors[0];
+      return `Kampanye Fashion Film & Arahan Visual: ${fashionActor.name}`;
     },
     generateDescription: (ctx: TitleContext) => {
-      const visualActor = ctx.actors.find((a) => a.assets.some((as) => as.category === 'CAPABILITY')) || ctx.actors[1];
-      const craftActors = ctx.actors.filter((a) => a.id !== visualActor?.id).map((a) => a.name).join(', ');
-      return `Produksi film pendek mode sinematik dan arahan artistik untuk ${craftActors} oleh ${visualActor ? visualActor.name : 'studio kreatif'} guna mengangkat narasi estetika ke panggung festival dan audiens internasional.`;
+      const visualActor = ctx.actors.find((a) => a.assets.some((as) => as.category === 'SKILL_TALENT')) || ctx.actors[1];
+      const brandActors = ctx.actors.filter((a) => a.id !== visualActor?.id).map((a) => a.name).join(', ');
+      return `Produksi film pendek mode sinematik dan arahan artistik untuk ${brandActors} oleh ${visualActor ? visualActor.name : 'studio kreatif'} guna mengangkat narasi estetika ke panggung festival dan audiens internasional.`;
     },
   },
   {
@@ -218,7 +218,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
         label: 'Desainer / Pemilik Koleksi Busana',
         required: true,
         minCount: 1,
-        acceptedCategories: ['PRODUCT', 'MATERIAL'],
+        acceptedCategories: ['PORTFOLIO_WORK', 'WARDROBE_PROP'],
         acceptedRoles: ['OUTPUT', 'COMPONENT'],
       },
       {
@@ -226,8 +226,8 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
         label: 'Fotografer Fashion & Model',
         required: true,
         minCount: 1,
-        acceptedCategories: ['CAPABILITY', 'RESOURCE'],
-        acceptedRoles: ['CAPABILITY', 'ENABLER'],
+        acceptedCategories: ['SKILL_TALENT', 'EQUIPMENT'],
+        acceptedRoles: ['SKILL_TALENT', 'ENABLER'],
       },
     ],
     optionalRoles: [],
@@ -237,7 +237,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       'Aset Digital Siap Rilis Kampanye',
     ],
     allowedRelationships: ['DIRECT_NEED_MATCH', 'CAPABILITY_GAP'],
-    preferredGoals: ['BRAND_GROWTH', 'MARKET_EXPANSION', 'REVENUE_GROWTH'],
+    preferredGoals: ['BRAND_AWARENESS', 'BRAND_AWARENESS', 'REVENUE_GENERATION'],
     generateTitle: (ctx: TitleContext) => {
       const maker = ctx.actors[0];
       const studio = ctx.actors[1];
@@ -260,19 +260,19 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     maxParticipants: 3,
     requiredRoles: [
       {
-        code: 'MAKER_CRAFT',
+        code: 'ATELIER_WORKSHOP',
         label: 'Atelier Jahit & Workshop Garmen',
         required: true,
         minCount: 1,
-        acceptedCategories: ['MATERIAL', 'PRODUCTION', 'CAPABILITY'],
-        acceptedRoles: ['CAPABILITY', 'COMPONENT', 'INPUT'],
+        acceptedCategories: ['WARDROBE_PROP', 'STUDIO_SPACE', 'SKILL_TALENT'],
+        acceptedRoles: ['SKILL_TALENT', 'COMPONENT', 'INPUT'],
       },
       {
         code: 'DESIGN_OR_COMPONENT',
         label: 'Sketsa Desain & Pola Busana',
         required: true,
         minCount: 1,
-        acceptedCategories: ['CREATIVE_ASSET', 'PRODUCT', 'MATERIAL'],
+        acceptedCategories: ['PORTFOLIO_WORK', 'PORTFOLIO_WORK', 'WARDROBE_PROP'],
         acceptedRoles: ['CREATIVE_ELEMENT', 'COMPONENT'],
       },
     ],
@@ -283,7 +283,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       'Produksi Batch Terbatas Siap Rilis',
     ],
     allowedRelationships: ['PRODUCTION_CHAIN', 'CAPABILITY_GAP', 'PRODUCT_COMBINATION'],
-    preferredGoals: ['PRODUCT_DEVELOPMENT', 'CAPABILITY_EXPANSION', 'REVENUE_GROWTH'],
+    preferredGoals: ['COMMERCIAL_CAMPAIGN', 'SKILL_DEVELOPMENT', 'REVENUE_GENERATION'],
     generateTitle: (ctx: TitleContext) => {
       const names = ctx.actors.map((a) => a.name).join(' & ');
       return `Produksi Lini Busana Kolaboratif: ${names}`;
@@ -298,7 +298,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     name: 'Runway Showcase & Peluncuran Koleksi Bersama',
     description:
       'Dua atau lebih label fashion dan studio kreatif menggabungkan basis audiens dalam sebuah peragaan busana atau peluncuran koleksi kolaboratif.',
-    category: 'MARKET_ACCESS',
+    category: 'EDITORIAL_PUBLICATION',
     version: 1,
     minParticipants: 2,
     maxParticipants: 4,
@@ -308,7 +308,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
         label: 'Label Fashion Kolaborator 1',
         required: true,
         minCount: 1,
-        acceptedCategories: ['PRODUCT', 'MATERIAL'],
+        acceptedCategories: ['PORTFOLIO_WORK', 'WARDROBE_PROP'],
         acceptedRoles: ['OUTPUT', 'COMPONENT'],
       },
       {
@@ -316,8 +316,8 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
         label: 'Label Fashion Kolaborator 2',
         required: true,
         minCount: 1,
-        acceptedCategories: ['PRODUCT', 'MATERIAL', 'CREATIVE_ASSET'],
-        acceptedRoles: ['OUTPUT', 'COMPONENT', 'MARKET_ACCESS'],
+        acceptedCategories: ['PORTFOLIO_WORK', 'WARDROBE_PROP', 'PORTFOLIO_WORK'],
+        acceptedRoles: ['OUTPUT', 'COMPONENT', 'EDITORIAL_PUBLICATION'],
       },
     ],
     optionalRoles: [
@@ -326,8 +326,8 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
         label: 'Dukungan Dokumentasi Runway',
         required: false,
         minCount: 0,
-        acceptedCategories: ['CAPABILITY'],
-        acceptedRoles: ['CAPABILITY', 'ENABLER'],
+        acceptedCategories: ['SKILL_TALENT'],
+        acceptedRoles: ['SKILL_TALENT', 'ENABLER'],
       },
     ],
     expectedOutputs: [
@@ -335,8 +335,8 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
       'Kampanye Cross-Promotion di Media Fashion',
       'Rilis Koleksi Kolaboratif Terbatas',
     ],
-    allowedRelationships: ['MARKET_ACCESS', 'PRODUCT_COMBINATION', 'CREATIVE_COMBINATION'],
-    preferredGoals: ['MARKET_EXPANSION', 'REVENUE_GROWTH', 'NETWORK_EXPANSION'],
+    allowedRelationships: ['EDITORIAL_PUBLICATION', 'PRODUCT_COMBINATION', 'CREATIVE_COMBINATION'],
+    preferredGoals: ['BRAND_AWARENESS', 'REVENUE_GENERATION', 'PORTFOLIO_BUILDING'],
     generateTitle: (ctx: TitleContext) => {
       const names = ctx.actors.map((a) => a.name).join(' × ');
       return `Runway Showcase & Peluncuran Bersama: ${names}`;

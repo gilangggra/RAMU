@@ -54,15 +54,15 @@ export default async function OpportunitiesPage({
         <section className="p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] relative overflow-hidden space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-semibold text-[#E66A48]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#E66A48] animate-pulse" />
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/25 text-xs font-bold text-amber-800">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                 Phase 3: Opportunity Engine Aktif
               </div>
               <h1 className="text-3xl font-extrabold text-[#27213D] tracking-tight">
                 Katalog Peluang Kolaborasi Kreatif
               </h1>
               <p className="text-sm text-[#716B7E] max-w-2xl leading-relaxed">
-                Hasil sintesis deterministik 12 tahap dari perpaduan aset, sasaran bisnis, dan kapabilitas perajin kriya nusantara. Setiap peluang dilengkapi evaluasi kelayakan dan alasan terukur.
+                Hasil sintesis deterministik dari perpaduan aset, tujuan kreatif, dan kapabilitas fotografer, desainer, model, serta studio profesional. Setiap peluang dilengkapi evaluasi kelayakan dan alasan terukur.
               </p>
             </div>
 

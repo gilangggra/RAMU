@@ -5,17 +5,18 @@ import { prisma } from "@/infrastructure/database/prisma";
 import { getShowcaseAssets } from "@/application/showcaseService";
 import { AppShell } from "@/components/layout/AppShell";
 import { ShowcaseCard } from "@/components/showcase/ShowcaseCard";
-import { Sparkles, Image as ImageIcon } from "lucide-react";
+import { ShowcaseFilterBar } from "@/components/showcase/ShowcaseFilterBar";
+import { ImageIcon, Sparkles } from "lucide-react";
 
 export const metadata = {
   title: "Karya & Inspirasi | RAMU",
-  description: "Eksplorasi mahakarya visual dari ekosistem kreatif RAMU.",
+  description: "Eksplorasi mahakarya visual dan profil kreatif dari ekosistem RAMU bergaya Apple Liquid Glass.",
 };
 
 export default async function ShowcasePage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; q?: string }>;
 }) {
   const supabase = await createClient();
   const {
@@ -33,83 +34,86 @@ export default async function ShowcasePage({
 
   const params = await searchParams;
   const currentCategory = params?.category || "ALL";
+  const searchQuery = params?.q || "";
 
-  const showcaseItems = await getShowcaseAssets({ category: currentCategory });
+  const showcaseItems = await getShowcaseAssets({
+    category: currentCategory,
+    search: searchQuery || undefined,
+  });
 
-  const categories = [
-    { id: "ALL", label: "Semua Karya" },
-    { id: "Fotografi & Video", label: "Fotografi & Video" },
-    { id: "Desain Visual", label: "Desain Visual" },
-    { id: "Fashion Styling", label: "Fashion Styling" },
-    { id: "Studio & Ruang", label: "Studio & Ruang" },
-  ];
+
 
   return (
     <AppShell actor={actor} activeRoute="/showcase">
-      <div className="space-y-8">
-        
-        {/* Hero Section */}
-        <section className="relative px-8 pt-12 pb-8 rounded-[32px] bg-[#27213D] overflow-hidden text-center space-y-6 shadow-[0_20px_40px_rgba(39,33,61,0.15)]">
-          {/* Aesthetic Background Elements */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-purple-600/30 rounded-full blur-[100px] mix-blend-screen" />
-            <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-amber-500/20 rounded-full blur-[100px] mix-blend-screen" />
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay" />
-          </div>
+      <div className="space-y-6">
 
-          <div className="relative z-10 max-w-2xl mx-auto space-y-4">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold text-white uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>Inspirasi Tanpa Batas</span>
+        {/* ── IPHONE GLASS HEADER & SPOTLIGHT CONTROL ── */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pt-1">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/75 backdrop-blur-xl border border-white/80 shadow-[0_2px_12px_rgba(39,33,61,0.04)] text-[11px] font-bold text-stone-700 mb-2">
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>Kurasi Visual Eksklusif • RAMU Spotlight</span>
             </div>
-            <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-              Eksplorasi Karya <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-500">
-                Ekosistem Kreatif
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-black text-[#1E1B2E] tracking-tight">
+                Karya &amp; Inspirasi
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full bg-white/70 backdrop-blur-md border border-white/80 text-[11px] font-extrabold text-stone-700 shadow-xs">
+                {showcaseItems.length} Karya
               </span>
-            </h1>
-            <p className="text-sm text-stone-300 leading-relaxed max-w-lg mx-auto">
-              Telusuri mahakarya visual terbaik dari para pelaku kreatif di RAMU. Biarkan visual berbicara, temukan gaya yang sesuai, dan inisiasi kolaborasi impian Anda.
+            </div>
+            <p className="text-xs sm:text-sm text-stone-500 mt-1 max-w-xl leading-relaxed">
+              Jelajahi karya visual pilihan dari kreator, fotografer, stylist, dan desainer terverifikasi.
             </p>
           </div>
-        </section>
 
-        {/* Filter Categories */}
-        <div className="flex flex-wrap items-center justify-center gap-2 sticky top-[72px] z-20 py-2 bg-[#FAF8F5]/80 backdrop-blur-xl rounded-full px-4 border border-stone-200/50 shadow-sm mx-auto w-fit">
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              href={`/showcase${cat.id === "ALL" ? "" : `?category=${encodeURIComponent(cat.id)}`}`}
-              className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
-                currentCategory === cat.id
-                  ? "bg-[#27213D] text-white shadow-md"
-                  : "bg-transparent text-stone-500 hover:text-[#27213D] hover:bg-stone-200/50"
-              }`}
-            >
-              {cat.label}
-            </Link>
-          ))}
+          {/* Quick Stats or Live Indicator */}
+          <div className="hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/60 backdrop-blur-xl border border-white/80 text-xs text-stone-600 shadow-xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="font-semibold text-stone-700">Ekosistem Terhubung</span>
+            <span className="text-stone-300">•</span>
+            <span className="text-stone-500">Klik karya untuk quick inspect</span>
+          </div>
         </div>
 
-        {/* Masonry Grid */}
+        {/* ── SHOWCASE FILTER BAR ── */}
+        <ShowcaseFilterBar />
+
+        {/* ── MASONRY GRID — IPHONE GLASS CARDS ── */}
         {showcaseItems.length > 0 ? (
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 pt-4">
+          <div className="columns-2 sm:columns-2 md:columns-3 xl:columns-4 gap-4">
             {showcaseItems.map((item) => (
               <ShowcaseCard key={item.id} item={item} />
             ))}
           </div>
         ) : (
-          <div className="text-center py-24 px-6 rounded-3xl bg-white/50 border border-stone-200/50 space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
-              <ImageIcon className="w-8 h-8" />
+          <div className="flex flex-col items-center justify-center py-20 px-6 rounded-[32px] bg-white/70 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_rgba(39,33,61,0.04)] space-y-4 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-white/80 border border-white/90 shadow-sm flex items-center justify-center text-stone-400">
+              <ImageIcon className="w-7 h-7" />
             </div>
-            <div className="space-y-1 max-w-md mx-auto">
-              <h3 className="text-lg font-extrabold text-[#27213D]">
-                Belum Ada Karya Ditemukan
+            <div className="space-y-1.5 max-w-sm">
+              <h3 className="text-base font-extrabold text-[#1E1B2E]">
+                {searchQuery ? `Tidak ada hasil untuk "${searchQuery}"` : "Karya Belum Tersedia"}
               </h3>
               <p className="text-xs text-stone-500 leading-relaxed">
-                Kategori ini belum memiliki portofolio publik. Coba ubah kategori di atas untuk melihat karya dari industri kreatif lainnya.
+                {searchQuery
+                  ? "Coba kata kunci lain atau bersihkan filter pencarian."
+                  : "Kategori kurasi ini sedang disiapkan oleh para kreator RAMU."}
               </p>
+            </div>
+            <div className="flex items-center gap-2.5 pt-2">
+              <Link
+                href="/showcase"
+                className="px-4 py-2 rounded-xl bg-[#1E1B2E] text-white text-xs font-bold hover:bg-black transition-all shadow-sm active:scale-95"
+              >
+                Tampilkan Semua
+              </Link>
+              <Link
+                href="/directory"
+                className="px-4 py-2 rounded-xl bg-white/80 backdrop-blur-md border border-white/90 text-[#1E1B2E] text-xs font-bold hover:bg-white transition-all shadow-xs active:scale-95"
+              >
+                Jelajahi Profil Pelaku
+              </Link>
             </div>
           </div>
         )}

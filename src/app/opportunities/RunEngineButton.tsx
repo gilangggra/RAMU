@@ -35,7 +35,7 @@ export function RunEngineButton({ actorName }: { actorName?: string }) {
       <button
         onClick={handleRunEngine}
         disabled={isRunning}
-        className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#FFD45A] via-[#FFAF94] to-[#E66A48] hover:from-[#FFB800] hover:to-[#D45938] text-[#27213D] font-bold text-xs sm:text-sm shadow-xs hover:shadow-md transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
+        className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-amber-400 hover:bg-amber-300 text-stone-950 font-black text-xs sm:text-sm shadow-[0_4px_16px_rgba(251,191,36,0.25)] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
       >
         {isRunning ? (
           <>

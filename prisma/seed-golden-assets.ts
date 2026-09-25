@@ -21,7 +21,7 @@ async function main() {
       name: {
         in: [
           "Sanggar Batik Sekar Wangi",
-          "Kriya Kulit Mandiri",
+          "Atelier Kulit Mandiri",
           "Nusantara Silver & Gem",
           "Lensa Kreatif Studio",
         ],
@@ -44,7 +44,7 @@ async function main() {
     await prisma.asset.create({
       data: {
         actorId: batik.id,
-        category: AssetCategory.MATERIAL,
+        category: AssetCategory.WARDROBE_PROP,
         subtype: "Batik Tulis",
         name: "Kain Batik Tulis Motif Parang & Kawung",
         description: "Batik tulis premium motif klasik Yogyakarta dengan pewarna alam",
@@ -59,7 +59,7 @@ async function main() {
     await prisma.goal.create({
       data: {
         actorId: batik.id,
-        category: GoalCategory.MARKET_EXPANSION,
+        category: GoalCategory.BRAND_AWARENESS,
         title: "Menjangkau pasar konsumen muda (Gen-Z & Millennial) via fashion kontemporer",
         priority: 5,
         status: GoalStatus.ACTIVE,
@@ -74,7 +74,7 @@ async function main() {
     await prisma.asset.create({
       data: {
         actorId: kulit.id,
-        category: AssetCategory.MATERIAL,
+        category: AssetCategory.WARDROBE_PROP,
         subtype: "Kulit Sapi Nabati",
         name: "Kulit Nabati Premium (Vegetable Tanned Leather)",
         description: "Kulit sapi berkualitas grade A untuk tas dan aksesoris",
@@ -89,8 +89,8 @@ async function main() {
     await prisma.asset.create({
       data: {
         actorId: kulit.id,
-        category: AssetCategory.CAPABILITY,
-        subtype: "Kerajinan Kulit",
+        category: AssetCategory.SKILL_TALENT,
+        subtype: "Aksesoris & Leather Goods",
         name: "Keahlian Konstruksi Tas & Dompet Kulit Handmade",
         description: "Pengerjaan jahitan tangan (hand-stitched) presisi tinggi",
         roles: [AssetRole.CAPABILITY, AssetRole.ENABLER],
@@ -104,7 +104,7 @@ async function main() {
     await prisma.goal.create({
       data: {
         actorId: kulit.id,
-        category: GoalCategory.PRODUCT_DEVELOPMENT,
+        category: GoalCategory.COMMERCIAL_CAMPAIGN,
         title: "Mengembangkan lini tas etnik modern bernilai tambah tinggi",
         priority: 5,
         status: GoalStatus.ACTIVE,
@@ -120,7 +120,7 @@ async function main() {
       await prisma.asset.create({
         data: {
           actorId: perak.id,
-          category: AssetCategory.PRODUCT,
+          category: AssetCategory.PORTFOLIO_WORK,
           subtype: "Aksesoris Perak",
           name: "Ornamen & Buckle Perak Bakar Tradisional Kotagede",
           description: "Detail gesper dan gantungan perak ukir untuk produk fashion",
@@ -141,10 +141,10 @@ async function main() {
       await prisma.asset.create({
         data: {
           actorId: lensa.id,
-          category: AssetCategory.CAPABILITY,
+          category: AssetCategory.SKILL_TALENT,
           subtype: "Fotografi Fashion",
           name: "Layanan Fotografi Komersial & Editorial Lookbook",
-          description: "Tim fotografer dan pengarah gaya berpengalaman untuk brand kriya",
+          description: "Tim fotografer dan pengarah gaya berpengalaman untuk brand fashion & editorial",
           roles: [AssetRole.CAPABILITY, AssetRole.ENABLER],
           attributes: { camera: "Medium Format", lighting: "Profoto" },
           sourceType: SourceType.SELF_REPORTED,

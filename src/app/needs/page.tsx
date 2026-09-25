@@ -28,16 +28,13 @@ const NEED_LABELS: Record<
   NeedCategory,
   { label: string; desc: string; icon: React.ComponentType<{ className?: string }>; color: string; badge: string }
 > = {
-  CAPABILITY_NEED: { label: "Kebutuhan Kapabilitas", desc: "Skill atau keahlian yang belum dimiliki", icon: Brain, color: "text-[#7C3AED]", badge: "bg-[#EDE8FF] text-[#7C3AED] border-[#DDD6FE]" },
-  RESOURCE_NEED: { label: "Kebutuhan Sumber Daya", desc: "Sumber daya yang dibutuhkan", icon: Zap, color: "text-[#0D9488]", badge: "bg-[#E0F7F0] text-[#0D9488] border-[#99F6E4]" },
-  MATERIAL_NEED: { label: "Kebutuhan Material", desc: "Bahan baku atau komponen", icon: Layers, color: "text-[#E66A48]", badge: "bg-[#FFF7ED] text-[#E66A48] border-[#F9D8C4]" },
-  PRODUCTION_NEED: { label: "Kebutuhan Produksi", desc: "Kapasitas atau fasilitas produksi", icon: Factory, color: "text-[#2563EB]", badge: "bg-[#E2F4FD] text-[#2563EB] border-[#BFDBFE]" },
-  MARKET_NEED: { label: "Kebutuhan Pasar", desc: "Akses ke pasar atau segmen tertentu", icon: ShoppingCart, color: "text-[#0D9488]", badge: "bg-[#E0F7F0] text-[#0D9488] border-[#99F6E4]" },
-  DISTRIBUTION_NEED: { label: "Kebutuhan Distribusi", desc: "Kanal distribusi atau logistik", icon: Truck, color: "text-[#2563EB]", badge: "bg-[#E2F4FD] text-[#2563EB] border-[#BFDBFE]" },
-  CREATIVE_NEED: { label: "Kebutuhan Kreatif", desc: "Desain, konten, atau aset visual", icon: Palette, color: "text-[#E66A48]", badge: "bg-[#FFF7ED] text-[#E66A48] border-[#F9D8C4]" },
-  TECHNOLOGY_NEED: { label: "Kebutuhan Teknologi", desc: "Tools, platform, atau infrastruktur tech", icon: Laptop, color: "text-[#7C3AED]", badge: "bg-[#EDE8FF] text-[#7C3AED] border-[#DDD6FE]" },
-  FUNDING_NEED: { label: "Kebutuhan Pendanaan", desc: "Modal atau investasi", icon: CircleDollarSign, color: "text-[#FFB800]", badge: "bg-[#FFFDE6] text-[#B45309] border-[#FDE68A]" },
-  SPACE_NEED: { label: "Kebutuhan Ruang", desc: "Ruang kerja, studio, atau gudang", icon: Home, color: "text-[#E66A48]", badge: "bg-[#FFF7ED] text-[#E66A48] border-[#F9D8C4]" },
+  TALENT_NEED: { label: "Model / Aktor", desc: "Talenta untuk pemotretan atau kampanye", icon: Brain, color: "text-[#1E1B2E]", badge: "bg-stone-100 text-[#1E1B2E] border-stone-200" },
+  CREW_NEED: { label: "Kru Profesional", desc: "Fotografer, MUA, Fashion Stylist", icon: Palette, color: "text-[#1E1B2E]", badge: "bg-stone-100 text-[#1E1B2E] border-stone-200" },
+  LOCATION_NEED: { label: "Studio / Lokasi", desc: "Ruang kerja atau lokasi pemotretan", icon: Home, color: "text-[#1E1B2E]", badge: "bg-stone-100 text-[#1E1B2E] border-stone-200" },
+  EQUIPMENT_NEED: { label: "Peralatan Produksi", desc: "Sewa Kamera, Lighting, atau alat", icon: Zap, color: "text-[#1E1B2E]", badge: "bg-stone-100 text-[#1E1B2E] border-stone-200" },
+  WARDROBE_NEED: { label: "Pakaian & Properti", desc: "Koleksi busana atau props khusus", icon: Layers, color: "text-[#1E1B2E]", badge: "bg-stone-100 text-[#1E1B2E] border-stone-200" },
+  FUNDING_NEED: { label: "Pendanaan Sponsor", desc: "Sponsor atau dukungan finansial", icon: CircleDollarSign, color: "text-[#1E1B2E]", badge: "bg-stone-100 text-[#1E1B2E] border-stone-200" },
+  PUBLICATION_NEED: { label: "Akses Publikasi", desc: "Akses ke majalah atau media fesyen", icon: Truck, color: "text-[#1E1B2E]", badge: "bg-stone-100 text-[#1E1B2E] border-stone-200" },
 };
 
 export default async function NeedsPage({ searchParams }: NeedsPageProps) {
@@ -93,15 +90,15 @@ export default async function NeedsPage({ searchParams }: NeedsPageProps) {
 
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
           <div className="xl:col-span-2 space-y-4">
-            <h2 className="text-xs font-bold text-[#9E98A8] uppercase tracking-wider">+ Tambah Kebutuhan</h2>
-            <div className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-xs space-y-5">
-              <form action={createNeed} className="space-y-4">
+            <h2 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-widest mb-6">+ Tambah Kebutuhan Baru</h2>
+            <div className="pt-2">
+              <form action={createNeed} className="space-y-6">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#9E98A8]">Kategori Kebutuhan *</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Kategori Kebutuhan *</label>
                   <select
                     name="category"
-                    defaultValue="CAPABILITY_NEED"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50/80 border border-stone-200 text-sm text-[#27213D] focus:outline-none focus:bg-white focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/15 transition-all"
+                    defaultValue="TALENT_NEED"
+                    className="w-full px-0 py-3 bg-transparent border-b border-stone-300 text-sm font-light text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E] cursor-pointer appearance-none"
                   >
                     {Object.entries(NEED_LABELS).map(([val, { label }]) => (
                       <option key={val} value={val}>{label}</option>
@@ -110,49 +107,49 @@ export default async function NeedsPage({ searchParams }: NeedsPageProps) {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#9E98A8]">Deskripsi Kebutuhan *</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Deskripsi Kebutuhan *</label>
                   <input
                     name="title"
                     type="text"
                     required
                     placeholder="misal: Fotografer fashion editorial & retoucher"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50/80 border border-stone-200 text-sm text-[#27213D] placeholder-stone-400 focus:outline-none focus:bg-white focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/15 transition-all"
+                    className="w-full px-0 py-3 bg-transparent border-b border-stone-300 text-sm font-light text-[#1E1B2E] placeholder:text-stone-400 focus:outline-none focus:border-[#1E1B2E] transition-colors"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#9E98A8]">Detail Tambahan (Opsional)</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Detail Tambahan (Opsional)</label>
                   <textarea
                     name="description"
                     rows={2}
                     placeholder="Spesifikasi atau kriteria yang dicari..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50/80 border border-stone-200 text-sm text-[#27213D] placeholder-stone-400 focus:outline-none focus:bg-white focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/15 transition-all resize-none"
+                    className="w-full px-0 py-3 bg-transparent border-b border-stone-300 text-sm font-light text-[#1E1B2E] placeholder:text-stone-400 focus:outline-none focus:border-[#1E1B2E] transition-colors resize-none"
                   />
                 </div>
 
                 {goals.length > 0 && (
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-[#9E98A8]">Terkait Goal (Opsional)</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Terkait Goal (Opsional)</label>
                     <select
                       name="relatedGoalId"
                       defaultValue=""
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50/80 border border-stone-200 text-sm text-[#27213D] focus:outline-none focus:bg-white focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/15 transition-all"
+                      className="w-full px-0 py-3 bg-transparent border-b border-stone-300 text-sm font-light text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E] cursor-pointer appearance-none"
                     >
                       <option value="">— Tidak dikaitkan ke goal tertentu —</option>
                       {goals.map((g) => (
                         <option key={g.id} value={g.id}>{g.title}</option>
                       ))}
                     </select>
-                    <p className="text-[11px] text-[#716B7E]">Menautkan need ke goal meningkatkan akurasi scoring Opportunity Engine.</p>
+                    <p className="text-[11px] text-stone-500 mt-1">Menautkan need ke goal meningkatkan akurasi scoring Opportunity Engine.</p>
                   </div>
                 )}
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#9E98A8]">Prioritas (1–5)</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Prioritas (1–5)</label>
                   <select
                     name="priority"
                     defaultValue="3"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50/80 border border-stone-200 text-sm text-[#27213D] focus:outline-none focus:bg-white focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/15 transition-all"
+                    className="w-full px-0 py-3 bg-transparent border-b border-stone-300 text-sm font-light text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E] cursor-pointer appearance-none"
                   >
                     <option value="5">5 — Sangat Tinggi</option>
                     <option value="4">4 — Tinggi</option>
@@ -164,10 +161,10 @@ export default async function NeedsPage({ searchParams }: NeedsPageProps) {
 
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xl bg-[#0D9488] hover:bg-[#0F766E] text-white font-bold text-sm shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full mt-8 px-6 py-4 bg-[#1E1B2E] hover:bg-black text-white text-[11px] font-bold uppercase tracking-widest transition-colors flex justify-center items-center gap-2"
                 >
+                  <Search className="w-4 h-4" />
                   <span>Simpan Kebutuhan</span>
-                  <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
             </div>

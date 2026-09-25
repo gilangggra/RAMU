@@ -176,6 +176,22 @@ export async function toggleTaskStatus(taskId: string, collaborationId: string, 
   }
 }
 
+export async function deleteTask(taskId: string, collaborationId: string) {
+  await getPrimaryActor();
+
+  try {
+    await prisma.task.delete({
+      where: { id: taskId },
+    });
+
+    revalidatePath(`/collaborations/${collaborationId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting task:", error);
+    return { success: false, error: "Gagal menghapus tugas." };
+  }
+}
+
 export async function updateMilestoneStatus(
   milestoneId: string,
   collaborationId: string,
@@ -226,3 +242,43 @@ export async function recordDecision(collaborationId: string, formData: FormData
     return { success: false, error: "Gagal mencatat keputusan." };
   }
 }
+
+export async function updateSharedProjectLinks(planId: string, formData: FormData) {
+  await getPrimaryActor();
+
+  const moodboardUrl = (formData.get("moodboardUrl") as string)?.trim() || "";
+  const assetsFolderUrl = (formData.get("assetsFolderUrl") as string)?.trim() || "";
+  const notesUrl = (formData.get("notesUrl") as string)?.trim() || "";
+
+  try {
+    const plan = await prisma.collaborationPlan.findUnique({
+      where: { id: planId },
+      include: { collaboration: true },
+    });
+
+    if (!plan) throw new Error("Rencana kolaborasi tidak ditemukan.");
+
+    const timeline = ((plan.timeline as any) || {}) as Record<string, any>;
+    timeline.projectLinks = {
+      moodboardUrl,
+      assetsFolderUrl,
+      notesUrl,
+    };
+
+    await prisma.collaborationPlan.update({
+      where: { id: planId },
+      data: {
+        timeline: timeline as unknown as Prisma.InputJsonValue,
+      },
+    });
+
+    if (plan.collaboration) {
+      revalidatePath(`/collaborations/${plan.collaboration.id}`);
+    }
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating project links:", error);
+    return { success: false, error: "Gagal menyimpan tautan kerja sama." };
+  }
+}
+

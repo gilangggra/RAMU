@@ -310,8 +310,8 @@ export function runOpportunityPipeline(
         goalsSupported,
         needsAddressed,
         targetMarket: {
-          audience: 'Urban Conscious Consumers & Corporate Gift Buyers',
-          segment: 'Pasar Premium Budaya & Kriya Nusantara Kontemporer',
+          audience: 'Urban Fashion Enthusiasts & Editorial Audiences',
+          segment: 'Pasar Fashion & Visual Editorial Kontemporer',
         },
         expectedOutputs: pattern.expectedOutputs,
         feasibility,

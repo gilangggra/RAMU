@@ -29,12 +29,12 @@ export function InitiateCollaborationButton({ opportunityId }: { opportunityId: 
     <button
       onClick={handleInitiate}
       disabled={loading}
-      className="inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-[#E66A48] hover:bg-[#D45938] text-white font-bold text-sm shadow-xs hover:shadow-md transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
+      className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-amber-400 hover:bg-amber-300 text-stone-950 font-black text-sm shadow-[0_6px_20px_rgba(251,191,36,0.3)] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group hover:scale-[1.01]"
     >
       {loading ? (
         <>
           <svg
-            className="animate-spin h-4 w-4 text-white"
+            className="animate-spin h-4 w-4 text-stone-950"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -57,7 +57,7 @@ export function InitiateCollaborationButton({ opportunityId }: { opportunityId: 
         </>
       ) : (
         <>
-          <Sparkles className="w-4 h-4 group-hover:scale-110 transition-transform text-white" />
+          <Sparkles className="w-4 h-4 group-hover:scale-110 transition-transform text-stone-950" />
           <span>Inisiasi Rencana Kolaborasi (Buka Workspace)</span>
         </>
       )}

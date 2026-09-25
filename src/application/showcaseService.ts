@@ -6,7 +6,7 @@ export interface ShowcaseFilterParams {
 }
 
 export interface ShowcaseItem {
-  id: string; // The asset ID
+  id: string;
   title: string;
   category: string;
   imageUrl: string;
@@ -14,6 +14,11 @@ export interface ShowcaseItem {
     id: string;
     name: string;
     sector: string;
+    location: string | null;
+    description?: string | null;
+    experienceLevel?: string | null;
+    aestheticStyles: string[];
+    compensationModels: string[];
     initials: string;
     avatarBg: string;
   };
@@ -76,6 +81,11 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
           id: true,
           name: true,
           sector: true,
+          location: true,
+          description: true,
+          experienceLevel: true,
+          aestheticStyles: true,
+          compensationModels: true,
           actorType: true
         }
       }
@@ -89,12 +99,8 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
 
   // Map database assets to visual showcase items
   assets.forEach((asset, index) => {
-    // Determine category based on Asset type or Actor sector
-    let displayCategory = "Karya Kreatif";
-    if (asset.actor.sector.toLowerCase().includes("fotogra") || asset.actor.sector.toLowerCase().includes("visual")) displayCategory = "Fotografi & Video";
-    else if (asset.actor.sector.toLowerCase().includes("desain")) displayCategory = "Desain Visual";
-    else if (asset.actor.sector.toLowerCase().includes("fashion") || asset.actor.actorType === "INDIVIDUAL") displayCategory = "Fashion Styling";
-    else if (asset.actor.actorType === "STUDIO") displayCategory = "Studio & Ruang";
+    // Use the actual subtype inputted by the user
+    let displayCategory = asset.subtype || "Lainnya";
 
     // Apply category filter if specified
     if (category && category !== "ALL" && displayCategory !== category) {
@@ -105,7 +111,8 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
     let imageUrl = null;
     if (asset.attributes) {
       const attrs = asset.attributes as any;
-      if (attrs.brand_gallery && attrs.brand_gallery.length > 0) imageUrl = attrs.brand_gallery[0];
+      if (attrs.image_url) imageUrl = attrs.image_url;
+      else if (attrs.brand_gallery && attrs.brand_gallery.length > 0) imageUrl = attrs.brand_gallery[0];
       else if (attrs.styling_gallery && attrs.styling_gallery.length > 0) imageUrl = attrs.styling_gallery[0];
       else if (attrs.comp_card && attrs.comp_card.images && attrs.comp_card.images.length > 0) imageUrl = attrs.comp_card.images[0];
     }
@@ -132,11 +139,18 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
         id: asset.actor.id,
         name: asset.actor.name,
         sector: asset.actor.sector,
+        location: asset.actor.location,
+        description: asset.actor.description,
+        experienceLevel: asset.actor.experienceLevel,
+        aestheticStyles: asset.actor.aestheticStyles || [],
+        compensationModels: asset.actor.compensationModels || [],
         initials,
         avatarBg: getAvatarBg(asset.actor.sector)
       }
     });
   });
+
+  let result = showcaseItems;
 
   // Duplicate items slightly if there are too few to make the masonry grid look full and beautiful
   if (showcaseItems.length > 0 && showcaseItems.length < 8) {
@@ -145,8 +159,9 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
        id: item.id + "-copy-" + idx,
        imageUrl: FALLBACK_IMAGES[(idx + 4) % FALLBACK_IMAGES.length]
      }));
-     return [...showcaseItems, ...extraItems];
+     result = [...showcaseItems, ...extraItems];
   }
 
-  return showcaseItems;
+  // Shuffle the result array to give an organic, Pinterest-style non-sequential feel
+  return result.sort(() => Math.random() - 0.5);
 }

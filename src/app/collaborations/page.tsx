@@ -40,7 +40,7 @@ export default async function CollaborationsPage() {
                 Ruang Proyek Kolaborasi Aktif
               </h1>
               <p className="text-sm text-[#716B7E] max-w-2xl leading-relaxed">
-                Kelola pembagian peran, negosiasikan kesepakatan pembagian hasil & aturan hak cipta, pantau penugasan tugas operasional, dan catat keputusan bersama mitra kriya Anda.
+                Kelola pembagian peran, negosiasikan kesepakatan pembagian hasil & aturan hak cipta (IP), pantau penugasan tugas operasional, dan catat keputusan bersama mitra kolaborator kreatif Anda.
               </p>
             </div>
 

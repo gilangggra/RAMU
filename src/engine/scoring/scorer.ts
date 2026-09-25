@@ -92,9 +92,9 @@ export function calculateOpportunityScore(params: {
       count +
       a.assets.filter(
         (as) =>
-          as.category === 'PRODUCT' ||
-          as.category === 'MATERIAL' ||
-          as.category === 'CAPABILITY'
+          as.category === 'PORTFOLIO_WORK' ||
+          as.category === 'WARDROBE_PROP' ||
+          as.category === 'SKILL_TALENT'
       ).length,
     0
   );

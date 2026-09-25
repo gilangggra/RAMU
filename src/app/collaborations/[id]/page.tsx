@@ -33,9 +33,9 @@ export default async function CollaborationDetailPage({
     notFound();
   }
 
-  const isParticipant = collaboration.participants.some(
-    (p) => p.actorId === actor.id
-  );
+  const isParticipant =
+    collaboration.participants.some((p) => p.actorId === actor.id) ||
+    collaboration.plan?.createdByActorId === actor.id;
   if (!isParticipant) {
     redirect("/collaborations");
   }
