@@ -11,14 +11,16 @@ import { Sparkles } from "lucide-react";
 export default async function OpportunitiesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ feasibility?: string }>;
+  searchParams: Promise<{ feasibility?: string; scope?: string; actorId?: string }>;
 }) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
+  if (!user) {
+    redirect(`/login?redirectTo=/opportunities&message=${encodeURIComponent("Silakan masuk atau daftar untuk meninjau rekomendasi peluang kolaborasi cerdas.")}`);
+  }
 
   const actor = await prisma.actor.findFirst({
     where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
@@ -29,17 +31,33 @@ export default async function OpportunitiesPage({
 
   const params = await searchParams;
   const feasibilityFilter = params?.feasibility || "ALL";
+  const targetActorId = params?.actorId;
+
+  const targetActor = targetActorId
+    ? await prisma.actor.findUnique({
+        where: { id: targetActorId },
+        select: { id: true, name: true, sector: true },
+      })
+    : null;
+
+  const scopeFilter = targetActor ? "target" : params?.scope || "my";
 
   let opportunities = await getOpportunities({
+    actorId: targetActor ? targetActor.id : scopeFilter === "my" ? actor.id : undefined,
     feasibility: feasibilityFilter === "ALL" ? undefined : feasibilityFilter,
   });
 
   if (opportunities.length === 0 && feasibilityFilter === "ALL") {
-    const actorCount = await prisma.actor.count({ where: { status: "ACTIVE" } });
-    if (actorCount >= 2) {
-      const { generateAndSaveOpportunities } = await import("@/application/opportunityService");
-      await generateAndSaveOpportunities({ focusActorId: actor.id });
-      opportunities = await getOpportunities();
+    const focusActorId = targetActor ? targetActor.id : scopeFilter === "my" ? actor.id : undefined;
+    if (focusActorId) {
+      const actorCount = await prisma.actor.count({ where: { status: "ACTIVE" } });
+      if (actorCount >= 2) {
+        const { generateAndSaveOpportunities } = await import("@/application/opportunityService");
+        await generateAndSaveOpportunities({ focusActorId });
+        opportunities = await getOpportunities({
+          actorId: focusActorId,
+        });
+      }
     }
   }
 
@@ -56,10 +74,10 @@ export default async function OpportunitiesPage({
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/25 text-xs font-bold text-amber-800">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                Phase 3: Opportunity Engine Aktif
+                Rekomendasi Sinergi Cerdas • RAMU Engine
               </div>
               <h1 className="text-3xl font-extrabold text-[#27213D] tracking-tight">
-                Katalog Peluang Kolaborasi Kreatif
+                Peluang Kolaborasi Kreatif
               </h1>
               <p className="text-sm text-[#716B7E] max-w-2xl leading-relaxed">
                 Hasil sintesis deterministik dari perpaduan aset, tujuan kreatif, dan kapabilitas fotografer, desainer, model, serta studio profesional. Setiap peluang dilengkapi evaluasi kelayakan dan alasan terukur.
@@ -73,7 +91,9 @@ export default async function OpportunitiesPage({
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-stone-100">
             <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
-              <div className="text-xs font-semibold text-[#716B7E]">Total Peluang</div>
+              <div className="text-xs font-semibold text-[#716B7E]">
+                {targetActor ? `Peluang: ${targetActor.name}` : scopeFilter === "my" ? "Peluang Untuk Anda" : "Total Peluang Ekosistem"}
+              </div>
               <div className="text-2xl font-black text-[#27213D] mt-0.5">{totalCount}</div>
             </div>
             <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80">
@@ -91,28 +111,76 @@ export default async function OpportunitiesPage({
           </div>
         </section>
 
-        <div className="flex flex-wrap items-center gap-2 border-b border-stone-200/80 pb-3">
-          {[
-            { key: "ALL", label: "Semua Peluang" },
-            { key: "FEASIBLE", label: "Layak Dijalankan (Feasible)" },
-            { key: "PROMISING", label: "Menjanjikan (Promising)" },
-            { key: "PARTIAL", label: "Perlu Pelengkap (Partial)" },
-          ].map((tab) => {
-            const isActive = feasibilityFilter === tab.key;
-            return (
-              <Link
-                key={tab.key}
-                href={tab.key === "ALL" ? "/opportunities" : `/opportunities?feasibility=${tab.key}`}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                  isActive
-                    ? "bg-[#27213D] text-white shadow-md shadow-[#27213D]/10"
-                    : "bg-white border border-stone-200/80 text-[#716B7E] hover:text-[#27213D] hover:bg-stone-50"
-                }`}
-              >
-                {tab.label}
-              </Link>
-            );
-          })}
+        {targetActor && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 px-6 rounded-2xl bg-amber-50/90 border border-amber-200 text-xs">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <span className="text-[#27213D] font-medium">
+                Menampilkan sinergi peluang kolaborasi melibatkan:{" "}
+                <strong className="text-amber-900 font-bold">{targetActor.name}</strong>{" "}
+                <span className="text-stone-500">({targetActor.sector})</span>
+              </span>
+            </div>
+            <Link
+              href="/opportunities"
+              className="text-xs font-bold text-amber-800 hover:text-amber-950 underline flex items-center gap-1 self-start sm:self-auto"
+            >
+              ✕ Hapus Filter Talenta
+            </Link>
+          </div>
+        )}
+
+        {/* Filter Bar: Scope + Feasibility */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200/80 pb-4">
+          {/* Scope Selector */}
+          <div className="inline-flex p-1 rounded-2xl bg-stone-100/90 border border-stone-200/80 text-xs font-bold">
+            <Link
+              href={`/opportunities?scope=my${feasibilityFilter !== "ALL" ? `&feasibility=${feasibilityFilter}` : ""}`}
+              className={`px-3.5 py-1.5 rounded-xl transition-all ${
+                scopeFilter === "my"
+                  ? "bg-[#1E1B2E] text-white shadow-xs"
+                  : "text-stone-500 hover:text-[#1E1B2E]"
+              }`}
+            >
+              Relevan Untuk Saya
+            </Link>
+            <Link
+              href={`/opportunities?scope=all${feasibilityFilter !== "ALL" ? `&feasibility=${feasibilityFilter}` : ""}`}
+              className={`px-3.5 py-1.5 rounded-xl transition-all ${
+                scopeFilter === "all"
+                  ? "bg-[#1E1B2E] text-white shadow-xs"
+                  : "text-stone-500 hover:text-[#1E1B2E]"
+              }`}
+            >
+              Seluruh Ekosistem
+            </Link>
+          </div>
+
+          {/* Feasibility Tabs */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            {[
+              { key: "ALL", label: "Semua" },
+              { key: "FEASIBLE", label: "Layak (Feasible)" },
+              { key: "PROMISING", label: "Menjanjikan" },
+              { key: "PARTIAL", label: "Perlu Pelengkap" },
+            ].map((tab) => {
+              const isActive = feasibilityFilter === tab.key;
+              const href = `/opportunities?${targetActor ? `actorId=${targetActor.id}&` : `scope=${scopeFilter}&`}${tab.key !== "ALL" ? `feasibility=${tab.key}` : ""}`;
+              return (
+                <Link
+                  key={tab.key}
+                  href={href}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-[#1E1B2E] text-white shadow-xs font-bold"
+                      : "bg-white border border-stone-200/80 text-[#716B7E] hover:text-[#27213D] hover:bg-stone-50"
+                  }`}
+                >
+                  {tab.label}
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
         {opportunities.length === 0 ? (

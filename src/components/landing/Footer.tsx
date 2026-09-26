@@ -66,17 +66,17 @@ export function Footer() {
             </div>
             <ul className="space-y-2 text-xs font-medium text-[#716B7E]">
               <li>
-                <Link href="#how-it-works" className="hover:text-[#27213D] transition-colors">
+                <Link href="/#how-it-works" className="hover:text-[#27213D] transition-colors">
                   12-Tahap Engine
                 </Link>
               </li>
               <li>
-                <Link href="#differentiator" className="hover:text-[#27213D] transition-colors">
+                <Link href="/#differentiator" className="hover:text-[#27213D] transition-colors">
                   Matriks Sinergi
                 </Link>
               </li>
               <li>
-                <Link href="#differentiator" className="hover:text-[#27213D] transition-colors">
+                <Link href="/#differentiator" className="hover:text-[#27213D] transition-colors">
                   Evaluasi 6 Dimensi
                 </Link>
               </li>

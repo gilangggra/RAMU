@@ -42,24 +42,50 @@ interface ActorCardProps {
 }
 
 export function ActorCard({ actor }: ActorCardProps) {
-  // Extract a preview image from assets if available
+  // Extract a preview image from assets (Prioritize creative portfolio/comp-card, strictly exclude equipment)
   let previewImage = null;
+
+  // Pass 1: Look for genuine creative works, comp cards, or curated galleries
   for (const asset of actor.assets) {
+    if (asset.category === "EQUIPMENT") continue; // Never use camera/equipment for cover
+    if (actor.actorType !== "STUDIO" && asset.category === "STUDIO_SPACE") continue;
+
     if (asset.attributes) {
       const attrs = asset.attributes as any;
-      if (attrs.brand_gallery && attrs.brand_gallery.length > 0) previewImage = attrs.brand_gallery[0];
-      else if (attrs.styling_gallery && attrs.styling_gallery.length > 0) previewImage = attrs.styling_gallery[0];
-      else if (attrs.comp_card && attrs.comp_card.images && attrs.comp_card.images.length > 0) previewImage = attrs.comp_card.images[0];
-      else if (attrs.image_url) previewImage = attrs.image_url;
+      if (asset.category === "PORTFOLIO_WORK" && attrs.image_url) {
+        previewImage = attrs.image_url;
+        break;
+      }
+      if (attrs.comp_card && attrs.comp_card.images && attrs.comp_card.images.length > 0) {
+        previewImage = attrs.comp_card.images[0];
+        break;
+      }
+      if (attrs.brand_gallery && attrs.brand_gallery.length > 0) {
+        previewImage = attrs.brand_gallery[0];
+        break;
+      }
+      if (attrs.styling_gallery && attrs.styling_gallery.length > 0) {
+        previewImage = attrs.styling_gallery[0];
+        break;
+      }
+      if (actor.actorType === "STUDIO" && attrs.image_url) {
+        previewImage = attrs.image_url;
+        break;
+      }
     }
-    if (previewImage) break;
   }
-  
+
   // Fallback beautiful images based on sector
   if (!previewImage) {
-    if (actor.sector.includes("Fashion")) previewImage = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&auto=format&fit=crop";
-    else if (actor.sector.includes("Kopi") || actor.sector.includes("F&B")) previewImage = "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=800&auto=format&fit=crop";
-    else previewImage = "https://images.unsplash.com/photo-1600508774634-4e11d34730e2?q=80&w=800&auto=format&fit=crop";
+    if (actor.actorType === "STUDIO") {
+      previewImage = "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd08?q=80&w=800&auto=format&fit=crop";
+    } else if (actor.sector.includes("Fashion")) {
+      previewImage = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&auto=format&fit=crop";
+    } else if (actor.sector.includes("Kopi") || actor.sector.includes("F&B")) {
+      previewImage = "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=800&auto=format&fit=crop";
+    } else {
+      previewImage = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop";
+    }
   }
 
   return (

@@ -59,6 +59,7 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const whereClause: any = {
     status: "ACTIVE",
+    category: "PORTFOLIO_WORK",
     actor: {
       status: { not: "ARCHIVED" }
     }

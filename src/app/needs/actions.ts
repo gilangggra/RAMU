@@ -30,13 +30,17 @@ export async function createNeed(formData: FormData) {
   const relatedGoalId = (formData.get("relatedGoalId") as string)?.trim() || null;
   const priorityStr = formData.get("priority") as string;
 
+  const returnTo = (formData.get("returnTo") as string) || "/readiness?tab=needs";
+  const baseUrl = returnTo.split("?")[0];
+  const queryStr = returnTo.includes("?") ? returnTo.slice(returnTo.indexOf("?")) : "";
+
   if (!category || !title) {
-    redirect(`/needs?error=${encodeURIComponent("Kategori dan judul kebutuhan wajib diisi.")}`);
+    redirect(`${baseUrl}${queryStr ? `${queryStr}&` : "?"}error=${encodeURIComponent("Kategori dan judul kebutuhan wajib diisi.")}`);
   }
 
   const validCategories = Object.values(NeedCategory);
   if (!validCategories.includes(category)) {
-    redirect(`/needs?error=${encodeURIComponent("Kategori kebutuhan tidak valid.")}`);
+    redirect(`${baseUrl}${queryStr ? `${queryStr}&` : "?"}error=${encodeURIComponent("Kategori kebutuhan tidak valid.")}`);
   }
 
   const priority = Math.min(5, Math.max(1, parseInt(priorityStr) || 3));
@@ -54,12 +58,13 @@ export async function createNeed(formData: FormData) {
       },
     });
   } catch (e: any) {
-    redirect(`/needs?error=${encodeURIComponent("Gagal menyimpan kebutuhan: " + (e?.message?.split("\n")[0] || "Error"))}`);
+    redirect(`${baseUrl}${queryStr ? `${queryStr}&` : "?"}error=${encodeURIComponent("Gagal menyimpan kebutuhan: " + (e?.message?.split("\n")[0] || "Error"))}`);
   }
 
+  revalidatePath("/readiness");
   revalidatePath("/needs");
   revalidatePath("/dashboard");
-  redirect("/needs");
+  redirect(returnTo);
 }
 
 export async function deleteNeed(needId: string) {
@@ -69,6 +74,7 @@ export async function deleteNeed(needId: string) {
     where: { id: needId, actorId: actor.id },
   });
 
+  revalidatePath("/readiness");
   revalidatePath("/needs");
   revalidatePath("/dashboard");
 }

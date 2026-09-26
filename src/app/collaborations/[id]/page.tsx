@@ -37,7 +37,11 @@ export default async function CollaborationDetailPage({
     collaboration.participants.some((p) => p.actorId === actor.id) ||
     collaboration.plan?.createdByActorId === actor.id;
   if (!isParticipant) {
-    redirect("/collaborations");
+    redirect(
+      `/collaborations?error=${encodeURIComponent(
+        "Akses ditolak: Anda belum terdaftar sebagai anggota atau inisiator di ruang kerja kolaborasi tersebut."
+      )}`
+    );
   }
 
   return (

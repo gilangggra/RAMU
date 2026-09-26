@@ -64,6 +64,10 @@ export default async function ProjectBriefDetailPage({
 
   const totalRoles = brief.neededRoles.length;
   const filledRoles = brief.neededRoles.filter((r) => r.isFilled).length;
+  const acceptedCount = brief.neededRoles.reduce(
+    (acc, r) => acc + r.interests.filter((i) => i.status === "ACCEPTED").length,
+    0
+  );
   const allFilled = totalRoles > 0 && filledRoles === totalRoles;
 
   const timeline = (brief.timeline as { estimatedDuration?: string; targetLaunch?: string }) || {};
@@ -323,6 +327,7 @@ export default async function ProjectBriefDetailPage({
               <FormCollaborationButton
                 briefId={brief.id}
                 isFilled={allFilled}
+                acceptedCount={acceptedCount}
                 collaborationId={brief.collaboration?.id}
               />
             </div>

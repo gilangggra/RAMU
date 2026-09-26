@@ -29,13 +29,17 @@ export async function createGoal(formData: FormData) {
   const description = (formData.get("description") as string)?.trim();
   const priorityStr = formData.get("priority") as string;
 
+  const returnTo = (formData.get("returnTo") as string) || "/readiness?tab=goals";
+  const baseUrl = returnTo.split("?")[0];
+  const queryStr = returnTo.includes("?") ? returnTo.slice(returnTo.indexOf("?")) : "";
+
   if (!category || !title) {
-    redirect(`/goals?error=${encodeURIComponent("Kategori dan judul goal wajib diisi.")}`);
+    redirect(`${baseUrl}${queryStr ? `${queryStr}&` : "?"}error=${encodeURIComponent("Kategori dan judul target wajib diisi.")}`);
   }
 
   const validCategories = Object.values(GoalCategory);
   if (!validCategories.includes(category)) {
-    redirect(`/goals?error=${encodeURIComponent("Kategori goal tidak valid.")}`);
+    redirect(`${baseUrl}${queryStr ? `${queryStr}&` : "?"}error=${encodeURIComponent("Kategori target tidak valid.")}`);
   }
 
   const priority = Math.min(5, Math.max(1, parseInt(priorityStr) || 3));
@@ -52,12 +56,13 @@ export async function createGoal(formData: FormData) {
       },
     });
   } catch (e: any) {
-    redirect(`/goals?error=${encodeURIComponent("Gagal menyimpan goal: " + (e?.message?.split("\n")[0] || "Error"))}`);
+    redirect(`${baseUrl}${queryStr ? `${queryStr}&` : "?"}error=${encodeURIComponent("Gagal menyimpan target: " + (e?.message?.split("\n")[0] || "Error"))}`);
   }
 
+  revalidatePath("/readiness");
   revalidatePath("/goals");
   revalidatePath("/dashboard");
-  redirect("/goals");
+  redirect(returnTo);
 }
 
 export async function deleteGoal(goalId: string) {
@@ -67,6 +72,7 @@ export async function deleteGoal(goalId: string) {
     where: { id: goalId, actorId: actor.id },
   });
 
+  revalidatePath("/readiness");
   revalidatePath("/goals");
   revalidatePath("/dashboard");
 }

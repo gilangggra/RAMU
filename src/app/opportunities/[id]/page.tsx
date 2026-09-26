@@ -16,6 +16,7 @@ import {
   AlertTriangle,
   XCircle,
   ArrowLeft,
+  ArrowUpRight,
 } from "lucide-react";
 
 export default async function OpportunityDetailPage({
@@ -183,14 +184,29 @@ export default async function OpportunityDetailPage({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-0.5">
-                      <div className="text-base font-bold text-[#27213D]">{p.actor.name}</div>
+                      <Link
+                        href={`/directory/${p.actor.id}`}
+                        className="text-base font-bold text-[#27213D] hover:text-amber-600 transition-colors inline-flex items-center gap-1.5 group/name"
+                      >
+                        <span>{p.actor.name}</span>
+                        <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover/name:opacity-100 transition-opacity text-amber-600" />
+                      </Link>
                       <div className="text-xs text-[#716B7E]">
                         {p.actor.sector} • {p.actor.location || "Indonesia"}
                       </div>
                     </div>
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                      {p.roleLabel || p.roleCode}
-                    </span>
+                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                        {p.roleLabel || p.roleCode}
+                      </span>
+                      <Link
+                        href={`/directory/${p.actor.id}`}
+                        className="text-[11px] font-bold text-stone-500 hover:text-[#1E1B2E] transition-colors inline-flex items-center gap-1"
+                      >
+                        <span>Profil &amp; Aset</span>
+                        <ArrowUpRight className="w-3 h-3" />
+                      </Link>
+                    </div>
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200/70 space-y-1">

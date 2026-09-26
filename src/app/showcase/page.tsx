@@ -6,7 +6,7 @@ import { getShowcaseAssets } from "@/application/showcaseService";
 import { AppShell } from "@/components/layout/AppShell";
 import { ShowcaseCard } from "@/components/showcase/ShowcaseCard";
 import { ShowcaseFilterBar } from "@/components/showcase/ShowcaseFilterBar";
-import { ImageIcon, Sparkles } from "lucide-react";
+import { ImageIcon, Sparkles, Plus } from "lucide-react";
 
 export const metadata = {
   title: "Karya & Inspirasi | RAMU",
@@ -23,7 +23,9 @@ export default async function ShowcasePage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
+  if (!user) {
+    redirect(`/login?redirectTo=/showcase&message=${encodeURIComponent("Silakan masuk atau daftar untuk menikmati kurasi karya visual dan portofolio kreatif.")}`);
+  }
 
   const actor = await prisma.actor.findFirst({
     where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
@@ -40,8 +42,6 @@ export default async function ShowcasePage({
     category: currentCategory,
     search: searchQuery || undefined,
   });
-
-
 
   return (
     <AppShell actor={actor} activeRoute="/showcase">
@@ -67,12 +67,19 @@ export default async function ShowcasePage({
             </p>
           </div>
 
-          {/* Quick Stats or Live Indicator */}
-          <div className="hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/60 backdrop-blur-xl border border-white/80 text-xs text-stone-600 shadow-xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-semibold text-stone-700">Ekosistem Terhubung</span>
-            <span className="text-stone-300">•</span>
-            <span className="text-stone-500">Klik karya untuk quick inspect</span>
+          {/* Quick Stats & Action Button */}
+          <div className="flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/60 backdrop-blur-xl border border-white/80 text-xs text-stone-600 shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="font-semibold text-stone-700">Ekosistem Terhubung</span>
+            </div>
+            <Link
+              href="/dashboard/showcase"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold transition-all shadow-sm hover:scale-[1.02]"
+            >
+              <Plus className="w-3.5 h-3.5 text-amber-400" />
+              <span>Unggah / Kelola Portofolio</span>
+            </Link>
           </div>
         </div>
 

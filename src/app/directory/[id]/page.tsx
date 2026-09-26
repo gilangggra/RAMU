@@ -57,17 +57,35 @@ export default async function DirectoryDetailPage({
 
   const isCurrentActor = currentActor.id === actor.id;
 
-  // Extract a preview image from assets if available for the cover/hero
+  // Extract a preview image from assets for the cover/hero (Prioritize portfolio/comp-card, strictly exclude equipment)
   let previewImage = null;
   for (const asset of actor.assets) {
+    if (asset.category === "EQUIPMENT") continue; // Never use camera/equipment for hero
+    if (actor.actorType !== "STUDIO" && asset.category === "STUDIO_SPACE") continue;
+
     if (asset.attributes) {
       const attrs = asset.attributes as any;
-      if (attrs.brand_gallery && attrs.brand_gallery.length > 0) previewImage = attrs.brand_gallery[0];
-      else if (attrs.styling_gallery && attrs.styling_gallery.length > 0) previewImage = attrs.styling_gallery[0];
-      else if (attrs.comp_card && attrs.comp_card.images && attrs.comp_card.images.length > 0) previewImage = attrs.comp_card.images[0];
-      else if (attrs.image_url) previewImage = attrs.image_url;
+      if (asset.category === "PORTFOLIO_WORK" && attrs.image_url) {
+        previewImage = attrs.image_url;
+        break;
+      }
+      if (attrs.comp_card && attrs.comp_card.images && attrs.comp_card.images.length > 0) {
+        previewImage = attrs.comp_card.images[0];
+        break;
+      }
+      if (attrs.brand_gallery && attrs.brand_gallery.length > 0) {
+        previewImage = attrs.brand_gallery[0];
+        break;
+      }
+      if (attrs.styling_gallery && attrs.styling_gallery.length > 0) {
+        previewImage = attrs.styling_gallery[0];
+        break;
+      }
+      if (actor.actorType === "STUDIO" && attrs.image_url) {
+        previewImage = attrs.image_url;
+        break;
+      }
     }
-    if (previewImage) break;
   }
   
   // Fallback images tailored to sector/type
@@ -148,21 +166,45 @@ export default async function DirectoryDetailPage({
               )}
 
               {/* Action Buttons */}
-              {!isCurrentActor && (
-                <div className="flex flex-wrap items-center gap-4">
+              {!isCurrentActor ? (
+                <div className="flex flex-wrap items-center gap-3">
                   <BookingButton 
                     targetId={actor.id} 
                     targetName={actor.name} 
                     targetSector={actor.sector} 
                     targetType={actor.actorType} 
-                    label="Booking Request" 
+                    label="Sewa Jasa (Direct Hire)" 
                   />
                   <Link
-                    href="/opportunities"
-                    className="w-11 h-11 border border-stone-200 hover:border-[#1E1B2E] text-stone-400 hover:text-[#1E1B2E] flex items-center justify-center transition-colors"
-                    title="Cek Sinergi"
+                    href={`/projects/new?partnerId=${actor.id}&partnerName=${encodeURIComponent(actor.name)}`}
+                    className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white text-xs font-bold uppercase tracking-widest shadow-xs transition-all cursor-pointer"
+                    title="Ajak ke Project Brief"
                   >
-                    <Lightbulb className="w-4 h-4" />
+                    <PlusCircle className="w-4 h-4" />
+                    <span>Ajak Kolaborasi Proyek</span>
+                  </Link>
+                  <Link
+                    href={`/opportunities?actorId=${actor.id}`}
+                    className="inline-flex items-center gap-2 px-5 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
+                    title="Cek Sinergi AI"
+                  >
+                    <Lightbulb className="w-4 h-4 text-amber-500" />
+                    <span>Cek Sinergi AI</span>
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link
+                    href="/settings/profile"
+                    className="inline-flex items-center gap-2 px-5 py-3 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition-all shadow-xs"
+                  >
+                    <span>Edit Profil Publik</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/showcase"
+                    className="inline-flex items-center gap-2 px-5 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
+                  >
+                    <span>Kelola Portofolio</span>
                   </Link>
                 </div>
               )}
@@ -208,15 +250,46 @@ export default async function DirectoryDetailPage({
               </div>
 
               {/* Action Buttons */}
-              {!isCurrentActor && (
-                <div className="flex items-center gap-3">
+              {!isCurrentActor ? (
+                <div className="flex flex-wrap items-center gap-3">
                   <BookingButton 
                     targetId={actor.id} 
                     targetName={actor.name} 
                     targetSector={actor.sector} 
                     targetType={actor.actorType} 
-                    label="Sewa Studio" 
+                    label="Sewa Studio (Direct)" 
                   />
+                  <Link
+                    href={`/projects/new?partnerId=${actor.id}&partnerName=${encodeURIComponent(actor.name)}`}
+                    className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white text-xs font-bold uppercase tracking-widest shadow-xs transition-all cursor-pointer"
+                    title="Ajak ke Project Brief"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    <span>Ajak Kolaborasi Proyek</span>
+                  </Link>
+                  <Link
+                    href={`/opportunities?actorId=${actor.id}`}
+                    className="inline-flex items-center gap-2 px-5 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
+                    title="Cek Sinergi AI"
+                  >
+                    <Lightbulb className="w-4 h-4 text-amber-500" />
+                    <span>Cek Sinergi AI</span>
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link
+                    href="/settings/profile"
+                    className="inline-flex items-center gap-2 px-5 py-3 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition-all shadow-xs"
+                  >
+                    <span>Edit Fasilitas Studio</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/showcase"
+                    className="inline-flex items-center gap-2 px-5 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
+                  >
+                    <span>Kelola Portofolio</span>
+                  </Link>
                 </div>
               )}
             </div>
@@ -265,14 +338,47 @@ export default async function DirectoryDetailPage({
             </div>
 
             {/* Action Buttons */}
-            {!isCurrentActor && (
-              <BookingButton 
-                targetId={actor.id} 
-                targetName={actor.name} 
-                targetSector={actor.sector} 
-                targetType={actor.actorType} 
-                label="Ajak Kolaborasi" 
-              />
+            {!isCurrentActor ? (
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <BookingButton 
+                  targetId={actor.id} 
+                  targetName={actor.name} 
+                  targetSector={actor.sector} 
+                  targetType={actor.actorType} 
+                  label="Pengadaan / Sewa (Direct)" 
+                />
+                <Link
+                  href={`/projects/new?partnerId=${actor.id}&partnerName=${encodeURIComponent(actor.name)}`}
+                  className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white text-xs font-bold uppercase tracking-widest shadow-xs transition-all cursor-pointer"
+                  title="Ajak ke Project Brief"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>Ajak Kolaborasi Proyek</span>
+                </Link>
+                <Link
+                  href={`/opportunities?actorId=${actor.id}`}
+                  className="inline-flex items-center gap-2 px-5 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
+                  title="Cek Sinergi AI"
+                >
+                  <Lightbulb className="w-4 h-4 text-amber-500" />
+                  <span>Cek Sinergi AI</span>
+                </Link>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <Link
+                  href="/settings/profile"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition-all shadow-xs"
+                >
+                  <span>Edit Brand & Profil</span>
+                </Link>
+                <Link
+                  href="/dashboard/showcase"
+                  className="inline-flex items-center gap-2 px-6 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
+                >
+                  <span>Kelola Portofolio</span>
+                </Link>
+              </div>
             )}
           </section>
         )}

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { AppShell } from "@/components/layout/AppShell";
-import { UserCircle, Sliders, Image as ImageIcon } from "lucide-react";
+import { UserCircle, Sliders, Image as ImageIcon, Package, Target, Search, ShieldAlert } from "lucide-react";
 
 export const metadata = {
   title: "Pengaturan | RAMU",
@@ -77,13 +77,27 @@ export default async function SettingsLayout({
               <span>Preferensi Kolaborasi</span>
             </Link>
 
-            <span
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-stone-600 whitespace-nowrap lg:whitespace-normal opacity-50 cursor-not-allowed"
-              title="Segera Hadir"
+            <Link
+              href="/dashboard/showcase"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
             >
-              <ImageIcon className="w-4 h-4 shrink-0" />
-              <span>Portofolio (Segera Hadir)</span>
-            </span>
+              <ImageIcon className="w-4 h-4 shrink-0 text-amber-500" />
+              <span>Kelola Portofolio & Karya</span>
+            </Link>
+
+            <div className="pt-3 mt-2 border-t border-stone-200 hidden lg:block">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#9E98A8] px-4 block mb-1">
+                Kesiapan Kolaborasi
+              </span>
+            </div>
+
+            <Link
+              href="/readiness"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
+            >
+              <Sliders className="w-4 h-4 shrink-0 text-amber-500" />
+              <span>Kelola Kesiapan & Parameter</span>
+            </Link>
           </nav>
 
           {/* Settings Content Area */}

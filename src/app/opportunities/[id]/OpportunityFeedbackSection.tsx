@@ -73,11 +73,11 @@ export function OpportunityFeedbackSection({
           <div className="flex items-center gap-2">
             <Star className="w-5 h-5 text-amber-500 fill-current" />
             <h2 className="text-lg font-bold text-[#27213D] tracking-tight">
-              Evaluasi Kualitas Rekomendasi Peluang (Phase 5)
+              Evaluasi Kualitas Rekomendasi Peluang
             </h2>
           </div>
           <p className="text-xs text-[#716B7E] max-w-xl leading-relaxed">
-            Apakah rekomendasi 12-tahap engine ini relevan dan masuk akal? Berikan umpan balik 4-dimensi untuk melatih kalibrasi bobot dan validitas data ekosistem.
+            Apakah rekomendasi sinergi cerdas ini relevan dan masuk akal? Berikan umpan balik 4-dimensi untuk melatih kalibrasi bobot dan validitas data ekosistem.
           </p>
         </div>
 

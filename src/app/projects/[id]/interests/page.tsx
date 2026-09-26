@@ -129,13 +129,16 @@ export default async function ProjectInterestsPage({
               <p className="text-xs text-[#716B7E] mt-0.5">
                 {allFilled
                   ? "Bentuk ruang kolaborasi sekarang untuk mengaktifkan workspace tugas dan milestone bersama."
-                  : "Setelah seluruh peran diterima, Anda dapat mengaktifkan ruang kolaborasi resmi bersama seluruh tim."}
+                  : acceptedCount > 0
+                  ? `Anda sudah dapat mengaktifkan ruang kolaborasi sekarang dengan ${acceptedCount} kolaborator yang diterima, atau menunggu peran lainnya.`
+                  : "Setelah kolaborator diterima, Anda dapat mengaktifkan ruang kolaborasi resmi bersama seluruh tim."}
               </p>
             </div>
 
             <FormCollaborationButton
               briefId={brief.id}
               isFilled={allFilled}
+              acceptedCount={acceptedCount}
               collaborationId={brief.collaboration?.id}
             />
           </div>

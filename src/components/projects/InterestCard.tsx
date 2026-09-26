@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { acceptCollaboratorAction, declineCollaboratorAction } from "@/app/projects/actions";
-import { MapPin, AlertCircle, Check } from "lucide-react";
+import { MapPin, AlertCircle, Check, ArrowUpRight } from "lucide-react";
 
 const CATEGORY_LABELS: Record<string, string> = {
   PORTFOLIO_WORK: "Karya / Portofolio",
@@ -107,7 +108,17 @@ export function InterestCard({
             {actor.name.charAt(0)}
           </div>
           <div>
-            <div className="font-bold text-[#27213D] text-sm">{actor.name}</div>
+            <div className="flex items-center gap-1.5">
+              <Link
+                href={`/directory/${actor.id}`}
+                target="_blank"
+                className="font-bold text-[#27213D] hover:text-amber-800 hover:underline text-sm inline-flex items-center gap-1 group"
+                title="Tinjau profil & portofolio"
+              >
+                <span>{actor.name}</span>
+                <ArrowUpRight className="w-3.5 h-3.5 text-stone-400 group-hover:text-amber-800 transition-colors" />
+              </Link>
+            </div>
             <div className="text-[11px] text-[#716B7E]">{actor.sector}</div>
             {actor.location && (
               <div className="text-[10px] text-[#716B7E] flex items-center gap-1">

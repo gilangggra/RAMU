@@ -53,12 +53,11 @@ const PROJECT_TYPES = [
 ];
 
 const ASSET_CATEGORIES = [
-  { value: "PORTFOLIO_WORK", label: "Karya & Portofolio (Portfolio Work)" },
-  { value: "EQUIPMENT", label: "Peralatan (Equipment)" },
-  { value: "STUDIO_SPACE", label: "Fasilitas & Studio (Studio Space)" },
-  { value: "SKILL_TALENT", label: "Keahlian & Talenta (Skill Talent)" },
-  { value: "WARDROBE_PROP", label: "Pakaian & Properti (Wardrobe & Prop)" },
-  { value: "AUDIENCE_REACH", label: "Akses Audiens & Pasar (Audience Reach)" },
+  { value: "SKILL_TALENT", label: "Keahlian & Talenta Kreatif (Skill & Talent)" },
+  { value: "EQUIPMENT", label: "Peralatan Produksi (Equipment & Gear)" },
+  { value: "STUDIO_SPACE", label: "Fasilitas & Lokasi Studio (Studio Space)" },
+  { value: "WARDROBE_PROP", label: "Koleksi Busana & Properti (Wardrobe & Props)" },
+  { value: "AUDIENCE_REACH", label: "Akses Komunitas & Audiens (Audience Reach)" },
 ];
 
 interface RoleInput {
@@ -83,7 +82,7 @@ export default function NewProjectBriefPage() {
   const [targetOutput, setTargetOutput] = useState("");
 
   const [roles, setRoles] = useState<RoleInput[]>([
-    { id: "1", blueprintId: undefined, roleLabel: "", assetCategory: "CAPABILITY", description: "", maxCollaborators: 1 },
+    { id: "1", blueprintId: undefined, roleLabel: "", assetCategory: "SKILL_TALENT", description: "", maxCollaborators: 1 },
   ]);
 
   const [location, setLocation] = useState("");
@@ -100,7 +99,7 @@ export default function NewProjectBriefPage() {
         id: String(Date.now()),
         blueprintId: undefined,
         roleLabel: "",
-        assetCategory: "CAPABILITY",
+        assetCategory: "SKILL_TALENT",
         description: "",
         maxCollaborators: 1,
       },

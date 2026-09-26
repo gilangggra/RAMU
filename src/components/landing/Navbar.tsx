@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -13,6 +15,15 @@ export function Navbar() {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const supabase = createClient();
+      supabase.auth.getUser().then(({ data }) => {
+        if (data?.user) setIsLoggedIn(true);
+      });
+    } catch {}
   }, []);
 
   return (
@@ -53,7 +64,7 @@ export function Navbar() {
           </div>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#716B7E]">
+        <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-[#716B7E]">
           <Link
             href="/#hero"
             className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
@@ -61,44 +72,56 @@ export function Navbar() {
             Beranda
           </Link>
           <Link
-            href="/#how-it-works"
-            className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
+            href="/showcase"
+            className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold flex items-center gap-1"
           >
-            Cara Kerja
-          </Link>
-          <Link
-            href="/opportunities"
-            className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
-          >
-            Peluang
+            <span>Karya &amp; Inspirasi</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
           </Link>
           <Link
             href="/directory"
             className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
           >
-            Direktori
+            Direktori Kreator
           </Link>
           <Link
-            href="/#differentiator"
+            href="/projects"
             className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
           >
-            Tentang
+            Papan Proyek
+          </Link>
+          <Link
+            href="/opportunities"
+            className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
+          >
+            Peluang Sinergi AI
           </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <Link
-            href="/login"
-            className="text-sm font-semibold text-[#27213D] hover:text-[#27213D]/70 px-4 py-2 transition-colors"
-          >
-            Masuk
-          </Link>
-          <Link
-            href="/register"
-            className="px-6 py-2.5 rounded-full bg-[#FFB800] hover:bg-[#FFA800] active:scale-[0.98] text-[#1E1B2E] text-sm font-extrabold shadow-[0_4px_16px_rgba(255,184,0,0.35)] transition-all hover:scale-105"
-          >
-            Mulai Sekarang
-          </Link>
+          {isLoggedIn ? (
+            <Link
+              href="/dashboard"
+              className="px-6 py-2.5 rounded-full bg-[#1E1B2E] hover:bg-black text-white text-sm font-extrabold shadow-[0_4px_16px_rgba(30,27,46,0.25)] transition-all hover:scale-105"
+            >
+              Buka Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="text-sm font-semibold text-[#27213D] hover:text-[#27213D]/70 px-4 py-2 transition-colors"
+              >
+                Masuk
+              </Link>
+              <Link
+                href="/register"
+                className="px-6 py-2.5 rounded-full bg-[#FFB800] hover:bg-[#FFA800] active:scale-[0.98] text-[#1E1B2E] text-sm font-extrabold shadow-[0_4px_16px_rgba(255,184,0,0.35)] transition-all hover:scale-105"
+              >
+                Mulai Sekarang
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -149,18 +172,12 @@ export function Navbar() {
               Beranda
             </Link>
             <Link
-              href="/#how-it-works"
+              href="/showcase"
               onClick={() => setMobileOpen(false)}
-              className="hover:text-[#27213D] py-1.5"
+              className="hover:text-[#27213D] py-1.5 flex items-center justify-between"
             >
-              Cara Kerja
-            </Link>
-            <Link
-              href="/opportunities"
-              onClick={() => setMobileOpen(false)}
-              className="hover:text-[#27213D] py-1.5"
-            >
-              Peluang
+              <span>Karya &amp; Inspirasi</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
             </Link>
             <Link
               href="/directory"
@@ -170,28 +187,47 @@ export function Navbar() {
               Direktori
             </Link>
             <Link
-              href="/#differentiator"
+              href="/projects"
               onClick={() => setMobileOpen(false)}
               className="hover:text-[#27213D] py-1.5"
             >
-              Tentang
+              Project Briefs
+            </Link>
+            <Link
+              href="/opportunities"
+              onClick={() => setMobileOpen(false)}
+              className="hover:text-[#27213D] py-1.5"
+            >
+              Peluang Engine
             </Link>
           </nav>
           <div className="pt-4 border-t border-stone-100 flex flex-col gap-3">
-            <Link
-              href="/login"
-              onClick={() => setMobileOpen(false)}
-              className="w-full text-center py-2.5 rounded-full border border-stone-200 text-sm font-semibold text-[#27213D]"
-            >
-              Masuk
-            </Link>
-            <Link
-              href="/register"
-              onClick={() => setMobileOpen(false)}
-              className="w-full text-center py-2.5 rounded-full bg-[#FFD45A] text-sm font-bold text-[#27213D] shadow-md"
-            >
-              Mulai Sekarang
-            </Link>
+            {isLoggedIn ? (
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileOpen(false)}
+                className="w-full text-center py-2.5 rounded-full bg-[#1E1B2E] text-white text-sm font-extrabold shadow-sm"
+              >
+                Buka Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="w-full text-center py-2.5 rounded-full border border-stone-200 text-sm font-semibold text-[#27213D]"
+                >
+                  Masuk
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setMobileOpen(false)}
+                  className="w-full text-center py-2.5 rounded-full bg-[#FFB800] text-sm font-bold text-[#1E1B2E] shadow-md"
+                >
+                  Mulai Sekarang
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

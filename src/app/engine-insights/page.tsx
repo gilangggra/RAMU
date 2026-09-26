@@ -18,6 +18,8 @@ import {
   Trophy,
   RotateCcw,
   ArrowRight,
+  Clock,
+  Zap,
 } from "lucide-react";
 
 export default async function EngineInsightsPage() {
@@ -60,18 +62,18 @@ export default async function EngineInsightsPage() {
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4] flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#E66A48] animate-pulse" />
-                Phase 5: Closed-Loop Learning Flywheel
+                RAMU Engine Intelligence • Closed-Loop Learning
               </span>
               <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                Data Nyata & Transparan (No Fake Precision)
+                Data Nyata &amp; Transparan
               </span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl font-black text-[#27213D] tracking-tight leading-tight">
-              Sinyal Pembelajaran Engine & Validasi Luaran Ekosistem
+              Sinyal Pembelajaran Engine &amp; Validasi Luaran Ekosistem
             </h1>
             <p className="text-sm text-[#716B7E] leading-relaxed">
-              Selamat datang di pusat pemantauan efektivitas Creative Opportunity Engine. Phase 5 menutup siklus penuh produk dari analisis komplementaritas deterministik hingga pembuktian realisasi luaran nyata dan kalibrasi umpan balik dari pelaku ekonomi kreatif.
+              Pusat pemantauan dampak nyata dan kalibrasi rekomendasi kolaborasi RAMU. Sistem memadukan analisis komplementaritas aset kreatif dengan pembuktian hasil karya riil di lapangan serta evaluasi langsung dari para praktisi kreatif.
             </p>
           </div>
 
@@ -81,7 +83,7 @@ export default async function EngineInsightsPage() {
               <div className="text-2xl font-black text-amber-600 mt-1">
                 {signals.conversionFunnel.opportunities}
               </div>
-              <span className="text-[10px] text-[#716B7E]">Rekomendasi 12-tahap</span>
+              <span className="text-[10px] text-[#716B7E]">Kurasi sinergi cerdas</span>
             </div>
 
             <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
@@ -111,9 +113,68 @@ export default async function EngineInsightsPage() {
               </div>
               <span className="text-[10px] text-[#716B7E]">
                 {signals.ecosystemMetrics.totalUnitsProduced > 0
-                  ? `${signals.ecosystemMetrics.totalUnitsProduced} unit fisik`
-                  : "Hasil riil tercatat"}
+                  ? `${signals.ecosystemMetrics.totalUnitsProduced} item karya fisik`
+                  : "Karya riil tervalidasi"}
               </span>
+            </div>
+          </div>
+        </section>
+
+        {/* Creator-Centric Value Impact (Dampak Nyata bagi Ekosistem Kreatif) */}
+        <section className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-amber-500" />
+                <span>Dampak Nyata bagi Pelaku Ekonomi Kreatif</span>
+              </h2>
+              <p className="text-xs text-[#716B7E]">
+                Bagaimana sinergi ekosistem RAMU menghemat waktu, mengoptimalkan biaya produksi, dan mengangkat kredibilitas karya.
+              </p>
+            </div>
+            <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-3.5 py-1 rounded-full border border-emerald-200">
+              Efisiensi Produksi Aktif
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-3">
+              <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+                <Clock className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-[#27213D]">Akselerasi Waktu Pra-Produksi</h3>
+                <div className="text-2xl font-black text-amber-600">3-5x Lebih Cepat</div>
+                <p className="text-xs text-[#716B7E] leading-relaxed">
+                  Menemukan talenta komplementer (MUA, Model, Fotografer, Studio) yang terverifikasi tanpa proses pitching dingin berhari-hari.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-3">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
+                <CircleDollarSign className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-[#27213D]">Optimalisasi Anggaran via Barter</h3>
+                <div className="text-2xl font-black text-emerald-600">Hingga 60% Efisiensi</div>
+                <p className="text-xs text-[#716B7E] leading-relaxed">
+                  Memanfaatkan studio idle, wardrobe arsip, dan peralatan kamera lewat skema pertukaran nilai karya (TFP) yang setara dan adil.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-3">
+              <div className="w-10 h-10 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600">
+                <Trophy className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-[#27213D]">Proteksi Hak &amp; Kredit Otentik</h3>
+                <div className="text-2xl font-black text-purple-600">100% Terverifikasi</div>
+                <p className="text-xs text-[#716B7E] leading-relaxed">
+                  Format kredit media sosial satu-klik dan log kesepakatan HAKI memastikan setiap kontributor diakui secara profesional.
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -369,25 +430,25 @@ export default async function EngineInsightsPage() {
         <section className="p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] space-y-4">
           <h2 className="text-base font-bold text-[#27213D] tracking-tight flex items-center gap-2">
             <RotateCcw className="w-5 h-5 text-amber-600" />
-            <span>Bagaimana Flywheel Pembelajaran Deterministik Bekerja?</span>
+            <span>Bagaimana Siklus Pembelajaran Ekosistem RAMU Bekerja?</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
             <div className="p-5 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-2">
-              <div className="font-bold text-[#27213D]">1. Transparan & Terlacak</div>
+              <div className="font-bold text-[#27213D]">1. Transparan Tanpa Komisi Gelap</div>
               <p className="text-[#716B7E] leading-relaxed">
-                Setiap luaran dan feedback disimpan dengan audit trail lengkap. Data tidak diubah oleh black-box realtime untuk menjaga stabilitas pipeline deterministik.
+                Platform memfasilitasi pertemuan kreator tanpa pemotongan biaya perantara atau algoritma misterius. Semua pertimbangan sinergi tercatat jelas dan dapat ditinjau bersama.
               </p>
             </div>
             <div className="p-5 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-2">
-              <div className="font-bold text-[#27213D]">2. Validasi Lapangan</div>
+              <div className="font-bold text-[#27213D]">2. Validasi Karya Nyata Lapangan</div>
               <p className="text-[#716B7E] leading-relaxed">
-                Umpan balik 4-dimensi (Relevansi, Kelayakan, Kebaruan, Manfaat) membuktikan apakah kombinasi aset berhasil dieksekusi oleh pelaku kreatif nyata.
+                Umpan balik 4-dimensi (Kesesuaian Brand, Kemudahan Koordinasi, Orisinalitas, dan Nilai Manfaat) membuktikan keberhasilan eksekusi riil dari setiap proyek kolaboratif.
               </p>
             </div>
             <div className="p-5 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-2">
-              <div className="font-bold text-[#27213D]">3. Kalibrasi Versi Engine</div>
+              <div className="font-bold text-[#27213D]">3. Pembelajaran Berkelanjutan Ekosistem</div>
               <p className="text-[#716B7E] leading-relaxed">
-                Data feedback diagregasi menjadi dataset validasi untuk mengalibrasi bobot 6D scoring dan melahirkan versi engine baru yang semakin presisi.
+                Hasil evaluasi para pelaku industri digunakan secara berkala untuk menaikkan akurasi rekomendasi mitra yang tepat modal, tepat waktu, dan tepat selera estetika.
               </p>
             </div>
           </div>

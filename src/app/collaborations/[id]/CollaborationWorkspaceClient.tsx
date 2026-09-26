@@ -50,6 +50,8 @@ import {
   User,
   Folder,
   ExternalLink,
+  Copy,
+  ListTodo,
 } from "lucide-react";
 import { SocialCreditGenerator } from "@/components/collaborations/SocialCreditGenerator";
 
@@ -59,7 +61,8 @@ interface WorkspaceProps {
 }
 
 export function CollaborationWorkspaceClient({ collaboration, currentActorId }: WorkspaceProps) {
-  const [activeTab, setActiveTab] = useState<"overview" | "plan" | "credits" | "outcomes">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "callsheet" | "plan" | "credits" | "outcomes">("overview");
+  const [callsheetCopied, setCallsheetCopied] = useState(false);
 
   const plan = collaboration.plan;
   const participants = collaboration.participants || [];
@@ -97,6 +100,49 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
   const [isEditingLinks, setIsEditingLinks] = useState(false);
   const [isSavingLinks, setIsSavingLinks] = useState(false);
   const [linksMessage, setLinksMessage] = useState<string | null>(null);
+
+  function generateCallsheetWhatsAppText() {
+    const lines: string[] = [];
+    lines.push(`📋 *CALL SHEET & RUNDOWN PRODUKSI*`);
+    lines.push(`*Proyek:* ${collaboration.title}`);
+    if (timeline?.targetLaunch || timeline?.estimatedDuration) {
+      lines.push(`*Jadwal/Target:* ${timeline.targetLaunch || timeline.estimatedDuration}`);
+    }
+    lines.push(``);
+
+    if (participants.length > 0) {
+      lines.push(`👥 *TIM PRODUKSI & KONTAK:*`);
+      participants.forEach((p: any) => {
+        const waNumber = p.actor?.contactPhone
+          ? ` (WA: https://wa.me/${p.actor.contactPhone.replace(/\\D/g, "").replace(/^0/, "62")})`
+          : "";
+        lines.push(`- *${p.actor.name}* [${p.roleCode} - ${p.actor.sector}]${waNumber}`);
+      });
+      lines.push(``);
+    }
+
+    if (projectLinks.moodboardUrl || projectLinks.assetsDriveUrl || projectLinks.notesUrl) {
+      lines.push(`📍 *TAUTAN KERJA & MOODBOARD:*`);
+      if (projectLinks.moodboardUrl) lines.push(`- 🎨 Moodboard: ${projectLinks.moodboardUrl}`);
+      if (projectLinks.assetsDriveUrl) lines.push(`- 📁 Google Drive: ${projectLinks.assetsDriveUrl}`);
+      if (projectLinks.notesUrl) lines.push(`- 📝 Catatan/Notion: ${projectLinks.notesUrl}`);
+      lines.push(``);
+    }
+
+    if (tasks.length > 0) {
+      lines.push(`⏰ *RUNDOWN SESI & DETAIL LOOK:*`);
+      tasks.forEach((t: any, idx: number) => {
+        const statusIcon = t.status === "DONE" ? "✅" : "⏳";
+        const assigned = t.assignedActor ? ` (PJ: ${t.assignedActor.name})` : "";
+        lines.push(`${idx + 1}. ${statusIcon} *${t.title}*${assigned}`);
+        if (t.description) lines.push(`   Catatan: ${t.description}`);
+      });
+      lines.push(``);
+    }
+
+    lines.push(`_Dibuat otomatis via RAMU Creative Workspace_`);
+    return lines.join("\n");
+  }
 
   async function handleSaveLinks(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -331,10 +377,66 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         </div>
       </section>
 
+      {/* COMPLETED CELEBRATION & TEAR-SHEET BANNER */}
+      {collaboration.status === "COMPLETED" && (
+        <section className="p-6 sm:p-8 rounded-[32px] bg-gradient-to-br from-emerald-950 via-[#1E1B2E] to-stone-900 text-white border border-emerald-500/30 shadow-2xl relative overflow-hidden animate-fade-in">
+          <div className="absolute -right-16 -top-16 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold border border-emerald-500/30">
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Karya Kolaborasi Resmi Selesai & Terverifikasi</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-light text-white tracking-tight">
+                Selamat! Proyek Sinergi Ini Telah Tuntas
+              </h2>
+              <p className="text-xs text-stone-300 font-light leading-relaxed">
+                Seluruh tahapan produksi telah diselesaikan bersama. Sekarang saatnya mempublikasikan karya ke media sosial dengan kredit tear-sheet terverifikasi dan menyematkan hasil luaran ke portofolio publik Anda.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setActiveTab("callsheet")}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 transition-all cursor-pointer"
+              >
+                <ListTodo className="w-4 h-4 text-amber-400" />
+                <span>Call Sheet ({completedTasks}/{tasks.length})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("credits")}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white text-xs font-bold transition-all shadow-md cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Salin Kredit & Tear Sheet</span>
+              </button>
+              <Link
+                href="/dashboard/showcase"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 transition-all cursor-pointer"
+              >
+                <ArrowUpRight className="w-4 h-4 text-emerald-400" />
+                <span>Sematkan ke Showcase</span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => setActiveTab("outcomes")}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 transition-all cursor-pointer"
+              >
+                <Star className="w-4 h-4 text-amber-400 fill-current" />
+                <span>Luaran & Ulasan ({outcomes.length})</span>
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Tabs */}
       <div className="flex items-center gap-8 overflow-x-auto no-scrollbar border-b border-stone-200">
         {[
           { key: "overview", label: "Ringkasan", badge: null },
+          { key: "callsheet", label: "Call Sheet & Rundown", badge: `${tasks.length}` },
           { key: "plan", label: "Ketentuan & Hak", badge: null },
           { key: "credits", label: "Kredit & Tag", badge: "Baru" },
           { key: "outcomes", label: "Luaran & Ulasan", badge: `${outcomes.length}` },
@@ -679,7 +781,302 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         </div>
       )}
 
-      {/* TAB 2: PLAN */}
+      {/* TAB 2: CALL SHEET & RUNDOWN SESI PRODUKSI */}
+      {activeTab === "callsheet" && (
+        <div className="space-y-8 animate-fade-in">
+          {/* Header Action Banner */}
+          <div className="p-6 sm:p-8 rounded-[32px] bg-gradient-to-r from-[#1E1B2E] via-[#2A243D] to-[#1E1B2E] text-white flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl shadow-[#1E1B2E]/5">
+            <div className="space-y-2 max-w-xl">
+              <div className="flex items-center gap-2">
+                <ListTodo className="w-5 h-5 text-amber-400" />
+                <h2 className="text-lg font-bold text-white tracking-tight">
+                  Call Sheet & Rundown Sesi Produksi
+                </h2>
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                  {completedTasks}/{tasks.length} Sesi Selesai
+                </span>
+              </div>
+              <p className="text-xs text-stone-300 font-light leading-relaxed">
+                Pusat kendali eksekusi hari-H bagi tim kreatif (Fotografer, MUA, Desainer, Model, Stylist). Pantau giliran look, jadwal fitting, dan salin langsung ke format WhatsApp tim H-1 sebelum pemotretan.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  const text = generateCallsheetWhatsAppText();
+                  navigator.clipboard.writeText(text);
+                  setCallsheetCopied(true);
+                  setTimeout(() => setCallsheetCopied(false), 3000);
+                }}
+                className={`inline-flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all shadow-md cursor-pointer ${
+                  callsheetCopied
+                    ? "bg-emerald-500 text-white shadow-emerald-500/20"
+                    : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30"
+                }`}
+              >
+                {callsheetCopied ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Tersalin! Siap Paste di WA Tim</span>
+                  </>
+                ) : (
+                  <>
+                    <Phone className="w-4 h-4 text-emerald-200" />
+                    <span>Salin Call Sheet ke WhatsApp Tim</span>
+                    <Copy className="w-3.5 h-3.5 opacity-80" />
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Sesi Rundown List */}
+          <section className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-amber-500" />
+                <h3 className="text-sm font-bold text-[#27213D] uppercase tracking-wider">
+                  Susunan Rundown & Jadwal Sesi ({tasks.length})
+                </h3>
+              </div>
+
+              {/* Status Filter */}
+              <div className="flex items-center gap-1.5 p-1 rounded-xl bg-stone-100 border border-stone-200 text-xs">
+                {[
+                  { key: "ALL", label: "Semua Sesi" },
+                  { key: "TODO", label: "Belum / Antrean" },
+                  { key: "IN_PROGRESS", label: "Berjalan" },
+                  { key: "DONE", label: "Selesai" },
+                ].map((f) => (
+                  <button
+                    key={f.key}
+                    type="button"
+                    onClick={() => setTaskFilter(f.key)}
+                    className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                      taskFilter === f.key
+                        ? "bg-white text-[#1E1B2E] shadow-2xs"
+                        : "text-stone-500 hover:text-stone-800"
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {filteredTasks.length === 0 ? (
+              <div className="p-10 rounded-[32px] bg-white/95 border border-dashed border-stone-300 text-center space-y-3">
+                <ListTodo className="w-8 h-8 text-stone-400 mx-auto" />
+                <h4 className="text-sm font-bold text-[#27213D]">
+                  {taskFilter === "ALL" ? "Belum Ada Sesi Rundown" : "Tidak Ada Sesi di Kategori Ini"}
+                </h4>
+                <p className="text-xs text-[#716B7E] max-w-md mx-auto">
+                  {taskFilter === "ALL"
+                    ? "Tambahkan rincian sesi pemotretan, fitting look, atau briefing menggunakan formulir di bawah."
+                    : "Pilih filter 'Semua Sesi' untuk melihat seluruh susunan jadwal."}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredTasks.map((t: any, index: number) => {
+                  const isDone = t.status === "DONE";
+                  const isInProgress = t.status === "IN_PROGRESS";
+                  const assignedParticipant = participants.find((p: any) => p.actorId === t.assignedActorId);
+
+                  return (
+                    <div
+                      key={t.id}
+                      className={`p-5 rounded-2xl border transition-all ${
+                        isDone
+                          ? "bg-emerald-50/40 border-emerald-200/80 opacity-80"
+                          : "bg-white/95 border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] hover:border-stone-300"
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        {/* Checkbox toggle */}
+                        <button
+                          type="button"
+                          onClick={() => handleToggleTask(t.id, t.status)}
+                          className={`mt-0.5 w-6 h-6 rounded-lg flex items-center justify-center transition-all cursor-pointer shrink-0 ${
+                            isDone
+                              ? "bg-emerald-600 text-white shadow-xs"
+                              : isInProgress
+                              ? "bg-amber-100 text-amber-800 border border-amber-300"
+                              : "border-2 border-stone-300 hover:border-[#E66A48] bg-white"
+                          }`}
+                          title={isDone ? "Tandai belum selesai" : "Tandai selesai"}
+                        >
+                          {isDone ? (
+                            <Check className="w-4 h-4 stroke-[3]" />
+                          ) : isInProgress ? (
+                            <Clock className="w-3.5 h-3.5" />
+                          ) : null}
+                        </button>
+
+                        <div className="flex-1 min-w-0 space-y-1.5">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-100 text-stone-600 border border-stone-200">
+                              Sesi #{index + 1}
+                            </span>
+                            <span
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                                t.priority === "HIGH"
+                                  ? "bg-rose-50 text-rose-700 border-rose-200"
+                                  : t.priority === "MEDIUM"
+                                  ? "bg-amber-50 text-amber-700 border-amber-200"
+                                  : "bg-stone-50 text-stone-600 border-stone-200"
+                              }`}
+                            >
+                              {t.priority === "HIGH"
+                                ? "Krusial / Wajib"
+                                : t.priority === "MEDIUM"
+                                ? "Prioritas Standar"
+                                : "Fleksibel"}
+                            </span>
+                            {assignedParticipant && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-100 text-[#1E1B2E] border border-stone-200 flex items-center gap-1">
+                                <User className="w-3 h-3 text-stone-500" />
+                                <span>PJ: {assignedParticipant.actor?.name}</span>
+                              </span>
+                            )}
+                          </div>
+
+                          <h4
+                            className={`text-sm font-bold ${
+                              isDone ? "line-through text-stone-500" : "text-[#27213D]"
+                            }`}
+                          >
+                            {t.title}
+                          </h4>
+
+                          {t.description && (
+                            <p className="text-xs text-[#716B7E] leading-relaxed">
+                              {t.description}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Delete button */}
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTask(t.id)}
+                          className="p-2 rounded-xl text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer shrink-0"
+                          title="Hapus sesi dari rundown"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* Form Tambah Sesi Rundown Baru */}
+          <form
+            onSubmit={handleCreateTask}
+            className="p-6 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-4"
+          >
+            <div className="space-y-1">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E] flex items-center gap-1.5">
+                <Plus className="w-3.5 h-3.5 text-[#E66A48]" />
+                <span>Tambah Sesi / Look Baru ke Rundown</span>
+              </h4>
+              <p className="text-xs text-stone-500 font-light">
+                Tambahkan sesi pemotretan, waktu fitting, briefing pencahayaan, atau penyerahan file ke call sheet tim.
+              </p>
+            </div>
+
+            {taskMessage && (
+              <div
+                className={`p-3 rounded-xl text-xs font-bold ${
+                  taskMessage.includes("berhasil")
+                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                    : "bg-rose-50 text-rose-800 border border-rose-200"
+                }`}
+              >
+                {taskMessage}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="space-y-1 sm:col-span-2 lg:col-span-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                  Judul Sesi / Jam *
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  required
+                  placeholder="Contoh: 09:30 - Look 1 Gaun Sutra Merah"
+                  className="w-full px-3.5 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs text-[#1E1B2E] focus:outline-none focus:border-[#E66A48] focus:bg-white"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                  Penanggung Jawab (PJ)
+                </label>
+                <select
+                  name="assignedActorId"
+                  defaultValue={currentActorId}
+                  className="w-full px-3.5 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs text-[#1E1B2E] focus:outline-none focus:border-[#E66A48] focus:bg-white cursor-pointer"
+                >
+                  <option value="">— Seluruh Tim —</option>
+                  {participants.map((p: any) => (
+                    <option key={p.actorId} value={p.actorId}>
+                      {p.actor?.name} ({p.roleCode})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                  Tingkat Prioritas
+                </label>
+                <select
+                  name="priority"
+                  defaultValue={TaskPriority.MEDIUM}
+                  className="w-full px-3.5 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs text-[#1E1B2E] focus:outline-none focus:border-[#E66A48] focus:bg-white cursor-pointer"
+                >
+                  <option value={TaskPriority.HIGH}>Krusial / Wajib</option>
+                  <option value={TaskPriority.MEDIUM}>Prioritas Standar</option>
+                  <option value={TaskPriority.LOW}>Fleksibel / Opsional</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                Detail Arahan Teknis / Catatan Sesi
+              </label>
+              <textarea
+                name="description"
+                rows={2}
+                placeholder="Contoh: Studio B, background polos beige, penataan rambut clean updo, lighting softbox 45 derajat..."
+                className="w-full px-3.5 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs text-[#1E1B2E] focus:outline-none focus:border-[#E66A48] focus:bg-white resize-none"
+              />
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={isCreatingTask}
+                className="px-5 py-2 rounded-xl bg-[#1E1B2E] hover:bg-stone-800 text-white font-bold text-xs shadow-sm transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>{isCreatingTask ? "Menambahkan..." : "Tambahkan ke Call Sheet"}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* TAB 3: PLAN */}
       {activeTab === "plan" && (
         <div className="space-y-8 animate-fade-in">
           <form onSubmit={handleSaveTerms} className="space-y-6">
@@ -959,7 +1356,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   </h2>
                 </div>
                 <p className="text-xs text-[#716B7E] max-w-xl leading-relaxed">
-                  Phase 5 menutup siklus peluang dengan merekam pencapaian nyata (produk, omzet, kampanye) serta umpan balik evaluasi 4-dimensi untuk melatih kecerdasan engine.
+                  Siklus kolaborasi dilengkapi dengan perekaman pencapaian nyata (produk, omzet, kampanye) serta umpan balik evaluasi komprehensif untuk menyempurnakan rekomendasi sinergi ekosistem.
                 </p>
               </div>
 
@@ -988,6 +1385,32 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                 {collabCompleteMessage}
               </div>
             )}
+
+            {/* Direct Loop to Portfolio Showcase */}
+            <div className="pt-3 border-t border-amber-200/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-xs text-stone-700">
+                <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>
+                  Hasil dan luaran kolaborasi dapat Anda kelola dan pamerkan langsung di portofolio publik Anda.
+                </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Link
+                  href="/dashboard/showcase"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white border border-stone-200 text-[#1E1B2E] hover:bg-stone-50 text-xs font-bold transition-all shadow-2xs"
+                >
+                  <span>Kelola di Portofolio</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </Link>
+                <Link
+                  href="/showcase"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#1E1B2E] text-white hover:bg-black text-xs font-bold transition-all shadow-2xs"
+                >
+                  <span>Lihat Showcase Publik</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
           </div>
 
           <section className="space-y-4">
@@ -1039,41 +1462,46 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                         <p className="text-xs text-[#716B7E] leading-relaxed">{item.description}</p>
                       </div>
 
+                      {/* Prominent Evidence / Live Publication Link */}
+                      {metrics.evidenceUrl && (
+                        <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-200/80 flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Globe className="w-4 h-4 text-[#E66A48] shrink-0" />
+                            <span className="text-xs font-bold text-[#27213D] truncate">Publikasi / Bukti Portofolio</span>
+                          </div>
+                          <a
+                            href={metrics.evidenceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#E66A48] hover:bg-[#d85c3b] text-white text-[11px] font-bold transition-all shrink-0 shadow-2xs"
+                          >
+                            <span>Buka Karya</span>
+                            <ArrowUpRight className="w-3.5 h-3.5" />
+                          </a>
+                        </div>
+                      )}
+
                       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-stone-100 text-xs">
                         <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70">
-                          <span className="text-[10px] text-[#716B7E] uppercase font-bold block">Unit Produksi</span>
+                          <span className="text-[10px] text-[#716B7E] uppercase font-bold block">Hasil Karya / Unit</span>
                           <span className="font-bold text-[#27213D] mt-0.5 block">
-                            {metrics.unitsProduced ? `${metrics.unitsProduced} Unit` : "Belum dicatat"}
+                            {metrics.unitsProduced ? `${metrics.unitsProduced} Item / Look` : "Koleksi Selesai"}
                           </span>
                         </div>
                         <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70">
                           <span className="text-[10px] text-[#716B7E] uppercase font-bold block">Nilai Finansial</span>
                           <span className="font-bold text-amber-800 mt-0.5 block">
-                            {metrics.revenueAmount || "Belum dicatat"}
+                            {metrics.revenueAmount || "Barter / TFP Kolaboratif"}
                           </span>
                         </div>
-                        <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70">
-                          <span className="text-[10px] text-[#716B7E] uppercase font-bold block">Jangkauan Audiens</span>
-                          <span className="font-bold text-purple-800 mt-0.5 block">
-                            {metrics.audienceReached || "Belum dicatat"}
-                          </span>
-                        </div>
-                        <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70">
-                          <span className="text-[10px] text-[#716B7E] uppercase font-bold block">Bukti Dokumentasi</span>
-                          {metrics.evidenceUrl ? (
-                            <a
-                              href={metrics.evidenceUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="font-bold text-[#E66A48] hover:underline flex items-center gap-1 truncate mt-0.5"
-                            >
-                              <span>Buka Tautan</span>
-                              <ArrowUpRight className="w-3.5 h-3.5" />
-                            </a>
-                          ) : (
-                            <span className="text-[#9E98A8] mt-0.5 block">Belum dicatat</span>
-                          )}
-                        </div>
+                        {metrics.audienceReached && (
+                          <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 col-span-2">
+                            <span className="text-[10px] text-[#716B7E] uppercase font-bold block">Jangkauan Audiens</span>
+                            <span className="font-bold text-purple-800 mt-0.5 block">
+                              {metrics.audienceReached}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       {metrics.notes && (
@@ -1151,6 +1579,23 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                 />
               </div>
 
+              <div className="space-y-1.5 sm:col-span-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E] flex items-center justify-between">
+                  <span>Tautan Bukti Publikasi / Media Sosial / Portofolio *</span>
+                  <span className="text-[10px] text-[#E66A48] font-bold">Otentikasi Lapangan</span>
+                </label>
+                <input
+                  type="url"
+                  name="evidenceUrl"
+                  required
+                  placeholder="https://instagram.com/p/... atau https://drive.google.com/... atau link website lookbook"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
+                />
+                <p className="text-[11px] text-[#716B7E]">
+                  Sertakan tautan postingan Instagram, link video TikTok BTS, katalog Google Drive, atau liputan media agar karya bersama terverifikasi.
+                </p>
+              </div>
+
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
                   Kategori Luaran *
@@ -1160,62 +1605,50 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   defaultValue="PRODUCT"
                   className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white cursor-pointer"
                 >
-                  <option value="PRODUCT">Produk Fisik / Digital</option>
+                  <option value="PRODUCT">Produk Fisik / Digital (Lookbook, Pakaian, Foto)</option>
                   <option value="CAMPAIGN">Kampanye / Pameran Bersama</option>
                   <option value="SERVICE">Layanan Kolaboratif</option>
-                  <option value="MARKET_ACCESS">Akses Pasar / Ritel</option>
-                  <option value="REVENUE">Realisasi Omzet / Penjualan</option>
-                  <option value="AUDIENCE_GROWTH">Pertumbuhan Pengikut / Audiens</option>
+                  <option value="MARKET_ACCESS">Akses Pasar / Ritel / Pop-up</option>
                   <option value="CREATIVE_ASSET">Aset Desain / HKI Bersama</option>
+                  <option value="REVENUE">Realisasi Omzet / Penjualan Berbayar</option>
+                  <option value="AUDIENCE_GROWTH">Pertumbuhan Pengikut / Audiens</option>
                   <option value="OTHER">Luaran Lainnya</option>
                 </select>
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
-                  Jumlah Unit Diproduksi
+                  Jumlah Karya / Look / Konten (Opsional)
                 </label>
                 <input
                   type="number"
                   name="unitsProduced"
                   min="0"
-                  placeholder="Contoh: 50 (opsional)"
+                  placeholder="Contoh: 12 (12 look foto / 3 video reels)"
                   className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
-                  Nilai Finansial / Omzet Riil
+                  Estimasi Nilai Komersial / Nilai Barter (Opsional)
                 </label>
                 <input
                   type="text"
                   name="revenueAmount"
-                  placeholder="Contoh: Rp 17.500.000 (opsional)"
+                  placeholder="Contoh: Rp 17.500.000 (kosongkan jika barter/TFP)"
                   className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
-                  Jangkauan Audiens / Pembeli
+                  Jangkauan Audiens / Impresi (Opsional)
                 </label>
                 <input
                   type="text"
                   name="audienceReached"
-                  placeholder="Contoh: 1.200 pengunjung pameran (opsional)"
-                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
-                />
-              </div>
-
-              <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">
-                  Tautan Bukti Dokumentasi / Katalog
-                </label>
-                <input
-                  type="url"
-                  name="evidenceUrl"
-                  placeholder="https://instagram.com/... atau https://katalog-produk.com"
+                  placeholder="Contoh: 12.000 tayangan video / 1.500 likes"
                   className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200/80 text-sm text-[#27213D] focus:outline-none focus:border-[#E66A48] focus:bg-white"
                 />
               </div>

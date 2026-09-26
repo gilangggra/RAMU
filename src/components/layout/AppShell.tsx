@@ -8,10 +8,6 @@ import {
   Lightbulb,
   Megaphone,
   Handshake,
-  Package,
-  Target,
-  Search,
-  ShieldAlert,
   Zap,
   Menu,
   X,
@@ -19,6 +15,9 @@ import {
   Users,
   Sparkles,
   Settings,
+  Sliders,
+  Inbox,
+  BarChart3,
 } from "lucide-react";
 
 interface ActorInfo {
@@ -44,12 +43,15 @@ interface NavItem {
 
 const PRIMARY_NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" /> },
-  { href: "/opportunities", label: "Peluang Kolaborasi", icon: <Lightbulb className="w-4 h-4" /> },
-  { href: "/projects", label: "Project Briefs", icon: <Megaphone className="w-4 h-4" /> },
-  { href: "/directory", label: "Profil Pelaku", icon: <Users className="w-4 h-4" /> },
+  { href: "/opportunities", label: "Peluang Sinergi AI", icon: <Lightbulb className="w-4 h-4" />, badge: "AI Match" },
+  { href: "/projects", label: "Papan Proyek (Open Briefs)", icon: <Megaphone className="w-4 h-4" /> },
+  { href: "/collaborations", label: "Ruang Kerja Tim (Workspaces)", icon: <Handshake className="w-4 h-4" /> },
+  { href: "/dashboard/bookings", label: "Permintaan Masuk (Bookings)", icon: <Inbox className="w-4 h-4" /> },
+  { href: "/directory", label: "Direktori Kreator", icon: <Users className="w-4 h-4" /> },
   { href: "/showcase", label: "Karya & Inspirasi", icon: <Sparkles className="w-4 h-4" /> },
-  { href: "/collaborations", label: "Ruang Kolaborasi", icon: <Handshake className="w-4 h-4" /> },
-  { href: "/settings", label: "Pengaturan", icon: <Settings className="w-4 h-4" /> },
+  { href: "/readiness", label: "Kesiapan & Ketentuan Kerja", icon: <Sliders className="w-4 h-4" /> },
+  { href: "/engine-insights", label: "Engine Intelligence", icon: <BarChart3 className="w-4 h-4" />, badge: "Metrik" },
+  { href: "/settings", label: "Pengaturan Akun", icon: <Settings className="w-4 h-4" /> },
 ];
 
 
@@ -132,11 +134,10 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
         <div className="flex-1 overflow-y-auto px-3.5 py-4 space-y-6">
           <div>
             <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-[#9E98A8] mb-2">
-              Utama
+              Menu Utama
             </p>
             {renderNavLinks(PRIMARY_NAV)}
           </div>
-
         </div>
 
         <div className="p-3.5 border-t border-stone-200/80 bg-stone-50/50">
@@ -200,7 +201,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
               </button>
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase text-[#9E98A8] mb-2">Utama</p>
+              <p className="text-[10px] font-bold uppercase text-[#9E98A8] mb-2">Menu Utama</p>
               {renderNavLinks(PRIMARY_NAV)}
             </div>
             <div className="pt-3 border-t border-stone-200">

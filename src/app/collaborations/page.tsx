@@ -4,9 +4,13 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { getCollaborationsForActor } from "@/application/collaborationService";
 import { AppShell } from "@/components/layout/AppShell";
-import { Handshake, ArrowRight } from "lucide-react";
+import { Handshake, ArrowRight, AlertCircle } from "lucide-react";
 
-export default async function CollaborationsPage() {
+interface CollaborationsPageProps {
+  searchParams: Promise<{ error?: string; success?: string }>;
+}
+
+export default async function CollaborationsPage({ searchParams }: CollaborationsPageProps) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -21,6 +25,9 @@ export default async function CollaborationsPage() {
 
   if (!actor) redirect("/onboarding");
 
+  const params = await searchParams;
+  const errorMessage = params?.error;
+
   const collaborations = await getCollaborationsForActor(actor.id);
 
   const activeCount = collaborations.filter((c) => c.status === "ACTIVE").length;
@@ -29,12 +36,24 @@ export default async function CollaborationsPage() {
   return (
     <AppShell actor={actor} activeRoute="/collaborations">
       <div className="space-y-8 max-w-6xl mx-auto">
+        {errorMessage && (
+          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center justify-between gap-3 animate-fade-in shadow-xs">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+            <Link href="/collaborations" className="text-stone-500 hover:text-stone-800 text-[11px] underline shrink-0">
+              Tutup
+            </Link>
+          </div>
+        )}
+
         <section className="p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] relative overflow-hidden space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold text-[#E66A48]">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#E66A48] animate-pulse" />
-                Phase 4: Collaboration Space & Negotiation
+                Workspace Kolaborasi • Eksekusi Karya & Negosiasi
               </div>
               <h1 className="text-3xl font-extrabold text-[#27213D] tracking-tight">
                 Ruang Proyek Kolaborasi Aktif

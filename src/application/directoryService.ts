@@ -51,7 +51,7 @@ export async function getDirectoryActors(params: DirectoryFilterParams = {}) {
     include: {
       assets: {
         where: { status: "ACTIVE" },
-        take: 5,
+        take: 10,
         select: {
           id: true,
           name: true,

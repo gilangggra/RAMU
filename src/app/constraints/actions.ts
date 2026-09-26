@@ -39,13 +39,17 @@ export async function createConstraint(formData: FormData) {
   const negotiability = ((formData.get("negotiability") as string)?.trim() || "NEGOTIABLE") as Negotiability;
   const notes = (formData.get("notes") as string)?.trim() || null;
 
+  const returnTo = (formData.get("returnTo") as string) || "/readiness?tab=constraints";
+  const baseUrl = returnTo.split("?")[0];
+  const queryStr = returnTo.includes("?") ? returnTo.slice(returnTo.indexOf("?")) : "";
+
   if (!type || !valueRaw) {
-    redirect(`/constraints?error=${encodeURIComponent("Tipe dan nilai constraint wajib diisi.")}`);
+    redirect(`${baseUrl}${queryStr ? `${queryStr}&` : "?"}error=${encodeURIComponent("Tipe dan nilai batasan wajib diisi.")}`);
   }
 
   const validTypes = Object.values(ConstraintType);
   if (!validTypes.includes(type)) {
-    redirect(`/constraints?error=${encodeURIComponent("Tipe constraint tidak valid.")}`);
+    redirect(`${baseUrl}${queryStr ? `${queryStr}&` : "?"}error=${encodeURIComponent("Tipe batasan tidak valid.")}`);
   }
 
   // Nilai disimpan sebagai JSON — bisa string, angka, atau array
@@ -72,12 +76,13 @@ export async function createConstraint(formData: FormData) {
       },
     });
   } catch (e: any) {
-    redirect(`/constraints?error=${encodeURIComponent("Gagal menyimpan constraint: " + (e?.message?.split("\n")[0] || "Error"))}`);
+    redirect(`${baseUrl}${queryStr ? `${queryStr}&` : "?"}error=${encodeURIComponent("Gagal menyimpan batasan: " + (e?.message?.split("\n")[0] || "Error"))}`);
   }
 
+  revalidatePath("/readiness");
   revalidatePath("/constraints");
   revalidatePath("/dashboard");
-  redirect("/constraints");
+  redirect(returnTo);
 }
 
 export async function deleteConstraint(constraintId: string) {
@@ -87,6 +92,7 @@ export async function deleteConstraint(constraintId: string) {
     where: { id: constraintId, actorId: actor.id },
   });
 
+  revalidatePath("/readiness");
   revalidatePath("/constraints");
   revalidatePath("/dashboard");
 }

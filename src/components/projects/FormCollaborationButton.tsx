@@ -8,12 +8,14 @@ import { Handshake, Rocket, ArrowRight } from "lucide-react";
 interface FormCollaborationButtonProps {
   briefId: string;
   isFilled: boolean;
+  acceptedCount?: number;
   collaborationId?: string | null;
 }
 
 export function FormCollaborationButton({
   briefId,
   isFilled,
+  acceptedCount = 0,
   collaborationId,
 }: FormCollaborationButtonProps) {
   const [loading, setLoading] = useState(false);
@@ -32,8 +34,13 @@ export function FormCollaborationButton({
     );
   }
 
+  const canForm = isFilled || acceptedCount > 0;
+
   async function handleForm() {
-    if (!confirm("Bentuk ruang kolaborasi sekarang dengan kolaborator yang telah diterima?")) {
+    const confirmMsg = isFilled
+      ? "Bentuk ruang kolaborasi sekarang dengan seluruh tim yang telah lengkap?"
+      : `Bentuk ruang kolaborasi sekarang dengan ${acceptedCount} kolaborator yang telah diterima?`;
+    if (!confirm(confirmMsg)) {
       return;
     }
     setLoading(true);
@@ -54,9 +61,9 @@ export function FormCollaborationButton({
   return (
     <button
       onClick={handleForm}
-      disabled={loading || !isFilled}
+      disabled={loading || !canForm}
       className={`inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all shadow-md ${
-        isFilled
+        canForm
           ? "bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white shadow-[#E66A48]/20 cursor-pointer group"
           : "bg-stone-200 text-stone-500 border border-stone-300/50 cursor-not-allowed opacity-75"
       }`}
@@ -91,7 +98,9 @@ export function FormCollaborationButton({
           <span>
             {isFilled
               ? "Bentuk Ruang Kolaborasi Sekarang"
-              : "Menunggu Semua Peran Terisi"}
+              : acceptedCount > 0
+              ? `Mulai Workspace (${acceptedCount} Kolaborator)`
+              : "Menunggu Kolaborator Diterima"}
           </span>
         </>
       )}

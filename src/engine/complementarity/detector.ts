@@ -91,8 +91,8 @@ function checkProductCombination(
   actorB: EngineActor,
   results: PairwiseComplementarity[]
 ) {
-  const materialsA = actorA.assets.filter((a) => a.category === 'WARDROBE_PROP' || a.category === 'PORTFOLIO_WORK');
-  const materialsB = actorB.assets.filter((a) => a.category === 'WARDROBE_PROP' || a.category === 'PORTFOLIO_WORK' || a.category === 'PORTFOLIO_WORK');
+  const materialsA = actorA.assets.filter((a) => a.category === 'WARDROBE_PROP');
+  const materialsB = actorB.assets.filter((a) => a.category === 'WARDROBE_PROP');
 
   for (const a of materialsA) {
     for (const b of materialsB) {

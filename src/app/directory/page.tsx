@@ -28,7 +28,9 @@ export default async function DirectoryPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
+  if (!user) {
+    redirect(`/login?redirectTo=/directory&message=${encodeURIComponent("Silakan masuk atau daftar akun untuk mengakses direktori lengkap pelaku kreatif dan studio.")}`);
+  }
 
   const actor = await prisma.actor.findFirst({
     where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },

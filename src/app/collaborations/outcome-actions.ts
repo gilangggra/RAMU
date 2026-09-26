@@ -47,7 +47,7 @@ export async function recordOutcomeAction(collaborationId: string, formData: For
   const unitsProduced = unitsProducedRaw && !isNaN(Number(unitsProducedRaw)) ? Number(unitsProducedRaw) : null;
 
   try {
-    await recordOutcome({
+    const outcome = await recordOutcome({
       collaborationId,
       actorId: actor.id,
       title,
@@ -62,9 +62,47 @@ export async function recordOutcomeAction(collaborationId: string, formData: For
       },
     });
 
+    // Otomatis integrasikan luaran ke Portofolio & Showcase partisipan jika ada bukti visual (evidenceUrl / image)
+    const collab = await prisma.collaboration.findUnique({
+      where: { id: collaborationId },
+      include: {
+        participants: {
+          include: { actor: true },
+        },
+      },
+    });
+
+    if (collab && evidenceUrl) {
+      for (const p of collab.participants) {
+        await prisma.asset.create({
+          data: {
+            actorId: p.actorId,
+            category: "PORTFOLIO_WORK",
+            subtype: "Karya Kolaborasi",
+            name: title,
+            description: `${description} • Kolaborasi di RAMU: ${collab.title}`,
+            roles: ["OUTPUT", "CREATIVE_ELEMENT"],
+            sourceType: "VERIFIED",
+            confidenceLevel: "HIGH",
+            status: "ACTIVE",
+            attributes: {
+              image_url: evidenceUrl,
+              collaborationId: collab.id,
+              outcomeId: outcome.id,
+              credits: collab.participants.map(part => `${part.actor.name} (${part.roleCode})`),
+              tags: ["Kolaborasi RAMU", "Verified Outcome"],
+            },
+          },
+        }).catch((err) => console.error("Auto asset creation error:", err));
+      }
+    }
+
     revalidatePath(`/collaborations/${collaborationId}`);
     revalidatePath("/collaborations");
     revalidatePath("/dashboard");
+    revalidatePath("/showcase");
+    revalidatePath("/dashboard/showcase");
+    revalidatePath("/directory");
     revalidatePath("/engine-insights");
     return { success: true };
   } catch (error) {

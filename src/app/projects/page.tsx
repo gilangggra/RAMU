@@ -17,7 +17,9 @@ export default async function ProjectsPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
+  if (!user) {
+    redirect(`/login?redirectTo=/projects&message=${encodeURIComponent("Silakan masuk atau daftar untuk meninjau dan melamar ke project briefs.")}`);
+  }
 
   const actor = await prisma.actor.findFirst({
     where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
@@ -28,6 +30,14 @@ export default async function ProjectsPage({
 
   const params = await searchParams;
   const activeTab = params?.tab || "browse";
+
+  const [openBriefsCount, myBriefsCount, pendingInterestCount] = await Promise.all([
+    prisma.projectBrief.count({ where: { status: "OPEN" } }),
+    prisma.projectBrief.count({ where: { creatorActorId: actor.id } }),
+    prisma.collaborationInterest.count({
+      where: { actorId: actor.id, status: "PENDING" },
+    }),
+  ]);
 
   const [allBriefs, myBriefs, myInterests] = await Promise.all([
     activeTab === "browse" || activeTab === "all"
@@ -59,13 +69,9 @@ export default async function ProjectsPage({
 
   const briefsToShow = activeTab === "mine" ? myBriefs : allBriefs;
 
-  const pendingInterestCount = await prisma.collaborationInterest.count({
-    where: { actorId: actor.id, status: "PENDING" },
-  });
-
   const tabs = [
-    { key: "browse", label: "Jelajahi Proyek", count: allBriefs.length },
-    { key: "mine", label: "Brief Saya", count: myBriefs.length },
+    { key: "browse", label: "Jelajahi Proyek", count: openBriefsCount },
+    { key: "mine", label: "Brief Saya", count: myBriefsCount },
     { key: "interests", label: "Minat Saya", count: pendingInterestCount },
   ];
 
@@ -98,12 +104,12 @@ export default async function ProjectsPage({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-stone-100">
             <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200">
               <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Proyek Terbuka</div>
-              <div className="text-2xl font-black text-[#1E1B2E] mt-1">{allBriefs.length}</div>
+              <div className="text-2xl font-black text-[#1E1B2E] mt-1">{openBriefsCount}</div>
             </div>
             <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200">
               <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Brief Anda</div>
               <div className="text-2xl font-black text-[#1E1B2E] mt-1">
-                {myBriefs.length || "0"}
+                {myBriefsCount}
               </div>
             </div>
             <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200">
