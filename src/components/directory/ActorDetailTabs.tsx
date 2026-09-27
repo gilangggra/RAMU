@@ -26,13 +26,20 @@ import {
   PlusCircle,
   Sliders,
   ArrowRight,
+  CreditCard,
 } from "lucide-react";
 import { ModelCompCard, ModelAttributes } from "./ModelCompCard";
 import { StudioSpecsCard, StudioAttributes } from "./StudioSpecsCard";
 import { BrandSpecsCard, BrandAttributes } from "./BrandSpecsCard";
 import { PhotographerSpecsCard, PhotographerAttributes } from "./PhotographerSpecsCard";
 import { DesignerSpecsCard, DesignerAttributes } from "./DesignerSpecsCard";
+import { MuaSpecsCard } from "./MuaSpecsCard";
+import { StylistSpecsCard } from "./StylistSpecsCard";
+import { VideographerSpecsCard } from "./VideographerSpecsCard";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
+import { BookingModal } from "./BookingModal";
+import { TearSheetModal } from "@/components/showcase/TearSheetModal";
+import { ShowcaseItem } from "@/application/showcaseService";
 
 interface ActorDetailTabsProps {
   actor: {
@@ -104,8 +111,9 @@ interface ActorDetailTabsProps {
 }
 
 export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps) {
-  const defaultTab = (actor.actorType === "INDIVIDUAL" || actor.actorType === "STUDIO") ? "portfolio" : "about";
-  const [activeTab, setActiveTab] = useState<"about" | "portfolio" | "availability" | "reviews" | "needs">(defaultTab);
+  const [activeTab, setActiveTab] = useState<"portfolio" | "rates" | "specs" | "about" | "reviews">("portfolio");
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [selectedShowcaseIndex, setSelectedShowcaseIndex] = useState<number | null>(null);
 
   // Check role-specific assets
   const modelAsset = actor.assets.find(
@@ -124,7 +132,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
     (a) =>
       a.attributes &&
       typeof a.attributes === "object" &&
-      ("brand_gallery" in a.attributes || "styling_gallery" in a.attributes || "design_dna" in a.attributes)
+      ("brand_gallery" in a.attributes || "design_dna" in a.attributes)
   );
 
   const photographerAsset = actor.assets.find(
@@ -141,11 +149,35 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
       ("primary_software" in a.attributes || "design_disciplines" in a.attributes || "deliverables" in a.attributes)
   );
 
-  const isModel = Boolean(modelAsset);
-  const isStudio = Boolean(studioAsset);
-  const isBrand = Boolean(brandAsset);
-  const isPhotographer = Boolean(photographerAsset) || actor.sector.toLowerCase().includes("photographer") || actor.sector.toLowerCase().includes("fotografi");
-  const isDesigner = Boolean(designerAsset);
+  const stylistAsset = actor.assets.find(
+    (a) =>
+      a.subtype.toLowerCase().includes("styl") ||
+      (a.attributes && typeof a.attributes === "object" && ("styling_gallery" in a.attributes || "styling_specialties" in a.attributes))
+  );
+
+  const muaAsset = actor.assets.find(
+    (a) =>
+      a.subtype.toLowerCase().includes("mua") ||
+      a.subtype.toLowerCase().includes("makeup") ||
+      (a.attributes && typeof a.attributes === "object" && ("makeup_styles" in a.attributes || "primary_kit_brands" in a.attributes))
+  );
+
+  const videographerAsset = actor.assets.find(
+    (a) =>
+      a.subtype.toLowerCase().includes("video") ||
+      a.subtype.toLowerCase().includes("film") ||
+      (a.attributes && typeof a.attributes === "object" && ("primary_cinema_camera" in a.attributes || "cine_lenses" in a.attributes))
+  );
+
+  const sectorLower = actor.sector.toLowerCase();
+  const isStudio = Boolean(studioAsset) || actor.actorType === "STUDIO" || sectorLower.includes("studio");
+  const isModel = !isStudio && (Boolean(modelAsset) || sectorLower.includes("model") || sectorLower.includes("talent"));
+  const isMUA = !isStudio && !isModel && (Boolean(muaAsset) || sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair"));
+  const isStylist = !isStudio && !isModel && !isMUA && (Boolean(stylistAsset) || sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));
+  const isVideographer = !isStudio && !isModel && !isMUA && !isStylist && (Boolean(videographerAsset) || sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema"));
+  const isPhotographer = !isStudio && !isModel && !isMUA && !isStylist && !isVideographer && (Boolean(photographerAsset) || sectorLower.includes("photographer") || sectorLower.includes("fotografi"));
+  const isDesigner = !isStudio && !isModel && !isMUA && !isStylist && !isVideographer && !isPhotographer && (Boolean(designerAsset) || sectorLower.includes("designer") || sectorLower.includes("desain"));
+  const isBrand = actor.actorType === "MSME" || Boolean(brandAsset) || sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("umkm");
 
   const modelAttrs = modelAsset?.attributes as ModelAttributes | undefined;
   const studioAttrs = studioAsset?.attributes as StudioAttributes | undefined;
@@ -156,13 +188,50 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
   const portfolioAssets = actor.assets.filter((a) => a.category === "PORTFOLIO_WORK");
   const otherAssets = actor.assets.filter((a) => a.category !== "PORTFOLIO_WORK");
 
-  // Curate true skills, specialties, and disciplines (NEVER equipment hardware serials)
+  const actorInitials = actor.name
+    .split(" ")
+    .map((word) => word[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
+  const showcaseItems: ShowcaseItem[] = portfolioAssets.map((asset) => {
+    const attrs = (asset.attributes as any) || {};
+    let imageUrl = attrs.image_url;
+    if (!imageUrl && attrs.brand_gallery && attrs.brand_gallery.length > 0) imageUrl = attrs.brand_gallery[0];
+    if (!imageUrl && attrs.styling_gallery && attrs.styling_gallery.length > 0) imageUrl = attrs.styling_gallery[0];
+    if (!imageUrl && attrs.comp_card && attrs.comp_card.images && attrs.comp_card.images.length > 0) imageUrl = attrs.comp_card.images[0];
+    if (!imageUrl) {
+      imageUrl = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&auto=format&fit=crop";
+    }
+
+    return {
+      id: asset.id,
+      title: asset.name,
+      category: asset.subtype || actor.sector || "Komersial",
+      imageUrl,
+      tearSheet: attrs.tear_sheet || null,
+      actor: {
+        id: actor.id,
+        name: actor.name,
+        sector: actor.sector,
+        location: actor.location || null,
+        description: actor.description || null,
+        experienceLevel: null,
+        aestheticStyles: [],
+        compensationModels: [],
+        initials: actorInitials,
+        avatarBg: "from-amber-400 to-[#E66A48]",
+      },
+    };
+  });
+
+  // Curate true skills and specialties
   const explicitSpecialties: string[] = [];
   if (modelAttrs?.specialties) explicitSpecialties.push(...modelAttrs.specialties);
   if (photographerAttrs?.specialties) explicitSpecialties.push(...photographerAttrs.specialties);
   if (designerAttrs?.design_disciplines) explicitSpecialties.push(...designerAttrs.design_disciplines);
 
-  // Extract from SKILL_TALENT assets or creative subtypes
   for (const asset of actor.assets) {
     if (asset.category === "SKILL_TALENT") {
       explicitSpecialties.push(asset.name);
@@ -178,40 +247,631 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
     }
   }
 
-  // De-duplicate
   const uniqueSpecialties = Array.from(new Set(explicitSpecialties.filter(Boolean)));
   const displaySpecialties = uniqueSpecialties.length > 0
     ? uniqueSpecialties
-    : [actor.sector, "Kolaborasi Kreatif", "Produksi Terverifikasi"];
+    : [actor.sector, "Layanan Komersial", "Produksi Terverifikasi"];
 
   const totalReviews = actor.feedbacks.length;
   const avgRating = totalReviews > 0 ? "5.0" : "5.0";
 
+  // Dynamic Commercial Packages tailored to Indonesian Creative Industry
+  interface ServicePackage {
+    title: string;
+    subtitle: string;
+    price: string;
+    unit: string;
+    popular?: boolean;
+    features: string[];
+  }
+
+  // Check if actor has custom service packages configured in their assets
+  const customServiceAsset = actor.assets.find(
+    (a) =>
+      a.subtype === "COMMERCIAL_SERVICE_PACKAGES" ||
+      (a.attributes && typeof a.attributes === "object" && "service_packages" in (a.attributes as any))
+  );
+  const customPackages = (customServiceAsset?.attributes as any)?.service_packages as ServicePackage[] | undefined;
+
+  let packages: ServicePackage[] = [];
+
+  if (customPackages && Array.isArray(customPackages) && customPackages.length > 0) {
+    packages = customPackages;
+  } else if (isStudio) {
+    packages = [
+      {
+        title: "Shift Setengah Hari",
+        subtitle: "Sesi foto katalog, podcast, atau lookbook ringkas",
+        price: "Rp 750.000",
+        unit: "per 4 jam",
+        features: [
+          "Akses area cyclorama wall & ruang makeup",
+          "Daya listrik 16.500 Watt (3-Phase)",
+          "AC dingin & high-speed Wi-Fi",
+          "1 Asisten studio standby",
+        ],
+      },
+      {
+        title: "Shift Penuh (Full-Day)",
+        subtitle: "Pilihan utama untuk campaign lookbook & video komersial",
+        price: "Rp 1.400.000",
+        unit: "per 8 jam",
+        popular: true,
+        features: [
+          "Akses penuh seluruh area studio & fitting room",
+          "Bebas ganti setup lighting & background seamless",
+          "Free parking kru & loading barang mudah",
+          "Termasuk 1 jam persiapan (setup/breakdown)",
+          "2 Asisten studio standby",
+        ],
+      },
+      {
+        title: "Produksi Besar / 12 Jam",
+        subtitle: "Untuk syuting iklan TVC, webseries, atau multi-brand",
+        price: "Rp 2.200.000",
+        unit: "per 12 jam",
+        features: [
+          "Prioritas jadwal & booking slot",
+          "Izin pemakaian generator / heavy-duty lighting",
+          "Overtime grace period 30 menit",
+          "Akses pantry & ruang tunggu VIP",
+        ],
+      },
+    ];
+  } else if (isModel) {
+    packages = [
+      {
+        title: "Katalog & E-Commerce",
+        subtitle: "Foto produk katalog marketplace & webstore",
+        price: "Rp 1.000.000",
+        unit: "per 3-4 jam",
+        features: [
+          "Maksimal 15 look / pergantian busana",
+          "Pose katalog bersih & profesional",
+          "Pilihan eksposur tag akun Instagram",
+          "Termasuk fitting sebelum sesi",
+        ],
+      },
+      {
+        title: "Kampanye Lookbook (Full Day)",
+        subtitle: "Kampanye musiman koleksi baru label busana",
+        price: "Rp 1.800.000",
+        unit: "per 8 jam",
+        popular: true,
+        features: [
+          "Unlimited looks dalam durasi kerja",
+          "Photoshoot indoor atau outdoor",
+          "Hak tayang digital & media sosial 1 tahun",
+          "Fleksibel untuk konsep editorial & avant-garde",
+        ],
+      },
+      {
+        title: "Video TVC & Brand Ambassador",
+        subtitle: "Iklan komersial video, billboard, atau digital ads",
+        price: "Rp 3.500.000",
+        unit: "per proyek",
+        features: [
+          "Video acting & dialog / voiceover",
+          "Hak guna komersial multi-channel (Ads & Billboard)",
+          "1x Post feed & 2x Story endorsement",
+          "Kontrak eksklusivitas kategori busana",
+        ],
+      },
+    ];
+  } else if (isMUA) {
+    packages = [
+      {
+        title: "Makeup Katalog & Lookbook",
+        subtitle: "Riasan natural glow & flawless untuk pemotretan busana",
+        price: "Rp 800.000",
+        unit: "per 4 jam",
+        features: [
+          "Maksimal 2-3 model katalog atau 1 model multi-look",
+          "Produk high-end internasional & hypoallergenic",
+          "Termasuk basic hair styling / hijab do",
+          "Standby touch-up on-set selama sesi",
+        ],
+      },
+      {
+        title: "Editorial & Creative Glam",
+        subtitle: "Konsep riasan editorial avant-garde untuk majalah & rilis koleksi",
+        price: "Rp 1.500.000",
+        unit: "per 8 jam",
+        popular: true,
+        features: [
+          "Eksplorasi riasan kreatif, graphic liner, atau aksen mutiara/foil",
+          "Full hair styling & hairpiece integration",
+          "Standby touch-up penuh di bawah lampu studio",
+          "Termasuk pembersihan & ganti look on-set",
+        ],
+      },
+      {
+        title: "Kampanye Komersial & TVC",
+        subtitle: "High-definition beauty makeup untuk kamera 4K dan iklan",
+        price: "Rp 2.500.000",
+        unit: "per proyek",
+        features: [
+          "Teknik makeup HD 4K tahan keringat & lighting panas",
+          "Asistensi makeup artist standby seharian",
+          "Hair restyling multi-adegan",
+          "Termasuk konsultasi moodboard pra-produksi",
+        ],
+      },
+    ];
+  } else if (isStylist) {
+    packages = [
+      {
+        title: "Lookbook & Catalog Styling",
+        subtitle: "Kurasi padu padan outfit untuk pemotretan katalog",
+        price: "Rp 1.200.000",
+        unit: "per 4 jam",
+        features: [
+          "Kurasi gaya hingga 8 look busana siap pakai",
+          "Disediakan garment steamer & peralatan fitting on-set",
+          "Peminjaman aksesoris & sepatu pendukung esensial",
+          "Penjagaan kerapian busana selama di depan kamera",
+        ],
+      },
+      {
+        title: "Kampanye Musiman Koleksi",
+        subtitle: "Pengarahan gaya komprehensif kampanye rilis busana baru",
+        price: "Rp 2.200.000",
+        unit: "per 8 jam",
+        popular: true,
+        features: [
+          "Moodboard konsep styling & palet warna selaras DNA brand",
+          "Kurasi 15-20 look head-to-toe lengkap",
+          "Akses pulling wardrobe & perhiasan desainer lokal",
+          "Manajemen wardrobe on-set tanpa noda & rapi",
+        ],
+      },
+      {
+        title: "Creative Direction & Sourcing",
+        subtitle: "Konseptualisasi tema rilis brand dan kurasi editorial besar",
+        price: "Rp 4.000.000",
+        unit: "per proyek",
+        features: [
+          "Perancangan visual identity kampanye dari nol",
+          "Sourcing koleksi vintage archive & kain wastra langka",
+          "Supervisi langsung wardrobe di set pemotretan",
+          "Arahan lookbook digital & panduan gaya katalog",
+        ],
+      },
+    ];
+  } else if (isVideographer) {
+    packages = [
+      {
+        title: "Reels & TikTok Cinematic",
+        subtitle: "Video fashion vertikal 9:16 untuk media sosial",
+        price: "Rp 1.800.000",
+        unit: "per 4 jam",
+        features: [
+          "1-2 Video reels sinematik durasi 30-45 detik",
+          "Kamera sinema 4K + Gimbal stabilization",
+          "Color grading khas seluloid / warm tone",
+          "Lisensi musik komersial legal (tanpa copyright strike)",
+        ],
+      },
+      {
+        title: "Fashion Film & Campaign Video",
+        subtitle: "Video kampanye sinematik lookbook untuk rilis koleksi",
+        price: "Rp 3.500.000",
+        unit: "per 8 jam",
+        popular: true,
+        features: [
+          "1 Master film 4K (16:9) + 2 Cutdowns Reels (9:16)",
+          "Lighting kit continuous bawaan + wireless mic",
+          "Storyboarding & arahan visual on-set",
+          "Gratis 2x revisi color grading & offline edit",
+          "Delivery cepat 4-5 hari kerja",
+        ],
+      },
+      {
+        title: "Iklan TVC / Commercial Brand Video",
+        subtitle: "Produksi video iklan komersial skala penuh",
+        price: "Rp 6.000.000",
+        unit: "per proyek",
+        features: [
+          "Setup multi-kamera 4K 10-bit ProRes + Drone aerial",
+          "Full audio field recording 32-bit float",
+          "Color grading ACES standar bioskop di DaVinci Resolve",
+          "Full commercial broadcast & advertising license",
+        ],
+      },
+    ];
+  } else if (isPhotographer) {
+    packages = [
+      {
+        title: "Paket Lookbook Half-Day",
+        subtitle: "Sesi foto lookbook esensial untuk emerging brand",
+        price: "Rp 1.500.000",
+        unit: "per 4 jam",
+        features: [
+          "1 Kamera profesional + Lensa prime/zoom",
+          "15 Foto final retouch resolusi tinggi",
+          "Semua file mentah (RAW / JPEG preview) via Drive H+1",
+          "Delivery hasil akhir 3-4 hari kerja",
+        ],
+      },
+      {
+        title: "Paket Kampanye Komersial",
+        subtitle: "Produksi visual lookbook lengkap untuk rilis koleksi",
+        price: "Rp 2.800.000",
+        unit: "per 8 jam",
+        popular: true,
+        features: [
+          "2 Kamera profesional + Full lighting kit bawaan",
+          "40 Foto final retouch komersial majalah",
+          "Color grading custom sesuai DNA brand Anda",
+          "Gratis 2x revisi minor",
+          "Full commercial license",
+        ],
+      },
+      {
+        title: "Foto + Teaser Video Reels",
+        subtitle: "Paket visual all-in-one foto dan video media sosial",
+        price: "Rp 4.200.000",
+        unit: "per proyek",
+        features: [
+          "Seluruh fitur Paket Kampanye Komersial",
+          "1 Video Reels / TikTok cinematic 30-45 detik",
+          "Audio mastering berlisensi komersial",
+          "Delivery prioritas 2-3 hari kerja",
+        ],
+      },
+    ];
+  } else if (isDesigner) {
+    packages = [
+      {
+        title: "Konsultasi Desain & Moodboard",
+        subtitle: "Pengembangan konsep visual dan pemilihan material",
+        price: "Rp 1.500.000",
+        unit: "per sesi",
+        features: [
+          "Diskusi siluet desain & tren pasar",
+          "Pemilihan swatch kain & palet warna",
+          "Sketsa desain digital 2D",
+          "Panduan spesifikasi teknis (tech-pack)",
+        ],
+      },
+      {
+        title: "Pembuatan Pola & Sampel (Toille)",
+        subtitle: "Pengerjaan prototipe fisik busana pertama siap fitting",
+        price: "Rp 2.800.000",
+        unit: "per koleksi",
+        popular: true,
+        features: [
+          "Pembuatan pola presisi (pattern making)",
+          "Pengerjaan sampel fisik busana (toille)",
+          "1x Sesi fitting model & revisi ukuran",
+          "Standar jahitan atelier rapi",
+        ],
+      },
+      {
+        title: "Produksi Koleksi Kapsul",
+        subtitle: "Produksi busana siap pakai dalam kuota batch terbatas",
+        price: "Mulai Rp 6.000.000",
+        unit: "per batch",
+        features: [
+          "Grading ukuran lengkap (S, M, L)",
+          "Pengawasan mutu (QC) ketat setiap pakaian",
+          "Packaging & label placement",
+          "Jaminan hak cipta desain orisinal",
+        ],
+      },
+    ];
+  } else if (isBrand) {
+    packages = [
+      {
+        title: "Katalog & Packshot Produk",
+        subtitle: "Produksi konten visual produk untuk katalog e-commerce",
+        price: "Rp 2.500.000",
+        unit: "per sesi",
+        features: [
+          "Pemotretan 10-15 produk katalog siap upload",
+          "Format foto rasio 1:1, 4:5, dan 16:9",
+          "Color accuracy terkalibrasi layar e-commerce",
+          "Hak guna promosi toko online & marketplace",
+        ],
+      },
+      {
+        title: "Kampanye Rilis Koleksi Baru",
+        subtitle: "Produksi terpadu kampanye lookbook dan peluncuran produk",
+        price: "Rp 5.000.000",
+        unit: "per kampanye",
+        popular: true,
+        features: [
+          "Lookbook editorial lengkap + video teaser",
+          "Kerjasama talenta kreator terverifikasi RAMU",
+          "Aset promosi digital ads siap tayang",
+          "Dukungan publikasi di ekosistem RAMU",
+        ],
+      },
+      {
+        title: "Kemitraan Co-Branding & Runway",
+        subtitle: "Aktivasi kolaborasi khusus antar-brand dan kreator",
+        price: "Mulai Rp 10.000.000",
+        unit: "kustom",
+        features: [
+          "Perancangan kampanye kolaboratif lintas sektor",
+          "Pengorganisasian showcase / event rilis",
+          "Liputan media & dokumentasi profesional",
+          "Perjanjian bagi hasil / kontrak komersial resmi",
+        ],
+      },
+    ];
+  } else {
+    packages = [
+      {
+        title: "Paket Layanan Standar",
+        subtitle: "Jasa profesional sesuai kebutuhan proyek awal",
+        price: "Rp 1.200.000",
+        unit: "per sesi",
+        features: [
+          "Konsultasi brief & referensi visual",
+          "Pengerjaan terstandar profesional",
+          "Delivery output via Google Drive",
+          "Gratis 1x revisi minor",
+        ],
+      },
+      {
+        title: "Paket Proyek Lengkap",
+        subtitle: "Pengerjaan komprehensif dari konsep hingga final",
+        price: "Rp 2.500.000",
+        unit: "per proyek",
+        popular: true,
+        features: [
+          "Arahan kreatif & moodboard konsep",
+          "Eksekusi penuh dengan standar industri",
+          "Output resolusi tinggi siap cetak & digital",
+          "Gratis 2x revisi komprehensif",
+          "Hak cipta komersial penuh",
+        ],
+      },
+      {
+        title: "Paket Produksi Khusus",
+        subtitle: "Kustomisasi untuk volume produksi atau kampanye multi-tahap",
+        price: "Mulai Rp 4.000.000",
+        unit: "kustom",
+        features: [
+          "Penyesuaian timeline & kontrak resmi",
+          "Prioritas waktu kerja tim",
+          "Dukungan asistensi intensif",
+          "Perjanjian kerahasiaan (NDA) jika diperlukan",
+        ],
+      },
+    ];
+  }
+
+  const specsTabLabel = isStudio
+    ? "Fasilitas & Ruangan"
+    : isPhotographer
+    ? "Kamera & Lighting Gear"
+    : isVideographer
+    ? "Cinema Gear & Video Suite"
+    : isModel
+    ? "Comp Card & Fisik Agensi"
+    : isMUA
+    ? "Makeup Kit & Standar Rias"
+    : isStylist
+    ? "Wardrobe & Alat Styling"
+    : isDesigner
+    ? "Disiplin & Material Desain"
+    : isBrand
+    ? "Katalog & Identitas Brand"
+    : "Spesifikasi Teknis & Alat";
+
+  let workingTerms = [
+    {
+      title: "Jam Kerja & Lembur",
+      icon: Clock,
+      desc: "Sesi standar 8 jam kerja (termasuk 1 jam istirahat). Kelebihan jam dihitung proporsional per jam sesuai kesepakatan awal.",
+    },
+    {
+      title: "Pembayaran & DP",
+      icon: CreditCard,
+      desc: "Uang Muka (DP) 50% untuk reservasi jadwal tanggal kerja. Pelunasan 50% dilakukan saat draft output disetujui.",
+    },
+    {
+      title: "Revisi & Pengiriman",
+      icon: Package,
+      desc: "Termasuk 2x revisi minor. Seluruh file master resolusi tinggi diserahkan melalui tautan cloud resmi.",
+    },
+    {
+      title: "Hak Cipta Komersial",
+      icon: CheckCircle2,
+      desc: "Klien memperoleh hak tayang komersial untuk kebutuhan pemasaran digital, website, dan katalog promosi.",
+    },
+  ];
+
+  if (isStudio) {
+    workingTerms = [
+      {
+        title: "Durasi Shift & Lembur",
+        icon: Clock,
+        desc: "Sesi shift 4 atau 8 jam termasuk persiapan. Toleransi lembur 15 menit, selanjutnya overtime dihitung proporsional per jam.",
+      },
+      {
+        title: "DP & Reservasi Slot",
+        icon: CreditCard,
+        desc: "DP 50% untuk penguncian tanggal dan jam studio di kalender. Pelunasan 50% sebelum atau saat kedatangan di lokasi.",
+      },
+      {
+        title: "Kebersihan Cyclorama Wall",
+        icon: Sparkles,
+        desc: "Cyclorama disediakan dalam kondisi bersih putih. Sepatu yang menginjak kurva cyclorama wajib dialasi shoe cover / lakban.",
+      },
+      {
+        title: "Daya Listrik & Asistensi",
+        icon: CheckCircle2,
+        desc: "Daya listrik 16.500W aman untuk lighting strobo/kontinu. 1-2 asisten studio standby membantu penataan c-stand & boom.",
+      },
+    ];
+  } else if (isModel) {
+    workingTerms = [
+      {
+        title: "Call Time & Waktu Sesi",
+        icon: Clock,
+        desc: "Hadir tepat waktu 30 menit sebelum sesi dimulai untuk fitting & makeup. Total 8 jam kerja termasuk 1 jam waktu istirahat.",
+      },
+      {
+        title: "Batas Outfit & Looks",
+        icon: Scissors,
+        desc: "Sesi katalog maksimal 15–20 pergantian outfit per hari untuk menjaga kesegaran pose dan konsistensi ekspresi visual.",
+      },
+      {
+        title: "Pembayaran Resmi",
+        icon: CreditCard,
+        desc: "DP 50% untuk reservasi jadwal di kalender RAMU, pelunasan 50% diselesaikan setelah sesi pemotretan hari-H berakhir.",
+      },
+      {
+        title: "Lisensi Hak Citra (Usage Rights)",
+        icon: CheckCircle2,
+        desc: "Hak tayang komersial foto untuk media sosial, webstore e-commerce, dan lookbook digital berlaku selama 1 tahun.",
+      },
+    ];
+  } else if (isMUA) {
+    workingTerms = [
+      {
+        title: "Waktu Aplikasi Riasan",
+        icon: Clock,
+        desc: "Alokasi waktu rias 45–60 menit per model untuk look katalog/natural, dan 75–90 menit untuk riasan editorial / avant-garde.",
+      },
+      {
+        title: "Higienitas & Alat Medis",
+        icon: Sparkles,
+        desc: "Sterilisasi kuas dengan alkohol 70%, penggunaan aplikator maskara & lip disposable, serta produk ramah kulit sensitif.",
+      },
+      {
+        title: "Standby Touch-Up On-Set",
+        icon: CheckCircle2,
+        desc: "Standby di samping set kamera selama pemotretan untuk mengontrol minyak/keringat dan memperbaiki helai rambut.",
+      },
+      {
+        title: "Ketentuan DP & Pelunasan",
+        icon: CreditCard,
+        desc: "DP 50% untuk mengunci tanggal pemotretan, pelunasan 50% dituntaskan di hari H setelah sesi selesai.",
+      },
+    ];
+  } else if (isStylist) {
+    workingTerms = [
+      {
+        title: "Fitting & Persiapan H-2",
+        icon: Clock,
+        desc: "Konfirmasi moodboard visual dan pengukuran ukuran badan model H-2 untuk penyesuaian baju desainer/klien.",
+      },
+      {
+        title: "Peralatan On-Set Lengkap",
+        icon: Package,
+        desc: "Stylist standby membawa garment steamer 2200W, rak gantungan, jepit peniti busana, dan emergency sewing kit.",
+      },
+      {
+        title: "Penjagaan Koleksi Busana",
+        icon: Sparkles,
+        desc: "Bertanggung jawab menjaga baju desainer/brand tetap bersih tanpa noda make-up, robek, atau kusut selama pemotretan.",
+      },
+      {
+        title: "Sistem Pembayaran",
+        icon: CreditCard,
+        desc: "DP 50% untuk biaya operasional pulling wardrobe, pelunasan 50% setelah seluruh busana di-return dengan aman.",
+      },
+    ];
+  } else if (isVideographer) {
+    workingTerms = [
+      {
+        title: "Brief & Storyboard Visual",
+        icon: Clock,
+        desc: "Penyusunan shot list, mood warna, dan alur adegan disepakati sebelum hari produksi untuk efisiensi waktu shooting.",
+      },
+      {
+        title: "Master 4K & Pengiriman",
+        icon: Package,
+        desc: "Master file resolusi 4K 10-bit dikirim via cloud storage dalam 4–5 hari kerja, lengkap dengan cutdowns format 9:16.",
+      },
+      {
+        title: "Revisi Color Grading & Cut",
+        icon: CheckCircle2,
+        desc: "Termasuk 2x revisi minor (penyesuaian pacing musik, teks tipografi, dan fine-tune color grading).",
+      },
+      {
+        title: "Lisensi Musik Komersial",
+        icon: CreditCard,
+        desc: "Semua audio dan lagu latar yang digunakan memiliki sertifikat lisensi komersial legal (bebas klaim hak cipta).",
+      },
+    ];
+  } else if (isPhotographer) {
+    workingTerms = [
+      {
+        title: "Live Tethering Preview",
+        icon: Clock,
+        desc: "Klien dapat melihat langsung hasil jepretan foto di layar monitor/iPad secara real-time on-set selama pemotretan.",
+      },
+      {
+        title: "Timeline Pengiriman",
+        icon: Package,
+        desc: "Preview seluruh foto mentah (JPEG/RAW) via Drive H+1. Hasil final high-resolution retouch dikirim dalam 3–5 hari kerja.",
+      },
+      {
+        title: "2x Revisi Retouching",
+        icon: Sparkles,
+        desc: "Termasuk 2x revisi minor untuk tone warna (skin tone, lighting, pembersihan noda minor pada busana).",
+      },
+      {
+        title: "Hak Cipta Komersial",
+        icon: CheckCircle2,
+        desc: "Klien memperoleh lisensi komersial penuh untuk kebutuhan media sosial, website e-commerce, dan materi promosi cetak.",
+      },
+    ];
+  } else if (isDesigner) {
+    workingTerms = [
+      {
+        title: "Konsultasi Konsep Siluet",
+        icon: Clock,
+        desc: "Sesi diskusi konsep desain, pemilihan material kain, dan pembuatan sketsa digital awal sebelum produksi sampel.",
+      },
+      {
+        title: "Pembuatan Sampel (Toille)",
+        icon: Package,
+        desc: "Proses pembuatan pola dan sampel fisik 7–14 hari kerja dengan 1x sesi fitting koreksi sebelum approval akhir.",
+      },
+      {
+        title: "DP Pengadaan Bahan",
+        icon: CreditCard,
+        desc: "DP 50% untuk pengadaan tekstil dan pengerjaan pola awal. Pelunasan 50% diselesaikan sebelum penyerahan busana sampel.",
+      },
+      {
+        title: "Eksklusivitas Orisinalitas",
+        icon: CheckCircle2,
+        desc: "Rancangan busana dijamin orisinal dan menjadi hak eksklusif pemesan sesuai dengan kontrak kemitraan.",
+      },
+    ];
+  }
+
   const tabs = [
     {
-      id: "about" as const,
-      label: actor.actorType === "MSME" ? "Brand Identity" : "Tentang Profil",
-    },
-    {
       id: "portfolio" as const,
-      label: isModel ? "Portofolio & Fisik" : isStudio ? "Fasilitas Studio" : isPhotographer ? "Peralatan & Karya" : isDesigner ? "Karya Desain" : "Aset Visual",
+      label: "Portofolio Karya",
     },
     {
-      id: "availability" as const,
-      label: "Ketersediaan",
+      id: "rates" as const,
+      label: "Paket Layanan & Tarif",
+    },
+    {
+      id: "specs" as const,
+      label: specsTabLabel,
+    },
+    {
+      id: "about" as const,
+      label: "Tentang & Ketentuan Kerja",
     },
     {
       id: "reviews" as const,
-      label: "Ulasan Klien",
-    },
-    {
-      id: "needs" as const,
-      label: "Kebutuhan & Target",
+      label: `Ulasan Klien (${totalReviews})`,
     },
   ];
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-10">
       {/* 🧭 Minimalist Tab Navigation Bar */}
       <div className="w-full flex items-center gap-8 overflow-x-auto no-scrollbar border-b border-stone-200">
         {tabs.map((tab) => {
@@ -221,7 +881,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`pb-4 whitespace-nowrap text-xs font-bold uppercase tracking-widest transition-all ${
+              className={`pb-4 whitespace-nowrap text-xs font-bold uppercase tracking-widest transition-all cursor-pointer ${
                 isActive
                   ? "text-[#1E1B2E] border-b-2 border-[#1E1B2E]"
                   : "text-stone-400 hover:text-stone-600 border-b-2 border-transparent"
@@ -234,204 +894,32 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
       </div>
 
       {/* ────────────────────────────────────────────────────────── */}
-      {/* TAB 1: ABOUT (Tentang & Karakteristik Profil) */}
-      {/* ────────────────────────────────────────────────────────── */}
-      {activeTab === "about" && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Bio & Creative Overview */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="p-7 sm:p-8 border border-stone-200 space-y-5">
-                <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                  {actor.actorType === "MSME" ? "Brand Philosophy" : "Bio & Filosofi Kreatif"}
-                </div>
-
-                <div className="text-base font-light text-[#1E1B2E] leading-relaxed max-w-2xl">
-                  {actor.description || "Profil terdaftar di ekosistem RAMU."}
-                </div>
-
-                {/* Role Specific Snapshot */}
-                {isModel && modelAttrs && (
-                  <div className="pt-6 border-t border-stone-100 grid grid-cols-2 sm:grid-cols-4 gap-6">
-                    <div>
-                      <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Tinggi Badan</span>
-                      <div className="text-xl font-light text-[#1E1B2E] mt-1">{modelAttrs.height_cm || 175} cm</div>
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">B-W-H</span>
-                      <div className="text-xl font-light text-[#1E1B2E] mt-1">{modelAttrs.bust_waist_hips || "84-60-89"}</div>
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Sample Size</span>
-                      <div className="text-xl font-light text-[#1E1B2E] mt-1">{modelAttrs.clothing_size || "S / 36 EU"}</div>
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Sepatu</span>
-                      <div className="text-xl font-light text-[#1E1B2E] mt-1">{modelAttrs.shoe_size || "39 EU"}</div>
-                    </div>
-                  </div>
-                )}
-
-                {isStudio && studioAttrs && (
-                  <div className="pt-4 border-t border-stone-100 grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70">
-                      <span className="text-[10px] font-bold text-stone-400 uppercase">Luas Cyclorama</span>
-                      <div className="text-base font-black text-[#27213D] mt-0.5">{studioAttrs.area_sqm || 120} m²</div>
-                    </div>
-                    <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70">
-                      <span className="text-[10px] font-bold text-stone-400 uppercase">Tinggi Plafon</span>
-                      <div className="text-base font-black text-[#E66A48] mt-0.5">{studioAttrs.ceiling_height_m || 4.5} m</div>
-                    </div>
-                    <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70">
-                      <span className="text-[10px] font-bold text-stone-400 uppercase">Daya Listrik</span>
-                      <div className="text-sm font-black text-[#27213D] mt-0.5">{studioAttrs.electrical_capacity || "16.500 Watt"}</div>
-                    </div>
-                  </div>
-                )}
-
-                {isBrand && brandAttrs && (
-                  <div className="pt-4 border-t border-stone-100 space-y-2">
-                    <span className="text-[10px] font-bold text-stone-400 uppercase">DNA Desain & Filosofi</span>
-                    <p className="text-xs text-stone-600 leading-relaxed font-medium">{brandAttrs.design_dna}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Specialties / Areas of Expertise */}
-              <div className="p-7 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-4">
-                <h3 className="text-sm font-extrabold text-[#27213D]">
-                  Bidang Spesialisasi &amp; Kapabilitas Utama
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {displaySpecialties.map((specialty, idx) => (
-                    <span
-                      key={idx}
-                      className="px-3.5 py-1.5 rounded-xl bg-stone-50 border border-stone-200/80 text-xs font-bold text-[#27213D] flex items-center gap-2"
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>{specialty}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Sidebar: Details & Action */}
-            <div className="space-y-6">
-              {/* Identity & Verification Card */}
-              <div className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-4">
-                <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider">
-                  Informasi Ekosistem
-                </h3>
-
-                <div className="space-y-3 text-xs">
-                  <div className="flex items-center justify-between pb-2 border-b border-stone-100">
-                    <span className="text-stone-500">Tipe Pelaku:</span>
-                    <span className="font-extrabold text-[#27213D]">{actor.actorType}</span>
-                  </div>
-                  <div className="flex items-center justify-between pb-2 border-b border-stone-100">
-                    <span className="text-stone-500">Subsektor:</span>
-                    <span className="font-extrabold text-[#27213D]">{actor.sector}</span>
-                  </div>
-                  <div className="flex items-center justify-between pb-2 border-b border-stone-100">
-                    <span className="text-stone-500">Domisili Utama:</span>
-                    <span className="font-extrabold text-[#27213D]">{actor.location || "-"}</span>
-                  </div>
-                  <div className="flex items-center justify-between pb-2 border-b border-stone-100">
-                    <span className="text-stone-500">Status Keanggotaan:</span>
-                    <span className="inline-flex items-center gap-1 font-bold text-emerald-700">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Terverifikasi Aktif</span>
-                    </span>
-                  </div>
-                  {actor.contactEmail && (
-                    <div className="flex items-center justify-between pb-2 border-b border-stone-100">
-                      <span className="text-stone-500">Email:</span>
-                      <span className="font-semibold text-[#27213D] truncate max-w-[170px]">{actor.contactEmail}</span>
-                    </div>
-                  )}
-                  {actor.websiteUrl && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-stone-500">Situs Web:</span>
-                      <a
-                        href={actor.websiteUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="font-bold text-[#E66A48] hover:underline flex items-center gap-1"
-                      >
-                        <span>Kunjungi</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    </div>
-                  )}
-                </div>
-
-                {!isCurrentActor ? (
-                  <div className="pt-3">
-                    <Link
-                      href={`/projects/new?partnerId=${actor.id}&partnerName=${encodeURIComponent(actor.name)}`}
-                      className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white font-bold text-xs shadow-md shadow-[#E66A48]/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <PlusCircle className="w-4 h-4" />
-                      <span>Ajak ke Project Brief</span>
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="pt-3">
-                    <Link
-                      href="/settings/profile"
-                      className="w-full py-3 rounded-2xl bg-[#1E1B2E] hover:bg-black text-white font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <span>Edit Profil Publik Saya</span>
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ────────────────────────────────────────────────────────── */}
-      {/* TAB 2: PORTFOLIO & VISUALS */}
+      {/* TAB 1: PORTOFOLIO KARYA (Visual Proof First!) */}
       {/* ────────────────────────────────────────────────────────── */}
       {activeTab === "portfolio" && (
         <div className="space-y-8">
-          {/* Specialized Role Showcase */}
-          {isModel && modelAttrs && (
-            <ModelCompCard attributes={modelAttrs} actorName={actor.name} />
-          )}
-
-          {isStudio && studioAttrs && (
-            <StudioSpecsCard attributes={studioAttrs} studioName={actor.name} />
-          )}
-
-          {isPhotographer && (
-            <PhotographerSpecsCard attributes={photographerAttrs || {}} actorName={actor.name} actorAssets={actor.assets} />
-          )}
-
-          {isDesigner && designerAttrs && (
-            <DesignerSpecsCard attributes={designerAttrs} actorName={actor.name} />
-          )}
-
-          {isBrand && brandAttrs && !isStudio && !isModel && !isPhotographer && !isDesigner && (
-            <BrandSpecsCard attributes={brandAttrs} brandName={actor.name} />
-          )}
-
           {/* Portfolio Masonry Grid (Visuals) */}
-          {portfolioAssets.length > 0 && (
+          {portfolioAssets.length > 0 ? (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-5 h-5 text-amber-500" />
-                <h3 className="text-xl font-black text-[#27213D]">
-                  Showcase Karya Visual
-                </h3>
+              <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-stone-400" />
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                    Galeri Hasil Karya &amp; Proyek Komersial ({portfolioAssets.length})
+                  </h3>
+                </div>
+                <span className="text-[11px] text-stone-400 font-medium">Klik untuk memperbesar</span>
               </div>
+              
               <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
-                {portfolioAssets.map((asset) => {
+                {portfolioAssets.map((asset, index) => {
                   const attrs = asset.attributes as any;
                   return (
-                    <div key={asset.id} className="break-inside-avoid relative group rounded-[24px] overflow-hidden bg-stone-100 border border-stone-200/60 shadow-xs hover:shadow-xl transition-all duration-500">
+                    <div
+                      key={asset.id}
+                      onClick={() => setSelectedShowcaseIndex(index)}
+                      className="break-inside-avoid relative group rounded-2xl overflow-hidden bg-stone-100 border border-stone-200/60 shadow-xs hover:shadow-xl transition-all duration-500 cursor-pointer"
+                    >
                       <div className="relative w-full aspect-[4/5] bg-stone-200">
                         {attrs?.image_url ? (
                           <img
@@ -444,22 +932,25 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                             <Sparkles className="w-8 h-8 opacity-50" />
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-5 flex flex-col justify-end">
-                          <div className="space-y-1.5 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                            <div className="inline-flex px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider">
-                              {asset.subtype}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-5 flex flex-col justify-end">
+                          <div className="space-y-1.5 translate-y-3 group-hover:translate-y-0 transition-transform duration-300">
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex px-2.5 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider">
+                                {asset.subtype}
+                              </span>
+                              <span className="px-2 py-0.5 rounded-md bg-amber-400/90 text-[10px] font-black text-stone-950 uppercase tracking-wider">
+                                Tear-Sheet
+                              </span>
                             </div>
-                            <h4 className="text-white font-extrabold text-base leading-tight">{asset.name}</h4>
-                            {attrs?.project_url && (
-                              <a
-                                href={attrs.project_url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-1.5 text-xs text-amber-300 font-bold hover:text-amber-200 mt-2"
-                              >
-                                Lihat Karya <ExternalLink className="w-3.5 h-3.5" />
-                              </a>
-                            )}
+                            <h4 className="text-white font-bold text-base leading-tight">{asset.name}</h4>
+                            <div className="flex items-center justify-between pt-2 border-t border-white/20 mt-1">
+                              <span className="inline-flex items-center gap-1.5 text-xs text-amber-300 font-bold hover:text-amber-200">
+                                Buka Detail Karya <ExternalLink className="w-3.5 h-3.5" />
+                              </span>
+                              <span className="text-[10px] text-white/80 font-medium">
+                                Hotspots &amp; Kredit
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -468,110 +959,259 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                 })}
               </div>
             </div>
+          ) : (
+            <div className="text-center py-16 px-6 bg-stone-50 border border-stone-200/80 rounded-2xl space-y-3">
+              <Sparkles className="w-8 h-8 text-stone-300 mx-auto" />
+              <h4 className="text-base font-semibold text-[#1E1B2E]">Portofolio Terdaftar Sedang Diselaraskan</h4>
+              <p className="text-xs text-stone-500 max-w-md mx-auto">
+                Karya portofolio resolusi tinggi dapat dilihat pada kartu spesifikasi teknis dan media sosial resmi kreator.
+              </p>
+              {isCurrentActor && (
+                <Link
+                  href="/dashboard/showcase"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-black transition-colors"
+                >
+                  + Unggah Portofolio Sekarang
+                </Link>
+              )}
+            </div>
           )}
 
-          {/* All Registered Assets & Capabilities List (Excluding Portfolio) */}
+          {/* Featured Comp Card / Lookbook Visuals if available */}
+          {isModel && modelAttrs?.comp_card && modelAttrs.comp_card.length > 0 && (
+            <div className="space-y-4 pt-6 border-t border-stone-200">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">Foto Comp-Card Editorial</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {modelAttrs.comp_card.map((item, i) => (
+                  <div key={i} className="aspect-[3/4] rounded-xl overflow-hidden bg-stone-100 border border-stone-200">
+                    <img src={item.url} alt={item.caption || `Comp card ${i + 1}`} className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {isBrand && brandAttrs?.brand_gallery && brandAttrs.brand_gallery.length > 0 && (
+            <div className="space-y-4 pt-6 border-t border-stone-200">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">Galeri Koleksi Brand</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {brandAttrs.brand_gallery.map((item, i) => (
+                  <div key={i} className="aspect-[4/5] rounded-xl overflow-hidden bg-stone-100 border border-stone-200">
+                    <img src={item.url} alt={item.title || `Brand lookbook ${i + 1}`} className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ────────────────────────────────────────────────────────── */}
+      {/* TAB 2: PAKET LAYANAN & TARIF (Commercial Rate Card) */}
+      {/* ────────────────────────────────────────────────────────── */}
+      {activeTab === "rates" && (
+        <div className="space-y-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
+            <div>
+              <h3 className="text-xl font-bold text-[#1E1B2E] tracking-tight">
+                Pilihan Paket Layanan &amp; Estimasi Tarif
+              </h3>
+              <p className="text-xs text-stone-500 mt-1">
+                Pilih paket yang sesuai dengan kebutuhan proyek Anda untuk langsung mengirim penawaran kerja.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              {isCurrentActor && (
+                <Link
+                  href="/settings/rates"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs"
+                >
+                  <CreditCard className="w-3.5 h-3.5" />
+                  <span>Atur Paket &amp; Tarif Saya</span>
+                </Link>
+              )}
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200 shrink-0">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Transparan &amp; Resmi</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Pricing Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {packages.map((pkg, idx) => (
+              <div
+                key={idx}
+                className={`relative flex flex-col justify-between p-6 sm:p-7 rounded-2xl border transition-all duration-300 ${
+                  pkg.popular
+                    ? "bg-white border-[#1E1B2E] shadow-xl ring-1 ring-[#1E1B2E]"
+                    : "bg-white border-stone-200/80 shadow-xs hover:border-stone-400"
+                }`}
+              >
+                {pkg.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-[#1E1B2E] text-white text-[9px] font-bold uppercase tracking-widest rounded-full shadow-xs">
+                    Paling Banyak Dipilih
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-lg font-bold text-[#1E1B2E] tracking-tight">{pkg.title}</h4>
+                    <p className="text-xs text-stone-500 mt-1 leading-relaxed">{pkg.subtitle}</p>
+                  </div>
+
+                  <div className="pt-2 pb-4 border-y border-stone-100">
+                    <div className="text-2xl sm:text-3xl font-black text-[#1E1B2E] tracking-tight">
+                      {pkg.price}
+                    </div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mt-0.5">
+                      {pkg.unit}
+                    </div>
+                  </div>
+
+                  {/* Feature list */}
+                  <div className="space-y-2.5 pt-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
+                      Rincian Layanan &amp; Output:
+                    </span>
+                    {pkg.features.map((feat, fIdx) => (
+                      <div key={fIdx} className="flex items-start gap-2.5 text-xs text-stone-600 leading-snug">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                        <span>{feat}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-8">
+                  {!isCurrentActor ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsBookingOpen(true)}
+                      className={`w-full py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                        pkg.popular
+                          ? "bg-[#1E1B2E] hover:bg-black text-white shadow-sm"
+                          : "bg-stone-100 hover:bg-stone-200 text-[#1E1B2E]"
+                      }`}
+                    >
+                      <Briefcase className="w-4 h-4" />
+                      <span>Sewa Paket Ini</span>
+                    </button>
+                  ) : (
+                    <Link
+                      href="/settings/rates"
+                      className="w-full py-3 text-xs font-bold uppercase tracking-widest rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <CreditCard className="w-3.5 h-3.5" />
+                      <span>Ubah Tarif Saya</span>
+                    </Link>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Custom Quote Note */}
+          <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+            <div className="space-y-0.5">
+              <span className="font-bold text-[#1E1B2E] block">Butuh paket khusus atau brief di luar daftar?</span>
+              <p className="text-stone-500">
+                Anda dapat menentukan sendiri estimasi anggaran dan durasi kerja melalui formulir Sewa Jasa Langsung.
+              </p>
+            </div>
+            {!isCurrentActor && (
+              <button
+                type="button"
+                onClick={() => setIsBookingOpen(true)}
+                className="px-5 py-2.5 bg-white border border-stone-300 hover:border-[#1E1B2E] text-[#1E1B2E] font-bold text-xs uppercase tracking-wider rounded-xl transition-colors shrink-0 shadow-xs cursor-pointer"
+              >
+                Ajukan Brief Kustom &rarr;
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ────────────────────────────────────────────────────────── */}
+      {/* TAB 3: SPESIFIKASI & ALAT KERJA */}
+      {/* ────────────────────────────────────────────────────────── */}
+      {activeTab === "specs" && (
+        <div className="space-y-8">
+          {/* Specialized Technical Specs Card */}
+          {isStudio && studioAttrs && (
+            <StudioSpecsCard attributes={studioAttrs} studioName={actor.name} />
+          )}
+
+          {isPhotographer && (
+            <PhotographerSpecsCard attributes={photographerAttrs || {}} actorName={actor.name} actorAssets={actor.assets} />
+          )}
+
+          {isVideographer && (
+            <VideographerSpecsCard attributes={(videographerAsset?.attributes as any) || {}} actorName={actor.name} />
+          )}
+
+          {isModel && modelAttrs && (
+            <ModelCompCard attributes={modelAttrs} actorName={actor.name} />
+          )}
+
+          {isMUA && (
+            <MuaSpecsCard attributes={(muaAsset?.attributes as any) || {}} actorName={actor.name} />
+          )}
+
+          {isStylist && (
+            <StylistSpecsCard attributes={(stylistAsset?.attributes as any) || {}} actorName={actor.name} />
+          )}
+
+          {isDesigner && designerAttrs && (
+            <DesignerSpecsCard attributes={designerAttrs} actorName={actor.name} />
+          )}
+
+          {isBrand && brandAttrs && !isStudio && !isModel && !isPhotographer && !isDesigner && !isVideographer && !isMUA && !isStylist && (
+            <BrandSpecsCard attributes={brandAttrs} brandName={actor.name} />
+          )}
+
+          {/* Hardware & Tools Inventory */}
           {otherAssets.length > 0 && (
-            <div className="p-7 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-6">
+            <div className="p-7 sm:p-8 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-5">
               <div className="flex items-center justify-between pb-3 border-b border-stone-100">
                 <div className="flex items-center gap-2">
-                  <Package className="w-4 h-4 text-amber-600" />
-                  <h3 className="text-base font-extrabold text-[#27213D]">
-                    Aset &amp; Modal Kreatif ({otherAssets.length})
+                  <Package className="w-4 h-4 text-stone-500" />
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                    Inventaris Alat &amp; Fasilitas Terverifikasi ({otherAssets.length})
                   </h3>
                 </div>
-                {isCurrentActor ? (
+                {isCurrentActor && (
                   <Link
                     href="/readiness?tab=assets"
-                    className="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1"
+                    className="text-xs font-bold text-[#1E1B2E] hover:underline flex items-center gap-1"
                   >
-                    <span>+ Kelola Aset</span>
+                    <span>+ Kelola Alat</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
-                ) : (
-                  <span className="text-xs text-stone-500 font-semibold">
-                    Modal Konkret Kolaborasi
-                  </span>
                 )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {otherAssets.map((asset) => {
                   const attrs = (asset.attributes && typeof asset.attributes === "object") ? (asset.attributes as Record<string, unknown>) : null;
-                  
-                  // Determine smart fallback photo if asset doesn't have custom image
-                  let assetPhoto = (attrs?.image_url as string) || (attrs?.photo_url as string) || null;
-                  if (!assetPhoto) {
-                    if (asset.category === "EQUIPMENT" || asset.name.toLowerCase().includes("kamera") || asset.name.toLowerCase().includes("lensa")) {
-                      assetPhoto = "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=600&q=80";
-                    } else if (asset.category === "STUDIO_SPACE" || asset.subtype.toLowerCase().includes("studio")) {
-                      assetPhoto = "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=600&q=80";
-                    } else if (asset.category === "WARDROBE_PROP" || asset.subtype.toLowerCase().includes("wardrobe") || asset.name.toLowerCase().includes("busana")) {
-                      assetPhoto = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=600&q=80";
-                    } else if (asset.category === "SKILL_TALENT") {
-                      assetPhoto = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80";
-                    } else {
-                      assetPhoto = "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=600&q=80";
-                    }
-                  }
-
                   return (
                     <div
                       key={asset.id}
-                      className="group rounded-3xl bg-white border border-stone-200/80 overflow-hidden hover:border-amber-300 hover:shadow-lg transition-all flex flex-col sm:flex-row gap-0"
+                      className="p-4 rounded-xl bg-stone-50/70 border border-stone-200/80 flex items-start justify-between gap-3 text-xs"
                     >
-                      <div className="relative w-full sm:w-36 h-36 bg-stone-100 shrink-0 overflow-hidden">
-                        <img
-                          src={assetPhoto}
-                          alt={asset.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          loading="lazy"
-                        />
-                        <div className="absolute top-2 left-2 sm:hidden">
-                          <span className="px-2 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-bold uppercase tracking-wider">
-                            {asset.category}
-                          </span>
-                        </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                          {asset.category} • {asset.subtype}
+                        </span>
+                        <h4 className="font-bold text-[#1E1B2E] text-sm">{asset.name}</h4>
+                        {asset.description && (
+                          <p className="text-stone-500 text-[11px] leading-relaxed line-clamp-2">{asset.description}</p>
+                        )}
                       </div>
-
-                      <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
-                        <div>
-                          <div className="flex items-center justify-between text-xs gap-2">
-                            <span className="font-bold text-[#E66A48] uppercase tracking-wider text-[10px] truncate">
-                              {asset.category} • {asset.subtype}
-                            </span>
-                            <div className="flex items-center gap-1 shrink-0">
-                              {asset.roles.map((r) => (
-                                <span key={r} className="px-1.5 py-0.5 rounded-md bg-stone-100 border border-stone-200 text-[9px] font-semibold text-stone-600">
-                                  {r}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-
-                          <h4 className="text-sm font-black text-[#1E1B2E] leading-snug mt-1 group-hover:text-amber-600 transition-colors">
-                            {asset.name}
-                          </h4>
-
-                          {asset.description && (
-                            <p className="text-xs text-stone-500 leading-relaxed line-clamp-2 mt-1">
-                              {asset.description}
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="pt-2 border-t border-stone-100 flex items-center justify-between text-[10px]">
-                          <span className="text-emerald-700 font-bold flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                            <span>Aset Terverifikasi</span>
-                          </span>
-                          {attrs?.capacity ? (
-                            <span className="text-stone-400 font-medium">
-                              Kapasitas: {String(attrs.capacity)} {attrs.unit ? String(attrs.unit) : ""}
-                            </span>
-                          ) : null}
-                        </div>
-                      </div>
+                      <span className="px-2 py-0.5 rounded-md bg-white border border-stone-200 text-[10px] font-bold text-emerald-700 shrink-0 flex items-center gap-1 shadow-xs">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        Siap Pakai
+                      </span>
                     </div>
                   );
                 })}
@@ -582,155 +1222,107 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
       )}
 
       {/* ────────────────────────────────────────────────────────── */}
-      {/* TAB 3: AVAILABILITY & TERMS (Ketersediaan & Ketentuan) */}
+      {/* TAB 4: TENTANG & KETENTUAN KERJA (Working Terms) */}
       {/* ────────────────────────────────────────────────────────── */}
-      {activeTab === "availability" && (
-        <div className="space-y-6">
+      {activeTab === "about" && (
+        <div className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left 2 Cols: Availability Parameters */}
+            {/* Bio & Professional Profile */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Status Banner */}
-              <div className="p-6 rounded-[28px] bg-emerald-50/80 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-start sm:items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold shrink-0">
-                    <CheckCircle2 className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-extrabold text-emerald-950">
-                      Status: Terbuka untuk Kolaborasi Baru
-                    </h3>
-                    <p className="text-xs text-emerald-800/80 mt-1">
-                      Tersedia untuk proyek kolaborasi dalam bulan ini.
-                    </p>
-                  </div>
+              <div className="p-7 sm:p-8 bg-white border border-stone-200/80 rounded-2xl space-y-4">
+                <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                  Profil &amp; Pengalaman Profesional
+                </div>
+                <div className="text-sm font-light text-[#1E1B2E] leading-relaxed">
+                  {actor.description || "Kreator dan pelaku industri terverifikasi di ekosistem RAMU Indonesia."}
                 </div>
 
-                <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold shrink-0">
-                  Ready to Book
-                </span>
+                {/* Specialties */}
+                <div className="pt-4 border-t border-stone-100 space-y-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
+                    Bidang Keahlian &amp; Layanan Utama:
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {displaySpecialties.map((s, idx) => (
+                      <span
+                        key={idx}
+                        className="px-3 py-1 rounded-lg bg-stone-50 border border-stone-200 text-xs font-semibold text-stone-700"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              {/* Calendar Visual */}
-              <AvailabilityCalendar />
-
-
-
-              {/* Operational Constraints */}
-              {actor.constraints.length > 0 && (
-                <div className="p-7 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-4">
-                  <div className="flex items-center justify-between pb-2 border-b border-stone-100">
-                    <div className="flex items-center gap-2 text-xs font-bold text-[#1E1B2E] uppercase tracking-wider">
-                      <ShieldAlert className="w-4 h-4 text-amber-600" />
-                      <span>Ketentuan &amp; Batasan Kerja ({actor.constraints.length})</span>
-                    </div>
-                    {isCurrentActor && (
-                      <Link
-                        href="/readiness?tab=constraints"
-                        className="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1"
-                      >
-                        <span>Kelola</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
-                    )}
+              {/* Standard Working Terms (Ketentuan Kerja Sederhana) */}
+              <div className="p-7 sm:p-8 bg-white border border-stone-200/80 rounded-2xl space-y-5">
+                <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                  <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                    Ketentuan &amp; SOP Pelaksanaan Kerja ({actor.sector})
                   </div>
-
-                  <div className="space-y-2.5">
-                    {actor.constraints.map((c) => {
-                      const typeLabel =
-                        c.type === "BUDGET"
-                          ? "Batas Anggaran"
-                          : c.type === "AVAILABILITY"
-                          ? "Ketersediaan Jadwal"
-                          : c.type === "LOCATION"
-                          ? "Jangkauan Wilayah"
-                          : c.type === "TIME"
-                          ? "Batas Waktu / Durasi"
-                          : c.type === "LEAD_TIME"
-                          ? "Lead Time Persiapan"
-                          : c.type === "CAPACITY"
-                          ? "Kapasitas Produksi"
-                          : c.type.toLowerCase().replace(/_/g, " ");
-
-                      return (
-                        <div
-                          key={c.id}
-                          className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
-                        >
-                          <div className="space-y-0.5">
-                            <div className="font-extrabold text-[#27213D]">
-                              {typeLabel}: {c.value ? `${c.value} ${c.unit || ""}` : ""}
-                            </div>
-                            {c.notes && <p className="text-[11px] text-stone-500">{c.notes}</p>}
-                          </div>
-
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span
-                              className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                                c.severity === "HARD"
-                                  ? "bg-rose-50 text-rose-700 border border-rose-200"
-                                  : "bg-amber-50 text-amber-700 border border-amber-200"
-                              }`}
-                            >
-                              {c.severity === "HARD" ? "Mutlak" : "Fleksibel"}
-                            </span>
-                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-stone-100 text-stone-600">
-                              {c.negotiability === "FIXED" ? "Tetap" : "Bisa Nego"}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                    Standar Industri RAMU
+                  </span>
                 </div>
-              )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {workingTerms.map((term, tIdx) => {
+                    const TermIcon = term.icon;
+                    return (
+                      <div key={tIdx} className="p-4 rounded-xl bg-stone-50 border border-stone-200/70 space-y-1.5">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-[#1E1B2E]">
+                          <TermIcon className="w-3.5 h-3.5 text-stone-600" />
+                          <span>{term.title}</span>
+                        </div>
+                        <p className="text-[11px] text-stone-500 leading-relaxed">
+                          {term.desc}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
-            {/* Right Column: Collaboration Terms */}
+            {/* Sidebar Details */}
             <div className="space-y-6">
-              <div className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-4">
+              <div className="p-6 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-4">
                 <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider">
-                  Ketentuan Kolaborasi RAMU
+                  Informasi Verifikasi
                 </h3>
 
-                <div className="space-y-3 text-xs text-stone-600 leading-relaxed">
-                  <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 space-y-1">
-                    <span className="font-bold text-[#27213D] block">Hak Cipta & Output</span>
-                    <p className="text-[11px] text-stone-500">
-                      Seluruh hasil foto lookbook & video disepakati melalui ruang kerja kolaborasi sebelum rilis publik.
-                    </p>
+                <div className="space-y-3 text-xs">
+                  <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                    <span className="text-stone-500">Tipe Entitas:</span>
+                    <span className="font-bold text-[#1E1B2E]">{actor.actorType}</span>
                   </div>
-
-                  <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 space-y-1">
-                    <span className="font-bold text-[#27213D] block">Milestone & Delivery</span>
-                    <p className="text-[11px] text-stone-500">
-                      Penyelesaian pekerjaan dipantau secara transparan melalui *Milestone Tracking* RAMU.
-                    </p>
+                  <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                    <span className="text-stone-500">Sektor:</span>
+                    <span className="font-bold text-[#1E1B2E]">{actor.sector}</span>
                   </div>
-
-                  <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 space-y-1">
-                    <span className="font-bold text-[#27213D] block">Inisiasi Kerja Sama</span>
-                    <p className="text-[11px] text-stone-500">
-                      Undang langsung aktor ke dalam *Project Brief* terbuka untuk memulai penyesuaian jadwal.
-                    </p>
+                  <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                    <span className="text-stone-500">Domisili:</span>
+                    <span className="font-bold text-[#1E1B2E]">{actor.location || "Indonesia"}</span>
+                  </div>
+                  <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                    <span className="text-stone-500">Status Akun:</span>
+                    <span className="inline-flex items-center gap-1 font-bold text-emerald-700">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Terverifikasi Aktif</span>
+                    </span>
                   </div>
                 </div>
 
-                {!isCurrentActor ? (
-                  <Link
-                    href={`/projects/new?partnerId=${actor.id}&partnerName=${encodeURIComponent(actor.name)}`}
-                    className="w-full py-3 rounded-2xl bg-[#27213D] hover:bg-[#382F57] text-white font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                {!isCurrentActor && (
+                  <button
+                    type="button"
+                    onClick={() => setIsBookingOpen(true)}
+                    className="w-full mt-2 py-3 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
                   >
-                    <span>Ajukan Kolaborasi Sekarang</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </Link>
-                ) : (
-                  <Link
-                    href="/readiness?tab=constraints"
-                    className="w-full py-3 rounded-2xl bg-[#1E1B2E] hover:bg-black text-white font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <Sliders className="w-3.5 h-3.5" />
-                    <span>Atur Ketentuan di Kesiapan Profil</span>
-                  </Link>
+                    <Briefcase className="w-4 h-4" />
+                    <span>Sewa Jasa Sekarang</span>
+                  </button>
                 )}
               </div>
             </div>
@@ -739,15 +1331,14 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
       )}
 
       {/* ────────────────────────────────────────────────────────── */}
-      {/* TAB 4: REVIEWS & REPUTATION (Ulasan & Reputasi) */}
+      {/* TAB 5: REVIEWS & REPUTATION (Ulasan Klien) */}
       {/* ────────────────────────────────────────────────────────── */}
       {activeTab === "reviews" && (
         <div className="space-y-6">
-          {/* Reputation Summary Header */}
-          <div className="p-7 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-6">
+          <div className="p-7 sm:p-8 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-stone-100">
               <div className="flex items-center gap-4">
-                <div className="text-4xl sm:text-5xl font-black text-[#27213D]">
+                <div className="text-4xl sm:text-5xl font-black text-[#1E1B2E]">
                   {avgRating}
                 </div>
                 <div>
@@ -757,35 +1348,35 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                     ))}
                   </div>
                   <div className="text-xs text-stone-500 font-semibold mt-1">
-                    Berdasarkan {totalReviews > 0 ? `${totalReviews} ulasan terverifikasi` : "kolaborasi terkonfirmasi di RAMU"}
+                    Berdasarkan {totalReviews > 0 ? `${totalReviews} ulasan klien terverifikasi` : "penilaian standar profesional RAMU"}
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                 <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 text-center">
-                  <span className="text-[10px] text-stone-400 font-bold uppercase">Relevansi</span>
-                  <div className="font-extrabold text-[#27213D]">98%</div>
+                  <span className="text-[10px] text-stone-400 font-bold uppercase">Kualitas Output</span>
+                  <div className="font-bold text-[#1E1B2E]">98%</div>
                 </div>
                 <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 text-center">
-                  <span className="text-[10px] text-stone-400 font-bold uppercase">Eksekusi</span>
-                  <div className="font-extrabold text-emerald-700">96%</div>
+                  <span className="text-[10px] text-stone-400 font-bold uppercase">Ketepatan Waktu</span>
+                  <div className="font-bold text-emerald-700">97%</div>
                 </div>
                 <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 text-center">
-                  <span className="text-[10px] text-stone-400 font-bold uppercase">Kebaruan</span>
-                  <div className="font-extrabold text-purple-700">95%</div>
+                  <span className="text-[10px] text-stone-400 font-bold uppercase">Komunikasi</span>
+                  <div className="font-bold text-purple-700">99%</div>
                 </div>
                 <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 text-center">
-                  <span className="text-[10px] text-stone-400 font-bold uppercase">Manfaat</span>
-                  <div className="font-extrabold text-[#E66A48]">97%</div>
+                  <span className="text-[10px] text-stone-400 font-bold uppercase">Kepuasan Klien</span>
+                  <div className="font-bold text-[#1E1B2E]">99%</div>
                 </div>
               </div>
             </div>
 
-            {/* Reviews List */}
+            {/* Testimonials List */}
             <div className="space-y-4">
               <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider">
-                Testimoni dari Rekan Kolaborator Ekosistem
+                Testimoni dari Klien &amp; Mitra Terverifikasi
               </h3>
 
               {actor.feedbacks.length > 0 ? (
@@ -801,221 +1392,69 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                     return (
                       <div
                         key={fb.id}
-                        className="p-6 rounded-3xl bg-white border border-stone-200/60 shadow-[0_4px_20px_rgba(39,33,61,0.02)] space-y-4 hover:border-amber-200 transition-colors"
+                        className="p-5 rounded-xl bg-stone-50/60 border border-stone-200/80 space-y-3"
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-2xl ${author.bg} flex items-center justify-center font-bold text-sm shrink-0`}>
+                            <div className={`w-9 h-9 rounded-xl ${author.bg} flex items-center justify-center font-bold text-xs shrink-0`}>
                               {author.initial}
                             </div>
                             <div>
-                              <h4 className="text-sm font-extrabold text-[#27213D]">{author.name}</h4>
-                              <p className="text-[11px] text-stone-500 font-medium">{author.role}</p>
+                              <h4 className="text-xs font-bold text-[#1E1B2E]">{author.name}</h4>
+                              <p className="text-[11px] text-stone-500">{author.role}</p>
                             </div>
                           </div>
-                          <div className="text-right space-y-1">
+                          <div className="text-right space-y-0.5">
                             <div className="flex items-center gap-0.5 text-amber-500 justify-end">
                               {[1, 2, 3, 4, 5].map((s) => (
                                 <Star key={s} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                               ))}
                             </div>
                             <span className="text-[10px] text-stone-400 font-semibold inline-flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Terverifikasi
+                              <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Klien Terverifikasi
                             </span>
                           </div>
                         </div>
-  
-                        <div className="pl-13 relative">
-                          <p className="text-xs sm:text-sm text-[#4E4760] leading-relaxed italic">
-                            &ldquo;{fb.comments}&rdquo;
-                          </p>
-                        </div>
+
+                        <p className="text-xs text-[#1E1B2E] leading-relaxed italic pl-12">
+                          &ldquo;{fb.comments}&rdquo;
+                        </p>
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <div className="p-8 text-center text-xs text-stone-400 italic bg-stone-50/50 rounded-2xl border border-dashed border-stone-200">
-                  Belum ada ulasan publik. Mulai kolaborasi pertama dengan aktor ini!
+                <div className="p-8 text-center text-xs text-stone-400 italic bg-stone-50/50 rounded-xl border border-dashed border-stone-200">
+                  Belum ada ulasan publik. Jadilah klien pertama yang bekerjasama dengan kreator ini!
                 </div>
               )}
             </div>
           </div>
-
-          {/* Engine Recommended Opportunities */}
-          {actor.opportunityParticipations.length > 0 && (
-            <div className="p-7 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-4">
-              <div className="flex items-center gap-2">
-                <Lightbulb className="w-4 h-4 text-amber-500" />
-                <h3 className="text-sm font-extrabold text-[#27213D]">
-                  Peluang Sinergi yang Melibatkan {actor.name} di RAMU
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {actor.opportunityParticipations.map((part) => (
-                  <Link
-                    key={part.opportunity.id}
-                    href={`/opportunities/${part.opportunity.id}`}
-                    className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 hover:border-amber-300 hover:bg-white transition-all space-y-1.5 group"
-                  >
-                    <div className="flex items-center justify-between text-[10px] font-bold text-[#E66A48]">
-                      <span>{part.opportunity.patternCode || "Pola Sinergi"}</span>
-                      <ExternalLink className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                    </div>
-                    <h4 className="text-xs font-bold text-[#27213D] line-clamp-2">
-                      {part.opportunity.title}
-                    </h4>
-                    <div className="text-[11px] text-stone-400 font-medium">
-                      Skor Sinergi:{" "}
-                      <span className="font-bold text-[#27213D]">
-                        {Math.round((part.opportunity.scores[0]?.overallScore || 0) * 100)}%
-                      </span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       )}
 
-      {/* ────────────────────────────────────────────────────────── */}
-      {/* TAB 5: NEEDS & GOALS (Kebutuhan & Target Kolaborasi) */}
-      {/* ────────────────────────────────────────────────────────── */}
-      {activeTab === "needs" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Needs Section */}
-          <div className="p-7 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-              <div className="flex items-center gap-2">
-                <Search className="w-4 h-4 text-[#E66A48]" />
-                <h3 className="text-base font-extrabold text-[#27213D]">
-                  Kebutuhan Kolaborasi Terbuka
-                </h3>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-[#FFF7ED] text-[#E66A48] text-xs font-bold border border-[#F9D8C4]">
-                  {actor.needs.length} Kebutuhan
-                </span>
-                {isCurrentActor && (
-                  <Link
-                    href="/readiness?tab=needs"
-                    className="text-xs font-bold text-[#E66A48] hover:text-[#d35938] flex items-center gap-1"
-                  >
-                    <span>+ Kelola</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                )}
-              </div>
-            </div>
-
-            <p className="text-xs text-stone-500">
-              Aset, kapabilitas, atau mitra yang sedang dicari untuk kampanye berikutnya:
-            </p>
-
-            {actor.needs.length > 0 ? (
-              <div className="space-y-3">
-                {actor.needs.map((need) => (
-                  <div
-                    key={need.id}
-                    className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 text-xs space-y-1.5 hover:border-amber-200 transition-all"
-                  >
-                    <div className="text-[10px] font-bold text-[#E66A48] uppercase tracking-wider">
-                      {need.category}
-                    </div>
-                    <div className="text-sm font-extrabold text-[#27213D] leading-snug">
-                      {need.title}
-                    </div>
-                    {need.description && (
-                      <p className="text-xs text-[#716B7E] pt-1 leading-relaxed">
-                        {need.description}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-6 text-center text-xs text-stone-400 italic space-y-2">
-                <p>Belum mencantumkan kebutuhan terbuka.</p>
-                {isCurrentActor && (
-                  <Link
-                    href="/readiness?tab=needs"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-[#1E1B2E] font-bold text-xs transition-colors not-italic"
-                  >
-                    <span>+ Tambah Kebutuhan Mitra</span>
-                  </Link>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Goals Section */}
-          <div className="p-7 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-              <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-purple-700" />
-                <h3 className="text-base font-extrabold text-[#27213D]">
-                  Target &amp; Arah Pertumbuhan
-                </h3>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 text-xs font-bold border border-purple-200">
-                  {actor.goals.length} Target
-                </span>
-                {isCurrentActor && (
-                  <Link
-                    href="/readiness?tab=goals"
-                    className="text-xs font-bold text-purple-700 hover:text-purple-800 flex items-center gap-1"
-                  >
-                    <span>+ Kelola</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                )}
-              </div>
-            </div>
-
-            <p className="text-xs text-stone-500">
-              Sasaran jangka panjang yang ingin dicapai melalui kolaborasi kreatif:
-            </p>
-
-            {actor.goals.length > 0 ? (
-              <div className="space-y-3">
-                {actor.goals.map((goal) => (
-                  <div
-                    key={goal.id}
-                    className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 text-xs space-y-1.5 hover:border-purple-200 transition-all"
-                  >
-                    <div className="text-[10px] font-bold text-purple-700 uppercase tracking-wider">
-                      {goal.category}
-                    </div>
-                    <div className="text-sm font-extrabold text-[#27213D] leading-snug">
-                      {goal.title}
-                    </div>
-                    {goal.description && (
-                      <p className="text-xs text-[#716B7E] pt-1 leading-relaxed">
-                        {goal.description}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-6 text-center text-xs text-stone-400 italic space-y-2">
-                <p>Belum mencantumkan target bisnis atau kreatif.</p>
-                {isCurrentActor && (
-                  <Link
-                    href="/readiness?tab=goals"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs transition-colors not-italic border border-purple-200"
-                  >
-                    <span>+ Pasang Target Capaian</span>
-                  </Link>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
+      {/* Tear Sheet Lightbox Modal */}
+      {selectedShowcaseIndex !== null && showcaseItems[selectedShowcaseIndex] && (
+        <TearSheetModal
+          item={showcaseItems[selectedShowcaseIndex]}
+          items={showcaseItems}
+          currentIndex={selectedShowcaseIndex}
+          isOpen={selectedShowcaseIndex !== null}
+          onClose={() => setSelectedShowcaseIndex(null)}
+          onSelectIndex={(newIdx) => setSelectedShowcaseIndex(newIdx)}
+          onBookAuthor={() => setIsBookingOpen(true)}
+        />
       )}
+
+      {/* Booking Modal Integrated */}
+      <BookingModal
+        isOpen={isBookingOpen}
+        onClose={() => setIsBookingOpen(false)}
+        targetId={actor.id}
+        targetName={actor.name}
+        targetSector={actor.sector}
+        targetType={actor.actorType}
+      />
     </div>
   );
 }

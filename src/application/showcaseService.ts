@@ -10,6 +10,8 @@ export interface ShowcaseItem {
   title: string;
   category: string;
   imageUrl: string;
+  tearSheet?: any;
+  availableActors?: { id: string; name: string; sector: string; location: string | null }[];
   actor: {
     id: string;
     name: string;
@@ -96,6 +98,18 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
     }
   });
 
+  // Fetch all active actors to populate genuine collaborative credits
+  const allActors = await prisma.actor.findMany({
+    where: { status: { not: "ARCHIVED" } },
+    select: {
+      id: true,
+      name: true,
+      sector: true,
+      location: true,
+    },
+    take: 50,
+  });
+
   const showcaseItems: ShowcaseItem[] = [];
 
   // Map database assets to visual showcase items
@@ -118,7 +132,7 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
       else if (attrs.comp_card && attrs.comp_card.images && attrs.comp_card.images.length > 0) imageUrl = attrs.comp_card.images[0];
     }
 
-    // Fallback to random beautiful images to ensure a stunning masonry grid
+    // Fallback to random beautiful images only if asset has no image
     if (!imageUrl) {
       imageUrl = FALLBACK_IMAGES[index % FALLBACK_IMAGES.length];
     }
@@ -136,6 +150,8 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
       title: asset.name,
       category: displayCategory,
       imageUrl,
+      tearSheet: (asset.attributes as any)?.tear_sheet || null,
+      availableActors: allActors,
       actor: {
         id: asset.actor.id,
         name: asset.actor.name,
@@ -151,18 +167,6 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
     });
   });
 
-  let result = showcaseItems;
-
-  // Duplicate items slightly if there are too few to make the masonry grid look full and beautiful
-  if (showcaseItems.length > 0 && showcaseItems.length < 8) {
-     const extraItems = showcaseItems.map((item, idx) => ({
-       ...item,
-       id: item.id + "-copy-" + idx,
-       imageUrl: FALLBACK_IMAGES[(idx + 4) % FALLBACK_IMAGES.length]
-     }));
-     result = [...showcaseItems, ...extraItems];
-  }
-
-  // Shuffle the result array to give an organic, Pinterest-style non-sequential feel
-  return result.sort(() => Math.random() - 0.5);
+  // Return real database assets in true chronological order
+  return showcaseItems;
 }

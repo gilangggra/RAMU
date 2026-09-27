@@ -9,8 +9,8 @@ import {
   Mail,
   Globe,
   ArrowLeft,
-  Lightbulb,
-  PlusCircle,
+  MessageCircle,
+  CheckCircle2,
 } from "lucide-react";
 import { ActorDetailTabs } from "@/components/directory/ActorDetailTabs";
 import { BookingButton } from "@/components/directory/BookingButton";
@@ -95,6 +95,64 @@ export default async function DirectoryDetailPage({
     else previewImage = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop"; // Model/Portrait fallback
   }
 
+  // Calculate Starting Estimated Rate Card & Turnaround for Indonesian creative market
+  const sectorLower = actor.sector.toLowerCase();
+  const isVideo = sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema");
+  const isModel = sectorLower.includes("model") || sectorLower.includes("talent");
+  const isMua = sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair");
+  const isStylist = sectorLower.includes("stylist") || sectorLower.includes("wardrobe");
+  const isPhotog = sectorLower.includes("fotografi") || sectorLower.includes("photographer");
+  const isDesigner = sectorLower.includes("designer") || sectorLower.includes("desain");
+  const isStudio = actor.actorType === "STUDIO" || sectorLower.includes("studio");
+
+  let startingRate = "Mulai Rp 1,5 Jt / sesi";
+  let turnaroundTime = "3 – 5 Hari Kerja";
+
+  if (isStudio) {
+    startingRate = "Mulai Rp 200rb / jam (Shift Rp 750rb)";
+    turnaroundTime = "Instan / Slot Booking";
+  } else if (isModel) {
+    startingRate = "Mulai Rp 1,0 Jt / sesi";
+    turnaroundTime = "Selesai Sesi Pemotretan";
+  } else if (isMua) {
+    startingRate = "Mulai Rp 800rb / sesi";
+    turnaroundTime = "Selesai On-Set Hari-H";
+  } else if (isStylist) {
+    startingRate = "Mulai Rp 1,2 Jt / sesi";
+    turnaroundTime = "Selesai On-Set Hari-H";
+  } else if (isVideo) {
+    startingRate = "Mulai Rp 1,8 Jt / video";
+    turnaroundTime = "4 – 6 Hari Kerja";
+  } else if (isPhotog) {
+    startingRate = "Mulai Rp 1,5 Jt / sesi";
+    turnaroundTime = "3 – 5 Hari Kerja";
+  } else if (isDesigner) {
+    startingRate = "Mulai Rp 2,5 Jt / koleksi";
+    turnaroundTime = "7 – 14 Hari Kerja";
+  } else if (actor.actorType === "MSME") {
+    startingRate = "Sesuai Brief & Volume";
+    turnaroundTime = "Sesuai Timeline Proyek";
+  }
+
+  // Override with actor's custom configured rates & turnaround if available
+  const customServiceAsset = actor.assets.find(
+    (a) =>
+      a.subtype === "COMMERCIAL_SERVICE_PACKAGES" ||
+      (a.attributes && typeof a.attributes === "object" && ("service_packages" in (a.attributes as any) || "starting_rate" in (a.attributes as any)))
+  );
+  const customAttrs = (customServiceAsset?.attributes as any) || {};
+  if (customAttrs.starting_rate) {
+    startingRate = customAttrs.starting_rate;
+  }
+  if (customAttrs.turnaround_time) {
+    turnaroundTime = customAttrs.turnaround_time;
+  }
+
+  // Format WhatsApp link if contact phone exists
+  const rawPhone = actor.contactPhone || "";
+  const cleanPhone = rawPhone.replace(/[^0-9]/g, "").replace(/^0/, "62");
+  const waLink = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Halo ${actor.name}, saya melihat profil Anda di RAMU dan tertarik bekerjasama untuk proyek.`)}` : null;
+
   return (
     <AppShell actor={currentActor} activeRoute="/directory">
       <div className="max-w-6xl mx-auto pb-24">
@@ -118,27 +176,37 @@ export default async function DirectoryDetailPage({
           <section className="flex flex-col md:flex-row gap-8 lg:gap-16 mb-16">
             {/* Left: Giant Portrait Image */}
             <div className="w-full md:w-[45%] shrink-0">
-              <div className="aspect-[3/4] w-full bg-stone-100 overflow-hidden">
+              <div className="aspect-[3/4] w-full bg-stone-100 overflow-hidden relative">
                 <img 
                   src={previewImage}
                   alt={actor.name}
                   className="w-full h-full object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-700"
                 />
+                <div className="absolute top-4 left-4">
+                  <span className="px-3 py-1 bg-white/95 backdrop-blur-md text-[9px] font-bold uppercase tracking-wider text-[#1E1B2E] shadow-xs">
+                    Kreator Profesional
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* Right: Typography & Details */}
-            <div className="flex flex-col justify-end pb-8">
-              <div className="mb-6">
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 mb-2">
-                  {actor.sector}
+            <div className="flex flex-col justify-end pb-4">
+              <div className="mb-4">
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 mb-2 flex items-center gap-2">
+                  <span>{actor.sector}</span>
+                  <span className="w-1 h-1 rounded-full bg-stone-300" />
+                  <span className="text-emerald-700 font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-700 animate-pulse" />
+                    Tersedia untuk Booking
+                  </span>
                 </div>
                 <h1 className="text-4xl sm:text-5xl lg:text-7xl font-light text-[#1E1B2E] tracking-tighter leading-[0.9]">
                   {actor.name}
                 </h1>
               </div>
 
-              <div className="flex flex-wrap items-center gap-6 text-xs font-bold uppercase tracking-widest text-stone-500 mb-8">
+              <div className="flex flex-wrap items-center gap-6 text-xs font-bold uppercase tracking-widest text-stone-500 mb-6">
                 {actor.location && (
                   <div className="flex items-center gap-2">
                     <MapPin className="w-3.5 h-3.5" />
@@ -160,12 +228,32 @@ export default async function DirectoryDetailPage({
               </div>
 
               {actor.description && (
-                <p className="text-sm font-light text-stone-500 leading-relaxed max-w-lg mb-10">
+                <p className="text-sm font-light text-stone-500 leading-relaxed max-w-lg mb-6">
                   {actor.description}
                 </p>
               )}
 
-              {/* Action Buttons */}
+              {/* Quick Working Terms Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-stone-50 border border-stone-200/80 mb-6">
+                <div className="space-y-0.5">
+                  <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Estimasi Tarif</div>
+                  <div className="text-xs font-semibold text-[#1E1B2E]">{startingRate}</div>
+                </div>
+                <div className="space-y-0.5 sm:border-l border-stone-200/60 sm:pl-3">
+                  <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Turnaround</div>
+                  <div className="text-xs font-semibold text-[#1E1B2E]">{turnaroundTime}</div>
+                </div>
+                <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/60 sm:pl-3 pt-2 sm:pt-0">
+                  <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Area Kerja</div>
+                  <div className="text-xs font-semibold text-[#1E1B2E] truncate">{actor.location ? actor.location.split(",")[0] : "Indonesia"}</div>
+                </div>
+                <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/60 sm:pl-3 pt-2 sm:pt-0">
+                  <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Sistem Bayar</div>
+                  <div className="text-xs font-semibold text-[#1E1B2E]">DP 50% + Pelunasan</div>
+                </div>
+              </div>
+
+              {/* Streamlined Action Buttons */}
               {!isCurrentActor ? (
                 <div className="flex flex-wrap items-center gap-3">
                   <BookingButton 
@@ -173,24 +261,29 @@ export default async function DirectoryDetailPage({
                     targetName={actor.name} 
                     targetSector={actor.sector} 
                     targetType={actor.actorType} 
-                    label="Sewa Jasa (Direct Hire)" 
+                    label="Sewa Jasa / Rekrut Sekarang" 
                   />
-                  <Link
-                    href={`/projects/new?partnerId=${actor.id}&partnerName=${encodeURIComponent(actor.name)}`}
-                    className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white text-xs font-bold uppercase tracking-widest shadow-xs transition-all cursor-pointer"
-                    title="Ajak ke Project Brief"
-                  >
-                    <PlusCircle className="w-4 h-4" />
-                    <span>Ajak Kolaborasi Proyek</span>
-                  </Link>
-                  <Link
-                    href={`/opportunities?actorId=${actor.id}`}
-                    className="inline-flex items-center gap-2 px-5 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
-                    title="Cek Sinergi AI"
-                  >
-                    <Lightbulb className="w-4 h-4 text-amber-500" />
-                    <span>Cek Sinergi AI</span>
-                  </Link>
+                  {waLink ? (
+                    <a
+                      href={waLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 px-6 py-3 border border-emerald-600/40 hover:border-emerald-600 bg-emerald-50/60 hover:bg-emerald-100/60 text-emerald-800 text-xs font-bold uppercase tracking-widest transition-all shadow-xs"
+                      title="Chat WhatsApp Langsung"
+                    >
+                      <MessageCircle className="w-4 h-4 text-emerald-600" />
+                      <span>Chat via WhatsApp</span>
+                    </a>
+                  ) : actor.contactEmail ? (
+                    <a
+                      href={`mailto:${actor.contactEmail}?subject=${encodeURIComponent(`Tawaran Proyek Kerja - ${actor.name}`)}`}
+                      className="inline-flex items-center gap-2 px-6 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
+                      title="Kirim Email Penawaran"
+                    >
+                      <Mail className="w-4 h-4 text-stone-500" />
+                      <span>Kirim Email</span>
+                    </a>
+                  ) : null}
                 </div>
               ) : (
                 <div className="flex flex-wrap items-center gap-3">
@@ -217,16 +310,20 @@ export default async function DirectoryDetailPage({
           <section className="mb-16">
             <div className="flex flex-col lg:flex-row justify-between items-end gap-6 mb-8">
               <div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 mb-2 flex items-center gap-2">
+                  <span>{actor.sector}</span>
+                  <span className="w-1 h-1 rounded-full bg-stone-300" />
+                  <span className="text-emerald-700 font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-700 animate-pulse" />
+                    Studio Siap Booking
+                  </span>
+                </div>
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium text-[#1E1B2E] tracking-tight mb-2">
                   {actor.name}
                 </h1>
                 <div className="flex flex-wrap items-center gap-4 text-xs font-bold uppercase tracking-widest text-stone-400">
-                  <span>{actor.sector}</span>
                   {actor.location && (
-                    <>
-                      <span>&mdash;</span>
-                      <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{actor.location}</span>
-                    </>
+                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{actor.location}</span>
                   )}
                   {actor.websiteUrl && (
                     <>
@@ -249,7 +346,7 @@ export default async function DirectoryDetailPage({
                 </div>
               </div>
 
-              {/* Action Buttons */}
+              {/* Streamlined Action Buttons */}
               {!isCurrentActor ? (
                 <div className="flex flex-wrap items-center gap-3">
                   <BookingButton 
@@ -257,24 +354,28 @@ export default async function DirectoryDetailPage({
                     targetName={actor.name} 
                     targetSector={actor.sector} 
                     targetType={actor.actorType} 
-                    label="Sewa Studio (Direct)" 
+                    label="Sewa Studio Sekarang" 
                   />
-                  <Link
-                    href={`/projects/new?partnerId=${actor.id}&partnerName=${encodeURIComponent(actor.name)}`}
-                    className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white text-xs font-bold uppercase tracking-widest shadow-xs transition-all cursor-pointer"
-                    title="Ajak ke Project Brief"
-                  >
-                    <PlusCircle className="w-4 h-4" />
-                    <span>Ajak Kolaborasi Proyek</span>
-                  </Link>
-                  <Link
-                    href={`/opportunities?actorId=${actor.id}`}
-                    className="inline-flex items-center gap-2 px-5 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
-                    title="Cek Sinergi AI"
-                  >
-                    <Lightbulb className="w-4 h-4 text-amber-500" />
-                    <span>Cek Sinergi AI</span>
-                  </Link>
+                  {waLink ? (
+                    <a
+                      href={waLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 px-6 py-3 border border-emerald-600/40 hover:border-emerald-600 bg-emerald-50/60 hover:bg-emerald-100/60 text-emerald-800 text-xs font-bold uppercase tracking-widest transition-all shadow-xs"
+                      title="Chat WhatsApp Langsung"
+                    >
+                      <MessageCircle className="w-4 h-4 text-emerald-600" />
+                      <span>Chat via WhatsApp</span>
+                    </a>
+                  ) : actor.contactEmail ? (
+                    <a
+                      href={`mailto:${actor.contactEmail}?subject=${encodeURIComponent(`Reservasi Sewa Studio - ${actor.name}`)}`}
+                      className="inline-flex items-center gap-2 px-6 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
+                    >
+                      <Mail className="w-4 h-4 text-stone-500" />
+                      <span>Kirim Email</span>
+                    </a>
+                  ) : null}
                 </div>
               ) : (
                 <div className="flex flex-wrap items-center gap-3">
@@ -294,6 +395,26 @@ export default async function DirectoryDetailPage({
               )}
             </div>
 
+            {/* Quick Working Terms Bar for Studio */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-stone-50 border border-stone-200/80 mb-6">
+              <div className="space-y-0.5">
+                <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Tarif Sewa</div>
+                <div className="text-xs font-semibold text-[#1E1B2E]">{startingRate}</div>
+              </div>
+              <div className="space-y-0.5 sm:border-l border-stone-200/60 sm:pl-3">
+                <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Waktu Booking</div>
+                <div className="text-xs font-semibold text-[#1E1B2E]">Shift 4 Jam / 8 Jam</div>
+              </div>
+              <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/60 sm:pl-3 pt-2 sm:pt-0">
+                <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Lokasi Studio</div>
+                <div className="text-xs font-semibold text-[#1E1B2E] truncate">{actor.location || "Jakarta"}</div>
+              </div>
+              <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/60 sm:pl-3 pt-2 sm:pt-0">
+                <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Sistem Pembayaran</div>
+                <div className="text-xs font-semibold text-[#1E1B2E]">DP Reservasi Slot 50%</div>
+              </div>
+            </div>
+
             {/* Wide Panoramic Image */}
             <div className="w-full h-[40vh] sm:h-[60vh] bg-stone-100 overflow-hidden">
                <img 
@@ -309,19 +430,39 @@ export default async function DirectoryDetailPage({
         {(actor.actorType === "MSME" || actor.actorType === "COLLECTIVE") && (
           <section className="flex flex-col items-center text-center max-w-4xl mx-auto mb-20 pt-10">
             <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-stone-400 mb-6">
-              {actor.actorType === "MSME" ? "Brand Identity" : "Creative Collective"}
+              {actor.actorType === "MSME" ? "Brand & Label Busana" : "Creative Collective"}
             </div>
             
             <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif italic text-[#1E1B2E] leading-tight mb-6">
               {actor.name}
             </h1>
             
-            <p className="text-base md:text-lg font-light text-stone-500 leading-relaxed max-w-2xl mb-10">
-              {actor.description || "Kami adalah entitas yang fokus pada penciptaan nilai visual tinggi melalui sinergi kolaboratif."}
+            <p className="text-base md:text-lg font-light text-stone-500 leading-relaxed max-w-2xl mb-8">
+              {actor.description || "Kami adalah entitas yang fokus pada penciptaan nilai visual tinggi melalui sinergi komersial."}
             </p>
 
+            {/* Quick Working Terms Bar for Brand */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-stone-50 border border-stone-200/80 mb-8 w-full text-left">
+              <div className="space-y-0.5">
+                <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Produksi & Katalog</div>
+                <div className="text-xs font-semibold text-[#1E1B2E]">{startingRate}</div>
+              </div>
+              <div className="space-y-0.5 sm:border-l border-stone-200/60 sm:pl-3">
+                <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Status Kerjasama</div>
+                <div className="text-xs font-semibold text-emerald-700">Menerima Pengadaan / Sewa</div>
+              </div>
+              <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/60 sm:pl-3 pt-2 sm:pt-0">
+                <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Domisili</div>
+                <div className="text-xs font-semibold text-[#1E1B2E] truncate">{actor.location || "Indonesia"}</div>
+              </div>
+              <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/60 sm:pl-3 pt-2 sm:pt-0">
+                <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Kontrak Kerja</div>
+                <div className="text-xs font-semibold text-[#1E1B2E]">Invoice Resmi & PO</div>
+              </div>
+            </div>
+
             {/* Minimalist Contact & Location */}
-            <div className="flex flex-wrap items-center justify-center gap-8 text-[11px] font-bold uppercase tracking-widest text-[#1E1B2E] mb-12 border-y border-stone-200 py-4 w-full">
+            <div className="flex flex-wrap items-center justify-center gap-8 text-[11px] font-bold uppercase tracking-widest text-[#1E1B2E] mb-8 border-y border-stone-200 py-4 w-full">
                {actor.location && (
                  <span className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5 text-stone-400" />{actor.location}</span>
                )}
@@ -337,7 +478,7 @@ export default async function DirectoryDetailPage({
                )}
             </div>
 
-            {/* Action Buttons */}
+            {/* Streamlined Action Buttons */}
             {!isCurrentActor ? (
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <BookingButton 
@@ -345,24 +486,28 @@ export default async function DirectoryDetailPage({
                   targetName={actor.name} 
                   targetSector={actor.sector} 
                   targetType={actor.actorType} 
-                  label="Pengadaan / Sewa (Direct)" 
+                  label="Pesan Jasa / Pengadaan" 
                 />
-                <Link
-                  href={`/projects/new?partnerId=${actor.id}&partnerName=${encodeURIComponent(actor.name)}`}
-                  className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white text-xs font-bold uppercase tracking-widest shadow-xs transition-all cursor-pointer"
-                  title="Ajak ke Project Brief"
-                >
-                  <PlusCircle className="w-4 h-4" />
-                  <span>Ajak Kolaborasi Proyek</span>
-                </Link>
-                <Link
-                  href={`/opportunities?actorId=${actor.id}`}
-                  className="inline-flex items-center gap-2 px-5 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
-                  title="Cek Sinergi AI"
-                >
-                  <Lightbulb className="w-4 h-4 text-amber-500" />
-                  <span>Cek Sinergi AI</span>
-                </Link>
+                {waLink ? (
+                  <a
+                    href={waLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3 border border-emerald-600/40 hover:border-emerald-600 bg-emerald-50/60 hover:bg-emerald-100/60 text-emerald-800 text-xs font-bold uppercase tracking-widest transition-all shadow-xs"
+                    title="Chat WhatsApp Langsung"
+                  >
+                    <MessageCircle className="w-4 h-4 text-emerald-600" />
+                    <span>Chat via WhatsApp</span>
+                  </a>
+                ) : actor.contactEmail ? (
+                  <a
+                    href={`mailto:${actor.contactEmail}?subject=${encodeURIComponent(`Penawaran Pengadaan / Kerjasama - ${actor.name}`)}`}
+                    className="inline-flex items-center gap-2 px-6 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
+                  >
+                    <Mail className="w-4 h-4 text-stone-500" />
+                    <span>Kirim Email</span>
+                  </a>
+                ) : null}
               </div>
             ) : (
               <div className="flex flex-wrap items-center justify-center gap-3">

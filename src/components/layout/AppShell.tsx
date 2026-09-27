@@ -5,19 +5,15 @@ import Link from "next/link";
 import { logout } from "@/app/(auth)/actions";
 import {
   LayoutDashboard,
-  Lightbulb,
   Megaphone,
-  Handshake,
-  Zap,
   Menu,
   X,
   LogOut,
   Users,
   Sparkles,
   Settings,
-  Sliders,
   Inbox,
-  BarChart3,
+  CreditCard,
 } from "lucide-react";
 
 interface ActorInfo {
@@ -43,14 +39,11 @@ interface NavItem {
 
 const PRIMARY_NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" /> },
-  { href: "/opportunities", label: "Peluang Sinergi AI", icon: <Lightbulb className="w-4 h-4" />, badge: "AI Match" },
-  { href: "/projects", label: "Papan Proyek (Open Briefs)", icon: <Megaphone className="w-4 h-4" /> },
-  { href: "/collaborations", label: "Ruang Kerja Tim (Workspaces)", icon: <Handshake className="w-4 h-4" /> },
-  { href: "/dashboard/bookings", label: "Permintaan Masuk (Bookings)", icon: <Inbox className="w-4 h-4" /> },
-  { href: "/directory", label: "Direktori Kreator", icon: <Users className="w-4 h-4" /> },
+  { href: "/directory", label: "Direktori Talenta & Studio", icon: <Users className="w-4 h-4" /> },
   { href: "/showcase", label: "Karya & Inspirasi", icon: <Sparkles className="w-4 h-4" /> },
-  { href: "/readiness", label: "Kesiapan & Ketentuan Kerja", icon: <Sliders className="w-4 h-4" /> },
-  { href: "/engine-insights", label: "Engine Intelligence", icon: <BarChart3 className="w-4 h-4" />, badge: "Metrik" },
+  { href: "/projects", label: "Papan Proyek Komersial", icon: <Megaphone className="w-4 h-4" /> },
+  { href: "/dashboard/bookings", label: "Pesanan Masuk (Bookings)", icon: <Inbox className="w-4 h-4" /> },
+  { href: "/settings/rates", label: "Paket Layanan & Tarif Saya", icon: <CreditCard className="w-4 h-4" /> },
   { href: "/settings", label: "Pengaturan Akun", icon: <Settings className="w-4 h-4" /> },
 ];
 
@@ -230,10 +223,10 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-stone-200/90 px-3 py-2 flex items-center justify-around z-40 shadow-lg">
         {[
           { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
-          { href: "/opportunities", label: "Peluang", icon: <Lightbulb className="w-5 h-5" /> },
+          { href: "/directory", label: "Direktori", icon: <Users className="w-5 h-5" /> },
           { href: "/projects", label: "Proyek", icon: <Megaphone className="w-5 h-5" /> },
-          { href: "/showcase", label: "Karya", icon: <Sparkles className="w-5 h-5" /> },
-          { href: "/collaborations", label: "Kolaborasi", icon: <Handshake className="w-5 h-5" /> },
+          { href: "/dashboard/bookings", label: "Pesanan", icon: <Inbox className="w-5 h-5" /> },
+          { href: "/settings/rates", label: "Tarif", icon: <CreditCard className="w-5 h-5" /> },
         ].map((item) => {
           const active = isItemActive(item.href);
           return (

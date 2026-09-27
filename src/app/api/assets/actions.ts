@@ -48,6 +48,16 @@ export async function createShowcaseAsset(formData: FormData) {
       throw new Error("Missing required fields");
     }
 
+    const tearSheetRaw = formData.get("tearSheet") as string | null;
+    let tearSheetData = null;
+    if (tearSheetRaw) {
+      try {
+        tearSheetData = JSON.parse(tearSheetRaw);
+      } catch (e) {
+        console.error("Failed to parse tearSheet JSON:", e);
+      }
+    }
+
     const newAsset = await prisma.asset.create({
       data: {
         actorId: actor.id,
@@ -59,6 +69,7 @@ export async function createShowcaseAsset(formData: FormData) {
         attributes: {
           image_url: imageUrl,
           project_url: projectUrl || null,
+          ...(tearSheetData ? { tear_sheet: tearSheetData } : {}),
         },
         sourceType: SourceType.SELF_REPORTED,
         confidenceLevel: ConfidenceLevel.HIGH,

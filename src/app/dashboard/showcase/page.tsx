@@ -41,6 +41,21 @@ export default async function DashboardShowcasePage() {
     },
   });
 
+  // Fetch active registered actors in RAMU to enable live collaborator tagging
+  const registeredActors = await prisma.actor.findMany({
+    where: { status: { not: "ARCHIVED" } },
+    select: {
+      id: true,
+      name: true,
+      sector: true,
+      location: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+    take: 100,
+  });
+
   return (
     <AppShell actor={primaryActor} activeRoute="/dashboard">
       <div className="space-y-6 pb-12">
@@ -48,7 +63,7 @@ export default async function DashboardShowcasePage() {
           <ArrowLeft className="w-4 h-4" />
           Kembali ke Dashboard
         </Link>
-        <ShowcaseManager assets={portfolioAssets} />
+        <ShowcaseManager assets={portfolioAssets} registeredActors={registeredActors} />
       </div>
     </AppShell>
   );

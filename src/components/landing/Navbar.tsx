@@ -72,6 +72,12 @@ export function Navbar() {
             Beranda
           </Link>
           <Link
+            href="/directory"
+            className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
+          >
+            Direktori Talenta
+          </Link>
+          <Link
             href="/showcase"
             className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold flex items-center gap-1"
           >
@@ -79,22 +85,10 @@ export function Navbar() {
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
           </Link>
           <Link
-            href="/directory"
-            className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
-          >
-            Direktori Kreator
-          </Link>
-          <Link
             href="/projects"
             className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
           >
             Papan Proyek
-          </Link>
-          <Link
-            href="/opportunities"
-            className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
-          >
-            Peluang Sinergi AI
           </Link>
         </nav>
 
@@ -172,6 +166,13 @@ export function Navbar() {
               Beranda
             </Link>
             <Link
+              href="/directory"
+              onClick={() => setMobileOpen(false)}
+              className="hover:text-[#27213D] py-1.5"
+            >
+              Direktori Talenta
+            </Link>
+            <Link
               href="/showcase"
               onClick={() => setMobileOpen(false)}
               className="hover:text-[#27213D] py-1.5 flex items-center justify-between"
@@ -180,25 +181,11 @@ export function Navbar() {
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
             </Link>
             <Link
-              href="/directory"
-              onClick={() => setMobileOpen(false)}
-              className="hover:text-[#27213D] py-1.5"
-            >
-              Direktori
-            </Link>
-            <Link
               href="/projects"
               onClick={() => setMobileOpen(false)}
               className="hover:text-[#27213D] py-1.5"
             >
-              Project Briefs
-            </Link>
-            <Link
-              href="/opportunities"
-              onClick={() => setMobileOpen(false)}
-              className="hover:text-[#27213D] py-1.5"
-            >
-              Peluang Engine
+              Papan Proyek
             </Link>
           </nav>
           <div className="pt-4 border-t border-stone-100 flex flex-col gap-3">

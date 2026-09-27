@@ -61,10 +61,10 @@ export function OpportunityShowcase() {
           </div>
 
           <Link
-            href="/opportunities"
+            href="/projects"
             className="inline-flex items-center gap-3 px-6 py-3 rounded-full border border-stone-200 text-xs font-semibold uppercase tracking-widest text-[#1E1B2E] hover:bg-stone-200 transition-colors shrink-0 group"
           >
-            <span>Lihat Semua</span>
+            <span>Jelajahi Proyek</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
