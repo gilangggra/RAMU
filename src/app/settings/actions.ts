@@ -101,3 +101,95 @@ export async function updatePreferences(formData: FormData) {
     return { success: false, error: error.message || "Terjadi kesalahan saat menyimpan preferensi." };
   }
 }
+
+export async function updateServicePackagesAndRates(formData: FormData) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      throw new Error("Unauthorized: Silakan login terlebih dahulu.");
+    }
+
+    const startingRate = formData.get("startingRate")?.toString().trim();
+    const turnaroundTime = formData.get("turnaroundTime")?.toString().trim();
+    const packagesJson = formData.get("packagesJson")?.toString().trim();
+
+    if (!startingRate) {
+      throw new Error("Estimasi tarif awal wajib diisi.");
+    }
+
+    let parsedPackages = [];
+    if (packagesJson) {
+      try {
+        parsedPackages = JSON.parse(packagesJson);
+      } catch (e) {
+        throw new Error("Format paket layanan tidak valid.");
+      }
+    }
+
+    const actor = await prisma.actor.findFirst({
+      where: { ownerUserId: user.id },
+    });
+
+    if (!actor) {
+      throw new Error("Profil kreator tidak ditemukan.");
+    }
+
+    // Check if commercial service packages asset exists
+    const existingAsset = await prisma.asset.findFirst({
+      where: {
+        actorId: actor.id,
+        subtype: "COMMERCIAL_SERVICE_PACKAGES",
+      },
+    });
+
+    const attributesData = {
+      starting_rate: startingRate,
+      turnaround_time: turnaroundTime || "3 – 5 Hari Kerja",
+      service_packages: parsedPackages,
+    };
+
+    if (existingAsset) {
+      const existingAttrs = (typeof existingAsset.attributes === "object" && existingAsset.attributes !== null)
+        ? (existingAsset.attributes as Record<string, unknown>)
+        : {};
+
+      await prisma.asset.update({
+        where: { id: existingAsset.id },
+        data: {
+          attributes: {
+            ...existingAttrs,
+            ...attributesData,
+          },
+        },
+      });
+    } else {
+      await prisma.asset.create({
+        data: {
+          actorId: actor.id,
+          category: "SKILL_TALENT",
+          subtype: "COMMERCIAL_SERVICE_PACKAGES",
+          name: "Paket Layanan & Tarif Mandiri",
+          description: "Daftar paket komersial dan estimasi tarif resmi yang diatur mandiri oleh kreator.",
+          roles: ["CAPABILITY"],
+          attributes: attributesData,
+          sourceType: "SELF_REPORTED",
+          confidenceLevel: "HIGH",
+          status: "ACTIVE",
+        },
+      });
+    }
+
+    revalidatePath("/settings/rates");
+    revalidatePath("/settings");
+    revalidatePath("/directory");
+    revalidatePath(`/directory/${actor.id}`);
+
+    return { success: true, message: "Paket layanan dan tarif mandiri Anda berhasil disimpan!" };
+  } catch (error: any) {
+    console.error("Error updating service packages:", error);
+    return { success: false, error: error.message || "Terjadi kesalahan saat menyimpan paket tarif." };
+  }
+}
+

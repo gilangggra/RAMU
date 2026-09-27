@@ -4,13 +4,13 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { getShowcaseAssets } from "@/application/showcaseService";
 import { AppShell } from "@/components/layout/AppShell";
-import { ShowcaseCard } from "@/components/showcase/ShowcaseCard";
+import { ShowcaseGalleryClient } from "@/components/showcase/ShowcaseGalleryClient";
 import { ShowcaseFilterBar } from "@/components/showcase/ShowcaseFilterBar";
-import { ImageIcon, Sparkles, Plus } from "lucide-react";
+import { ImageIcon, Sparkles, Plus, Layers } from "lucide-react";
 
 export const metadata = {
   title: "Karya & Inspirasi | RAMU",
-  description: "Eksplorasi mahakarya visual dan profil kreatif dari ekosistem RAMU bergaya Apple Liquid Glass.",
+  description: "Eksplorasi mahakarya visual dan profil kreatif dari ekosistem RAMU lengkap dengan Interactive Hotspot Tear-Sheet.",
 };
 
 export default async function ShowcasePage({
@@ -47,13 +47,20 @@ export default async function ShowcasePage({
     <AppShell actor={actor} activeRoute="/showcase">
       <div className="space-y-6">
 
-        {/* ── IPHONE GLASS HEADER & SPOTLIGHT CONTROL ── */}
+        {/* ── HIGH-FASHION EDITORIAL HEADER & SPOTLIGHT CONTROL ── */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pt-1">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/75 backdrop-blur-xl border border-white/80 shadow-[0_2px_12px_rgba(39,33,61,0.04)] text-[11px] font-bold text-stone-700 mb-2">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Kurasi Visual Eksklusif • RAMU Spotlight</span>
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/75 backdrop-blur-xl border border-white/80 shadow-[0_2px_12px_rgba(39,33,61,0.04)] text-[11px] font-bold text-stone-700">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>Kurasi Visual Eksklusif • RAMU Spotlight</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 backdrop-blur-xl border border-amber-500/20 text-[11px] font-mono font-bold text-amber-800">
+                <Layers className="w-3 h-3 text-amber-600" />
+                <span>Hotspot Tear-Sheet Active</span>
+              </div>
             </div>
+
             <div className="flex items-center gap-3">
               <h1 className="text-2xl sm:text-3xl font-black text-[#1E1B2E] tracking-tight">
                 Karya &amp; Inspirasi
@@ -63,7 +70,7 @@ export default async function ShowcasePage({
               </span>
             </div>
             <p className="text-xs sm:text-sm text-stone-500 mt-1 max-w-xl leading-relaxed">
-              Jelajahi karya visual pilihan dari kreator, fotografer, stylist, dan desainer terverifikasi.
+              Jelajahi karya visual pilihan. Klik pada gambar untuk menginspeksi <strong>Hotspot Tear-Sheet</strong>, memeriksa rincian teknis gear, wardrobe, beauty, serta menyalin kredit editorial resmi.
             </p>
           </div>
 
@@ -86,13 +93,9 @@ export default async function ShowcasePage({
         {/* ── SHOWCASE FILTER BAR ── */}
         <ShowcaseFilterBar />
 
-        {/* ── MASONRY GRID — IPHONE GLASS CARDS ── */}
+        {/* ── MASONRY GRID WITH INTERACTIVE TEAR-SHEET MODAL ── */}
         {showcaseItems.length > 0 ? (
-          <div className="columns-2 sm:columns-2 md:columns-3 xl:columns-4 gap-4">
-            {showcaseItems.map((item) => (
-              <ShowcaseCard key={item.id} item={item} />
-            ))}
-          </div>
+          <ShowcaseGalleryClient items={showcaseItems} />
         ) : (
           <div className="flex flex-col items-center justify-center py-20 px-6 rounded-[32px] bg-white/70 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_rgba(39,33,61,0.04)] space-y-4 text-center">
             <div className="w-14 h-14 rounded-2xl bg-white/80 border border-white/90 shadow-sm flex items-center justify-center text-stone-400">
@@ -129,3 +132,4 @@ export default async function ShowcasePage({
     </AppShell>
   );
 }
+

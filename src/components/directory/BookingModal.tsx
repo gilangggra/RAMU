@@ -195,18 +195,12 @@ export function BookingModal({
           </button>
         </div>
 
-        {/* Distinction Notice Banner */}
-        <div className="bg-amber-50/70 border-b border-amber-200/60 px-6 py-2.5 text-xs text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <span className="text-[11px] text-amber-900">
-            Form ini untuk <strong>penugasan berbayar langsung</strong>. Jika ingin kolaborasi karya / TFP / bagi hasil:
+        {/* Professional Assurance Banner */}
+        <div className="bg-emerald-50/80 border-b border-emerald-200/60 px-6 py-2.5 text-xs text-emerald-950 flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span className="text-[11px] text-emerald-900 font-medium">
+            Penawaran proyek kerja resmi & sewa langsung melalui ekosistem <strong>RAMU Verified</strong>.
           </span>
-          <Link
-            href={`/projects/new?partnerId=${targetId}&partnerName=${encodeURIComponent(targetName)}`}
-            onClick={handleClose}
-            className="text-[11px] font-bold text-[#E66A48] hover:underline whitespace-nowrap shrink-0"
-          >
-            Ajak ke Project Brief &rarr;
-          </Link>
         </div>
 
         {/* Body */}

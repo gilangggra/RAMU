@@ -69,16 +69,16 @@ export default async function DirectoryPage({
               <div className="inline-flex items-center gap-3 mb-6">
                  <span className="w-8 h-px bg-stone-300"></span>
                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
-                   Eksplorasi Ekosistem
+                   Direktori Talenta & Studio Profesional
                  </span>
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light text-[#1E1B2E] tracking-tight leading-[1.1] mb-6">
-                Temukan rekan <br className="hidden sm:block" />
-                <span className="font-serif italic text-stone-500">kolaborasi ideal</span> Anda.
+                Temukan talenta kreatif & <br className="hidden sm:block" />
+                <span className="font-serif italic text-stone-500">studio foto</span> untuk proyek Anda.
               </h1>
               <p className="text-base text-stone-500 font-light leading-relaxed max-w-lg">
-                Jelajahi kurasi portofolio dari studio foto, talenta kreatif, dan desainer terverifikasi. 
-                Temukan kecocokan gaya visual dan inisiasi kolaborasi produksi bernilai tinggi.
+                Katalog kurasi fotografer, videografer, model, desainer, dan studio visual terverifikasi di Indonesia. 
+                Siap disewa langsung untuk kampanye komersial, lookbook, dan produksi kreatif Anda.
               </p>
             </div>
             
@@ -86,17 +86,17 @@ export default async function DirectoryPage({
             <div className="flex flex-wrap items-center gap-8 lg:gap-12 pb-2">
               <div className="space-y-1">
                 <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{totalActors}</div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Total Entitas</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Entitas Terdaftar</div>
               </div>
               <div className="w-px h-10 bg-stone-200 hidden sm:block"></div>
               <div className="space-y-1">
                 <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{totalStudios}</div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Studio Visual</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Studio Siap Booking</div>
               </div>
               <div className="w-px h-10 bg-stone-200 hidden sm:block"></div>
               <div className="space-y-1">
                 <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{totalIndividuals}</div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Kreator</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Talenta Siap Rekrut</div>
               </div>
             </div>
           </div>

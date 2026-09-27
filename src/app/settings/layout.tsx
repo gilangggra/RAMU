@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { AppShell } from "@/components/layout/AppShell";
-import { UserCircle, Sliders, Image as ImageIcon, Package, Target, Search, ShieldAlert } from "lucide-react";
+import { UserCircle, Sliders, Image as ImageIcon, Package, Target, Search, ShieldAlert, CreditCard } from "lucide-react";
 
 export const metadata = {
   title: "Pengaturan | RAMU",
@@ -68,6 +68,14 @@ export default async function SettingsLayout({
               <UserCircle className="w-4 h-4 shrink-0" />
               <span>Profil Dasar</span>
             </Link>
+
+            <Link
+              href="/settings/rates"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
+            >
+              <CreditCard className="w-4 h-4 shrink-0 text-emerald-600" />
+              <span>Paket Layanan &amp; Tarif</span>
+            </Link>
             
             <Link
               href="/settings/preferences"
@@ -83,20 +91,6 @@ export default async function SettingsLayout({
             >
               <ImageIcon className="w-4 h-4 shrink-0 text-amber-500" />
               <span>Kelola Portofolio & Karya</span>
-            </Link>
-
-            <div className="pt-3 mt-2 border-t border-stone-200 hidden lg:block">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#9E98A8] px-4 block mb-1">
-                Kesiapan Kolaborasi
-              </span>
-            </div>
-
-            <Link
-              href="/readiness"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
-            >
-              <Sliders className="w-4 h-4 shrink-0 text-amber-500" />
-              <span>Kelola Kesiapan & Parameter</span>
             </Link>
           </nav>
 

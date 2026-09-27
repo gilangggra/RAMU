@@ -43,18 +43,23 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/opportunities" className="hover:text-[#27213D] transition-colors">
-                  Katalog Peluang
+                <Link href="/directory" className="hover:text-[#27213D] transition-colors">
+                  Direktori Talenta & Studio
+                </Link>
+              </li>
+              <li>
+                <Link href="/showcase" className="hover:text-[#27213D] transition-colors">
+                  Karya & Inspirasi
                 </Link>
               </li>
               <li>
                 <Link href="/projects" className="hover:text-[#27213D] transition-colors">
-                  Project Briefs & Kebutuhan
+                  Papan Proyek Komersial
                 </Link>
               </li>
               <li>
-                <Link href="/collaborations" className="hover:text-[#27213D] transition-colors">
-                  Ruang Kolaborasi
+                <Link href="/dashboard/bookings" className="hover:text-[#27213D] transition-colors">
+                  Pesanan Masuk (Bookings)
                 </Link>
               </li>
             </ul>
@@ -62,27 +67,22 @@ export function Footer() {
 
           <div className="md:col-span-2 space-y-3">
             <div className="text-xs font-bold uppercase tracking-wider text-[#27213D]">
-              Metode
+              Layanan
             </div>
             <ul className="space-y-2 text-xs font-medium text-[#716B7E]">
               <li>
+                <Link href="/settings/rates" className="hover:text-[#27213D] transition-colors">
+                  Paket & Tarif Layanan
+                </Link>
+              </li>
+              <li>
                 <Link href="/#how-it-works" className="hover:text-[#27213D] transition-colors">
-                  12-Tahap Engine
+                  Cara Kerja Platform
                 </Link>
               </li>
               <li>
                 <Link href="/#differentiator" className="hover:text-[#27213D] transition-colors">
-                  Matriks Sinergi
-                </Link>
-              </li>
-              <li>
-                <Link href="/#differentiator" className="hover:text-[#27213D] transition-colors">
-                  Evaluasi 6 Dimensi
-                </Link>
-              </li>
-              <li>
-                <Link href="/engine-insights" className="hover:text-[#27213D] transition-colors">
-                  Engine Insights
+                  Keamanan & Transparansi
                 </Link>
               </li>
             </ul>
