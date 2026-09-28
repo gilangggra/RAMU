@@ -184,11 +184,12 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
       actorId: photoActor?.id,
       location: photoActor?.location || photoPick.location || undefined,
       details: `${photoPick.camera} • ${photoPick.lens}`,
-      verified: true,
-      verificationTimestamp: "Maret 2026",
-      verifiedBy: "Diverifikasi silang via RAMU Production Network",
-      verificationMethod: "PEER_CONFIRMED",
-      status: "VERIFIED"
+      verified: isPhotoPrimary,
+      isUploader: isPhotoPrimary,
+      verificationTimestamp: isPhotoPrimary ? "Maret 2026" : undefined,
+      verifiedBy: isPhotoPrimary ? "Pemilik Portofolio (Uploader)" : undefined,
+      verificationMethod: isPhotoPrimary ? "DIRECT_CLAIM" : "PEER_CONFIRMED",
+      status: isPhotoPrimary ? "VERIFIED" : "PENDING"
     },
     {
       role: "Fashion Design & Styling",
@@ -198,9 +199,10 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
       actorId: wardrobeActor?.id,
       location: wardrobeActor?.location || wardrobePick.location || undefined,
       details: wardrobePick.piece,
-      verified: true,
+      verified: isFashionPrimary || !isPhotoPrimary, // Verified if uploader or confirmed co-creator
+      isUploader: isFashionPrimary,
       verificationTimestamp: "Maret 2026",
-      verifiedBy: "Diverifikasi silang via RAMU Production Network",
+      verifiedBy: isFashionPrimary ? "Pemilik Portofolio (Uploader)" : "Dikonfirmasi Silang di Set",
       verificationMethod: "PEER_CONFIRMED",
       status: "VERIFIED"
     },
@@ -212,11 +214,12 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
       actorId: muaActor?.id,
       location: muaActor?.location || hmuaPick.location || undefined,
       details: hmuaPick.concept,
-      verified: true,
-      verificationTimestamp: "Maret 2026",
-      verifiedBy: "Diverifikasi silang via RAMU Production Network",
+      verified: isMuaPrimary,
+      isUploader: isMuaPrimary,
+      verificationTimestamp: isMuaPrimary ? "Maret 2026" : undefined,
+      verifiedBy: isMuaPrimary ? "Pemilik Portofolio (Uploader)" : undefined,
       verificationMethod: "PEER_CONFIRMED",
-      status: "VERIFIED"
+      status: isMuaPrimary ? "VERIFIED" : "PENDING"
     },
     {
       role: "Editorial Muse & Model",
@@ -226,11 +229,10 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
       actorId: talentActor?.id,
       location: talentActor?.location || undefined,
       details: talentPick.agency,
-      verified: true,
-      verificationTimestamp: "Maret 2026",
-      verifiedBy: "Diverifikasi silang via RAMU Production Network",
+      verified: false, // Pending confirmation by model
+      isUploader: false,
       verificationMethod: "PEER_CONFIRMED",
-      status: "VERIFIED"
+      status: talentActor?.id ? "PENDING" : "EXTERNAL"
     },
     {
       role: "Art Direction & Space",
@@ -240,11 +242,9 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
       actorId: artActor?.id,
       location: artActor?.location || undefined,
       details: artPick.style,
-      verified: true,
-      verificationTimestamp: "Maret 2026",
-      verifiedBy: "Diverifikasi silang via RAMU Production Network",
-      verificationMethod: "PEER_CONFIRMED",
-      status: "VERIFIED"
+      verified: false,
+      isUploader: false,
+      status: "EXTERNAL" // External studio mention
     }
   ];
 
@@ -254,9 +254,50 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
   // If custom user-inputted tear-sheet is present, merge seamlessly
   if (item.tearSheet) {
     const custom = item.tearSheet;
-    const finalCredits = custom.credits && custom.credits.length > 0 ? custom.credits : credits;
+    const rawCredits: TearSheetCredit[] = custom.credits && custom.credits.length > 0 ? custom.credits : credits;
+    
+    // Normalize verification status for user uploaded custom tear sheet
+    const finalCredits: TearSheetCredit[] = rawCredits.map((c, idx) => {
+      // First credit or credit matching actor is the uploader
+      const isActorUploader = c.actorId === item.actor.id || idx === 0 || c.isUploader;
+      if (isActorUploader) {
+        return {
+          ...c,
+          verified: true,
+          status: "VERIFIED",
+          isUploader: true,
+          verifiedBy: "Pemilik Portofolio (Uploader)"
+        };
+      }
+      if (c.verified) {
+        return {
+          ...c,
+          status: "VERIFIED"
+        };
+      }
+      if (c.actorId) {
+        return {
+          ...c,
+          verified: false,
+          status: "PENDING"
+        };
+      }
+      return {
+        ...c,
+        verified: false,
+        status: "EXTERNAL"
+      };
+    });
+
     const finalHotspots = custom.hotspots && custom.hotspots.length > 0 ? custom.hotspots : hotspots;
     const finalSpecs = custom.technicalSpecs ? { ...technicalSpecs, ...custom.technicalSpecs } : technicalSpecs;
+
+    const verifiedCount = finalCredits.filter(c => c.verified).length;
+    const totalCount = finalCredits.length;
+    const isFullyVerified = verifiedCount === totalCount && totalCount > 0;
+    const verificationRate = isFullyVerified
+      ? `100% (${verifiedCount}/${totalCount} Kru Terverifikasi)`
+      : `${verifiedCount}/${totalCount} Kru Terkonfirmasi (Verifikasi Parsial)`;
 
     return {
       issueNumber: `№ ${issueNum}`,
@@ -275,14 +316,21 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
         "Editorial",
         "Tear-Sheet",
         "RAMU Synergy",
-        "Anti-Catfishing Certified",
+        isFullyVerified ? "Anti-Catfishing Certified" : "Pending Crew Verification",
         "Peer-Verified"
       ],
       antiCatfishingCertificateId,
-      verificationRate: "100% (5/5 Kru Terverifikasi)",
+      verificationRate,
       verifiedDate: "2026"
     };
   }
+
+  const verifiedCount = credits.filter(c => c.verified).length;
+  const totalCount = credits.length;
+  const isFullyVerified = verifiedCount === totalCount && totalCount > 0;
+  const verificationRate = isFullyVerified
+    ? `100% (${verifiedCount}/${totalCount} Kru Terverifikasi)`
+    : `${verifiedCount}/${totalCount} Kru Terkonfirmasi (Verifikasi Parsial)`;
 
   return {
     issueNumber: `№ ${issueNum}`,
@@ -299,11 +347,11 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
       "Editorial",
       "Tear-Sheet",
       "RAMU Synergy",
-      "Anti-Catfishing Certified",
+      isFullyVerified ? "Anti-Catfishing Certified" : "Pending Crew Verification",
       "Peer-Verified"
     ],
     antiCatfishingCertificateId,
-    verificationRate: "100% (5/5 Kru Terverifikasi)",
+    verificationRate,
     verifiedDate: "2026"
   };
 }
@@ -317,7 +365,13 @@ export function formatInstagramCredits(item: ShowcaseItem, data: TearSheetData):
       if (c.category === "hmua") icon = "💄";
       if (c.category === "talent") icon = "👤";
       if (c.category === "art_direction") icon = "🎨";
-      const verifBadge = c.verified ? " [✓ Terverifikasi Bersama]" : "";
+      
+      let verifBadge = "";
+      if (c.isUploader) verifBadge = " [✓ Pemilik Portofolio / Uploader]";
+      else if (c.verified) verifBadge = " [✓ Peer-Verified di Set]";
+      else if (c.status === "PENDING") verifBadge = " [⏳ Menunggu Konfirmasi Rekan]";
+      else if (c.status === "EXTERNAL") verifBadge = " [🏷️ Kredit Eksternal]";
+      
       return `${icon} ${c.role}: ${c.handle} (${c.details})${verifBadge}`;
     })
     .join("\n");
@@ -330,11 +384,11 @@ export function formatInstagramCredits(item: ShowcaseItem, data: TearSheetData):
 ${data.edition}
 Curated on @ramu.creative • Creative Opportunity Engine
 
-🛡️ ANTI-CATFISHING CERTIFICATE: #${data.antiCatfishingCertificateId}
-Status: Peer-Verified Co-Credit (${data.verificationRate})
-Menjamin 100% orisinalitas karya asli produksi tim, dilindungi dari pencurian portofolio & penghapusan kredit talenta.
+🛡️ ANTI-CATFISHING STATUS: #${data.antiCatfishingCertificateId}
+Status: ${data.verificationRate}
+Menjamin perlindungan hak atribusi karya asli produksi tim, terlindungi dari pencurian portofolio (catfishing) & penghapusan kredit talenta.
 
-CREDITS & KRU TERVERIFIKASI:
+CREDITS & STATUS KRU:
 ${creditsLines}${techLine}
 
 📍 Production: ${item.actor.location || "Indonesia"}

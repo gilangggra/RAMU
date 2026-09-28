@@ -271,15 +271,22 @@ export function ShowcaseManager({
 
       // Tear Sheet Metadata payload with bound actorIds
       const tearSheetPayload = {
-        credits: credits.map((c) => ({
-          role: c.role,
-          category: c.category,
-          name: c.name,
-          handle: c.handle,
-          details: c.details,
-          actorId: c.actorId || undefined,
-          verified: true
-        })),
+        credits: credits.map((c, index) => {
+          const isUploader = index === 0;
+          return {
+            role: c.role,
+            category: c.category,
+            name: c.name,
+            handle: c.handle,
+            details: c.details,
+            actorId: c.actorId || undefined,
+            verified: isUploader,
+            status: isUploader ? "VERIFIED" : (c.actorId ? "PENDING" : "EXTERNAL"),
+            isUploader,
+            verifiedBy: isUploader ? "Pemilik Portofolio (Uploader)" : undefined,
+            verificationTimestamp: isUploader ? new Date().toISOString() : undefined
+          };
+        }),
         hotspots: hotspots.length > 0 ? hotspots : undefined,
         technicalSpecs: (camera || lens || lighting) ? {
           camera: camera || undefined,

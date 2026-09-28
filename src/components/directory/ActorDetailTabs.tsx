@@ -960,14 +960,28 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                               <span className="inline-flex px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-[9px] font-bold text-white uppercase tracking-wider">
                                 {asset.subtype}
                               </span>
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/90 backdrop-blur-md text-[9px] font-bold text-white uppercase tracking-wider shadow-2xs">
-                                <ShieldCheck className="w-2.5 h-2.5" /> Kru Terverifikasi
+                              {attrs?.is_co_credit ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-600/90 backdrop-blur-md text-[9px] font-bold text-white uppercase tracking-wider shadow-2xs">
+                                  Co-Credit &bull; {attrs.uploader_name}
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/90 backdrop-blur-md text-[9px] font-bold text-white uppercase tracking-wider shadow-2xs">
+                                  <ShieldCheck className="w-2.5 h-2.5" /> Karya Mandiri
+                                </span>
+                              )}
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-600/90 backdrop-blur-md text-[9px] font-bold text-white uppercase tracking-wider shadow-2xs">
+                                <CheckCircle2 className="w-2.5 h-2.5" /> Peer-Verified
                               </span>
                               <span className="px-2 py-0.5 rounded-md bg-amber-400 text-[9px] font-black text-stone-950 uppercase tracking-wider">
                                 Tear-Sheet
                               </span>
                             </div>
                             <h4 className="text-white font-bold text-base leading-tight">{asset.name}</h4>
+                            {attrs?.is_co_credit && attrs?.co_credit_role && (
+                              <p className="text-[11px] text-amber-300 font-medium">
+                                Peran Anda: {attrs.co_credit_role}
+                              </p>
+                            )}
                             <div className="flex items-center justify-between pt-2 border-t border-white/20 mt-1">
                               <span className="inline-flex items-center gap-1.5 text-xs text-amber-300 font-bold hover:text-amber-200">
                                 Buka Detail Karya <ExternalLink className="w-3.5 h-3.5" />

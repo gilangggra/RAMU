@@ -57,9 +57,55 @@ export default async function DirectoryDetailPage({
 
   const isCurrentActor = currentActor.id === actor.id;
 
+  // Fetch confirmed co-credit works where this actor was confirmed as a collaborator
+  const potentialOtherAssets = await prisma.asset.findMany({
+    where: {
+      category: "PORTFOLIO_WORK",
+      status: "ACTIVE",
+      actorId: { not: actor.id },
+    },
+    include: {
+      actor: {
+        select: { id: true, name: true, sector: true, location: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 30,
+  });
+
+  const confirmedCoCredits: any[] = [];
+  for (const oAsset of potentialOtherAssets) {
+    const ts = (oAsset.attributes as any)?.tear_sheet;
+    if (ts && Array.isArray(ts.credits)) {
+      const match = ts.credits.find((c: any) => c.actorId === actor.id && c.verified);
+      if (match) {
+        confirmedCoCredits.push({
+          id: oAsset.id,
+          name: oAsset.name,
+          category: "PORTFOLIO_WORK",
+          subtype: oAsset.subtype,
+          roles: oAsset.roles,
+          description: oAsset.description,
+          attributes: {
+            ...(oAsset.attributes as any),
+            is_co_credit: true,
+            co_credit_role: match.role,
+            uploader_name: oAsset.actor.name,
+            uploader_id: oAsset.actor.id,
+          },
+        });
+      }
+    }
+  }
+
+  const actorWithCoCredits = {
+    ...actor,
+    assets: [...actor.assets, ...confirmedCoCredits],
+  };
+
   // Extract a preview image from assets for the cover/hero (Prioritize portfolio/comp-card, strictly exclude equipment)
   let previewImage = null;
-  for (const asset of actor.assets) {
+  for (const asset of actorWithCoCredits.assets) {
     if (asset.category === "EQUIPMENT") continue; // Never use camera/equipment for hero
     if (actor.actorType !== "STUDIO" && asset.category === "STUDIO_SPACE") continue;
 
@@ -533,12 +579,12 @@ export default async function DirectoryDetailPage({
         )}
 
         {/* =========================================================================
-            TABS SECTION (Re-designed internally in ActorDetailTabs)
+            TABS SECTION (Re-designed internally in ActorDetailTabs with Co-Credits)
            ========================================================================= */}
         <div className="border-t border-stone-200 pt-12">
           <ActorDetailTabs
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            actor={actor as any}
+            actor={actorWithCoCredits as any}
             isCurrentActor={isCurrentActor}
           />
         </div>

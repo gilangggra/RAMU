@@ -28,7 +28,8 @@ import {
   Shield,
   UserCheck,
   Share2,
-  Info
+  Info,
+  Clock
 } from "lucide-react";
 
 interface TearSheetModalProps {
@@ -181,8 +182,36 @@ export function TearSheetModal({
 
   const tearSheetData = getTearSheetData(item);
 
+  const activeCredits = tearSheetData.credits.map((c) => {
+    if (
+      userClaimedRole &&
+      (c.role.toLowerCase().includes(userClaimedRole.toLowerCase()) ||
+        userClaimedRole.toLowerCase().includes(c.role.toLowerCase()))
+    ) {
+      return {
+        ...c,
+        verified: true,
+        status: "VERIFIED" as const,
+        verifiedBy: "Dikonfirmasi Langsung oleh Anda",
+      };
+    }
+    return c;
+  });
+
+  const verifiedCount = activeCredits.filter((c) => c.verified).length;
+  const totalCount = activeCredits.length;
+  const isFullyVerified = verifiedCount === totalCount && totalCount > 0;
+  const currentVerificationRate = isFullyVerified
+    ? `100% (${verifiedCount}/${totalCount} Kru Terverifikasi)`
+    : `${verifiedCount}/${totalCount} Kru Terkonfirmasi (Verifikasi Parsial)`;
+
   const handleCopyCredits = async () => {
-    const text = formatInstagramCredits(item, tearSheetData);
+    const dynamicData = {
+      ...tearSheetData,
+      credits: activeCredits,
+      verificationRate: currentVerificationRate,
+    };
+    const text = formatInstagramCredits(item, dynamicData);
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
@@ -248,16 +277,32 @@ export function TearSheetModal({
             <button
               type="button"
               onClick={() => setShowGuaranteeModal(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-300 text-xs font-semibold text-emerald-950 shadow-2xs transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold shadow-2xs transition-all hover:scale-105 active:scale-95 cursor-pointer ${
+                isFullyVerified
+                  ? "bg-emerald-50 hover:bg-emerald-100/80 border-emerald-300 text-emerald-950"
+                  : "bg-amber-50 hover:bg-amber-100/80 border-amber-300 text-amber-950"
+              }`}
               title="Klik untuk melihat Sertifikat Keaslian & Jaminan Anti-Catfishing"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              {isFullyVerified ? (
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              ) : (
+                <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              )}
               <span className="font-mono text-[10px] font-black uppercase tracking-wider hidden sm:inline">
-                ANTI-CATFISHING
+                {isFullyVerified ? "ANTI-CATFISHING" : "VERIFIKASI KRU"}
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse hidden sm:inline" />
-              <span className="text-[11px] font-bold text-emerald-800">
-                {tearSheetData.verificationRate}
+              <span
+                className={`w-1.5 h-1.5 rounded-full animate-pulse hidden sm:inline ${
+                  isFullyVerified ? "bg-emerald-500" : "bg-amber-500"
+                }`}
+              />
+              <span
+                className={`text-[11px] font-bold ${
+                  isFullyVerified ? "text-emerald-800" : "text-amber-800"
+                }`}
+              >
+                {currentVerificationRate}
               </span>
             </button>
 
@@ -432,17 +477,19 @@ export function TearSheetModal({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <h3 className="text-xs font-mono font-black text-stone-800 uppercase tracking-widest">
-                      KREDIT KONTRIBUTOR ({tearSheetData.credits.length})
+                      KREDIT KONTRIBUTOR ({activeCredits.length})
                     </h3>
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                   </div>
-                  <span className="text-[10px] text-emerald-700 font-mono font-bold">
-                    PEER-VERIFIED
+                  <span className={`text-[10px] font-mono font-bold ${
+                    isFullyVerified ? "text-emerald-700" : "text-amber-700"
+                  }`}>
+                    {isFullyVerified ? "PEER-VERIFIED" : "SEBAGIAN TERVERIFIKASI"}
                   </span>
                 </div>
 
                 <div className="space-y-2">
-                  {tearSheetData.credits.map((credit, idx) => {
+                  {activeCredits.map((credit, idx) => {
                     const Icon = CATEGORY_ICONS[credit.category] || Sparkles;
                     const profileHref = credit.actorId
                       ? `/directory/${credit.actorId}`
@@ -462,14 +509,30 @@ export function TearSheetModal({
                             </div>
 
                             <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
+                              <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className="block text-[10px] font-mono uppercase font-black tracking-wider text-stone-500 group-hover/credit:text-emerald-800">
                                   {credit.role}
                                 </span>
-                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-900 text-[8px] font-mono font-extrabold">
-                                  <Check className="w-2.5 h-2.5 text-emerald-700" />
-                                  <span>VERIFIED</span>
-                                </span>
+                                {credit.isUploader ? (
+                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-900 text-[8px] font-mono font-extrabold border border-amber-300">
+                                    <Check className="w-2.5 h-2.5 text-amber-700" />
+                                    <span>UPLOADER</span>
+                                  </span>
+                                ) : credit.verified ? (
+                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-900 text-[8px] font-mono font-extrabold border border-emerald-300">
+                                    <Check className="w-2.5 h-2.5 text-emerald-700" />
+                                    <span>TERVERIFIKASI BERSAMA</span>
+                                  </span>
+                                ) : credit.status === "EXTERNAL" ? (
+                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full bg-stone-100 text-stone-600 text-[8px] font-mono font-extrabold border border-stone-200">
+                                    <span>KREDIT EKSTERNAL</span>
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full bg-amber-50 text-amber-900 text-[8px] font-mono font-extrabold border border-amber-200">
+                                    <Clock className="w-2.5 h-2.5 text-amber-600" />
+                                    <span>MENUNGGU KONFIRMASI</span>
+                                  </span>
+                                )}
                               </div>
                               <div className="flex items-center gap-1.5 mt-0.5">
                                 <span className="text-xs font-bold text-stone-900 group-hover/credit:text-emerald-950 truncate">

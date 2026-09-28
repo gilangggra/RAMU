@@ -124,3 +124,153 @@ export async function deleteShowcaseAsset(assetId: string) {
     return { success: false, error: error.message };
   }
 }
+
+export async function confirmCoCredit(assetId: string) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) throw new Error("Unauthorized");
+
+    const actor = await prisma.actor.findFirst({
+      where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
+    });
+
+    if (!actor) throw new Error("Actor profile not found");
+
+    const asset = await prisma.asset.findUnique({
+      where: { id: assetId },
+      include: { actor: true },
+    });
+
+    if (!asset) throw new Error("Asset not found");
+
+    const attrs = (asset.attributes as any) || {};
+    const tearSheet = attrs.tear_sheet || {
+      verified: true,
+      verifiedBy: "RAMU Protocol",
+      verificationRate: "100%",
+      spkNumber: `RAMU-TS-${Date.now().toString().slice(-6)}`,
+      credits: [],
+    };
+
+    const existingCredits = Array.isArray(tearSheet.credits) ? [...tearSheet.credits] : [];
+
+    // Update the credit entry for this actor
+    let updated = false;
+    const newCredits = existingCredits.map((c: any) => {
+      if (c.actorId === actor.id) {
+        updated = true;
+        return {
+          ...c,
+          verified: true,
+          status: "VERIFIED",
+          verificationTimestamp: new Date().toISOString(),
+          verifiedBy: `Dikonfirmasi langsung oleh @${actor.name.toLowerCase().replace(/[\s&.]+/g, "_")}`,
+          verificationMethod: "PEER_CONFIRMED",
+        };
+      }
+      return c;
+    });
+
+    if (!updated) {
+      newCredits.push({
+        actorId: actor.id,
+        name: actor.name,
+        role: actor.sector.toLowerCase().includes("foto") ? "Director of Photography" : "Lead Creative Co-Collaborator",
+        handle: `@${actor.name.toLowerCase().replace(/[\s&.]+/g, "_")}`,
+        verified: true,
+        status: "VERIFIED",
+        isUploader: false,
+        verificationTimestamp: new Date().toISOString(),
+        verifiedBy: `Dikonfirmasi langsung oleh @${actor.name.toLowerCase().replace(/[\s&.]+/g, "_")}`,
+        verificationMethod: "PEER_CONFIRMED",
+      });
+    }
+
+    await prisma.asset.update({
+      where: { id: assetId },
+      data: {
+        attributes: {
+          ...attrs,
+          tear_sheet: {
+            ...tearSheet,
+            credits: newCredits,
+          },
+        },
+      },
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/showcase");
+    revalidatePath(`/directory/${actor.id}`);
+    revalidatePath(`/directory/${asset.actorId}`);
+    revalidatePath("/dashboard/showcase");
+
+    return { success: true, assetName: asset.name };
+  } catch (error: any) {
+    console.error("Error confirming co-credit:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function rejectCoCredit(assetId: string, reason?: string) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) throw new Error("Unauthorized");
+
+    const actor = await prisma.actor.findFirst({
+      where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
+    });
+
+    if (!actor) throw new Error("Actor profile not found");
+
+    const asset = await prisma.asset.findUnique({
+      where: { id: assetId },
+    });
+
+    if (!asset) throw new Error("Asset not found");
+
+    const attrs = (asset.attributes as any) || {};
+    const tearSheet = attrs.tear_sheet || { credits: [] };
+    const existingCredits = Array.isArray(tearSheet.credits) ? [...tearSheet.credits] : [];
+
+    const newCredits = existingCredits.map((c: any) => {
+      if (c.actorId === actor.id) {
+        return {
+          ...c,
+          verified: false,
+          status: "REJECTED",
+          rejectedAt: new Date().toISOString(),
+          rejectionReason: reason || "Ditolak oleh pemilik nama",
+        };
+      }
+      return c;
+    });
+
+    await prisma.asset.update({
+      where: { id: assetId },
+      data: {
+        attributes: {
+          ...attrs,
+          tear_sheet: {
+            ...tearSheet,
+            credits: newCredits,
+          },
+        },
+      },
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/showcase");
+    revalidatePath(`/directory/${actor.id}`);
+    revalidatePath(`/directory/${asset.actorId}`);
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error rejecting co-credit:", error);
+    return { success: false, error: error.message };
+  }
+}

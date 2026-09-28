@@ -30,7 +30,8 @@ export interface TearSheetCredit {
   verificationTimestamp?: string;
   verifiedBy?: string;
   verificationMethod?: "PEER_CONFIRMED" | "CONTRACT_MATCHED" | "DIRECT_CLAIM";
-  status?: "VERIFIED" | "PENDING";
+  status?: "VERIFIED" | "PENDING" | "EXTERNAL" | "REJECTED";
+  isUploader?: boolean;
 }
 
 export interface TearSheetTechnicalSpecs {
