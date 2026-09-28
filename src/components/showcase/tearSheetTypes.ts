@@ -27,6 +27,10 @@ export interface TearSheetCredit {
   location?: string;
   details: string;
   verified: boolean;
+  verificationTimestamp?: string;
+  verifiedBy?: string;
+  verificationMethod?: "PEER_CONFIRMED" | "CONTRACT_MATCHED" | "DIRECT_CLAIM";
+  status?: "VERIFIED" | "PENDING";
 }
 
 export interface TearSheetTechnicalSpecs {
@@ -49,4 +53,7 @@ export interface TearSheetData {
   hotspots: HotspotPin[];
   technicalSpecs?: TearSheetTechnicalSpecs;
   tags: string[];
+  antiCatfishingCertificateId: string;
+  verificationRate: string;
+  verifiedDate: string;
 }

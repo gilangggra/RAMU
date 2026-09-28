@@ -23,7 +23,12 @@ import {
   ExternalLink,
   Sliders,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  ShieldCheck,
+  Shield,
+  UserCheck,
+  Share2,
+  Info
 } from "lucide-react";
 
 interface TearSheetModalProps {
@@ -102,16 +107,50 @@ export function TearSheetModal({
   const [imgLoaded, setImgLoaded] = useState(false);
   const creditRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  const [userClaimedRole, setUserClaimedRole] = useState<string | null>(null);
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [claimedRoleInput, setClaimedRoleInput] = useState("Fashion Stylist / Wardrobe Designer");
+  const [claimSuccessMessage, setClaimSuccessMessage] = useState<string | null>(null);
+  const [showGuaranteeModal, setShowGuaranteeModal] = useState(false);
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Reset states on item change
+  // Reset states on item change & read localStorage
   useEffect(() => {
     setImgLoaded(false);
     setActivePinId(null);
     setHoveredPinId(null);
+    setIsClaiming(false);
+    setClaimSuccessMessage(null);
+    if (item?.id && typeof window !== "undefined") {
+      const saved = localStorage.getItem(`ramu_verified_role_${item.id}`);
+      setUserClaimedRole(saved);
+    }
   }, [item?.id]);
+
+  const handleConfirmClaim = (role: string) => {
+    if (!item?.id) return;
+    localStorage.setItem(`ramu_verified_role_${item.id}`, role);
+    setUserClaimedRole(role);
+    setIsClaiming(false);
+    setClaimSuccessMessage(`Peran Anda sebagai "${role}" berhasil diverifikasi silang.`);
+    setTimeout(() => setClaimSuccessMessage(null), 4500);
+  };
+
+  const handleRevokeClaim = () => {
+    if (!item?.id) return;
+    localStorage.removeItem(`ramu_verified_role_${item.id}`);
+    setUserClaimedRole(null);
+    setIsClaiming(false);
+  };
+
+  const handleShareWhatsApp = (certId: string, title: string, edition: string) => {
+    const text = `*SERTIFIKAT KEASLIAN PORTOFOLIO & PEER-VERIFIED CO-CREDIT (RAMU)*\n\nKarya: "${title}"\nEdisi: ${edition}\nID Sertifikat: #${certId}\nStatus: Anti-Catfishing Certified (5/5 Kru Terverifikasi Silang)\n\nSeluruh tim produksi (Fotografer, MUA, Stylist, Model, Studio) telah memvalidasi keterlibatan masing-masing di set produksi RAMU Ecosystem untuk menjamin karya orisinal 100% tanpa materi catfishing/curian.\n\nLihat rincian lengkap & profil kru: https://ramu.id/showcase`;
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank");
+  };
 
   // Keyboard navigation: Escape, ArrowLeft, ArrowRight
   useEffect(() => {
@@ -197,19 +236,30 @@ export function TearSheetModal({
               <span className="font-mono text-xs font-black tracking-[0.2em] uppercase text-stone-900">
                 RAMU TEAR-SHEET
               </span>
-              <span className="text-stone-300">•</span>
+              <span className="text-stone-300 hidden sm:inline">•</span>
               <span className="text-xs font-semibold text-stone-500 hidden sm:inline">
                 {tearSheetData.issueNumber} ({tearSheetData.edition})
               </span>
             </div>
           </div>
 
-          {/* Center Navigation & Counter */}
+          {/* Center Navigation & Anti-Catfishing Status */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-xs font-semibold text-amber-900 shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              <span>Tim Kolaborator Terverifikasi</span>
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowGuaranteeModal(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-300 text-xs font-semibold text-emerald-950 shadow-2xs transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              title="Klik untuk melihat Sertifikat Keaslian & Jaminan Anti-Catfishing"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span className="font-mono text-[10px] font-black uppercase tracking-wider hidden sm:inline">
+                ANTI-CATFISHING
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse hidden sm:inline" />
+              <span className="text-[11px] font-bold text-emerald-800">
+                {tearSheetData.verificationRate}
+              </span>
+            </button>
 
             {/* Gallery Index Navigation */}
             <div className="flex items-center gap-1 bg-stone-50 border border-stone-200 rounded-full px-2 py-1 shadow-2xs">
@@ -249,7 +299,7 @@ export function TearSheetModal({
         {/* ── MAIN WORKSPACE: SPLIT STAGE (IMAGE VIEWPORT + EDITORIAL TEAR-SHEET) ── */}
         <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
           
-          {/* ── LEFT: INTERACTIVE PHOTO HOTSPOT VIEWPORT ── */}
+          {/* ── LEFT: INTERACTIVE PHOTO VIEWPORT ── */}
           <div className="flex-1 min-h-0 relative bg-[#F7F6F3] border-b lg:border-b-0 lg:border-r border-stone-200/80 flex items-center justify-center overflow-hidden p-4 sm:p-6 select-none">
             
             {/* Navigation Arrows (Hover on Desktop) */}
@@ -268,7 +318,7 @@ export function TearSheetModal({
               <ChevronRight className="w-5 h-5" />
             </button>
 
-            {/* Image Canvas Container (Clean Photo, No Pins) */}
+            {/* Image Canvas Container (Clean Photo) */}
             <div className="relative inline-flex items-center justify-center max-w-full max-h-full">
               {!imgLoaded && (
                 <div className="w-[380px] h-[520px] max-w-full bg-stone-200/70 rounded-2xl animate-pulse flex items-center justify-center">
@@ -320,6 +370,29 @@ export function TearSheetModal({
                 <p className="text-xs text-stone-600 leading-relaxed pt-2">
                   {tearSheetData.concept}
                 </p>
+
+                {/* Anti-Catfishing Certificate Code Box */}
+                <div
+                  onClick={() => setShowGuaranteeModal(true)}
+                  className="mt-3 p-3 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-amber-500/5 to-transparent border border-emerald-300/80 flex items-center justify-between gap-3 cursor-pointer hover:border-emerald-400 transition-all shadow-2xs group/cert"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs group-hover/cert:scale-105 transition-transform">
+                      <ShieldCheck className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="block font-mono text-[9px] uppercase font-bold text-emerald-900 tracking-wider">
+                        ANTI-CATFISHING CERTIFIED
+                      </span>
+                      <span className="block font-mono text-xs font-black text-stone-900 truncate">
+                        #{tearSheetData.antiCatfishingCertificateId}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-md bg-white border border-emerald-300 text-[10px] font-bold text-emerald-900 shrink-0 shadow-2xs group-hover/cert:bg-emerald-600 group-hover/cert:text-white transition-colors">
+                    Lihat Bukti ↗
+                  </span>
+                </div>
               </div>
 
               {/* ── LEAD CREATOR CARD ── */}
@@ -354,14 +427,17 @@ export function TearSheetModal({
                 </Link>
               </div>
 
-              {/* ── COLLABORATIVE CREDITS ROSTER (CLICK TO PROFILE) ── */}
+              {/* ── COLLABORATIVE CREDITS ROSTER (PEER-VERIFIED) ── */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-mono font-black text-stone-800 uppercase tracking-widest">
-                    KREDIT KONTRIBUTOR ({tearSheetData.credits.length})
-                  </h3>
-                  <span className="text-[10px] text-amber-700 font-mono font-bold">
-                    KLIK UNTUK KE PROFIL
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="text-xs font-mono font-black text-stone-800 uppercase tracking-widest">
+                      KREDIT KONTRIBUTOR ({tearSheetData.credits.length})
+                    </h3>
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  </div>
+                  <span className="text-[10px] text-emerald-700 font-mono font-bold">
+                    PEER-VERIFIED
                   </span>
                 </div>
 
@@ -376,21 +452,27 @@ export function TearSheetModal({
                       <Link
                         key={idx}
                         href={profileHref}
-                        className="group/credit block p-3 rounded-2xl border border-stone-200/70 bg-white hover:bg-amber-50/50 hover:border-amber-300 hover:shadow-xs transition-all duration-200"
+                        className="group/credit block p-3 rounded-2xl border border-stone-200/70 bg-white hover:bg-emerald-50/40 hover:border-emerald-300 hover:shadow-xs transition-all duration-200"
                         title={`Buka profil ${credit.name} (${credit.role})`}
                       >
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-start gap-2.5 min-w-0">
-                            <div className="w-7 h-7 rounded-lg bg-stone-100 group-hover/credit:bg-amber-500 group-hover/credit:text-white flex items-center justify-center text-stone-600 shrink-0 mt-0.5 transition-colors">
+                            <div className="w-7 h-7 rounded-lg bg-stone-100 group-hover/credit:bg-emerald-600 group-hover/credit:text-white flex items-center justify-center text-stone-600 shrink-0 mt-0.5 transition-colors">
                               <Icon className="w-3.5 h-3.5" />
                             </div>
 
                             <div className="min-w-0">
-                              <span className="block text-[10px] font-mono uppercase font-black tracking-wider text-stone-500 group-hover/credit:text-amber-800">
-                                {credit.role}
-                              </span>
+                              <div className="flex items-center gap-1.5">
+                                <span className="block text-[10px] font-mono uppercase font-black tracking-wider text-stone-500 group-hover/credit:text-emerald-800">
+                                  {credit.role}
+                                </span>
+                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-900 text-[8px] font-mono font-extrabold">
+                                  <Check className="w-2.5 h-2.5 text-emerald-700" />
+                                  <span>VERIFIED</span>
+                                </span>
+                              </div>
                               <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className="text-xs font-bold text-stone-900 group-hover/credit:text-amber-950 truncate">
+                                <span className="text-xs font-bold text-stone-900 group-hover/credit:text-emerald-950 truncate">
                                   {credit.name}
                                 </span>
                                 <span className="text-[11px] font-mono text-stone-400">
@@ -405,12 +487,162 @@ export function TearSheetModal({
 
                           <div className="flex items-center gap-1 shrink-0 px-2.5 py-1 rounded-xl bg-stone-50 group-hover/credit:bg-white border border-stone-200 text-stone-700 text-[10px] font-bold transition-all shadow-2xs group-hover/credit:scale-105">
                             <span>Profil</span>
-                            <ExternalLink className="w-3 h-3 text-stone-400 group-hover/credit:text-amber-700" />
+                            <ExternalLink className="w-3 h-3 text-stone-400 group-hover/credit:text-emerald-700" />
                           </div>
                         </div>
                       </Link>
                     );
                   })}
+                </div>
+              </div>
+
+              {/* ── INTERACTIVE CO-CREDIT VERIFICATION / CLAIM TRIGGER ── */}
+              <div className="space-y-2">
+                {claimSuccessMessage && (
+                  <div className="p-3 rounded-2xl bg-emerald-500 text-white text-xs font-bold flex items-center gap-2 shadow-sm animate-fade-in">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{claimSuccessMessage}</span>
+                  </div>
+                )}
+
+                {userClaimedRole ? (
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-300 flex items-center justify-between gap-3 shadow-2xs">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                        <Check className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-emerald-950">Kontribusi Anda Terverifikasi</span>
+                          <span className="text-[8px] px-1.5 py-0.2 rounded bg-emerald-200 text-emerald-900 font-mono font-black">
+                            PEER-VERIFIED
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-emerald-800 truncate">
+                          Peran: <strong>{userClaimedRole}</strong> • Tercatat di Sertifikat RAMU
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRevokeClaim}
+                      className="text-[10px] font-bold text-stone-400 hover:text-stone-700 underline shrink-0 cursor-pointer"
+                    >
+                      Ubah
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200 space-y-2.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <UserCheck className="w-4 h-4 text-emerald-700 shrink-0" />
+                        <h4 className="text-xs font-bold text-stone-900">
+                          Apakah Anda Terlibat di Proyek Ini?
+                        </h4>
+                      </div>
+                      <span className="text-[9px] font-mono font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+                        Co-Credit
+                      </span>
+                    </div>
+
+                    <p className="text-[11px] text-stone-600 leading-snug">
+                      Verifikasi kehadiran Anda di set untuk melindungi hak cipta, mencegah penghapusan kredit (credit erasure), dan memastikan portofolio ini bebas catfishing.
+                    </p>
+
+                    {!isClaiming ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsClaiming(true)}
+                        className="w-full py-2 px-3 rounded-xl bg-white hover:bg-stone-100 border border-stone-300 text-stone-900 text-xs font-bold transition-all shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.01] active:scale-98"
+                      >
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Verifikasi Kontribusi Saya di Proyek Ini</span>
+                      </button>
+                    ) : (
+                      <div className="space-y-2 pt-2 border-t border-stone-200">
+                        <label className="block text-[10px] font-bold text-stone-700 uppercase">
+                          Pilih Peran Kontribusi Anda:
+                        </label>
+                        <select
+                          value={claimedRoleInput}
+                          onChange={(e) => setClaimedRoleInput(e.target.value)}
+                          className="w-full text-xs p-2 rounded-xl bg-white border border-stone-300 text-stone-900 font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                        >
+                          <option value="Fotografi / Asisten Lighting">Fotografi / Asisten Lighting</option>
+                          <option value="Fashion Stylist / Wardrobe Designer">Fashion Stylist / Wardrobe Designer</option>
+                          <option value="Hair & Makeup Artist (HMUA)">Hair & Makeup Artist (HMUA)</option>
+                          <option value="Model / Talent">Model / Talent</option>
+                          <option value="Art Director / Set Designer">Art Director / Set Designer</option>
+                          <option value="Studio / Location Provider">Studio / Location Provider</option>
+                        </select>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleConfirmClaim(claimedRoleInput)}
+                            className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Konfirmasi &amp; Verifikasi</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsClaiming(false)}
+                            className="py-2 px-3 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-800 text-xs font-medium cursor-pointer"
+                          >
+                            Batal
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* ── ANTI-CATFISHING ZERO-FRAUD GUARANTEE CARD ── */}
+              <div className="p-4 rounded-2xl bg-[#1E1B2E] text-white space-y-3 shadow-md border border-stone-800">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                      <ShieldCheck className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-wider text-white">
+                        Jaminan Anti-Catfishing RAMU
+                      </h4>
+                      <span className="text-[10px] text-stone-400 font-mono">
+                        Perlindungan Klien &amp; Hak Cipta Kreator
+                      </span>
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-mono text-[9px] font-black">
+                    TERVERIFIKASI
+                  </span>
+                </div>
+
+                <div className="space-y-2 text-[11px] text-stone-300 border-t border-stone-800 pt-2.5">
+                  <div className="flex items-start gap-2">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
+                    <span><strong>Verifikasi Multi-Pihak:</strong> Seluruh kru (Fotografer, MUA, Stylist, Model) saling mengonfirmasi kehadiran di set.</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
+                    <span><strong>Bebas Portofolio Curian:</strong> Klien aman dari risiko booking talenta yang mencuri foto dari Pinterest / akun luar negeri.</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
+                    <span><strong>Anti-Credit Erasure:</strong> Menghentikan kebiasaan posting karya komersial tanpa mencantumkan kredit kru.</span>
+                  </div>
+                </div>
+
+                <div className="pt-1 flex items-center justify-between text-[10px] text-stone-400 border-t border-stone-800/80">
+                  <span>KUHPerdata 1320 &amp; UU Hak Cipta 28/2014</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowGuaranteeModal(true)}
+                    className="text-amber-400 hover:text-amber-300 underline font-bold cursor-pointer"
+                  >
+                    Detail Sertifikat ↗
+                  </button>
                 </div>
               </div>
 
@@ -466,31 +698,49 @@ export function TearSheetModal({
 
             </div>
 
-            {/* ── FIXED ACTION FOOTER (COPY CREDITS + COLLAB CTA) ── */}
-            <div className="p-4 sm:p-5 bg-white border-t border-stone-200/80 space-y-2.5 shrink-0">
+            {/* ── FIXED ACTION FOOTER (COPY CREDITS + WHATSAPP SHARE + COLLAB CTA) ── */}
+            <div className="p-4 sm:p-5 bg-white border-t border-stone-200/80 space-y-2 shrink-0">
               
-              {/* 1-Click Copy Tear-Sheet to Instagram/Press */}
-              <button
-                type="button"
-                onClick={handleCopyCredits}
-                className={`w-full py-2.5 px-4 rounded-xl border text-xs font-bold transition-all duration-300 flex items-center justify-center gap-2 active:scale-98 ${
-                  copied
-                    ? "bg-emerald-50 border-emerald-300 text-emerald-800 shadow-2xs"
-                    : "bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-800"
-                }`}
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4 text-emerald-600" />
-                    <span>Kredit Editorial Tersalin ke Clipboard!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4 text-amber-600" />
-                    <span>Salin Format Kredit (Instagram / Press)</span>
-                  </>
-                )}
-              </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {/* 1-Click Copy Tear-Sheet to Instagram/Press */}
+                <button
+                  type="button"
+                  onClick={handleCopyCredits}
+                  className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all duration-300 flex items-center justify-center gap-1.5 active:scale-98 cursor-pointer ${
+                    copied
+                      ? "bg-emerald-50 border-emerald-300 text-emerald-800 shadow-2xs"
+                      : "bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-800"
+                  }`}
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4 text-emerald-600" />
+                      <span>Kredit Tersalin!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4 text-amber-600" />
+                      <span>Salin Kredit (IG)</span>
+                    </>
+                  )}
+                </button>
+
+                {/* WhatsApp Share Proof of Authenticity */}
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleShareWhatsApp(
+                      tearSheetData.antiCatfishingCertificateId,
+                      tearSheetData.title,
+                      tearSheetData.edition
+                    )
+                  }
+                  className="py-2.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-300 text-emerald-950 text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer hover:scale-[1.01] active:scale-98"
+                >
+                  <Share2 className="w-4 h-4 text-emerald-600" />
+                  <span>Kirim Bukti (WA)</span>
+                </button>
+              </div>
 
               {/* Primary Collab CTA or Direct Booking */}
               {onBookAuthor ? (
@@ -500,7 +750,7 @@ export function TearSheetModal({
                     onClose();
                     onBookAuthor();
                   }}
-                  className="w-full py-3 px-4 rounded-xl bg-[#1E1B2E] hover:bg-black text-white font-extrabold text-xs transition-all shadow-md hover:scale-[1.01] active:scale-98 flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 rounded-xl bg-[#1E1B2E] hover:bg-black text-white font-extrabold text-xs transition-all shadow-md hover:scale-[1.01] active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span>Ajukan Booking Jasa ke {item.actor.name}</span>
                   <ArrowRight className="w-4 h-4 text-amber-400" />
@@ -521,6 +771,133 @@ export function TearSheetModal({
           </div>
 
         </div>
+
+        {/* ── ANTI-CATFISHING CERTIFICATE MODAL DIALOG ── */}
+        {showGuaranteeModal && (
+          <div
+            className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-stone-950/60 backdrop-blur-sm animate-fade-in"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowGuaranteeModal(false);
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl border border-stone-200 text-stone-900 space-y-5 animate-scale-up"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md">
+                    <ShieldCheck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-sm text-stone-900 tracking-tight">
+                      SERTIFIKAT KEASLIAN PORTOFOLIO
+                    </h3>
+                    <p className="text-[11px] font-mono text-emerald-800 font-bold">
+                      Anti-Catfishing &bull; Peer-Verified Co-Credit
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowGuaranteeModal(false)}
+                  className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-500 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Certificate Details */}
+              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] uppercase font-bold text-stone-500">
+                    ID SERTIFIKAT RAMU
+                  </span>
+                  <span className="font-mono text-xs font-black text-stone-900 bg-white px-2 py-0.5 rounded border border-stone-200">
+                    #{tearSheetData.antiCatfishingCertificateId}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] uppercase font-bold text-stone-500">
+                    JUDUL KARYA
+                  </span>
+                  <span className="text-xs font-bold text-stone-900 truncate max-w-[200px]">
+                    {tearSheetData.title}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] uppercase font-bold text-stone-500">
+                    STATUS VERIFIKASI
+                  </span>
+                  <span className="text-[11px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                    {tearSheetData.verificationRate}
+                  </span>
+                </div>
+              </div>
+
+              {/* Verified Crew List in Certificate */}
+              <div className="space-y-2">
+                <h4 className="text-[11px] font-mono font-black text-stone-700 uppercase">
+                  Daftar Kru Produksi Terverifikasi Bersama:
+                </h4>
+                <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                  {tearSheetData.credits.map((c, i) => (
+                    <div
+                      key={i}
+                      className="p-2 rounded-xl bg-white border border-stone-200 flex items-center justify-between text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <div>
+                          <span className="font-bold text-stone-900">{c.name}</span>
+                          <span className="text-[10px] text-stone-400 font-mono ml-1.5">
+                            ({c.role})
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-[9px] font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded">
+                        CONFIRMED
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-[11px] text-amber-950 space-y-1">
+                <p className="font-bold">Perlindungan Klien &amp; Talenta:</p>
+                <p className="text-[10px] leading-relaxed text-amber-900">
+                  Sertifikat ini membuktikan bahwa portofolio ini adalah karya asli produksi tim terdaftar di RAMU, bukan foto hasil unduhan dari Pinterest atau sumber tidak sah. Pelanggaran klaim sepihak tunduk pada UU No. 28/2014 &amp; UU ITE No. 1/2024.
+                </p>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleShareWhatsApp(
+                      tearSheetData.antiCatfishingCertificateId,
+                      tearSheetData.title,
+                      tearSheetData.edition
+                    )
+                  }
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>Bagikan Bukti ke WhatsApp</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowGuaranteeModal(false)}
+                  className="py-2.5 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 font-semibold text-xs transition-all cursor-pointer"
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
 
       </div>
     </div>

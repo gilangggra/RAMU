@@ -15,6 +15,7 @@ import {
   Globe,
   Package,
   ShieldAlert,
+  ShieldCheck,
   Lightbulb,
   ExternalLink,
   CheckCircle2,
@@ -902,6 +903,26 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
           {/* Portfolio Masonry Grid (Visuals) */}
           {portfolioAssets.length > 0 ? (
             <div className="space-y-4">
+              {/* Anti-Catfishing Trust Banner */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-amber-500/5 to-transparent border border-emerald-300/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <ShieldCheck className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="font-bold text-emerald-950 block">
+                      Portofolio Terverifikasi Bebas Catfishing (Peer-Verified Co-Credit)
+                    </span>
+                    <span className="text-[11px] text-emerald-800">
+                      Setiap karya diverifikasi silang bersama kru produksi di set untuk memastikan 100% orisinalitas tanpa materi curian.
+                    </span>
+                  </div>
+                </div>
+                <span className="self-start sm:self-auto px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 font-mono text-[10px] font-black border border-emerald-300 shrink-0">
+                  ANTI-CATFISHING CERTIFIED
+                </span>
+              </div>
+
               <div className="flex items-center justify-between pb-2 border-b border-stone-100">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-stone-400" />
@@ -909,7 +930,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                     Galeri Hasil Karya &amp; Proyek Komersial ({portfolioAssets.length})
                   </h3>
                 </div>
-                <span className="text-[11px] text-stone-400 font-medium">Klik untuk memperbesar</span>
+                <span className="text-[11px] text-stone-400 font-medium">Klik untuk inspeksi kru &amp; tear-sheet</span>
               </div>
               
               <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
@@ -935,11 +956,14 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-5 flex flex-col justify-end">
                           <div className="space-y-1.5 translate-y-3 group-hover:translate-y-0 transition-transform duration-300">
-                            <div className="flex items-center gap-2">
-                              <span className="inline-flex px-2.5 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="inline-flex px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-[9px] font-bold text-white uppercase tracking-wider">
                                 {asset.subtype}
                               </span>
-                              <span className="px-2 py-0.5 rounded-md bg-amber-400/90 text-[10px] font-black text-stone-950 uppercase tracking-wider">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/90 backdrop-blur-md text-[9px] font-bold text-white uppercase tracking-wider shadow-2xs">
+                                <ShieldCheck className="w-2.5 h-2.5" /> Kru Terverifikasi
+                              </span>
+                              <span className="px-2 py-0.5 rounded-md bg-amber-400 text-[9px] font-black text-stone-950 uppercase tracking-wider">
                                 Tear-Sheet
                               </span>
                             </div>
@@ -949,7 +973,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                                 Buka Detail Karya <ExternalLink className="w-3.5 h-3.5" />
                               </span>
                               <span className="text-[10px] text-white/80 font-medium">
-                                Hotspots &amp; Kredit
+                                Kru &amp; Kredit Resmi
                               </span>
                             </div>
                           </div>

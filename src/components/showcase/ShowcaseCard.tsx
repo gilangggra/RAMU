@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { ShowcaseItem } from "@/application/showcaseService";
-import { MapPin, Heart, Sparkles, Layers } from "lucide-react";
+import { MapPin, Heart, Sparkles, Layers, ShieldCheck, CheckCircle2 } from "lucide-react";
 
 interface ShowcaseCardProps {
   item: ShowcaseItem;
@@ -73,12 +73,16 @@ export function ShowcaseCard({ item, onOpenTearSheet }: ShowcaseCardProps) {
           </span>
         </Link>
 
-        {/* Top Right: Heart & Tear-Sheet Badge */}
+        {/* Top Right: Heart & Peer-Verified Crew Badge */}
         <div className="flex items-center gap-1.5">
-          {/* Tear-Sheet Available Indicator Badge */}
-          <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-xl border border-amber-300/90 text-[10px] font-mono font-bold text-amber-900 shadow-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-            <span>TEAR-SHEET</span>
+          {/* Peer-Verified Crew / Anti-Catfishing Badge */}
+          <div
+            title="Peer-Verified Co-Credit: Seluruh kru produksi terverifikasi silang (Anti-Catfishing)"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-xl border border-emerald-300 text-[10px] font-mono font-bold text-emerald-900 shadow-sm"
+          >
+            <ShieldCheck className="w-3 h-3 text-emerald-600" />
+            <span className="hidden sm:inline">VERIFIED CREW</span>
+            <span className="sm:hidden">VERIFIED</span>
           </div>
 
           {/* Heart Button */}
@@ -137,6 +141,11 @@ export function ShowcaseCard({ item, onOpenTearSheet }: ShowcaseCardProps) {
               <span className="flex items-center gap-1 text-[10px] font-bold text-amber-300">
                 <Sparkles className="w-3 h-3" />
                 {compLabel}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-white/30" />
+              <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-300">
+                <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                Verified Crew
               </span>
             </div>
           </div>

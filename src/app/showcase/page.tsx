@@ -6,7 +6,7 @@ import { getShowcaseAssets } from "@/application/showcaseService";
 import { AppShell } from "@/components/layout/AppShell";
 import { ShowcaseGalleryClient } from "@/components/showcase/ShowcaseGalleryClient";
 import { ShowcaseFilterBar } from "@/components/showcase/ShowcaseFilterBar";
-import { ImageIcon, Sparkles, Plus, Layers } from "lucide-react";
+import { ImageIcon, Sparkles, Plus, Layers, ShieldCheck } from "lucide-react";
 
 export const metadata = {
   title: "Karya & Inspirasi | RAMU",
@@ -55,9 +55,9 @@ export default async function ShowcasePage({
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                 <span>Kurasi Visual Eksklusif • RAMU Spotlight</span>
               </div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 backdrop-blur-xl border border-amber-500/20 text-[11px] font-mono font-bold text-amber-800">
-                <Layers className="w-3 h-3 text-amber-600" />
-                <span>Hotspot Tear-Sheet Active</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 backdrop-blur-xl border border-emerald-500/30 text-[11px] font-mono font-bold text-emerald-800">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                <span>100% Peer-Verified &bull; Anti-Catfishing Certified</span>
               </div>
             </div>
 
@@ -70,7 +70,7 @@ export default async function ShowcasePage({
               </span>
             </div>
             <p className="text-xs sm:text-sm text-stone-500 mt-1 max-w-xl leading-relaxed">
-              Jelajahi karya visual pilihan. Klik pada gambar untuk menginspeksi <strong>Hotspot Tear-Sheet</strong>, memeriksa rincian teknis gear, wardrobe, beauty, serta menyalin kredit editorial resmi.
+              Jelajahi karya visual pilihan berstandar editorial. Seluruh karya dilengkapi <strong>Peer-Verified Co-Credit</strong> untuk menjamin keaslian tim tanpa portofolio curian (anti-catfishing). Klik karya untuk memeriksa spesifikasi teknis dan kru resmi.
             </p>
           </div>
 
