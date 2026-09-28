@@ -256,17 +256,17 @@ export function TearSheetModal({
         className="relative w-full max-w-6xl h-full md:h-[90vh] max-h-[880px] bg-white border border-stone-200/90 rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.16)] flex flex-col overflow-hidden text-stone-900"
       >
         {/* ── TOP EDITORIAL HEADER BAR ── */}
-        <div className="h-16 shrink-0 px-4 sm:px-6 bg-white border-b border-stone-200/80 flex items-center justify-between gap-4">
+        <div className="h-14 shrink-0 px-4 sm:px-6 bg-white border-b border-stone-100 flex items-center justify-between gap-4">
           
           {/* Issue Branding */}
-          <div className="flex items-center gap-3">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+          <div className="flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-stone-900" />
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-black tracking-[0.2em] uppercase text-stone-900">
-                RAMU TEAR-SHEET
+              <span className="font-mono text-[11px] font-extrabold tracking-[0.22em] uppercase text-stone-900">
+                RAMU DOSSIER
               </span>
               <span className="text-stone-300 hidden sm:inline">•</span>
-              <span className="text-xs font-semibold text-stone-500 hidden sm:inline">
+              <span className="text-[11px] font-mono text-stone-500 hidden sm:inline">
                 {tearSheetData.issueNumber} ({tearSheetData.edition})
               </span>
             </div>
@@ -277,55 +277,39 @@ export function TearSheetModal({
             <button
               type="button"
               onClick={() => setShowGuaranteeModal(true)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold shadow-2xs transition-all hover:scale-105 active:scale-95 cursor-pointer ${
-                isFullyVerified
-                  ? "bg-emerald-50 hover:bg-emerald-100/80 border-emerald-300 text-emerald-950"
-                  : "bg-amber-50 hover:bg-amber-100/80 border-amber-300 text-amber-950"
-              }`}
-              title="Klik untuk melihat Sertifikat Keaslian & Jaminan Anti-Catfishing"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-stone-200/90 hover:border-stone-400 bg-stone-50/70 hover:bg-stone-100 text-stone-700 text-xs transition-all cursor-pointer shadow-2xs"
+              title="Klik untuk membuka Sertifikat Keaslian & Anti-Catfishing"
             >
-              {isFullyVerified ? (
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              ) : (
-                <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              )}
-              <span className="font-mono text-[10px] font-black uppercase tracking-wider hidden sm:inline">
-                {isFullyVerified ? "ANTI-CATFISHING" : "VERIFIKASI KRU"}
+              <span className={`w-1.5 h-1.5 rounded-full ${isFullyVerified ? "bg-emerald-500" : "bg-amber-500"}`} />
+              <span className="font-mono text-[10px] uppercase tracking-wider text-stone-500 hidden sm:inline">
+                {isFullyVerified ? "VERIFIKASI PENUH" : "VERIFIKASI KRU"}
               </span>
-              <span
-                className={`w-1.5 h-1.5 rounded-full animate-pulse hidden sm:inline ${
-                  isFullyVerified ? "bg-emerald-500" : "bg-amber-500"
-                }`}
-              />
-              <span
-                className={`text-[11px] font-bold ${
-                  isFullyVerified ? "text-emerald-800" : "text-amber-800"
-                }`}
-              >
-                {currentVerificationRate}
+              <span className="text-[11px] font-bold text-stone-900">
+                {isFullyVerified ? "100% Terverifikasi" : `${verifiedCount}/${totalCount} Terkonfirmasi`}
               </span>
+              <span className="text-stone-400 text-[10px]">↗</span>
             </button>
 
             {/* Gallery Index Navigation */}
-            <div className="flex items-center gap-1 bg-stone-50 border border-stone-200 rounded-full px-2 py-1 shadow-2xs">
+            <div className="flex items-center gap-1 bg-stone-50 border border-stone-200/80 rounded-full px-2 py-0.5 shadow-2xs">
               <button
                 type="button"
                 onClick={handlePrev}
                 title="Karya Sebelumnya (Panah Kiri)"
-                className="w-6 h-6 rounded-full hover:bg-stone-200/80 flex items-center justify-center text-stone-600 hover:text-stone-950 transition-colors"
+                className="w-5 h-5 rounded-full hover:bg-stone-200/80 flex items-center justify-center text-stone-600 hover:text-stone-950 transition-colors"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-3.5 h-3.5" />
               </button>
-              <span className="font-mono text-[11px] px-1.5 font-bold text-stone-600">
+              <span className="font-mono text-[10px] px-1 font-bold text-stone-600">
                 {String(currentIndex + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}
               </span>
               <button
                 type="button"
                 onClick={handleNext}
                 title="Karya Selanjutnya (Panah Kanan)"
-                className="w-6 h-6 rounded-full hover:bg-stone-200/80 flex items-center justify-center text-stone-600 hover:text-stone-950 transition-colors"
+                className="w-5 h-5 rounded-full hover:bg-stone-200/80 flex items-center justify-center text-stone-600 hover:text-stone-950 transition-colors"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -335,7 +319,7 @@ export function TearSheetModal({
             type="button"
             onClick={onClose}
             title="Tutup (Esc)"
-            className="w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200/80 border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-950 transition-all hover:scale-105 active:scale-95"
+            className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200/80 border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-950 transition-all hover:scale-105 active:scale-95"
           >
             <X className="w-4 h-4" />
           </button>
@@ -345,20 +329,20 @@ export function TearSheetModal({
         <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
           
           {/* ── LEFT: INTERACTIVE PHOTO VIEWPORT ── */}
-          <div className="flex-1 min-h-0 relative bg-[#F7F6F3] border-b lg:border-b-0 lg:border-r border-stone-200/80 flex items-center justify-center overflow-hidden p-4 sm:p-6 select-none">
+          <div className="flex-1 min-h-0 relative bg-[#FBFBFA] border-b lg:border-b-0 lg:border-r border-stone-100 flex items-center justify-center overflow-hidden p-4 sm:p-8 select-none">
             
             {/* Navigation Arrows (Hover on Desktop) */}
             <button
               type="button"
               onClick={handlePrev}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-white/90 hover:bg-white border border-stone-200/90 shadow-md backdrop-blur-md flex items-center justify-center text-stone-700 hover:text-stone-950 transition-all hover:scale-110 active:scale-95 hidden md:flex"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/90 hover:bg-white border border-stone-200/90 shadow-md backdrop-blur-md flex items-center justify-center text-stone-700 hover:text-stone-950 transition-all hover:scale-110 active:scale-95 hidden md:flex"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               type="button"
               onClick={handleNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-white/90 hover:bg-white border border-stone-200/90 shadow-md backdrop-blur-md flex items-center justify-center text-stone-700 hover:text-stone-950 transition-all hover:scale-110 active:scale-95 hidden md:flex"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/90 hover:bg-white border border-stone-200/90 shadow-md backdrop-blur-md flex items-center justify-center text-stone-700 hover:text-stone-950 transition-all hover:scale-110 active:scale-95 hidden md:flex"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -366,8 +350,8 @@ export function TearSheetModal({
             {/* Image Canvas Container (Clean Photo) */}
             <div className="relative inline-flex items-center justify-center max-w-full max-h-full">
               {!imgLoaded && (
-                <div className="w-[380px] h-[520px] max-w-full bg-stone-200/70 rounded-2xl animate-pulse flex items-center justify-center">
-                  <span className="font-mono text-xs text-stone-500 tracking-wider">
+                <div className="w-[380px] h-[520px] max-w-full bg-stone-200/60 rounded-2xl animate-pulse flex items-center justify-center">
+                  <span className="font-mono text-xs text-stone-400 tracking-wider">
                     MEMUAT RESOLUSI TINGGI...
                   </span>
                 </div>
@@ -377,120 +361,83 @@ export function TearSheetModal({
                 src={item.imageUrl}
                 alt={item.title}
                 onLoad={() => setImgLoaded(true)}
-                className={`max-w-full max-h-[calc(90vh-140px)] object-contain rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-stone-200/60 transition-opacity duration-500 ${
+                className={`max-w-full max-h-[calc(90vh-140px)] object-contain rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.07)] border border-stone-200/50 transition-opacity duration-500 ${
                   imgLoaded ? "opacity-100" : "opacity-0"
                 }`}
               />
             </div>
           </div>
 
-          {/* ── RIGHT: CLEAN WHITE EDITORIAL TEAR-SHEET SIDEBAR ── */}
+          {/* ── RIGHT: VOGUE EDITORIAL DOSSIER SIDEBAR ── */}
           <div className="w-full lg:w-[420px] xl:w-[460px] shrink-0 bg-white flex flex-col h-full min-h-0 overflow-hidden">
             
             {/* Scrollable Content Container */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-5 sm:p-6 space-y-6">
+            <div className="flex-1 min-h-0 overflow-y-auto p-6 sm:p-7 space-y-6">
               
               {/* ── EDITORIAL HEADER SECTION ── */}
-              <div className="space-y-2 border-b border-stone-100 pb-5">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-[10px] tracking-[0.25em] text-amber-800 uppercase font-black">
-                    [ EDITORIAL DOSSIER ]
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-stone-100 border border-stone-200 text-[10px] font-mono font-bold text-stone-700">
-                    {item.category}
-                  </span>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-[10px] font-mono tracking-[0.2em] text-stone-400 uppercase">
+                  <span>{item.category}</span>
+                  <span>{item.actor.location || "Indonesia"}</span>
                 </div>
 
-                <h2 className="text-xl sm:text-2xl font-black text-stone-900 tracking-tight leading-snug">
+                <h2 className="text-2xl sm:text-[26px] font-extrabold text-stone-950 tracking-tight leading-[1.25] font-serif pt-0.5">
                   {tearSheetData.title}
                 </h2>
 
-                <div className="flex items-center gap-2 text-xs text-stone-500 pt-1">
-                  <MapPin className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                  <span>{item.actor.location || "Indonesia"}</span>
-                  <span className="text-stone-300">•</span>
-                  <span>{item.actor.sector}</span>
-                </div>
-
-                <p className="text-xs text-stone-600 leading-relaxed pt-2">
-                  {tearSheetData.concept}
-                </p>
-
-                {/* Anti-Catfishing Certificate Code Box */}
-                <div
-                  onClick={() => setShowGuaranteeModal(true)}
-                  className="mt-3 p-3 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-amber-500/5 to-transparent border border-emerald-300/80 flex items-center justify-between gap-3 cursor-pointer hover:border-emerald-400 transition-all shadow-2xs group/cert"
-                >
+                {/* Creator Byline & Discreet Certificate Stamp */}
+                <div className="flex items-center justify-between gap-3 pt-2 pb-3.5 border-b border-stone-100">
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs group-hover/cert:scale-105 transition-transform">
-                      <ShieldCheck className="w-4 h-4" />
+                    <div
+                      className={`w-7 h-7 rounded-full bg-gradient-to-br ${item.actor.avatarBg} flex items-center justify-center text-xs font-bold text-black shrink-0 shadow-2xs`}
+                    >
+                      {item.actor.initials}
                     </div>
                     <div className="min-w-0">
-                      <span className="block font-mono text-[9px] uppercase font-bold text-emerald-900 tracking-wider">
-                        ANTI-CATFISHING CERTIFIED
-                      </span>
-                      <span className="block font-mono text-xs font-black text-stone-900 truncate">
-                        #{tearSheetData.antiCatfishingCertificateId}
-                      </span>
-                    </div>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-md bg-white border border-emerald-300 text-[10px] font-bold text-emerald-900 shrink-0 shadow-2xs group-hover/cert:bg-emerald-600 group-hover/cert:text-white transition-colors">
-                    Lihat Bukti ↗
-                  </span>
-                </div>
-              </div>
-
-              {/* ── LEAD CREATOR CARD ── */}
-              <div className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/80 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.actor.avatarBg} flex items-center justify-center text-sm font-extrabold text-black shrink-0 shadow-xs`}
-                  >
-                    {item.actor.initials}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <h3 className="text-xs font-bold text-stone-900 truncate">
+                      <Link
+                        href={`/directory/${realActorId}`}
+                        className="text-xs font-bold text-stone-900 hover:text-amber-800 transition-colors truncate block"
+                      >
                         {item.actor.name}
-                      </h3>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-amber-100 text-amber-900 font-mono font-black border border-amber-200">
-                        LEAD
+                      </Link>
+                      <span className="text-[10px] text-stone-500 font-mono block truncate">
+                        {item.actor.sector}
                       </span>
                     </div>
-                    <p className="text-[11px] text-stone-500 truncate">
-                      {item.actor.sector} • {item.actor.experienceLevel || "Profesional"}
-                    </p>
                   </div>
+
+                  {/* Chic Minimalist Certificate Pill */}
+                  <button
+                    type="button"
+                    onClick={() => setShowGuaranteeModal(true)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50/80 hover:bg-emerald-100 border border-emerald-200/80 text-emerald-900 text-[10px] font-mono font-bold transition-all cursor-pointer shrink-0"
+                    title="Buka sertifikat resmi anti-catfishing"
+                  >
+                    <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                    <span>Anti-Catfish</span>
+                    <span className="text-emerald-700">↗</span>
+                  </button>
                 </div>
 
-                <Link
-                  href={`/directory/${realActorId}`}
-                  className="px-3 py-1.5 rounded-xl bg-white hover:bg-stone-100 text-stone-800 border border-stone-200 text-[11px] font-bold transition-all flex items-center gap-1 shrink-0 shadow-2xs hover:scale-105 active:scale-95"
-                >
-                  <span>Profil</span>
-                  <ExternalLink className="w-3 h-3 text-stone-500" />
-                </Link>
+                {/* Concept Narrative */}
+                <p className="text-[13px] text-stone-600 leading-relaxed font-sans pt-1">
+                  {tearSheetData.concept}
+                </p>
               </div>
 
-              {/* ── COLLABORATIVE CREDITS ROSTER (PEER-VERIFIED) ── */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="text-xs font-mono font-black text-stone-800 uppercase tracking-widest">
-                      KREDIT KONTRIBUTOR ({activeCredits.length})
-                    </h3>
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  </div>
-                  <span className={`text-[10px] font-mono font-bold ${
-                    isFullyVerified ? "text-emerald-700" : "text-amber-700"
-                  }`}>
-                    {isFullyVerified ? "PEER-VERIFIED" : "SEBAGIAN TERVERIFIKASI"}
+              {/* ── MASTHEAD PRODUCTION CREDITS (VOGUE ROSTER) ── */}
+              <div className="space-y-2 pt-4 border-t border-stone-100">
+                <div className="flex items-center justify-between pb-1">
+                  <span className="font-mono text-[10px] font-bold tracking-[0.25em] text-stone-400 uppercase">
+                    PRODUCTION CREDITS
+                  </span>
+                  <span className="text-[10px] font-mono text-stone-400">
+                    {verifiedCount}/{totalCount} CONFIRMED
                   </span>
                 </div>
 
-                <div className="space-y-2">
+                <div className="divide-y divide-stone-100">
                   {activeCredits.map((credit, idx) => {
-                    const Icon = CATEGORY_ICONS[credit.category] || Sparkles;
                     const profileHref = credit.actorId
                       ? `/directory/${credit.actorId}`
                       : `/directory?q=${encodeURIComponent(credit.name)}`;
@@ -499,59 +446,51 @@ export function TearSheetModal({
                       <Link
                         key={idx}
                         href={profileHref}
-                        className="group/credit block p-3 rounded-2xl border border-stone-200/70 bg-white hover:bg-emerald-50/40 hover:border-emerald-300 hover:shadow-xs transition-all duration-200"
+                        className="group py-2.5 flex items-center justify-between gap-3 text-xs hover:bg-stone-50/80 -mx-2 px-2 rounded-lg transition-colors"
                         title={`Buka profil ${credit.name} (${credit.role})`}
                       >
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-start gap-2.5 min-w-0">
-                            <div className="w-7 h-7 rounded-lg bg-stone-100 group-hover/credit:bg-emerald-600 group-hover/credit:text-white flex items-center justify-center text-stone-600 shrink-0 mt-0.5 transition-colors">
-                              <Icon className="w-3.5 h-3.5" />
-                            </div>
+                        {/* Left: Role */}
+                        <div className="w-[42%] shrink-0 min-w-0">
+                          <span className="font-mono text-[10px] uppercase tracking-wider text-stone-400 group-hover:text-stone-700 truncate block">
+                            {credit.role}
+                          </span>
+                        </div>
 
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="block text-[10px] font-mono uppercase font-black tracking-wider text-stone-500 group-hover/credit:text-emerald-800">
-                                  {credit.role}
-                                </span>
-                                {credit.isUploader ? (
-                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-900 text-[8px] font-mono font-extrabold border border-amber-300">
-                                    <Check className="w-2.5 h-2.5 text-amber-700" />
-                                    <span>UPLOADER</span>
-                                  </span>
-                                ) : credit.verified ? (
-                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-900 text-[8px] font-mono font-extrabold border border-emerald-300">
-                                    <Check className="w-2.5 h-2.5 text-emerald-700" />
-                                    <span>TERVERIFIKASI BERSAMA</span>
-                                  </span>
-                                ) : credit.status === "EXTERNAL" ? (
-                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full bg-stone-100 text-stone-600 text-[8px] font-mono font-extrabold border border-stone-200">
-                                    <span>KREDIT EKSTERNAL</span>
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full bg-amber-50 text-amber-900 text-[8px] font-mono font-extrabold border border-amber-200">
-                                    <Clock className="w-2.5 h-2.5 text-amber-600" />
-                                    <span>MENUNGGU KONFIRMASI</span>
-                                  </span>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className="text-xs font-bold text-stone-900 group-hover/credit:text-emerald-950 truncate">
-                                  {credit.name}
-                                </span>
-                                <span className="text-[11px] font-mono text-stone-400">
-                                  {credit.handle}
-                                </span>
-                              </div>
-                              <p className="text-[11px] text-stone-600 mt-0.5 line-clamp-1">
-                                {credit.details}
-                              </p>
-                            </div>
+                        {/* Right: Contributor Name, Handle & Status Dot */}
+                        <div className="w-[58%] flex items-center justify-end gap-2 min-w-0">
+                          <div className="text-right min-w-0">
+                            <span className="font-medium text-stone-900 group-hover:text-stone-950 truncate block">
+                              {credit.name}
+                            </span>
+                            {credit.handle && (
+                              <span className="text-[10px] font-mono text-stone-400 group-hover:text-stone-500 block truncate">
+                                {credit.handle}
+                              </span>
+                            )}
                           </div>
 
-                          <div className="flex items-center gap-1 shrink-0 px-2.5 py-1 rounded-xl bg-stone-50 group-hover/credit:bg-white border border-stone-200 text-stone-700 text-[10px] font-bold transition-all shadow-2xs group-hover/credit:scale-105">
-                            <span>Profil</span>
-                            <ExternalLink className="w-3 h-3 text-stone-400 group-hover/credit:text-emerald-700" />
-                          </div>
+                          {/* Elegant Status Indicator */}
+                          {credit.isUploader ? (
+                            <span
+                              className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"
+                              title="Pemilik Portofolio (Uploader)"
+                            />
+                          ) : credit.verified ? (
+                            <span
+                              className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"
+                              title="Terverifikasi Bersama"
+                            />
+                          ) : credit.status === "EXTERNAL" ? (
+                            <span
+                              className="w-1.5 h-1.5 rounded-full bg-stone-300 shrink-0"
+                              title="Kredit Eksternal"
+                            />
+                          ) : (
+                            <span
+                              className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0"
+                              title="Menunggu Konfirmasi Rekan"
+                            />
+                          )}
                         </div>
                       </Link>
                     );
@@ -559,253 +498,157 @@ export function TearSheetModal({
                 </div>
               </div>
 
-              {/* ── INTERACTIVE CO-CREDIT VERIFICATION / CLAIM TRIGGER ── */}
-              <div className="space-y-2">
+              {/* ── CO-CREDIT PARTICIPATION ACCORDION ── */}
+              <div className="pt-4 border-t border-stone-100 space-y-2">
                 {claimSuccessMessage && (
-                  <div className="p-3 rounded-2xl bg-emerald-500 text-white text-xs font-bold flex items-center gap-2 shadow-sm animate-fade-in">
-                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                     <span>{claimSuccessMessage}</span>
                   </div>
                 )}
 
                 {userClaimedRole ? (
-                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-300 flex items-center justify-between gap-3 shadow-2xs">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
-                        <Check className="w-4 h-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold text-emerald-950">Kontribusi Anda Terverifikasi</span>
-                          <span className="text-[8px] px-1.5 py-0.2 rounded bg-emerald-200 text-emerald-900 font-mono font-black">
-                            PEER-VERIFIED
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-emerald-800 truncate">
-                          Peran: <strong>{userClaimedRole}</strong> • Tercatat di Sertifikat RAMU
-                        </p>
-                      </div>
+                  <div className="flex items-center justify-between text-xs py-1 text-emerald-900">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span className="truncate">Peran Anda: <strong>{userClaimedRole}</strong></span>
                     </div>
                     <button
                       type="button"
                       onClick={handleRevokeClaim}
-                      className="text-[10px] font-bold text-stone-400 hover:text-stone-700 underline shrink-0 cursor-pointer"
+                      className="text-[10px] text-stone-400 hover:text-stone-700 underline shrink-0 cursor-pointer ml-2"
                     >
                       Ubah
                     </button>
                   </div>
                 ) : (
-                  <div className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200 space-y-2.5">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-1.5">
-                        <UserCheck className="w-4 h-4 text-emerald-700 shrink-0" />
-                        <h4 className="text-xs font-bold text-stone-900">
-                          Apakah Anda Terlibat di Proyek Ini?
-                        </h4>
-                      </div>
-                      <span className="text-[9px] font-mono font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
-                        Co-Credit
-                      </span>
-                    </div>
+                  <div className="flex items-center justify-between text-xs text-stone-500 py-1">
+                    <span>Terlibat dalam karya ini?</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsClaiming(!isClaiming)}
+                      className="font-bold text-stone-900 hover:text-amber-800 underline text-xs cursor-pointer"
+                    >
+                      {isClaiming ? "Tutup" : "Klaim Kontribusi ↗"}
+                    </button>
+                  </div>
+                )}
 
-                    <p className="text-[11px] text-stone-600 leading-snug">
-                      Verifikasi kehadiran Anda di set untuk melindungi hak cipta, mencegah penghapusan kredit (credit erasure), dan memastikan portofolio ini bebas catfishing.
-                    </p>
-
-                    {!isClaiming ? (
+                {isClaiming && (
+                  <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/80 space-y-2 animate-fade-in text-xs">
+                    <label className="block text-[10px] font-mono uppercase font-bold text-stone-600">
+                      Pilih Peran Anda di Tim Produksi:
+                    </label>
+                    <select
+                      value={claimedRoleInput}
+                      onChange={(e) => setClaimedRoleInput(e.target.value)}
+                      className="w-full text-xs p-2 rounded-lg bg-white border border-stone-300 text-stone-900 focus:outline-hidden focus:ring-1 focus:ring-stone-400"
+                    >
+                      <option value="Fotografi / Asisten Lighting">Fotografi / Asisten Lighting</option>
+                      <option value="Fashion Stylist / Wardrobe Designer">Fashion Stylist / Wardrobe Designer</option>
+                      <option value="Hair & Makeup Artist (HMUA)">Hair & Makeup Artist (HMUA)</option>
+                      <option value="Model / Talent">Model / Talent</option>
+                      <option value="Art Director / Set Designer">Art Director / Set Designer</option>
+                      <option value="Studio / Location Provider">Studio / Location Provider</option>
+                    </select>
+                    <div className="flex gap-2 pt-1">
                       <button
                         type="button"
-                        onClick={() => setIsClaiming(true)}
-                        className="w-full py-2 px-3 rounded-xl bg-white hover:bg-stone-100 border border-stone-300 text-stone-900 text-xs font-bold transition-all shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.01] active:scale-98"
+                        onClick={() => handleConfirmClaim(claimedRoleInput)}
+                        className="flex-1 py-1.5 px-3 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-bold transition-all cursor-pointer"
                       >
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Verifikasi Kontribusi Saya di Proyek Ini</span>
+                        Konfirmasi
                       </button>
-                    ) : (
-                      <div className="space-y-2 pt-2 border-t border-stone-200">
-                        <label className="block text-[10px] font-bold text-stone-700 uppercase">
-                          Pilih Peran Kontribusi Anda:
-                        </label>
-                        <select
-                          value={claimedRoleInput}
-                          onChange={(e) => setClaimedRoleInput(e.target.value)}
-                          className="w-full text-xs p-2 rounded-xl bg-white border border-stone-300 text-stone-900 font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
-                        >
-                          <option value="Fotografi / Asisten Lighting">Fotografi / Asisten Lighting</option>
-                          <option value="Fashion Stylist / Wardrobe Designer">Fashion Stylist / Wardrobe Designer</option>
-                          <option value="Hair & Makeup Artist (HMUA)">Hair & Makeup Artist (HMUA)</option>
-                          <option value="Model / Talent">Model / Talent</option>
-                          <option value="Art Director / Set Designer">Art Director / Set Designer</option>
-                          <option value="Studio / Location Provider">Studio / Location Provider</option>
-                        </select>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleConfirmClaim(claimedRoleInput)}
-                            className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-xs cursor-pointer"
-                          >
-                            <Check className="w-3.5 h-3.5" />
-                            <span>Konfirmasi &amp; Verifikasi</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setIsClaiming(false)}
-                            className="py-2 px-3 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-800 text-xs font-medium cursor-pointer"
-                          >
-                            Batal
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                      <button
+                        type="button"
+                        onClick={() => setIsClaiming(false)}
+                        className="py-1.5 px-3 rounded-lg bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs cursor-pointer"
+                      >
+                        Batal
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
 
-              {/* ── ANTI-CATFISHING ZERO-FRAUD GUARANTEE CARD ── */}
-              <div className="p-4 rounded-2xl bg-[#1E1B2E] text-white space-y-3 shadow-md border border-stone-800">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-                      <ShieldCheck className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-black uppercase tracking-wider text-white">
-                        Jaminan Anti-Catfishing RAMU
-                      </h4>
-                      <span className="text-[10px] text-stone-400 font-mono">
-                        Perlindungan Klien &amp; Hak Cipta Kreator
-                      </span>
-                    </div>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-mono text-[9px] font-black">
-                    TERVERIFIKASI
-                  </span>
-                </div>
-
-                <div className="space-y-2 text-[11px] text-stone-300 border-t border-stone-800 pt-2.5">
-                  <div className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
-                    <span><strong>Verifikasi Multi-Pihak:</strong> Seluruh kru (Fotografer, MUA, Stylist, Model) saling mengonfirmasi kehadiran di set.</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
-                    <span><strong>Bebas Portofolio Curian:</strong> Klien aman dari risiko booking talenta yang mencuri foto dari Pinterest / akun luar negeri.</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
-                    <span><strong>Anti-Credit Erasure:</strong> Menghentikan kebiasaan posting karya komersial tanpa mencantumkan kredit kru.</span>
-                  </div>
-                </div>
-
-                <div className="pt-1 flex items-center justify-between text-[10px] text-stone-400 border-t border-stone-800/80">
-                  <span>KUHPerdata 1320 &amp; UU Hak Cipta 28/2014</span>
-                  <button
-                    type="button"
-                    onClick={() => setShowGuaranteeModal(true)}
-                    className="text-amber-400 hover:text-amber-300 underline font-bold cursor-pointer"
-                  >
-                    Detail Sertifikat ↗
-                  </button>
-                </div>
-              </div>
-
-              {/* ── TECHNICAL CAMERA & RIG BLUEPRINT ── */}
+              {/* ── TECHNICAL RIG SPECIFICATIONS ── */}
               {tearSheetData.technicalSpecs && (
-                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-2.5">
-                  <div className="flex items-center gap-2">
-                    <Sliders className="w-3.5 h-3.5 text-amber-600" />
-                    <h4 className="font-mono text-[10px] uppercase tracking-widest font-black text-stone-800">
-                      TECHNICAL RIG &amp; CAMERA BLUEPRINT
-                    </h4>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 text-[11px]">
-                    <div className="p-2.5 rounded-xl bg-white border border-stone-200/80 shadow-2xs">
-                      <span className="block text-[9px] font-mono text-stone-500 uppercase font-bold">KAMERA</span>
-                      <span className="font-bold text-stone-900 truncate block">
-                        {tearSheetData.technicalSpecs.camera}
-                      </span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-white border border-stone-200/80 shadow-2xs">
-                      <span className="block text-[9px] font-mono text-stone-500 uppercase font-bold">LENSA</span>
-                      <span className="font-bold text-stone-900 truncate block">
-                        {tearSheetData.technicalSpecs.lens}
-                      </span>
-                    </div>
-                    <div className="col-span-2 p-2.5 rounded-xl bg-white border border-stone-200/80 shadow-2xs">
-                      <span className="block text-[9px] font-mono text-stone-500 uppercase font-bold">LIGHTING MODIFIER</span>
-                      <span className="font-semibold text-stone-900 truncate block">
-                        {tearSheetData.technicalSpecs.lighting}
-                      </span>
-                    </div>
+                <div className="pt-4 border-t border-stone-100 text-[10px] font-mono text-stone-500 space-y-1.5">
+                  <span className="font-bold uppercase tracking-wider text-stone-400 block">
+                    PRODUCTION GEAR
+                  </span>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-stone-700">
+                    <span>{tearSheetData.technicalSpecs.camera}</span>
+                    <span className="text-stone-300">•</span>
+                    <span>{tearSheetData.technicalSpecs.lens}</span>
+                    <span className="text-stone-300">•</span>
+                    <span>{tearSheetData.technicalSpecs.lighting}</span>
                   </div>
                 </div>
               )}
 
               {/* ── AESTHETIC TAGS ── */}
-              <div className="space-y-1.5">
-                <span className="font-mono text-[10px] text-stone-500 uppercase tracking-widest font-black block">
-                  TAGS &amp; ESTETIKA
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {tearSheetData.tags.map((tag, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2.5 py-1 rounded-lg bg-stone-100 border border-stone-200 text-[10px] font-semibold text-stone-700"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
+              <div className="flex flex-wrap gap-1.5 pt-2">
+                {tearSheetData.tags.map((tag, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2 py-0.5 rounded-md bg-stone-100 text-[10px] font-mono text-stone-600"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+
+              {/* ── LEGAL ASSURANCE FOOTER LINK ── */}
+              <div className="pt-4 border-t border-stone-100 flex items-center justify-between text-[10px] font-mono text-stone-400">
+                <span>RAMU PROTOCOL • UU NO. 28/2014</span>
+                <button
+                  type="button"
+                  onClick={() => setShowGuaranteeModal(true)}
+                  className="hover:text-stone-700 underline cursor-pointer"
+                >
+                  Jaminan Anti-Catfishing ↗
+                </button>
               </div>
 
             </div>
 
-            {/* ── FIXED ACTION FOOTER (COPY CREDITS + WHATSAPP SHARE + COLLAB CTA) ── */}
-            <div className="p-4 sm:p-5 bg-white border-t border-stone-200/80 space-y-2 shrink-0">
+            {/* ── FIXED ACTION FOOTER (1-ROW SLEEK EDITORIAL BAR) ── */}
+            <div className="p-4 sm:p-5 bg-white border-t border-stone-100 flex items-center gap-2.5 shrink-0">
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {/* 1-Click Copy Tear-Sheet to Instagram/Press */}
-                <button
-                  type="button"
-                  onClick={handleCopyCredits}
-                  className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all duration-300 flex items-center justify-center gap-1.5 active:scale-98 cursor-pointer ${
-                    copied
-                      ? "bg-emerald-50 border-emerald-300 text-emerald-800 shadow-2xs"
-                      : "bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-800"
-                  }`}
-                >
-                  {copied ? (
-                    <>
-                      <Check className="w-4 h-4 text-emerald-600" />
-                      <span>Kredit Tersalin!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-4 h-4 text-amber-600" />
-                      <span>Salin Kredit (IG)</span>
-                    </>
-                  )}
-                </button>
+              {/* Secondary Action: Copy IG Credits */}
+              <button
+                type="button"
+                onClick={handleCopyCredits}
+                className={`h-11 px-3.5 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer ${
+                  copied
+                    ? "bg-emerald-50 border-emerald-300 text-emerald-800"
+                    : "bg-white hover:bg-stone-50 border-stone-200 text-stone-700"
+                }`}
+                title="Salin Format Kredit untuk Caption Instagram"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-stone-500" />}
+                <span className="hidden sm:inline">{copied ? "Tersalin" : "Salin IG"}</span>
+              </button>
 
-                {/* WhatsApp Share Proof of Authenticity */}
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleShareWhatsApp(
-                      tearSheetData.antiCatfishingCertificateId,
-                      tearSheetData.title,
-                      tearSheetData.edition
-                    )
-                  }
-                  className="py-2.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-300 text-emerald-950 text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer hover:scale-[1.01] active:scale-98"
-                >
-                  <Share2 className="w-4 h-4 text-emerald-600" />
-                  <span>Kirim Bukti (WA)</span>
-                </button>
-              </div>
+              {/* Secondary Action: WhatsApp Share */}
+              <button
+                type="button"
+                onClick={() =>
+                  handleShareWhatsApp(
+                    tearSheetData.antiCatfishingCertificateId,
+                    tearSheetData.title,
+                    tearSheetData.edition
+                  )
+                }
+                className="h-11 px-3.5 rounded-xl bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                title="Bagikan Bukti Sertifikat via WhatsApp"
+              >
+                <Share2 className="w-3.5 h-3.5 text-stone-500" />
+                <span className="hidden sm:inline">Bukti WA</span>
+              </button>
 
-              {/* Primary Collab CTA or Direct Booking */}
+              {/* Primary Collab CTA */}
               {onBookAuthor ? (
                 <button
                   type="button"
@@ -813,20 +656,20 @@ export function TearSheetModal({
                     onClose();
                     onBookAuthor();
                   }}
-                  className="w-full py-3 px-4 rounded-xl bg-[#1E1B2E] hover:bg-black text-white font-extrabold text-xs transition-all shadow-md hover:scale-[1.01] active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-1 h-11 px-4 rounded-xl bg-stone-900 hover:bg-black text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-98"
                 >
-                  <span>Ajukan Booking Jasa ke {item.actor.name}</span>
-                  <ArrowRight className="w-4 h-4 text-amber-400" />
+                  <span>Ajak Tim Ini Berkolaborasi</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
                 </button>
               ) : (
                 <Link
                   href={`/projects/new?title=${encodeURIComponent(
                     `Kolaborasi Sinergis: ${item.title}`
                   )}&category=${encodeURIComponent(item.category)}`}
-                  className="w-full py-3 px-4 rounded-xl bg-[#1E1B2E] hover:bg-black text-white font-extrabold text-xs transition-all shadow-md hover:scale-[1.01] active:scale-98 flex items-center justify-center gap-2"
+                  className="flex-1 h-11 px-4 rounded-xl bg-stone-900 hover:bg-black text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 shadow-sm hover:scale-[1.01] active:scale-98"
                 >
                   <span>Ajak Tim Ini Berkolaborasi</span>
-                  <ArrowRight className="w-4 h-4 text-amber-400" />
+                  <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
                 </Link>
               )}
             </div>
