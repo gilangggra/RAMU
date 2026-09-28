@@ -13,6 +13,9 @@ import {
   HelpCircle,
   Check,
   Star,
+  ShieldCheck,
+  Clock,
+  UserCheck,
 } from "lucide-react";
 
 export interface ServicePackage {
@@ -24,10 +27,87 @@ export interface ServicePackage {
   features: string[];
 }
 
+export interface TermsAndConditionsConfig {
+  dpPercentage: number;
+  maxRevisions: number;
+  shiftHours: number;
+  overtimeRate: string;
+  gracePeriodMinutes: number;
+  safeSetCompliant: boolean;
+  roleSpecifics: {
+    wardrobeRestrictions?: string;
+    chaperoneAllowed?: boolean;
+    usageRightsPeriod?: string;
+    maxHeadsIncluded?: number;
+    prepTimeRequired?: string;
+    extraHeadFee?: string;
+    pullingDepositResponsibility?: string;
+    wardrobeDamageResponsibility?: string;
+    aspectRatiosIncluded?: string;
+    musicLicenseIncluded?: boolean;
+    majorRevisionFeeNote?: string;
+    maxCrewCapacity?: number;
+    cycloramaShoeTapeRequired?: boolean;
+    overtimePerBlockFee?: string;
+    colorAccuracyCommitment?: boolean;
+    rawFilePolicy?: string;
+  };
+}
+
+export function getDefaultTerms(sector: string, type: string): TermsAndConditionsConfig {
+  const s = sector.toLowerCase();
+  const isStudio = type === "STUDIO" || s.includes("studio");
+  const isModel = !isStudio && (s.includes("model") || s.includes("talent"));
+  const isMUA = !isStudio && !isModel && (s.includes("mua") || s.includes("makeup") || s.includes("hair"));
+  const isStylist = !isStudio && !isModel && !isMUA && (s.includes("stylist") || s.includes("wardrobe"));
+  const isVideographer = !isStudio && !isModel && !isMUA && !isStylist && (s.includes("video") || s.includes("film") || s.includes("cinema"));
+  const isPhotographer = !isStudio && !isModel && !isMUA && !isStylist && !isVideographer;
+
+  return {
+    dpPercentage: 50,
+    maxRevisions: 2,
+    shiftHours: isStudio ? 4 : 8,
+    overtimeRate: isStudio ? "Rp 150.000 / 30 menit" : "Rp 250.000 / jam",
+    gracePeriodMinutes: 30,
+    safeSetCompliant: true,
+    roleSpecifics: {
+      ...(isModel && {
+        wardrobeRestrictions: "Casual, Formal, Modest / Hijab (Sesuai Moodboard Awal)",
+        chaperoneAllowed: true,
+        usageRightsPeriod: "1 Tahun Digital Media (Medsos & Website)",
+      }),
+      ...(isMUA && {
+        maxHeadsIncluded: 1,
+        prepTimeRequired: "90 Menit sebelum sesi foto dimulai",
+        extraHeadFee: "Rp 350.000 / orang tambahan",
+      }),
+      ...(isStylist && {
+        pullingDepositResponsibility: "Biaya sewa/deposit baju desainer dibayarkan langsung oleh klien",
+        wardrobeDamageResponsibility: "Ganti rugi noda/robekan busana di set ditanggung klien",
+      }),
+      ...(isVideographer && {
+        aspectRatiosIncluded: "1x Vertikal Reels 9:16 (30-45 detik)",
+        musicLicenseIncluded: true,
+        majorRevisionFeeNote: "Ganti musik latar setelah final cut dikenakan biaya re-editing",
+      }),
+      ...(isStudio && {
+        maxCrewCapacity: 10,
+        cycloramaShoeTapeRequired: true,
+        overtimePerBlockFee: "Rp 150.000 per 30 menit",
+      }),
+      ...(isPhotographer && {
+        colorAccuracyCommitment: true,
+        rawFilePolicy: "File JPG resolusi tinggi (High-Res); RAW tidak diserahkan",
+      }),
+    },
+  };
+}
+
 interface RatesFormProps {
   initialStartingRate: string;
   initialTurnaroundTime: string;
   initialPackages: ServicePackage[];
+  initialTerms?: TermsAndConditionsConfig | null;
   actorSector: string;
   actorType: string;
 }
@@ -36,6 +116,7 @@ export function RatesForm({
   initialStartingRate,
   initialTurnaroundTime,
   initialPackages,
+  initialTerms,
   actorSector,
   actorType,
 }: RatesFormProps) {
@@ -44,6 +125,17 @@ export function RatesForm({
   const [packages, setPackages] = useState<ServicePackage[]>(
     initialPackages.length > 0 ? initialPackages : []
   );
+  const [terms, setTerms] = useState<TermsAndConditionsConfig>(
+    initialTerms || getDefaultTerms(actorSector, actorType)
+  );
+
+  const sectorLower = actorSector.toLowerCase();
+  const isStudio = actorType === "STUDIO" || sectorLower.includes("studio");
+  const isModel = !isStudio && (sectorLower.includes("model") || sectorLower.includes("talent"));
+  const isMUA = !isStudio && !isModel && (sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair"));
+  const isStylist = !isStudio && !isModel && !isMUA && (sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));
+  const isVideographer = !isStudio && !isModel && !isMUA && !isStylist && (sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema"));
+  const isPhotographer = !isStudio && !isModel && !isMUA && !isStylist && !isVideographer;
 
   const [isPending, setIsPending] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -297,6 +389,7 @@ export function RatesForm({
     formData.append("startingRate", startingRate);
     formData.append("turnaroundTime", turnaroundTime);
     formData.append("packagesJson", JSON.stringify(packages));
+    formData.append("termsAndConditionsJson", JSON.stringify(terms));
 
     const result = await updateServicePackagesAndRates(formData);
 
@@ -574,6 +667,413 @@ export function RatesForm({
               ))}
             </div>
           )}
+        </div>
+
+        {/* 3. Ketentuan Standar Kerja & Proteksi Layanan (Terms & Conditions) */}
+        <div className="space-y-6 pt-6 border-t border-stone-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-200">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-amber-600" />
+                <h3 className="text-sm font-bold text-[#1E1B2E]">Standar Kerja &amp; Proteksi Layanan (Terms &amp; Conditions)</h3>
+                <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-black uppercase">
+                  Proteksi 2-Arah
+                </span>
+              </div>
+              <p className="text-xs text-stone-600 font-light">
+                Atur ketentuan kerja resmi Anda. Ketentuan ini akan otomatis mengikat klien saat melakukan booking untuk mencegah penundaan pembayaran, revisi tanpa batas, dan kerja lembur tanpa bayaran.
+              </p>
+            </div>
+          </div>
+
+          {/* General Terms: DP, Shift Hours, Revisions, Overtime */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-5 rounded-2xl bg-stone-50 border border-stone-200/80">
+            <div>
+              <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                Uang Muka (DP Kunci Tanggal)
+              </label>
+              <select
+                value={terms.dpPercentage}
+                onChange={(e) => setTerms({ ...terms, dpPercentage: Number(e.target.value) })}
+                className="w-full px-3 py-2.5 rounded-xl bg-white border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E]"
+              >
+                <option value={30}>30% (Fleksibel UMKM)</option>
+                <option value={50}>50% (Standar Industri - Rekomendasi)</option>
+                <option value={70}>70% (Proyek Produksi Berat)</option>
+              </select>
+              <p className="text-[10px] text-stone-400 mt-1">DP mengikat jadwal talenta.</p>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                Batas Durasi Shift Standar
+              </label>
+              <select
+                value={terms.shiftHours}
+                onChange={(e) => setTerms({ ...terms, shiftHours: Number(e.target.value) })}
+                className="w-full px-3 py-2.5 rounded-xl bg-white border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E]"
+              >
+                <option value={3}>3 Jam (Sesi Ringkas)</option>
+                <option value={4}>4 Jam (Half-Day)</option>
+                <option value={6}>6 Jam (Medium Shift)</option>
+                <option value={8}>8 Jam (Full-Day)</option>
+              </select>
+              <p className="text-[10px] text-stone-400 mt-1">Termasuk 1 jam istirahat.</p>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                Tarif Lembur (Overtime / Jam)
+              </label>
+              <input
+                type="text"
+                value={terms.overtimeRate}
+                onChange={(e) => setTerms({ ...terms, overtimeRate: e.target.value })}
+                placeholder="Rp 250.000 / jam"
+                className="w-full px-3 py-2.5 rounded-xl bg-white border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E]"
+              />
+              <p className="text-[10px] text-stone-400 mt-1">Toleransi keterlambatan 30 menit.</p>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                Batas Maksimal Revisi Minor
+              </label>
+              <select
+                value={terms.maxRevisions}
+                onChange={(e) => setTerms({ ...terms, maxRevisions: Number(e.target.value) })}
+                className="w-full px-3 py-2.5 rounded-xl bg-white border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E]"
+              >
+                <option value={1}>1x Revisi Minor</option>
+                <option value={2}>2x Revisi Minor (Standar)</option>
+                <option value={3}>3x Revisi Minor</option>
+              </select>
+              <p className="text-[10px] text-stone-400 mt-1">Ganti konsep = addendum baru.</p>
+            </div>
+          </div>
+
+          {/* Role-Specific Specialized Terms */}
+          <div className="p-5 rounded-2xl bg-white border border-stone-200 space-y-4 shadow-2xs">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+              <span className="text-xs font-bold text-[#1E1B2E] uppercase tracking-wider flex items-center gap-2">
+                <span>Ketentuan Spesifik Profesi:</span>
+                <span className="px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 text-[11px] font-bold">
+                  {actorSector}
+                </span>
+              </span>
+              <span className="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                ✓ Otomatis Diterapkan ke SPK
+              </span>
+            </div>
+
+            {/* Model / Talent specifics */}
+            {isModel && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                    Batasan Busana (Wardrobe Scope)
+                  </label>
+                  <input
+                    type="text"
+                    value={terms.roleSpecifics.wardrobeRestrictions || ""}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, wardrobeRestrictions: e.target.value },
+                      })
+                    }
+                    placeholder="Misal: Casual, Modest / Hijab, Formal"
+                    className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                    Masa Lisensi Hak Pakai (Usage Rights)
+                  </label>
+                  <input
+                    type="text"
+                    value={terms.roleSpecifics.usageRightsPeriod || ""}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, usageRightsPeriod: e.target.value },
+                      })
+                    }
+                    placeholder="Misal: 1 Tahun Digital Media (Medsos & Web)"
+                    className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                  />
+                </div>
+                <div className="flex items-center gap-2 pt-6">
+                  <input
+                    type="checkbox"
+                    id="chaperoneAllowed"
+                    checked={terms.roleSpecifics.chaperoneAllowed ?? true}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, chaperoneAllowed: e.target.checked },
+                      })
+                    }
+                    className="w-4 h-4 rounded text-[#1E1B2E] border-stone-300 focus:ring-[#1E1B2E]"
+                  />
+                  <label htmlFor="chaperoneAllowed" className="text-xs font-bold text-stone-700">
+                    Hak Membawa 1 Pendamping di Lokasi
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {/* MUA specifics */}
+            {isMUA && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                    Batas Jumlah Wajah Dirias Termasuk Paket
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={terms.roleSpecifics.maxHeadsIncluded || 1}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, maxHeadsIncluded: Number(e.target.value) },
+                      })
+                    }
+                    className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                    Waktu Persiapan Minimum Sebelum On-Set
+                  </label>
+                  <input
+                    type="text"
+                    value={terms.roleSpecifics.prepTimeRequired || ""}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, prepTimeRequired: e.target.value },
+                      })
+                    }
+                    placeholder="Misal: 90 Menit sebelum sesi foto"
+                    className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                    Biaya Tambahan per Orang di Luar Paket
+                  </label>
+                  <input
+                    type="text"
+                    value={terms.roleSpecifics.extraHeadFee || ""}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, extraHeadFee: e.target.value },
+                      })
+                    }
+                    placeholder="Misal: Rp 350.000 / orang tambahan"
+                    className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Stylist specifics */}
+            {isStylist && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                    Ketentuan Uang Sewa / Deposit Peminjaman Busana
+                  </label>
+                  <input
+                    type="text"
+                    value={terms.roleSpecifics.pullingDepositResponsibility || ""}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, pullingDepositResponsibility: e.target.value },
+                      })
+                    }
+                    placeholder="Biaya sewa/deposit baju desainer dibayarkan langsung oleh klien"
+                    className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                    Tanggung Jawab Kerusakan / Noda Busana di Set
+                  </label>
+                  <input
+                    type="text"
+                    value={terms.roleSpecifics.wardrobeDamageResponsibility || ""}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, wardrobeDamageResponsibility: e.target.value },
+                      })
+                    }
+                    placeholder="Ganti rugi noda/robekan busana di set ditanggung klien/brand"
+                    className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Videographer specifics */}
+            {isVideographer && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                    Format Output Aspek Rasio Utama
+                  </label>
+                  <input
+                    type="text"
+                    value={terms.roleSpecifics.aspectRatiosIncluded || ""}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, aspectRatiosIncluded: e.target.value },
+                      })
+                    }
+                    placeholder="Misal: 1x Reels 9:16 (30-45 detik)"
+                    className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                    Ketentuan Ganti Musik Latar
+                  </label>
+                  <input
+                    type="text"
+                    value={terms.roleSpecifics.majorRevisionFeeNote || ""}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, majorRevisionFeeNote: e.target.value },
+                      })
+                    }
+                    placeholder="Ganti musik setelah final cut dikenakan biaya re-editing"
+                    className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                  />
+                </div>
+                <div className="flex items-center gap-2 pt-6">
+                  <input
+                    type="checkbox"
+                    id="musicLicenseIncluded"
+                    checked={terms.roleSpecifics.musicLicenseIncluded ?? true}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, musicLicenseIncluded: e.target.checked },
+                      })
+                    }
+                    className="w-4 h-4 rounded text-[#1E1B2E] border-stone-300 focus:ring-[#1E1B2E]"
+                  />
+                  <label htmlFor="musicLicenseIncluded" className="text-xs font-bold text-stone-700">
+                    Jaminan Musik Bebas Klaim Hak Cipta
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {/* Studio specifics */}
+            {isStudio && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                    Kapasitas Maksimal Orang di Studio
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={terms.roleSpecifics.maxCrewCapacity || 10}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, maxCrewCapacity: Number(e.target.value) },
+                      })
+                    }
+                    className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                    Biaya Lembur Perpanjangan Shift
+                  </label>
+                  <input
+                    type="text"
+                    value={terms.roleSpecifics.overtimePerBlockFee || ""}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, overtimePerBlockFee: e.target.value },
+                      })
+                    }
+                    placeholder="Rp 150.000 per 30 menit"
+                    className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                  />
+                </div>
+                <div className="flex items-center gap-2 pt-6">
+                  <input
+                    type="checkbox"
+                    id="cycloramaShoeTapeRequired"
+                    checked={terms.roleSpecifics.cycloramaShoeTapeRequired ?? true}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, cycloramaShoeTapeRequired: e.target.checked },
+                      })
+                    }
+                    className="w-4 h-4 rounded text-[#1E1B2E] border-stone-300 focus:ring-[#1E1B2E]"
+                  />
+                  <label htmlFor="cycloramaShoeTapeRequired" className="text-xs font-bold text-stone-700">
+                    Wajib Lakban Khusus Sol Sepatu
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {/* Photographer specifics */}
+            {isPhotographer && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                    Kebijakan Penyerahan File Mentah (RAW)
+                  </label>
+                  <input
+                    type="text"
+                    value={terms.roleSpecifics.rawFilePolicy || ""}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, rawFilePolicy: e.target.value },
+                      })
+                    }
+                    placeholder="File JPG resolusi tinggi; RAW tidak diserahkan"
+                    className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                  />
+                </div>
+                <div className="flex items-center gap-2 pt-6">
+                  <input
+                    type="checkbox"
+                    id="colorAccuracyCommitment"
+                    checked={terms.roleSpecifics.colorAccuracyCommitment ?? true}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, colorAccuracyCommitment: e.target.checked },
+                      })
+                    }
+                    className="w-4 h-4 rounded text-[#1E1B2E] border-stone-300 focus:ring-[#1E1B2E]"
+                  />
+                  <label htmlFor="colorAccuracyCommitment" className="text-xs font-bold text-stone-700">
+                    Jaminan Akurasi Warna Produk Asli
+                  </label>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Submit Button */}
