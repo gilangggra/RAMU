@@ -7,9 +7,10 @@ import { TearSheetModal } from "./TearSheetModal";
 
 interface ShowcaseGalleryClientProps {
   items: ShowcaseItem[];
+  currentActorId?: string;
 }
 
-export function ShowcaseGalleryClient({ items }: ShowcaseGalleryClientProps) {
+export function ShowcaseGalleryClient({ items, currentActorId }: ShowcaseGalleryClientProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const handleOpenTearSheet = (item: ShowcaseItem) => {
@@ -52,6 +53,7 @@ export function ShowcaseGalleryClient({ items }: ShowcaseGalleryClientProps) {
         isOpen={selectedIndex !== null}
         onClose={handleClose}
         onSelectIndex={handleSelectIndex}
+        currentActorId={currentActorId}
       />
     </>
   );

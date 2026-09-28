@@ -3,9 +3,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ShowcaseItem } from "@/application/showcaseService";
 import { getTearSheetData, formatInstagramCredits } from "./tearSheetUtils";
 import { HotspotCategory } from "./tearSheetTypes";
+import { confirmCoCredit, rejectCoCredit } from "@/app/api/assets/actions";
 import {
   X,
   ChevronLeft,
@@ -29,7 +31,8 @@ import {
   UserCheck,
   Share2,
   Info,
-  Clock
+  Clock,
+  Loader2
 } from "lucide-react";
 
 interface TearSheetModalProps {
@@ -40,6 +43,7 @@ interface TearSheetModalProps {
   onClose: () => void;
   onSelectIndex: (index: number) => void;
   onBookAuthor?: () => void;
+  currentActorId?: string;
 }
 
 const CATEGORY_ICONS: Record<HotspotCategory, React.ElementType> = {
@@ -98,8 +102,10 @@ export function TearSheetModal({
   isOpen,
   onClose,
   onSelectIndex,
-  onBookAuthor
+  onBookAuthor,
+  currentActorId
 }: TearSheetModalProps) {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [showHotspots, setShowHotspots] = useState(true);
   const [activePinId, setActivePinId] = useState<string | null>(null);
@@ -114,6 +120,11 @@ export function TearSheetModal({
   const [claimSuccessMessage, setClaimSuccessMessage] = useState<string | null>(null);
   const [showGuaranteeModal, setShowGuaranteeModal] = useState(false);
 
+  // Persona & Co-Credit interactive states
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [actionFeedback, setActionFeedback] = useState<{ type: "success" | "rejected" | "info"; msg: string } | null>(null);
+  const [localConfirmedActorIds, setLocalConfirmedActorIds] = useState<string[]>([]);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -125,6 +136,7 @@ export function TearSheetModal({
     setHoveredPinId(null);
     setIsClaiming(false);
     setClaimSuccessMessage(null);
+    setActionFeedback(null);
     if (item?.id && typeof window !== "undefined") {
       const saved = localStorage.getItem(`ramu_verified_role_${item.id}`);
       setUserClaimedRole(saved);
@@ -182,7 +194,23 @@ export function TearSheetModal({
 
   const tearSheetData = getTearSheetData(item);
 
+  // Determine owner and actor persona
+  const realActorId = item.actor.id.split("-copy-")[0];
+  const isOwner = Boolean(
+    currentActorId &&
+    (realActorId === currentActorId || item.actor.id === currentActorId)
+  );
+
   const activeCredits = tearSheetData.credits.map((c) => {
+    const isLocallyConfirmed = c.actorId && localConfirmedActorIds.includes(c.actorId);
+    if (isLocallyConfirmed) {
+      return {
+        ...c,
+        verified: true,
+        status: "VERIFIED" as const,
+        verifiedBy: "Dikonfirmasi Langsung oleh Anda",
+      };
+    }
     if (
       userClaimedRole &&
       (c.role.toLowerCase().includes(userClaimedRole.toLowerCase()) ||
@@ -198,12 +226,74 @@ export function TearSheetModal({
     return c;
   });
 
+  // Contributor persona
+  const myCredit = activeCredits.find((c) => c.actorId === currentActorId);
+  const isCoCreditor = Boolean(myCredit);
+  const isPendingCoCredit = isCoCreditor && (!myCredit?.verified || myCredit?.status === "PENDING") && !localConfirmedActorIds.includes(currentActorId || "");
+  const isVerifiedCoCredit = isCoCreditor && (myCredit?.verified || localConfirmedActorIds.includes(currentActorId || ""));
+
+  const pendingCredits = activeCredits.filter((c) => (!c.verified || c.status === "PENDING") && !localConfirmedActorIds.includes(c.actorId || ""));
   const verifiedCount = activeCredits.filter((c) => c.verified).length;
   const totalCount = activeCredits.length;
   const isFullyVerified = verifiedCount === totalCount && totalCount > 0;
   const currentVerificationRate = isFullyVerified
     ? `100% (${verifiedCount}/${totalCount} Kru Terverifikasi)`
     : `${verifiedCount}/${totalCount} Kru Terkonfirmasi (Verifikasi Parsial)`;
+
+  const handleConfirmMyCredit = async () => {
+    if (!item?.id || !currentActorId) return;
+    setIsConfirming(true);
+    try {
+      const res = await confirmCoCredit(item.id);
+      if (res.success) {
+        setLocalConfirmedActorIds((prev) => [...prev, currentActorId]);
+        setActionFeedback({
+          type: "success",
+          msg: `Keterlibatan Anda pada "${item.title}" berhasil diverifikasi dan resmi tersinkronisasi ke profil portofolio Anda!`,
+        });
+        router.refresh();
+        setTimeout(() => setActionFeedback(null), 4000);
+      }
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
+  const handleRejectMyCredit = async () => {
+    if (!item?.id || !currentActorId) return;
+    if (!confirm(`Apakah Anda yakin ingin menolak penyematan kredit pada "${item.title}"? Nama Anda akan dihapus dari penyematan karya ini.`)) return;
+    setIsConfirming(true);
+    try {
+      const res = await rejectCoCredit(item.id);
+      if (res.success) {
+        setActionFeedback({
+          type: "rejected",
+          msg: `Penyematan kredit telah ditolak.`,
+        });
+        router.refresh();
+        setTimeout(() => setActionFeedback(null), 3000);
+      }
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
+  const handleSendCrewReminderWA = () => {
+    const pendingNames = pendingCredits.map((c) => c.name).join(", ");
+    const text = `Halo tim kreatif (${pendingNames})! Portofolio karya kolaborasi kita "${tearSheetData.title}" sudah tayang di RAMU. Yuk luangkan 10 detik untuk konfirmasi kreditmu di sini agar sertifikat anti-catfishing kita 100% aktif & karyanya otomatis tersambung ke profilmu: https://ramu.id/showcase`;
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank");
+  };
+
+  const handleSharePitchWA = () => {
+    const text = `Halo, berikut adalah portofolio kurasi visual resmi kami di RAMU: "${tearSheetData.title}" (${item.category}). Diproduksi secara sinergis dengan seluruh tim terverifikasi (bebas catfishing). Cek detail konsep dan spesifikasi produksi: https://ramu.id/showcase`;
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank");
+  };
 
   const handleCopyCredits = async () => {
     const dynamicData = {
@@ -240,8 +330,6 @@ export function TearSheetModal({
     if (currentIndex < items.length - 1) onSelectIndex(currentIndex + 1);
     else onSelectIndex(0);
   };
-
-  const realActorId = item.actor.id.split("-copy-")[0];
 
   const modalContent = (
     <div
@@ -385,7 +473,7 @@ export function TearSheetModal({
                   {tearSheetData.title}
                 </h2>
 
-                {/* Creator Byline & Discreet Certificate Stamp */}
+                {/* Creator Byline & Minimalist Certificate Stamp */}
                 <div className="flex items-center justify-between gap-3 pt-2 pb-3.5 border-b border-stone-100">
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div
@@ -394,12 +482,24 @@ export function TearSheetModal({
                       {item.actor.initials}
                     </div>
                     <div className="min-w-0">
-                      <Link
-                        href={`/directory/${realActorId}`}
-                        className="text-xs font-bold text-stone-900 hover:text-amber-800 transition-colors truncate block"
-                      >
-                        {item.actor.name}
-                      </Link>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <Link
+                          href={`/directory/${realActorId}`}
+                          className="text-xs font-bold text-stone-900 hover:text-amber-800 transition-colors truncate block"
+                        >
+                          {item.actor.name}
+                        </Link>
+                        {isOwner && (
+                          <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-amber-100 text-amber-900 font-mono font-black border border-amber-300">
+                            KARYA ANDA
+                          </span>
+                        )}
+                        {isCoCreditor && !isOwner && (
+                          <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-emerald-100 text-emerald-900 font-mono font-black border border-emerald-300">
+                            KOLABORASI ANDA
+                          </span>
+                        )}
+                      </div>
                       <span className="text-[10px] text-stone-500 font-mono block truncate">
                         {item.actor.sector}
                       </span>
@@ -425,6 +525,78 @@ export function TearSheetModal({
                 </p>
               </div>
 
+              {/* ── ACTION FEEDBACK BANNER (IF ANY) ── */}
+              {actionFeedback && (
+                <div
+                  className={`p-3 rounded-xl border text-xs font-semibold flex items-center gap-2 animate-fade-in ${
+                    actionFeedback.type === "success"
+                      ? "bg-emerald-50 border-emerald-300 text-emerald-950"
+                      : "bg-rose-50 border-rose-300 text-rose-950"
+                  }`}
+                >
+                  {actionFeedback.type === "success" ? (
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  ) : (
+                    <X className="w-4 h-4 text-rose-600 shrink-0" />
+                  )}
+                  <span>{actionFeedback.msg}</span>
+                </div>
+              )}
+
+              {/* ── CASE 1: OWNER PENDING CREW NUDGE ── */}
+              {isOwner && pendingCredits.length > 0 && (
+                <div className="p-3 rounded-xl bg-amber-50/90 border border-amber-200/90 text-amber-950 text-xs flex items-center justify-between gap-3 animate-fade-in">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <span className="truncate">
+                      <strong>{pendingCredits.length} rekan tim</strong> belum konfirmasi
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSendCrewReminderWA}
+                    className="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[10px] shrink-0 transition-all flex items-center gap-1 cursor-pointer shadow-2xs"
+                    title="Kirim pengingat konfirmasi ke WhatsApp rekan tim"
+                  >
+                    <Share2 className="w-3 h-3" />
+                    <span>Ingatkan (WA)</span>
+                  </button>
+                </div>
+              )}
+
+              {/* ── CASE 2: CO-CREDITOR INVITATION BANNER ── */}
+              {isCoCreditor && isPendingCoCredit && (
+                <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 to-emerald-500/10 border border-amber-300/80 text-xs text-stone-900 space-y-2 animate-fade-in">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-amber-600" />
+                      <span className="font-bold">Permintaan Verifikasi Co-Credit</span>
+                    </div>
+                    <span className="text-[9px] font-mono font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded">
+                      Menunggu Anda
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-stone-600 leading-snug">
+                    Kreator menyematkan Anda sebagai <strong>{myCredit?.role}</strong>. Konfirmasi sekarang untuk mengaktifkan stempel anti-catfishing dan menyinkronkan karya ini ke portofolio profil Anda.
+                  </p>
+                </div>
+              )}
+
+              {/* ── CASE 2B: CO-CREDITOR VERIFIED BADGE ── */}
+              {isCoCreditor && isVerifiedCoCredit && (
+                <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs flex items-center justify-between gap-2 animate-fade-in">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span className="truncate">
+                      Anda terverifikasi sebagai <strong>{myCredit?.role}</strong>
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-emerald-800 shrink-0">
+                    Tersinkron di Profil
+                  </span>
+                </div>
+              )}
+
               {/* ── MASTHEAD PRODUCTION CREDITS (VOGUE ROSTER) ── */}
               <div className="space-y-2 pt-4 border-t border-stone-100">
                 <div className="flex items-center justify-between pb-1">
@@ -442,11 +614,15 @@ export function TearSheetModal({
                       ? `/directory/${credit.actorId}`
                       : `/directory?q=${encodeURIComponent(credit.name)}`;
 
+                    const isThisUser = currentActorId && credit.actorId === currentActorId;
+
                     return (
                       <Link
                         key={idx}
                         href={profileHref}
-                        className="group py-2.5 flex items-center justify-between gap-3 text-xs hover:bg-stone-50/80 -mx-2 px-2 rounded-lg transition-colors"
+                        className={`group py-2.5 flex items-center justify-between gap-3 text-xs -mx-2 px-2 rounded-lg transition-colors ${
+                          isThisUser ? "bg-amber-50/60 hover:bg-amber-100/60" : "hover:bg-stone-50/80"
+                        }`}
                         title={`Buka profil ${credit.name} (${credit.role})`}
                       >
                         {/* Left: Role */}
@@ -460,7 +636,7 @@ export function TearSheetModal({
                         <div className="w-[58%] flex items-center justify-end gap-2 min-w-0">
                           <div className="text-right min-w-0">
                             <span className="font-medium text-stone-900 group-hover:text-stone-950 truncate block">
-                              {credit.name}
+                              {credit.name} {isThisUser && <span className="text-amber-800 font-bold">(Anda)</span>}
                             </span>
                             {credit.handle && (
                               <span className="text-[10px] font-mono text-stone-400 group-hover:text-stone-500 block truncate">
@@ -498,78 +674,80 @@ export function TearSheetModal({
                 </div>
               </div>
 
-              {/* ── CO-CREDIT PARTICIPATION ACCORDION ── */}
-              <div className="pt-4 border-t border-stone-100 space-y-2">
-                {claimSuccessMessage && (
-                  <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>{claimSuccessMessage}</span>
-                  </div>
-                )}
-
-                {userClaimedRole ? (
-                  <div className="flex items-center justify-between text-xs py-1 text-emerald-900">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span className="truncate">Peran Anda: <strong>{userClaimedRole}</strong></span>
+              {/* ── CASE 3: EXTERNAL VISITOR CLAIM ACCORDION (ONLY IF NOT OWNER & NOT CO-CREDITOR) ── */}
+              {!isOwner && !isCoCreditor && (
+                <div className="pt-4 border-t border-stone-100 space-y-2">
+                  {claimSuccessMessage && (
+                    <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>{claimSuccessMessage}</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleRevokeClaim}
-                      className="text-[10px] text-stone-400 hover:text-stone-700 underline shrink-0 cursor-pointer ml-2"
-                    >
-                      Ubah
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between text-xs text-stone-500 py-1">
-                    <span>Terlibat dalam karya ini?</span>
-                    <button
-                      type="button"
-                      onClick={() => setIsClaiming(!isClaiming)}
-                      className="font-bold text-stone-900 hover:text-amber-800 underline text-xs cursor-pointer"
-                    >
-                      {isClaiming ? "Tutup" : "Klaim Kontribusi ↗"}
-                    </button>
-                  </div>
-                )}
+                  )}
 
-                {isClaiming && (
-                  <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/80 space-y-2 animate-fade-in text-xs">
-                    <label className="block text-[10px] font-mono uppercase font-bold text-stone-600">
-                      Pilih Peran Anda di Tim Produksi:
-                    </label>
-                    <select
-                      value={claimedRoleInput}
-                      onChange={(e) => setClaimedRoleInput(e.target.value)}
-                      className="w-full text-xs p-2 rounded-lg bg-white border border-stone-300 text-stone-900 focus:outline-hidden focus:ring-1 focus:ring-stone-400"
-                    >
-                      <option value="Fotografi / Asisten Lighting">Fotografi / Asisten Lighting</option>
-                      <option value="Fashion Stylist / Wardrobe Designer">Fashion Stylist / Wardrobe Designer</option>
-                      <option value="Hair & Makeup Artist (HMUA)">Hair & Makeup Artist (HMUA)</option>
-                      <option value="Model / Talent">Model / Talent</option>
-                      <option value="Art Director / Set Designer">Art Director / Set Designer</option>
-                      <option value="Studio / Location Provider">Studio / Location Provider</option>
-                    </select>
-                    <div className="flex gap-2 pt-1">
+                  {userClaimedRole ? (
+                    <div className="flex items-center justify-between text-xs py-1 text-emerald-900">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span className="truncate">Peran Anda: <strong>{userClaimedRole}</strong></span>
+                      </div>
                       <button
                         type="button"
-                        onClick={() => handleConfirmClaim(claimedRoleInput)}
-                        className="flex-1 py-1.5 px-3 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-bold transition-all cursor-pointer"
+                        onClick={handleRevokeClaim}
+                        className="text-[10px] text-stone-400 hover:text-stone-700 underline shrink-0 cursor-pointer ml-2"
                       >
-                        Konfirmasi
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setIsClaiming(false)}
-                        className="py-1.5 px-3 rounded-lg bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs cursor-pointer"
-                      >
-                        Batal
+                        Ubah
                       </button>
                     </div>
-                  </div>
-                )}
-              </div>
+                  ) : (
+                    <div className="flex items-center justify-between text-xs text-stone-500 py-1">
+                      <span>Terlibat dalam karya ini?</span>
+                      <button
+                        type="button"
+                        onClick={() => setIsClaiming(!isClaiming)}
+                        className="font-bold text-stone-900 hover:text-amber-800 underline text-xs cursor-pointer"
+                      >
+                        {isClaiming ? "Tutup" : "Klaim Kontribusi ↗"}
+                      </button>
+                    </div>
+                  )}
+
+                  {isClaiming && (
+                    <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/80 space-y-2 animate-fade-in text-xs">
+                      <label className="block text-[10px] font-mono uppercase font-bold text-stone-600">
+                        Pilih Peran Anda di Tim Produksi:
+                      </label>
+                      <select
+                        value={claimedRoleInput}
+                        onChange={(e) => setClaimedRoleInput(e.target.value)}
+                        className="w-full text-xs p-2 rounded-lg bg-white border border-stone-300 text-stone-900 focus:outline-hidden focus:ring-1 focus:ring-stone-400"
+                      >
+                        <option value="Fotografi / Asisten Lighting">Fotografi / Asisten Lighting</option>
+                        <option value="Fashion Stylist / Wardrobe Designer">Fashion Stylist / Wardrobe Designer</option>
+                        <option value="Hair & Makeup Artist (HMUA)">Hair & Makeup Artist (HMUA)</option>
+                        <option value="Model / Talent">Model / Talent</option>
+                        <option value="Art Director / Set Designer">Art Director / Set Designer</option>
+                        <option value="Studio / Location Provider">Studio / Location Provider</option>
+                      </select>
+                      <div className="flex gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => handleConfirmClaim(claimedRoleInput)}
+                          className="flex-1 py-1.5 px-3 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-bold transition-all cursor-pointer"
+                        >
+                          Konfirmasi
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsClaiming(false)}
+                          className="py-1.5 px-3 rounded-lg bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs cursor-pointer"
+                        >
+                          Batal
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* ── TECHNICAL RIG SPECIFICATIONS ── */}
               {tearSheetData.technicalSpecs && (
@@ -613,65 +791,172 @@ export function TearSheetModal({
 
             </div>
 
-            {/* ── FIXED ACTION FOOTER (1-ROW SLEEK EDITORIAL BAR) ── */}
+            {/* ── CONTEXT-AWARE 1-ROW ACTION FOOTER ── */}
             <div className="p-4 sm:p-5 bg-white border-t border-stone-100 flex items-center gap-2.5 shrink-0">
               
-              {/* Secondary Action: Copy IG Credits */}
-              <button
-                type="button"
-                onClick={handleCopyCredits}
-                className={`h-11 px-3.5 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer ${
-                  copied
-                    ? "bg-emerald-50 border-emerald-300 text-emerald-800"
-                    : "bg-white hover:bg-stone-50 border-stone-200 text-stone-700"
-                }`}
-                title="Salin Format Kredit untuk Caption Instagram"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-stone-500" />}
-                <span className="hidden sm:inline">{copied ? "Tersalin" : "Salin IG"}</span>
-              </button>
+              {/* CASE 1: OWNER FOOTER */}
+              {isOwner ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleCopyCredits}
+                    className={`h-11 px-3.5 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer ${
+                      copied
+                        ? "bg-emerald-50 border-emerald-300 text-emerald-800"
+                        : "bg-white hover:bg-stone-50 border-stone-200 text-stone-700"
+                    }`}
+                    title="Salin Format Kredit untuk Caption Instagram"
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-stone-500" />}
+                    <span className="hidden sm:inline">{copied ? "Tersalin" : "Salin IG"}</span>
+                  </button>
 
-              {/* Secondary Action: WhatsApp Share */}
-              <button
-                type="button"
-                onClick={() =>
-                  handleShareWhatsApp(
-                    tearSheetData.antiCatfishingCertificateId,
-                    tearSheetData.title,
-                    tearSheetData.edition
-                  )
-                }
-                className="h-11 px-3.5 rounded-xl bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
-                title="Bagikan Bukti Sertifikat via WhatsApp"
-              >
-                <Share2 className="w-3.5 h-3.5 text-stone-500" />
-                <span className="hidden sm:inline">Bukti WA</span>
-              </button>
+                  <button
+                    type="button"
+                    onClick={handleSharePitchWA}
+                    className="h-11 px-3.5 rounded-xl bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                    title="Kirim presentasi portofolio ke Klien via WhatsApp"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-stone-500" />
+                    <span className="hidden sm:inline">Kirim Pitch</span>
+                  </button>
 
-              {/* Primary Collab CTA */}
-              {onBookAuthor ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClose();
-                    onBookAuthor();
-                  }}
-                  className="flex-1 h-11 px-4 rounded-xl bg-stone-900 hover:bg-black text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-98"
-                >
-                  <span>Ajak Tim Ini Berkolaborasi</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
-                </button>
+                  <Link
+                    href="/dashboard/showcase"
+                    className="flex-1 h-11 px-4 rounded-xl bg-stone-900 hover:bg-black text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-98"
+                  >
+                    <Sliders className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Kelola Portofolio</span>
+                  </Link>
+                </>
+              ) : isCoCreditor && isPendingCoCredit ? (
+                /* CASE 2: CO-CREDITOR PENDING CONFIRMATION FOOTER */
+                <>
+                  <button
+                    type="button"
+                    disabled={isConfirming}
+                    onClick={handleRejectMyCredit}
+                    className="h-11 px-3.5 rounded-xl bg-stone-100 hover:bg-rose-50 hover:text-rose-700 border border-stone-200 text-stone-600 text-xs font-semibold transition-all flex items-center justify-center gap-1 shrink-0 cursor-pointer disabled:opacity-50"
+                    title="Tolak penyematan kredit jika Anda tidak terlibat"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    <span>Bukan Saya</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={isConfirming}
+                    onClick={handleConfirmMyCredit}
+                    className="flex-1 h-11 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-98 disabled:opacity-50"
+                  >
+                    {isConfirming ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Check className="w-4 h-4" />
+                    )}
+                    <span>Konfirmasi Keterlibatan Saya</span>
+                  </button>
+                </>
+              ) : isCoCreditor && isVerifiedCoCredit ? (
+                /* CASE 2B: CO-CREDITOR VERIFIED FOOTER */
+                <>
+                  <button
+                    type="button"
+                    onClick={handleCopyCredits}
+                    className={`h-11 px-3.5 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer ${
+                      copied
+                        ? "bg-emerald-50 border-emerald-300 text-emerald-800"
+                        : "bg-white hover:bg-stone-50 border-stone-200 text-stone-700"
+                    }`}
+                    title="Salin Format Kredit untuk Caption Instagram"
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-stone-500" />}
+                    <span className="hidden sm:inline">{copied ? "Tersalin" : "Salin IG"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleShareWhatsApp(
+                        tearSheetData.antiCatfishingCertificateId,
+                        tearSheetData.title,
+                        tearSheetData.edition
+                      )
+                    }
+                    className="h-11 px-3.5 rounded-xl bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                    title="Bagikan Bukti Sertifikat via WhatsApp"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-stone-500" />
+                    <span className="hidden sm:inline">Bukti WA</span>
+                  </button>
+
+                  <Link
+                    href={`/directory/${currentActorId}`}
+                    className="flex-1 h-11 px-4 rounded-xl bg-stone-900 hover:bg-black text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-98"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Lihat di Profil Saya</span>
+                  </Link>
+                </>
               ) : (
-                <Link
-                  href={`/projects/new?title=${encodeURIComponent(
-                    `Kolaborasi Sinergis: ${item.title}`
-                  )}&category=${encodeURIComponent(item.category)}`}
-                  className="flex-1 h-11 px-4 rounded-xl bg-stone-900 hover:bg-black text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 shadow-sm hover:scale-[1.01] active:scale-98"
-                >
-                  <span>Ajak Tim Ini Berkolaborasi</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
-                </Link>
+                /* CASE 3: EXTERNAL VISITOR / CLIENT FOOTER */
+                <>
+                  <button
+                    type="button"
+                    onClick={handleCopyCredits}
+                    className={`h-11 px-3.5 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer ${
+                      copied
+                        ? "bg-emerald-50 border-emerald-300 text-emerald-800"
+                        : "bg-white hover:bg-stone-50 border-stone-200 text-stone-700"
+                    }`}
+                    title="Salin Format Kredit untuk Caption Instagram"
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-stone-500" />}
+                    <span className="hidden sm:inline">{copied ? "Tersalin" : "Salin IG"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleShareWhatsApp(
+                        tearSheetData.antiCatfishingCertificateId,
+                        tearSheetData.title,
+                        tearSheetData.edition
+                      )
+                    }
+                    className="h-11 px-3.5 rounded-xl bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                    title="Bagikan Bukti Sertifikat via WhatsApp"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-stone-500" />
+                    <span className="hidden sm:inline">Bukti WA</span>
+                  </button>
+
+                  {onBookAuthor ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onBookAuthor();
+                      }}
+                      className="flex-1 h-11 px-4 rounded-xl bg-stone-900 hover:bg-black text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-98"
+                    >
+                      <span>Ajak Tim Ini Berkolaborasi</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
+                    </button>
+                  ) : (
+                    <Link
+                      href={`/projects/new?title=${encodeURIComponent(
+                        `Kolaborasi Sinergis: ${item.title}`
+                      )}&category=${encodeURIComponent(item.category)}`}
+                      className="flex-1 h-11 px-4 rounded-xl bg-stone-900 hover:bg-black text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 shadow-sm hover:scale-[1.01] active:scale-98"
+                    >
+                      <span>Ajak Tim Ini Berkolaborasi</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
+                    </Link>
+                  )}
+                </>
               )}
+
             </div>
 
           </div>

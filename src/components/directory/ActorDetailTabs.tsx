@@ -1482,6 +1482,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
           onClose={() => setSelectedShowcaseIndex(null)}
           onSelectIndex={(newIdx) => setSelectedShowcaseIndex(newIdx)}
           onBookAuthor={() => setIsBookingOpen(true)}
+          currentActorId={isCurrentActor ? actor.id : undefined}
         />
       )}
 

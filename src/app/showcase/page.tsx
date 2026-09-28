@@ -95,7 +95,7 @@ export default async function ShowcasePage({
 
         {/* ── MASONRY GRID WITH INTERACTIVE TEAR-SHEET MODAL ── */}
         {showcaseItems.length > 0 ? (
-          <ShowcaseGalleryClient items={showcaseItems} />
+          <ShowcaseGalleryClient items={showcaseItems} currentActorId={actor.id} />
         ) : (
           <div className="flex flex-col items-center justify-center py-20 px-6 rounded-[32px] bg-white/70 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_rgba(39,33,61,0.04)] space-y-4 text-center">
             <div className="w-14 h-14 rounded-2xl bg-white/80 border border-white/90 shadow-sm flex items-center justify-center text-stone-400">
