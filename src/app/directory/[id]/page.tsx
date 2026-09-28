@@ -138,7 +138,7 @@ export default async function DirectoryDetailPage({
   const customServiceAsset = actor.assets.find(
     (a) =>
       a.subtype === "COMMERCIAL_SERVICE_PACKAGES" ||
-      (a.attributes && typeof a.attributes === "object" && ("service_packages" in (a.attributes as any) || "starting_rate" in (a.attributes as any)))
+      (a.attributes && typeof a.attributes === "object" && ("service_packages" in (a.attributes as any) || "starting_rate" in (a.attributes as any) || "terms_and_conditions" in (a.attributes as any)))
   );
   const customAttrs = (customServiceAsset?.attributes as any) || {};
   if (customAttrs.starting_rate) {
@@ -147,6 +147,7 @@ export default async function DirectoryDetailPage({
   if (customAttrs.turnaround_time) {
     turnaroundTime = customAttrs.turnaround_time;
   }
+  const customTermsConfig = customAttrs.terms_and_conditions || null;
 
   // Format WhatsApp link if contact phone exists
   const rawPhone = actor.contactPhone || "";
@@ -262,6 +263,7 @@ export default async function DirectoryDetailPage({
                     targetSector={actor.sector} 
                     targetType={actor.actorType} 
                     label="Sewa Jasa / Rekrut Sekarang" 
+                    termsConfig={customTermsConfig}
                   />
                   {waLink ? (
                     <a
@@ -355,6 +357,7 @@ export default async function DirectoryDetailPage({
                     targetSector={actor.sector} 
                     targetType={actor.actorType} 
                     label="Sewa Studio Sekarang" 
+                    termsConfig={customTermsConfig}
                   />
                   {waLink ? (
                     <a
@@ -487,6 +490,7 @@ export default async function DirectoryDetailPage({
                   targetSector={actor.sector} 
                   targetType={actor.actorType} 
                   label="Pesan Jasa / Pengadaan" 
+                  termsConfig={customTermsConfig}
                 />
                 {waLink ? (
                   <a

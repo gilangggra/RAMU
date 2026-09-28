@@ -40,6 +40,7 @@ export default async function SettingsRatesPage() {
   const customStartingRate = attrs.starting_rate || "";
   const customTurnaround = attrs.turnaround_time || "";
   const customPackages: ServicePackage[] = Array.isArray(attrs.service_packages) ? attrs.service_packages : [];
+  const customTerms = attrs.terms_and_conditions || null;
 
   // Default baseline fallback if user hasn't set anything yet
   const sectorLower = actor.sector.toLowerCase();
@@ -72,6 +73,7 @@ export default async function SettingsRatesPage() {
         initialStartingRate={customStartingRate || defaultStartingRate}
         initialTurnaroundTime={customTurnaround || defaultTurnaround}
         initialPackages={customPackages}
+        initialTerms={customTerms}
         actorSector={actor.sector}
         actorType={actor.actorType}
       />

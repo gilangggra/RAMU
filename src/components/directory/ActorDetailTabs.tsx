@@ -269,9 +269,10 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
   const customServiceAsset = actor.assets.find(
     (a) =>
       a.subtype === "COMMERCIAL_SERVICE_PACKAGES" ||
-      (a.attributes && typeof a.attributes === "object" && "service_packages" in (a.attributes as any))
+      (a.attributes && typeof a.attributes === "object" && ("service_packages" in (a.attributes as any) || "terms_and_conditions" in (a.attributes as any)))
   );
   const customPackages = (customServiceAsset?.attributes as any)?.service_packages as ServicePackage[] | undefined;
+  const customTermsConfig = (customServiceAsset?.attributes as any)?.terms_and_conditions || null;
 
   let packages: ServicePackage[] = [];
 
@@ -1454,6 +1455,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
         targetName={actor.name}
         targetSector={actor.sector}
         targetType={actor.actorType}
+        termsConfig={customTermsConfig}
       />
     </div>
   );

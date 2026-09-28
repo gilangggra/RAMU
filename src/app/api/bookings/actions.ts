@@ -84,17 +84,17 @@ export async function updateBookingStatus(bookingId: string, status: "ACCEPTED" 
       include: { actors: { where: { status: { not: "ARCHIVED" } } } }
     });
 
-    const primaryActor = profile?.actors?.[0];
-    if (!primaryActor) return { success: false, error: "Profile not found." };
+    const userActorIds = profile?.actors?.map((a) => a.id) || [];
+    if (userActorIds.length === 0) return { success: false, error: "Profil aktor tidak ditemukan." };
 
     // Verify ownership of the target actor
     const booking = await prisma.bookingRequest.findUnique({
       where: { id: bookingId }
     });
 
-    if (!booking) return { success: false, error: "Booking not found." };
-    if (booking.targetId !== primaryActor.id) {
-      return { success: false, error: "You are not authorized to update this booking." };
+    if (!booking) return { success: false, error: "Pesanan tidak ditemukan." };
+    if (!userActorIds.includes(booking.targetId)) {
+      return { success: false, error: "Anda tidak memiliki akses untuk memperbarui pesanan ini." };
     }
 
     await prisma.bookingRequest.update({
@@ -103,10 +103,11 @@ export async function updateBookingStatus(bookingId: string, status: "ACCEPTED" 
     });
 
     revalidatePath("/dashboard/bookings");
+    revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
     console.error("Error updating booking status:", error);
-    return { success: false, error: "Failed to update status." };
+    return { success: false, error: "Gagal memperbarui status pesanan." };
   }
 }
 
@@ -123,7 +124,8 @@ export async function convertBookingToCollaboration(bookingId: string) {
     });
 
     const primaryActor = profile?.actors?.[0];
-    if (!primaryActor) return { success: false, error: "Profile not found." };
+    if (!primaryActor) return { success: false, error: "Profil aktor tidak ditemukan." };
+    const userActorIds = profile?.actors?.map((a) => a.id) || [];
 
     const booking = await prisma.bookingRequest.findUnique({
       where: { id: bookingId },
@@ -136,7 +138,7 @@ export async function convertBookingToCollaboration(bookingId: string) {
     if (!booking) return { success: false, error: "Booking tidak ditemukan." };
 
     // Verify user is either target or requester
-    if (booking.targetId !== primaryActor.id && booking.requesterId !== primaryActor.id) {
+    if (!userActorIds.includes(booking.targetId) && !userActorIds.includes(booking.requesterId)) {
       return { success: false, error: "Anda tidak memiliki izin untuk mengonversi pesanan ini." };
     }
 

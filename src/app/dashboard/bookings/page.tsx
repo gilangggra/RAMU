@@ -4,7 +4,13 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { AppShell } from "@/components/layout/AppShell";
 import { ArrowLeft, Clock, CheckCircle2, XCircle, ChevronRight, Inbox, Send, ArrowUpRight, ExternalLink } from "lucide-react";
-import { BookingStatusManager, ConvertBookingButton, BookingContactActions } from "./BookingStatusManager";
+import {
+  BookingStatusManager,
+  ConvertBookingButton,
+  BookingContactActions,
+  ViewSpkButton,
+  BookingMilestoneTracker,
+} from "./BookingStatusManager";
 
 export default async function BookingManagementPage() {
   const supabase = await createClient();
@@ -35,13 +41,13 @@ export default async function BookingManagementPage() {
 
   const incomingBookings = await prisma.bookingRequest.findMany({
     where: { targetId: primaryActor.id },
-    include: { requester: true },
+    include: { requester: true, target: true },
     orderBy: { createdAt: "desc" },
   });
 
   const outgoingBookings = await prisma.bookingRequest.findMany({
     where: { requesterId: primaryActor.id },
-    include: { target: true },
+    include: { requester: true, target: true },
     orderBy: { createdAt: "desc" },
   });
 
@@ -131,6 +137,16 @@ export default async function BookingManagementPage() {
                       </div>
                     </div>
 
+                    <BookingMilestoneTracker
+                      status={booking.status}
+                      dpPercentage={(booking.details as any)?.agreedTerms?.dpPercentage || 50}
+                    />
+
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-stone-100">
+                      <ViewSpkButton booking={booking as any} />
+                      <span className="text-[11px] font-mono text-stone-400 font-medium">Ref: SPK-RAMU-{booking.id.slice(0, 8).toUpperCase()}</span>
+                    </div>
+
                     {booking.status === "PENDING" && (
                       <BookingStatusManager bookingId={booking.id} />
                     )}
@@ -215,6 +231,16 @@ export default async function BookingManagementPage() {
                       </div>
                     </div>
 
+                    <BookingMilestoneTracker
+                      status={booking.status}
+                      dpPercentage={(booking.details as any)?.agreedTerms?.dpPercentage || 50}
+                    />
+
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-stone-100">
+                      <ViewSpkButton booking={booking as any} />
+                      <span className="text-[11px] font-mono text-stone-400 font-medium">Ref: SPK-RAMU-{booking.id.slice(0, 8).toUpperCase()}</span>
+                    </div>
+
                     {booking.status === "ACCEPTED" && (
                       <div className="mt-4 pt-4 border-t border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
@@ -254,7 +280,7 @@ function BookingDetailsBadgeList({ details }: { details: any }) {
   }
 
   const entries = Object.entries(details).filter(
-    ([key, val]) => key !== "collaborationId" && val && String(val).trim() !== ""
+    ([key, val]) => key !== "collaborationId" && key !== "agreedTerms" && val && String(val).trim() !== ""
   );
 
   if (entries.length === 0) {

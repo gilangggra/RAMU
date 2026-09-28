@@ -10,9 +10,10 @@ interface BookingButtonProps {
   targetSector: string;
   targetType: string;
   label?: string;
+  termsConfig?: any;
 }
 
-export function BookingButton({ targetId, targetName, targetSector, targetType, label }: BookingButtonProps) {
+export function BookingButton({ targetId, targetName, targetSector, targetType, label, termsConfig }: BookingButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -32,6 +33,7 @@ export function BookingButton({ targetId, targetName, targetSector, targetType, 
         targetName={targetName}
         targetSector={targetSector}
         targetType={targetType}
+        termsConfig={termsConfig}
       />
     </>
   );

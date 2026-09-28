@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { X, Calendar, Loader2, CheckCircle2, ArrowRight } from "lucide-react";
+import { X, Calendar, Loader2, CheckCircle2, ArrowRight, ShieldCheck } from "lucide-react";
 import { createBookingRequest } from "@/app/api/bookings/actions";
+import { TermsAndConditionsConfig, getDefaultTerms } from "@/components/settings/RatesForm";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface BookingModalProps {
   targetName: string;
   targetSector: string;
   targetType: string;
+  termsConfig?: TermsAndConditionsConfig | null;
 }
 
 export function BookingModal({
@@ -21,8 +23,11 @@ export function BookingModal({
   targetName,
   targetSector,
   targetType,
+  termsConfig,
 }: BookingModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const effectiveTerms = termsConfig || getDefaultTerms(targetSector, targetType);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -58,12 +63,26 @@ export function BookingModal({
     setIsLoading(true);
     setErrorMessage(null);
 
+    const detailsPayload: Record<string, any> = {
+      ...details,
+      agreedTerms: {
+        dpPercentage: effectiveTerms.dpPercentage,
+        maxRevisions: effectiveTerms.maxRevisions,
+        shiftHours: effectiveTerms.shiftHours,
+        overtimeRate: effectiveTerms.overtimeRate,
+        gracePeriodMinutes: effectiveTerms.gracePeriodMinutes,
+        roleSpecifics: effectiveTerms.roleSpecifics,
+        safeSetCompliant: effectiveTerms.safeSetCompliant,
+        clientAgreedAt: new Date().toISOString(),
+      },
+    };
+
     const result = await createBookingRequest({
       targetId,
       startDate,
       endDate: endDate || undefined,
       budget,
-      details,
+      details: detailsPayload,
     });
 
     setIsLoading(false);
@@ -289,6 +308,87 @@ export function BookingModal({
               {/* Dynamic Polymorphic Fields */}
               {renderDynamicFields()}
 
+              {/* Ringkasan Kesepakatan & Proteksi RAMU */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-stone-50 border border-amber-200/80 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-amber-600" />
+                    <span className="text-xs font-bold text-[#1E1B2E] uppercase tracking-wider">
+                      Kesepakatan &amp; Proteksi Kerja RAMU
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">
+                    Standar Industri
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-stone-600 pt-1">
+                  <div className="flex items-start gap-2 bg-white/80 p-2.5 rounded-xl border border-stone-100">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-[#1E1B2E] block">DP {effectiveTerms.dpPercentage}% Kunci Jadwal</span>
+                      <span className="text-[11px] text-stone-500 leading-tight">Jadwal resmi diikat setelah DP; pembatalan mendadak H-3 DP tidak dapat ditarik kembali.</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2 bg-white/80 p-2.5 rounded-xl border border-stone-100">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-[#1E1B2E] block">Batas {effectiveTerms.maxRevisions}x Revisi Minor</span>
+                      <span className="text-[11px] text-stone-500 leading-tight">Penyesuaian tone/warna; ganti konsep total di luar brief dikenakan addendum baru.</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2 bg-white/80 p-2.5 rounded-xl border border-stone-100">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-[#1E1B2E] block">Shift {effectiveTerms.shiftHours} Jam &amp; Lembur</span>
+                      <span className="text-[11px] text-stone-500 leading-tight">Overtime {effectiveTerms.overtimeRate} setelah toleransi {effectiveTerms.gracePeriodMinutes} menit.</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2 bg-white/80 p-2.5 rounded-xl border border-stone-100">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-[#1E1B2E] block">🛡️ Garansi Klien 100% Anti No-Show</span>
+                      <span className="text-[11px] text-stone-500 leading-tight">Uang DP 100% dikembalikan jika talenta mangkir/tidak hadir di lokasi.</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Role Specific Highlight if any */}
+                {effectiveTerms.roleSpecifics.wardrobeRestrictions && (
+                  <p className="text-[11px] text-stone-600 bg-white/80 p-2.5 rounded-xl border border-amber-100">
+                    👗 <strong>Batasan Busana:</strong> {effectiveTerms.roleSpecifics.wardrobeRestrictions}
+                  </p>
+                )}
+                {effectiveTerms.roleSpecifics.maxHeadsIncluded && (
+                  <p className="text-[11px] text-stone-600 bg-white/80 p-2.5 rounded-xl border border-amber-100">
+                    💄 <strong>Lingkup Rias:</strong> Maksimal {effectiveTerms.roleSpecifics.maxHeadsIncluded} orang (orang tambahan: {effectiveTerms.roleSpecifics.extraHeadFee || "biaya terpisah"}).
+                  </p>
+                )}
+                {effectiveTerms.roleSpecifics.maxCrewCapacity && (
+                  <p className="text-[11px] text-stone-600 bg-white/80 p-2.5 rounded-xl border border-amber-100">
+                    🏛️ <strong>Kapasitas Studio:</strong> Maksimal {effectiveTerms.roleSpecifics.maxCrewCapacity} orang di dalam area studio.
+                  </p>
+                )}
+
+                {/* Mandatory Checkbox */}
+                <div className="pt-2 border-t border-amber-200/60 flex items-start gap-2.5">
+                  <input
+                    type="checkbox"
+                    id="agreedToTerms"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                    required
+                    className="w-4 h-4 rounded text-[#1E1B2E] border-stone-300 focus:ring-[#1E1B2E] mt-0.5 cursor-pointer"
+                  />
+                  <label htmlFor="agreedToTerms" className="text-xs font-bold text-[#1E1B2E] cursor-pointer leading-relaxed">
+                    Saya menyetujui Ketentuan Kerja Profesional RAMU di atas dan memahami komitmen DP 50%, batas revisi, serta Garansi Anti No-Show.
+                  </label>
+                </div>
+              </div>
+
             </form>
           )}
         </div>
@@ -307,8 +407,8 @@ export function BookingModal({
             <button
               type="submit"
               form="booking-form"
-              disabled={isLoading}
-              className="px-8 py-3 bg-[#1E1B2E] hover:bg-black text-white rounded-xl text-sm font-bold tracking-wide transition-colors flex items-center gap-2"
+              disabled={isLoading || !agreedToTerms}
+              className="px-8 py-3 bg-[#1E1B2E] hover:bg-black text-white rounded-xl text-sm font-bold tracking-wide transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               {isLoading ? (
                 <>

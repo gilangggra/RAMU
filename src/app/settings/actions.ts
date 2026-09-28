@@ -128,6 +128,16 @@ export async function updateServicePackagesAndRates(formData: FormData) {
       }
     }
 
+    const termsAndConditionsJson = formData.get("termsAndConditionsJson")?.toString().trim();
+    let parsedTerms = null;
+    if (termsAndConditionsJson) {
+      try {
+        parsedTerms = JSON.parse(termsAndConditionsJson);
+      } catch (e) {
+        // ignore format error
+      }
+    }
+
     const actor = await prisma.actor.findFirst({
       where: { ownerUserId: user.id },
     });
@@ -148,6 +158,7 @@ export async function updateServicePackagesAndRates(formData: FormData) {
       starting_rate: startingRate,
       turnaround_time: turnaroundTime || "3 – 5 Hari Kerja",
       service_packages: parsedPackages,
+      terms_and_conditions: parsedTerms,
     };
 
     if (existingAsset) {
