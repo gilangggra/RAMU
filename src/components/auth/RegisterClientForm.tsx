@@ -150,6 +150,10 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [location, setLocation] = useState(POPULAR_LOCATIONS[0]);
   
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const avatarInputRef = React.useRef<HTMLInputElement>(null);
+
   const [bio, setBio] = useState("");
   const [address, setAddress] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
@@ -161,6 +165,30 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stepError, setStepError] = useState("");
   const [isPending, startTransition] = useTransition();
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setStepError("Ukuran foto profil maksimal 5 MB.");
+        return;
+      }
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+      setStepError("");
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarFile(null);
+    if (avatarPreview) {
+      URL.revokeObjectURL(avatarPreview);
+      setAvatarPreview(null);
+    }
+    if (avatarInputRef.current) {
+      avatarInputRef.current.value = "";
+    }
+  };
 
   const specializationsForRole = SPECIALIZATIONS_BY_ROLE[selectedRole] || [];
   const hasSpecializationStep = specializationsForRole.length > 0;
@@ -215,6 +243,9 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
     formData.set("location", location);
 
     if (!skipOptional) {
+      if (avatarFile) {
+        formData.set("avatarFile", avatarFile);
+      }
       formData.set("bio", bio.trim());
       formData.set("address", address.trim());
       formData.set("skills", JSON.stringify(skills));
@@ -538,6 +569,64 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
               <div className="space-y-5">
                 <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 leading-relaxed">
                   <strong>Opsional:</strong> Informasi ini membantu Engine RAMU mencocokkan Anda dengan peluang kolaborasi yang lebih tepat. Anda juga dapat melewatinya sekarang dan mengisinya nanti di Pengaturan Akun.
+                </div>
+
+                <div className="p-4 rounded-2xl bg-stone-50 border-2 border-stone-200 flex flex-col sm:flex-row items-center gap-4">
+                  <div
+                    onClick={() => avatarInputRef.current?.click()}
+                    className="w-16 h-16 rounded-full overflow-hidden border-2 border-dashed border-stone-300 bg-white hover:border-[#1E1B2E] transition-all flex items-center justify-center cursor-pointer shrink-0 group relative shadow-xs"
+                  >
+                    {avatarPreview ? (
+                      <img
+                        src={avatarPreview}
+                        alt="Preview Foto Profil"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-stone-400 group-hover:text-[#1E1B2E] transition-colors">
+                        <Camera className="w-5 h-5" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold">
+                      {avatarPreview ? "Ubah" : "Pilih"}
+                    </div>
+                  </div>
+
+                  <div className="flex-1 text-center sm:text-left space-y-1">
+                    <p className="text-xs font-bold text-[#1E1B2E]">Foto Profil (Opsional)</p>
+                    <p className="text-[11px] text-stone-500 leading-relaxed">
+                      Unggah foto wajah atau logo studio Anda. Format JPG, PNG, atau WebP (maks. 5 MB).
+                    </p>
+                    <div className="flex items-center justify-center sm:justify-start gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => avatarInputRef.current?.click()}
+                        className="text-xs font-bold text-amber-700 hover:text-amber-800 cursor-pointer"
+                      >
+                        {avatarPreview ? "Ganti Foto" : "Pilih File Foto"}
+                      </button>
+                      {avatarPreview && (
+                        <>
+                          <span className="text-stone-300">·</span>
+                          <button
+                            type="button"
+                            onClick={handleRemoveAvatar}
+                            className="text-xs font-bold text-rose-500 hover:text-rose-700 cursor-pointer"
+                          >
+                            Hapus
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <input
+                    type="file"
+                    ref={avatarInputRef}
+                    accept="image/png, image/jpeg, image/jpg, image/webp"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                  />
                 </div>
 
                 <div className="space-y-1.5">

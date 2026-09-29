@@ -7,9 +7,10 @@ import { TearSheetModal } from "./TearSheetModal";
 
 interface ShowcaseGalleryClientProps {
   items: ShowcaseItem[];
+  currentActorId?: string;
 }
 
-export function ShowcaseGalleryClient({ items }: ShowcaseGalleryClientProps) {
+export function ShowcaseGalleryClient({ items, currentActorId }: ShowcaseGalleryClientProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const handleOpenTearSheet = (item: ShowcaseItem) => {
@@ -33,8 +34,8 @@ export function ShowcaseGalleryClient({ items }: ShowcaseGalleryClientProps) {
 
   return (
     <>
-      {/* ── MASONRY GRID ── */}
-      <div className="columns-2 sm:columns-2 md:columns-3 xl:columns-4 gap-4">
+      {/* ── MASONRY GRID (PURE HIGH-DENSITY VISUAL WALL) ── */}
+      <div className="columns-2 sm:columns-3 md:columns-4 xl:columns-5 gap-1.5 sm:gap-2">
         {items.map((item) => (
           <ShowcaseCard
             key={item.id}
@@ -52,6 +53,7 @@ export function ShowcaseGalleryClient({ items }: ShowcaseGalleryClientProps) {
         isOpen={selectedIndex !== null}
         onClose={handleClose}
         onSelectIndex={handleSelectIndex}
+        currentActorId={currentActorId}
       />
     </>
   );

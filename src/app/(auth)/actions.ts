@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 
@@ -34,11 +36,15 @@ export async function login(formData: FormData) {
 
   if (data.user) {
     try {
-      // Pastikan profile sinkron di database Prisma (migrasikan kepemilikan aktor jika dari seeding)
+      const userMeta = data.user.user_metadata || {};
+      const oauthAvatar = userMeta.avatar_url || userMeta.picture || null;
+      const oauthName = userMeta.display_name || userMeta.full_name || userMeta.name;
+
       await syncUserProfile(
         data.user.id,
         data.user.email ?? email,
-        data.user.user_metadata?.display_name
+        oauthName,
+        oauthAvatar
       );
 
       // Cek apakah user sudah memiliki Actor profile
@@ -100,6 +106,30 @@ export async function signup(formData: FormData) {
     redirect(`/register?error=${encodeURIComponent("Kata sandi minimal harus 6 karakter.")}`);
   }
 
+  const avatarFile = formData.get("avatarFile") as File | null;
+  let finalAvatarUrl: string | null = null;
+
+  if (avatarFile && avatarFile.size > 0 && typeof avatarFile.arrayBuffer === "function") {
+    try {
+      const bytes = await avatarFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const safeName = avatarFile.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+      const filename = `${Date.now()}-${safeName}`;
+      const uploadDir = path.join(process.cwd(), "public", "uploads", "avatars");
+      await mkdir(uploadDir, { recursive: true });
+      const filepath = path.join(uploadDir, filename);
+      await writeFile(filepath, buffer);
+      finalAvatarUrl = `/uploads/avatars/${filename}`;
+    } catch (uploadErr) {
+      console.error("Gagal menyimpan file avatar saat pendaftaran:", uploadErr);
+    }
+  }
+
+  if (!finalAvatarUrl) {
+    const rawAvatarUrl = (formData.get("avatarUrl") as string)?.trim();
+    if (rawAvatarUrl) finalAvatarUrl = rawAvatarUrl;
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -107,6 +137,7 @@ export async function signup(formData: FormData) {
     options: {
       data: {
         display_name: displayName,
+        avatar_url: finalAvatarUrl || undefined,
         role: role || undefined,
         location: location || undefined,
         bio: bio || undefined,
@@ -124,7 +155,12 @@ export async function signup(formData: FormData) {
 
   if (data.user) {
     try {
-      await syncUserProfile(data.user.id, data.user.email ?? email, displayName);
+      await syncUserProfile(
+        data.user.id,
+        data.user.email ?? email,
+        displayName,
+        finalAvatarUrl || data.user.user_metadata?.avatar_url || data.user.user_metadata?.picture
+      );
 
       if (bio) {
         await prisma.profile.update({

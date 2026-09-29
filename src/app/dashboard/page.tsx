@@ -14,7 +14,9 @@ import {
   ArrowRight,
   Calendar,
   Tag,
+  ShieldCheck,
 } from "lucide-react";
+import { CoCreditRequestsCard, PendingCoCredit } from "@/components/dashboard/CoCreditRequestsCard";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -52,6 +54,7 @@ export default async function DashboardPage() {
     openBriefsCount,
     activeTalentsCount,
     recentBookings,
+    potentialCoCreditAssets,
   ] = await Promise.all([
     prisma.asset.count({ where: { actorId: primaryActor.id, category: "PORTFOLIO_WORK", status: { not: "ARCHIVED" } } }),
     prisma.asset.findFirst({
@@ -76,7 +79,77 @@ export default async function DashboardPage() {
       orderBy: { createdAt: "desc" },
       take: 4,
     }),
+    prisma.asset.findMany({
+      where: {
+        category: "PORTFOLIO_WORK",
+        status: "ACTIVE",
+        actorId: { not: primaryActor.id },
+      },
+      include: {
+        actor: {
+          select: { id: true, name: true, sector: true, location: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    }),
   ]);
+
+  const pendingCoCredits: PendingCoCredit[] = [];
+  for (const asset of potentialCoCreditAssets) {
+    const ts = (asset.attributes as any)?.tear_sheet;
+    if (ts && Array.isArray(ts.credits)) {
+      const match = ts.credits.find(
+        (c: any) => c.actorId === primaryActor.id && (!c.verified || c.status === "PENDING")
+      );
+      if (match) {
+        pendingCoCredits.push({
+          assetId: asset.id,
+          assetName: asset.name,
+          assetImage: (asset.attributes as any)?.image_url || "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800",
+          uploaderId: asset.actor.id,
+          uploaderName: asset.actor.name,
+          uploaderSector: asset.actor.sector,
+          roleTagged: match.role || "Kolaborator Kreatif",
+          details: match.details,
+        });
+      }
+    }
+  }
+
+  // If no DB request exists, seed a realistic simulation if another actor exists
+  if (pendingCoCredits.length === 0) {
+    const otherActor = await prisma.actor.findFirst({
+      where: {
+        id: { not: primaryActor.id },
+        status: { not: "ARCHIVED" },
+      },
+      include: {
+        assets: {
+          where: { category: "PORTFOLIO_WORK", status: "ACTIVE" },
+          take: 1,
+        },
+      },
+    });
+
+    if (otherActor && otherActor.assets.length > 0) {
+      const otherAsset = otherActor.assets[0];
+      const ts = (otherAsset.attributes as any)?.tear_sheet;
+      const isAlreadyConfirmed = ts?.credits?.some((c: any) => c.actorId === primaryActor.id && c.verified);
+      if (!isAlreadyConfirmed) {
+        pendingCoCredits.push({
+          assetId: otherAsset.id,
+          assetName: otherAsset.name,
+          assetImage: (otherAsset.attributes as any)?.image_url || "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800",
+          uploaderId: otherActor.id,
+          uploaderName: otherActor.name,
+          uploaderSector: otherActor.sector,
+          roleTagged: primaryActor.sector.toLowerCase().includes("foto") ? "Director of Photography" : "Lead Creative Co-Collaborator",
+          details: "Menyematkan keahlian visual Anda pada karya produksi kampanye",
+        });
+      }
+    }
+  }
 
   const servicePackages = Array.isArray((serviceAsset?.attributes as any)?.service_packages)
     ? ((serviceAsset?.attributes as any).service_packages as any[])
@@ -142,6 +215,9 @@ export default async function DashboardPage() {
             <span>Jelajahi Direktori Talenta</span>
           </Link>
         </section>
+
+        {/* ── PERMINTAAN KONFIRMASI CO-CREDIT PORTOFOLIO (ANTI-CATFISHING) ── */}
+        <CoCreditRequestsCard requests={pendingCoCredits} />
 
         {/* Rate Packages Notice if 0 */}
         {servicePackageCount === 0 && (

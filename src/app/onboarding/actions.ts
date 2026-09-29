@@ -64,10 +64,12 @@ export async function createActorProfile(formData: FormData) {
 
   // Pastikan profile user ada dan sinkron
   try {
+    const oauthAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture;
     await syncUserProfile(
       user.id,
       user.email || "user@ramu.id",
-      user.user_metadata?.display_name || name
+      user.user_metadata?.display_name || name,
+      oauthAvatar
     );
 
     if (bio) {

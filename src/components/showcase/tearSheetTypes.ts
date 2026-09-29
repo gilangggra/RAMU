@@ -1,4 +1,4 @@
-export type HotspotCategory = "wardrobe" | "photography" | "hmua" | "talent" | "art_direction";
+export type HotspotCategory = "wardrobe" | "photography" | "hmua" | "talent" | "art_direction" | "cinematography" | "sound";
 
 export interface HotspotPin {
   id: string;
@@ -27,6 +27,11 @@ export interface TearSheetCredit {
   location?: string;
   details: string;
   verified: boolean;
+  verificationTimestamp?: string;
+  verifiedBy?: string;
+  verificationMethod?: "PEER_CONFIRMED" | "CONTRACT_MATCHED" | "DIRECT_CLAIM";
+  status?: "VERIFIED" | "PENDING" | "EXTERNAL" | "REJECTED";
+  isUploader?: boolean;
 }
 
 export interface TearSheetTechnicalSpecs {
@@ -49,4 +54,7 @@ export interface TearSheetData {
   hotspots: HotspotPin[];
   technicalSpecs?: TearSheetTechnicalSpecs;
   tags: string[];
+  antiCatfishingCertificateId: string;
+  verificationRate: string;
+  verifiedDate: string;
 }

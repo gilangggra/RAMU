@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 
@@ -25,7 +27,39 @@ export async function updateProfileBasicInfo(formData: FormData) {
       throw new Error("Nama dan Sektor wajib diisi.");
     }
 
-    // Find the actor ID owned by the user
+    const avatarFile = formData.get("avatarFile") as File | null;
+    const removeAvatar = formData.get("removeAvatar") === "true";
+    let newAvatarUrl: string | null | undefined = undefined;
+
+    if (avatarFile && avatarFile.size > 0 && typeof avatarFile.arrayBuffer === "function") {
+      try {
+        const bytes = await avatarFile.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        const safeName = avatarFile.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+        const filename = `${Date.now()}-${safeName}`;
+        const uploadDir = path.join(process.cwd(), "public", "uploads", "avatars");
+        await mkdir(uploadDir, { recursive: true });
+        const filepath = path.join(uploadDir, filename);
+        await writeFile(filepath, buffer);
+        newAvatarUrl = `/uploads/avatars/${filename}`;
+      } catch (uploadErr) {
+        console.error("Gagal menyimpan file avatar di settings:", uploadErr);
+      }
+    } else if (removeAvatar) {
+      newAvatarUrl = null;
+    }
+
+    if (newAvatarUrl !== undefined) {
+      await prisma.profile.update({
+        where: { id: user.id },
+        data: { avatarUrl: newAvatarUrl },
+      }).catch((err) => console.error("Gagal update profile avatar:", err));
+
+      await supabase.auth.updateUser({
+        data: { avatar_url: newAvatarUrl || null },
+      }).catch(() => {});
+    }
+
     const actor = await prisma.actor.findFirst({
       where: { ownerUserId: user.id },
     });
@@ -49,6 +83,7 @@ export async function updateProfileBasicInfo(formData: FormData) {
     });
 
     revalidatePath("/settings");
+    revalidatePath("/settings/profile");
     revalidatePath("/directory");
     revalidatePath("/showcase");
 

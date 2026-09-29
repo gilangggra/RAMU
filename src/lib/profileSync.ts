@@ -3,7 +3,8 @@ import { prisma } from "@/infrastructure/database/prisma";
 export async function syncUserProfile(
   userId: string,
   userEmail: string,
-  displayName?: string
+  displayName?: string,
+  avatarUrl?: string | null
 ) {
   const email = userEmail.toLowerCase().trim();
   const name = displayName || email.split("@")[0];
@@ -13,11 +14,23 @@ export async function syncUserProfile(
   });
 
   if (profileById) {
+    const updateData: { email?: string; displayName?: string; avatarUrl?: string } = {};
+
     if (profileById.email !== email) {
-      await prisma.profile.update({
+      updateData.email = email;
+    }
+    if (avatarUrl && avatarUrl !== profileById.avatarUrl) {
+      updateData.avatarUrl = avatarUrl;
+    }
+    if (displayName && profileById.displayName !== displayName && !profileById.displayName) {
+      updateData.displayName = displayName;
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      return await prisma.profile.update({
         where: { id: userId },
-        data: { email },
-      }).catch(() => {});
+        data: updateData,
+      }).catch(() => profileById);
     }
     return profileById;
   }
@@ -28,39 +41,42 @@ export async function syncUserProfile(
 
   if (profileByEmail && profileByEmail.id !== userId) {
     const tempEmail = `${userId.slice(0, 8)}_${Date.now()}@temp.ramu.id`;
+    const finalAvatarUrl = avatarUrl || profileByEmail.avatarUrl || null;
+
     await prisma.profile.create({
       data: {
         id: userId,
         email: tempEmail,
         displayName: profileByEmail.displayName || name,
+        avatarUrl: finalAvatarUrl,
         bio: profileByEmail.bio,
       },
     });
 
-    // Pindahkan referensi kepemilikan aktor ke userId baru
     await prisma.actor.updateMany({
       where: { ownerUserId: profileByEmail.id },
       data: { ownerUserId: userId },
     });
 
-    // Hapus profile lama
     await prisma.profile.delete({
       where: { id: profileByEmail.id },
     });
 
-    // Kembalikan email asli ke profile baru
     return await prisma.profile.update({
       where: { id: userId },
-      data: { email },
+      data: { 
+        email,
+        ...(finalAvatarUrl ? { avatarUrl: finalAvatarUrl } : {}),
+      },
     });
   }
 
-  // 3. Buat baru jika belum ada
   return await prisma.profile.create({
     data: {
       id: userId,
       email,
       displayName: name,
+      avatarUrl: avatarUrl || null,
     },
   });
 }

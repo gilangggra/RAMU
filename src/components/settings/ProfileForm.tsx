@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { updateProfileBasicInfo } from "@/app/settings/actions";
-import { Save, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Save, Loader2, CheckCircle2, AlertCircle, Camera, Trash2, User } from "lucide-react";
 
 interface ProfileData {
   name: string;
@@ -12,11 +12,37 @@ interface ProfileData {
   websiteUrl: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
+  avatarUrl?: string | null;
 }
 
 export function ProfileForm({ initialData }: { initialData: ProfileData }) {
   const [isPending, setIsPending] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(initialData.avatarUrl || null);
+  const [removeAvatar, setRemoveAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage({ type: "error", text: "Ukuran foto profil maksimal 5 MB." });
+        return;
+      }
+      setAvatarPreview(URL.createObjectURL(file));
+      setRemoveAvatar(false);
+      setMessage(null);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setAvatarPreview(null);
+    setRemoveAvatar(true);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -57,6 +83,69 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
             <p className="mt-0.5">{message.text}</p>
           </div>
         )}
+
+        <div className="p-4 sm:p-5 rounded-2xl bg-stone-50/80 border border-stone-200/80 flex flex-col sm:flex-row items-center gap-5">
+          <input
+            type="file"
+            name="avatarFile"
+            ref={fileInputRef}
+            className="hidden"
+            accept="image/png, image/jpeg, image/jpg, image/webp"
+            onChange={handleAvatarFile}
+          />
+          <input
+            type="hidden"
+            name="removeAvatar"
+            value={removeAvatar ? "true" : "false"}
+          />
+
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            className="w-20 h-20 rounded-full overflow-hidden border-2 border-stone-200 bg-white hover:border-[#1E1B2E] transition-all flex items-center justify-center cursor-pointer shrink-0 group relative shadow-xs"
+          >
+            {avatarPreview ? (
+              <img
+                src={avatarPreview}
+                alt={initialData.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] flex items-center justify-center font-bold text-lg text-[#27213D]">
+                {initialData.name ? initialData.name.charAt(0).toUpperCase() : <User className="w-6 h-6 text-stone-400" />}
+              </div>
+            )}
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold">
+              Ubah Foto
+            </div>
+          </div>
+
+          <div className="flex-1 text-center sm:text-left space-y-1">
+            <h3 className="text-xs font-bold text-[#1E1B2E] uppercase tracking-wider">Foto Profil</h3>
+            <p className="text-xs text-stone-500 leading-relaxed">
+              Format JPG, PNG, atau WebP. Maksimal ukuran 5 MB.
+            </p>
+            <div className="flex items-center justify-center sm:justify-start gap-2.5 pt-1">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-stone-200 text-xs font-bold text-stone-700 hover:text-stone-900 hover:bg-stone-50 shadow-2xs transition-all cursor-pointer"
+              >
+                <Camera className="w-3.5 h-3.5 text-stone-500" />
+                <span>{avatarPreview ? "Ganti Foto" : "Unggah Foto"}</span>
+              </button>
+              {avatarPreview && (
+                <button
+                  type="button"
+                  onClick={handleRemovePhoto}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Hapus</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">

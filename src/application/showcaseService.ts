@@ -3,6 +3,8 @@ import { prisma } from "@/infrastructure/database/prisma";
 export interface ShowcaseFilterParams {
   search?: string;
   category?: string;
+  scope?: "all" | "mine";
+  currentActorId?: string;
 }
 
 export interface ShowcaseItem {
@@ -10,6 +12,12 @@ export interface ShowcaseItem {
   title: string;
   category: string;
   imageUrl: string;
+  mediaType?: "IMAGE" | "VIDEO";
+  videoUrl?: string | null;
+  videoSource?: "DIRECT_UPLOAD" | "YOUTUBE" | "VIMEO" | "EXTERNAL" | null;
+  aspectRatio?: string | null;
+  isOwner?: boolean;
+  isCoCreditor?: boolean;
   tearSheet?: any;
   availableActors?: { id: string; name: string; sector: string; location: string | null }[];
   actor: {
@@ -56,7 +64,7 @@ const FALLBACK_IMAGES = [
 ];
 
 export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Promise<ShowcaseItem[]> {
-  const { search, category } = params;
+  const { search, category, scope, currentActorId } = params;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const whereClause: any = {
@@ -114,6 +122,22 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
 
   // Map database assets to visual showcase items
   assets.forEach((asset, index) => {
+    // Extract media attributes
+    const attrs = (asset.attributes as any) || {};
+    const tearSheet = attrs.tear_sheet || null;
+
+    const isOwner = currentActorId ? asset.actorId === currentActorId : false;
+    const isCoCreditor = currentActorId && tearSheet?.credits
+      ? tearSheet.credits.some((c: any) => c.actorId === currentActorId)
+      : false;
+
+    // Filter by scope (mine)
+    if (scope === "mine") {
+      if (!isOwner && !isCoCreditor) {
+        return; // Skip if not owner and not co-creditor
+      }
+    }
+
     // Use the actual subtype inputted by the user
     let displayCategory = asset.subtype || "Lainnya";
 
@@ -122,15 +146,16 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
       return; // Skip this item
     }
 
-    // Extract image from attributes
     let imageUrl = null;
-    if (asset.attributes) {
-      const attrs = asset.attributes as any;
-      if (attrs.image_url) imageUrl = attrs.image_url;
-      else if (attrs.brand_gallery && attrs.brand_gallery.length > 0) imageUrl = attrs.brand_gallery[0];
-      else if (attrs.styling_gallery && attrs.styling_gallery.length > 0) imageUrl = attrs.styling_gallery[0];
-      else if (attrs.comp_card && attrs.comp_card.images && attrs.comp_card.images.length > 0) imageUrl = attrs.comp_card.images[0];
-    }
+    if (attrs.image_url) imageUrl = attrs.image_url;
+    else if (attrs.brand_gallery && attrs.brand_gallery.length > 0) imageUrl = attrs.brand_gallery[0];
+    else if (attrs.styling_gallery && attrs.styling_gallery.length > 0) imageUrl = attrs.styling_gallery[0];
+    else if (attrs.comp_card && attrs.comp_card.images && attrs.comp_card.images.length > 0) imageUrl = attrs.comp_card.images[0];
+
+    const mediaType: "IMAGE" | "VIDEO" = attrs.media_type || (attrs.video_url ? "VIDEO" : "IMAGE");
+    const videoUrl: string | null = attrs.video_url || null;
+    const videoSource = attrs.video_source || (videoUrl ? "EXTERNAL" : null);
+    const aspectRatio = attrs.aspect_ratio || "16:9";
 
     // Fallback to random beautiful images only if asset has no image
     if (!imageUrl) {
@@ -150,7 +175,13 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
       title: asset.name,
       category: displayCategory,
       imageUrl,
-      tearSheet: (asset.attributes as any)?.tear_sheet || null,
+      mediaType,
+      videoUrl,
+      videoSource,
+      aspectRatio,
+      isOwner,
+      isCoCreditor,
+      tearSheet,
       availableActors: allActors,
       actor: {
         id: asset.actor.id,
@@ -169,4 +200,43 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
 
   // Return real database assets in true chronological order
   return showcaseItems;
+}
+
+/**
+ * Helper to count total portfolio items for a specific actor (both authored and co-credited)
+ */
+export async function getActorShowcaseCount(actorId: string): Promise<number> {
+  if (!actorId) return 0;
+
+  try {
+    const assets = await prisma.asset.findMany({
+      where: {
+        status: "ACTIVE",
+        category: "PORTFOLIO_WORK",
+        actor: { status: { not: "ARCHIVED" } }
+      },
+      select: {
+        id: true,
+        actorId: true,
+        attributes: true,
+      }
+    });
+
+    let count = 0;
+    assets.forEach((asset) => {
+      if (asset.actorId === actorId) {
+        count++;
+      } else if (asset.attributes) {
+        const attrs = asset.attributes as any;
+        if (attrs.tear_sheet?.credits?.some((c: any) => c.actorId === actorId)) {
+          count++;
+        }
+      }
+    });
+
+    return count;
+  } catch (error) {
+    console.error("Error getting actor showcase count:", error);
+    return 0;
+  }
 }
