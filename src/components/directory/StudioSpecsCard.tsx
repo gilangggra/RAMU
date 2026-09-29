@@ -34,12 +34,34 @@ export interface StudioAttributes {
 interface StudioSpecsCardProps {
   attributes: StudioAttributes;
   studioName: string;
+  actorAssets?: Array<{
+    id: string;
+    name: string;
+    category: string;
+    subtype: string;
+    description?: string | null;
+    attributes?: Record<string, unknown> | null;
+  }>;
 }
 
-export function StudioSpecsCard({ attributes, studioName }: StudioSpecsCardProps) {
+export function StudioSpecsCard({ attributes, studioName, actorAssets }: StudioSpecsCardProps) {
   const [selectedPhoto, setSelectedPhoto] = useState<StudioGalleryPhoto | null>(null);
 
-  const gallery = attributes.studio_gallery || [];
+  const portfolioWorks: StudioGalleryPhoto[] = (actorAssets || [])
+    .filter((a) => a.category === "PORTFOLIO_WORK" || a.category === "STUDIO_SPACE")
+    .map((a) => {
+      const attrs = (a.attributes && typeof a.attributes === "object") ? (a.attributes as Record<string, unknown>) : null;
+      return {
+        title: a.name,
+        url: (attrs?.image_url as string) || "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1000&q=80",
+        caption: a.description || "Fasilitas studio dan area produksi visual.",
+      };
+    });
+
+  const gallery = (attributes.studio_gallery && attributes.studio_gallery.length > 0)
+    ? attributes.studio_gallery
+    : portfolioWorks;
+
   const facilities = attributes.facilities || [];
   const gearList = attributes.gear_included || [];
 

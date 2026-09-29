@@ -32,9 +32,17 @@ export interface StylistAttributes {
 interface StylistSpecsCardProps {
   attributes: StylistAttributes;
   actorName: string;
+  actorAssets?: Array<{
+    id: string;
+    name: string;
+    category: string;
+    subtype: string;
+    description?: string | null;
+    attributes?: Record<string, unknown> | null;
+  }>;
 }
 
-export function StylistSpecsCard({ attributes, actorName }: StylistSpecsCardProps) {
+export function StylistSpecsCard({ attributes, actorName, actorAssets }: StylistSpecsCardProps) {
   const [selectedImage, setSelectedImage] = useState<{
     url: string;
     title: string;
@@ -65,29 +73,47 @@ export function StylistSpecsCard({ attributes, actorName }: StylistSpecsCardProp
     "Studio Aksesoris & Perhiasan Etnik Nusantara",
   ];
 
-  const gallery = attributes.styling_gallery || [
-    {
-      title: "Moodboard Konsep & Palet Warna Lookbook",
-      url: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1000&q=80",
-      role: "Lead Fashion Stylist",
-      client: "Label Busana Kontemporer",
-      caption: "Pengarahan gaya perpaduan kain tradisional nusantara dengan siluet monokromatis modern.",
-    },
-    {
-      title: "Archive Wardrobe & Koleksi Aksesoris On-Set",
-      url: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=1000&q=80",
-      role: "Wardrobe Director",
-      client: "Musim Rilis Summer 2026",
-      caption: "Koleksi pakaian arsip dan aksesoris etnik siap pinjam untuk kelengkapan styling kampanye.",
-    },
-    {
-      title: "Editorial Avant-Garde Draping & Layering",
-      url: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1000&q=80",
-      role: "Creative Stylist",
-      client: "Indonesia Fashion Review",
-      caption: "Eksplorasi teknik layering dan kontras tekstur material sutra dengan katun linen alami.",
-    },
-  ];
+  const portfolioWorks = (actorAssets || [])
+    .filter((a) => a.category === "PORTFOLIO_WORK")
+    .map((a) => {
+      const attrs = (a.attributes && typeof a.attributes === "object") ? (a.attributes as Record<string, unknown>) : null;
+      const tearSheet = (attrs?.tear_sheet && typeof attrs.tear_sheet === "object") ? (attrs.tear_sheet as Record<string, unknown>) : null;
+      return {
+        title: a.name,
+        url: (attrs?.image_url as string) || "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1000&q=80",
+        role: (attrs?.role as string) || a.subtype || "Lead Fashion Stylist",
+        client: (tearSheet?.client as string) || (attrs?.client as string) || "Karya Portofolio",
+        caption: a.description || "Pengarahan gaya dan pemilihan wardrobe profesional.",
+      };
+    });
+
+  const gallery = (attributes.styling_gallery && attributes.styling_gallery.length > 0)
+    ? attributes.styling_gallery
+    : portfolioWorks.length > 0
+    ? portfolioWorks
+    : [
+        {
+          title: "Moodboard Konsep & Palet Warna Lookbook",
+          url: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1000&q=80",
+          role: "Lead Fashion Stylist",
+          client: "Label Busana Kontemporer",
+          caption: "Pengarahan gaya perpaduan kain tradisional nusantara dengan siluet monokromatis modern.",
+        },
+        {
+          title: "Archive Wardrobe & Koleksi Aksesoris On-Set",
+          url: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=1000&q=80",
+          role: "Wardrobe Director",
+          client: "Musim Rilis Summer 2026",
+          caption: "Koleksi pakaian arsip dan aksesoris etnik siap pinjam untuk kelengkapan styling kampanye.",
+        },
+        {
+          title: "Editorial Avant-Garde Draping & Layering",
+          url: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1000&q=80",
+          role: "Creative Stylist",
+          client: "Indonesia Fashion Review",
+          caption: "Eksplorasi teknik layering dan kontras tekstur material sutra dengan katun linen alami.",
+        },
+      ];
 
   return (
     <div className="space-y-8">

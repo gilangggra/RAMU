@@ -30,12 +30,36 @@ export interface BrandAttributes {
 interface BrandSpecsCardProps {
   attributes: BrandAttributes;
   brandName: string;
+  actorAssets?: Array<{
+    id: string;
+    name: string;
+    category: string;
+    subtype: string;
+    description?: string | null;
+    attributes?: Record<string, unknown> | null;
+  }>;
 }
 
-export function BrandSpecsCard({ attributes, brandName }: BrandSpecsCardProps) {
+export function BrandSpecsCard({ attributes, brandName, actorAssets }: BrandSpecsCardProps) {
   const [selectedPhoto, setSelectedPhoto] = useState<BrandGalleryPhoto | null>(null);
 
-  const gallery = attributes.brand_gallery || attributes.styling_gallery || [];
+  const portfolioWorks: BrandGalleryPhoto[] = (actorAssets || [])
+    .filter((a) => a.category === "PORTFOLIO_WORK")
+    .map((a) => {
+      const attrs = (a.attributes && typeof a.attributes === "object") ? (a.attributes as Record<string, unknown>) : null;
+      return {
+        title: a.name,
+        url: (attrs?.image_url as string) || "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1000&q=80",
+        caption: a.description || "Koleksi karya dari showcase resmi brand.",
+      };
+    });
+
+  const gallery = (attributes.brand_gallery && attributes.brand_gallery.length > 0)
+    ? attributes.brand_gallery
+    : (attributes.styling_gallery && attributes.styling_gallery.length > 0)
+    ? attributes.styling_gallery
+    : portfolioWorks;
+
   const materials = attributes.fabric_materials || attributes.styling_specialties || [];
 
   return (

@@ -31,10 +31,35 @@ export interface DesignerAttributes {
 interface DesignerSpecsCardProps {
   attributes: DesignerAttributes;
   actorName: string;
+  actorAssets?: Array<{
+    id: string;
+    name: string;
+    category: string;
+    subtype: string;
+    description?: string | null;
+    attributes?: Record<string, unknown> | null;
+  }>;
 }
 
-export function DesignerSpecsCard({ attributes, actorName }: DesignerSpecsCardProps) {
-  const portfolioGallery = attributes.portfolio_gallery || [];
+export function DesignerSpecsCard({ attributes, actorName, actorAssets }: DesignerSpecsCardProps) {
+  const portfolioWorks: PortfolioGalleryItem[] = (actorAssets || [])
+    .filter((a) => a.category === "PORTFOLIO_WORK")
+    .map((a) => {
+      const attrs = (a.attributes && typeof a.attributes === "object") ? (a.attributes as Record<string, unknown>) : null;
+      const tearSheet = (attrs?.tear_sheet && typeof attrs.tear_sheet === "object") ? (attrs.tear_sheet as Record<string, unknown>) : null;
+      return {
+        title: a.name,
+        url: (attrs?.image_url as string) || "https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=1000&q=80",
+        role: (attrs?.role as string) || a.subtype || "Desainer Grafis / Visual",
+        client: (tearSheet?.client as string) || (attrs?.client as string) || "Karya Portofolio",
+        caption: a.description || undefined,
+      };
+    });
+
+  const portfolioGallery = (attributes.portfolio_gallery && attributes.portfolio_gallery.length > 0)
+    ? attributes.portfolio_gallery
+    : portfolioWorks;
+
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string; caption?: string } | null>(null);
 
   return (

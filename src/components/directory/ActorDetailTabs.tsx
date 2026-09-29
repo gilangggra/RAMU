@@ -1181,8 +1181,8 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
       {activeTab === "specs" && (
         <div className="space-y-8">
           {/* Specialized Technical Specs Card */}
-          {isStudio && studioAttrs && (
-            <StudioSpecsCard attributes={studioAttrs} studioName={actor.name} />
+          {isStudio && (
+            <StudioSpecsCard attributes={studioAttrs || {}} studioName={actor.name} actorAssets={actor.assets} />
           )}
 
           {isPhotographer && (
@@ -1190,27 +1190,27 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
           )}
 
           {isVideographer && (
-            <VideographerSpecsCard attributes={(videographerAsset?.attributes as any) || {}} actorName={actor.name} />
+            <VideographerSpecsCard attributes={(videographerAsset?.attributes as any) || {}} actorName={actor.name} actorAssets={actor.assets} />
           )}
 
-          {isModel && modelAttrs && (
-            <ModelCompCard attributes={modelAttrs} actorName={actor.name} avatarUrl={actor.owner?.avatarUrl} />
+          {isModel && (
+            <ModelCompCard attributes={modelAttrs || {}} actorName={actor.name} avatarUrl={actor.owner?.avatarUrl} actorAssets={actor.assets} />
           )}
 
           {isMUA && (
-            <MuaSpecsCard attributes={(muaAsset?.attributes as any) || {}} actorName={actor.name} />
+            <MuaSpecsCard attributes={(muaAsset?.attributes as any) || {}} actorName={actor.name} actorAssets={actor.assets} />
           )}
 
           {isStylist && (
-            <StylistSpecsCard attributes={(stylistAsset?.attributes as any) || {}} actorName={actor.name} />
+            <StylistSpecsCard attributes={(stylistAsset?.attributes as any) || {}} actorName={actor.name} actorAssets={actor.assets} />
           )}
 
-          {isDesigner && designerAttrs && (
-            <DesignerSpecsCard attributes={designerAttrs} actorName={actor.name} />
+          {isDesigner && (
+            <DesignerSpecsCard attributes={designerAttrs || {}} actorName={actor.name} actorAssets={actor.assets} />
           )}
 
-          {isBrand && brandAttrs && !isStudio && !isModel && !isPhotographer && !isDesigner && !isVideographer && !isMUA && !isStylist && (
-            <BrandSpecsCard attributes={brandAttrs} brandName={actor.name} />
+          {isBrand && !isStudio && !isModel && !isPhotographer && !isDesigner && !isVideographer && !isMUA && !isStylist && (
+            <BrandSpecsCard attributes={brandAttrs || {}} brandName={actor.name} actorAssets={actor.assets} />
           )}
 
           {/* Hardware & Tools Inventory */}

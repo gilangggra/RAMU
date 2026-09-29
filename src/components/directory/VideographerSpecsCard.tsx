@@ -38,9 +38,17 @@ export interface VideographerAttributes {
 interface VideographerSpecsCardProps {
   attributes: VideographerAttributes;
   actorName: string;
+  actorAssets?: Array<{
+    id: string;
+    name: string;
+    category: string;
+    subtype: string;
+    description?: string | null;
+    attributes?: Record<string, unknown> | null;
+  }>;
 }
 
-export function VideographerSpecsCard({ attributes, actorName }: VideographerSpecsCardProps) {
+export function VideographerSpecsCard({ attributes, actorName, actorAssets }: VideographerSpecsCardProps) {
   const [selectedVideo, setSelectedVideo] = useState<{
     title: string;
     url: string;
@@ -83,35 +91,55 @@ export function VideographerSpecsCard({ attributes, actorName }: VideographerSpe
     "Lisensi Musik Komersial Legal (Artlist & Musicbed Enterprise)",
   ];
 
-  const videos = attributes.portfolio_videos || [
-    {
-      title: "Fashion Film Musim Semi — 'Siluet Senja'",
-      url: "https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=1000&q=80",
-      thumbnail: "https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=1000&q=80",
-      role: "Director of Photography & Colorist",
-      client: "Label Busana Jakarta",
-      duration: "0:45 min",
-      caption: "Video lookbook sinematik rasio 9:16 untuk Instagram Reels & TikTok dengan color grading hangat ala seluloid 35mm.",
-    },
-    {
-      title: "TVC Iklan Komersial — 'Urban Movement'",
-      url: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1000&q=80",
-      thumbnail: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1000&q=80",
-      role: "Lead Cinematographer",
-      client: "Brand Sepatu Lokal",
-      duration: "1:00 min",
-      caption: "Iklan komersial gerakan dinamis dengan teknik gimbal tracking shot 120fps slow-motion.",
-    },
-    {
-      title: "Behind The Scenes — Lookbook Campaign 2026",
-      url: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1000&q=80",
-      thumbnail: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1000&q=80",
-      role: "Videographer & Video Editor",
-      client: "Studio Kreatif Nusantara",
-      duration: "0:30 min",
-      caption: "Cuplikan video dokumentasi proses kreatif tim di balik layar sesi pemotretan majalah.",
-    },
-  ];
+  const portfolioWorks = (actorAssets || [])
+    .filter((a) => a.category === "PORTFOLIO_WORK")
+    .map((a) => {
+      const attrs = (a.attributes && typeof a.attributes === "object") ? (a.attributes as Record<string, unknown>) : null;
+      const tearSheet = (attrs?.tear_sheet && typeof attrs.tear_sheet === "object") ? (attrs.tear_sheet as Record<string, unknown>) : null;
+      return {
+        title: a.name,
+        url: (attrs?.video_url as string) || (attrs?.image_url as string) || "https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=1000&q=80",
+        thumbnail: (attrs?.image_url as string) || "https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=1000&q=80",
+        role: (attrs?.role as string) || a.subtype || "Director of Photography",
+        client: (tearSheet?.client as string) || (attrs?.client as string) || "Karya Sinematik",
+        duration: (attrs?.duration as string) || "0:45 min",
+        caption: a.description || undefined,
+      };
+    });
+
+  const videos = (attributes.portfolio_videos && attributes.portfolio_videos.length > 0)
+    ? attributes.portfolio_videos
+    : portfolioWorks.length > 0
+    ? portfolioWorks
+    : [
+        {
+          title: "Fashion Film Musim Semi — 'Siluet Senja'",
+          url: "https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=1000&q=80",
+          thumbnail: "https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=1000&q=80",
+          role: "Director of Photography & Colorist",
+          client: "Label Busana Jakarta",
+          duration: "0:45 min",
+          caption: "Video lookbook sinematik rasio 9:16 untuk Instagram Reels & TikTok dengan color grading hangat ala seluloid 35mm.",
+        },
+        {
+          title: "TVC Iklan Komersial — 'Urban Movement'",
+          url: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1000&q=80",
+          thumbnail: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1000&q=80",
+          role: "Lead Cinematographer",
+          client: "Brand Sepatu Lokal",
+          duration: "1:00 min",
+          caption: "Iklan komersial gerakan dinamis dengan teknik gimbal tracking shot 120fps slow-motion.",
+        },
+        {
+          title: "Behind The Scenes — Lookbook Campaign 2026",
+          url: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1000&q=80",
+          thumbnail: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1000&q=80",
+          role: "Videographer & Video Editor",
+          client: "Studio Kreatif Nusantara",
+          duration: "0:30 min",
+          caption: "Cuplikan video dokumentasi proses kreatif tim di balik layar sesi pemotretan majalah.",
+        },
+      ];
 
   return (
     <div className="space-y-8">

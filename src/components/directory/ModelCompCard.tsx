@@ -45,24 +45,71 @@ interface ModelCompCardProps {
   attributes: ModelAttributes;
   actorName: string;
   avatarUrl?: string | null;
+  actorAssets?: Array<{
+    id: string;
+    name: string;
+    category: string;
+    subtype: string;
+    description?: string | null;
+    attributes?: Record<string, unknown> | null;
+  }>;
 }
 
-export function ModelCompCard({ attributes, actorName, avatarUrl }: ModelCompCardProps) {
+export function ModelCompCard({ attributes, actorName, avatarUrl, actorAssets }: ModelCompCardProps) {
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string; caption?: string } | null>(null);
 
-  const compCardPhotos =
-    attributes.comp_card && attributes.comp_card.length > 0
-      ? attributes.comp_card
-      : avatarUrl
-      ? [
-          {
-            type: "Headshot Resmi",
-            url: avatarUrl,
-            caption: `Foto profil resmi ${actorName}`,
-          },
-        ]
-      : [];
-  const portfolioGallery = attributes.portfolio_gallery || [];
+  const portfolioWorks: PortfolioGalleryItem[] = (actorAssets || [])
+    .filter((a) => a.category === "PORTFOLIO_WORK")
+    .map((a) => {
+      const attrs = (a.attributes && typeof a.attributes === "object") ? (a.attributes as Record<string, unknown>) : null;
+      const tearSheet = (attrs?.tear_sheet && typeof attrs.tear_sheet === "object") ? (attrs.tear_sheet as Record<string, unknown>) : null;
+      return {
+        title: a.name,
+        url: (attrs?.image_url as string) || avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+        role: (attrs?.role as string) || a.subtype || "Model",
+        client: (tearSheet?.client as string) || (attrs?.client as string) || "Editorial",
+      };
+    });
+
+  const portfolioGallery = (attributes.portfolio_gallery && attributes.portfolio_gallery.length > 0)
+    ? attributes.portfolio_gallery
+    : portfolioWorks;
+
+  const portfolioCompCards: CompCardPhoto[] = (actorAssets || [])
+    .filter((a) => a.category === "PORTFOLIO_WORK")
+    .slice(0, 3)
+    .map((a, idx) => {
+      const attrs = (a.attributes && typeof a.attributes === "object") ? (a.attributes as Record<string, unknown>) : null;
+      const angleLabels = ["Full Body Angle", "Profile Side Angle", "Editorial Angle"];
+      return {
+        type: angleLabels[idx] || a.subtype || "Polaroid Look",
+        url: (attrs?.image_url as string) || avatarUrl || "",
+        caption: a.name || `Tampilan ${angleLabels[idx] || "Karya"}`,
+      };
+    })
+    .filter((p) => Boolean(p.url));
+
+  let compCardPhotos: CompCardPhoto[] = [];
+  if (attributes.comp_card && attributes.comp_card.length > 0) {
+    compCardPhotos = attributes.comp_card;
+  } else if (portfolioCompCards.length > 0) {
+    if (avatarUrl && !portfolioCompCards.some((p) => p.url === avatarUrl)) {
+      compCardPhotos = [
+        { type: "Headshot Resmi", url: avatarUrl, caption: `Foto profil resmi ${actorName}` },
+        ...portfolioCompCards.slice(0, 2),
+      ];
+    } else {
+      compCardPhotos = portfolioCompCards;
+    }
+  } else if (avatarUrl) {
+    compCardPhotos = [
+      {
+        type: "Headshot Resmi",
+        url: avatarUrl,
+        caption: `Foto profil resmi ${actorName}`,
+      },
+    ];
+  }
 
   return (
     <div className="space-y-8">

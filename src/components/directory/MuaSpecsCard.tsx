@@ -33,9 +33,17 @@ export interface MuaAttributes {
 interface MuaSpecsCardProps {
   attributes: MuaAttributes;
   actorName: string;
+  actorAssets?: Array<{
+    id: string;
+    name: string;
+    category: string;
+    subtype: string;
+    description?: string | null;
+    attributes?: Record<string, unknown> | null;
+  }>;
 }
 
-export function MuaSpecsCard({ attributes, actorName }: MuaSpecsCardProps) {
+export function MuaSpecsCard({ attributes, actorName, actorAssets }: MuaSpecsCardProps) {
   const [selectedImage, setSelectedImage] = useState<{
     url: string;
     title: string;
@@ -77,29 +85,47 @@ export function MuaSpecsCard({ attributes, actorName }: MuaSpecsCardProps) {
     "Produk ramah kulit sensitif & hypoallergenic berkualitas tinggi",
   ];
 
-  const gallery = attributes.portfolio_gallery || [
-    {
-      title: "Clean Editorial Glow — IFW Lookbook",
-      url: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1000&q=80",
-      role: "Lead Makeup Artist",
-      client: "Label Busana Jakarta",
-      caption: "Fokus pada tekstur kulit alami dengan kilau dewy dan riasan mata minimalis di bawah studio lighting.",
-    },
-    {
-      title: "High Fashion Bold Graphic Eyeliner",
-      url: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1000&q=80",
-      role: "Creative MUA & Hair",
-      client: "Editorial Magazine Indonesia",
-      caption: "Aplikasi eyeliner grafis presisi tinggi tahan air dan rambut sleek wet look.",
-    },
-    {
-      title: "Commercial Catalog Natural Radiance",
-      url: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=1000&q=80",
-      role: "Commercial Beauty Stylist",
-      client: "E-Commerce Fashion Campaign",
-      caption: "Riasan fresh tahan 8 jam pemotretan dengan sentuhan touch-up berkala.",
-    },
-  ];
+  const portfolioWorks = (actorAssets || [])
+    .filter((a) => a.category === "PORTFOLIO_WORK")
+    .map((a) => {
+      const attrs = (a.attributes && typeof a.attributes === "object") ? (a.attributes as Record<string, unknown>) : null;
+      const tearSheet = (attrs?.tear_sheet && typeof attrs.tear_sheet === "object") ? (attrs.tear_sheet as Record<string, unknown>) : null;
+      return {
+        title: a.name,
+        url: (attrs?.image_url as string) || "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1000&q=80",
+        role: (attrs?.role as string) || a.subtype || "Lead Makeup Artist",
+        client: (tearSheet?.client as string) || (attrs?.client as string) || "Karya Portofolio",
+        caption: a.description || undefined,
+      };
+    });
+
+  const gallery = (attributes.portfolio_gallery && attributes.portfolio_gallery.length > 0)
+    ? attributes.portfolio_gallery
+    : portfolioWorks.length > 0
+    ? portfolioWorks
+    : [
+        {
+          title: "Clean Editorial Glow — IFW Lookbook",
+          url: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1000&q=80",
+          role: "Lead Makeup Artist",
+          client: "Label Busana Jakarta",
+          caption: "Fokus pada tekstur kulit alami dengan kilau dewy dan riasan mata minimalis di bawah studio lighting.",
+        },
+        {
+          title: "High Fashion Bold Graphic Eyeliner",
+          url: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1000&q=80",
+          role: "Creative MUA & Hair",
+          client: "Editorial Magazine Indonesia",
+          caption: "Aplikasi eyeliner grafis presisi tinggi tahan air dan rambut sleek wet look.",
+        },
+        {
+          title: "Commercial Catalog Natural Radiance",
+          url: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=1000&q=80",
+          role: "Commercial Beauty Stylist",
+          client: "E-Commerce Fashion Campaign",
+          caption: "Riasan fresh tahan 8 jam pemotretan dengan sentuhan touch-up berkala.",
+        },
+      ];
 
   return (
     <div className="space-y-8">

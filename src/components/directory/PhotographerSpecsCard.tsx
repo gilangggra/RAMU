@@ -124,12 +124,26 @@ const DEFAULT_GEAR_SHOWCASE: GearShowcaseItem[] = [
 ];
 
 export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: PhotographerSpecsCardProps) {
-  const portfolioGallery = attributes.portfolio_gallery || [];
+  const portfolioWorks: PortfolioGalleryItem[] = (actorAssets || [])
+    .filter((a) => a.category === "PORTFOLIO_WORK")
+    .map((a) => {
+      const attrs = (a.attributes && typeof a.attributes === "object") ? (a.attributes as Record<string, unknown>) : null;
+      const tearSheet = (attrs?.tear_sheet && typeof attrs.tear_sheet === "object") ? (attrs.tear_sheet as Record<string, unknown>) : null;
+      return {
+        title: a.name,
+        url: (attrs?.image_url as string) || "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1000&q=80",
+        role: (attrs?.role as string) || a.subtype || "Fotografer Utama",
+        client: (tearSheet?.client as string) || (attrs?.client as string) || "Karya Portofolio",
+        caption: a.description || undefined,
+      };
+    });
+
+  const portfolioGallery = (attributes.portfolio_gallery && attributes.portfolio_gallery.length > 0)
+    ? attributes.portfolio_gallery
+    : portfolioWorks;
   
-  // Extract custom equipment/gear registered directly by the actor in their assets
   const registeredGearItems: GearShowcaseItem[] = (actorAssets || [])
     .filter((a) => {
-      // Strictly ignore artworks and portfolio items
       if (a.category === "PORTFOLIO_WORK") return false;
       const attrs = (a.attributes && typeof a.attributes === "object") ? (a.attributes as Record<string, unknown>) : null;
       return (

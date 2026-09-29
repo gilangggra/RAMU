@@ -49,16 +49,36 @@ export async function updateProfileBasicInfo(formData: FormData) {
       newAvatarUrl = null;
     }
 
+    const profileUpdateData: { displayName: string; bio: string | null; avatarUrl?: string | null } = {
+      displayName: name,
+      bio: description || null,
+    };
     if (newAvatarUrl !== undefined) {
-      await prisma.profile.update({
-        where: { id: user.id },
-        data: { avatarUrl: newAvatarUrl },
-      }).catch((err) => console.error("Gagal update profile avatar:", err));
-
-      await supabase.auth.updateUser({
-        data: { avatar_url: newAvatarUrl || null },
-      }).catch(() => {});
+      profileUpdateData.avatarUrl = newAvatarUrl;
     }
+
+    await prisma.profile.upsert({
+      where: { id: user.id },
+      update: profileUpdateData,
+      create: {
+        id: user.id,
+        email: user.email || `${user.id}@ramu.id`,
+        displayName: name,
+        bio: description || null,
+        avatarUrl: newAvatarUrl !== undefined ? newAvatarUrl : (user.user_metadata?.avatar_url || null),
+      },
+    }).catch((err) => console.error("Gagal update profile basic info:", err));
+
+    const authUpdateMetadata: { display_name: string; avatar_url?: string | null } = {
+      display_name: name,
+    };
+    if (newAvatarUrl !== undefined) {
+      authUpdateMetadata.avatar_url = newAvatarUrl || null;
+    }
+
+    await supabase.auth.updateUser({
+      data: authUpdateMetadata,
+    }).catch(() => {});
 
     const actor = await prisma.actor.findFirst({
       where: { ownerUserId: user.id },
@@ -68,7 +88,6 @@ export async function updateProfileBasicInfo(formData: FormData) {
       throw new Error("Profil kreator tidak ditemukan.");
     }
 
-    // Update the actor
     await prisma.actor.update({
       where: { id: actor.id },
       data: {
@@ -85,7 +104,10 @@ export async function updateProfileBasicInfo(formData: FormData) {
     revalidatePath("/settings");
     revalidatePath("/settings/profile");
     revalidatePath("/directory");
+    revalidatePath(`/directory/${actor.id}`);
     revalidatePath("/showcase");
+    revalidatePath("/dashboard");
+    revalidatePath("/", "layout");
 
     return { success: true, message: "Profil dasar berhasil diperbarui." };
   } catch (error: any) {
