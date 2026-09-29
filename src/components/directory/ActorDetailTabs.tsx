@@ -122,6 +122,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
   const [activeTab, setActiveTab] = useState<"portfolio" | "rates" | "specs" | "about" | "reviews">("portfolio");
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [selectedShowcaseIndex, setSelectedShowcaseIndex] = useState<number | null>(null);
+  const [detectedRatios, setDetectedRatios] = useState<Record<string, "horizontal" | "vertical" | "square">>({});
 
   // Check role-specific assets
   const modelAsset = actor.assets.find(
@@ -951,8 +952,8 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                   portfolioAssets.length === 1
                     ? "grid grid-cols-1 max-w-2xl mx-auto gap-6"
                     : portfolioAssets.length === 2
-                    ? "grid grid-cols-1 md:grid-cols-2 gap-6"
-                    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                    ? "grid grid-cols-1 md:grid-cols-2 gap-6 items-start"
+                    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start"
                 }
               >
                 {portfolioAssets.map((asset, index) => {
@@ -965,7 +966,26 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                     asset.subtype?.toLowerCase().includes("cinema") ||
                     (attrs.image_url && attrs.image_url.includes("img.youtube.com"));
 
-                  const mediaAspectRatio = isVideo ? "aspect-[16/10]" : "aspect-[4/5]";
+                  const storedRatio = attrs.aspect_ratio?.toLowerCase();
+                  const detected = detectedRatios[asset.id];
+
+                  const isHorizontal =
+                    isVideo ||
+                    storedRatio === "16:9" ||
+                    storedRatio === "4:3" ||
+                    storedRatio === "horizontal" ||
+                    detected === "horizontal";
+
+                  const isSquare =
+                    storedRatio === "1:1" ||
+                    storedRatio === "square" ||
+                    detected === "square";
+
+                  const mediaAspectRatio = isHorizontal
+                    ? "aspect-[16/10]"
+                    : isSquare
+                    ? "aspect-square"
+                    : "aspect-[4/5]";
 
                   return (
                     <div
@@ -978,6 +998,16 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                           <img
                             src={attrs.image_url}
                             alt={asset.name}
+                            onLoad={(e) => {
+                              const { naturalWidth, naturalHeight } = e.currentTarget;
+                              if (naturalWidth && naturalHeight) {
+                                const ratio = naturalWidth / naturalHeight;
+                                const orientation = ratio > 1.15 ? "horizontal" : ratio < 0.85 ? "vertical" : "square";
+                                if (detectedRatios[asset.id] !== orientation) {
+                                  setDetectedRatios((prev) => ({ ...prev, [asset.id]: orientation }));
+                                }
+                              }
+                            }}
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           />
                         ) : (
@@ -1017,7 +1047,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                           ) : (
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-bold text-stone-200 shadow-xs">
                               <Camera className="w-3 h-3 text-stone-300" />
-                              <span>FOTO</span>
+                              <span>{isHorizontal ? "FOTO 16:9" : isSquare ? "FOTO 1:1" : "FOTO 4:5"}</span>
                             </span>
                           )}
                         </div>
