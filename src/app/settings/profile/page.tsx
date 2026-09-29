@@ -21,6 +21,11 @@ export default async function SettingsProfilePage() {
       websiteUrl: true,
       contactEmail: true,
       contactPhone: true,
+      owner: {
+        select: {
+          avatarUrl: true,
+        },
+      },
     },
   });
 
@@ -28,9 +33,20 @@ export default async function SettingsProfilePage() {
     redirect("/onboarding");
   }
 
+  const profileData = {
+    name: actor.name,
+    sector: actor.sector,
+    description: actor.description,
+    location: actor.location,
+    websiteUrl: actor.websiteUrl,
+    contactEmail: actor.contactEmail,
+    contactPhone: actor.contactPhone,
+    avatarUrl: actor.owner?.avatarUrl || null,
+  };
+
   return (
     <div className="space-y-6">
-      <ProfileForm initialData={actor} />
+      <ProfileForm initialData={profileData} />
     </div>
   );
 }
