@@ -10,6 +10,10 @@ export interface ShowcaseItem {
   title: string;
   category: string;
   imageUrl: string;
+  mediaType?: "IMAGE" | "VIDEO";
+  videoUrl?: string | null;
+  videoSource?: "DIRECT_UPLOAD" | "YOUTUBE" | "VIMEO" | "EXTERNAL" | null;
+  aspectRatio?: string | null;
   tearSheet?: any;
   availableActors?: { id: string; name: string; sector: string; location: string | null }[];
   actor: {
@@ -122,15 +126,18 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
       return; // Skip this item
     }
 
-    // Extract image from attributes
+    // Extract media attributes
+    const attrs = (asset.attributes as any) || {};
     let imageUrl = null;
-    if (asset.attributes) {
-      const attrs = asset.attributes as any;
-      if (attrs.image_url) imageUrl = attrs.image_url;
-      else if (attrs.brand_gallery && attrs.brand_gallery.length > 0) imageUrl = attrs.brand_gallery[0];
-      else if (attrs.styling_gallery && attrs.styling_gallery.length > 0) imageUrl = attrs.styling_gallery[0];
-      else if (attrs.comp_card && attrs.comp_card.images && attrs.comp_card.images.length > 0) imageUrl = attrs.comp_card.images[0];
-    }
+    if (attrs.image_url) imageUrl = attrs.image_url;
+    else if (attrs.brand_gallery && attrs.brand_gallery.length > 0) imageUrl = attrs.brand_gallery[0];
+    else if (attrs.styling_gallery && attrs.styling_gallery.length > 0) imageUrl = attrs.styling_gallery[0];
+    else if (attrs.comp_card && attrs.comp_card.images && attrs.comp_card.images.length > 0) imageUrl = attrs.comp_card.images[0];
+
+    const mediaType: "IMAGE" | "VIDEO" = attrs.media_type || (attrs.video_url ? "VIDEO" : "IMAGE");
+    const videoUrl: string | null = attrs.video_url || null;
+    const videoSource = attrs.video_source || (videoUrl ? "EXTERNAL" : null);
+    const aspectRatio = attrs.aspect_ratio || "16:9";
 
     // Fallback to random beautiful images only if asset has no image
     if (!imageUrl) {
@@ -150,7 +157,11 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
       title: asset.name,
       category: displayCategory,
       imageUrl,
-      tearSheet: (asset.attributes as any)?.tear_sheet || null,
+      mediaType,
+      videoUrl,
+      videoSource,
+      aspectRatio,
+      tearSheet: attrs.tear_sheet || null,
       availableActors: allActors,
       actor: {
         id: asset.actor.id,

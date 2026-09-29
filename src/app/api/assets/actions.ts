@@ -27,6 +27,33 @@ export async function createShowcaseAsset(formData: FormData) {
     const projectUrl = formData.get("projectUrl") as string;
     const imageFile = formData.get("imageFile") as File | null;
 
+    // Video metadata & direct video upload handling
+    const mediaType = (formData.get("mediaType") as string) || "IMAGE";
+    let videoSource = (formData.get("videoSource") as string) || null;
+    let videoUrl = (formData.get("videoUrl") as string) || "";
+    const aspectRatio = (formData.get("aspectRatio") as string) || "16:9";
+    const videoFile = formData.get("videoFile") as File | null;
+
+    // Handle direct video upload
+    if (videoFile && videoFile.size > 0) {
+      const videoBytes = await videoFile.arrayBuffer();
+      const videoBuffer = Buffer.from(videoBytes);
+      const cleanVideoName = `${Date.now()}-${videoFile.name.replace(/\s+/g, '-')}`;
+      const videoUploadDir = path.join(process.cwd(), 'public', 'uploads', 'portfolios', 'videos');
+
+      try {
+        await mkdir(videoUploadDir, { recursive: true });
+      } catch (e) {
+        // ignore if exists
+      }
+
+      const videoFilePath = path.join(videoUploadDir, cleanVideoName);
+      await writeFile(videoFilePath, videoBuffer);
+      videoUrl = `/uploads/portfolios/videos/${cleanVideoName}`;
+      videoSource = "DIRECT_UPLOAD";
+    }
+
+    // Handle poster cover image upload
     if (imageFile && imageFile.size > 0) {
       const bytes = await imageFile.arrayBuffer();
       const buffer = Buffer.from(bytes);
@@ -44,8 +71,29 @@ export async function createShowcaseAsset(formData: FormData) {
       imageUrl = `/uploads/portfolios/${filename}`;
     }
 
-    if (!name || !subtype || !imageUrl) {
-      throw new Error("Missing required fields");
+    // Auto-detect YouTube thumbnail if cover image wasn't uploaded manually
+    if (mediaType === "VIDEO" && !imageUrl && videoUrl) {
+      const ytMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/);
+      if (ytMatch && ytMatch[1]) {
+        imageUrl = `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg`;
+        if (!videoSource) videoSource = "YOUTUBE";
+      } else if (videoUrl.includes("vimeo.com")) {
+        if (!videoSource) videoSource = "VIMEO";
+        imageUrl = "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=800&auto=format&fit=crop";
+      }
+    }
+
+    if (!name || !subtype) {
+      throw new Error("Missing required fields: Judul dan Kategori wajib diisi");
+    }
+
+    if (mediaType === "VIDEO" && !videoUrl && !videoFile) {
+      throw new Error("Mohon sediakan tautan video atau unggah file video portofolio Anda.");
+    }
+
+    if (!imageUrl) {
+      // Fallback poster for video or general portfolio
+      imageUrl = "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=800&auto=format&fit=crop";
     }
 
     const tearSheetRaw = formData.get("tearSheet") as string | null;
@@ -68,6 +116,10 @@ export async function createShowcaseAsset(formData: FormData) {
         roles: ["OUTPUT"], // Default role for portfolio works
         attributes: {
           image_url: imageUrl,
+          media_type: mediaType,
+          video_url: videoUrl || null,
+          video_source: videoSource || null,
+          aspect_ratio: aspectRatio,
           project_url: projectUrl || null,
           ...(tearSheetData ? { tear_sheet: tearSheetData } : {}),
         },

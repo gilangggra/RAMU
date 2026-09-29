@@ -1,4 +1,4 @@
-export type HotspotCategory = "wardrobe" | "photography" | "hmua" | "talent" | "art_direction";
+export type HotspotCategory = "wardrobe" | "photography" | "hmua" | "talent" | "art_direction" | "cinematography" | "sound";
 
 export interface HotspotPin {
   id: string;

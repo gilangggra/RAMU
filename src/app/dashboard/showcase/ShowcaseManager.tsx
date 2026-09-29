@@ -22,11 +22,29 @@ import {
   ArrowRight,
   Info,
   CheckCircle2,
-  Search
+  Search,
+  Video,
+  Film,
+  Play,
+  Volume2,
+  UploadCloud
 } from "lucide-react";
 import { createShowcaseAsset, deleteShowcaseAsset } from "@/app/api/assets/actions";
 import { useRouter } from "next/navigation";
 import { HotspotCategory } from "@/components/showcase/tearSheetTypes";
+import { parseVideoUrl, captureVideoFrame } from "@/lib/videoUtils";
+
+function dataURLtoFile(dataurl: string, filename: string): File {
+  const arr = dataurl.split(",");
+  const mime = arr[0].match(/:(.*?);/)?.[1] || "image/jpeg";
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+}
 
 interface Asset {
   id: string;
@@ -68,27 +86,33 @@ interface InputHotspot {
 }
 
 const CATEGORY_ROLES: { category: HotspotCategory; label: string; defaultRole: string; icon: React.ElementType }[] = [
+  { category: "cinematography", label: "Penyutradaraan & Sinematografi", defaultRole: "Film Director / DoP", icon: Video },
   { category: "photography", label: "Fotografi & Lighting", defaultRole: "Director of Photography", icon: Camera },
   { category: "wardrobe", label: "Wardrobe & Styling", defaultRole: "Fashion Designer / Stylist", icon: Shirt },
   { category: "hmua", label: "Makeup & Hair (HMUA)", defaultRole: "Lead Beauty & Hair Stylist", icon: Sparkles },
   { category: "talent", label: "Model & Talent", defaultRole: "Editorial Muse / Model", icon: User },
-  { category: "art_direction", label: "Art Direction & Studio", defaultRole: "Art Director & Set Designer", icon: Palette },
+  { category: "art_direction", label: "Art Direction & Pascaproduksi", defaultRole: "Art Director & Colorist", icon: Palette },
+  { category: "sound", label: "Penata Suara & Musik", defaultRole: "Sound Designer / Music", icon: Volume2 },
 ];
 
 const CATEGORY_COLORS: Record<HotspotCategory, { bg: string; text: string; border: string }> = {
+  cinematography: { bg: "bg-purple-500", text: "text-purple-700", border: "border-purple-300" },
   photography: { bg: "bg-emerald-500", text: "text-emerald-700", border: "border-emerald-300" },
   wardrobe: { bg: "bg-indigo-500", text: "text-indigo-700", border: "border-indigo-300" },
   hmua: { bg: "bg-rose-500", text: "text-rose-700", border: "border-rose-300" },
   talent: { bg: "bg-amber-500", text: "text-amber-800", border: "border-amber-300" },
   art_direction: { bg: "bg-sky-500", text: "text-sky-700", border: "border-sky-300" },
+  sound: { bg: "bg-cyan-500", text: "text-cyan-700", border: "border-cyan-300" },
 };
 
 function detectCategoryFromSector(sector: string): HotspotCategory {
   const s = sector.toLowerCase();
+  if (s.includes("video") || s.includes("film") || s.includes("sinema") || s.includes("sutradara")) return "cinematography";
+  if (s.includes("suara") || s.includes("musik") || s.includes("audio") || s.includes("sound")) return "sound";
   if (s.includes("foto") || s.includes("visual") || s.includes("kamera")) return "photography";
   if (s.includes("fashion") || s.includes("desain") || s.includes("busana") || s.includes("stylist") || s.includes("label")) return "wardrobe";
   if (s.includes("makeup") || s.includes("mua") || s.includes("kecantikan")) return "hmua";
-  if (s.includes("model") || s.includes("talent")) return "talent";
+  if (s.includes("model") || s.includes("talent") || s.includes("aktor")) return "talent";
   if (s.includes("art") || s.includes("director") || s.includes("studio") || s.includes("kreatif")) return "art_direction";
   return "wardrobe";
 }
@@ -106,6 +130,15 @@ export function ShowcaseManager({
   const [mounted, setMounted] = useState(false);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"basics" | "tearsheet">("basics");
+
+  // Media Type: Foto vs Video
+  const [mediaType, setMediaType] = useState<"IMAGE" | "VIDEO">("IMAGE");
+  const [videoSourceType, setVideoSourceType] = useState<"URL" | "FILE">("URL");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [selectedVideoFile, setSelectedVideoFile] = useState<File | null>(null);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
+  const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16" | "1:1">("16:9");
+  const [isCapturingPoster, setIsCapturingPoster] = useState(false);
 
   // Form states
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -154,6 +187,60 @@ export function ShowcaseManager({
       setSelectedFile(file);
       const url = URL.createObjectURL(file);
       setImagePreview(url);
+    }
+  };
+
+  const handleVideoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 55 * 1024 * 1024) {
+        setError("Ukuran video melebihi 50MB. Disarankan menggunakan tautan Vimeo/YouTube untuk video sinematik resolusi tinggi.");
+        return;
+      }
+      setError("");
+      setSelectedVideoFile(file);
+      const url = URL.createObjectURL(file);
+      setVideoPreviewUrl(url);
+
+      // Auto capture frame for cover poster if no image file has been manually uploaded yet
+      if (!selectedFile) {
+        setIsCapturingPoster(true);
+        try {
+          const frameDataUrl = await captureVideoFrame(file);
+          if (frameDataUrl) {
+            setImagePreview(frameDataUrl);
+          }
+        } catch (err) {
+          console.error("Frame capture error:", err);
+        } finally {
+          setIsCapturingPoster(false);
+        }
+      }
+    }
+  };
+
+  const handleVideoUrlChange = (url: string) => {
+    setVideoUrl(url);
+    setError("");
+    const parsed = parseVideoUrl(url);
+    if (parsed?.thumbnailUrl && !selectedFile) {
+      setImagePreview(parsed.thumbnailUrl);
+    }
+  };
+
+  const handleManualCaptureFrame = async () => {
+    if (!selectedVideoFile) return;
+    setIsCapturingPoster(true);
+    try {
+      const frameDataUrl = await captureVideoFrame(selectedVideoFile);
+      if (frameDataUrl) {
+        setImagePreview(frameDataUrl);
+        setSelectedFile(null);
+      }
+    } catch (err) {
+      console.error("Frame capture error:", err);
+    } finally {
+      setIsCapturingPoster(false);
     }
   };
 
@@ -255,19 +342,57 @@ export function ShowcaseManager({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!title || !subtype || !selectedFile) {
-      setError("Mohon lengkapi judul, kategori, dan foto cover.");
+    if (!title.trim() || !subtype) {
+      setError("Mohon lengkapi judul dan kategori karya.");
       return;
+    }
+
+    if (mediaType === "IMAGE" && !selectedFile && !imagePreview) {
+      setError("Mohon pilih foto cover portofolio Anda.");
+      return;
+    }
+
+    if (mediaType === "VIDEO") {
+      if (videoSourceType === "FILE" && !selectedVideoFile) {
+        setError("Mohon pilih file video (MP4/WebM) portofolio Anda.");
+        return;
+      }
+      if (videoSourceType === "URL" && !videoUrl.trim()) {
+        setError("Mohon masukkan tautan video (YouTube/Vimeo/URL streaming) portofolio Anda.");
+        return;
+      }
     }
 
     setError("");
     startTransition(async () => {
       const formData = new FormData();
-      formData.append("name", title);
+      formData.append("name", title.trim());
       formData.append("subtype", subtype);
       formData.append("description", description);
       formData.append("projectUrl", projectUrl);
-      formData.append("imageFile", selectedFile);
+      formData.append("mediaType", mediaType);
+
+      if (mediaType === "VIDEO") {
+        formData.append("aspectRatio", aspectRatio);
+        if (videoSourceType === "FILE" && selectedVideoFile) {
+          formData.append("videoFile", selectedVideoFile);
+          formData.append("videoSource", "DIRECT_UPLOAD");
+        } else if (videoSourceType === "URL" && videoUrl.trim()) {
+          formData.append("videoUrl", videoUrl.trim());
+          const parsed = parseVideoUrl(videoUrl.trim());
+          formData.append("videoSource", parsed?.platform || "EXTERNAL");
+        }
+      }
+
+      // Handle Cover Poster Image
+      if (selectedFile) {
+        formData.append("imageFile", selectedFile);
+      } else if (imagePreview && imagePreview.startsWith("data:")) {
+        const posterFile = dataURLtoFile(imagePreview, `poster-${Date.now()}.jpg`);
+        formData.append("imageFile", posterFile);
+      } else if (imagePreview && imagePreview.startsWith("http")) {
+        formData.append("imageUrl", imagePreview);
+      }
 
       // Tear Sheet Metadata payload with bound actorIds
       const tearSheetPayload = {
@@ -306,6 +431,11 @@ export function ShowcaseManager({
         setProjectUrl("");
         setSelectedFile(null);
         setImagePreview(null);
+        setSelectedVideoFile(null);
+        setVideoPreviewUrl(null);
+        setVideoUrl("");
+        setMediaType("IMAGE");
+        setVideoSourceType("URL");
         setHotspots([]);
         setActiveTab("basics");
         router.refresh();
@@ -400,123 +530,410 @@ export function ShowcaseManager({
           {/* ── TAB 1: INFORMASI KARYA UTAMA ── */}
           {activeTab === "basics" && (
             <div className="flex-1 min-h-0 overflow-y-auto p-6 sm:p-8 space-y-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                
-                {/* Left: Input Fields */}
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
-                      Judul Karya *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      placeholder="Contoh: Fall Fashion Campaign 'Silk Horizon'"
-                      className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
-                    />
+              
+              {/* Media Mode Selector */}
+              <div className="flex items-center gap-2 p-1.5 bg-stone-100/90 rounded-2xl w-fit border border-stone-200/80 mb-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMediaType("IMAGE");
+                    if (subtype === "Video Komersial") setSubtype("Fotografi");
+                  }}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    mediaType === "IMAGE"
+                      ? "bg-white text-stone-900 shadow-xs"
+                      : "text-stone-500 hover:text-stone-900"
+                  }`}
+                >
+                  <ImageIcon className="w-3.5 h-3.5 text-stone-700" />
+                  <span>Portofolio Foto</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMediaType("VIDEO");
+                    if (subtype === "Fotografi") setSubtype("Video Komersial");
+                  }}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    mediaType === "VIDEO"
+                      ? "bg-stone-950 text-white shadow-xs"
+                      : "text-stone-500 hover:text-stone-900"
+                  }`}
+                >
+                  <Film className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Portofolio Video / Sinema</span>
+                </button>
+              </div>
+
+              {/* ── CASE A: PORTOFOLIO FOTO ── */}
+              {mediaType === "IMAGE" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* Left: Input Fields */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                        Judul Karya *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="Contoh: Fall Fashion Campaign 'Silk Horizon'"
+                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                        Kategori Spesifik *
+                      </label>
+                      <select
+                        value={subtype}
+                        onChange={(e) => setSubtype(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                      >
+                        <option value="Fotografi">Fotografi</option>
+                        <option value="Fashion Styling">Fashion Styling</option>
+                        <option value="Desain Grafis">Desain Grafis</option>
+                        <option value="3D & Animasi">3D & Animasi</option>
+                        <option value="Lainnya">Lainnya</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                        <LinkIcon className="w-3.5 h-3.5 text-stone-500" /> Tautan Proyek (Opsional)
+                      </label>
+                      <input
+                        type="url"
+                        value={projectUrl}
+                        onChange={(e) => setProjectUrl(e.target.value)}
+                        placeholder="https://behance.net/... atau tautan eksternal"
+                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                        Deskripsi Singkat
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Ceritakan konsep karya, siluet, atau peranan Anda dalam kolaborasi ini..."
+                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40 resize-none"
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
-                      Kategori Spesifik *
+                  {/* Right: Cover Image Upload with Live Preview */}
+                  <div className="space-y-2">
+                    <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                      <ImageIcon className="w-3.5 h-3.5 text-stone-500" /> Foto Cover Karya *
                     </label>
-                    <select
-                      value={subtype}
-                      onChange={(e) => setSubtype(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
-                    >
-                      <option value="Fotografi">Fotografi</option>
-                      <option value="Video Komersial">Video Komersial</option>
-                      <option value="Fashion Styling">Fashion Styling</option>
-                      <option value="Desain Grafis">Desain Grafis</option>
-                      <option value="3D & Animasi">3D & Animasi</option>
-                      <option value="Lainnya">Lainnya</option>
-                    </select>
-                  </div>
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                      <LinkIcon className="w-3.5 h-3.5 text-stone-500" /> Tautan Proyek (Opsional)
-                    </label>
-                    <input
-                      type="url"
-                      value={projectUrl}
-                      onChange={(e) => setProjectUrl(e.target.value)}
-                      placeholder="https://behance.net/... atau https://youtube.com/..."
-                      className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
-                    />
-                  </div>
+                    <div className="relative border-2 border-dashed border-stone-200 hover:border-amber-400/80 rounded-2xl p-4 bg-stone-50/60 transition-colors flex flex-col items-center justify-center min-h-[260px] text-center overflow-hidden">
+                      {imagePreview ? (
+                        <div className="relative w-full h-[240px] flex items-center justify-center">
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="max-h-full max-w-full object-contain rounded-xl shadow-xs"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setImagePreview(null);
+                              setSelectedFile(null);
+                            }}
+                            className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white hover:bg-black transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-2 flex flex-col items-center">
+                          <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600 shadow-2xs">
+                            <ImageIcon className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-stone-800">Pilih atau Seret Foto ke Sini</p>
+                            <p className="text-[10px] text-stone-500 mt-0.5">JPG, PNG, atau WebP (Maks 5MB)</p>
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            required={!selectedFile}
+                            onChange={handleImageChange}
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                          />
+                        </div>
+                      )}
+                    </div>
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
-                      Deskripsi Singkat
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Ceritakan konsep karya, siluet, atau peranan Anda dalam kolaborasi ini..."
-                      className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40 resize-none"
-                    />
+                    <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/80 text-[11px] text-amber-900 flex items-start gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <span>
+                        Setelah memilih foto, Anda dapat beralih ke <strong>Tab 2 (Kredit Tim)</strong> untuk men-tag kolaborator terdaftar!
+                      </span>
+                    </div>
                   </div>
                 </div>
+              )}
 
-                {/* Right: Cover Image Upload with Live Preview */}
-                <div className="space-y-2">
-                  <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                    <ImageIcon className="w-3.5 h-3.5 text-stone-500" /> Foto Cover Karya *
-                  </label>
+              {/* ── CASE B: PORTOFOLIO VIDEO / SINEMA ── */}
+              {mediaType === "VIDEO" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* Left: Video Details */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                        Judul Karya Video *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="Contoh: Vogue Runway Teaser 'Aura 2026'"
+                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                      />
+                    </div>
 
-                  <div className="relative border-2 border-dashed border-stone-200 hover:border-amber-400/80 rounded-2xl p-4 bg-stone-50/60 transition-colors flex flex-col items-center justify-center min-h-[260px] text-center overflow-hidden">
-                    {imagePreview ? (
-                      <div className="relative w-full h-[240px] flex items-center justify-center">
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          className="max-h-full max-w-full object-contain rounded-xl shadow-xs"
-                        />
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                          Kategori Video *
+                        </label>
+                        <select
+                          value={subtype}
+                          onChange={(e) => setSubtype(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                        >
+                          <option value="Video Komersial">Video Komersial</option>
+                          <option value="Fashion Film">Fashion Film</option>
+                          <option value="Music Video">Music Video</option>
+                          <option value="Campaign Reels">Campaign Reels (9:16)</option>
+                          <option value="Dokumenter">Dokumenter</option>
+                          <option value="Motion Graphic">Motion Graphic</option>
+                          <option value="Lainnya">Lainnya</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                          Rasio Aspek
+                        </label>
+                        <select
+                          value={aspectRatio}
+                          onChange={(e) => setAspectRatio(e.target.value as any)}
+                          className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                        >
+                          <option value="16:9">16:9 Sinematik (Lanskap)</option>
+                          <option value="9:16">9:16 Reels / TikTok (Vertikal)</option>
+                          <option value="1:1">1:1 Persegi</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                        Deskripsi / Sinopsis Konsep
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Deskripsikan visi visual, color grading, konsep sinematik, atau narasi film ini..."
+                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40 resize-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                        <LinkIcon className="w-3.5 h-3.5 text-stone-500" /> Tautan Proyek Lengkap (Opsional)
+                      </label>
+                      <input
+                        type="url"
+                        value={projectUrl}
+                        onChange={(e) => setProjectUrl(e.target.value)}
+                        placeholder="https://vimeo.com/... atau tautan proyek eksternal"
+                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Right: Video Source & Poster */}
+                  <div className="space-y-4">
+                    
+                    {/* Source Switcher */}
+                    <div className="space-y-1.5">
+                      <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider">
+                        Sumber Video *
+                      </label>
+                      <div className="grid grid-cols-2 gap-2 p-1 bg-stone-100 rounded-xl border border-stone-200/80">
                         <button
                           type="button"
-                          onClick={() => {
-                            setImagePreview(null);
-                            setSelectedFile(null);
-                          }}
-                          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white hover:bg-black transition-colors"
+                          onClick={() => setVideoSourceType("URL")}
+                          className={`py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                            videoSourceType === "URL"
+                              ? "bg-white text-stone-950 shadow-xs"
+                              : "text-stone-500 hover:text-stone-900"
+                          }`}
                         >
-                          <X className="w-4 h-4" />
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Tautan Video</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setVideoSourceType("FILE")}
+                          className={`py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                            videoSourceType === "FILE"
+                              ? "bg-white text-stone-950 shadow-xs"
+                              : "text-stone-500 hover:text-stone-900"
+                          }`}
+                        >
+                          <UploadCloud className="w-3.5 h-3.5" />
+                          <span>Upload File MP4</span>
                         </button>
                       </div>
-                    ) : (
-                      <div className="space-y-2 flex flex-col items-center">
-                        <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600 shadow-2xs">
-                          <ImageIcon className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-stone-800">Pilih atau Seret Foto ke Sini</p>
-                          <p className="text-[10px] text-stone-500 mt-0.5">JPG, PNG, atau WebP (Maks 5MB)</p>
-                        </div>
+                    </div>
+
+                    {/* Mode URL */}
+                    {videoSourceType === "URL" && (
+                      <div className="space-y-2">
                         <input
-                          type="file"
-                          accept="image/*"
-                          required={!selectedFile}
-                          onChange={handleImageChange}
-                          className="absolute inset-0 opacity-0 cursor-pointer"
+                          type="url"
+                          value={videoUrl}
+                          onChange={(e) => handleVideoUrlChange(e.target.value)}
+                          placeholder="Tempel link: https://youtube.com/... atau https://vimeo.com/..."
+                          className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
                         />
+                        {videoUrl && (
+                          <div className="flex items-center gap-2 text-[11px] font-mono font-bold text-stone-600 bg-stone-50 px-3 py-1.5 rounded-lg border border-stone-200">
+                            <Video className="w-3.5 h-3.5 text-purple-600" />
+                            <span>
+                              Platform: {parseVideoUrl(videoUrl)?.platform === "YOUTUBE" ? "YouTube Terdeteksi" : parseVideoUrl(videoUrl)?.platform === "VIMEO" ? "Vimeo Terdeteksi" : "Tautan Streaming Langsung"}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     )}
-                  </div>
 
-                  <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/80 text-[11px] text-amber-900 flex items-start gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                    <span>
-                      Setelah memilih foto, Anda dapat beralih ke <strong>Tab 2 (Kredit Tim)</strong> untuk men-tag kolaborator seperti di Instagram dengan rekomendasi akun otomatis!
-                    </span>
+                    {/* Mode FILE Upload */}
+                    {videoSourceType === "FILE" && (
+                      <div className="relative border-2 border-dashed border-stone-200 hover:border-amber-400/80 rounded-2xl p-4 bg-stone-50/60 transition-colors flex flex-col items-center justify-center min-h-[140px] text-center overflow-hidden">
+                        {selectedVideoFile ? (
+                          <div className="space-y-2 w-full flex flex-col items-center">
+                            <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-700">
+                              <Video className="w-5 h-5" />
+                            </div>
+                            <p className="text-xs font-bold text-stone-900 truncate max-w-[280px]">
+                              {selectedVideoFile.name}
+                            </p>
+                            <p className="text-[10px] text-stone-500">
+                              {(selectedVideoFile.size / (1024 * 1024)).toFixed(1)} MB • Video Siap
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedVideoFile(null);
+                                setVideoPreviewUrl(null);
+                              }}
+                              className="text-[11px] text-rose-600 hover:underline font-bold cursor-pointer"
+                            >
+                              Ganti Video
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="space-y-2 flex flex-col items-center">
+                            <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 shadow-2xs">
+                              <UploadCloud className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold text-stone-800">Unggah File Video</p>
+                              <p className="text-[10px] text-stone-500 mt-0.5">MP4, WebM, atau MOV (Maks 50MB)</p>
+                            </div>
+                            <input
+                              type="file"
+                              accept="video/mp4,video/webm,video/quicktime"
+                              onChange={handleVideoFileChange}
+                              className="absolute inset-0 opacity-0 cursor-pointer"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Poster Cover Section */}
+                    <div className="space-y-2 pt-1 border-t border-stone-200/80">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider flex items-center gap-1.5">
+                          <ImageIcon className="w-3.5 h-3.5 text-stone-500" /> Poster Cover Video *
+                        </label>
+                        {selectedVideoFile && (
+                          <button
+                            type="button"
+                            onClick={handleManualCaptureFrame}
+                            disabled={isCapturingPoster}
+                            className="text-[10px] font-bold text-amber-700 hover:underline cursor-pointer disabled:opacity-50"
+                          >
+                            {isCapturingPoster ? "Mengambil Frame..." : "⚡ Ambil Frame Video"}
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="relative border border-stone-200 rounded-xl p-3 bg-stone-50/80 flex items-center gap-3">
+                        {imagePreview ? (
+                          <>
+                            <img
+                              src={imagePreview}
+                              alt="Poster preview"
+                              className="w-16 h-16 object-cover rounded-lg border border-stone-200 shrink-0"
+                            />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-bold text-stone-900 truncate">
+                                Poster Cover Terpasang
+                              </p>
+                              <p className="text-[10px] text-stone-500">
+                                Dimuat cepat pada galeri showcase sebelum video berputar.
+                              </p>
+                              <label className="text-[10px] font-bold text-amber-700 hover:underline cursor-pointer mt-1 inline-block">
+                                Ganti Gambar Custom
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleImageChange}
+                                  className="hidden"
+                                />
+                              </label>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="w-full text-center py-2">
+                            <label className="text-xs font-bold text-amber-700 hover:underline cursor-pointer inline-flex items-center gap-1.5">
+                              <ImageIcon className="w-3.5 h-3.5" /> Pilih Gambar Poster Cover
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                className="hidden"
+                              />
+                            </label>
+                            <p className="text-[10px] text-stone-400 mt-0.5">
+                              Atau otomatis diambil dari frame video / thumbnail YouTube
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
                   </div>
                 </div>
+              )}
 
-              </div>
             </div>
           )}
 
@@ -560,10 +977,16 @@ export function ShowcaseManager({
                       </div>
                     ) : (
                       <div className="p-8 text-center space-y-2">
-                        <ImageIcon className="w-8 h-8 text-stone-400 mx-auto" />
-                        <p className="text-xs font-bold text-stone-600">Foto belum dipilih</p>
+                        {mediaType === "VIDEO" ? (
+                          <Film className="w-8 h-8 text-stone-400 mx-auto" />
+                        ) : (
+                          <ImageIcon className="w-8 h-8 text-stone-400 mx-auto" />
+                        )}
+                        <p className="text-xs font-bold text-stone-600">
+                          {mediaType === "VIDEO" ? "Video atau Poster belum dipilih" : "Foto belum dipilih"}
+                        </p>
                         <p className="text-[11px] text-stone-400 max-w-xs leading-relaxed">
-                          Silakan kembali ke Tab 1 (Info Karya) dan pilih foto cover terlebih dahulu.
+                          Silakan kembali ke Tab 1 (Info Karya) dan lengkapi media karya terlebih dahulu.
                         </p>
                       </div>
                     )}

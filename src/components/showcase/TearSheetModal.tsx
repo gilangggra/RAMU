@@ -8,6 +8,7 @@ import { ShowcaseItem } from "@/application/showcaseService";
 import { getTearSheetData, formatInstagramCredits } from "./tearSheetUtils";
 import { HotspotCategory } from "./tearSheetTypes";
 import { confirmCoCredit, rejectCoCredit } from "@/app/api/assets/actions";
+import { parseVideoUrl } from "@/lib/videoUtils";
 import {
   X,
   ChevronLeft,
@@ -32,7 +33,11 @@ import {
   Share2,
   Info,
   Clock,
-  Loader2
+  Loader2,
+  Play,
+  Film,
+  Video,
+  Volume2
 } from "lucide-react";
 
 interface TearSheetModalProps {
@@ -47,17 +52,26 @@ interface TearSheetModalProps {
 }
 
 const CATEGORY_ICONS: Record<HotspotCategory, React.ElementType> = {
+  cinematography: Video,
   photography: Camera,
   wardrobe: Shirt,
   hmua: Sparkles,
   talent: User,
-  art_direction: Palette
+  art_direction: Palette,
+  sound: Volume2
 };
 
 const CATEGORY_COLORS: Record<
   HotspotCategory,
   { border: string; bg: string; text: string; badgeBg: string; activeRing: string }
 > = {
+  cinematography: {
+    border: "border-purple-300",
+    bg: "bg-purple-500",
+    text: "text-purple-700",
+    badgeBg: "bg-purple-50 text-purple-800 border-purple-200",
+    activeRing: "ring-2 ring-purple-400/40"
+  },
   photography: {
     border: "border-emerald-300",
     bg: "bg-emerald-500",
@@ -92,6 +106,13 @@ const CATEGORY_COLORS: Record<
     text: "text-sky-700",
     badgeBg: "bg-sky-50 text-sky-800 border-sky-200",
     activeRing: "ring-2 ring-sky-400/40"
+  },
+  sound: {
+    border: "border-cyan-300",
+    bg: "bg-cyan-500",
+    text: "text-cyan-700",
+    badgeBg: "bg-cyan-50 text-cyan-800 border-cyan-200",
+    activeRing: "ring-2 ring-cyan-400/40"
   }
 };
 
@@ -124,6 +145,10 @@ export function TearSheetModal({
   const [isConfirming, setIsConfirming] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<{ type: "success" | "rejected" | "info"; msg: string } | null>(null);
   const [localConfirmedActorIds, setLocalConfirmedActorIds] = useState<string[]>([]);
+
+  // Video parsing
+  const isVideo = item?.mediaType === "VIDEO" || !!item?.videoUrl;
+  const parsedVideo = isVideo && item?.videoUrl ? parseVideoUrl(item.videoUrl) : null;
 
   useEffect(() => {
     setMounted(true);
@@ -357,6 +382,11 @@ export function TearSheetModal({
               <span className="text-[11px] font-mono text-stone-500 hidden sm:inline">
                 {tearSheetData.issueNumber} ({tearSheetData.edition})
               </span>
+              {isVideo && (
+                <span className="px-2 py-0.5 rounded-full bg-stone-900 text-stone-100 font-mono text-[9px] font-bold tracking-wider uppercase hidden sm:inline-flex items-center gap-1">
+                  <Play className="w-2.5 h-2.5 fill-current" /> CINEMA FILM
+                </span>
+              )}
             </div>
           </div>
 
@@ -416,8 +446,8 @@ export function TearSheetModal({
         {/* ── MAIN WORKSPACE: SPLIT STAGE (IMAGE VIEWPORT + EDITORIAL TEAR-SHEET) ── */}
         <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
           
-          {/* ── LEFT: INTERACTIVE PHOTO VIEWPORT ── */}
-          <div className="flex-1 min-h-0 relative bg-[#FBFBFA] border-b lg:border-b-0 lg:border-r border-stone-100 flex items-center justify-center overflow-hidden p-4 sm:p-8 select-none">
+          {/* ── LEFT: INTERACTIVE PHOTO / CINEMA VIEWPORT ── */}
+          <div className="flex-1 min-h-0 relative bg-[#0D0D0C] lg:bg-[#FBFBFA] border-b lg:border-b-0 lg:border-r border-stone-100 flex items-center justify-center overflow-hidden p-3 sm:p-6 md:p-8 select-none">
             
             {/* Navigation Arrows (Hover on Desktop) */}
             <button
@@ -435,25 +465,57 @@ export function TearSheetModal({
               <ChevronRight className="w-5 h-5" />
             </button>
 
-            {/* Image Canvas Container (Clean Photo) */}
-            <div className="relative inline-flex items-center justify-center max-w-full max-h-full">
-              {!imgLoaded && (
-                <div className="w-[380px] h-[520px] max-w-full bg-stone-200/60 rounded-2xl animate-pulse flex items-center justify-center">
-                  <span className="font-mono text-xs text-stone-400 tracking-wider">
-                    MEMUAT RESOLUSI TINGGI...
-                  </span>
-                </div>
-              )}
+            {isVideo && parsedVideo ? (
+              <div className="relative w-full max-w-4xl max-h-[calc(90vh-140px)] flex items-center justify-center p-2">
+                {parsedVideo.embedUrl ? (
+                  <div
+                    className={`relative w-full overflow-hidden rounded-2xl shadow-[0_24px_70px_rgba(0,0,0,0.35)] border border-stone-800 bg-black ${
+                      item.aspectRatio === "9:16" ? "max-w-[360px] aspect-[9/16]" : "aspect-video"
+                    }`}
+                  >
+                    <iframe
+                      src={parsedVideo.embedUrl}
+                      title={item.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      className="w-full h-full border-0"
+                    />
+                  </div>
+                ) : (
+                  <div className="relative w-full max-w-4xl flex items-center justify-center">
+                    <video
+                      src={parsedVideo.directUrl || item.videoUrl!}
+                      poster={item.imageUrl}
+                      controls
+                      playsInline
+                      autoPlay
+                      className={`max-w-full max-h-[calc(90vh-140px)] rounded-2xl shadow-[0_24px_70px_rgba(0,0,0,0.35)] border border-stone-800/80 bg-black object-contain ${
+                        item.aspectRatio === "9:16" ? "max-w-[360px] aspect-[9/16]" : ""
+                      }`}
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="relative inline-flex items-center justify-center max-w-full max-h-full">
+                {!imgLoaded && (
+                  <div className="w-[380px] h-[520px] max-w-full bg-stone-200/60 rounded-2xl animate-pulse flex items-center justify-center">
+                    <span className="font-mono text-xs text-stone-400 tracking-wider">
+                      MEMUAT RESOLUSI TINGGI...
+                    </span>
+                  </div>
+                )}
 
-              <img
-                src={item.imageUrl}
-                alt={item.title}
-                onLoad={() => setImgLoaded(true)}
-                className={`max-w-full max-h-[calc(90vh-140px)] object-contain rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.07)] border border-stone-200/50 transition-opacity duration-500 ${
-                  imgLoaded ? "opacity-100" : "opacity-0"
-                }`}
-              />
-            </div>
+                <img
+                  src={item.imageUrl}
+                  alt={item.title}
+                  onLoad={() => setImgLoaded(true)}
+                  className={`max-w-full max-h-[calc(90vh-140px)] object-contain rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.07)] border border-stone-200/50 transition-opacity duration-500 ${
+                    imgLoaded ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              </div>
+            )}
           </div>
 
           {/* ── RIGHT: VOGUE EDITORIAL DOSSIER SIDEBAR ── */}
