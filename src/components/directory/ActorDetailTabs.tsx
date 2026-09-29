@@ -28,6 +28,9 @@ import {
   Sliders,
   ArrowRight,
   CreditCard,
+  Play,
+  Film,
+  Camera,
 } from "lucide-react";
 import { ModelCompCard, ModelAttributes } from "./ModelCompCard";
 import { StudioSpecsCard, StudioAttributes } from "./StudioSpecsCard";
@@ -210,11 +213,17 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
       imageUrl = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&auto=format&fit=crop";
     }
 
+    const mediaType: "IMAGE" | "VIDEO" = attrs.media_type || (attrs.video_url ? "VIDEO" : "IMAGE");
+
     return {
       id: asset.id,
       title: asset.name,
       category: asset.subtype || actor.sector || "Komersial",
       imageUrl,
+      mediaType,
+      videoUrl: attrs.video_url || null,
+      videoSource: attrs.video_source || (attrs.video_url ? "EXTERNAL" : null),
+      aspectRatio: attrs.aspect_ratio || null,
       tearSheet: attrs.tear_sheet || null,
       actor: {
         id: actor.id,
@@ -937,16 +946,34 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                 <span className="text-[11px] text-stone-400 font-medium">Klik untuk inspeksi kru &amp; tear-sheet</span>
               </div>
               
-              <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+              <div
+                className={
+                  portfolioAssets.length === 1
+                    ? "grid grid-cols-1 max-w-2xl mx-auto gap-6"
+                    : portfolioAssets.length === 2
+                    ? "grid grid-cols-1 md:grid-cols-2 gap-6"
+                    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                }
+              >
                 {portfolioAssets.map((asset, index) => {
-                  const attrs = asset.attributes as any;
+                  const attrs = (asset.attributes as any) || {};
+                  const isVideo =
+                    attrs.media_type === "VIDEO" ||
+                    Boolean(attrs.video_url) ||
+                    asset.subtype?.toLowerCase().includes("video") ||
+                    asset.subtype?.toLowerCase().includes("film") ||
+                    asset.subtype?.toLowerCase().includes("cinema") ||
+                    (attrs.image_url && attrs.image_url.includes("img.youtube.com"));
+
+                  const mediaAspectRatio = isVideo ? "aspect-[16/10]" : "aspect-[4/5]";
+
                   return (
                     <div
                       key={asset.id}
                       onClick={() => setSelectedShowcaseIndex(index)}
-                      className="break-inside-avoid relative group rounded-2xl overflow-hidden bg-stone-100 border border-stone-200/60 shadow-xs hover:shadow-xl transition-all duration-500 cursor-pointer"
+                      className="group flex flex-col rounded-3xl overflow-hidden bg-white border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] hover:shadow-xl hover:border-amber-300/80 transition-all duration-300 cursor-pointer"
                     >
-                      <div className="relative w-full aspect-[4/5] bg-stone-200">
+                      <div className={`relative w-full ${mediaAspectRatio} bg-stone-900 overflow-hidden`}>
                         {attrs?.image_url ? (
                           <img
                             src={attrs.image_url}
@@ -958,43 +985,80 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                             <Sparkles className="w-8 h-8 opacity-50" />
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-5 flex flex-col justify-end">
-                          <div className="space-y-1.5 translate-y-3 group-hover:translate-y-0 transition-transform duration-300">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="inline-flex px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-[9px] font-bold text-white uppercase tracking-wider">
-                                {asset.subtype}
-                              </span>
-                              {attrs?.is_co_credit ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-600/90 backdrop-blur-md text-[9px] font-bold text-white uppercase tracking-wider shadow-2xs">
-                                  Co-Credit &bull; {attrs.uploader_name}
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/90 backdrop-blur-md text-[9px] font-bold text-white uppercase tracking-wider shadow-2xs">
-                                  <ShieldCheck className="w-2.5 h-2.5" /> Karya Mandiri
-                                </span>
-                              )}
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-600/90 backdrop-blur-md text-[9px] font-bold text-white uppercase tracking-wider shadow-2xs">
-                                <CheckCircle2 className="w-2.5 h-2.5" /> Peer-Verified
-                              </span>
-                              <span className="px-2 py-0.5 rounded-md bg-amber-400 text-[9px] font-black text-stone-950 uppercase tracking-wider">
-                                Tear-Sheet
-                              </span>
-                            </div>
-                            <h4 className="text-white font-bold text-base leading-tight">{asset.name}</h4>
-                            {attrs?.is_co_credit && attrs?.co_credit_role && (
-                              <p className="text-[11px] text-amber-300 font-medium">
-                                Peran Anda: {attrs.co_credit_role}
-                              </p>
-                            )}
-                            <div className="flex items-center justify-between pt-2 border-t border-white/20 mt-1">
-                              <span className="inline-flex items-center gap-1.5 text-xs text-amber-300 font-bold hover:text-amber-200">
-                                Buka Detail Karya <ExternalLink className="w-3.5 h-3.5" />
-                              </span>
-                              <span className="text-[10px] text-white/80 font-medium">
-                                Kru &amp; Kredit Resmi
-                              </span>
+
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-40 group-hover:opacity-60 transition-opacity" />
+
+                        {isVideo && (
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="w-12 h-12 rounded-full bg-white/95 text-[#1E1B2E] flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:bg-[#E66A48] group-hover:text-white transition-all backdrop-blur-xs">
+                              <Play className="w-5 h-5 ml-0.5 fill-current" />
                             </div>
                           </div>
+                        )}
+
+                        <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between pointer-events-none gap-2">
+                          {attrs?.is_co_credit ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-900/85 backdrop-blur-md text-[10px] font-bold text-white border border-purple-400/30 shadow-xs">
+                              <span>Co-Credit</span>
+                              <span className="text-purple-300">• {attrs.uploader_name}</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-bold text-white shadow-xs">
+                              <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                              <span>Karya Mandiri</span>
+                            </span>
+                          )}
+
+                          {isVideo ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-bold text-amber-300 shadow-xs">
+                              <Film className="w-3 h-3" />
+                              <span>VIDEO</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-bold text-stone-200 shadow-xs">
+                              <Camera className="w-3 h-3 text-stone-300" />
+                              <span>FOTO</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="p-5 flex flex-col justify-between flex-1 gap-3 bg-white">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <span className="px-2.5 py-0.5 rounded-lg bg-stone-100 text-stone-700 text-[10px] font-bold uppercase tracking-wider">
+                              {asset.subtype || "Karya"}
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/80">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                              <span>Peer-Verified</span>
+                            </span>
+                          </div>
+
+                          <h4 className="text-base font-extrabold text-[#1E1B2E] group-hover:text-[#E66A48] transition-colors leading-snug line-clamp-1">
+                            {asset.name}
+                          </h4>
+
+                          {attrs?.is_co_credit && attrs?.co_credit_role ? (
+                            <p className="text-xs text-stone-500 font-medium line-clamp-1">
+                              Peran: <strong className="text-stone-700">{attrs.co_credit_role}</strong>
+                            </p>
+                          ) : asset.description ? (
+                            <p className="text-xs text-stone-500 font-medium line-clamp-2 leading-relaxed">
+                              {asset.description}
+                            </p>
+                          ) : (
+                            <p className="text-xs text-stone-400 font-medium">
+                              Karya resmi terverifikasi di ekosistem kolaborasi RAMU
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between pt-3 border-t border-stone-100 text-xs font-bold text-[#E66A48]">
+                          <span className="inline-flex items-center gap-1 text-xs">
+                            <span>Inspeksi Kru &amp; Tear-Sheet</span>
+                          </span>
+                          <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                         </div>
                       </div>
                     </div>
