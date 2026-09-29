@@ -20,6 +20,13 @@ export default async function CollaborationsPage({ searchParams }: Collaboration
 
   const actor = await prisma.actor.findFirst({
     where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
+    include: {
+      owner: {
+        select: {
+          avatarUrl: true,
+        },
+      },
+    },
     orderBy: { createdAt: "asc" },
   });
 

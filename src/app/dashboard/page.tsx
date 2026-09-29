@@ -157,7 +157,7 @@ export default async function DashboardPage() {
   const servicePackageCount = servicePackages.length;
 
   return (
-    <AppShell actor={primaryActor} activeRoute="/dashboard">
+    <AppShell actor={{ ...primaryActor, avatarUrl: profile.avatarUrl }} activeRoute="/dashboard">
       <div className="space-y-10 pb-12">
         {/* Welcome Hero Banner */}
         <section className="relative p-8 md:p-12 rounded-[32px] overflow-hidden bg-[#1E1B2E] border border-stone-800 shadow-2xl group">

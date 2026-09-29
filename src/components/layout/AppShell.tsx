@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { logout } from "@/app/(auth)/actions";
+import { getCurrentUserAvatar } from "@/app/settings/actions";
+import { createClient } from "@/lib/supabase/client";
 import {
   LayoutDashboard,
   Megaphone,
@@ -22,6 +24,10 @@ interface ActorInfo {
   sector: string;
   location?: string | null;
   actorType?: string;
+  avatarUrl?: string | null;
+  owner?: {
+    avatarUrl?: string | null;
+  } | null;
 }
 
 interface AppShellProps {
@@ -47,10 +53,31 @@ const PRIMARY_NAV: NavItem[] = [
   { href: "/settings", label: "Pengaturan Akun", icon: <Settings className="w-4 h-4" /> },
 ];
 
-
-
 export function AppShell({ actor, activeRoute, children }: AppShellProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const initialAvatar = actor.avatarUrl || actor.owner?.avatarUrl || null;
+  const [avatar, setAvatar] = useState<string | null>(initialAvatar);
+  const [avatarError, setAvatarError] = useState(false);
+
+  useEffect(() => {
+    if (initialAvatar) {
+      setAvatar(initialAvatar);
+      setAvatarError(false);
+      return;
+    }
+
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      const metaAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+      if (metaAvatar) {
+        setAvatar(metaAvatar);
+      } else {
+        getCurrentUserAvatar().then((url) => {
+          if (url) setAvatar(url);
+        });
+      }
+    });
+  }, [initialAvatar]);
 
   function isItemActive(href: string) {
     if (href === "/dashboard") return activeRoute === "/dashboard";
@@ -135,15 +162,28 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
 
         <div className="p-3.5 border-t border-stone-200/80 bg-stone-50/50">
           <div className="p-3 rounded-2xl bg-white border border-stone-200/80 shadow-xs flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] flex items-center justify-center font-bold text-xs text-[#27213D] shrink-0">
-                {actor.name.charAt(0).toUpperCase()}
+            <Link
+              href="/settings"
+              className="flex items-center gap-2.5 min-w-0 group hover:opacity-90 transition-opacity"
+              title="Buka Pengaturan Akun"
+            >
+              <div className="w-8 h-8 rounded-xl overflow-hidden bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] flex items-center justify-center font-bold text-xs text-[#27213D] shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                {avatar && !avatarError ? (
+                  <img
+                    src={avatar}
+                    alt={actor.name}
+                    onError={() => setAvatarError(true)}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span>{actor.name.charAt(0).toUpperCase()}</span>
+                )}
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-[#27213D] truncate">{actor.name}</p>
+                <p className="text-xs font-bold text-[#27213D] truncate group-hover:text-amber-600 transition-colors">{actor.name}</p>
                 <p className="text-[10px] text-[#716B7E] truncate">{actor.sector}</p>
               </div>
-            </div>
+            </Link>
 
             <form action={logout}>
               <button
@@ -167,10 +207,28 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
           <span className="font-extrabold text-sm tracking-tight text-[#27213D]">RAMU</span>
         </Link>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-[#27213D] font-semibold truncate max-w-[120px]">
-            {actor.name}
-          </span>
+        <div className="flex items-center gap-2.5">
+          <Link
+            href="/settings"
+            className="flex items-center gap-2 max-w-[150px] group"
+            title="Buka Pengaturan Akun"
+          >
+            <div className="w-7 h-7 rounded-lg overflow-hidden bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] flex items-center justify-center font-bold text-[11px] text-[#27213D] shrink-0">
+              {avatar && !avatarError ? (
+                <img
+                  src={avatar}
+                  alt={actor.name}
+                  onError={() => setAvatarError(true)}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{actor.name.charAt(0).toUpperCase()}</span>
+              )}
+            </div>
+            <span className="text-xs text-[#27213D] font-bold truncate group-hover:text-amber-600 transition-colors">
+              {actor.name}
+            </span>
+          </Link>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-2 rounded-xl bg-stone-100 hover:bg-stone-200/80 border border-stone-200 text-[#27213D]"
@@ -185,14 +243,36 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
         <div className="md:hidden fixed inset-0 z-50 bg-[#27213D]/40 backdrop-blur-xs flex flex-col justify-end">
           <div className="bg-white border-t border-stone-200 p-5 rounded-t-3xl max-h-[85vh] overflow-y-auto space-y-5 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-stone-200">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#9E98A8]">Menu Navigasi</span>
+              <Link
+                href="/settings"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 min-w-0"
+              >
+                <div className="w-8 h-8 rounded-xl overflow-hidden bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] flex items-center justify-center font-bold text-xs text-[#27213D] shrink-0 shadow-xs">
+                  {avatar && !avatarError ? (
+                    <img
+                      src={avatar}
+                      alt={actor.name}
+                      onError={() => setAvatarError(true)}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span>{actor.name.charAt(0).toUpperCase()}</span>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-[#27213D] truncate">{actor.name}</p>
+                  <p className="text-[10px] text-[#716B7E] truncate">{actor.sector}</p>
+                </div>
+              </Link>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-[#716B7E] hover:text-[#27213D] p-1"
+                className="text-[#716B7E] hover:text-[#27213D] p-1.5 rounded-xl hover:bg-stone-100"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
+
             <div>
               <p className="text-[10px] font-bold uppercase text-[#9E98A8] mb-2">Menu Utama</p>
               {renderNavLinks(PRIMARY_NAV)}

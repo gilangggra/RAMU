@@ -30,6 +30,11 @@ export default async function SettingsLayout({
       sector: true,
       location: true,
       actorType: true,
+      owner: {
+        select: {
+          avatarUrl: true,
+        },
+      },
     },
     orderBy: { createdAt: "asc" },
   });

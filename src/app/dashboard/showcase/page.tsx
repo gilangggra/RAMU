@@ -23,6 +23,13 @@ export default async function DashboardShowcasePage() {
 
   const primaryActor = await prisma.actor.findFirst({
     where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
+    include: {
+      owner: {
+        select: {
+          avatarUrl: true,
+        },
+      },
+    },
     orderBy: { createdAt: "asc" },
   });
 

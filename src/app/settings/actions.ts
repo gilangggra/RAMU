@@ -239,3 +239,18 @@ export async function updateServicePackagesAndRates(formData: FormData) {
   }
 }
 
+export async function getCurrentUserAvatar(): Promise<string | null> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+    const profile = await prisma.profile.findUnique({
+      where: { id: user.id },
+      select: { avatarUrl: true },
+    });
+    return profile?.avatarUrl || (user.user_metadata?.avatar_url as string) || (user.user_metadata?.picture as string) || null;
+  } catch {
+    return null;
+  }
+}
+
