@@ -44,12 +44,24 @@ export interface ModelAttributes {
 interface ModelCompCardProps {
   attributes: ModelAttributes;
   actorName: string;
+  avatarUrl?: string | null;
 }
 
-export function ModelCompCard({ attributes, actorName }: ModelCompCardProps) {
+export function ModelCompCard({ attributes, actorName, avatarUrl }: ModelCompCardProps) {
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string; caption?: string } | null>(null);
 
-  const compCardPhotos = attributes.comp_card || [];
+  const compCardPhotos =
+    attributes.comp_card && attributes.comp_card.length > 0
+      ? attributes.comp_card
+      : avatarUrl
+      ? [
+          {
+            type: "Headshot Resmi",
+            url: avatarUrl,
+            caption: `Foto profil resmi ${actorName}`,
+          },
+        ]
+      : [];
   const portfolioGallery = attributes.portfolio_gallery || [];
 
   return (

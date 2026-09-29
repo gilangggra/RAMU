@@ -12,6 +12,11 @@ export interface DirectoryActorItem {
   sector: string;
   description?: string | null;
   location?: string | null;
+  owner?: {
+    displayName?: string | null;
+    avatarUrl?: string | null;
+    email?: string | null;
+  } | null;
   assets: Array<{
     id: string;
     name: string;
@@ -78,7 +83,12 @@ export function ActorCard({ actor }: ActorCardProps) {
     }
   }
 
-  // Fallback beautiful images based on sector
+  // Fallback to real profile avatar uploaded by the user if no portfolio work image exists
+  if (!previewImage && actor.owner?.avatarUrl) {
+    previewImage = actor.owner.avatarUrl;
+  }
+
+  // Fallback beautiful images based on sector only if no portfolio and no avatar
   if (!previewImage) {
     if (actor.actorType === "STUDIO") {
       previewImage = "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd08?q=80&w=800&auto=format&fit=crop";
@@ -177,9 +187,24 @@ export function ActorCard({ actor }: ActorCardProps) {
       {/* Typography & Commercial Details Section */}
       <div className="flex flex-col gap-1.5 pt-1">
         <div className="flex items-start justify-between gap-2">
-          <h2 className="text-sm font-semibold text-[#1E1B2E] tracking-tight group-hover:text-stone-600 transition-colors truncate">
-            {actor.name}
-          </h2>
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-6 h-6 rounded-full overflow-hidden bg-stone-100 border border-stone-200/80 shrink-0">
+              {actor.owner?.avatarUrl ? (
+                <img
+                  src={actor.owner.avatarUrl}
+                  alt={actor.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="w-full h-full flex items-center justify-center font-bold text-[9px] text-[#27213D] bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF]">
+                  {actor.name.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <h2 className="text-sm font-semibold text-[#1E1B2E] tracking-tight group-hover:text-stone-600 transition-colors truncate">
+              {actor.name}
+            </h2>
+          </div>
           {actor.location && (
             <span className="text-[10px] font-medium text-stone-400 shrink-0 flex items-center gap-0.5">
               <MapPin className="w-2.5 h-2.5" />
@@ -188,7 +213,7 @@ export function ActorCard({ actor }: ActorCardProps) {
           )}
         </div>
         
-        <div className="text-[11px] font-light text-stone-500 truncate">
+        <div className="text-[11px] font-light text-stone-500 truncate pl-8">
           {actor.sector}
         </div>
 
@@ -201,3 +226,4 @@ export function ActorCard({ actor }: ActorCardProps) {
     </Link>
   );
 }
+

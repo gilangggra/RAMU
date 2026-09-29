@@ -134,7 +134,12 @@ export default async function DirectoryDetailPage({
     }
   }
   
-  // Fallback images tailored to sector/type
+  // Fallback to real profile avatar uploaded by the user if no portfolio work image exists
+  if (!previewImage && actor.owner?.avatarUrl) {
+    previewImage = actor.owner.avatarUrl;
+  }
+
+  // Fallback images tailored to sector/type only if no portfolio and no avatar
   if (!previewImage) {
     if (actor.actorType === "STUDIO") previewImage = "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd08?q=80&w=2000&auto=format&fit=crop";
     else if (actor.actorType === "MSME") previewImage = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2000&auto=format&fit=crop";
@@ -248,9 +253,16 @@ export default async function DirectoryDetailPage({
                     Tersedia untuk Booking
                   </span>
                 </div>
-                <h1 className="text-4xl sm:text-5xl lg:text-7xl font-light text-[#1E1B2E] tracking-tighter leading-[0.9]">
-                  {actor.name}
-                </h1>
+                <div className="flex items-center gap-4">
+                  {previewImage !== actor.owner?.avatarUrl && actor.owner?.avatarUrl && (
+                    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-stone-100 border border-stone-200 shadow-xs shrink-0">
+                      <img src={actor.owner.avatarUrl} alt={actor.name} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <h1 className="text-4xl sm:text-5xl lg:text-7xl font-light text-[#1E1B2E] tracking-tighter leading-[0.9]">
+                    {actor.name}
+                  </h1>
+                </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-6 text-xs font-bold uppercase tracking-widest text-stone-500 mb-6">
@@ -366,9 +378,16 @@ export default async function DirectoryDetailPage({
                     Studio Siap Booking
                   </span>
                 </div>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium text-[#1E1B2E] tracking-tight mb-2">
-                  {actor.name}
-                </h1>
+                <div className="flex items-center gap-3.5 mb-2">
+                  {actor.owner?.avatarUrl && (
+                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-stone-100 border border-stone-200 shadow-xs shrink-0">
+                      <img src={actor.owner.avatarUrl} alt={actor.name} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium text-[#1E1B2E] tracking-tight">
+                    {actor.name}
+                  </h1>
+                </div>
                 <div className="flex flex-wrap items-center gap-4 text-xs font-bold uppercase tracking-widest text-stone-400">
                   {actor.location && (
                     <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{actor.location}</span>
@@ -482,6 +501,11 @@ export default async function DirectoryDetailPage({
               {actor.actorType === "MSME" ? "Brand & Label Busana" : "Creative Collective"}
             </div>
             
+            {actor.owner?.avatarUrl && (
+              <div className="w-20 h-20 rounded-2xl overflow-hidden bg-stone-100 border border-stone-200 mx-auto mb-4 shadow-xs">
+                <img src={actor.owner.avatarUrl} alt={actor.name} className="w-full h-full object-cover" />
+              </div>
+            )}
             <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif italic text-[#1E1B2E] leading-tight mb-6">
               {actor.name}
             </h1>

@@ -49,6 +49,13 @@ export async function getDirectoryActors(params: DirectoryFilterParams = {}) {
   const actors = await prisma.actor.findMany({
     where: whereClause,
     include: {
+      owner: {
+        select: {
+          displayName: true,
+          avatarUrl: true,
+          email: true,
+        },
+      },
       assets: {
         where: { status: "ACTIVE" },
         take: 10,

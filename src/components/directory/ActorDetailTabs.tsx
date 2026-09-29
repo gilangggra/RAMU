@@ -52,6 +52,10 @@ interface ActorDetailTabsProps {
     description?: string | null;
     contactEmail?: string | null;
     websiteUrl?: string | null;
+    owner?: {
+      displayName?: string | null;
+      avatarUrl?: string | null;
+    } | null;
     assets: Array<{
       id: string;
       name: string;
@@ -1190,7 +1194,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
           )}
 
           {isModel && modelAttrs && (
-            <ModelCompCard attributes={modelAttrs} actorName={actor.name} />
+            <ModelCompCard attributes={modelAttrs} actorName={actor.name} avatarUrl={actor.owner?.avatarUrl} />
           )}
 
           {isMUA && (
