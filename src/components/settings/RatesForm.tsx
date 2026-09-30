@@ -130,7 +130,21 @@ export function RatesForm({
   );
 
   const sectorLower = actorSector.toLowerCase();
-  const isStudio = actorType === "STUDIO" || sectorLower.includes("studio");
+  const isIndividualSector =
+    sectorLower.includes("photographer") ||
+    sectorLower.includes("fotografi") ||
+    sectorLower.includes("model") ||
+    sectorLower.includes("talent") ||
+    sectorLower.includes("mua") ||
+    sectorLower.includes("makeup") ||
+    sectorLower.includes("hair") ||
+    sectorLower.includes("stylist") ||
+    sectorLower.includes("wardrobe") ||
+    sectorLower.includes("video") ||
+    sectorLower.includes("film") ||
+    sectorLower.includes("cinema");
+
+  const isStudio = !isIndividualSector && (actorType === "STUDIO" || sectorLower.includes("studio"));
   const isModel = !isStudio && (sectorLower.includes("model") || sectorLower.includes("talent"));
   const isMUA = !isStudio && !isModel && (sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair"));
   const isStylist = !isStudio && !isModel && !isMUA && (sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));

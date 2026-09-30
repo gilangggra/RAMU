@@ -12,6 +12,7 @@ import {
   X,
   ExternalLink,
   ShieldCheck,
+  Pencil,
 } from "lucide-react";
 
 interface StudioGalleryPhoto {
@@ -34,6 +35,7 @@ export interface StudioAttributes {
 interface StudioSpecsCardProps {
   attributes: StudioAttributes;
   studioName: string;
+  isCurrentActor?: boolean;
   actorAssets?: Array<{
     id: string;
     name: string;
@@ -44,7 +46,7 @@ interface StudioSpecsCardProps {
   }>;
 }
 
-export function StudioSpecsCard({ attributes, studioName, actorAssets }: StudioSpecsCardProps) {
+export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorAssets }: StudioSpecsCardProps) {
   const [selectedPhoto, setSelectedPhoto] = useState<StudioGalleryPhoto | null>(null);
 
   const portfolioWorks: StudioGalleryPhoto[] = (actorAssets || [])
@@ -68,10 +70,10 @@ export function StudioSpecsCard({ attributes, studioName, actorAssets }: StudioS
   return (
     <div className="space-y-8">
       {/* 1. Dimension & Cyclorama Specifications Card */}
-      <section className="p-7 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-6">
+      <section className="p-7 sm:p-8 rounded-none bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold text-[#E66A48]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold text-[#E66A48]">
               <Building2 className="w-3.5 h-3.5 text-[#E66A48]" />
               <span>Spesifikasi Cyclorama & Parameter Ruangan Studio</span>
             </div>
@@ -80,15 +82,29 @@ export function StudioSpecsCard({ attributes, studioName, actorAssets }: StudioS
             </h2>
           </div>
 
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 text-stone-700 text-xs font-bold shrink-0">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span>Terverifikasi Siap Produksi</span>
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-stone-100 text-stone-700 text-xs font-bold">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span>Terverifikasi Siap Produksi</span>
+            </div>
+            {isCurrentActor && (
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                <span>Edit Spesifikasi</span>
+              </button>
+            )}
           </div>
         </div>
 
         {/* 4 Primary Room Metrics */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-1">
+          <div className="p-4 rounded-none bg-stone-50/80 border border-stone-200/70 space-y-1">
             <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
               Luas Area Indoor
             </div>
@@ -98,7 +114,7 @@ export function StudioSpecsCard({ attributes, studioName, actorAssets }: StudioS
             <div className="text-[10px] text-stone-500 font-medium">Kapasitas hingga 15 kru</div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-1">
+          <div className="p-4 rounded-none bg-stone-50/80 border border-stone-200/70 space-y-1">
             <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
               Tinggi Plafon (Ceiling)
             </div>
@@ -108,7 +124,7 @@ export function StudioSpecsCard({ attributes, studioName, actorAssets }: StudioS
             <div className="text-[10px] text-stone-500 font-medium">Ideal untuk overhead boom</div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-1">
+          <div className="p-4 rounded-none bg-stone-50/80 border border-stone-200/70 space-y-1">
             <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
               Daya Listrik
             </div>
@@ -121,7 +137,7 @@ export function StudioSpecsCard({ attributes, studioName, actorAssets }: StudioS
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-1">
+          <div className="p-4 rounded-none bg-stone-50/80 border border-stone-200/70 space-y-1">
             <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
               Bentuk Cyclorama
             </div>
@@ -140,33 +156,32 @@ export function StudioSpecsCard({ attributes, studioName, actorAssets }: StudioS
               <span className="text-[11px] font-semibold text-[#716B7E]">Klik foto untuk inspeksi detail</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="columns-1 sm:columns-2 gap-3">
               {gallery.map((photo, idx) => (
                 <div
                   key={idx}
                   onClick={() => setSelectedPhoto(photo)}
-                  className="group cursor-pointer rounded-2xl bg-stone-50 border border-stone-200/80 overflow-hidden hover:border-amber-300 hover:shadow-lg transition-all space-y-2 p-3"
+                  className="break-inside-avoid mb-3 group cursor-pointer rounded-none bg-stone-100 border border-stone-200/80 overflow-hidden hover:shadow-xl transition-all relative block"
                 >
-                  <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-stone-200">
-                    <img
-                      src={photo.url}
-                      alt={photo.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-white">
-                        <Maximize2 className="w-4 h-4" />
+                  <img
+                    src={photo.url}
+                    alt={photo.title}
+                    className="w-full h-auto object-cover rounded-none block transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
+                    <div className="space-y-1 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                      <h4 className="text-sm font-bold text-white leading-tight">
+                        {photo.title}
+                      </h4>
+                      {photo.caption && (
+                        <p className="text-xs text-stone-300 leading-relaxed font-medium">{photo.caption}</p>
+                      )}
+                      <div className="pt-1.5 flex items-center gap-1 text-[10px] font-bold text-amber-300">
+                        <Maximize2 className="w-3 h-3" />
                         <span>Inspeksi Set Studio</span>
-                      </span>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="px-1 space-y-0.5">
-                    <h4 className="text-xs sm:text-sm font-extrabold text-[#27213D] group-hover:text-[#E66A48] transition-colors">
-                      {photo.title}
-                    </h4>
-                    <p className="text-xs text-stone-500 leading-relaxed">{photo.caption}</p>
                   </div>
                 </div>
               ))}
@@ -186,9 +201,9 @@ export function StudioSpecsCard({ attributes, studioName, actorAssets }: StudioS
               {gearList.map((gear, i) => (
                 <div
                   key={i}
-                  className="p-3 rounded-xl bg-stone-50/90 border border-stone-200/70 text-xs text-[#27213D] flex items-start gap-2.5"
+                  className="p-3 rounded-none bg-stone-50/90 border border-stone-200/70 text-xs text-[#27213D] flex items-start gap-2.5"
                 >
-                  <div className="w-5 h-5 rounded-md bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
+                  <div className="w-5 h-5 rounded-none bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
                     ✓
                   </div>
                   <span className="font-medium leading-snug">{gear}</span>
@@ -210,7 +225,7 @@ export function StudioSpecsCard({ attributes, studioName, actorAssets }: StudioS
               {facilities.map((fac, i) => (
                 <div
                   key={i}
-                  className="p-3 rounded-xl bg-purple-50/50 border border-purple-200/60 text-xs text-[#27213D] flex items-center gap-2.5"
+                  className="p-3 rounded-none bg-purple-50/50 border border-purple-200/60 text-xs text-[#27213D] flex items-center gap-2.5"
                 >
                   <CheckCircle2 className="w-4 h-4 text-purple-600 shrink-0" />
                   <span className="font-medium">{fac}</span>
@@ -229,12 +244,12 @@ export function StudioSpecsCard({ attributes, studioName, actorAssets }: StudioS
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative max-w-4xl w-full bg-[#1E1B2E] rounded-3xl overflow-hidden shadow-2xl border border-white/10"
+            className="relative max-w-4xl w-full bg-[#1E1B2E] rounded-none overflow-hidden shadow-2xl border border-white/10"
           >
             <button
               type="button"
               onClick={() => setSelectedPhoto(null)}
-              className="absolute top-4 right-4 z-10 p-2.5 rounded-full bg-black/60 hover:bg-black text-white transition-colors cursor-pointer"
+              className="absolute top-4 right-4 z-10 p-2.5 rounded-none bg-black/60 hover:bg-black text-white transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -256,7 +271,7 @@ export function StudioSpecsCard({ attributes, studioName, actorAssets }: StudioS
                 href={selectedPhoto.url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-colors shrink-0"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-none bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-colors shrink-0"
               >
                 <span>Buka Resolusi Penuh</span>
                 <ExternalLink className="w-3.5 h-3.5" />

@@ -9,6 +9,7 @@ import {
   X,
   ExternalLink,
   PackageCheck,
+  Pencil,
 } from "lucide-react";
 
 interface BrandGalleryPhoto {
@@ -30,6 +31,7 @@ export interface BrandAttributes {
 interface BrandSpecsCardProps {
   attributes: BrandAttributes;
   brandName: string;
+  isCurrentActor?: boolean;
   actorAssets?: Array<{
     id: string;
     name: string;
@@ -40,7 +42,7 @@ interface BrandSpecsCardProps {
   }>;
 }
 
-export function BrandSpecsCard({ attributes, brandName, actorAssets }: BrandSpecsCardProps) {
+export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAssets }: BrandSpecsCardProps) {
   const [selectedPhoto, setSelectedPhoto] = useState<BrandGalleryPhoto | null>(null);
 
   const portfolioWorks: BrandGalleryPhoto[] = (actorAssets || [])
@@ -63,10 +65,10 @@ export function BrandSpecsCard({ attributes, brandName, actorAssets }: BrandSpec
   const materials = attributes.fabric_materials || attributes.styling_specialties || [];
 
   return (
-    <section className="p-7 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-6">
+    <section className="p-7 sm:p-8 rounded-none bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800">
             <Sparkles className="w-3.5 h-3.5 text-amber-600" />
             <span>Katalog Koleksi & Karakteristik Desain</span>
           </div>
@@ -75,18 +77,32 @@ export function BrandSpecsCard({ attributes, brandName, actorAssets }: BrandSpec
           </h2>
         </div>
 
-        {attributes.sample_sizes_ready && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-700 text-xs font-bold shrink-0">
-            <Scissors className="w-3.5 h-3.5" />
-            <span>Busana Sampel: {attributes.sample_sizes_ready}</span>
-          </div>
-        )}
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {attributes.sample_sizes_ready && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-purple-50 border border-purple-200 text-purple-700 text-xs font-bold">
+              <Scissors className="w-3.5 h-3.5" />
+              <span>Busana Sampel: {attributes.sample_sizes_ready}</span>
+            </div>
+          )}
+          {isCurrentActor && (
+            <button
+              type="button"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              <span>Edit Spesifikasi</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Brand Attributes Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {attributes.design_dna && (
-          <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-1 sm:col-span-2">
+          <div className="p-4 rounded-none bg-stone-50/80 border border-stone-200/70 space-y-1 sm:col-span-2">
             <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
               DNA & Filosofi Desain
             </div>
@@ -97,7 +113,7 @@ export function BrandSpecsCard({ attributes, brandName, actorAssets }: BrandSpec
         )}
 
         {attributes.capacity_monthly && (
-          <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-1">
+          <div className="p-4 rounded-none bg-stone-50/80 border border-stone-200/70 space-y-1">
             <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
               Kapasitas Produksi
             </div>
@@ -119,7 +135,7 @@ export function BrandSpecsCard({ attributes, brandName, actorAssets }: BrandSpec
             {materials.map((mat, i) => (
               <span
                 key={i}
-                className="px-3 py-1 rounded-xl bg-stone-50 border border-stone-200/80 text-xs font-bold text-[#27213D] flex items-center gap-1.5"
+                className="px-3 py-1 rounded-none bg-stone-50 border border-stone-200/80 text-xs font-bold text-[#27213D] flex items-center gap-1.5"
               >
                 <PackageCheck className="w-3.5 h-3.5 text-emerald-600" />
                 <span>{mat}</span>
@@ -137,33 +153,32 @@ export function BrandSpecsCard({ attributes, brandName, actorAssets }: BrandSpec
             <span className="text-[11px] font-semibold text-[#716B7E]">Klik foto untuk resolusi penuh</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-3">
             {gallery.map((photo, idx) => (
               <div
                 key={idx}
                 onClick={() => setSelectedPhoto(photo)}
-                className="group cursor-pointer rounded-2xl bg-stone-50 border border-stone-200/80 overflow-hidden hover:border-amber-300 hover:shadow-lg transition-all space-y-2 p-2.5"
+                className="break-inside-avoid mb-3 group cursor-pointer rounded-none bg-stone-100 border border-stone-200/80 overflow-hidden hover:shadow-xl transition-all relative block"
               >
-                <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-stone-200">
-                  <img
-                    src={photo.url}
-                    alt={photo.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-white">
-                      <Maximize2 className="w-3.5 h-3.5" />
-                      <span>Perbesar</span>
-                    </span>
+                <img
+                  src={photo.url}
+                  alt={photo.title}
+                  className="w-full h-auto object-cover rounded-none block transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
+                  <div className="space-y-1 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                    <h4 className="text-xs font-bold text-white line-clamp-2">
+                      {photo.title}
+                    </h4>
+                    {photo.caption && (
+                      <p className="text-[11px] text-stone-300 line-clamp-2 font-medium">{photo.caption}</p>
+                    )}
+                    <div className="pt-1.5 flex items-center gap-1 text-[10px] font-bold text-amber-300">
+                      <Maximize2 className="w-3 h-3" />
+                      <span>Perbesar Foto</span>
+                    </div>
                   </div>
-                </div>
-
-                <div className="px-1 space-y-0.5">
-                  <h4 className="text-xs font-black text-[#27213D] group-hover:text-[#E66A48] transition-colors leading-snug">
-                    {photo.title}
-                  </h4>
-                  <p className="text-[11px] text-stone-500 line-clamp-2">{photo.caption}</p>
                 </div>
               </div>
             ))}
@@ -179,12 +194,12 @@ export function BrandSpecsCard({ attributes, brandName, actorAssets }: BrandSpec
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative max-w-4xl w-full bg-[#1E1B2E] rounded-3xl overflow-hidden shadow-2xl border border-white/10"
+            className="relative max-w-4xl w-full bg-[#1E1B2E] rounded-none overflow-hidden shadow-2xl border border-white/10"
           >
             <button
               type="button"
               onClick={() => setSelectedPhoto(null)}
-              className="absolute top-4 right-4 z-10 p-2.5 rounded-full bg-black/60 hover:bg-black text-white transition-colors cursor-pointer"
+              className="absolute top-4 right-4 z-10 p-2.5 rounded-none bg-black/60 hover:bg-black text-white transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -206,7 +221,7 @@ export function BrandSpecsCard({ attributes, brandName, actorAssets }: BrandSpec
                 href={selectedPhoto.url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-colors shrink-0"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-none bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-colors shrink-0"
               >
                 <span>Buka Resolusi Penuh</span>
                 <ExternalLink className="w-3.5 h-3.5" />

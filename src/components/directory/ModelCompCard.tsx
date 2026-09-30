@@ -10,6 +10,7 @@ import {
   X,
   CheckCircle2,
   ExternalLink,
+  Pencil,
 } from "lucide-react";
 
 interface CompCardPhoto {
@@ -45,6 +46,7 @@ interface ModelCompCardProps {
   attributes: ModelAttributes;
   actorName: string;
   avatarUrl?: string | null;
+  isCurrentActor?: boolean;
   actorAssets?: Array<{
     id: string;
     name: string;
@@ -55,7 +57,7 @@ interface ModelCompCardProps {
   }>;
 }
 
-export function ModelCompCard({ attributes, actorName, avatarUrl, actorAssets }: ModelCompCardProps) {
+export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor, actorAssets }: ModelCompCardProps) {
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string; caption?: string } | null>(null);
 
   const portfolioWorks: PortfolioGalleryItem[] = (actorAssets || [])
@@ -114,10 +116,10 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, actorAssets }:
   return (
     <div className="space-y-8">
       {/* 1. Comp Card & Body Measurements Section */}
-      <section className="p-7 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-6">
+      <section className="p-7 sm:p-8 rounded-none bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 border border-purple-200 text-xs font-bold text-purple-700">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-purple-50 border border-purple-200 text-xs font-bold text-purple-700">
               <Camera className="w-3.5 h-3.5" />
               <span>Official Comp Card & Physical Measurements</span>
             </div>
@@ -126,12 +128,26 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, actorAssets }:
             </h2>
           </div>
 
-          {attributes.video_reel_title && (
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-stone-50 border border-stone-200/80 text-xs font-semibold text-[#27213D] shrink-0">
-              <Film className="w-4 h-4 text-[#E66A48]" />
-              <span>{attributes.video_reel_title}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-3 shrink-0">
+            {attributes.video_reel_title && (
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-none bg-stone-50 border border-stone-200/80 text-xs font-semibold text-[#27213D]">
+                <Film className="w-4 h-4 text-[#E66A48]" />
+                <span>{attributes.video_reel_title}</span>
+              </div>
+            )}
+            {isCurrentActor && (
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                <span>Edit Comp Card</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Polaroid Comp Card Grid (3 Angles) */}
@@ -142,31 +158,28 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, actorAssets }:
               <span className="text-[11px] font-semibold text-[#716B7E]">Klik foto untuk memperbesar</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="columns-1 sm:columns-3 gap-3">
               {compCardPhotos.map((photo, idx) => (
                 <div
                   key={idx}
                   onClick={() => setSelectedImage({ url: photo.url, title: photo.type, caption: photo.caption })}
-                  className="group relative cursor-pointer overflow-hidden rounded-2xl bg-stone-100 border border-stone-200/80 p-2.5 space-y-2 hover:border-purple-300 hover:shadow-md transition-all"
+                  className="break-inside-avoid mb-3 group relative cursor-pointer overflow-hidden rounded-none bg-stone-100 border border-stone-200/80 hover:shadow-xl transition-all block"
                 >
-                  <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-stone-200">
-                    <img
-                      src={photo.url}
-                      alt={photo.caption}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-white">
-                        <Maximize2 className="w-3.5 h-3.5" />
-                        <span>Perbesar</span>
-                      </span>
+                  <img
+                    src={photo.url}
+                    alt={photo.caption}
+                    className="w-full h-auto object-cover rounded-none block transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
+                    <div className="space-y-1 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                      <div className="text-xs font-bold text-white uppercase tracking-wider">{photo.type}</div>
+                      <p className="text-[11px] text-stone-300 line-clamp-2 font-medium">{photo.caption}</p>
+                      <div className="pt-1.5 flex items-center gap-1 text-[10px] font-bold text-amber-300">
+                        <Maximize2 className="w-3 h-3" />
+                        <span>Perbesar Foto</span>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="px-1 space-y-0.5">
-                    <div className="text-xs font-extrabold text-[#27213D]">{photo.type}</div>
-                    <p className="text-[11px] text-stone-500 line-clamp-1">{photo.caption}</p>
                   </div>
                 </div>
               ))}
@@ -182,7 +195,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, actorAssets }:
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-3.5 rounded-2xl bg-stone-50/80 border border-stone-200/70">
+            <div className="p-3.5 rounded-none bg-stone-50/80 border border-stone-200/70">
               <div className="text-[10px] font-bold text-stone-400 uppercase">Tinggi Badan</div>
               <div className="text-lg font-black text-[#27213D] mt-0.5">
                 {attributes.height_cm ? `${attributes.height_cm} cm` : "-"}
@@ -190,7 +203,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, actorAssets }:
               <div className="text-[10px] text-stone-500 font-medium">Standard Editorial</div>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-stone-50/80 border border-stone-200/70">
+            <div className="p-3.5 rounded-none bg-stone-50/80 border border-stone-200/70">
               <div className="text-[10px] font-bold text-stone-400 uppercase">B-W-H (Dada/Pinggang/Pinggul)</div>
               <div className="text-base font-black text-[#27213D] mt-0.5">
                 {attributes.bust_waist_hips || "84-60-89 cm"}
@@ -198,7 +211,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, actorAssets }:
               <div className="text-[10px] text-stone-500 font-medium">Proporsional Lookbook</div>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-stone-50/80 border border-stone-200/70">
+            <div className="p-3.5 rounded-none bg-stone-50/80 border border-stone-200/70">
               <div className="text-[10px] font-bold text-stone-400 uppercase">Ukuran Baju (Sample)</div>
               <div className="text-base font-black text-purple-700 mt-0.5">
                 {attributes.clothing_size || "S / 36 EU"}
@@ -206,7 +219,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, actorAssets }:
               <div className="text-[10px] text-stone-500 font-medium">Kesesuaian Busana Desainer</div>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-stone-50/80 border border-stone-200/70">
+            <div className="p-3.5 rounded-none bg-stone-50/80 border border-stone-200/70">
               <div className="text-[10px] font-bold text-stone-400 uppercase">Ukuran Sepatu</div>
               <div className="text-base font-black text-[#27213D] mt-0.5">
                 {attributes.shoe_size || "39 EU"}
@@ -217,15 +230,15 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, actorAssets }:
 
           {/* Secondary Physical Attributes */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-            <div className="p-3 rounded-xl bg-stone-50/50 border border-stone-200/60 text-xs flex items-center justify-between">
+            <div className="p-3 rounded-none bg-stone-50/50 border border-stone-200/60 text-xs flex items-center justify-between">
               <span className="text-stone-500">Warna Rambut:</span>
               <span className="font-bold text-[#27213D]">{attributes.hair_color || "Hitam Alami"}</span>
             </div>
-            <div className="p-3 rounded-xl bg-stone-50/50 border border-stone-200/60 text-xs flex items-center justify-between">
+            <div className="p-3 rounded-none bg-stone-50/50 border border-stone-200/60 text-xs flex items-center justify-between">
               <span className="text-stone-500">Warna Mata:</span>
               <span className="font-bold text-[#27213D]">{attributes.eye_color || "Cokelat Tua"}</span>
             </div>
-            <div className="p-3 rounded-xl bg-stone-50/50 border border-stone-200/60 text-xs flex items-center justify-between">
+            <div className="p-3 rounded-none bg-stone-50/50 border border-stone-200/60 text-xs flex items-center justify-between">
               <span className="text-stone-500">Skin Undertone:</span>
               <span className="font-bold text-[#27213D]">{attributes.skin_undertone || "Warm Olive"}</span>
             </div>
@@ -242,7 +255,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, actorAssets }:
               {attributes.specialties.map((spec, i) => (
                 <span
                   key={i}
-                  className="px-3 py-1 rounded-xl bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold text-[#E66A48] flex items-center gap-1.5"
+                  className="px-3 py-1 rounded-none bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold text-[#E66A48] flex items-center gap-1.5"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5 text-[#E66A48]" />
                   <span>{spec}</span>
@@ -255,10 +268,10 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, actorAssets }:
 
       {/* 2. Visual Portfolio & Campaign Gallery */}
       {portfolioGallery.length > 0 && (
-        <section className="p-7 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-6">
+        <section className="p-7 sm:p-8 rounded-none bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-stone-100">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800">
                 <Sparkles className="w-3.5 h-3.5 text-amber-600" />
                 <span>Editorial & Commercial Lookbook Works</span>
               </div>
@@ -271,38 +284,34 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, actorAssets }:
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="columns-1 sm:columns-2 gap-3">
             {portfolioGallery.map((item, idx) => (
               <div
                 key={idx}
                 onClick={() => setSelectedImage({ url: item.url, title: item.title, caption: `${item.role} • ${item.client}` })}
-                className="group cursor-pointer rounded-2xl bg-stone-50 border border-stone-200/80 overflow-hidden hover:border-amber-300 hover:shadow-lg transition-all space-y-3 p-3"
+                className="break-inside-avoid mb-3 group cursor-pointer rounded-none bg-stone-100 border border-stone-200/80 overflow-hidden hover:shadow-xl transition-all relative block"
               >
-                <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-stone-200">
-                  <img
-                    src={item.url}
-                    alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-4">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-white">
-                      <Maximize2 className="w-4 h-4" />
+                <img
+                  src={item.url}
+                  alt={item.title}
+                  className="w-full h-auto object-cover rounded-none block transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
+                  <div className="space-y-1 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="px-2 py-0.5 rounded-none bg-white/20 backdrop-blur-md text-[9px] font-bold text-white uppercase tracking-wider">
+                        {item.role}
+                      </span>
+                      <span className="text-[10px] text-stone-300 font-medium">
+                        Klien: {item.client}
+                      </span>
+                    </div>
+                    <h4 className="text-sm font-bold text-white leading-tight">{item.title}</h4>
+                    <div className="pt-1 flex items-center gap-1 text-[10px] font-bold text-amber-300">
+                      <Maximize2 className="w-3 h-3" />
                       <span>Lihat Resolusi Penuh</span>
-                    </span>
-                    <span className="px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-[10px] font-bold text-white">
-                      {item.role}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="px-1 space-y-1">
-                  <h4 className="text-sm font-black text-[#27213D] group-hover:text-[#E66A48] transition-colors leading-snug">
-                    {item.title}
-                  </h4>
-                  <div className="flex items-center justify-between text-xs text-stone-500 font-medium">
-                    <span>Peran: <strong className="text-[#27213D]">{item.role}</strong></span>
-                    <span className="text-stone-400">Klien: {item.client}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -319,12 +328,12 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, actorAssets }:
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative max-w-4xl w-full bg-[#1E1B2E] rounded-3xl overflow-hidden shadow-2xl border border-white/10"
+            className="relative max-w-4xl w-full bg-[#1E1B2E] rounded-none overflow-hidden shadow-2xl border border-white/10"
           >
             <button
               type="button"
               onClick={() => setSelectedImage(null)}
-              className="absolute top-4 right-4 z-10 p-2.5 rounded-full bg-black/60 hover:bg-black text-white transition-colors cursor-pointer"
+              className="absolute top-4 right-4 z-10 p-2.5 rounded-none bg-black/60 hover:bg-black text-white transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -348,7 +357,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, actorAssets }:
                 href={selectedImage.url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-colors shrink-0"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-none bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-colors shrink-0"
               >
                 <span>Buka Gambar Asli</span>
                 <ExternalLink className="w-3.5 h-3.5" />

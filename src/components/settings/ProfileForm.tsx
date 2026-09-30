@@ -3,6 +3,7 @@
 import React, { useState, useRef } from "react";
 import { updateProfileBasicInfo } from "@/app/settings/actions";
 import { Save, Loader2, CheckCircle2, AlertCircle, Camera, Trash2, User } from "lucide-react";
+import { parseSocialLinks, InstagramIcon } from "@/lib/socialUtils";
 
 interface ProfileData {
   name: string;
@@ -22,6 +23,8 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(initialData.avatarUrl || null);
   const [removeAvatar, setRemoveAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const initialSocials = parseSocialLinks(initialData.websiteUrl);
 
   const handleAvatarFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -62,9 +65,9 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
   }
 
   return (
-    <div className="bg-white rounded-3xl border border-stone-200 shadow-[0_8px_30px_rgba(39,33,61,0.04)] overflow-hidden">
+    <div className="bg-white rounded-none border border-stone-200 shadow-xs overflow-hidden">
       <div className="p-6 sm:p-8 border-b border-stone-100 bg-stone-50/50">
-        <h2 className="text-xl font-extrabold text-[#1E1B2E]">Profil Dasar</h2>
+        <h2 className="text-xl font-bold text-[#1E1B2E]">Profil Dasar</h2>
         <p className="text-sm text-stone-500 mt-1">
           Informasi ini akan ditampilkan secara publik di Direktori dan Showcase.
         </p>
@@ -72,7 +75,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
 
       <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
         {message && (
-          <div className={`p-4 rounded-2xl flex items-start gap-3 text-sm font-semibold ${
+          <div className={`p-4 rounded-none flex items-start gap-3 text-sm font-semibold ${
             message.type === "success" ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-rose-50 text-rose-800 border border-rose-200"
           }`}>
             {message.type === "success" ? (
@@ -84,7 +87,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
           </div>
         )}
 
-        <div className="p-4 sm:p-5 rounded-2xl bg-stone-50/80 border border-stone-200/80 flex flex-col sm:flex-row items-center gap-5">
+        <div className="p-4 sm:p-5 rounded-none bg-stone-50/80 border border-stone-200/80 flex flex-col sm:flex-row items-center gap-5">
           <input
             type="file"
             name="avatarFile"
@@ -101,7 +104,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
 
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="w-20 h-20 rounded-full overflow-hidden border-2 border-stone-200 bg-white hover:border-[#1E1B2E] transition-all flex items-center justify-center cursor-pointer shrink-0 group relative shadow-xs"
+            className="w-20 h-20 rounded-none overflow-hidden border border-stone-200 bg-white hover:border-[#1E1B2E] transition-all flex items-center justify-center cursor-pointer shrink-0 group relative shadow-2xs"
           >
             {avatarPreview ? (
               <img
@@ -110,7 +113,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] flex items-center justify-center font-bold text-lg text-[#27213D]">
+              <div className="w-full h-full bg-stone-100 flex items-center justify-center font-bold text-lg text-[#1E1B2E]">
                 {initialData.name ? initialData.name.charAt(0).toUpperCase() : <User className="w-6 h-6 text-stone-400" />}
               </div>
             )}
@@ -128,7 +131,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-stone-200 text-xs font-bold text-stone-700 hover:text-stone-900 hover:bg-stone-50 shadow-2xs transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-white border border-stone-200 text-xs font-bold text-stone-700 hover:text-stone-900 hover:bg-stone-50 shadow-2xs transition-all cursor-pointer"
               >
                 <Camera className="w-3.5 h-3.5 text-stone-500" />
                 <span>{avatarPreview ? "Ganti Foto" : "Unggah Foto"}</span>
@@ -137,7 +140,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
                 <button
                   type="button"
                   onClick={handleRemovePhoto}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs font-bold text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Hapus</span>
@@ -158,7 +161,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               name="name"
               defaultValue={initialData.name}
               required
-              className="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-medium text-stone-800"
+              className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-medium text-stone-800"
               placeholder="Misal: Budi Santoso"
             />
           </div>
@@ -173,7 +176,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               name="sector"
               defaultValue={initialData.sector}
               required
-              className="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-medium text-stone-800"
+              className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-medium text-stone-800"
               placeholder="Misal: Fotografer, Model, dsb"
             />
           </div>
@@ -187,7 +190,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               name="description"
               defaultValue={initialData.description || ""}
               rows={4}
-              className="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm text-stone-800 resize-none"
+              className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm text-stone-800 resize-none"
               placeholder="Ceritakan tentang diri Anda, fokus karya, dan visi kreatif..."
             />
           </div>
@@ -201,7 +204,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               id="location"
               name="location"
               defaultValue={initialData.location || ""}
-              className="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-medium text-stone-800"
+              className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-medium text-stone-800"
               placeholder="Misal: Jakarta, Indonesia"
             />
           </div>
@@ -215,7 +218,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               id="contactEmail"
               name="contactEmail"
               defaultValue={initialData.contactEmail || ""}
-              className="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-medium text-stone-800"
+              className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-medium text-stone-800"
               placeholder="email@contoh.com"
             />
           </div>
@@ -229,22 +232,37 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               id="contactPhone"
               name="contactPhone"
               defaultValue={initialData.contactPhone || ""}
-              className="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-medium text-stone-800"
+              className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-medium text-stone-800"
               placeholder="+62..."
             />
           </div>
 
-          <div className="space-y-2 md:col-span-2">
+          <div className="space-y-2">
+            <label htmlFor="instagram" className="text-xs font-bold text-[#1E1B2E] uppercase tracking-wider flex items-center gap-1.5">
+              <InstagramIcon className="w-3.5 h-3.5 text-stone-500" />
+              <span>Akun Instagram (Opsional)</span>
+            </label>
+            <input
+              type="text"
+              id="instagram"
+              name="instagram"
+              defaultValue={initialSocials.instagram?.handle || ""}
+              className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-medium text-stone-800"
+              placeholder="@username atau https://instagram.com/..."
+            />
+          </div>
+
+          <div className="space-y-2">
             <label htmlFor="websiteUrl" className="text-xs font-bold text-[#1E1B2E] uppercase tracking-wider">
-              Website / Link Portofolio Tambahan
+              Website / Portofolio Eksternal (Opsional)
             </label>
             <input
               type="url"
               id="websiteUrl"
               name="websiteUrl"
-              defaultValue={initialData.websiteUrl || ""}
-              className="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-medium text-stone-800"
-              placeholder="https://..."
+              defaultValue={initialSocials.website?.url || ""}
+              className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-medium text-stone-800"
+              placeholder="https://portofolioanda.com"
             />
           </div>
         </div>
@@ -253,7 +271,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
           <button
             type="submit"
             disabled={isPending}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#1E1B2E] text-white font-extrabold text-sm hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-md"
+            className="flex items-center gap-2 px-6 py-3 rounded-none bg-[#1E1B2E] text-white font-bold text-sm hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-xs cursor-pointer"
           >
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             <span>{isPending ? "Menyimpan..." : "Simpan Perubahan"}</span>

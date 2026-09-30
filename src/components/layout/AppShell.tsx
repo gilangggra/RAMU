@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
 import { getCurrentUserAvatar } from "@/app/settings/actions";
 import { createClient } from "@/lib/supabase/client";
@@ -16,6 +17,8 @@ import {
   Settings,
   Inbox,
   CreditCard,
+  User,
+  Images,
 } from "lucide-react";
 
 interface ActorInfo {
@@ -43,21 +46,27 @@ interface NavItem {
   badge?: string;
 }
 
-const PRIMARY_NAV: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" /> },
-  { href: "/directory", label: "Direktori Talenta & Studio", icon: <Users className="w-4 h-4" /> },
-  { href: "/showcase", label: "Karya & Inspirasi", icon: <Sparkles className="w-4 h-4" /> },
-  { href: "/projects", label: "Papan Proyek Komersial", icon: <Megaphone className="w-4 h-4" /> },
-  { href: "/dashboard/bookings", label: "Pesanan Masuk (Bookings)", icon: <Inbox className="w-4 h-4" /> },
-  { href: "/settings/rates", label: "Paket Layanan & Tarif Saya", icon: <CreditCard className="w-4 h-4" /> },
-  { href: "/settings", label: "Pengaturan Akun", icon: <Settings className="w-4 h-4" /> },
-];
-
 export function AppShell({ actor, activeRoute, children }: AppShellProps) {
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const initialAvatar = actor.avatarUrl || actor.owner?.avatarUrl || null;
   const [avatar, setAvatar] = useState<string | null>(initialAvatar);
   const [avatarError, setAvatarError] = useState(false);
+
+  const personalNav: NavItem[] = [
+    { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" /> },
+    { href: `/directory/${actor.id}`, label: "Profil Publik Saya", icon: <User className="w-4 h-4" /> },
+    { href: "/dashboard/showcase", label: "Kelola Portofolio", icon: <Images className="w-4 h-4" /> },
+    { href: "/settings/rates", label: "Paket Layanan & Tarif", icon: <CreditCard className="w-4 h-4" /> },
+    { href: "/dashboard/bookings", label: "Pesanan Masuk", icon: <Inbox className="w-4 h-4" /> },
+  ];
+
+  const ecosystemNav: NavItem[] = [
+    { href: "/directory", label: "Direktori Talenta & Studio", icon: <Users className="w-4 h-4" /> },
+    { href: "/showcase", label: "Karya & Inspirasi", icon: <Sparkles className="w-4 h-4" /> },
+    { href: "/projects", label: "Papan Proyek Komersial", icon: <Megaphone className="w-4 h-4" /> },
+    { href: "/settings", label: "Pengaturan Akun", icon: <Settings className="w-4 h-4" /> },
+  ];
 
   useEffect(() => {
     if (initialAvatar) {
@@ -80,8 +89,14 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
   }, [initialAvatar]);
 
   function isItemActive(href: string) {
-    if (href === "/dashboard") return activeRoute === "/dashboard";
-    return activeRoute.startsWith(href);
+    const current = pathname || activeRoute;
+    if (href === "/dashboard") return current === "/dashboard";
+    if (href === `/directory/${actor.id}`) return current === `/directory/${actor.id}`;
+    if (href === "/directory") return current === "/directory" || (current.startsWith("/directory") && current !== `/directory/${actor.id}`);
+    if (href === "/settings/rates") return current.startsWith("/settings/rates");
+    if (href === "/settings") return current === "/settings" || (current.startsWith("/settings") && !current.startsWith("/settings/rates"));
+    if (href === "/dashboard/showcase") return current.startsWith("/dashboard/showcase");
+    return current.startsWith(href);
   }
 
   const renderNavLinks = (items: NavItem[]) => (
@@ -154,18 +169,25 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
         <div className="flex-1 overflow-y-auto px-3.5 py-4 space-y-6">
           <div>
             <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-[#9E98A8] mb-2">
-              Menu Utama
+              Profil &amp; Bisnis Saya
             </p>
-            {renderNavLinks(PRIMARY_NAV)}
+            {renderNavLinks(personalNav)}
+          </div>
+
+          <div className="pt-2 border-t border-stone-200/60">
+            <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-[#9E98A8] mb-2">
+              Eksplorasi Ekosistem
+            </p>
+            {renderNavLinks(ecosystemNav)}
           </div>
         </div>
 
         <div className="p-3.5 border-t border-stone-200/80 bg-stone-50/50">
           <div className="p-3 rounded-2xl bg-white border border-stone-200/80 shadow-xs flex items-center justify-between gap-3">
             <Link
-              href="/settings"
+              href={`/directory/${actor.id}`}
               className="flex items-center gap-2.5 min-w-0 group hover:opacity-90 transition-opacity"
-              title="Buka Pengaturan Akun"
+              title="Lihat Profil Publik Saya"
             >
               <div className="w-8 h-8 rounded-xl overflow-hidden bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] flex items-center justify-center font-bold text-xs text-[#27213D] shrink-0 shadow-xs group-hover:scale-105 transition-transform">
                 {avatar && !avatarError ? (
@@ -181,19 +203,30 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-bold text-[#27213D] truncate group-hover:text-amber-600 transition-colors">{actor.name}</p>
-                <p className="text-[10px] text-[#716B7E] truncate">{actor.sector}</p>
+                <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200 inline-block">
+                  Lihat Profil
+                </span>
               </div>
             </Link>
 
-            <form action={logout}>
-              <button
-                type="submit"
-                title="Keluar dari akun"
-                className="p-1.5 rounded-lg text-[#716B7E] hover:text-rose-600 hover:bg-rose-50 transition-colors"
+            <div className="flex items-center gap-1">
+              <Link
+                href="/settings"
+                title="Pengaturan Akun"
+                className="p-1.5 rounded-lg text-[#716B7E] hover:text-[#1E1B2E] hover:bg-stone-100 transition-colors"
               >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </form>
+                <Settings className="w-3.5 h-3.5" />
+              </Link>
+              <form action={logout}>
+                <button
+                  type="submit"
+                  title="Keluar dari akun"
+                  className="p-1.5 rounded-lg text-[#716B7E] hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </aside>
@@ -209,9 +242,9 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
 
         <div className="flex items-center gap-2.5">
           <Link
-            href="/settings"
+            href={`/directory/${actor.id}`}
             className="flex items-center gap-2 max-w-[150px] group"
-            title="Buka Pengaturan Akun"
+            title="Lihat Profil Publik Saya"
           >
             <div className="w-7 h-7 rounded-lg overflow-hidden bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] flex items-center justify-center font-bold text-[11px] text-[#27213D] shrink-0">
               {avatar && !avatarError ? (
@@ -244,7 +277,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
           <div className="bg-white border-t border-stone-200 p-5 rounded-t-3xl max-h-[85vh] overflow-y-auto space-y-5 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-stone-200">
               <Link
-                href="/settings"
+                href={`/directory/${actor.id}`}
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-2.5 min-w-0"
               >
@@ -273,10 +306,17 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
               </button>
             </div>
 
-            <div>
-              <p className="text-[10px] font-bold uppercase text-[#9E98A8] mb-2">Menu Utama</p>
-              {renderNavLinks(PRIMARY_NAV)}
+            <div className="space-y-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#9E98A8] mb-2">Profil &amp; Bisnis Saya</p>
+                {renderNavLinks(personalNav)}
+              </div>
+              <div className="pt-2 border-t border-stone-100">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#9E98A8] mb-2">Eksplorasi Ekosistem</p>
+                {renderNavLinks(ecosystemNav)}
+              </div>
             </div>
+
             <div className="pt-3 border-t border-stone-200">
               <form action={logout}>
                 <button
@@ -303,10 +343,10 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-stone-200/90 px-3 py-2 flex items-center justify-around z-40 shadow-lg">
         {[
           { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
+          { href: `/directory/${actor.id}`, label: "Profil Saya", icon: <User className="w-5 h-5" /> },
           { href: "/directory", label: "Direktori", icon: <Users className="w-5 h-5" /> },
           { href: "/projects", label: "Proyek", icon: <Megaphone className="w-5 h-5" /> },
           { href: "/dashboard/bookings", label: "Pesanan", icon: <Inbox className="w-5 h-5" /> },
-          { href: "/settings/rates", label: "Tarif", icon: <CreditCard className="w-5 h-5" /> },
         ].map((item) => {
           const active = isItemActive(item.href);
           return (

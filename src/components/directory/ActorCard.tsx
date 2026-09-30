@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { ActorType } from "@prisma/client";
-import { ArrowUpRight, CheckCircle2, MapPin } from "lucide-react";
+import { ArrowUpRight, MapPin, Zap } from "lucide-react";
 
 export interface DirectoryActorItem {
   id: string;
@@ -46,9 +46,11 @@ export interface DirectoryActorItem {
 
 interface ActorCardProps {
   actor: DirectoryActorItem;
+  /** Complementarity score 0-100. Undefined = no match context available. */
+  complementarityScore?: number;
 }
 
-export function ActorCard({ actor }: ActorCardProps) {
+export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
   const [imageError, setImageError] = useState(false);
 
   // Extract a preview image from assets (Prioritize creative portfolio/comp-card, strictly exclude equipment)
@@ -103,8 +105,26 @@ export function ActorCard({ actor }: ActorCardProps) {
 
   // Calculate Starting Estimated Rate Card for Indonesian creative market
   const sectorLower = actor.sector.toLowerCase();
+  const isIndividualSector =
+    sectorLower.includes("photographer") ||
+    sectorLower.includes("fotografi") ||
+    sectorLower.includes("model") ||
+    sectorLower.includes("talent") ||
+    sectorLower.includes("mua") ||
+    sectorLower.includes("makeup") ||
+    sectorLower.includes("hair") ||
+    sectorLower.includes("stylist") ||
+    sectorLower.includes("wardrobe") ||
+    sectorLower.includes("video") ||
+    sectorLower.includes("film") ||
+    sectorLower.includes("cinema") ||
+    sectorLower.includes("designer") ||
+    sectorLower.includes("desain");
+
+  const isStudio = !isIndividualSector && (actor.actorType === "STUDIO" || sectorLower.includes("studio"));
+
   let startingRate = "Mulai Rp 1,5 Jt / sesi";
-  if (actor.actorType === "STUDIO") {
+  if (isStudio) {
     startingRate = "Mulai Rp 200rb / jam";
   } else if (sectorLower.includes("model") || sectorLower.includes("talent")) {
     startingRate = "Mulai Rp 1,0 Jt / sesi";
@@ -139,6 +159,21 @@ export function ActorCard({ actor }: ActorCardProps) {
     .map((w) => w[0]?.toUpperCase())
     .join("");
 
+  // ── Complementarity badge config ─────────────────────────────────────
+  const hasScore = complementarityScore !== undefined && complementarityScore > 0;
+  const scoreLabel =
+    !hasScore ? null
+    : complementarityScore! >= 80 ? "Sangat Cocok"
+    : complementarityScore! >= 50 ? "Cocok"
+    : "Ada Kecocokan";
+  const scoreBg =
+    complementarityScore! >= 80
+      ? "bg-emerald-500/90"
+      : complementarityScore! >= 50
+      ? "bg-amber-400/95"
+      : "bg-sky-500/90";
+  const scoreText = complementarityScore! >= 80 ? "text-white" : "text-stone-950";
+
   return (
     <Link 
       href={`/directory/${actor.id}`}
@@ -166,13 +201,24 @@ export function ActorCard({ actor }: ActorCardProps) {
         {/* Top Badges */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
           <div className="px-2.5 py-1 bg-white/95 backdrop-blur-md text-[9px] font-bold uppercase tracking-wider text-[#1E1B2E] shadow-xs">
-            {actor.actorType === "STUDIO" ? "Studio Foto" : actor.actorType === "MSME" ? "Brand" : "Kreator"}
+            {isStudio ? "Studio Foto" : actor.actorType === "MSME" ? "Brand" : "Kreator"}
           </div>
 
-          <div className="px-2 py-0.5 bg-emerald-500/90 backdrop-blur-md text-[9px] font-bold text-white flex items-center gap-1 shadow-xs rounded-full">
-            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-            <span>Siap Kerja</span>
-          </div>
+          {/* Complementarity badge (replaces static green dot when available) */}
+          {hasScore ? (
+            <div
+              className={`px-2.5 py-1 ${scoreBg} backdrop-blur-md text-[9px] font-extrabold ${scoreText} flex items-center gap-1 shadow-xs`}
+            >
+              <Zap className="w-2.5 h-2.5" />
+              <span>{complementarityScore}%</span>
+              <span className="opacity-80">{scoreLabel}</span>
+            </div>
+          ) : (
+            <div className="px-2 py-0.5 bg-emerald-500/90 backdrop-blur-md text-[9px] font-bold text-white flex items-center gap-1 shadow-xs rounded-none">
+              <span className="w-1.5 h-1.5 bg-white animate-pulse" />
+              <span>Siap Kerja</span>
+            </div>
+          )}
         </div>
 
         {/* Hover Action Overlay Bottom */}
@@ -188,7 +234,7 @@ export function ActorCard({ actor }: ActorCardProps) {
       <div className="flex flex-col gap-1.5 pt-1">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-6 h-6 rounded-full overflow-hidden bg-stone-100 border border-stone-200/80 shrink-0">
+            <div className="w-6 h-6 rounded-none overflow-hidden bg-stone-100 border border-stone-200/80 shrink-0">
               {actor.owner?.avatarUrl ? (
                 <img
                   src={actor.owner.avatarUrl}
@@ -217,10 +263,43 @@ export function ActorCard({ actor }: ActorCardProps) {
           {actor.sector}
         </div>
 
-        {/* Rate Card & Terms Ribbon */}
-        <div className="pt-2 mt-1 border-t border-stone-100 flex items-center justify-between text-[11px]">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Estimasi Tarif</span>
-          <span className="font-semibold text-[#1E1B2E] tracking-tight">{startingRate}</span>
+        {/* Rate Card & Complementarity row */}
+        <div className="pt-2 mt-1 border-t border-stone-100 space-y-1.5">
+          <div className="flex items-center justify-between text-[11px]">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Estimasi Tarif</span>
+            <span className="font-semibold text-[#1E1B2E] tracking-tight">{startingRate}</span>
+          </div>
+          {hasScore && (
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-300">Relevansi Untukmu</span>
+              <div className="flex items-center gap-1.5">
+                {/* Mini progress bar */}
+                <div className="w-16 h-1 bg-stone-100 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      complementarityScore! >= 80
+                        ? "bg-emerald-500"
+                        : complementarityScore! >= 50
+                        ? "bg-amber-400"
+                        : "bg-sky-400"
+                    }`}
+                    style={{ width: `${complementarityScore}%` }}
+                  />
+                </div>
+                <span
+                  className={`text-[10px] font-extrabold ${
+                    complementarityScore! >= 80
+                      ? "text-emerald-600"
+                      : complementarityScore! >= 50
+                      ? "text-amber-600"
+                      : "text-sky-600"
+                  }`}
+                >
+                  {complementarityScore}%
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </Link>

@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   User,
   Sparkles,
@@ -17,7 +18,6 @@ import {
   ShieldAlert,
   ShieldCheck,
   Lightbulb,
-  ExternalLink,
   CheckCircle2,
   Clock,
   Briefcase,
@@ -31,6 +31,7 @@ import {
   Play,
   Film,
   Camera,
+  Pencil,
 } from "lucide-react";
 import { ModelCompCard, ModelAttributes } from "./ModelCompCard";
 import { StudioSpecsCard, StudioAttributes } from "./StudioSpecsCard";
@@ -44,6 +45,8 @@ import { AvailabilityCalendar } from "./AvailabilityCalendar";
 import { BookingModal } from "./BookingModal";
 import { TearSheetModal } from "@/components/showcase/TearSheetModal";
 import { ShowcaseItem } from "@/application/showcaseService";
+import { parseSocialLinks, InstagramIcon } from "@/lib/socialUtils";
+import { ProfileSlideOverDrawer, DrawerTabType } from "./ProfileSlideOverDrawer";
 
 interface ActorDetailTabsProps {
   actor: {
@@ -54,6 +57,7 @@ interface ActorDetailTabsProps {
     location?: string | null;
     description?: string | null;
     contactEmail?: string | null;
+    contactPhone?: string | null;
     websiteUrl?: string | null;
     owner?: {
       displayName?: string | null;
@@ -122,9 +126,39 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
   const [activeTab, setActiveTab] = useState<"portfolio" | "rates" | "specs" | "about" | "reviews">("portfolio");
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [selectedShowcaseIndex, setSelectedShowcaseIndex] = useState<number | null>(null);
-  const [detectedRatios, setDetectedRatios] = useState<Record<string, "horizontal" | "vertical" | "square">>({});
+  const [portfolioFilter, setPortfolioFilter] = useState<string>("ALL");
 
-  // Check role-specific assets
+  const searchParams = useSearchParams();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerTab, setDrawerTab] = useState<DrawerTabType>("specs");
+
+  useEffect(() => {
+    if (isCurrentActor) {
+      const editParam = searchParams.get("edit");
+      if (editParam === "specs" || editParam === "rates" || editParam === "profile" || editParam === "contact" || editParam === "portfolio") {
+        setDrawerTab(editParam as DrawerTabType);
+        setIsDrawerOpen(true);
+      }
+    }
+  }, [searchParams, isCurrentActor]);
+
+  useEffect(() => {
+    const handleOpenEdit = (e: Event) => {
+      const customEvent = e as CustomEvent<{ tab?: DrawerTabType }>;
+      if (customEvent.detail?.tab) {
+        setDrawerTab(customEvent.detail.tab);
+      }
+      setIsDrawerOpen(true);
+    };
+
+    window.addEventListener("open-edit-modal", handleOpenEdit);
+    return () => {
+      window.removeEventListener("open-edit-modal", handleOpenEdit);
+    };
+  }, []);
+
+  const socialLinks = useMemo(() => parseSocialLinks(actor.websiteUrl), [actor.websiteUrl]);
+
   const modelAsset = actor.assets.find(
     (a) =>
       a.subtype.toLowerCase().includes("model") ||
@@ -179,14 +213,33 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
   );
 
   const sectorLower = actor.sector.toLowerCase();
-  const isStudio = Boolean(studioAsset) || actor.actorType === "STUDIO" || sectorLower.includes("studio");
+  const hasStudioSpaceAsset = actor.assets.some(
+    (a) => a.category === "STUDIO_SPACE" || a.subtype.toLowerCase().includes("studio")
+  );
+  const isIndividualSector =
+    sectorLower.includes("photographer") ||
+    sectorLower.includes("fotografi") ||
+    sectorLower.includes("model") ||
+    sectorLower.includes("talent") ||
+    sectorLower.includes("video") ||
+    sectorLower.includes("film") ||
+    sectorLower.includes("cinema") ||
+    sectorLower.includes("mua") ||
+    sectorLower.includes("makeup") ||
+    sectorLower.includes("hair") ||
+    sectorLower.includes("stylist") ||
+    sectorLower.includes("wardrobe") ||
+    sectorLower.includes("designer") ||
+    sectorLower.includes("desain");
+
+  const isStudio = !isIndividualSector && (hasStudioSpaceAsset || Boolean(studioAsset) || actor.actorType === "STUDIO" || sectorLower.includes("studio"));
   const isModel = !isStudio && (Boolean(modelAsset) || sectorLower.includes("model") || sectorLower.includes("talent"));
   const isMUA = !isStudio && !isModel && (Boolean(muaAsset) || sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair"));
   const isStylist = !isStudio && !isModel && !isMUA && (Boolean(stylistAsset) || sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));
   const isVideographer = !isStudio && !isModel && !isMUA && !isStylist && (Boolean(videographerAsset) || sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema"));
   const isPhotographer = !isStudio && !isModel && !isMUA && !isStylist && !isVideographer && (Boolean(photographerAsset) || sectorLower.includes("photographer") || sectorLower.includes("fotografi"));
   const isDesigner = !isStudio && !isModel && !isMUA && !isStylist && !isVideographer && !isPhotographer && (Boolean(designerAsset) || sectorLower.includes("designer") || sectorLower.includes("desain"));
-  const isBrand = actor.actorType === "MSME" || Boolean(brandAsset) || sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("umkm");
+  const isBrand = !isIndividualSector && !isStudio && (actor.actorType === "MSME" || Boolean(brandAsset) || sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("umkm"));
 
   const modelAttrs = modelAsset?.attributes as ModelAttributes | undefined;
   const studioAttrs = studioAsset?.attributes as StudioAttributes | undefined;
@@ -240,6 +293,73 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
       },
     };
   });
+
+  const portfolioCategories = useMemo(() => {
+    const counts: Record<string, number> = {};
+    let videoCount = 0;
+    let photoCount = 0;
+
+    portfolioAssets.forEach((asset) => {
+      const attrs = (asset.attributes as any) || {};
+      const isVid =
+        attrs.media_type === "VIDEO" ||
+        Boolean(attrs.video_url) ||
+        asset.subtype?.toLowerCase().includes("video") ||
+        asset.subtype?.toLowerCase().includes("film") ||
+        asset.subtype?.toLowerCase().includes("cinema") ||
+        (attrs.image_url && attrs.image_url.includes("img.youtube.com"));
+
+      if (isVid) videoCount++;
+      else photoCount++;
+
+      const sub = asset.subtype || "Karya";
+      counts[sub] = (counts[sub] || 0) + 1;
+    });
+
+    const categoryList = Object.entries(counts).map(([name, count]) => ({
+      id: name,
+      label: name,
+      count,
+    }));
+
+    return {
+      categoryList,
+      videoCount,
+      photoCount,
+      totalCount: portfolioAssets.length,
+    };
+  }, [portfolioAssets]);
+
+  const filteredPortfolioAssets = useMemo(() => {
+    if (portfolioFilter === "ALL") return portfolioAssets;
+    if (portfolioFilter === "VIDEO") {
+      return portfolioAssets.filter((a) => {
+        const attrs = (a.attributes as any) || {};
+        return (
+          attrs.media_type === "VIDEO" ||
+          Boolean(attrs.video_url) ||
+          a.subtype?.toLowerCase().includes("video") ||
+          a.subtype?.toLowerCase().includes("film") ||
+          a.subtype?.toLowerCase().includes("cinema") ||
+          (attrs.image_url && attrs.image_url.includes("img.youtube.com"))
+        );
+      });
+    }
+    if (portfolioFilter === "PHOTO") {
+      return portfolioAssets.filter((a) => {
+        const attrs = (a.attributes as any) || {};
+        const isVid =
+          attrs.media_type === "VIDEO" ||
+          Boolean(attrs.video_url) ||
+          a.subtype?.toLowerCase().includes("video") ||
+          a.subtype?.toLowerCase().includes("film") ||
+          a.subtype?.toLowerCase().includes("cinema") ||
+          (attrs.image_url && attrs.image_url.includes("img.youtube.com"));
+        return !isVid;
+      });
+    }
+    return portfolioAssets.filter((a) => (a.subtype || "Karya") === portfolioFilter);
+  }, [portfolioAssets, portfolioFilter]);
 
   // Curate true skills and specialties
   const explicitSpecialties: string[] = [];
@@ -866,29 +986,28 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
   const tabs = [
     {
       id: "portfolio" as const,
-      label: "Portofolio Karya",
+      label: "Portofolio",
     },
     {
       id: "rates" as const,
-      label: "Paket Layanan & Tarif",
+      label: "Tarif",
     },
     {
       id: "specs" as const,
-      label: specsTabLabel,
+      label: "Spesifikasi",
     },
     {
       id: "about" as const,
-      label: "Tentang & Ketentuan Kerja",
+      label: "Tentang",
     },
     {
       id: "reviews" as const,
-      label: `Ulasan Klien (${totalReviews})`,
+      label: `Ulasan (${totalReviews})`,
     },
   ];
 
   return (
     <div className="space-y-10">
-      {/* 🧭 Minimalist Tab Navigation Bar */}
       <div className="w-full flex items-center gap-8 overflow-x-auto no-scrollbar border-b border-stone-200">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -918,9 +1037,9 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
           {portfolioAssets.length > 0 ? (
             <div className="space-y-4">
               {/* Anti-Catfishing Trust Banner */}
-              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-amber-500/5 to-transparent border border-emerald-300/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
+              <div className="p-3.5 rounded-none bg-gradient-to-r from-emerald-500/10 via-amber-500/5 to-transparent border border-emerald-300/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                  <div className="w-8 h-8 rounded-none bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                   <div>
@@ -932,184 +1051,200 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                     </span>
                   </div>
                 </div>
-                <span className="self-start sm:self-auto px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 font-mono text-[10px] font-black border border-emerald-300 shrink-0">
+                <span className="self-start sm:self-auto px-2.5 py-1 rounded-none bg-emerald-100 text-emerald-900 font-mono text-[10px] font-black border border-emerald-300 shrink-0">
                   ANTI-CATFISHING CERTIFIED
                 </span>
               </div>
 
-              <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-100 gap-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-stone-400" />
                   <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
                     Galeri Hasil Karya &amp; Proyek Komersial ({portfolioAssets.length})
                   </h3>
                 </div>
-                <span className="text-[11px] text-stone-400 font-medium">Klik untuk inspeksi kru &amp; tear-sheet</span>
-              </div>
-              
-              <div
-                className={
-                  portfolioAssets.length === 1
-                    ? "grid grid-cols-1 max-w-2xl mx-auto gap-6"
-                    : portfolioAssets.length === 2
-                    ? "grid grid-cols-1 md:grid-cols-2 gap-6 items-start"
-                    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start"
-                }
-              >
-                {portfolioAssets.map((asset, index) => {
-                  const attrs = (asset.attributes as any) || {};
-                  const isVideo =
-                    attrs.media_type === "VIDEO" ||
-                    Boolean(attrs.video_url) ||
-                    asset.subtype?.toLowerCase().includes("video") ||
-                    asset.subtype?.toLowerCase().includes("film") ||
-                    asset.subtype?.toLowerCase().includes("cinema") ||
-                    (attrs.image_url && attrs.image_url.includes("img.youtube.com"));
-
-                  const storedRatio = attrs.aspect_ratio?.toLowerCase();
-                  const detected = detectedRatios[asset.id];
-
-                  const isHorizontal =
-                    isVideo ||
-                    storedRatio === "16:9" ||
-                    storedRatio === "4:3" ||
-                    storedRatio === "horizontal" ||
-                    detected === "horizontal";
-
-                  const isSquare =
-                    storedRatio === "1:1" ||
-                    storedRatio === "square" ||
-                    detected === "square";
-
-                  const mediaAspectRatio = isHorizontal
-                    ? "aspect-[16/10]"
-                    : isSquare
-                    ? "aspect-square"
-                    : "aspect-[4/5]";
-
-                  return (
-                    <div
-                      key={asset.id}
-                      onClick={() => setSelectedShowcaseIndex(index)}
-                      className="group flex flex-col rounded-3xl overflow-hidden bg-white border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] hover:shadow-xl hover:border-amber-300/80 transition-all duration-300 cursor-pointer"
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className="text-[11px] text-stone-400 font-medium hidden sm:block">Klik karya untuk inspeksi kru &amp; tear-sheet</span>
+                  {isCurrentActor && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "portfolio" } }));
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
                     >
-                      <div className={`relative w-full ${mediaAspectRatio} bg-stone-900 overflow-hidden`}>
+                      <PlusCircle className="w-3.5 h-3.5" />
+                      <span>Tambah Karya</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {(portfolioCategories.categoryList.length > 1 || (portfolioCategories.videoCount > 0 && portfolioCategories.photoCount > 0)) && (
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                  <button
+                    type="button"
+                    onClick={() => setPortfolioFilter("ALL")}
+                    className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-none ${
+                      portfolioFilter === "ALL"
+                        ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
+                        : "bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 border-stone-200"
+                    }`}
+                  >
+                    <span>Semua</span>
+                    <span className={`text-[10px] font-mono px-1.5 py-0.5 ${portfolioFilter === "ALL" ? "bg-white/20 text-white" : "bg-stone-100 text-stone-600"}`}>
+                      {portfolioCategories.totalCount}
+                    </span>
+                  </button>
+
+                  {portfolioCategories.categoryList.map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setPortfolioFilter(cat.id)}
+                      className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-none whitespace-nowrap ${
+                        portfolioFilter === cat.id
+                          ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
+                          : "bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 border-stone-200"
+                      }`}
+                    >
+                      <span>{cat.label}</span>
+                      <span className={`text-[10px] font-mono px-1.5 py-0.5 ${portfolioFilter === cat.id ? "bg-white/20 text-white" : "bg-stone-100 text-stone-600"}`}>
+                        {cat.count}
+                      </span>
+                    </button>
+                  ))}
+
+                  {portfolioCategories.videoCount > 0 && !portfolioCategories.categoryList.some((c) => c.id.toLowerCase().includes("video")) && (
+                    <button
+                      type="button"
+                      onClick={() => setPortfolioFilter("VIDEO")}
+                      className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-none whitespace-nowrap ${
+                        portfolioFilter === "VIDEO"
+                          ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
+                          : "bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 border-stone-200"
+                      }`}
+                    >
+                      <Film className="w-3 h-3 text-amber-500" />
+                      <span>Video</span>
+                      <span className={`text-[10px] font-mono px-1.5 py-0.5 ${portfolioFilter === "VIDEO" ? "bg-white/20 text-white" : "bg-stone-100 text-stone-600"}`}>
+                        {portfolioCategories.videoCount}
+                      </span>
+                    </button>
+                  )}
+                </div>
+              )}
+              
+              {filteredPortfolioAssets.length > 0 ? (
+                <div
+                  className={
+                    filteredPortfolioAssets.length === 1
+                      ? "max-w-xl mx-auto"
+                      : filteredPortfolioAssets.length === 2
+                      ? "columns-1 sm:columns-2 gap-4 max-w-4xl mx-auto"
+                      : "columns-1 sm:columns-2 lg:columns-3 gap-4"
+                  }
+                >
+                  {filteredPortfolioAssets.map((asset) => {
+                    const originalIndex = showcaseItems.findIndex((item) => item.id === asset.id);
+                    const targetIndex = originalIndex !== -1 ? originalIndex : 0;
+                    const attrs = (asset.attributes as any) || {};
+                    const isVideo =
+                      attrs.media_type === "VIDEO" ||
+                      Boolean(attrs.video_url) ||
+                      asset.subtype?.toLowerCase().includes("video") ||
+                      asset.subtype?.toLowerCase().includes("film") ||
+                      asset.subtype?.toLowerCase().includes("cinema") ||
+                      (attrs.image_url && attrs.image_url.includes("img.youtube.com"));
+
+                    const isDirectVideo =
+                      isVideo &&
+                      attrs.video_url &&
+                      (/\.(mp4|webm|mov)(\?.*)?$/i.test(attrs.video_url) ||
+                        attrs.video_url.startsWith("/uploads/portfolios/videos/"));
+
+                    return (
+                      <div
+                        key={asset.id}
+                        onClick={() => setSelectedShowcaseIndex(targetIndex)}
+                        className="break-inside-avoid mb-4 group relative block overflow-hidden rounded-none bg-stone-100 border border-stone-200/80 shadow-xs hover:shadow-xl transition-all duration-500 cursor-pointer select-none"
+                      >
+                        {isDirectVideo && attrs.video_url && (
+                          <video
+                            src={attrs.video_url}
+                            muted
+                            loop
+                            playsInline
+                            preload="none"
+                            onMouseEnter={(e) => e.currentTarget.play().catch(() => {})}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.pause();
+                              e.currentTarget.currentTime = 0;
+                            }}
+                            className="absolute inset-0 w-full h-full object-cover z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-none"
+                          />
+                        )}
+
                         {attrs?.image_url ? (
                           <img
                             src={attrs.image_url}
                             alt={asset.name}
-                            onLoad={(e) => {
-                              const { naturalWidth, naturalHeight } = e.currentTarget;
-                              if (naturalWidth && naturalHeight) {
-                                const ratio = naturalWidth / naturalHeight;
-                                const orientation = ratio > 1.15 ? "horizontal" : ratio < 0.85 ? "vertical" : "square";
-                                if (detectedRatios[asset.id] !== orientation) {
-                                  setDetectedRatios((prev) => ({ ...prev, [asset.id]: orientation }));
-                                }
-                              }
-                            }}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            className="w-full h-auto object-cover rounded-none block transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                            loading="lazy"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-stone-400">
+                          <div className="w-full aspect-[4/3] flex items-center justify-center text-stone-400 bg-stone-100">
                             <Sparkles className="w-8 h-8 opacity-50" />
                           </div>
                         )}
 
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-40 group-hover:opacity-60 transition-opacity" />
-
                         {isVideo && (
-                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div className="w-12 h-12 rounded-full bg-white/95 text-[#1E1B2E] flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:bg-[#E66A48] group-hover:text-white transition-all backdrop-blur-xs">
-                              <Play className="w-5 h-5 ml-0.5 fill-current" />
-                            </div>
+                          <div className="absolute top-2.5 right-2.5 z-20 w-7 h-7 bg-black/50 backdrop-blur-xs flex items-center justify-center text-white/95 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                            <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
                           </div>
                         )}
-
-                        <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between pointer-events-none gap-2">
-                          {attrs?.is_co_credit ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-900/85 backdrop-blur-md text-[10px] font-bold text-white border border-purple-400/30 shadow-xs">
-                              <span>Co-Credit</span>
-                              <span className="text-purple-300">• {attrs.uploader_name}</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-bold text-white shadow-xs">
-                              <ShieldCheck className="w-3 h-3 text-emerald-400" />
-                              <span>Karya Mandiri</span>
-                            </span>
-                          )}
-
-                          {isVideo ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-bold text-amber-300 shadow-xs">
-                              <Film className="w-3 h-3" />
-                              <span>VIDEO</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-bold text-stone-200 shadow-xs">
-                              <Camera className="w-3 h-3 text-stone-300" />
-                              <span>{isHorizontal ? "FOTO 16:9" : isSquare ? "FOTO 1:1" : "FOTO 4:5"}</span>
-                            </span>
-                          )}
-                        </div>
                       </div>
-
-                      <div className="p-5 flex flex-col justify-between flex-1 gap-3 bg-white">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between gap-2 flex-wrap">
-                            <span className="px-2.5 py-0.5 rounded-lg bg-stone-100 text-stone-700 text-[10px] font-bold uppercase tracking-wider">
-                              {asset.subtype || "Karya"}
-                            </span>
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/80">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                              <span>Peer-Verified</span>
-                            </span>
-                          </div>
-
-                          <h4 className="text-base font-extrabold text-[#1E1B2E] group-hover:text-[#E66A48] transition-colors leading-snug line-clamp-1">
-                            {asset.name}
-                          </h4>
-
-                          {attrs?.is_co_credit && attrs?.co_credit_role ? (
-                            <p className="text-xs text-stone-500 font-medium line-clamp-1">
-                              Peran: <strong className="text-stone-700">{attrs.co_credit_role}</strong>
-                            </p>
-                          ) : asset.description ? (
-                            <p className="text-xs text-stone-500 font-medium line-clamp-2 leading-relaxed">
-                              {asset.description}
-                            </p>
-                          ) : (
-                            <p className="text-xs text-stone-400 font-medium">
-                              Karya resmi terverifikasi di ekosistem kolaborasi RAMU
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="flex items-center justify-between pt-3 border-t border-stone-100 text-xs font-bold text-[#E66A48]">
-                          <span className="inline-flex items-center gap-1 text-xs">
-                            <span>Inspeksi Kru &amp; Tear-Sheet</span>
-                          </span>
-                          <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-12 px-4 bg-stone-50 border border-stone-200 rounded-none space-y-2">
+                  <p className="text-xs text-stone-500">Tidak ada karya yang sesuai dengan kategori ini.</p>
+                  <button
+                    type="button"
+                    onClick={() => setPortfolioFilter("ALL")}
+                    className="text-xs font-bold text-[#E66A48] hover:underline cursor-pointer"
+                  >
+                    Tampilkan Semua Karya
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="text-center py-16 px-6 bg-stone-50 border border-stone-200/80 rounded-2xl space-y-3">
+            <div className="text-center py-16 px-6 bg-stone-50 border border-stone-200/80 rounded-none space-y-3">
               <Sparkles className="w-8 h-8 text-stone-300 mx-auto" />
               <h4 className="text-base font-semibold text-[#1E1B2E]">Portofolio Terdaftar Sedang Diselaraskan</h4>
               <p className="text-xs text-stone-500 max-w-md mx-auto">
                 Karya portofolio resolusi tinggi dapat dilihat pada kartu spesifikasi teknis dan media sosial resmi kreator.
               </p>
               {isCurrentActor && (
-                <Link
-                  href="/dashboard/showcase"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-black transition-colors"
-                >
-                  + Unggah Portofolio Sekarang
-                </Link>
+                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "portfolio" } }));
+                    }}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider rounded-none hover:bg-black transition-colors cursor-pointer"
+                  >
+                    + Unggah Portofolio Sekarang
+                  </button>
+                  <Link
+                    href="/dashboard/showcase"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-stone-300 text-[#1E1B2E] text-xs font-bold uppercase tracking-wider rounded-none hover:bg-stone-50 transition-colors"
+                  >
+                    Studio Showcase &rarr;
+                  </Link>
+                </div>
               )}
             </div>
           )}
@@ -1117,10 +1252,24 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
           {/* Featured Comp Card / Lookbook Visuals if available */}
           {isModel && modelAttrs?.comp_card && modelAttrs.comp_card.length > 0 && (
             <div className="space-y-4 pt-6 border-t border-stone-200">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">Foto Comp-Card Editorial</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">Foto Comp-Card Editorial</h3>
+                {isCurrentActor && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-none bg-[#1E1B2E] text-white text-[11px] font-bold uppercase tracking-wider hover:bg-black transition-colors cursor-pointer"
+                  >
+                    <Pencil className="w-3 h-3" />
+                    <span>Edit Comp Card</span>
+                  </button>
+                )}
+              </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {modelAttrs.comp_card.map((item, i) => (
-                  <div key={i} className="aspect-[3/4] rounded-xl overflow-hidden bg-stone-100 border border-stone-200">
+                  <div key={i} className="aspect-[3/4] rounded-none overflow-hidden bg-stone-100 border border-stone-200">
                     <img src={item.url} alt={item.caption || `Comp card ${i + 1}`} className="w-full h-full object-cover" />
                   </div>
                 ))}
@@ -1130,10 +1279,24 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
 
           {isBrand && brandAttrs?.brand_gallery && brandAttrs.brand_gallery.length > 0 && (
             <div className="space-y-4 pt-6 border-t border-stone-200">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">Galeri Koleksi Brand</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">Galeri Koleksi Brand</h3>
+                {isCurrentActor && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-none bg-[#1E1B2E] text-white text-[11px] font-bold uppercase tracking-wider hover:bg-black transition-colors cursor-pointer"
+                  >
+                    <Pencil className="w-3 h-3" />
+                    <span>Edit Galeri Brand</span>
+                  </button>
+                )}
+              </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {brandAttrs.brand_gallery.map((item, i) => (
-                  <div key={i} className="aspect-[4/5] rounded-xl overflow-hidden bg-stone-100 border border-stone-200">
+                  <div key={i} className="aspect-[4/5] rounded-none overflow-hidden bg-stone-100 border border-stone-200">
                     <img src={item.url} alt={item.title || `Brand lookbook ${i + 1}`} className="w-full h-full object-cover" />
                   </div>
                 ))}
@@ -1149,25 +1312,26 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
       {activeTab === "rates" && (
         <div className="space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
-            <div>
-              <h3 className="text-xl font-bold text-[#1E1B2E] tracking-tight">
-                Pilihan Paket Layanan &amp; Estimasi Tarif
+            <div className="flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-stone-400" />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                Pilihan Paket &amp; Estimasi Tarif
               </h3>
-              <p className="text-xs text-stone-500 mt-1">
-                Pilih paket yang sesuai dengan kebutuhan proyek Anda untuk langsung mengirim penawaran kerja.
-              </p>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-3 shrink-0">
               {isCurrentActor && (
-                <Link
-                  href="/settings/rates"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs"
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "rates" } }));
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
                 >
                   <CreditCard className="w-3.5 h-3.5" />
                   <span>Atur Paket &amp; Tarif Saya</span>
-                </Link>
+                </button>
               )}
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200 shrink-0">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Transparan &amp; Resmi</span>
               </div>
@@ -1179,14 +1343,14 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
             {packages.map((pkg, idx) => (
               <div
                 key={idx}
-                className={`relative flex flex-col justify-between p-6 sm:p-7 rounded-2xl border transition-all duration-300 ${
+                className={`relative flex flex-col justify-between p-6 sm:p-7 rounded-none border transition-all duration-300 ${
                   pkg.popular
                     ? "bg-white border-[#1E1B2E] shadow-xl ring-1 ring-[#1E1B2E]"
                     : "bg-white border-stone-200/80 shadow-xs hover:border-stone-400"
                 }`}
               >
                 {pkg.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-[#1E1B2E] text-white text-[9px] font-bold uppercase tracking-widest rounded-full shadow-xs">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-[#1E1B2E] text-white text-[9px] font-bold uppercase tracking-widest rounded-none shadow-xs">
                     Paling Banyak Dipilih
                   </div>
                 )}
@@ -1225,7 +1389,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                     <button
                       type="button"
                       onClick={() => setIsBookingOpen(true)}
-                      className={`w-full py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                      className={`w-full py-3 text-xs font-bold uppercase tracking-widest rounded-none transition-all cursor-pointer flex items-center justify-center gap-2 ${
                         pkg.popular
                           ? "bg-[#1E1B2E] hover:bg-black text-white shadow-sm"
                           : "bg-stone-100 hover:bg-stone-200 text-[#1E1B2E]"
@@ -1235,13 +1399,16 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                       <span>Sewa Paket Ini</span>
                     </button>
                   ) : (
-                    <Link
-                      href="/settings/rates"
-                      className="w-full py-3 text-xs font-bold uppercase tracking-widest rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors flex items-center justify-center gap-1.5"
+                    <button
+                      type="button"
+                      onClick={() => {
+                        window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "rates" } }));
+                      }}
+                      className="w-full py-3 text-xs font-bold uppercase tracking-widest rounded-none bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <CreditCard className="w-3.5 h-3.5" />
                       <span>Ubah Tarif Saya</span>
-                    </Link>
+                    </button>
                   )}
                 </div>
               </div>
@@ -1249,7 +1416,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
           </div>
 
           {/* Custom Quote Note */}
-          <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+          <div className="p-5 rounded-none bg-stone-50 border border-stone-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
             <div className="space-y-0.5">
               <span className="font-bold text-[#1E1B2E] block">Butuh paket khusus atau brief di luar daftar?</span>
               <p className="text-stone-500">
@@ -1260,7 +1427,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
               <button
                 type="button"
                 onClick={() => setIsBookingOpen(true)}
-                className="px-5 py-2.5 bg-white border border-stone-300 hover:border-[#1E1B2E] text-[#1E1B2E] font-bold text-xs uppercase tracking-wider rounded-xl transition-colors shrink-0 shadow-xs cursor-pointer"
+                className="px-5 py-2.5 bg-white border border-stone-300 hover:border-[#1E1B2E] text-[#1E1B2E] font-bold text-xs uppercase tracking-wider rounded-none transition-colors shrink-0 shadow-xs cursor-pointer"
               >
                 Ajukan Brief Kustom &rarr;
               </button>
@@ -1274,58 +1441,68 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
       {/* ────────────────────────────────────────────────────────── */}
       {activeTab === "specs" && (
         <div className="space-y-8">
-          {/* Specialized Technical Specs Card */}
+          {/* Section Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
+            <div className="flex items-center gap-2">
+              <Sliders className="w-4 h-4 text-stone-400" />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                Kartu Spesifikasi Teknis
+              </h3>
+            </div>
+            {isCurrentActor && (
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+              >
+                <Sliders className="w-3.5 h-3.5" />
+                <span>Edit Spesifikasi</span>
+              </button>
+            )}
+          </div>
+
           {isStudio && (
-            <StudioSpecsCard attributes={studioAttrs || {}} studioName={actor.name} actorAssets={actor.assets} />
+            <StudioSpecsCard attributes={studioAttrs || {}} studioName={actor.name} isCurrentActor={isCurrentActor} actorAssets={actor.assets} />
           )}
 
           {isPhotographer && (
-            <PhotographerSpecsCard attributes={photographerAttrs || {}} actorName={actor.name} actorAssets={actor.assets} />
+            <PhotographerSpecsCard attributes={photographerAttrs || {}} actorName={actor.name} isCurrentActor={isCurrentActor} actorAssets={actor.assets} />
           )}
 
           {isVideographer && (
-            <VideographerSpecsCard attributes={(videographerAsset?.attributes as any) || {}} actorName={actor.name} actorAssets={actor.assets} />
+            <VideographerSpecsCard attributes={(videographerAsset?.attributes as any) || {}} actorName={actor.name} isCurrentActor={isCurrentActor} actorAssets={actor.assets} />
           )}
 
           {isModel && (
-            <ModelCompCard attributes={modelAttrs || {}} actorName={actor.name} avatarUrl={actor.owner?.avatarUrl} actorAssets={actor.assets} />
+            <ModelCompCard attributes={modelAttrs || {}} actorName={actor.name} avatarUrl={actor.owner?.avatarUrl} isCurrentActor={isCurrentActor} actorAssets={actor.assets} />
           )}
 
           {isMUA && (
-            <MuaSpecsCard attributes={(muaAsset?.attributes as any) || {}} actorName={actor.name} actorAssets={actor.assets} />
+            <MuaSpecsCard attributes={(muaAsset?.attributes as any) || {}} actorName={actor.name} isCurrentActor={isCurrentActor} actorAssets={actor.assets} />
           )}
 
           {isStylist && (
-            <StylistSpecsCard attributes={(stylistAsset?.attributes as any) || {}} actorName={actor.name} actorAssets={actor.assets} />
+            <StylistSpecsCard attributes={(stylistAsset?.attributes as any) || {}} actorName={actor.name} isCurrentActor={isCurrentActor} actorAssets={actor.assets} />
           )}
 
           {isDesigner && (
-            <DesignerSpecsCard attributes={designerAttrs || {}} actorName={actor.name} actorAssets={actor.assets} />
+            <DesignerSpecsCard attributes={designerAttrs || {}} actorName={actor.name} isCurrentActor={isCurrentActor} actorAssets={actor.assets} />
           )}
 
           {isBrand && !isStudio && !isModel && !isPhotographer && !isDesigner && !isVideographer && !isMUA && !isStylist && (
-            <BrandSpecsCard attributes={brandAttrs || {}} brandName={actor.name} actorAssets={actor.assets} />
+            <BrandSpecsCard attributes={brandAttrs || {}} brandName={actor.name} isCurrentActor={isCurrentActor} actorAssets={actor.assets} />
           )}
 
           {/* Hardware & Tools Inventory */}
           {otherAssets.length > 0 && (
-            <div className="p-7 sm:p-8 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-                <div className="flex items-center gap-2">
-                  <Package className="w-4 h-4 text-stone-500" />
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
-                    Inventaris Alat &amp; Fasilitas Terverifikasi ({otherAssets.length})
-                  </h3>
-                </div>
-                {isCurrentActor && (
-                  <Link
-                    href="/readiness?tab=assets"
-                    className="text-xs font-bold text-[#1E1B2E] hover:underline flex items-center gap-1"
-                  >
-                    <span>+ Kelola Alat</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                )}
+            <div className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-5">
+              <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
+                <Package className="w-4 h-4 text-stone-500" />
+                <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                  Inventaris Alat &amp; Fasilitas Terverifikasi ({otherAssets.length})
+                </h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1334,7 +1511,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                   return (
                     <div
                       key={asset.id}
-                      className="p-4 rounded-xl bg-stone-50/70 border border-stone-200/80 flex items-start justify-between gap-3 text-xs"
+                      className="p-4 rounded-none bg-stone-50/70 border border-stone-200/80 flex items-start justify-between gap-3 text-xs"
                     >
                       <div className="space-y-1">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
@@ -1345,7 +1522,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                           <p className="text-stone-500 text-[11px] leading-relaxed line-clamp-2">{asset.description}</p>
                         )}
                       </div>
-                      <span className="px-2 py-0.5 rounded-md bg-white border border-stone-200 text-[10px] font-bold text-emerald-700 shrink-0 flex items-center gap-1 shadow-xs">
+                      <span className="px-2 py-0.5 rounded-none bg-white border border-stone-200 text-[10px] font-bold text-emerald-700 shrink-0 flex items-center gap-1 shadow-xs">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                         Siap Pakai
                       </span>
@@ -1363,12 +1540,36 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
       {/* ────────────────────────────────────────────────────────── */}
       {activeTab === "about" && (
         <div className="space-y-8">
+          {/* Section Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-stone-400" />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                Profil &amp; Ketentuan Kerja
+              </h3>
+            </div>
+            {isCurrentActor && (
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "profile" } }));
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                <span>Edit Profil</span>
+              </button>
+            )}
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Bio & Professional Profile */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="p-7 sm:p-8 bg-white border border-stone-200/80 rounded-2xl space-y-4">
-                <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                  Profil &amp; Pengalaman Profesional
+              <div className="p-7 sm:p-8 bg-white border border-stone-200/80 rounded-none space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                  <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                    Profil &amp; Pengalaman Profesional
+                  </div>
                 </div>
                 <div className="text-sm font-light text-[#1E1B2E] leading-relaxed">
                   {actor.description || "Kreator dan pelaku industri terverifikasi di ekosistem RAMU Indonesia."}
@@ -1383,7 +1584,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                     {displaySpecialties.map((s, idx) => (
                       <span
                         key={idx}
-                        className="px-3 py-1 rounded-lg bg-stone-50 border border-stone-200 text-xs font-semibold text-stone-700"
+                        className="px-3 py-1 rounded-none bg-stone-50 border border-stone-200 text-xs font-semibold text-stone-700"
                       >
                         {s}
                       </span>
@@ -1393,12 +1594,12 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
               </div>
 
               {/* Standard Working Terms (Ketentuan Kerja Sederhana) */}
-              <div className="p-7 sm:p-8 bg-white border border-stone-200/80 rounded-2xl space-y-5">
+              <div className="p-7 sm:p-8 bg-white border border-stone-200/80 rounded-none space-y-5">
                 <div className="flex items-center justify-between pb-2 border-b border-stone-100">
                   <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
                     Ketentuan &amp; SOP Pelaksanaan Kerja ({actor.sector})
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-none border border-emerald-200">
                     Standar Industri RAMU
                   </span>
                 </div>
@@ -1407,7 +1608,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                   {workingTerms.map((term, tIdx) => {
                     const TermIcon = term.icon;
                     return (
-                      <div key={tIdx} className="p-4 rounded-xl bg-stone-50 border border-stone-200/70 space-y-1.5">
+                      <div key={tIdx} className="p-4 rounded-none bg-stone-50 border border-stone-200/70 space-y-1.5">
                         <div className="flex items-center gap-1.5 text-xs font-bold text-[#1E1B2E]">
                           <TermIcon className="w-3.5 h-3.5 text-stone-600" />
                           <span>{term.title}</span>
@@ -1424,7 +1625,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
 
             {/* Sidebar Details */}
             <div className="space-y-6">
-              <div className="p-6 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-4">
+              <div className="p-6 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-4">
                 <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider">
                   Informasi Verifikasi
                 </h3>
@@ -1449,13 +1650,41 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                       <span>Terverifikasi Aktif</span>
                     </span>
                   </div>
+                  {socialLinks.instagram && (
+                    <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                      <span className="text-stone-500">Instagram:</span>
+                      <a
+                        href={socialLinks.instagram.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-bold text-[#1E1B2E] hover:underline flex items-center gap-1.5"
+                      >
+                        <InstagramIcon className="w-3.5 h-3.5 text-stone-400" />
+                        <span>Instagram</span>
+                      </a>
+                    </div>
+                  )}
+                  {socialLinks.website && (
+                    <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                      <span className="text-stone-500">Website:</span>
+                      <a
+                        href={socialLinks.website.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-bold text-[#1E1B2E] hover:underline flex items-center gap-1.5"
+                      >
+                        <Globe className="w-3.5 h-3.5 text-stone-400" />
+                        <span>Website</span>
+                      </a>
+                    </div>
+                  )}
                 </div>
 
                 {!isCurrentActor && (
                   <button
                     type="button"
                     onClick={() => setIsBookingOpen(true)}
-                    className="w-full mt-2 py-3 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
+                    className="w-full mt-2 py-3 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-wider rounded-none transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
                   >
                     <Briefcase className="w-4 h-4" />
                     <span>Sewa Jasa Sekarang</span>
@@ -1471,8 +1700,16 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
       {/* TAB 5: REVIEWS & REPUTATION (Ulasan Klien) */}
       {/* ────────────────────────────────────────────────────────── */}
       {activeTab === "reviews" && (
-        <div className="space-y-6">
-          <div className="p-7 sm:p-8 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-6">
+        <div className="space-y-8">
+          {/* Section Header */}
+          <div className="flex items-center gap-2 pb-4 border-b border-stone-100">
+            <Star className="w-4 h-4 text-stone-400" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+              Ulasan &amp; Reputasi Klien
+            </h3>
+          </div>
+
+          <div className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-stone-100">
               <div className="flex items-center gap-4">
                 <div className="text-4xl sm:text-5xl font-black text-[#1E1B2E]">
@@ -1491,19 +1728,19 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 text-center">
+                <div className="p-3 rounded-none bg-stone-50 border border-stone-200/70 text-center">
                   <span className="text-[10px] text-stone-400 font-bold uppercase">Kualitas Output</span>
                   <div className="font-bold text-[#1E1B2E]">98%</div>
                 </div>
-                <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 text-center">
+                <div className="p-3 rounded-none bg-stone-50 border border-stone-200/70 text-center">
                   <span className="text-[10px] text-stone-400 font-bold uppercase">Ketepatan Waktu</span>
                   <div className="font-bold text-emerald-700">97%</div>
                 </div>
-                <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 text-center">
+                <div className="p-3 rounded-none bg-stone-50 border border-stone-200/70 text-center">
                   <span className="text-[10px] text-stone-400 font-bold uppercase">Komunikasi</span>
                   <div className="font-bold text-purple-700">99%</div>
                 </div>
-                <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 text-center">
+                <div className="p-3 rounded-none bg-stone-50 border border-stone-200/70 text-center">
                   <span className="text-[10px] text-stone-400 font-bold uppercase">Kepuasan Klien</span>
                   <div className="font-bold text-[#1E1B2E]">99%</div>
                 </div>
@@ -1529,11 +1766,11 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                     return (
                       <div
                         key={fb.id}
-                        className="p-5 rounded-xl bg-stone-50/60 border border-stone-200/80 space-y-3"
+                        className="p-5 rounded-none bg-stone-50/60 border border-stone-200/80 space-y-3"
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-center gap-3">
-                            <div className={`w-9 h-9 rounded-xl ${author.bg} flex items-center justify-center font-bold text-xs shrink-0`}>
+                            <div className={`w-9 h-9 rounded-none ${author.bg} flex items-center justify-center font-bold text-xs shrink-0`}>
                               {author.initial}
                             </div>
                             <div>
@@ -1561,7 +1798,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                   })}
                 </div>
               ) : (
-                <div className="p-8 text-center text-xs text-stone-400 italic bg-stone-50/50 rounded-xl border border-dashed border-stone-200">
+                <div className="p-8 text-center text-xs text-stone-400 italic bg-stone-50/50 rounded-none border border-dashed border-stone-200">
                   Belum ada ulasan publik. Jadilah klien pertama yang bekerjasama dengan kreator ini!
                 </div>
               )}
@@ -1594,6 +1831,26 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
         targetType={actor.actorType}
         termsConfig={customTermsConfig}
       />
+
+
+
+      {isCurrentActor && (
+        <ProfileSlideOverDrawer
+          isOpen={isDrawerOpen}
+          onClose={() => {
+            setIsDrawerOpen(false);
+            if (typeof window !== "undefined") {
+              const url = new URL(window.location.href);
+              if (url.searchParams.has("edit")) {
+                url.searchParams.delete("edit");
+                window.history.replaceState({}, "", url.toString());
+              }
+            }
+          }}
+          defaultTab={drawerTab}
+          actor={actor}
+        />
+      )}
     </div>
   );
 }

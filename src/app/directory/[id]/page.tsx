@@ -11,9 +11,12 @@ import {
   ArrowLeft,
   MessageCircle,
   CheckCircle2,
+  Pencil,
 } from "lucide-react";
+import { parseSocialLinks, InstagramIcon } from "@/lib/socialUtils";
 import { ActorDetailTabs } from "@/components/directory/ActorDetailTabs";
 import { BookingButton } from "@/components/directory/BookingButton";
+import { OpenEditModalButton } from "@/components/directory/OpenEditModalButton";
 
 export async function generateMetadata({
   params,
@@ -154,7 +157,14 @@ export default async function DirectoryDetailPage({
   const isStylist = sectorLower.includes("stylist") || sectorLower.includes("wardrobe");
   const isPhotog = sectorLower.includes("fotografi") || sectorLower.includes("photographer");
   const isDesigner = sectorLower.includes("designer") || sectorLower.includes("desain");
-  const isStudio = actor.actorType === "STUDIO" || sectorLower.includes("studio");
+
+  const isIndividualSector = isVideo || isModel || isMua || isStylist || isPhotog || isDesigner;
+  const hasStudioSpaceAsset = actor.assets.some(
+    (a) => a.category === "STUDIO_SPACE" || a.subtype?.toLowerCase().includes("studio")
+  );
+  const isStudio = !isIndividualSector && (actor.actorType === "STUDIO" || sectorLower.includes("studio") || hasStudioSpaceAsset);
+  const isBrand = !isIndividualSector && !isStudio && (actor.actorType === "MSME" || actor.actorType === "COLLECTIVE" || sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("umkm"));
+  const isIndividual = !isStudio && !isBrand;
 
   let startingRate = "Mulai Rp 1,5 Jt / sesi";
   let turnaroundTime = "3 – 5 Hari Kerja";
@@ -180,7 +190,7 @@ export default async function DirectoryDetailPage({
   } else if (isDesigner) {
     startingRate = "Mulai Rp 2,5 Jt / koleksi";
     turnaroundTime = "7 – 14 Hari Kerja";
-  } else if (actor.actorType === "MSME") {
+  } else if (isBrand) {
     startingRate = "Sesuai Brief & Volume";
     turnaroundTime = "Sesuai Timeline Proyek";
   }
@@ -200,10 +210,11 @@ export default async function DirectoryDetailPage({
   }
   const customTermsConfig = customAttrs.terms_and_conditions || null;
 
-  // Format WhatsApp link if contact phone exists
   const rawPhone = actor.contactPhone || "";
   const cleanPhone = rawPhone.replace(/[^0-9]/g, "").replace(/^0/, "62");
   const waLink = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Halo ${actor.name}, saya melihat profil Anda di RAMU dan tertarik bekerjasama untuk proyek.`)}` : null;
+
+  const socialLinks = parseSocialLinks(actor.websiteUrl);
 
   return (
     <AppShell actor={currentActor} activeRoute="/directory">
@@ -223,164 +234,227 @@ export default async function DirectoryDetailPage({
             DYNAMIC HEADER BASED ON ACTOR TYPE
            ========================================================================= */}
 
-        {/* --- 1. INDIVIDUAL (Comp Card / Magazine Style) --- */}
-        {actor.actorType === "INDIVIDUAL" && (
-          <section className="flex flex-col md:flex-row gap-8 lg:gap-16 mb-16">
-            {/* Left: Giant Portrait Image */}
-            <div className="w-full md:w-[45%] shrink-0">
-              <div className="aspect-[3/4] w-full bg-stone-100 overflow-hidden relative">
-                <img 
-                  src={previewImage}
-                  alt={actor.name}
-                  className="w-full h-full object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-700"
-                />
-                <div className="absolute top-4 left-4">
-                  <span className="px-3 py-1 bg-white/95 backdrop-blur-md text-[9px] font-bold uppercase tracking-wider text-[#1E1B2E] shadow-xs">
-                    Kreator Profesional
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: Typography & Details */}
-            <div className="flex flex-col justify-end pb-4">
-              <div className="mb-4">
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 mb-2 flex items-center gap-2">
-                  <span>{actor.sector}</span>
-                  <span className="w-1 h-1 rounded-full bg-stone-300" />
-                  <span className="text-emerald-700 font-bold flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-700 animate-pulse" />
-                    Tersedia untuk Booking
-                  </span>
-                </div>
-                <div className="flex items-center gap-4">
-                  {previewImage !== actor.owner?.avatarUrl && actor.owner?.avatarUrl && (
-                    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-stone-100 border border-stone-200 shadow-xs shrink-0">
-                      <img src={actor.owner.avatarUrl} alt={actor.name} className="w-full h-full object-cover" />
+        {/* --- 1. INDIVIDUAL (Minimalist Luxury Editorial - Vogue / Kinfolk / SSENSE Style) --- */}
+        {isIndividual && (
+          <section className="mb-14 pt-2">
+            <div className="flex flex-col md:flex-row items-start gap-8 lg:gap-12 pb-10 border-b border-stone-200">
+              <div className="w-full sm:w-64 md:w-72 shrink-0">
+                <div className="aspect-[3/4] w-full bg-stone-100 border border-stone-200/90 relative overflow-hidden shadow-xs">
+                  {actor.owner?.avatarUrl ? (
+                    <img
+                      src={actor.owner.avatarUrl}
+                      alt={actor.name}
+                      className="w-full h-full object-cover grayscale-[10%] hover:grayscale-0 transition-all duration-700"
+                    />
+                  ) : previewImage ? (
+                    <img
+                      src={previewImage}
+                      alt={actor.name}
+                      className="w-full h-full object-cover grayscale-[10%] hover:grayscale-0 transition-all duration-700"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[#1E1B2E] text-white flex items-center justify-center text-4xl font-light tracking-tight">
+                      {actor.name.slice(0, 2).toUpperCase()}
                     </div>
                   )}
-                  <h1 className="text-4xl sm:text-5xl lg:text-7xl font-light text-[#1E1B2E] tracking-tighter leading-[0.9]">
+                  <div className="absolute top-3 left-3">
+                    <span className="px-2.5 py-1 bg-white/95 backdrop-blur-md text-[9px] font-bold uppercase tracking-widest text-[#1E1B2E] shadow-2xs border border-stone-200/50">
+                      Kreator Terverifikasi
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-2.5 flex items-center justify-between text-[10px] uppercase tracking-wider font-semibold px-0.5">
+                  <span className="text-stone-400">ID: {actor.name.toUpperCase()}</span>
+                  <span className="flex items-center gap-1 text-emerald-700 font-bold">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    SPK Terlindungi
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex-1 flex flex-col justify-between min-h-[360px] w-full">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2.5 text-[10px] font-bold uppercase tracking-[0.25em] text-stone-400 mb-2.5">
+                    <span>{actor.sector}</span>
+                    <span className="w-1 h-1 bg-stone-300" />
+                    <span className="text-emerald-700 flex items-center gap-1.5 font-bold">
+                      <span className="w-1.5 h-1.5 bg-emerald-600 animate-pulse" />
+                      Tersedia untuk Booking
+                    </span>
+                  </div>
+
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light text-[#1E1B2E] tracking-tighter leading-none mb-4">
                     {actor.name}
                   </h1>
-                </div>
-              </div>
 
-              <div className="flex flex-wrap items-center gap-6 text-xs font-bold uppercase tracking-widest text-stone-500 mb-6">
-                {actor.location && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-3.5 h-3.5" />
-                    <span>{actor.location}</span>
+                  <div className="flex flex-wrap items-center gap-5 text-xs font-semibold uppercase tracking-wider text-stone-500 mb-5">
+                    {actor.location && (
+                      <div className="flex items-center gap-1.5 text-stone-600">
+                        <MapPin className="w-3.5 h-3.5 text-stone-400" />
+                        <span>{actor.location}</span>
+                      </div>
+                    )}
+                    {socialLinks.instagram && (
+                      <a
+                        href={socialLinks.instagram.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1.5 hover:text-[#1E1B2E] transition-colors"
+                      >
+                        <InstagramIcon className="w-3.5 h-3.5 text-stone-400" />
+                        <span>Instagram</span>
+                      </a>
+                    )}
+                    {socialLinks.website && (
+                      <a
+                        href={socialLinks.website.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1.5 hover:text-[#1E1B2E] transition-colors"
+                      >
+                        <Globe className="w-3.5 h-3.5 text-stone-400" />
+                        <span>Website</span>
+                      </a>
+                    )}
+                    {actor.contactEmail && (
+                      <a
+                        href={`mailto:${actor.contactEmail}`}
+                        className="flex items-center gap-1.5 hover:text-[#1E1B2E] transition-colors lowercase tracking-normal"
+                      >
+                        <Mail className="w-3.5 h-3.5 text-stone-400" />
+                        <span>{actor.contactEmail}</span>
+                      </a>
+                    )}
                   </div>
-                )}
-                {actor.websiteUrl && (
-                  <a href={actor.websiteUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 hover:text-[#1E1B2E] transition-colors">
-                    <Globe className="w-3.5 h-3.5 text-stone-400" />
-                    <span>Website</span>
-                  </a>
-                )}
-                {actor.contactEmail && (
-                  <a href={`mailto:${actor.contactEmail}`} className="flex items-center gap-1.5 hover:text-[#1E1B2E] transition-colors">
-                    <Mail className="w-3.5 h-3.5 text-stone-400" />
-                    <span>Email</span>
-                  </a>
-                )}
+
+                  <p className="text-sm font-light text-stone-600 leading-relaxed max-w-2xl mb-6">
+                    {actor.description ||
+                      `${actor.name} adalah ${actor.sector} profesional berbasis di ${actor.location || "Indonesia"}, fokus pada penciptaan narasi visual komersial, editorial lookbook, dan kampanye berestetika tinggi yang terkurasi untuk brand busana dan media kreatif kontemporer.`}
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-2 mb-8">
+                    <span className="px-3 py-1 bg-white border border-stone-200 text-[10px] font-bold uppercase tracking-wider text-stone-600">
+                      Editorial &amp; Lookbook
+                    </span>
+                    <span className="px-3 py-1 bg-white border border-stone-200 text-[10px] font-bold uppercase tracking-wider text-stone-600">
+                      High-Fashion Campaign
+                    </span>
+                    <span className="px-3 py-1 bg-white border border-stone-200 text-[10px] font-bold uppercase tracking-wider text-stone-600">
+                      Studio &amp; On-Location
+                    </span>
+                    <span className="px-3 py-1 bg-white border border-stone-200 text-[10px] font-bold uppercase tracking-wider text-stone-600">
+                      Canon EOS R5 Production Kit
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-6 pt-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-4 border-y border-stone-200">
+                    <div>
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400 block mb-0.5">
+                        Estimasi Tarif
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-[#1E1B2E]">
+                        {startingRate}
+                      </span>
+                    </div>
+                    <div className="sm:border-l border-stone-200 sm:pl-4">
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400 block mb-0.5">
+                        Turnaround
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-[#1E1B2E]">
+                        {turnaroundTime}
+                      </span>
+                    </div>
+                    <div className="border-t sm:border-t-0 sm:border-l border-stone-200 sm:pl-4 pt-2 sm:pt-0">
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400 block mb-0.5">
+                        Area Kerja
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-[#1E1B2E] truncate block">
+                        {actor.location ? actor.location.split(",")[0] : "Indonesia"}
+                      </span>
+                    </div>
+                    <div className="border-t sm:border-t-0 sm:border-l border-stone-200 sm:pl-4 pt-2 sm:pt-0">
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400 block mb-0.5">
+                        Sistem Bayar
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-[#1E1B2E]">
+                        DP 50% + Pelunasan
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    {!isCurrentActor ? (
+                      <div className="flex flex-wrap items-center gap-3">
+                        <BookingButton
+                          targetId={actor.id}
+                          targetName={actor.name}
+                          targetSector={actor.sector}
+                          targetType={actor.actorType}
+                          label="Sewa Jasa / Rekrut Sekarang"
+                          termsConfig={customTermsConfig}
+                        />
+                        {waLink && (
+                          <a
+                            href={waLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 px-5 py-3 border border-emerald-600/40 hover:border-emerald-600 bg-emerald-50/60 hover:bg-emerald-100/60 text-emerald-800 text-xs font-bold uppercase tracking-widest transition-all shadow-xs"
+                            title="Chat WhatsApp Langsung"
+                          >
+                            <MessageCircle className="w-4 h-4 text-emerald-600" />
+                            <span>WhatsApp</span>
+                          </a>
+                        )}
+                        {actor.contactEmail && !waLink && (
+                          <a
+                            href={`mailto:${actor.contactEmail}?subject=${encodeURIComponent(`Tawaran Proyek Kerja - ${actor.name}`)}`}
+                            className="inline-flex items-center gap-2 px-5 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
+                          >
+                            <Mail className="w-4 h-4 text-stone-500" />
+                            <span>Kirim Email</span>
+                          </a>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap items-center gap-3">
+                        <OpenEditModalButton
+                          initialTab="specs"
+                          label="Edit Halaman Profil"
+                        />
+                        <Link
+                          href="/dashboard/showcase"
+                          className="inline-flex items-center gap-2 px-6 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
+                        >
+                          <span>Kelola Portofolio</span>
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-
-              {actor.description && (
-                <p className="text-sm font-light text-stone-500 leading-relaxed max-w-lg mb-6">
-                  {actor.description}
-                </p>
-              )}
-
-              {/* Quick Working Terms Bar */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-stone-50 border border-stone-200/80 mb-6">
-                <div className="space-y-0.5">
-                  <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Estimasi Tarif</div>
-                  <div className="text-xs font-semibold text-[#1E1B2E]">{startingRate}</div>
-                </div>
-                <div className="space-y-0.5 sm:border-l border-stone-200/60 sm:pl-3">
-                  <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Turnaround</div>
-                  <div className="text-xs font-semibold text-[#1E1B2E]">{turnaroundTime}</div>
-                </div>
-                <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/60 sm:pl-3 pt-2 sm:pt-0">
-                  <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Area Kerja</div>
-                  <div className="text-xs font-semibold text-[#1E1B2E] truncate">{actor.location ? actor.location.split(",")[0] : "Indonesia"}</div>
-                </div>
-                <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/60 sm:pl-3 pt-2 sm:pt-0">
-                  <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Sistem Bayar</div>
-                  <div className="text-xs font-semibold text-[#1E1B2E]">DP 50% + Pelunasan</div>
-                </div>
-              </div>
-
-              {/* Streamlined Action Buttons */}
-              {!isCurrentActor ? (
-                <div className="flex flex-wrap items-center gap-3">
-                  <BookingButton 
-                    targetId={actor.id} 
-                    targetName={actor.name} 
-                    targetSector={actor.sector} 
-                    targetType={actor.actorType} 
-                    label="Sewa Jasa / Rekrut Sekarang" 
-                    termsConfig={customTermsConfig}
-                  />
-                  {waLink ? (
-                    <a
-                      href={waLink}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 px-6 py-3 border border-emerald-600/40 hover:border-emerald-600 bg-emerald-50/60 hover:bg-emerald-100/60 text-emerald-800 text-xs font-bold uppercase tracking-widest transition-all shadow-xs"
-                      title="Chat WhatsApp Langsung"
-                    >
-                      <MessageCircle className="w-4 h-4 text-emerald-600" />
-                      <span>Chat via WhatsApp</span>
-                    </a>
-                  ) : actor.contactEmail ? (
-                    <a
-                      href={`mailto:${actor.contactEmail}?subject=${encodeURIComponent(`Tawaran Proyek Kerja - ${actor.name}`)}`}
-                      className="inline-flex items-center gap-2 px-6 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
-                      title="Kirim Email Penawaran"
-                    >
-                      <Mail className="w-4 h-4 text-stone-500" />
-                      <span>Kirim Email</span>
-                    </a>
-                  ) : null}
-                </div>
-              ) : (
-                <div className="flex flex-wrap items-center gap-3">
-                  <Link
-                    href="/settings/profile"
-                    className="inline-flex items-center gap-2 px-5 py-3 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition-all shadow-xs"
-                  >
-                    <span>Edit Profil Publik</span>
-                  </Link>
-                  <Link
-                    href="/dashboard/showcase"
-                    className="inline-flex items-center gap-2 px-5 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
-                  >
-                    <span>Kelola Portofolio</span>
-                  </Link>
-                </div>
-              )}
             </div>
           </section>
         )}
 
         {/* --- 2. STUDIO (Real-Estate / Architectural Style) --- */}
-        {actor.actorType === "STUDIO" && (
+        {isStudio && (
           <section className="mb-16">
             <div className="flex flex-col lg:flex-row justify-between items-end gap-6 mb-8">
               <div>
                 <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 mb-2 flex items-center gap-2">
                   <span>{actor.sector}</span>
-                  <span className="w-1 h-1 rounded-full bg-stone-300" />
+                  <span className="w-1 h-1 bg-stone-300" />
                   <span className="text-emerald-700 font-bold flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-700 animate-pulse" />
+                    <span className="w-1.5 h-1.5 bg-emerald-700 animate-pulse" />
                     Studio Siap Booking
                   </span>
                 </div>
                 <div className="flex items-center gap-3.5 mb-2">
                   {actor.owner?.avatarUrl && (
-                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-stone-100 border border-stone-200 shadow-xs shrink-0">
+                    <div className="w-12 h-12 rounded-none overflow-hidden bg-stone-100 border border-stone-200 shadow-xs shrink-0">
                       <img src={actor.owner.avatarUrl} alt={actor.name} className="w-full h-full object-cover" />
                     </div>
                   )}
@@ -392,10 +466,19 @@ export default async function DirectoryDetailPage({
                   {actor.location && (
                     <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{actor.location}</span>
                   )}
-                  {actor.websiteUrl && (
+                  {socialLinks.instagram && (
                     <>
                       <span>&mdash;</span>
-                      <a href={actor.websiteUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-[#1E1B2E] transition-colors">
+                      <a href={socialLinks.instagram.url} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-[#1E1B2E] transition-colors">
+                        <InstagramIcon className="w-3 h-3" />
+                        <span>Instagram</span>
+                      </a>
+                    </>
+                  )}
+                  {socialLinks.website && (
+                    <>
+                      <span>&mdash;</span>
+                      <a href={socialLinks.website.url} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-[#1E1B2E] transition-colors">
                         <Globe className="w-3 h-3" />
                         <span>Website</span>
                       </a>
@@ -447,12 +530,11 @@ export default async function DirectoryDetailPage({
                 </div>
               ) : (
                 <div className="flex flex-wrap items-center gap-3">
-                  <Link
-                    href="/settings/profile"
-                    className="inline-flex items-center gap-2 px-5 py-3 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition-all shadow-xs"
-                  >
-                    <span>Edit Fasilitas Studio</span>
-                  </Link>
+                  <OpenEditModalButton
+                    initialTab="specs"
+                    label="Edit Fasilitas & Profil"
+                    iconClassName="text-blue-300"
+                  />
                   <Link
                     href="/dashboard/showcase"
                     className="inline-flex items-center gap-2 px-5 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
@@ -495,14 +577,14 @@ export default async function DirectoryDetailPage({
         )}
 
         {/* --- 3. MSME & COLLECTIVE (Brand Deck / Agency Style) --- */}
-        {(actor.actorType === "MSME" || actor.actorType === "COLLECTIVE") && (
+        {isBrand && (
           <section className="flex flex-col items-center text-center max-w-4xl mx-auto mb-20 pt-10">
             <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-stone-400 mb-6">
               {actor.actorType === "MSME" ? "Brand & Label Busana" : "Creative Collective"}
             </div>
             
             {actor.owner?.avatarUrl && (
-              <div className="w-20 h-20 rounded-2xl overflow-hidden bg-stone-100 border border-stone-200 mx-auto mb-4 shadow-xs">
+              <div className="w-20 h-20 rounded-none overflow-hidden bg-stone-100 border border-stone-200 mx-auto mb-4 shadow-xs">
                 <img src={actor.owner.avatarUrl} alt={actor.name} className="w-full h-full object-cover" />
               </div>
             )}
@@ -539,9 +621,16 @@ export default async function DirectoryDetailPage({
                {actor.location && (
                  <span className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5 text-stone-400" />{actor.location}</span>
                )}
-               {actor.websiteUrl && (
-                 <a href={actor.websiteUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-stone-500 transition-colors">
-                   <Globe className="w-3.5 h-3.5 text-stone-400" /> Website
+               {socialLinks.instagram && (
+                 <a href={socialLinks.instagram.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-stone-500 transition-colors">
+                   <InstagramIcon className="w-3.5 h-3.5 text-stone-400" />
+                   <span>Instagram</span>
+                 </a>
+               )}
+               {socialLinks.website && (
+                 <a href={socialLinks.website.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-stone-500 transition-colors">
+                   <Globe className="w-3.5 h-3.5 text-stone-400" />
+                   <span>Website</span>
                  </a>
                )}
                {actor.contactEmail && (
@@ -585,12 +674,11 @@ export default async function DirectoryDetailPage({
               </div>
             ) : (
               <div className="flex flex-wrap items-center justify-center gap-3">
-                <Link
-                  href="/settings/profile"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition-all shadow-xs"
-                >
-                  <span>Edit Brand & Profil</span>
-                </Link>
+                <OpenEditModalButton
+                  initialTab="profile"
+                  label="Edit Brand & Profil"
+                  iconClassName="text-emerald-300"
+                />
                 <Link
                   href="/dashboard/showcase"
                   className="inline-flex items-center gap-2 px-6 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
