@@ -10,6 +10,7 @@ import {
   Eye,
   Maximize2,
   X,
+  Pencil,
 } from "lucide-react";
 
 export interface MuaAttributes {
@@ -33,9 +34,18 @@ export interface MuaAttributes {
 interface MuaSpecsCardProps {
   attributes: MuaAttributes;
   actorName: string;
+  isCurrentActor?: boolean;
+  actorAssets?: Array<{
+    id: string;
+    name: string;
+    category: string;
+    subtype: string;
+    description?: string | null;
+    attributes?: Record<string, unknown> | null;
+  }>;
 }
 
-export function MuaSpecsCard({ attributes, actorName }: MuaSpecsCardProps) {
+export function MuaSpecsCard({ attributes, actorName, isCurrentActor, actorAssets }: MuaSpecsCardProps) {
   const [selectedImage, setSelectedImage] = useState<{
     url: string;
     title: string;
@@ -77,37 +87,55 @@ export function MuaSpecsCard({ attributes, actorName }: MuaSpecsCardProps) {
     "Produk ramah kulit sensitif & hypoallergenic berkualitas tinggi",
   ];
 
-  const gallery = attributes.portfolio_gallery || [
-    {
-      title: "Clean Editorial Glow — IFW Lookbook",
-      url: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1000&q=80",
-      role: "Lead Makeup Artist",
-      client: "Label Busana Jakarta",
-      caption: "Fokus pada tekstur kulit alami dengan kilau dewy dan riasan mata minimalis di bawah studio lighting.",
-    },
-    {
-      title: "High Fashion Bold Graphic Eyeliner",
-      url: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1000&q=80",
-      role: "Creative MUA & Hair",
-      client: "Editorial Magazine Indonesia",
-      caption: "Aplikasi eyeliner grafis presisi tinggi tahan air dan rambut sleek wet look.",
-    },
-    {
-      title: "Commercial Catalog Natural Radiance",
-      url: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=1000&q=80",
-      role: "Commercial Beauty Stylist",
-      client: "E-Commerce Fashion Campaign",
-      caption: "Riasan fresh tahan 8 jam pemotretan dengan sentuhan touch-up berkala.",
-    },
-  ];
+  const portfolioWorks = (actorAssets || [])
+    .filter((a) => a.category === "PORTFOLIO_WORK")
+    .map((a) => {
+      const attrs = (a.attributes && typeof a.attributes === "object") ? (a.attributes as Record<string, unknown>) : null;
+      const tearSheet = (attrs?.tear_sheet && typeof attrs.tear_sheet === "object") ? (attrs.tear_sheet as Record<string, unknown>) : null;
+      return {
+        title: a.name,
+        url: (attrs?.image_url as string) || "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1000&q=80",
+        role: (attrs?.role as string) || a.subtype || "Lead Makeup Artist",
+        client: (tearSheet?.client as string) || (attrs?.client as string) || "Karya Portofolio",
+        caption: a.description || undefined,
+      };
+    });
+
+  const gallery = (attributes.portfolio_gallery && attributes.portfolio_gallery.length > 0)
+    ? attributes.portfolio_gallery
+    : portfolioWorks.length > 0
+    ? portfolioWorks
+    : [
+        {
+          title: "Clean Editorial Glow — IFW Lookbook",
+          url: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1000&q=80",
+          role: "Lead Makeup Artist",
+          client: "Label Busana Jakarta",
+          caption: "Fokus pada tekstur kulit alami dengan kilau dewy dan riasan mata minimalis di bawah studio lighting.",
+        },
+        {
+          title: "High Fashion Bold Graphic Eyeliner",
+          url: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1000&q=80",
+          role: "Creative MUA & Hair",
+          client: "Editorial Magazine Indonesia",
+          caption: "Aplikasi eyeliner grafis presisi tinggi tahan air dan rambut sleek wet look.",
+        },
+        {
+          title: "Commercial Catalog Natural Radiance",
+          url: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=1000&q=80",
+          role: "Commercial Beauty Stylist",
+          client: "E-Commerce Fashion Campaign",
+          caption: "Riasan fresh tahan 8 jam pemotretan dengan sentuhan touch-up berkala.",
+        },
+      ];
 
   return (
     <div className="space-y-8">
       {/* 1. Header & Quick Kit Overview */}
-      <section className="p-7 sm:p-8 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-6">
+      <section className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-xs font-bold text-rose-800">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-none bg-rose-50 border border-rose-200 text-xs font-bold text-rose-800">
               <Sparkles className="w-3.5 h-3.5 text-rose-600" />
               <span>Makeup &amp; Hair Artist Specification</span>
             </div>
@@ -116,16 +144,30 @@ export function MuaSpecsCard({ attributes, actorName }: MuaSpecsCardProps) {
             </h2>
           </div>
 
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] shrink-0">
-            <Clock className="w-4 h-4 text-rose-600" />
-            <span>Standby Touch-Up: Hingga {attributes.touchup_standby_hours || 8} Jam Sesi</span>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-none bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E]">
+              <Clock className="w-3.5 h-3.5 text-rose-600" />
+              <span>Standby Touch-Up: Hingga {attributes.touchup_standby_hours || 8} Jam Sesi</span>
+            </div>
+            {isCurrentActor && (
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                <span>Edit Spesifikasi</span>
+              </button>
+            )}
           </div>
         </div>
 
         {/* 3 Metric Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Card 1: Makeup Styles */}
-          <div className="p-5 rounded-xl bg-stone-50/70 border border-stone-200/80 space-y-3">
+          <div className="p-5 rounded-none bg-stone-50/70 border border-stone-200/80 space-y-3">
             <div className="flex items-center gap-2 text-stone-500">
               <Eye className="w-4 h-4 text-rose-600" />
               <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
@@ -143,7 +185,7 @@ export function MuaSpecsCard({ attributes, actorName }: MuaSpecsCardProps) {
           </div>
 
           {/* Card 2: Hair Specialties */}
-          <div className="p-5 rounded-xl bg-stone-50/70 border border-stone-200/80 space-y-3">
+          <div className="p-5 rounded-none bg-stone-50/70 border border-stone-200/80 space-y-3">
             <div className="flex items-center gap-2 text-stone-500">
               <Scissors className="w-4 h-4 text-amber-600" />
               <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
@@ -161,7 +203,7 @@ export function MuaSpecsCard({ attributes, actorName }: MuaSpecsCardProps) {
           </div>
 
           {/* Card 3: Kit Brands */}
-          <div className="p-5 rounded-xl bg-stone-50/70 border border-stone-200/80 space-y-3">
+          <div className="p-5 rounded-none bg-stone-50/70 border border-stone-200/80 space-y-3">
             <div className="flex items-center gap-2 text-stone-500">
               <Sparkles className="w-4 h-4 text-purple-600" />
               <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
@@ -172,7 +214,7 @@ export function MuaSpecsCard({ attributes, actorName }: MuaSpecsCardProps) {
               {kitBrands.map((brand, i) => (
                 <span
                   key={i}
-                  className="px-2.5 py-1 rounded-md bg-white border border-stone-200 text-[11px] font-bold text-stone-700 shadow-2xs"
+                  className="px-2.5 py-1 rounded-none bg-white border border-stone-200 text-[11px] font-bold text-stone-700 shadow-2xs"
                 >
                   {brand}
                 </span>
@@ -182,7 +224,7 @@ export function MuaSpecsCard({ attributes, actorName }: MuaSpecsCardProps) {
         </div>
 
         {/* Hygiene and Sanitation Assurance */}
-        <div className="p-5 rounded-xl bg-emerald-50/50 border border-emerald-200/80 space-y-2">
+        <div className="p-5 rounded-none bg-emerald-50/50 border border-emerald-200/80 space-y-2">
           <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
             <span>Protokol Higienitas &amp; Sanitasi Alat (Clean Standard)</span>
@@ -200,7 +242,7 @@ export function MuaSpecsCard({ attributes, actorName }: MuaSpecsCardProps) {
 
       {/* 2. Visual Looks Gallery */}
       {gallery.length > 0 && (
-        <section className="p-7 sm:p-8 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-5">
+        <section className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-5">
           <div className="flex items-center justify-between pb-3 border-b border-stone-100">
             <div>
               <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
@@ -212,24 +254,25 @@ export function MuaSpecsCard({ attributes, actorName }: MuaSpecsCardProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-3">
             {gallery.map((item, idx) => (
               <div
                 key={idx}
                 onClick={() => setSelectedImage(item)}
-                className="group relative cursor-pointer overflow-hidden rounded-xl bg-stone-100 border border-stone-200/80 aspect-[3/4]"
+                className="break-inside-avoid mb-3 group relative cursor-pointer overflow-hidden rounded-none bg-stone-100 border border-stone-200/80 block hover:shadow-xl transition-all"
               >
                 <img
                   src={item.url}
                   alt={item.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="w-full h-auto object-cover rounded-none block transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                  loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-end text-white">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end text-white">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-rose-300">
                     {item.client || "Client Work"}
                   </span>
                   <h4 className="font-bold text-sm leading-tight mt-0.5">{item.title}</h4>
-                  <div className="flex items-center gap-1 text-[10px] text-stone-300 mt-2 font-medium">
+                  <div className="flex items-center gap-1 text-[10px] text-amber-300 mt-2 font-medium">
                     <Maximize2 className="w-3 h-3" />
                     <span>Perbesar Foto</span>
                   </div>
@@ -247,7 +290,7 @@ export function MuaSpecsCard({ attributes, actorName }: MuaSpecsCardProps) {
           onClick={() => setSelectedImage(null)}
         >
           <div
-            className="relative max-w-2xl w-full bg-white rounded-2xl overflow-hidden shadow-2xl"
+            className="relative max-w-2xl w-full bg-white rounded-none overflow-hidden shadow-2xl border border-white/10"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative aspect-[4/5] bg-stone-900 w-full overflow-hidden">
@@ -259,7 +302,7 @@ export function MuaSpecsCard({ attributes, actorName }: MuaSpecsCardProps) {
               <button
                 type="button"
                 onClick={() => setSelectedImage(null)}
-                className="absolute top-4 right-4 p-2 rounded-full bg-black/60 text-white hover:bg-black transition-colors cursor-pointer"
+                className="absolute top-4 right-4 p-2 rounded-none bg-black/60 text-white hover:bg-black transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>

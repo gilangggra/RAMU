@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { AppShell } from "@/components/layout/AppShell";
-import { UserCircle, Sliders, Image as ImageIcon, Package, Target, Search, ShieldAlert, CreditCard } from "lucide-react";
+import { UserCircle, Sliders, Image as ImageIcon, Package, Target, Search, ShieldAlert, CreditCard, Camera } from "lucide-react";
 
 export const metadata = {
   title: "Pengaturan | RAMU",
@@ -30,6 +30,11 @@ export default async function SettingsLayout({
       sector: true,
       location: true,
       actorType: true,
+      owner: {
+        select: {
+          avatarUrl: true,
+        },
+      },
     },
     orderBy: { createdAt: "asc" },
   });
@@ -38,15 +43,9 @@ export default async function SettingsLayout({
     redirect("/onboarding");
   }
 
-  // Active path detection cannot be done directly in Server Components cleanly for nested layouts without usePathname (Client Component), 
-  // so we'll pass active state logic to a small client component or just render the menu as links.
-  // Actually, we can use a client component for the sidebar navigation. Let's create an inline client component or just simple links.
-
   return (
     <AppShell actor={actor} activeRoute="/settings">
       <div className="max-w-5xl mx-auto space-y-8">
-        
-        {/* Page Header */}
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-[#1E1B2E] tracking-tight">
             Pengaturan Akun
@@ -56,22 +55,27 @@ export default async function SettingsLayout({
           </p>
         </div>
 
-        {/* Layout Grid */}
         <div className="flex flex-col lg:flex-row gap-8 items-start">
-          
-          {/* Settings Sidebar */}
           <nav className="w-full lg:w-64 flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 scrollbar-none shrink-0 border-b lg:border-b-0 lg:border-r border-stone-200 lg:pr-6">
             <Link
               href="/settings/profile"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
+              className="flex items-center gap-3 px-4 py-3 rounded-none text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
             >
               <UserCircle className="w-4 h-4 shrink-0" />
               <span>Profil Dasar</span>
             </Link>
 
             <Link
+              href="/settings/specs"
+              className="flex items-center gap-3 px-4 py-3 rounded-none text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
+            >
+              <Camera className="w-4 h-4 shrink-0 text-purple-600" />
+              <span>Spesifikasi &amp; Comp Card</span>
+            </Link>
+
+            <Link
               href="/settings/rates"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
+              className="flex items-center gap-3 px-4 py-3 rounded-none text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
             >
               <CreditCard className="w-4 h-4 shrink-0 text-emerald-600" />
               <span>Paket Layanan &amp; Tarif</span>
@@ -79,7 +83,7 @@ export default async function SettingsLayout({
             
             <Link
               href="/settings/preferences"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
+              className="flex items-center gap-3 px-4 py-3 rounded-none text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
             >
               <Sliders className="w-4 h-4 shrink-0" />
               <span>Preferensi Kolaborasi</span>
@@ -87,14 +91,13 @@ export default async function SettingsLayout({
 
             <Link
               href="/dashboard/showcase"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
+              className="flex items-center gap-3 px-4 py-3 rounded-none text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
             >
               <ImageIcon className="w-4 h-4 shrink-0 text-amber-500" />
               <span>Kelola Portofolio & Karya</span>
             </Link>
           </nav>
 
-          {/* Settings Content Area */}
           <div className="flex-1 min-w-0 w-full">
             {children}
           </div>

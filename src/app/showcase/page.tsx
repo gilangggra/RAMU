@@ -6,6 +6,7 @@ import { getShowcaseAssets, getActorShowcaseCount } from "@/application/showcase
 import { AppShell } from "@/components/layout/AppShell";
 import { ShowcaseGalleryClient } from "@/components/showcase/ShowcaseGalleryClient";
 import { ShowcaseFilterBar } from "@/components/showcase/ShowcaseFilterBar";
+import { ShowcaseUploadTrigger } from "@/components/showcase/ShowcaseUploadTrigger";
 import { ImageIcon, Sparkles, Plus, Layers, ShieldCheck } from "lucide-react";
 
 export const metadata = {
@@ -29,6 +30,13 @@ export default async function ShowcasePage({
 
   const actor = await prisma.actor.findFirst({
     where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
+    include: {
+      owner: {
+        select: {
+          avatarUrl: true,
+        },
+      },
+    },
     orderBy: { createdAt: "asc" },
   });
 
@@ -39,39 +47,41 @@ export default async function ShowcasePage({
   const searchQuery = params?.q || "";
   const currentScope = params?.scope === "mine" ? "mine" : "all";
 
-  // Fetch count of items owned or co-credited to this actor
-  const myTotalCount = await getActorShowcaseCount(actor.id);
-
-  const showcaseItems = await getShowcaseAssets({
-    category: currentCategory,
-    search: searchQuery || undefined,
-    scope: currentScope,
-    currentActorId: actor.id,
-  });
+  const [myTotalCount, showcaseItems, registeredActors] = await Promise.all([
+    getActorShowcaseCount(actor.id),
+    getShowcaseAssets({
+      category: currentCategory,
+      search: searchQuery || undefined,
+      scope: currentScope,
+      currentActorId: actor.id,
+    }),
+    prisma.actor.findMany({
+      where: { status: { not: "ARCHIVED" } },
+      select: {
+        id: true,
+        name: true,
+        sector: true,
+        location: true,
+      },
+      orderBy: { name: "asc" },
+      take: 100,
+    }),
+  ]);
 
   return (
     <AppShell actor={actor} activeRoute="/showcase">
       <div className="space-y-6">
 
-        {/* ── ULTRA-CLEAN EDITORIAL MASTHEAD ── */}
         <div className="flex items-center justify-between gap-4 pt-1">
           <h1 className="text-2xl sm:text-3xl font-black text-[#1E1B2E] tracking-tight">
             Karya &amp; Inspirasi
           </h1>
 
-          <Link
-            href="/dashboard/showcase"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold transition-all shadow-sm hover:scale-[1.02] shrink-0"
-          >
-            <Plus className="w-3.5 h-3.5 text-amber-400" />
-            <span>Unggah Karya</span>
-          </Link>
+          <ShowcaseUploadTrigger registeredActors={registeredActors} />
         </div>
 
-        {/* ── SHOWCASE FILTER BAR (WITH COSMOS.SO / VSCO DUAL-SCOPE SWITCHER) ── */}
         <ShowcaseFilterBar myCount={myTotalCount} />
 
-        {/* ── MASONRY GRID WITH INTERACTIVE TEAR-SHEET MODAL ── */}
         {showcaseItems.length > 0 ? (
           <ShowcaseGalleryClient items={showcaseItems} currentActorId={actor.id} />
         ) : currentScope === "mine" ? (
@@ -90,13 +100,11 @@ export default async function ShowcasePage({
               </p>
             </div>
             <div className="flex items-center gap-2.5 pt-2">
-              <Link
-                href="/dashboard/showcase"
-                className="px-5 py-2.5 rounded-xl bg-[#1E1B2E] text-white text-xs font-bold hover:bg-black transition-all shadow-sm active:scale-95 flex items-center gap-1.5"
-              >
-                <Plus className="w-3.5 h-3.5 text-amber-400" />
-                <span>Unggah Portofolio Pertama</span>
-              </Link>
+              <ShowcaseUploadTrigger
+                registeredActors={registeredActors}
+                className="px-5 py-2.5 rounded-xl bg-[#1E1B2E] text-white text-xs font-bold hover:bg-black transition-all shadow-sm active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                label="Unggah Portofolio Pertama"
+              />
               {searchQuery && (
                 <Link
                   href="/showcase?scope=mine"

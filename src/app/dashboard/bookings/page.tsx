@@ -54,7 +54,7 @@ export default async function BookingManagementPage() {
   const pendingCount = incomingBookings.filter(b => b.status === "PENDING").length;
 
   return (
-    <AppShell actor={primaryActor} activeRoute="/dashboard/bookings">
+    <AppShell actor={{ ...primaryActor, avatarUrl: profile.avatarUrl }} activeRoute="/dashboard/bookings">
       <div className="space-y-8 pb-12">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 sm:p-8 rounded-[28px] border border-stone-200 shadow-xs">

@@ -155,7 +155,7 @@ export function DirectoryFilterBar({
             <button
               key={sector.id}
               onClick={() => updateQuery({ sector: sector.id })}
-              className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+              className={`px-3 py-1 rounded-none text-[10px] font-bold uppercase tracking-widest transition-all ${
                 currentSector === sector.id
                   ? "bg-[#1E1B2E] text-white"
                   : "bg-transparent text-stone-500 hover:bg-stone-100"

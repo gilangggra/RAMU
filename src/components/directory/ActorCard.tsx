@@ -214,8 +214,8 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
               <span className="opacity-80">{scoreLabel}</span>
             </div>
           ) : (
-            <div className="px-2 py-0.5 bg-emerald-500/90 backdrop-blur-md text-[9px] font-bold text-white flex items-center gap-1 shadow-xs rounded-full">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            <div className="px-2 py-0.5 bg-emerald-500/90 backdrop-blur-md text-[9px] font-bold text-white flex items-center gap-1 shadow-xs rounded-none">
+              <span className="w-1.5 h-1.5 bg-white animate-pulse" />
               <span>Siap Kerja</span>
             </div>
           )}
@@ -233,9 +233,24 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
       {/* Typography & Commercial Details Section */}
       <div className="flex flex-col gap-1.5 pt-1">
         <div className="flex items-start justify-between gap-2">
-          <h2 className="text-sm font-semibold text-[#1E1B2E] tracking-tight group-hover:text-stone-600 transition-colors truncate">
-            {actor.name}
-          </h2>
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-6 h-6 rounded-none overflow-hidden bg-stone-100 border border-stone-200/80 shrink-0">
+              {actor.owner?.avatarUrl ? (
+                <img
+                  src={actor.owner.avatarUrl}
+                  alt={actor.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="w-full h-full flex items-center justify-center font-bold text-[9px] text-[#27213D] bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF]">
+                  {actor.name.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <h2 className="text-sm font-semibold text-[#1E1B2E] tracking-tight group-hover:text-stone-600 transition-colors truncate">
+              {actor.name}
+            </h2>
+          </div>
           {actor.location && (
             <span className="text-[10px] font-medium text-stone-400 shrink-0 flex items-center gap-0.5">
               <MapPin className="w-2.5 h-2.5" />
@@ -244,7 +259,7 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
           )}
         </div>
         
-        <div className="text-[11px] font-light text-stone-500 truncate">
+        <div className="text-[11px] font-light text-stone-500 truncate pl-8">
           {actor.sector}
         </div>
 
@@ -290,3 +305,4 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
     </Link>
   );
 }
+
