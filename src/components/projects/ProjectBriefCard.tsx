@@ -82,97 +82,99 @@ export function ProjectBriefCard({
   return (
     <Link
       href={`/projects/${id}`}
-      className="group block p-6 rounded-[28px] bg-white/95 border border-stone-200/80 hover:border-amber-300/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] hover:shadow-[0_15px_35px_rgba(39,33,61,0.07)] transition-all duration-200 space-y-5"
+      className="group block p-6 sm:p-7 bg-white border border-stone-200 hover:border-stone-800 transition-all duration-300 shadow-2xs hover:shadow-md space-y-4"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">
+              {projectType}
+            </span>
+            <span className="text-stone-300">•</span>
             <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${statusCfg.badge}`}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold border ${statusCfg.badge}`}
             >
               <span
                 className={`w-1.5 h-1.5 rounded-full ${statusCfg.dot} ${status === "OPEN" ? "animate-pulse" : ""}`}
               />
               {statusCfg.label}
             </span>
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-stone-100 text-stone-700 border border-stone-200">
-              {projectType}
-            </span>
             {isOwnBrief && (
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-stone-50 text-[#1E1B2E] border border-stone-200">
+              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-stone-100 text-stone-800 border border-stone-200">
                 Brief Anda
               </span>
             )}
           </div>
 
-          <h3 className="text-base font-bold text-[#1E1B2E] tracking-tight group-hover:text-[#1E1B2E] transition-colors line-clamp-2">
+          <h3 className="text-lg font-medium text-[#1E1B2E] tracking-tight group-hover:text-stone-600 transition-colors line-clamp-2 leading-snug">
             {title}
           </h3>
         </div>
       </div>
 
-      <p className="text-xs text-stone-500 leading-relaxed line-clamp-2">{description}</p>
+      <p className="text-xs text-stone-500 font-light leading-relaxed line-clamp-2">{description}</p>
 
-      <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-stone-50 border border-stone-200/70">
-        <Target className="w-4 h-4 text-[#1E1B2E] shrink-0 mt-0.5" />
-        <div className="min-w-0">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-0.5">
-            Target Luaran Kolektif
-          </div>
-          <p className="text-xs text-[#1E1B2E] font-medium line-clamp-1">{targetOutput}</p>
-        </div>
+      {/* Target Output Row */}
+      <div className="pt-2 border-t border-stone-100 flex items-center gap-2 text-xs">
+        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">
+          Target Luaran:
+        </span>
+        <span className="text-xs font-medium text-stone-800 truncate">{targetOutput}</span>
       </div>
 
-      <div className="space-y-2">
-        <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
-          Peran Kolaborator ({neededRoles.length})
+      {/* Roles Row */}
+      <div className="space-y-2 pt-2 border-t border-stone-100">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">
+            Peran Dibutuhkan ({neededRoles.length})
+          </span>
+          {openRoles.length > 0 ? (
+            <span className="text-[11px] font-semibold text-amber-800">
+              {openRoles.length} peran terbuka
+            </span>
+          ) : (
+            <span className="text-[11px] font-semibold text-emerald-800 flex items-center gap-1">
+              <Check className="w-3 h-3 text-emerald-600" />
+              <span>Lengkap</span>
+            </span>
+          )}
         </div>
         <div className="flex flex-wrap gap-1.5">
           {neededRoles.map((role) => (
             <span
               key={role.id}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium border ${
                 role.isFilled
-                  ? "bg-emerald-50 text-emerald-800 border-emerald-200 line-through opacity-75"
-                  : "bg-white text-[#1E1B2E] border-stone-200/80 shadow-2xs"
+                  ? "bg-stone-50 text-stone-400 border-stone-200 line-through"
+                  : "bg-white text-stone-800 border-stone-200 shadow-2xs"
               }`}
             >
               {role.isFilled ? (
-                <Check className="w-3 h-3 text-emerald-600" />
+                <Check className="w-2.5 h-2.5 text-stone-400" />
               ) : (
-                <Circle className="w-2.5 h-2.5 text-stone-400" />
+                <Circle className="w-2 h-2 text-amber-500 fill-amber-500" />
               )}
               <span>{role.roleLabel}</span>
             </span>
           ))}
         </div>
-        {openRoles.length > 0 && (
-          <p className="text-[11px] text-amber-800 font-semibold">
-            {openRoles.length} dari {neededRoles.length} peran terbuka
-          </p>
-        )}
-        {filledRoles.length === neededRoles.length && (
-          <p className="text-[11px] text-emerald-800 font-semibold flex items-center gap-1.5">
-            <Check className="w-3.5 h-3.5" />
-            <span>Seluruh peran telah diterima</span>
-          </p>
-        )}
       </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-stone-100">
+      {/* Creator & Meta Footer */}
+      <div className="flex items-center justify-between pt-3 border-t border-stone-100 text-xs">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-center text-xs font-bold text-amber-800 shrink-0">
-            {creatorActor.name.charAt(0)}
+          <div className="w-6 h-6 overflow-hidden bg-stone-100 border border-stone-200 flex items-center justify-center text-[10px] font-bold text-[#1E1B2E] shrink-0">
+            {creatorActor.name.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
-            <div className="text-xs font-bold text-[#1E1B2E] truncate">
+            <div className="text-xs font-semibold text-[#1E1B2E] truncate">
               {creatorActor.name}
             </div>
-            <div className="text-[10px] text-stone-500 truncate">{creatorActor.sector}</div>
+            <div className="text-[10px] text-stone-400 font-light truncate">{creatorActor.sector}</div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 text-[11px] text-stone-500 shrink-0">
+        <div className="flex items-center gap-3 text-[11px] text-stone-400 shrink-0 font-light">
           {location && (
             <span className="flex items-center gap-1">
               <MapPin className="w-3 h-3 text-stone-400" />
@@ -180,7 +182,7 @@ export function ProjectBriefCard({
             </span>
           )}
           {totalInterests > 0 && (
-            <span className="text-[#1E1B2E] font-bold">
+            <span className="text-stone-800 font-semibold">
               {totalInterests} minat
             </span>
           )}

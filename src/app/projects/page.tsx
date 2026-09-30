@@ -85,69 +85,84 @@ export default async function ProjectsPage({
   return (
     <AppShell actor={actor} activeRoute="/projects">
       <div className="space-y-8">
-        <section className="p-8 sm:p-10 rounded-[28px] bg-white border border-stone-200 shadow-xs relative overflow-hidden space-y-6">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-stone-100 border border-stone-200 text-xs font-bold text-[#1E1B2E] shadow-2xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#1E1B2E] animate-pulse" />
-                Open Collaboration Hub
+        {/* Editorial Hero Section */}
+        <section className="pt-10 pb-8 border-b border-stone-200">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-4">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-3 mb-5">
+                <span className="w-8 h-px bg-stone-300"></span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
+                  Papan Produksi & Brief Terbuka
+                </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1E1B2E] tracking-tight">
-                Project Briefs Terbuka
+              <h1 className="text-4xl sm:text-5xl font-light text-[#1E1B2E] tracking-tight leading-[1.15] mb-5">
+                Inisiasi ide & rekrut kru <br className="hidden sm:block" />
+                <span className="font-serif italic text-stone-500">produksi kolaboratif</span> Anda.
               </h1>
-              <p className="text-xs sm:text-sm text-stone-500 max-w-2xl leading-relaxed">
-                Inisiasi proyek kreatif baru dan undang rekan kolaborator yang memiliki aset komplementer, atau bergabunglah ke proyek terbuka dengan menawarkan aset dan kapabilitas Anda.
+              <p className="text-sm text-stone-500 font-light leading-relaxed max-w-xl">
+                Temukan rekan kolaborator dengan aset komplementer untuk kampanye lookbook, editorial, dan proyek kreatif bersama tanpa transaksi sewa konvensional.
               </p>
             </div>
 
-            <Link
-              href="/projects/new"
-              className="shrink-0 inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#1E1B2E] hover:bg-black text-white font-bold text-[11px] uppercase tracking-widest transition-colors cursor-pointer"
-            >
-              <span>+ Inisiasi Project Brief</span>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-stone-100">
-            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200">
-              <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Proyek Terbuka</div>
-              <div className="text-2xl font-black text-[#1E1B2E] mt-1">{openBriefsCount}</div>
-            </div>
-            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200">
-              <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Brief Anda</div>
-              <div className="text-2xl font-black text-[#1E1B2E] mt-1">
-                {myBriefsCount}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-6 lg:gap-8 pb-2">
+              {/* Minimalist Metrics */}
+              <div className="flex items-center gap-6 sm:gap-8">
+                <div className="space-y-1">
+                  <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{openBriefsCount}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">Proyek Terbuka</div>
+                </div>
+                <div className="w-px h-8 bg-stone-200"></div>
+                <div className="space-y-1">
+                  <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{myBriefsCount}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">Brief Anda</div>
+                </div>
+                {pendingInterestCount > 0 && (
+                  <>
+                    <div className="w-px h-8 bg-stone-200"></div>
+                    <div className="space-y-1">
+                      <div className="text-3xl sm:text-4xl font-light text-amber-700">{pendingInterestCount}</div>
+                      <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-700/80">Minat Masuk</div>
+                    </div>
+                  </>
+                )}
               </div>
-            </div>
-            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200">
-              <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Minat Pending</div>
-              <div className="text-2xl font-black text-[#1E1B2E] mt-1">{pendingInterestCount}</div>
+
+              <Link
+                href="/projects/new"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#1E1B2E] hover:bg-black text-white font-bold text-[10px] uppercase tracking-[0.15em] transition-all shadow-sm shrink-0"
+              >
+                <span>+ Inisiasi Project Brief</span>
+              </Link>
             </div>
           </div>
         </section>
 
-        <div className="flex items-center gap-2 border-b border-stone-200/80 pb-3">
+        {/* Minimalist Editorial Tabs */}
+        <div className="flex items-center gap-8 border-b border-stone-200 text-xs">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.key;
             return (
               <Link
                 key={tab.key}
                 href={`/projects?tab=${tab.key}`}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                className={`pb-3 font-semibold transition-all relative flex items-center gap-2 cursor-pointer ${
                   isActive
-                    ? "bg-[#1E1B2E] text-white shadow-sm"
-                    : "bg-white text-stone-500 hover:text-[#1E1B2E] hover:bg-stone-50 border border-stone-200/80"
+                    ? "text-[#1E1B2E] font-bold"
+                    : "text-stone-400 hover:text-stone-700"
                 }`}
               >
-                <span>{tab.label}</span>
+                <span className="tracking-wide">{tab.label}</span>
                 {tab.count > 0 && (
                   <span
-                    className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                      isActive ? "bg-white/20 text-white" : "bg-stone-100 text-stone-500"
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                      isActive ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-500"
                     }`}
                   >
                     {tab.count}
                   </span>
+                )}
+                {isActive && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#1E1B2E]" />
                 )}
               </Link>
             );
