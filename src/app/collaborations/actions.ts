@@ -282,3 +282,51 @@ export async function updateSharedProjectLinks(planId: string, formData: FormDat
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// signSpkAction — record digital SPK signature for current actor
+// ─────────────────────────────────────────────────────────────────────
+
+export async function signSpkAction(
+  collaborationId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const actor = await getPrimaryActor();
+
+    // Verify the actor is a participant of this collaboration
+    const participant = await prisma.collaborationParticipant.findFirst({
+      where: {
+        collaborationId,
+        actorId: actor.id,
+        status: "ACTIVE",
+      },
+    });
+
+    if (!participant) {
+      return {
+        success: false,
+        error: "Anda bukan bagian dari kolaborasi ini atau tidak memiliki akses untuk menandatangani.",
+      };
+    }
+
+    // Prevent double-signing
+    if (participant.signedAt) {
+      return {
+        success: false,
+        error: "Anda sudah pernah menandatangani perjanjian ini sebelumnya.",
+      };
+    }
+
+    // Record the digital signature timestamp
+    await prisma.collaborationParticipant.update({
+      where: { id: participant.id },
+      data: { signedAt: new Date() },
+    });
+
+    revalidatePath(`/collaborations/${collaborationId}`);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error signing SPK:", error);
+    return { success: false, error: "Gagal mencatat tanda tangan digital. Silakan coba lagi." };
+  }
+}

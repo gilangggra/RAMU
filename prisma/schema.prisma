@@ -608,6 +608,7 @@ model CollaborationParticipant {
   status          ParticipantCollaborationStatus @default(ACTIVE)
   joinedAt        DateTime                       @default(now()) @map("joined_at")
   leftAt          DateTime?                      @map("left_at")
+  signedAt        DateTime?                      @map("signed_at")
 
   collaboration   Collaboration                  @relation(fields: [collaborationId], references: [id], onDelete: Cascade)
   actor           Actor                          @relation(fields: [actorId], references: [id], onDelete: Cascade)

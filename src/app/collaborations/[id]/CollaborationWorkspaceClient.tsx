@@ -10,6 +10,7 @@ import {
   deleteTask,
   updateMilestoneStatus,
   recordDecision,
+  signSpkAction,
 } from "../actions";
 import {
   recordOutcomeAction,
@@ -52,8 +53,14 @@ import {
   ExternalLink,
   Copy,
   ListTodo,
+  Zap,
 } from "lucide-react";
 import { SocialCreditGenerator } from "@/components/collaborations/SocialCreditGenerator";
+import {
+  MultiPartySpkModal,
+  type MultiPartySpkData,
+  type SpkParticipant,
+} from "@/components/collaborations/MultiPartySpkModal";
 
 interface WorkspaceProps {
   collaboration: any;
@@ -62,6 +69,7 @@ interface WorkspaceProps {
 
 export function CollaborationWorkspaceClient({ collaboration, currentActorId }: WorkspaceProps) {
   const [activeTab, setActiveTab] = useState<"overview" | "callsheet" | "plan" | "credits" | "outcomes">("overview");
+  const [isSpkModalOpen, setIsSpkModalOpen] = useState(false);
   const [callsheetCopied, setCallsheetCopied] = useState(false);
 
   const plan = collaboration.plan;
@@ -80,6 +88,15 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
   const completedTasks = tasks.filter((t: any) => t.status === "DONE").length;
   const achievedMilestones = milestones.filter((m: any) => m.status === "ACHIEVED").length;
+
+  // SPK signing status helpers
+  const totalParties = participants.length;
+  const signedParties = participants.filter((p: any) => Boolean(p.signedAt)).length;
+  const currentActorParticipant = participants.find(
+    (p: any) => (p.actorId ?? p.id) === currentActorId
+  );
+  const hasCurrentActorSigned = Boolean(currentActorParticipant?.signedAt);
+  const isSpkFullySigned = totalParties > 0 && signedParties === totalParties;
 
   const [taskFilter, setTaskFilter] = useState<string>("ALL");
   const filteredTasks = tasks.filter((t: any) => {
@@ -373,6 +390,23 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                 {outcomes.length} <span className="text-stone-300 text-lg">Luaran</span>
               </div>
             </div>
+            <div className="w-px h-10 bg-stone-200 hidden sm:block"></div>
+            <div className="space-y-1">
+              <div className="text-[10px] text-stone-400 uppercase font-bold tracking-[0.2em]">PKSK / SPK</div>
+              <button
+                type="button"
+                onClick={() => setIsSpkModalOpen(true)}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#E66A48] hover:text-[#d85c3b] transition-colors cursor-pointer group pt-1"
+                title="Buka Lembar SPK / Perjanjian Kerja Sama Kolaborasi Multi-Pihak"
+              >
+                <FileText className="w-3.5 h-3.5 text-amber-500 group-hover:scale-110 transition-transform shrink-0" />
+                <span className="underline decoration-stone-300 underline-offset-4">
+                  {isSpkFullySigned
+                    ? "Sah UU ITE"
+                    : `${signedParties}/${totalParties} TTD`}
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -437,7 +471,15 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         {[
           { key: "overview", label: "Ringkasan", badge: null },
           { key: "callsheet", label: "Call Sheet & Rundown", badge: `${tasks.length}` },
-          { key: "plan", label: "Ketentuan & Hak", badge: null },
+          {
+            key: "plan",
+            label: "Ketentuan & SPK",
+            badge: isSpkFullySigned
+              ? "Sah"
+              : totalParties > 0
+              ? `${signedParties}/${totalParties} TTD`
+              : "SPK",
+          },
           { key: "credits", label: "Kredit & Tag", badge: "Baru" },
           { key: "outcomes", label: "Luaran & Ulasan", badge: `${outcomes.length}` },
         ].map((tab) => {
@@ -468,6 +510,49 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
       {/* TAB 1: OVERVIEW */}
       {activeTab === "overview" && (
         <div className="space-y-8 animate-fade-in">
+          {/* SPK LEGAL STATUS BANNER IN OVERVIEW */}
+          <section className="p-5 sm:p-6 rounded-[28px] bg-gradient-to-r from-stone-900 via-[#1E1B2E] to-stone-900 text-white border border-stone-800 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3.5">
+              <div className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-sm font-bold text-white tracking-tight">
+                    Surat Perintah Kerja (SPK) & Perjanjian Kolaborasi
+                  </h3>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                    isSpkFullySigned
+                      ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
+                      : "bg-amber-500/20 border-amber-500/30 text-amber-300"
+                  }`}>
+                    {isSpkFullySigned ? "Sah UU ITE" : `${signedParties}/${totalParties} Tanda Tangan`}
+                  </span>
+                </div>
+                <p className="text-xs text-stone-300 font-light leading-relaxed">
+                  {!hasCurrentActorSigned
+                    ? "Tanda tangan digital Anda diperlukan untuk mengaktifkan perlindungan hukum (klausul Anti-AI, bagi hasil, dan hak moral cipta)."
+                    : "Anda telah menandatangani SPK ini. Seluruh ketentuan hak cipta dan pembagian kerja telah sah terlindungi."}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 shrink-0 pl-12 md:pl-0">
+              <button
+                type="button"
+                onClick={() => setIsSpkModalOpen(true)}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  !hasCurrentActorSigned
+                    ? "bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white shadow-md shadow-[#E66A48]/20"
+                    : "bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>{!hasCurrentActorSigned ? "Buka & Tandatangani PKSK" : "Lihat Dokumen PKSK"}</span>
+              </button>
+            </div>
+          </section>
+
           {/* SHARED PROJECT HUB (LINKS) */}
           <section className="p-6 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1079,6 +1164,90 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
       {/* TAB 3: PLAN */}
       {activeTab === "plan" && (
         <div className="space-y-8 animate-fade-in">
+          {/* DIGITAL MULTI-PARTY SPK CARD */}
+          <div className="p-6 sm:p-8 rounded-[32px] bg-gradient-to-br from-[#1E1B2E] via-stone-900 to-[#27213D] text-white border border-stone-800 shadow-xl relative overflow-hidden">
+            <div className="absolute -right-12 -top-12 w-48 h-48 bg-[#E66A48]/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+              <div className="space-y-3 max-w-2xl">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-amber-300 text-[11px] font-bold border border-white/15">
+                    <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Perjanjian Kerjasama Kolaborasi (PKSK Digital)</span>
+                  </span>
+                  {isSpkFullySigned ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
+                      <Check className="w-3 h-3 text-emerald-400" />
+                      <span>Sah UU ITE — Semua Pihak Menandatangani</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30">
+                      <Clock className="w-3 h-3 text-amber-400" />
+                      <span>{signedParties}/{totalParties} Pihak Menandatangani</span>
+                    </span>
+                  )}
+                </div>
+
+                <h3 className="text-xl sm:text-2xl font-light text-white tracking-tight">
+                  Dokumen Hukum SPK Resmi Multi-Pihak
+                </h3>
+                <p className="text-xs text-stone-300 font-light leading-relaxed">
+                  Melindungi seluruh pihak kolaborator dengan klausul standar industri kreatif: larangan pelatihan AI (Anti-AI Training), hak moral atribusi kredit, batas maksimal revisi 2 kali, dan mufakat bagi hasil yang sah.
+                </p>
+
+                {/* Participant signature pills */}
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {participants.map((p: any) => {
+                    const isSigned = Boolean(p.signedAt);
+                    const isMe = (p.actorId ?? p.id) === currentActorId;
+                    return (
+                      <div
+                        key={p.id || p.actorId}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-medium border ${
+                          isSigned
+                            ? "bg-emerald-950/60 border-emerald-500/40 text-emerald-200"
+                            : "bg-white/5 border-white/15 text-stone-400"
+                        }`}
+                      >
+                        {isSigned ? (
+                          <Check className="w-3 h-3 text-emerald-400" />
+                        ) : (
+                          <span className="w-2 h-2 rounded-full bg-amber-400/80 animate-pulse" />
+                        )}
+                        <span>{p.actor?.name || "Kreator"}</span>
+                        {isMe && <span className="text-[9px] opacity-75 font-bold">(Anda)</span>}
+                        <span className="text-[9px] uppercase tracking-wider opacity-60">
+                          {isSigned ? "• TTD Sah" : "• Menunggu"}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsSpkModalOpen(true)}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white text-xs font-bold transition-all shadow-lg shadow-[#E66A48]/20 cursor-pointer"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>
+                    {!hasCurrentActorSigned
+                      ? "Buka & Tandatangani PKSK"
+                      : "Lihat / Cetak Dokumen SPK"}
+                  </span>
+                </button>
+                <div className="text-[10px] text-stone-400 text-center">
+                  {!hasCurrentActorSigned ? (
+                    <span className="text-amber-400 font-semibold">Tanda tangan digital Anda dibutuhkan</span>
+                  ) : (
+                    <span>Tanda tangan Anda telah terekam</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <form onSubmit={handleSaveTerms} className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
@@ -1342,6 +1511,78 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
           />
         </div>
       )}
+
+      {/* ── MULTI-PARTY SPK MODAL ── */}
+      {(() => {
+        // Build initiator from the first participant who is the plan creator
+        const planCreator = collaboration.plan;
+        const allP: any[] = participants;
+
+        // Map participants to SpkParticipant shape
+        const buildParty = (p: any): SpkParticipant => ({
+          id: p.actorId ?? p.id,
+          name: p.actor?.name ?? "—",
+          sector: p.actor?.sector ?? "—",
+          roleCode: p.roleCode ?? "KREATOR",
+          roleLabel: p.roleCode ?? p.actor?.sector ?? "Kreator",
+          location: p.actor?.location ?? null,
+          contactPhone: p.actor?.contactPhone ?? null,
+          contactEmail: p.actor?.contactEmail ?? null,
+          actorType: p.actor?.actorType,
+          signedAt: p.signedAt ? String(p.signedAt) : null,
+        });
+
+        if (allP.length === 0) return null;
+
+        // Determine initiator (Pihak I) by creator of plan/collaboration, fallback to first participant
+        const creatorId = collaboration.plan?.createdByActorId || collaboration.initiatorActorId;
+        const initiatorIndex = allP.findIndex((p: any) => (p.actorId ?? p.id) === creatorId);
+        const initiatorRaw = initiatorIndex >= 0 ? allP[initiatorIndex] : allP[0];
+        const restRaw = initiatorIndex >= 0
+          ? allP.filter((_: any, idx: number) => idx !== initiatorIndex)
+          : allP.slice(1);
+
+        const spkData: MultiPartySpkData = {
+          collaborationId: collaboration.id,
+          collaborationTitle: collaboration.title,
+          createdAt: collaboration.startedAt ?? collaboration.createdAt ?? new Date().toISOString(),
+          status: collaboration.status,
+          initiator: buildParty(initiatorRaw),
+          participants: restRaw.map(buildParty),
+          plan: {
+            objective: planCreator?.objective ?? collaboration.description ?? null,
+            budget: {
+              estimatedTotal: (planCreator?.budget as any)?.estimatedTotal,
+              costSharingModel: (planCreator?.budget as any)?.costSharingModel,
+            },
+            timeline: {
+              estimatedDuration: (planCreator?.timeline as any)?.estimatedDuration,
+              targetLaunch: (planCreator?.timeline as any)?.targetLaunch,
+            },
+            revenueModel: {
+              proposedSplit: (planCreator?.revenueModel as any)?.proposedSplit,
+              brandModel: (planCreator?.revenueModel as any)?.brandModel,
+            },
+            ipRules: {
+              originalIp: (planCreator?.ipRules as any)?.originalIp,
+              derivativeWorks: (planCreator?.ipRules as any)?.derivativeWorks,
+            },
+            ownershipRules: {
+              brandModel: (planCreator?.ownershipRules as any)?.brandModel,
+            },
+          },
+        };
+
+        return (
+          <MultiPartySpkModal
+            isOpen={isSpkModalOpen}
+            onClose={() => setIsSpkModalOpen(false)}
+            data={spkData}
+            currentActorId={currentActorId}
+            onSign={signSpkAction}
+          />
+        );
+      })()}
 
       {/* TAB 6: OUTCOMES & EVALUATION */}
       {activeTab === "outcomes" && (
