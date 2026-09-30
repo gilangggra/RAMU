@@ -553,7 +553,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
               </button>
             </div>
           </section>
-
           {/* ACTIVITY FEED TIMELINE */}
           <CollaborationActivityFeed collaboration={collaboration} />
 
