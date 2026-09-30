@@ -108,7 +108,7 @@ export default async function ProjectBriefDetailPage({
   const pendingInterestsCount = brief.interests.filter((i) => i.status === "PENDING").length;
 
   // ── MATCH CONTEXT ENGINE (For Non-Initiators) ──────────────────────────────────
-  let matchContext: { roleLabel: string; reasons: string[]; score: number } | null = null;
+  let matchContext: { roleLabel: string; roleId: string; reasons: string[]; score: number } | null = null;
   
   if (!isInitiator && brief.status === "OPEN") {
     let bestScore = 0;
@@ -150,7 +150,7 @@ export default async function ProjectBriefDetailPage({
         
         if (score > bestScore) {
           bestScore = score;
-          matchContext = { roleLabel: role.roleLabel, reasons, score };
+          matchContext = { roleLabel: role.roleLabel, roleId: role.id, reasons, score };
         }
       }
     }
@@ -209,7 +209,10 @@ export default async function ProjectBriefDetailPage({
               </div>
             </div>
             <div className="shrink-0 text-right sm:text-left">
-              <a href="#roles-section" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md">
+              <a
+                href={`#role-${matchContext.roleId}`}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md cursor-pointer"
+              >
                 <span>Lamar Sekarang</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </a>
@@ -431,7 +434,7 @@ export default async function ProjectBriefDetailPage({
               </p>
             </section>
 
-            <section className="space-y-4">
+            <section id="roles-section" className="space-y-4 scroll-mt-24">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-base font-bold text-[#1E1B2E] flex items-center gap-2">
@@ -451,6 +454,7 @@ export default async function ProjectBriefDetailPage({
                 {brief.neededRoles.map((role) => {
                   const userInterest = role.interests.find((i) => i.actorId === actor.id);
                   const status = userInterest ? userInterest.status : null;
+                  const isMatched = matchContext?.roleId === role.id;
 
                   return (
                     <RoleSlot
@@ -466,6 +470,8 @@ export default async function ProjectBriefDetailPage({
                       isInitiator={isInitiator}
                       currentActorInterestStatus={status}
                       actorAssets={actorAssets}
+                      initialOpen={isMatched}
+                      isMatched={isMatched}
                     />
                   );
                 })}
