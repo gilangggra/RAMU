@@ -2,7 +2,12 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
-import { getProjectBriefById, getRecommendedActorsForBrief } from "@/application/projectBriefService";
+import {
+  getProjectBriefById,
+  getCrewRecommendationsForBrief,
+  type CrewRecommendation,
+} from "@/application/projectBriefService";
+import { SmartCrewPanel } from "@/components/projects/SmartCrewPanel";
 import { RoleSlot } from "@/components/projects/RoleSlot";
 import { InterestCard } from "@/components/projects/InterestCard";
 import { FormCollaborationButton } from "@/components/projects/FormCollaborationButton";
@@ -20,8 +25,6 @@ import {
   Check,
   ArrowRight,
   ArrowLeft,
-  Sparkles,
-  Star,
 } from "lucide-react";
 
 export default async function ProjectBriefDetailPage({
@@ -52,9 +55,9 @@ export default async function ProjectBriefDetailPage({
 
   const isInitiator = brief.creatorActorId === actor.id;
 
-  let recommendations: any[] = [];
+  let crewRecommendations: CrewRecommendation[] = [];
   if (isInitiator) {
-    recommendations = await getRecommendedActorsForBrief(id);
+    crewRecommendations = await getCrewRecommendationsForBrief(id);
   }
 
   const actorAssets = await prisma.asset.findMany({
@@ -104,6 +107,55 @@ export default async function ProjectBriefDetailPage({
   const currentBadge = statusBadges[brief.status] || statusBadges.OPEN;
   const pendingInterestsCount = brief.interests.filter((i) => i.status === "PENDING").length;
 
+  // ── MATCH CONTEXT ENGINE (For Non-Initiators) ──────────────────────────────────
+  let matchContext: { roleLabel: string; reasons: string[]; score: number } | null = null;
+  
+  if (!isInitiator && brief.status === "OPEN") {
+    let bestScore = 0;
+    for (const role of brief.neededRoles) {
+      if (role.isFilled) continue;
+      
+      let score = 0;
+      const reasons: string[] = [];
+      const actorCategories = actorAssets.map((a) => a.category);
+
+      // 1. Mandatory Gate: Asset Category Match (50 pts)
+      if (actorCategories.includes(role.assetCategory)) {
+        score += 50;
+        reasons.push("Kategori Aset Cocok");
+      }
+
+      if (score >= 50) {
+        // 2. Aesthetic Match (20 pts)
+        if (brief.aestheticStyle && actor.aestheticStyles.includes(brief.aestheticStyle)) {
+          score += 20;
+          reasons.push("Gaya Visual Sesuai");
+        }
+        
+        // 3. Location Match (15 pts)
+        if (brief.location && actor.location) {
+          const bLoc = brief.location.toLowerCase();
+          const aLoc = actor.location.toLowerCase();
+          if (aLoc.includes(bLoc) || bLoc.includes(aLoc) || bLoc.includes("remote")) {
+            score += 15;
+            reasons.push("Lokasi Relevan");
+          }
+        }
+        
+        // 4. Compensation Match (15 pts)
+        if (brief.compensationModel && actor.compensationModels.includes(brief.compensationModel)) {
+          score += 15;
+          reasons.push("Model Kompensasi Sesuai");
+        }
+        
+        if (score > bestScore) {
+          bestScore = score;
+          matchContext = { roleLabel: role.roleLabel, reasons, score };
+        }
+      }
+    }
+  }
+
   return (
     <AppShell actor={actor} activeRoute="/projects">
       <div className="space-y-8 max-w-6xl mx-auto">
@@ -131,6 +183,39 @@ export default async function ProjectBriefDetailPage({
             </Link>
           )}
         </div>
+
+        {/* PERSONALIZED MATCH CONTEXT BANNER */}
+        {matchContext && (
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent border border-emerald-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                <Target className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-extrabold text-[#1E1B2E]">
+                  Anda sangat cocok untuk peran <span className="text-emerald-700">{matchContext.roleLabel}</span>!
+                </h3>
+                <p className="text-xs text-stone-600">
+                  Profil Anda memiliki kecocokan <span className="font-bold text-emerald-600">{matchContext.score}%</span> dengan kebutuhan proyek ini.
+                </p>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {matchContext.reasons.map((reason, idx) => (
+                    <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 rounded bg-white text-emerald-700 text-[10px] font-bold border border-emerald-100 shadow-xs">
+                      <Check className="w-3 h-3" />
+                      {reason}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="shrink-0 text-right sm:text-left">
+              <a href="#roles-section" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md">
+                <span>Lamar Sekarang</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
+        )}
 
         {/* Project Lifecycle Indicator */}
         <div className="p-5 rounded-2xl bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.02)]">
@@ -428,50 +513,8 @@ export default async function ProjectBriefDetailPage({
               </section>
             )}
 
-            {isInitiator && recommendations.length > 0 && (
-              <section className="p-6 sm:p-8 rounded-[28px] bg-gradient-to-br from-[#FFF7ED] to-white border border-[#FFB800]/30 shadow-[0_10px_30px_rgba(255,184,0,0.05)] space-y-5">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-5 h-5 text-[#FFB800]" />
-                  <h2 className="text-xl font-extrabold text-[#27213D] tracking-tight">Smart Match: Rekomendasi Kreator</h2>
-                </div>
-                <p className="text-xs text-[#716B7E] leading-relaxed">
-                  Engine RAMU telah menyeleksi {recommendations.length} kreator dengan profil, gaya visual, atau preferensi yang cocok dengan proyek ini.
-                </p>
-
-                <div className="space-y-3 pt-2">
-                  {recommendations.map((rec) => (
-                    <div key={rec.actor.id} className="p-4 bg-white rounded-2xl border border-stone-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center font-black text-[#27213D]">
-                          {rec.actor.name.charAt(0)}
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-[#27213D]">{rec.actor.name}</h4>
-                          <p className="text-[11px] text-stone-500">{rec.actor.sector} · {rec.actor.location}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
-                        <div className="flex flex-col sm:items-end gap-1">
-                          <div className="flex items-center gap-1 text-[11px] font-bold text-[#FFB800] bg-[#FFF7ED] px-2 py-0.5 rounded-full border border-[#FFB800]/20">
-                            <Star className="w-3 h-3 fill-current" />
-                            <span>{rec.matchScore}% Match</span>
-                          </div>
-                          <div className="text-[10px] text-stone-400">
-                            {rec.matchReasons[0]}
-                            {rec.matchReasons.length > 1 && ` +${rec.matchReasons.length - 1} lainnya`}
-                          </div>
-                        </div>
-                        <Link
-                          href={`/directory/${rec.actor.id}`}
-                          className="px-4 py-2 rounded-xl bg-[#27213D] text-white text-[11px] font-bold hover:bg-black transition-colors"
-                        >
-                          Lihat Profil
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
+            {isInitiator && crewRecommendations.length > 0 && (
+              <SmartCrewPanel recommendations={crewRecommendations} briefId={brief.id} />
             )}
           </div>
 
