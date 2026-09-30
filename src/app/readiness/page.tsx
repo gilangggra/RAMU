@@ -127,6 +127,13 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
 
   const actor = await prisma.actor.findFirst({
     where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
+    include: {
+      owner: {
+        select: {
+          avatarUrl: true,
+        },
+      },
+    },
     orderBy: { createdAt: "asc" },
   });
   if (!actor) redirect("/onboarding");

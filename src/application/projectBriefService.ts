@@ -501,77 +501,168 @@ export async function getProjectBriefDashboardStats(actorId: string) {
 }
 
 // ----------------------------------------------------------------------------
-// SMART MATCHING ALGORITHM
+// SMART CREW BUILDER — Per-role crew recommendation engine
 // ----------------------------------------------------------------------------
 
-export async function getRecommendedActorsForBrief(briefId: string) {
+export interface CrewCandidate {
+  actor: {
+    id: string;
+    name: string;
+    sector: string;
+    location: string | null;
+    description: string | null;
+    aestheticStyles: string[];
+    compensationModels: string[];
+  };
+  matchScore: number;
+  matchReasons: string[];
+}
+
+export interface CrewRecommendation {
+  roleId: string;
+  roleLabel: string;
+  assetCategory: string;
+  isFilled: boolean;
+  candidates: CrewCandidate[];
+}
+
+/**
+ * Per-role Smart Crew Builder.
+ * Returns one `CrewRecommendation` per `neededRole` in the brief,
+ * each containing up to 4 ranked candidate actors for that specific role.
+ */
+const recommendationsCache = new Map<string, { data: CrewRecommendation[]; timestamp: number }>();
+
+export async function getCrewRecommendationsForBrief(
+  briefId: string
+): Promise<CrewRecommendation[]> {
+  const cached = recommendationsCache.get(briefId);
+  // Cache for 5 minutes
+  if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) {
+    return cached.data;
+  }
+
   const brief = await getProjectBriefById(briefId);
   if (!brief) return [];
 
-  const neededCategories = brief.neededRoles.map(r => r.assetCategory);
-  
-  // Ambil semua aktor aktif kecuali kreator brief
+  // Fetch all active actors except the brief creator
   const actors = await prisma.actor.findMany({
-    where: { 
+    where: {
       status: 'ACTIVE',
-      id: { not: brief.creatorActorId }
+      id: { not: brief.creatorActorId },
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      sector: true,
+      location: true,
+      description: true,
+      aestheticStyles: true,
+      compensationModels: true,
       assets: {
-        select: { category: true }
-      }
-    }
+        where: { status: 'ACTIVE' },
+        select: { category: true, subtype: true },
+      },
+    },
   });
 
-  const scoredActors = actors.map(actor => {
-    let score = 0;
-    const matchReasons: string[] = [];
+  // Pre-build a set of actor IDs already accepted per role (exclude them from candidates)
+  const acceptedByRole = new Map<string, Set<string>>();
+  for (const role of brief.neededRoles) {
+    const accepted = new Set(
+      role.interests
+        .filter((i) => i.status === InterestStatus.ACCEPTED)
+        .map((i) => i.actorId)
+    );
+    acceptedByRole.set(role.id, accepted);
+  }
 
-    // 1. Role Match (40% - up to 40 points)
-    const actorCategories = actor.assets.map(a => a.category);
-    let roleMatches = 0;
-    for (const cat of neededCategories) {
-      if (actorCategories.includes(cat)) {
-        roleMatches++;
+  const results: CrewRecommendation[] = [];
+
+  for (const role of brief.neededRoles) {
+    const alreadyAccepted = acceptedByRole.get(role.id) ?? new Set<string>();
+
+    const candidates = actors
+      .filter((actor) => !alreadyAccepted.has(actor.id))
+      .map((actor) => {
+        let score = 0;
+        const matchReasons: string[] = [];
+        const actorCategories = actor.assets.map((a) => a.category);
+
+        // ── 1. Role / Asset Category Match (50 pts — mandatory gate) ──────────
+        if (actorCategories.includes(role.assetCategory)) {
+          score += 50;
+          matchReasons.push('Kategori Aset Cocok');
+        }
+
+        // ── 2. Aesthetic Style Match (20 pts) ─────────────────────────────────
+        if (
+          brief.aestheticStyle &&
+          actor.aestheticStyles.includes(brief.aestheticStyle)
+        ) {
+          score += 20;
+          matchReasons.push('Gaya Visual Sesuai');
+        }
+
+        // ── 3. Location Match (15 pts) ────────────────────────────────────────
+        if (brief.location && actor.location) {
+          const briefLoc = brief.location.toLowerCase();
+          const actorLoc = actor.location.toLowerCase();
+          if (
+            actorLoc.includes(briefLoc) ||
+            briefLoc.includes(actorLoc) ||
+            briefLoc.includes('remote')
+          ) {
+            score += 15;
+            matchReasons.push('Lokasi Sesuai');
+          }
+        }
+
+        // ── 4. Compensation Model Match (15 pts) ──────────────────────────────
+        if (
+          brief.compensationModel &&
+          actor.compensationModels.includes(brief.compensationModel)
+        ) {
+          score += 15;
+          matchReasons.push('Model Kompensasi Sesuai');
+        }
+
+        return { actor, matchScore: score, matchReasons };
+      })
+      // Must at least match the role's asset category
+      .filter((c) => c.matchScore >= 50)
+      .sort((a, b) => b.matchScore - a.matchScore)
+      .slice(0, 4); // Top 4 candidates per role
+
+    results.push({
+      roleId: role.id,
+      roleLabel: role.roleLabel,
+      assetCategory: role.assetCategory,
+      isFilled: role.isFilled,
+      candidates,
+    });
+  }
+
+  recommendationsCache.set(briefId, { data: results, timestamp: Date.now() });
+  return results;
+}
+
+/**
+ * Legacy wrapper — kept for backward compatibility with older callers.
+ * Prefer `getCrewRecommendationsForBrief` for new features.
+ */
+export async function getRecommendedActorsForBrief(briefId: string) {
+  const perRole = await getCrewRecommendationsForBrief(briefId);
+  // Flatten to a deduplicated, globally sorted list (legacy format)
+  const seen = new Set<string>();
+  const flat: { actor: CrewCandidate['actor']; matchScore: number; matchReasons: string[] }[] = [];
+  for (const rec of perRole) {
+    for (const c of rec.candidates) {
+      if (!seen.has(c.actor.id)) {
+        seen.add(c.actor.id);
+        flat.push(c);
       }
     }
-    if (neededCategories.length > 0 && roleMatches > 0) {
-      const roleScore = Math.round((roleMatches / neededCategories.length) * 40);
-      score += roleScore;
-      if (roleScore > 0) matchReasons.push("Kategori Aset Sesuai");
-    }
-
-    // 2. Aesthetic Match (25% - 25 points)
-    if (brief.aestheticStyle && actor.aestheticStyles.includes(brief.aestheticStyle)) {
-      score += 25;
-      matchReasons.push("Gaya Visual Sesuai");
-    }
-
-    // 3. Location Match (20% - 20 points)
-    if (brief.location && actor.location) {
-      if (actor.location.toLowerCase().includes(brief.location.toLowerCase()) || 
-          brief.location.toLowerCase().includes(actor.location.toLowerCase()) ||
-          brief.location.toLowerCase().includes('remote')) {
-        score += 20;
-        matchReasons.push("Lokasi Sesuai");
-      }
-    }
-
-    // 4. Compensation Match (15% - 15 points)
-    if (brief.compensationModel && actor.compensationModels.includes(brief.compensationModel)) {
-      score += 15;
-      matchReasons.push("Model Kompensasi Sesuai");
-    }
-
-    return {
-      actor,
-      matchScore: score,
-      matchReasons
-    };
-  });
-
-  return scoredActors
-    .filter(a => a.matchScore >= 20) // Minimum threshold
-    .sort((a, b) => b.matchScore - a.matchScore)
-    .slice(0, 5); // Return top 5
+  }
+  return flat.sort((a, b) => b.matchScore - a.matchScore).slice(0, 5);
 }

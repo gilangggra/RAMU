@@ -11,6 +11,7 @@ import {
   declineCollaborator,
   withdrawInterest,
   formCollaborationFromBrief,
+  getCrewRecommendationsForBrief,
 } from "@/application/projectBriefService";
 
 async function getPrimaryActor() {
@@ -85,6 +86,12 @@ export async function createProjectBriefAction(formData: FormData) {
 
     revalidatePath("/projects");
     revalidatePath("/dashboard");
+
+    // Auto-trigger the matching engine to warm the cache in the background.
+    // We don't await it to ensure the UI can redirect instantly.
+    getCrewRecommendationsForBrief(brief.id).catch((err) =>
+      console.error("Failed to auto-trigger engine:", err)
+    );
 
     return { success: true, briefId: brief.id };
   } catch (error) {
@@ -208,6 +215,62 @@ export async function formCollaborationAction(briefId: string) {
     return {
       success: false,
       error: error instanceof Error ? error.message : "Gagal membentuk kolaborasi.",
+    };
+  }
+}
+
+// ----------------------------------------------------------------------------
+// INVITE ACTOR TO ROLE (dari Smart Crew Builder — hanya untuk inisiator)
+// ----------------------------------------------------------------------------
+
+export async function inviteActorToRoleAction(
+  targetActorId: string,
+  briefId: string,
+  roleId: string
+) {
+  const initiator = await getPrimaryActor();
+
+  // Pastikan hanya initiator brief yang bisa mengundang
+  const brief = await prisma.projectBrief.findUnique({
+    where: { id: briefId },
+    select: { creatorActorId: true, title: true },
+  });
+
+  if (!brief) return { success: false, error: "Brief tidak ditemukan." };
+  if (brief.creatorActorId !== initiator.id) {
+    return { success: false, error: "Hanya inisiator proyek yang dapat mengundang." };
+  }
+
+  // Cek apakah target actor sudah ada interest di role ini
+  const existing = await prisma.collaborationInterest.findUnique({
+    where: { briefId_actorId_roleId: { briefId, actorId: targetActorId, roleId } },
+  });
+
+  if (existing && existing.status === "PENDING") {
+    return { success: false, error: "Kreator ini sudah memiliki interest aktif di peran ini." };
+  }
+  if (existing && existing.status === "ACCEPTED") {
+    return { success: false, error: "Peran ini sudah diterima oleh kreator ini." };
+  }
+
+  try {
+    await expressInterest(
+      targetActorId,
+      briefId,
+      roleId,
+      `🎯 Undangan Kolaborasi dari Inisiator\n\nAnda direkomendasikan oleh Smart Crew Builder RAMU dan secara khusus diundang oleh inisiator proyek "${brief.title}" untuk bergabung dalam peran ini. Silakan tinjau dan balas undangan ini.`,
+      []
+    );
+
+    revalidatePath(`/projects/${briefId}`);
+    revalidatePath(`/projects/${briefId}/interests`);
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Error inviting actor:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Gagal mengirim undangan.",
     };
   }
 }

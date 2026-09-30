@@ -40,33 +40,33 @@ export function AvailabilityCalendar() {
   };
 
   return (
-    <div className="p-6 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-extrabold text-[#27213D] flex items-center gap-2">
+    <div className="p-6 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
+      <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E] flex items-center gap-2">
           <CalendarIcon className="w-4 h-4 text-emerald-600" />
-          <span>Kalender Ketersediaan</span>
+          <span>Kalender Ketersediaan Jadwal</span>
         </h3>
         
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5 text-[10px] font-bold text-stone-500 uppercase">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-100 border border-emerald-300"></span> Tersedia
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-stone-500 uppercase tracking-wider">
+            <span className="w-2 h-2 rounded-none bg-emerald-500"></span> Tersedia
           </div>
-          <div className="flex items-center gap-1.5 text-[10px] font-bold text-stone-500 uppercase">
-            <span className="w-2.5 h-2.5 rounded-full bg-stone-100 border border-stone-200"></span> Penuh
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-stone-500 uppercase tracking-wider">
+            <span className="w-2 h-2 rounded-none bg-stone-300"></span> Penuh
           </div>
         </div>
       </div>
 
-      <div className="bg-stone-50 rounded-2xl border border-stone-200/50 p-4">
+      <div className="bg-stone-50 rounded-none border border-stone-200/70 p-4">
         {/* Calendar Header */}
         <div className="flex items-center justify-between mb-4 px-2">
-          <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-stone-200 text-stone-500 transition-colors">
+          <button onClick={prevMonth} className="p-1.5 rounded-none hover:bg-stone-200 text-stone-500 transition-colors cursor-pointer">
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h4 className="text-sm font-black text-[#27213D]">
+          <h4 className="text-xs font-bold uppercase tracking-widest text-[#1E1B2E]">
             {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </h4>
-          <button onClick={nextMonth} className="p-1.5 rounded-lg hover:bg-stone-200 text-stone-500 transition-colors">
+          <button onClick={nextMonth} className="p-1.5 rounded-none hover:bg-stone-200 text-stone-500 transition-colors cursor-pointer">
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
@@ -98,18 +98,18 @@ export function AvailabilityCalendar() {
             } else if (status === "booked") {
               statusClasses = "bg-stone-100 text-stone-400 border-stone-200/50 cursor-not-allowed line-through decoration-stone-300";
             } else {
-              statusClasses = "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 hover:-translate-y-0.5 hover:shadow-sm cursor-pointer font-bold";
+              statusClasses = "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 cursor-pointer font-bold";
             }
 
             return (
               <div 
                 key={day} 
-                className={`relative aspect-square flex flex-col items-center justify-center rounded-xl border transition-all duration-200 ${statusClasses}`}
+                className={`relative aspect-square flex flex-col items-center justify-center rounded-none border transition-all duration-200 ${statusClasses}`}
                 title={status === "available" ? `Tersedia pada ${day} ${monthNames[currentDate.getMonth()]}` : status === "booked" ? "Sudah dipesan" : ""}
               >
                 <span className="text-xs sm:text-sm">{day}</span>
                 {status === "available" && (
-                  <div className="absolute bottom-1.5 w-1 h-1 rounded-full bg-emerald-500"></div>
+                  <div className="absolute bottom-1.5 w-1 h-1 rounded-none bg-emerald-500"></div>
                 )}
               </div>
             );

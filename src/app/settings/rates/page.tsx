@@ -44,10 +44,26 @@ export default async function SettingsRatesPage() {
 
   // Default baseline fallback if user hasn't set anything yet
   const sectorLower = actor.sector.toLowerCase();
+  const isIndividualSector =
+    sectorLower.includes("photographer") ||
+    sectorLower.includes("fotografi") ||
+    sectorLower.includes("model") ||
+    sectorLower.includes("talent") ||
+    sectorLower.includes("mua") ||
+    sectorLower.includes("makeup") ||
+    sectorLower.includes("hair") ||
+    sectorLower.includes("stylist") ||
+    sectorLower.includes("wardrobe") ||
+    sectorLower.includes("video") ||
+    sectorLower.includes("film") ||
+    sectorLower.includes("cinema") ||
+    sectorLower.includes("designer") ||
+    sectorLower.includes("desain");
+
   let defaultStartingRate = "Mulai Rp 1,5 Jt / sesi";
   let defaultTurnaround = "3 – 5 Hari Kerja";
 
-  if (actor.actorType === "STUDIO" || sectorLower.includes("studio")) {
+  if (!isIndividualSector && (actor.actorType === "STUDIO" || sectorLower.includes("studio"))) {
     defaultStartingRate = "Mulai Rp 200rb / jam (Shift Rp 750rb)";
     defaultTurnaround = "Instan / Slot Booking";
   } else if (sectorLower.includes("model") || sectorLower.includes("talent")) {

@@ -17,6 +17,7 @@ import {
   Layers,
   Sliders,
   Eye,
+  Pencil,
 } from "lucide-react";
 
 export interface PortfolioGalleryItem {
@@ -55,6 +56,7 @@ export interface PhotographerAttributes {
 interface PhotographerSpecsCardProps {
   attributes: PhotographerAttributes;
   actorName: string;
+  isCurrentActor?: boolean;
   actorAssets?: Array<{
     id: string;
     name: string;
@@ -123,13 +125,27 @@ const DEFAULT_GEAR_SHOWCASE: GearShowcaseItem[] = [
   },
 ];
 
-export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: PhotographerSpecsCardProps) {
-  const portfolioGallery = attributes.portfolio_gallery || [];
+export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, actorAssets }: PhotographerSpecsCardProps) {
+  const portfolioWorks: PortfolioGalleryItem[] = (actorAssets || [])
+    .filter((a) => a.category === "PORTFOLIO_WORK")
+    .map((a) => {
+      const attrs = (a.attributes && typeof a.attributes === "object") ? (a.attributes as Record<string, unknown>) : null;
+      const tearSheet = (attrs?.tear_sheet && typeof attrs.tear_sheet === "object") ? (attrs.tear_sheet as Record<string, unknown>) : null;
+      return {
+        title: a.name,
+        url: (attrs?.image_url as string) || "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1000&q=80",
+        role: (attrs?.role as string) || a.subtype || "Fotografer Utama",
+        client: (tearSheet?.client as string) || (attrs?.client as string) || "Karya Portofolio",
+        caption: a.description || undefined,
+      };
+    });
+
+  const portfolioGallery = (attributes.portfolio_gallery && attributes.portfolio_gallery.length > 0)
+    ? attributes.portfolio_gallery
+    : portfolioWorks;
   
-  // Extract custom equipment/gear registered directly by the actor in their assets
   const registeredGearItems: GearShowcaseItem[] = (actorAssets || [])
     .filter((a) => {
-      // Strictly ignore artworks and portfolio items
       if (a.category === "PORTFOLIO_WORK") return false;
       const attrs = (a.attributes && typeof a.attributes === "object") ? (a.attributes as Record<string, unknown>) : null;
       return (
@@ -187,10 +203,10 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
   return (
     <div className="space-y-10">
       {/* 1. Header Overview & Rate Card */}
-      <section className="p-7 sm:p-8 rounded-[32px] bg-white border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-6">
+      <section className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
           <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-xs font-bold text-blue-700">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-blue-50 border border-blue-200 text-xs font-bold text-blue-700">
               <Camera className="w-3.5 h-3.5" />
               <span>Technical &amp; Production Gear Proof</span>
             </div>
@@ -204,21 +220,33 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
           
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             {attributes.rate_starting_at && (
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">
-                <MonitorPlay className="w-4 h-4 text-emerald-600" />
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-none bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">
+                <MonitorPlay className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Tarif: {attributes.rate_starting_at}</span>
               </div>
             )}
-            <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-stone-100 text-stone-700 text-xs font-bold">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-stone-100 text-stone-700 text-xs font-bold">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
               <span>Hardware On-Set Terverifikasi</span>
             </div>
+            {isCurrentActor && (
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                <span>Edit Spesifikasi</span>
+              </button>
+            )}
           </div>
         </div>
 
         {/* 4 Summary Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-2xl bg-stone-50/90 border border-stone-200/70 space-y-2">
+          <div className="p-4 rounded-none bg-stone-50/90 border border-stone-200/70 space-y-2">
             <div className="flex items-center gap-2 text-stone-500">
               <Aperture className="w-4 h-4 text-blue-600" />
               <span className="text-[10px] font-bold uppercase tracking-wider">Kamera Utama</span>
@@ -231,7 +259,7 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-stone-50/90 border border-stone-200/70 space-y-2">
+          <div className="p-4 rounded-none bg-stone-50/90 border border-stone-200/70 space-y-2">
             <div className="flex items-center gap-2 text-stone-500">
               <Camera className="w-4 h-4 text-purple-600" />
               <span className="text-[10px] font-bold uppercase tracking-wider">Lensa G-Master</span>
@@ -244,7 +272,7 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-stone-50/90 border border-stone-200/70 space-y-2">
+          <div className="p-4 rounded-none bg-stone-50/90 border border-stone-200/70 space-y-2">
             <div className="flex items-center gap-2 text-stone-500">
               <Zap className="w-4 h-4 text-amber-500" />
               <span className="text-[10px] font-bold uppercase tracking-wider">Lighting Studio</span>
@@ -257,7 +285,7 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-stone-50/90 border border-stone-200/70 space-y-2">
+          <div className="p-4 rounded-none bg-stone-50/90 border border-stone-200/70 space-y-2">
             <div className="flex items-center gap-2 text-stone-500">
               <Video className="w-4 h-4 text-emerald-600" />
               <span className="text-[10px] font-bold uppercase tracking-wider">Format Video &amp; Drone</span>
@@ -274,10 +302,10 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
       </section>
 
       {/* 2. PROMINENT SECTION: VISUAL GEAR PROOF GALLERY */}
-      <section className="p-7 sm:p-8 rounded-[32px] bg-white border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-6">
+      <section className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-stone-100">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 border border-purple-200 text-xs font-bold text-purple-700 mb-1">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-purple-50 border border-purple-200 text-xs font-bold text-purple-700 mb-1">
               <Sparkles className="w-3.5 h-3.5 text-purple-600" />
               <span>Galeri Bukti Fisik Peralatan</span>
             </div>
@@ -290,13 +318,13 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
           </div>
 
           {/* Filter Bar */}
-          <div className="flex flex-wrap items-center gap-1.5 bg-stone-100 p-1 rounded-2xl">
+          <div className="flex flex-wrap items-center gap-1.5 bg-stone-100 p-1 rounded-none">
             {categories.map((cat) => (
               <button
                 key={cat}
                 type="button"
                 onClick={() => setFilterCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-none text-xs font-bold transition-all cursor-pointer ${
                   filterCategory === cat
                     ? "bg-[#1E1B2E] text-white shadow-xs"
                     : "text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-200/60"
@@ -314,7 +342,7 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
             <div
               key={gear.id || gear.name}
               onClick={() => setSelectedGear(gear)}
-              className="group relative rounded-3xl bg-stone-50 border border-stone-200/80 overflow-hidden hover:border-amber-400 hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer"
+              className="group relative rounded-none bg-stone-50 border border-stone-200/80 overflow-hidden hover:border-[#1E1B2E] hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer"
             >
               {/* Gear Photo */}
               <div className="relative aspect-[4/3] w-full bg-stone-200 overflow-hidden">
@@ -327,18 +355,18 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
                 
                 {/* Badges on Image */}
                 <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
-                  <span className="px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider">
+                  <span className="px-2.5 py-1 rounded-none bg-black/70 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider">
                     {gear.category}
                   </span>
                   {gear.tag && (
-                    <span className="px-2 py-0.5 rounded-md bg-amber-400 text-stone-950 text-[9px] font-black uppercase tracking-wider self-start">
+                    <span className="px-2 py-0.5 rounded-none bg-amber-400 text-stone-950 text-[9px] font-black uppercase tracking-wider self-start">
                       {gear.tag}
                     </span>
                   )}
                 </div>
 
                 <div className="absolute top-3 right-3 z-10">
-                  <div className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-stone-700 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
+                  <div className="w-8 h-8 rounded-none bg-white/80 backdrop-blur-md flex items-center justify-center text-stone-700 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
                     <Maximize2 className="w-4 h-4" />
                   </div>
                 </div>
@@ -381,7 +409,7 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
       </section>
 
       {/* 3. Video Showreel & BTS Section */}
-      <section className="p-7 sm:p-8 rounded-[32px] bg-white border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-6">
+      <section className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
         <div className="flex items-center justify-between pb-4 border-b border-stone-100">
           <div className="flex items-center gap-2">
             <Video className="w-4 h-4 text-emerald-600" />
@@ -394,14 +422,14 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
           </span>
         </div>
         
-        <div className="w-full aspect-video rounded-3xl bg-stone-900 overflow-hidden relative group cursor-pointer border border-stone-200/50 shadow-md">
+        <div className="w-full aspect-video rounded-none bg-stone-900 overflow-hidden relative group cursor-pointer border border-stone-200/50 shadow-md">
           <img
             src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&q=80"
             alt="Behind the scenes on set"
             className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
           />
           <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors flex flex-col items-center justify-center gap-3">
-            <div className="w-16 h-16 rounded-full bg-white/95 backdrop-blur-md shadow-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div className="w-16 h-16 rounded-none bg-white/95 backdrop-blur-md shadow-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
               <div className="w-0 h-0 border-y-[10px] border-y-transparent border-l-[16px] border-l-[#1E1B2E] ml-1" />
             </div>
             <div className="text-center">
@@ -418,7 +446,7 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
 
       {/* 4. Portfolio Gallery Section */}
       {portfolioGallery.length > 0 && (
-        <section className="p-7 sm:p-8 rounded-[32px] bg-white border border-stone-200/80 shadow-[0_4px_20px_rgba(39,33,61,0.03)] space-y-6">
+        <section className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-stone-100">
             <div className="flex items-center gap-2">
               <ImageIcon className="w-4 h-4 text-blue-600" />
@@ -431,26 +459,26 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-3">
             {portfolioGallery.map((item, idx) => (
               <div
                 key={idx}
-                className="group relative cursor-pointer overflow-hidden rounded-3xl bg-stone-100 border border-stone-200/80 aspect-[4/3] shadow-xs hover:shadow-xl transition-all"
+                className="break-inside-avoid mb-3 group relative cursor-pointer overflow-hidden rounded-none bg-stone-100 border border-stone-200/80 shadow-xs hover:shadow-xl transition-all block"
                 onClick={() => setSelectedImage(item)}
               >
                 <img
                   src={item.url}
                   alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  className="w-full h-auto object-cover rounded-none block transition-transform duration-700 ease-out group-hover:scale-[1.02]"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
-                  <div className="transform translate-y-0 sm:translate-y-4 sm:group-hover:translate-y-0 transition-transform duration-300 space-y-1.5">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-md border border-white/30 text-[10px] font-bold text-white uppercase tracking-wide">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                  <div className="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 space-y-1.5">
+                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-none bg-white/20 backdrop-blur-md border border-white/30 text-[9px] font-bold text-white uppercase tracking-wide">
                       <CheckCircle2 className="w-3 h-3 text-blue-300" />
                       <span>{item.client}</span>
                     </div>
-                    <h4 className="text-base font-extrabold text-white leading-tight">{item.title}</h4>
+                    <h4 className="text-sm font-extrabold text-white leading-tight">{item.title}</h4>
                     <p className="text-xs text-stone-300 font-medium">{item.role}</p>
                   </div>
                 </div>
@@ -467,13 +495,13 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
           onClick={() => setSelectedGear(null)}
         >
           <div
-            className="relative max-w-2xl w-full bg-[#1E1B2E] text-white rounded-3xl overflow-hidden shadow-2xl border border-white/10"
+            className="relative max-w-2xl w-full bg-[#1E1B2E] text-white rounded-none overflow-hidden shadow-2xl border border-white/10"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
               onClick={() => setSelectedGear(null)}
-              className="absolute top-4 right-4 z-10 p-2.5 rounded-full bg-black/60 hover:bg-black text-white transition-colors cursor-pointer"
+              className="absolute top-4 right-4 z-10 p-2.5 rounded-none bg-black/60 hover:bg-black text-white transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -485,7 +513,7 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
                 className="w-full h-full object-contain"
               />
               <div className="absolute top-4 left-4">
-                <span className="px-3 py-1 rounded-lg bg-amber-400 text-stone-950 font-black text-xs uppercase tracking-wider">
+                <span className="px-3 py-1 rounded-none bg-amber-400 text-stone-950 font-black text-xs uppercase tracking-wider">
                   {selectedGear.category}
                 </span>
               </div>
@@ -501,7 +529,7 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
                 )}
               </div>
 
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+              <div className="p-4 rounded-none bg-white/5 border border-white/10 space-y-2">
                 <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block">
                   Spesifikasi Teknis &amp; Kalibrasi
                 </span>
@@ -518,7 +546,7 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
                 <button
                   type="button"
                   onClick={() => setSelectedGear(null)}
-                  className="px-4 py-2 rounded-xl bg-white text-stone-950 font-bold text-xs hover:bg-stone-200 transition-colors"
+                  className="px-4 py-2 rounded-none bg-white text-stone-950 font-bold text-xs hover:bg-stone-200 transition-colors cursor-pointer"
                 >
                   Tutup
                 </button>
@@ -548,7 +576,7 @@ export function PhotographerSpecsCard({ attributes, actorName, actorAssets }: Ph
             <img
               src={selectedImage.url}
               alt={selectedImage.title}
-              className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl"
+              className="max-w-full max-h-[80vh] object-contain rounded-none shadow-2xl"
             />
             <div className="mt-4 p-4 text-center text-white space-y-1">
               <h3 className="text-lg font-bold">{selectedImage.title}</h3>

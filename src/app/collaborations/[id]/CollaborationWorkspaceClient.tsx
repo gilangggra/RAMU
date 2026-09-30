@@ -56,6 +56,7 @@ import {
   Zap,
 } from "lucide-react";
 import { SocialCreditGenerator } from "@/components/collaborations/SocialCreditGenerator";
+import { CollaborationActivityFeed } from "@/components/collaborations/CollaborationActivityFeed";
 import {
   MultiPartySpkModal,
   type MultiPartySpkData,
@@ -552,6 +553,9 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
               </button>
             </div>
           </section>
+
+          {/* ACTIVITY FEED TIMELINE */}
+          <CollaborationActivityFeed collaboration={collaboration} />
 
           {/* SHARED PROJECT HUB (LINKS) */}
           <section className="p-6 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-6">
