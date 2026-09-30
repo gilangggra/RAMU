@@ -54,6 +54,7 @@ import {
   ListTodo,
 } from "lucide-react";
 import { SocialCreditGenerator } from "@/components/collaborations/SocialCreditGenerator";
+import { CollaborationActivityFeed } from "@/components/collaborations/CollaborationActivityFeed";
 
 interface WorkspaceProps {
   collaboration: any;
@@ -468,6 +469,9 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
       {/* TAB 1: OVERVIEW */}
       {activeTab === "overview" && (
         <div className="space-y-8 animate-fade-in">
+          {/* ACTIVITY FEED TIMELINE */}
+          <CollaborationActivityFeed collaboration={collaboration} />
+
           {/* SHARED PROJECT HUB (LINKS) */}
           <section className="p-6 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

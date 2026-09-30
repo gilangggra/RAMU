@@ -34,6 +34,22 @@ export default async function DirectoryPage({
 
   const actor = await prisma.actor.findFirst({
     where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
+    include: {
+      owner: { select: { avatarUrl: true } },
+      needs: {
+        where: { status: "ACTIVE" },
+        select: { category: true },
+      },
+      createdProjectBriefs: {
+        where: { status: "OPEN" },
+        select: {
+          neededRoles: {
+            where: { isFilled: false },
+            select: { assetCategory: true },
+          },
+        },
+      },
+    },
     orderBy: { createdAt: "asc" },
   });
 
@@ -52,6 +68,36 @@ export default async function DirectoryPage({
       select: { actorType: true },
     }),
   ]);
+
+  // ── Complementarity Score computation ─────────────────────────────────────
+  // Build a flat list of "wanted" asset categories from the current actor's
+  // active needs + unfilled roles from their open project briefs.
+  const actorNeeds = actor!.needs ?? [];
+  const actorBriefs = actor!.createdProjectBriefs ?? [];
+  const wantedCategories = new Set<string>([
+    ...actorNeeds.map((n) => n.category as string),
+    ...actorBriefs.flatMap((b) =>
+      b.neededRoles.map((r) => r.assetCategory as string)
+    ),
+  ]);
+
+  // For each directory actor, score how many of their active asset categories
+  // overlap with what the current actor wants.
+  // Score = (matches / wantedCategories.size) * 100, capped at 100.
+  const scoreMap = new Map<string, number>();
+  if (wantedCategories.size > 0) {
+    for (const a of actors) {
+      if (a.id === actor!.id) continue; // exclude self
+      const actorCats = new Set<string>(a.assets.map((asset) => asset.category as string));
+      let matches = 0;
+      for (const cat of wantedCategories) {
+        if (actorCats.has(cat)) matches++;
+      }
+      if (matches > 0) {
+        scoreMap.set(a.id, Math.min(100, Math.round((matches / wantedCategories.size) * 100)));
+      }
+    }
+  }
 
   const totalActors = allActors.length;
   const totalStudios = allActors.filter((a) => a.actorType === "STUDIO").length;
@@ -122,7 +168,11 @@ export default async function DirectoryPage({
           {actors.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
               {actors.map((item) => (
-                <ActorCard key={item.id} actor={item} />
+                <ActorCard
+                  key={item.id}
+                  actor={item}
+                  complementarityScore={scoreMap.get(item.id)}
+                />
               ))}
             </div>
           ) : (
