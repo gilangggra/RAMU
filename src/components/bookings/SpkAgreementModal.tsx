@@ -15,7 +15,13 @@ import {
   ExternalLink,
   Award,
 } from "lucide-react";
-import { TermsAndConditionsConfig, getDefaultTerms } from "@/components/settings/RatesForm";
+import {
+  TermsAndConditionsConfig,
+  getDefaultTerms,
+  getUsageScopeLabel,
+  getUsageDurationLabel,
+  getMilestoneSchemeLabel,
+} from "@/components/settings/RatesForm";
 
 export interface BookingSpkData {
   id: string;
@@ -70,9 +76,15 @@ export function SpkAgreementModal({ isOpen, onClose, booking }: SpkAgreementModa
         overtimeRate: agreedTermsRaw.overtimeRate ?? defaultFallback.overtimeRate,
         gracePeriodMinutes: agreedTermsRaw.gracePeriodMinutes ?? defaultFallback.gracePeriodMinutes,
         safeSetCompliant: agreedTermsRaw.safeSetCompliant ?? defaultFallback.safeSetCompliant,
+        usageRightsScope: agreedTermsRaw.usageRightsScope ?? defaultFallback.usageRightsScope,
+        usageRightsDuration: agreedTermsRaw.usageRightsDuration ?? defaultFallback.usageRightsDuration,
+        extraRevisionFee: agreedTermsRaw.extraRevisionFee ?? defaultFallback.extraRevisionFee,
+        paymentMilestoneScheme: agreedTermsRaw.paymentMilestoneScheme ?? defaultFallback.paymentMilestoneScheme,
         roleSpecifics: agreedTermsRaw.roleSpecifics ?? defaultFallback.roleSpecifics ?? {},
       }
     : defaultFallback;
+
+  const milestoneInfo = getMilestoneSchemeLabel(terms.paymentMilestoneScheme, terms.dpPercentage);
 
   const dateObj = new Date(booking.createdAt);
   const romanMonth = toRomanMonth(dateObj.getMonth());
@@ -100,6 +112,8 @@ export function SpkAgreementModal({ isOpen, onClose, booking }: SpkAgreementModa
   const isMua = !isStudio && !isModel && (targetSectorLower.includes("mua") || targetSectorLower.includes("makeup"));
   const isStylist = !isStudio && !isModel && !isMua && (targetSectorLower.includes("stylist") || targetSectorLower.includes("wardrobe"));
   const isVideographer = !isStudio && !isModel && !isMua && !isStylist && (targetSectorLower.includes("video") || targetSectorLower.includes("film"));
+  const isDesigner = !isStudio && !isModel && !isMua && !isStylist && !isVideographer && (targetSectorLower.includes("design") || targetSectorLower.includes("fashion") || targetSectorLower.includes("busana"));
+  const isPhotographer = !isStudio && !isModel && !isMua && !isStylist && !isVideographer && !isDesigner;
 
   function handlePrint() {
     window.print();
@@ -116,10 +130,11 @@ Platform: RAMU Creative Ecosystem (PSE Terdaftar)
 
 *RINGKASAN PASAL KESEPAKATAN:*
 - Pasal 1 (Jadwal): ${formattedDate} (Shift: ${terms.shiftHours} Jam)
-- Pasal 2 (Biaya): ${booking.budget || "Sesuai kesepakatan"} | DP ${terms.dpPercentage}% (Kunci Jadwal) & Pelunasan ${100 - terms.dpPercentage}%
+- Pasal 2 (Biaya & Termin): ${booking.budget || "Sesuai kesepakatan"} | ${milestoneInfo.title}
 - Pasal 3 (Lembur): Rp ${terms.overtimeRate}/jam (Toleransi ${terms.gracePeriodMinutes} mnt)
-- Pasal 4 (Revisi): Maksimal ${terms.maxRevisions}x revisi minor
-- Pasal 5 (Proteksi): Garansi 100% refund jika Pihak II No-Show; DP hangus jika Pihak I batal <48 jam.
+- Pasal 4 (Revisi): Maksimal ${terms.maxRevisions}x revisi minor (Biaya revisi ekstra: ${terms.extraRevisionFee || "Rp 100.000 / foto"})
+- Pasal 5 (Hak Cipta & Lisensi): ${getUsageScopeLabel(terms.usageRightsScope).split(" (")[0]} selama ${getUsageDurationLabel(terms.usageRightsDuration).split(" —")[0]}. Watermark protection berlaku sebelum pelunasan.
+- Pasal 6 (Proteksi): Garansi 100% refund jika Pihak II No-Show; DP hangus jika Pihak I batal <48 jam.
 
 Dokumen sah digital: https://ramu.id/dashboard/bookings`;
 
@@ -133,10 +148,11 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
       `No: ${spkNomorResmi}\n\n` +
       `Klien: ${booking.requester.name}\n` +
       `Talenta: ${booking.target.name}\n` +
-      `Jadwal: ${formattedDate}\n` +
+      `Jadwal: ${formattedDate} (Shift ${terms.shiftHours} Jam)\n` +
       `Honorarium: ${booking.budget || "Sesuai kesepakatan"}\n` +
-      `Skema: DP ${terms.dpPercentage}% (Lock Jadwal) + Pelunasan ${100 - terms.dpPercentage}%\n` +
-      `Shift: ${terms.shiftHours} Jam (Lembur: Rp ${terms.overtimeRate}/jam)\n\n` +
+      `Skema: ${milestoneInfo.title}\n` +
+      `Lisensi Hak Pakai: ${getUsageScopeLabel(terms.usageRightsScope).split(" (")[0]} (${getUsageDurationLabel(terms.usageRightsDuration).split(" —")[0]})\n` +
+      `Batas Revisi: Maksimal ${terms.maxRevisions}x putaran minor\n\n` +
       `Dokumen perikatan sah sesuai KUHPerdata Pasal 1320 & UU ITE tercatat di RAMU.`
   )}`;
 
@@ -326,13 +342,16 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
                   <strong className="text-stone-950">{booking.budget || "Sesuai tarif paket resmi"}</strong>.
                 </li>
                 <li>
-                  Pembayaran dilakukan dengan mekanisme 2 (dua) tahap perlindungan:
+                  Mekanisme pembayaran mengacu pada skema: <strong className="text-stone-950">{milestoneInfo.title}</strong>.
                   <ul className="list-disc pl-5 mt-1 space-y-1">
                     <li>
-                      <strong>Tahap I (Uang Muka / DP {terms.dpPercentage}%)</strong>: Wajib dibayarkan oleh PIHAK PERTAMA kepada PIHAK KEDUA sebelum hari pelaksanaan pekerjaan guna mengunci slot jadwal kerja dan alokasi sumber daya.
+                      <strong>Tahap I (Uang Muka / DP {terms.dpPercentage}%)</strong>: Wajib disetorkan oleh PIHAK PERTAMA guna mengunci (*lock slot*) jadwal kerja, persiapan kru, dan penahanan tanggal dari tawaran pihak lain.
                     </li>
                     <li>
-                      <strong>Tahap II (Pelunasan Sisa {100 - terms.dpPercentage}%)</strong>: Wajib diselesaikan oleh PIHAK PERTAMA sebelum atau pada saat penyerahan hasil karya final / master aset resolusi penuh dari PIHAK KEDUA.
+                      <strong>Tahap II (Pelunasan Sisa {100 - terms.dpPercentage}%)</strong>: Wajib dilunasi oleh PIHAK PERTAMA setelah penyerahan draf pratinjau (*contact sheet / watermarked preview*) disetujui, sebelum master file resolusi penuh (High-Res / Clean Output) diserahkan.
+                    </li>
+                    <li>
+                      <strong>Proteksi Pratinjau (Watermark Protection)</strong>: Sebelum pelunasan Tahap II diterima penuh oleh PIHAK KEDUA, seluruh aset hasil kerja yang diserahkan berstatus <em>&ldquo;Pratinjau Bertanda-Air&rdquo;</em> dan <strong>DILARANG KERAS</strong> untuk diunggah, dipublikasikan, atau dikomersialisasikan oleh PIHAK PERTAMA di media manapun.
                     </li>
                   </ul>
                 </li>
@@ -362,12 +381,18 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
               </h3>
               <ol className="list-decimal pl-5 space-y-1 text-stone-700 text-[11px]">
                 <li>
-                  Pekerjaan mencakup maksimal <strong>{terms.maxRevisions} (dua) kali putaran revisi minor</strong> yang relevan dengan brief awal. Revisi besar di luar konsep awal akan dikenakan biaya penyesuaian tersendiri.
+                  Pekerjaan mencakup maksimal <strong>{terms.maxRevisions} (dua) kali putaran revisi minor</strong> yang mencakup penyesuaian wajar (*exposure*, *color tone balancing*, perapian noda minor, atau *trim cut*) yang relevan dengan brief awal.
+                </li>
+                <li>
+                  Permintaan revisi tambahan di luar kuota maksimal dikenakan biaya revisi ekstra sebesar <strong>{terms.extraRevisionFee || "Rp 100.000 / foto"}</strong>.
+                </li>
+                <li>
+                  Perubahan konsep visual, penggantian talenta/lokasi pasca-produksi, atau permintaan pengambilan gambar ulang (*reshoot*) bukan merupakan bagian dari revisi dan wajib disepakati sebagai adendum/kontrak kerja baru.
                 </li>
 
                 {isModel && (
                   <li>
-                    <strong>Ketentuan Khusus Talenta/Model</strong>: Konsep busana wajib mematuhi kesepakatan awal ({terms.roleSpecifics.wardrobeRestrictions || "Konsep sopan terverifikasi"}). Talenta {terms.roleSpecifics.chaperoneAllowed ? "berhak didampingi 1 orang pendamping di lokasi" : "bekerja bersama kru resmi"}. Hak tayang citra diri terbatas pada media digital selama {terms.roleSpecifics.usageRightsPeriod || "1 (satu) tahun"}.
+                    <strong>Ketentuan Khusus Talenta/Model</strong>: Konsep busana wajib mematuhi kesepakatan awal ({terms.roleSpecifics.wardrobeRestrictions || "Konsep sopan terverifikasi"}). Talenta {terms.roleSpecifics.chaperoneAllowed ? "berhak didampingi 1 orang pendamping di lokasi" : "bekerja bersama kru resmi"}. Hak tayang citra diri terbatas pada media dan durasi yang diatur dalam Pasal 5 Perjanjian ini.
                   </li>
                 )}
                 {isMua && (
@@ -390,7 +415,12 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
                     <strong>Ketentuan Khusus Videografi</strong>: Luaran video sesuai rasio ({terms.roleSpecifics.aspectRatiosIncluded || "16:9 Landscape & 9:16 Vertikal"}). {terms.roleSpecifics.musicLicenseIncluded ? "Sudah termasuk royalti musik komersial standar." : "Lisensi musik komersial khusus disediakan oleh PIHAK PERTAMA."}
                   </li>
                 )}
-                {!isStudio && !isModel && !isMua && !isStylist && !isVideographer && (
+                {isDesigner && (
+                  <li>
+                    <strong>Ketentuan Khusus Desainer Busana (Fashion Designer)</strong>: {terms.roleSpecifics.fittingPolicy || "Fitting busana dilakukan H-1 atau di lokasi sebelum sesi dimulai"}. {terms.roleSpecifics.dryCleaningResponsibility || "Biaya laundry/dry cleaning busana pasca-sesi ditanggung oleh PIHAK PERTAMA selaku peminjam/penyelenggara"}. {terms.roleSpecifics.noAlteringPolicy || "Dilarang memotong, mengubah jahitan, atau merusak siluet busana tanpa izin tertulis desainer"}. Hak cipta desain dan pola tetap melekat pada desainer, dan PIHAK PERTAMA wajib mencantumkan tag/kredit nama desainer pada seluruh materi publikasi.
+                  </li>
+                )}
+                {isPhotographer && (
                   <li>
                     <strong>Ketentuan Khusus Fotografi</strong>: {terms.roleSpecifics.rawFilePolicy || "PIHAK KEDUA menyerahkan hasil kurasi akhir beresolusi tinggi (JPEG/TIFF). Penyerahan file master mentah (RAW) memerlukan adendum kesepakatan terpisah."}
                   </li>
@@ -398,9 +428,33 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
               </ol>
             </div>
 
+            <div className="space-y-1.5 border border-amber-300 p-3.5 bg-amber-50/50">
+              <h3 className="font-bold text-amber-950 text-xs uppercase tracking-wide flex items-center gap-1.5">
+                <Award className="w-3.5 h-3.5 text-amber-700" />
+                <span>PASAL 5: HAK CIPTA, LISENSI PENGGUNAAN (USAGE RIGHTS), DAN HAK CITRA DIRI</span>
+              </h3>
+              <ol className="list-decimal pl-5 space-y-1 text-stone-800 text-[11px]">
+                <li>
+                  <strong>Kepemilikan Hak Cipta</strong>: Hak Cipta (Hak Moral dan Hak Ekonomi Dasar) atas seluruh karya asli foto, rekaman video, rancangan busana, dan hasil kreatif tetap merupakan milik sah dan melekat pada PIHAK KEDUA sebagai Pencipta berdasarkan Undang-Undang No. 28 Tahun 2014 tentang Hak Cipta.
+                </li>
+                <li>
+                  <strong>Ruang Lingkup Lisensi Penggunaan</strong>: PIHAK KEDUA memberikan hak pakai/lisensi non-eksklusif kepada PIHAK PERTAMA khusus untuk media: <strong className="text-stone-950">{getUsageScopeLabel(terms.usageRightsScope)}</strong>.
+                </li>
+                <li>
+                  <strong>Jangka Waktu Lisensi</strong>: Lisensi penayangan berlaku selama <strong className="text-stone-950">{getUsageDurationLabel(terms.usageRightsDuration)}</strong> terhitung sejak tanggal pelunasan biaya jasa diselesaikan penuh.
+                </li>
+                <li>
+                  <strong>Hak Citra Diri (Likeness Rights)</strong>: Khusus talenta model, penayangan wajah, postur tubuh, dan citra diri dibatasi hanya pada ruang lingkup media dan durasi yang disepakati di atas. Penggunaan untuk keperluan di luar cakupan ini wajib memperoleh persetujuan tertulis terpisah.
+                </li>
+                <li>
+                  <strong>Sanksi Pelanggaran Lisensi Komersial</strong>: Apabila PIHAK PERTAMA menayangkan, mendistribusikan, atau mengalihkan karya melampaui ruang lingkup media atau masa berlaku tanpa persetujuan tertulis dari PIHAK KEDUA (seperti menayangkan di iklan berbayar/billboard luar ruang tanpa lisensi komersial), maka PIHAK PERTAMA wajib membayar biaya lisensi komersial tambahan (*Extended Commercial License Fee*) sebesar <strong>200% dari total nilai jasa</strong>.
+                </li>
+              </ol>
+            </div>
+
             <div className="space-y-1.5">
               <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
-                PASAL 5: PEMBATALAN, KETIDAKHADIRAN, DAN JAMINAN REFUND DUA ARAH
+                PASAL 6: PEMBATALAN, KETIDAKHADIRAN, DAN JAMINAN REFUND DUA ARAH
               </h3>
               <ol className="list-decimal pl-5 space-y-1 text-stone-700 text-[11px]">
                 <li>
@@ -414,7 +468,7 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
 
             <div className="space-y-1.5">
               <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
-                PASAL 6: KEADAAN MEMAKSA (FORCE MAJEURE)
+                PASAL 7: KEADAAN MEMAKSA (FORCE MAJEURE)
               </h3>
               <p className="text-[11px] text-stone-700">
                 Dalam hal terjadi peristiwa di luar kendali PARA PIHAK seperti bencana alam, kebakaran, kerusuhan massal, kecelakaan fatal, atau sakit mendadak yang dibuktikan dengan surat keterangan resmi rumah sakit, PARA PIHAK sepakat untuk menjadwalkan ulang (*reschedule*) pelaksanaan pekerjaan tanpa dikenakan penalti.
@@ -423,14 +477,14 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
 
             <div className="space-y-1.5">
               <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
-                PASAL 7: PENYELESAIAN PERSELISIHAN &amp; KETENTUAN HUKUM
+                PASAL 8: PENYELESAIAN PERSELISIHAN &amp; KETENTUAN HUKUM
               </h3>
               <ol className="list-decimal pl-5 space-y-1 text-stone-700 text-[11px]">
                 <li>
                   Segala perselisihan yang timbul dari pelaksanaan Perjanjian ini akan diselesaikan terlebih dahulu melalui musyawarah mufakat secara kekeluargaan, dengan difasilitasi oleh platform RAMU sebagai penyedia catatan jejak digital (*audit trail*).
                 </li>
                 <li>
-                  Perjanjian ini tunduk pada hukum positif Negara Republik Indonesia, khususnya Kitab Undang-Undang Hukum Perdata (KUHPerdata) Pasal 1320 dan Pasal 1338, serta Undang-Undang No. 11 Tahun 2008 jo. UU No. 1 Tahun 2024 tentang Informasi dan Transaksi Elektronik (UU ITE).
+                  Perjanjian ini tunduk pada hukum positif Negara Republik Indonesia, khususnya Kitab Undang-Undang Hukum Perdata (KUHPerdata) Pasal 1320 dan Pasal 1338, Undang-Undang No. 28 Tahun 2014 tentang Hak Cipta, serta Undang-Undang No. 11 Tahun 2008 jo. UU No. 1 Tahun 2024 tentang Informasi dan Transaksi Elektronik (UU ITE).
                 </li>
               </ol>
             </div>

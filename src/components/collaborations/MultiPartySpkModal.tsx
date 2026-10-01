@@ -319,12 +319,19 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
             </div>
 
             <div className="space-y-2">
-              <ArticleHead n={2} title="PASAL 2: ANGGARAN, PEMBAGIAN BIAYA, DAN ALOKASI INVESTASI" />
+              <ArticleHead n={2} title="PASAL 2: ANGGARAN, PEMBAGIAN BIAYA, DAN TERMIN PEMBAYARAN BERTAHAP" />
               <ol className="list-decimal pl-6 space-y-1.5 text-stone-700 text-[11px]">
-                <li>Total anggaran produksi: <strong>{budget.estimatedTotal ?? "sesuai kesepakatan para pihak"}</strong>.</li>
+                <li>Total anggaran produksi kolaborasi: <strong>{budget.estimatedTotal ?? "sesuai kesepakatan para pihak"}</strong>.</li>
                 <li>Skema pembagian biaya: <strong>{budget.costSharingModel ?? "Proporsional sesuai kontribusi masing-masing"}</strong>.</li>
-                <li>Setiap pihak wajib melaporkan pengeluaran melalui catatan adendum ruang kerja RAMU demi transparansi bersama.</li>
-                <li>Penambahan anggaran di luar estimasi awal harus disepakati seluruh pihak dan dicatat sebagai adendum resmi.</li>
+                <li>
+                  Mekanisme termin pembayaran/pengeluaran:
+                  <ul className="list-disc pl-5 mt-1 space-y-1">
+                    <li><strong>Termin I (DP 50% / Biaya Pra-Produksi)</strong>: Wajib disetorkan sebelum tanggal produksi untuk mengunci sewa studio, talenta, dan akomodasi.</li>
+                    <li><strong>Termin II (Pelunasan 50% Pasca-Produksi)</strong>: Dilunasi setelah draf hasil kerja (pratinjau ber-watermark) disetujui bersama sebelum penyerahan master file resolusi penuh.</li>
+                  </ul>
+                </li>
+                <li>Setiap pihak wajib melaporkan pengeluaran riil melalui catatan ruang kerja RAMU demi transparansi audit trail.</li>
+                <li>Penambahan anggaran di luar estimasi awal harus disetujui secara tertulis oleh seluruh pihak sebelum dieksekusi.</li>
               </ol>
             </div>
 
@@ -339,12 +346,13 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
             </div>
 
             <div className="space-y-2">
-              <ArticleHead n={4} title="PASAL 4: HAK KEKAYAAN INTELEKTUAL (HKI) DAN KEPEMILIKAN KARYA" />
+              <ArticleHead n={4} title="PASAL 4: HAK CIPTA, LISENSI HAK PAKAI (USAGE RIGHTS), DAN BATAS REVISI" />
               <ol className="list-decimal pl-6 space-y-1.5 text-stone-700 text-[11px]">
-                <li>Karya asli pra-proyek: <strong>{ip.originalIp ?? "Hak cipta tetap milik pencipta asli masing-masing"}</strong>.</li>
-                <li>Karya turunan kolaborasi: <strong>{ip.derivativeWorks ?? "Hak pakai bersama selama proyek aktif; penggunaan komersial pasca-proyek memerlukan persetujuan tertulis seluruh pihak"}</strong>.</li>
+                <li>Karya asli pra-proyek: <strong>{ip.originalIp ?? "Hak cipta tetap milik pencipta asli masing-masing pihak"}</strong>.</li>
+                <li>Karya turunan kolaborasi: Berstatus hak pakai bersama non-eksklusif untuk promosi portofolio digital dan media sosial organik selama <strong>1 (satu) tahun</strong> terhitung sejak peluncuran resmi.</li>
+                <li>Pemanfaatan karya untuk iklan berbayar skala komersial (Meta/TikTok Ads, Billboard, atau komersialisasi retail) di luar kesepakatan awal <strong>wajib memperoleh izin tertulis dan adendum kompensasi bagi hasil dari seluruh pihak</strong>.</li>
+                <li>Batas revisi pasca-produksi: Dibatasi maksimal <strong>2x (dua kali) putaran revisi minor</strong> untuk penyelarasan warna, retouching, dan pemotongan klip. Perubahan konsep dasar memerlukan kesepakatan bulat para pihak.</li>
                 <li>Setiap publikasi karya wajib mencantumkan kredit kolaborasi lengkap sesuai format yang disepakati di tab Kredit &amp; Tag RAMU.</li>
-                <li>Pendistribusian ulang karya di luar lingkup yang disepakati wajib dinotifikasikan kepada seluruh pihak minimal 7 hari sebelumnya.</li>
               </ol>
             </div>
 

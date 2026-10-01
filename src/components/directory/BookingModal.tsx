@@ -4,7 +4,16 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { X, Calendar, Loader2, CheckCircle2, ArrowRight, ShieldCheck } from "lucide-react";
 import { createBookingRequest } from "@/app/api/bookings/actions";
-import { TermsAndConditionsConfig, getDefaultTerms } from "@/components/settings/RatesForm";
+import {
+  TermsAndConditionsConfig,
+  getDefaultTerms,
+  UsageRightsScope,
+  UsageRightsDuration,
+  PaymentMilestoneScheme,
+  getUsageScopeLabel,
+  getUsageDurationLabel,
+  getMilestoneSchemeLabel,
+} from "@/components/settings/RatesForm";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -28,6 +37,17 @@ export function BookingModal({
   const [isLoading, setIsLoading] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const effectiveTerms = termsConfig || getDefaultTerms(targetSector, targetType);
+
+  const [selectedUsageScope, setSelectedUsageScope] = useState<UsageRightsScope>(
+    effectiveTerms.usageRightsScope || "ORGANIC_SOCIAL"
+  );
+  const [selectedUsageDuration, setSelectedUsageDuration] = useState<UsageRightsDuration>(
+    effectiveTerms.usageRightsDuration || "1_YEAR"
+  );
+  const [selectedMilestoneScheme, setSelectedMilestoneScheme] = useState<PaymentMilestoneScheme>(
+    effectiveTerms.paymentMilestoneScheme || "50_50_WATERMARK"
+  );
+
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -71,6 +91,10 @@ export function BookingModal({
         gracePeriodMinutes: effectiveTerms.gracePeriodMinutes,
         roleSpecifics: effectiveTerms.roleSpecifics,
         safeSetCompliant: effectiveTerms.safeSetCompliant,
+        usageRightsScope: selectedUsageScope,
+        usageRightsDuration: selectedUsageDuration,
+        extraRevisionFee: effectiveTerms.extraRevisionFee || "Rp 100.000 / foto tambahan",
+        paymentMilestoneScheme: selectedMilestoneScheme,
         clientAgreedAt: new Date().toISOString(),
       },
     };
@@ -93,14 +117,22 @@ export function BookingModal({
 
   const renderDynamicFields = () => {
 
-    if (targetType === "STUDIO") {
+    const sectorLower = targetSector.toLowerCase();
+    const isStudio = targetType === "STUDIO" || sectorLower.includes("studio");
+    const isModel = !isStudio && (sectorLower.includes("model") || sectorLower.includes("talent"));
+    const isDesigner = !isStudio && !isModel && (sectorLower.includes("design") || sectorLower.includes("fashion") || sectorLower.includes("busana"));
+    const isStylist = !isStudio && !isModel && !isDesigner && (sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));
+    const isMua = !isStudio && !isModel && !isDesigner && !isStylist && (sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair"));
+    const isVideographer = !isStudio && !isModel && !isDesigner && !isStylist && !isMua && (sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema"));
+
+    if (isStudio) {
       return (
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Tipe Ruangan/Studio</label>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Tipe Ruangan / Set Studio</label>
             <input
               type="text"
-              placeholder="Misal: Studio A, Podcast Room"
+              placeholder="Misal: Studio A (Cyclorama), Set Ruang Tamu, Podcast Room"
               required
               className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.roomType || ""}
@@ -108,10 +140,21 @@ export function BookingModal({
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Kebutuhan Tambahan (Add-ons)</label>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Perkiraan Jumlah Kru &amp; Talent</label>
             <input
               type="text"
-              placeholder="Misal: Tambahan Lighting, Stylist, dll"
+              placeholder="Misal: 8 Orang (Kapasitas maks studio: 10-15 orang)"
+              required
+              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              value={details.crewCount || ""}
+              onChange={(e) => handleDetailChange("crewCount", e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Kebutuhan Tambahan / Add-ons</label>
+            <input
+              type="text"
+              placeholder="Misal: Tambahan Lampu Godox/Profoto, Seamless Paper warna beige"
               className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.addons || ""}
               onChange={(e) => handleDetailChange("addons", e.target.value)}
@@ -121,14 +164,14 @@ export function BookingModal({
       );
     }
 
-    if (targetSector.toLowerCase().includes("model") || targetSector.toLowerCase().includes("talent")) {
+    if (isModel) {
       return (
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Peran / Karakter</label>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Konsep Busana &amp; Karakter</label>
             <input
               type="text"
-              placeholder="Misal: Model Casual, Pemeran Utama"
+              placeholder="Misal: Editorial Avant-Garde, Casual Modest / Hijab"
               required
               className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.role || ""}
@@ -136,14 +179,140 @@ export function BookingModal({
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Hak Penggunaan (Usage Rights)</label>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Lokasi Sesi &amp; Pendamping</label>
             <input
               type="text"
-              placeholder="Misal: Social Media Selamanya, TVC 1 Tahun"
+              placeholder="Misal: Studio A Jakarta Selatan, Talenta didampingi 1 orang"
               required
               className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
-              value={details.usageRights || ""}
-              onChange={(e) => handleDetailChange("usageRights", e.target.value)}
+              value={details.location || ""}
+              onChange={(e) => handleDetailChange("location", e.target.value)}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (isDesigner) {
+      return (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Jumlah Look / Busana yang Dipesan / Dipinjam</label>
+            <input
+              type="text"
+              placeholder="Misal: 5 Look Koleksi Raya 2026, 2 Gaun Utama"
+              required
+              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              value={details.lookCount || ""}
+              onChange={(e) => handleDetailChange("lookCount", e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Jadwal Fitting &amp; Penyerahan Busana</label>
+            <input
+              type="text"
+              placeholder="Misal: Fitting H-1 di Studio Desainer, Pengambilan mandiri oleh tim"
+              required
+              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              value={details.fittingSchedule || ""}
+              onChange={(e) => handleDetailChange("fittingSchedule", e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Link Moodboard / Konsep Kampanye</label>
+            <input
+              type="url"
+              placeholder="Link Pinterest / Google Drive"
+              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              value={details.referenceUrl || ""}
+              onChange={(e) => handleDetailChange("referenceUrl", e.target.value)}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (isStylist) {
+      return (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Jumlah Look &amp; Arahan Gaya (Styling Direction)</label>
+            <input
+              type="text"
+              placeholder="Misal: 8 Look Katalog, Konsep Streetwear Luxury &amp; Aksesoris"
+              required
+              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              value={details.stylingLooks || ""}
+              onChange={(e) => handleDetailChange("stylingLooks", e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Sumber Busana / Wardrobe Source</label>
+            <input
+              type="text"
+              placeholder="Misal: Peminjaman Desainer (Pulling) &amp; Wardrobe Klien"
+              required
+              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              value={details.wardrobeSource || ""}
+              onChange={(e) => handleDetailChange("wardrobeSource", e.target.value)}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (isMua) {
+      return (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Jumlah Orang yang Dirias (Heads) &amp; Gaya Rias</label>
+            <input
+              type="text"
+              placeholder="Misal: 2 Model (Gaya: Natural Clean &amp; Editorial Bold Hair)"
+              required
+              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              value={details.muaHeads || ""}
+              onChange={(e) => handleDetailChange("muaHeads", e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Waktu Call Time / Mulai Persiapan Rias</label>
+            <input
+              type="text"
+              placeholder="Misal: 07:00 WIB (Sesi foto mulai 09:00 WIB)"
+              required
+              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              value={details.prepTime || ""}
+              onChange={(e) => handleDetailChange("prepTime", e.target.value)}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (isVideographer) {
+      return (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Format Luaran Video Utama</label>
+            <input
+              type="text"
+              placeholder="Misal: 2x Reels 9:16 Vertikal (30 detik) &amp; 1x Teaser 16:9"
+              required
+              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              value={details.videoFormats || ""}
+              onChange={(e) => handleDetailChange("videoFormats", e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Lokasi &amp; Kebutuhan Audio/Lighting</label>
+            <input
+              type="text"
+              placeholder="Misal: Studio Indoor Jakarta, Butuh Mic Lavalier Wireless"
+              required
+              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              value={details.location || ""}
+              onChange={(e) => handleDetailChange("location", e.target.value)}
             />
           </div>
         </div>
@@ -153,10 +322,10 @@ export function BookingModal({
     return (
       <div className="space-y-4">
         <div>
-          <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Lokasi Pelaksanaan</label>
+          <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Lokasi Sesi Pemotretan</label>
           <input
             type="text"
-            placeholder="Misal: Studio Indoor, Jakarta Selatan"
+            placeholder="Misal: Studio Indoor, Lokasi Outdoor Jakarta Selatan"
             required
             className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
             value={details.location || ""}
@@ -164,9 +333,9 @@ export function BookingModal({
           />
         </div>
         <div>
-          <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Output yang Diharapkan</label>
+          <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Output yang Diharapkan (Deliverables)</label>
           <textarea
-            placeholder="Misal: 50 Foto Edit, 1 Video Reels"
+            placeholder="Misal: 25 Foto Edit High-Res, 5 Foto Retouch Beauty, Semua Foto Kurasi (JPG)"
             required
             rows={2}
             className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 resize-none"
@@ -175,7 +344,7 @@ export function BookingModal({
           />
         </div>
         <div>
-          <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Link Referensi Visual (Opsional)</label>
+          <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Link Referensi Moodboard (Opsional)</label>
           <input
             type="url"
             placeholder="Link Pinterest / Google Drive"
@@ -297,7 +466,7 @@ export function BookingModal({
 
               {renderDynamicFields()}
 
-              <div className="p-4 sm:p-5 rounded-none bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-stone-50 border border-amber-200/80 space-y-3">
+              <div className="p-4 sm:p-5 rounded-none bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-stone-50 border border-amber-200/80 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-amber-600" />
@@ -306,40 +475,85 @@ export function BookingModal({
                     </span>
                   </div>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-none bg-amber-200 text-amber-900 uppercase">
-                    Standar Industri
+                    Standar Industri Indonesia
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-stone-600 pt-1">
-                  <div className="flex items-start gap-2 bg-white/80 p-2.5 rounded-none border border-stone-100">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-bold text-[#1E1B2E] block">DP {effectiveTerms.dpPercentage}% Kunci Jadwal</span>
-                      <span className="text-[11px] text-stone-500 leading-tight">Jadwal resmi diikat setelah DP; pembatalan mendadak H-3 DP tidak dapat ditarik kembali.</span>
+                <div className="space-y-3 pt-1">
+                  <div className="bg-white/90 p-3 rounded-none border border-stone-200/80 space-y-2">
+                    <label className="text-[10px] font-bold text-stone-600 uppercase tracking-wider block">
+                      1. Ruang Lingkup Lisensi &amp; Durasi Hak Pakai (Usage Rights)
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <span className="text-[9px] text-stone-400 font-semibold block mb-0.5">Media Penayangan</span>
+                        <select
+                          value={selectedUsageScope}
+                          onChange={(e) => setSelectedUsageScope(e.target.value as any)}
+                          className="w-full bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] px-2.5 py-1.5 focus:border-[#1E1B2E]"
+                        >
+                          <option value="ORGANIC_SOCIAL">Medsos Organik &amp; Web Portofolio</option>
+                          <option value="PAID_ADS_DIGITAL">Iklan Berbayar Digital (+Ads)</option>
+                          <option value="COMMERCIAL_OOH">Komersial Cetak &amp; Luar Ruang (Billboard)</option>
+                          <option value="FULL_BUYOUT">Full Buyout (All Media Selamanya)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-stone-400 font-semibold block mb-0.5">Masa Berlaku</span>
+                        <select
+                          value={selectedUsageDuration}
+                          onChange={(e) => setSelectedUsageDuration(e.target.value as any)}
+                          className="w-full bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] px-2.5 py-1.5 focus:border-[#1E1B2E]"
+                        >
+                          <option value="6_MONTHS">6 Bulan (Musiman / Seasonal)</option>
+                          <option value="1_YEAR">1 Tahun (Standar Industri)</option>
+                          <option value="2_YEARS">2 Tahun</option>
+                          <option value="PERPETUAL">Selamanya / Perpetual</option>
+                        </select>
+                      </div>
                     </div>
+                    <p className="text-[10px] text-stone-500 leading-tight">
+                      Penayangan di luar lingkup ini tanpa izin tertulis dikenakan denda lisensi komersial (Extended License).
+                    </p>
                   </div>
 
-                  <div className="flex items-start gap-2 bg-white/80 p-2.5 rounded-none border border-stone-100">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-bold text-[#1E1B2E] block">Batas {effectiveTerms.maxRevisions}x Revisi Minor</span>
-                      <span className="text-[11px] text-stone-500 leading-tight">Penyesuaian tone/warna; ganti konsep total di luar brief dikenakan addendum baru.</span>
-                    </div>
+                  <div className="bg-white/90 p-3 rounded-none border border-stone-200/80 space-y-2">
+                    <label className="text-[10px] font-bold text-stone-600 uppercase tracking-wider block">
+                      2. Skema &amp; Termin Pembayaran Bertahap
+                    </label>
+                    <select
+                      value={selectedMilestoneScheme}
+                      onChange={(e) => setSelectedMilestoneScheme(e.target.value as any)}
+                      className="w-full bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] px-2.5 py-1.5 focus:border-[#1E1B2E]"
+                    >
+                      <option value="50_50_WATERMARK">DP 50% Kunci Jadwal + Pelunasan 50% (Watermark Protected)</option>
+                      <option value="30_40_30">Termin 30% Booking - 40% On-Set - 30% Final File</option>
+                      <option value="100_ESCROW">100% Ditampung Aman di Rekening Escrow RAMU</option>
+                    </select>
+                    <p className="text-[10px] text-stone-500 leading-tight">
+                      {getMilestoneSchemeLabel(selectedMilestoneScheme, effectiveTerms.dpPercentage).desc}
+                    </p>
                   </div>
 
-                  <div className="flex items-start gap-2 bg-white/80 p-2.5 rounded-none border border-stone-100">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-bold text-[#1E1B2E] block">Shift {effectiveTerms.shiftHours} Jam &amp; Lembur</span>
-                      <span className="text-[11px] text-stone-500 leading-tight">Overtime {effectiveTerms.overtimeRate} setelah toleransi {effectiveTerms.gracePeriodMinutes} menit.</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-stone-600">
+                    <div className="flex items-start gap-2 bg-white/90 p-2.5 rounded-none border border-stone-200/80">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold text-[#1E1B2E] block">Batas {effectiveTerms.maxRevisions}x Revisi Minor</span>
+                        <span className="text-[10px] text-stone-500 leading-tight">
+                          Revisi ekstra: {effectiveTerms.extraRevisionFee || "Rp 100.000 / foto"}. Ganti konsep total = SPK baru.
+                        </span>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-start gap-2 bg-white/80 p-2.5 rounded-none border border-stone-100">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-bold text-[#1E1B2E] block">🛡️ Garansi Klien 100% Anti No-Show</span>
-                      <span className="text-[11px] text-stone-500 leading-tight">Uang DP 100% dikembalikan jika talenta mangkir/tidak hadir di lokasi.</span>
+                    <div className="flex items-start gap-2 bg-white/90 p-2.5 rounded-none border border-stone-200/80">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold text-[#1E1B2E] block">Shift {effectiveTerms.shiftHours} Jam &amp; Lembur</span>
+                        <span className="text-[10px] text-stone-500 leading-tight">
+                          Overtime {effectiveTerms.overtimeRate} setelah toleransi {effectiveTerms.gracePeriodMinutes} menit.
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -370,7 +584,7 @@ export function BookingModal({
                     className="w-4 h-4 rounded-none text-[#1E1B2E] border-stone-300 focus:ring-[#1E1B2E] mt-0.5 cursor-pointer"
                   />
                   <label htmlFor="agreedToTerms" className="text-xs font-bold text-[#1E1B2E] cursor-pointer leading-relaxed">
-                    Saya menyetujui Ketentuan Kerja Profesional RAMU di atas dan memahami komitmen DP 50%, batas revisi, serta Garansi Anti No-Show.
+                    Saya menyetujui Ketentuan Kerja Profesional RAMU di atas: batasan hak pakai ({getUsageScopeLabel(selectedUsageScope).split(" (")[0]}), termin pembayaran bertahap, batas revisi, serta Garansi Anti No-Show.
                   </label>
                 </div>
               </div>
