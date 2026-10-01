@@ -90,7 +90,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
   const completedTasks = tasks.filter((t: any) => t.status === "DONE").length;
   const achievedMilestones = milestones.filter((m: any) => m.status === "ACHIEVED").length;
 
-  // SPK signing status helpers
   const totalParties = participants.length;
   const signedParties = participants.filter((p: any) => Boolean(p.signedAt)).length;
   const currentActorParticipant = participants.find(
@@ -343,7 +342,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
   return (
     <div className="space-y-12">
-      {/* Editorial Header */}
+
       <section className="border-b border-stone-200 pb-10">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
           <div className="space-y-4">
@@ -412,7 +411,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         </div>
       </section>
 
-      {/* COMPLETED CELEBRATION & TEAR-SHEET BANNER */}
       {collaboration.status === "COMPLETED" && (
         <section className="p-6 sm:p-8 rounded-[32px] bg-gradient-to-br from-emerald-950 via-[#1E1B2E] to-stone-900 text-white border border-emerald-500/30 shadow-2xl relative overflow-hidden animate-fade-in">
           <div className="absolute -right-16 -top-16 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -467,7 +465,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         </section>
       )}
 
-      {/* Tabs */}
       <div className="flex items-center gap-8 overflow-x-auto no-scrollbar border-b border-stone-200">
         {[
           { key: "overview", label: "Ringkasan", badge: null },
@@ -508,10 +505,9 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         })}
       </div>
 
-      {/* TAB 1: OVERVIEW */}
       {activeTab === "overview" && (
         <div className="space-y-8 animate-fade-in">
-          {/* SPK LEGAL STATUS BANNER IN OVERVIEW */}
+
           <section className="p-5 sm:p-6 rounded-[28px] bg-gradient-to-r from-stone-900 via-[#1E1B2E] to-stone-900 text-white border border-stone-800 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start sm:items-center gap-3.5">
               <div className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
@@ -553,10 +549,9 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
               </button>
             </div>
           </section>
-          {/* ACTIVITY FEED TIMELINE */}
+
           <CollaborationActivityFeed collaboration={collaboration} />
 
-          {/* SHARED PROJECT HUB (LINKS) */}
           <section className="p-6 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
@@ -637,7 +632,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
               </form>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {/* Moodboard Card */}
+
                 <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/80 flex flex-col justify-between space-y-3 hover:bg-stone-50 transition-colors">
                   <div className="space-y-1">
                     <div className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">
@@ -671,7 +666,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   )}
                 </div>
 
-                {/* Asset Folder Card */}
                 <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/80 flex flex-col justify-between space-y-3 hover:bg-stone-50 transition-colors">
                   <div className="space-y-1">
                     <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">
@@ -705,7 +699,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   )}
                 </div>
 
-                {/* Production Notes / Call Sheet Card */}
                 <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/80 flex flex-col justify-between space-y-3 hover:bg-stone-50 transition-colors">
                   <div className="space-y-1">
                     <div className="text-[10px] font-bold text-purple-700 uppercase tracking-wider">
@@ -789,7 +782,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                       </div>
                     )}
 
-                    {/* Action Links */}
                     <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-stone-100">
                       <Link
                         href={`/directory/${p.actorId}`}
@@ -828,7 +820,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
             </div>
           </section>
 
-          {/* Quick Social Media Credits Banner */}
           <div className="p-6 rounded-[28px] bg-gradient-to-r from-amber-500/10 via-[#E66A48]/10 to-transparent border border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
@@ -869,10 +860,9 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         </div>
       )}
 
-      {/* TAB 2: CALL SHEET & RUNDOWN SESI PRODUKSI */}
       {activeTab === "callsheet" && (
         <div className="space-y-8 animate-fade-in">
-          {/* Header Action Banner */}
+
           <div className="p-6 sm:p-8 rounded-[32px] bg-gradient-to-r from-[#1E1B2E] via-[#2A243D] to-[#1E1B2E] text-white flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl shadow-[#1E1B2E]/5">
             <div className="space-y-2 max-w-xl">
               <div className="flex items-center gap-2">
@@ -920,7 +910,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
             </div>
           </div>
 
-          {/* Sesi Rundown List */}
           <section className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2">
@@ -930,7 +919,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                 </h3>
               </div>
 
-              {/* Status Filter */}
               <div className="flex items-center gap-1.5 p-1 rounded-xl bg-stone-100 border border-stone-200 text-xs">
                 {[
                   { key: "ALL", label: "Semua Sesi" },
@@ -983,7 +971,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                       }`}
                     >
                       <div className="flex items-start gap-4">
-                        {/* Checkbox toggle */}
+
                         <button
                           type="button"
                           onClick={() => handleToggleTask(t.id, t.status)}
@@ -1046,7 +1034,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                           )}
                         </div>
 
-                        {/* Delete button */}
                         <button
                           type="button"
                           onClick={() => handleDeleteTask(t.id)}
@@ -1063,7 +1050,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
             )}
           </section>
 
-          {/* Form Tambah Sesi Rundown Baru */}
           <form
             onSubmit={handleCreateTask}
             className="p-6 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-4"
@@ -1164,10 +1150,9 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         </div>
       )}
 
-      {/* TAB 3: PLAN */}
       {activeTab === "plan" && (
         <div className="space-y-8 animate-fade-in">
-          {/* DIGITAL MULTI-PARTY SPK CARD */}
+
           <div className="p-6 sm:p-8 rounded-[32px] bg-gradient-to-br from-[#1E1B2E] via-stone-900 to-[#27213D] text-white border border-stone-800 shadow-xl relative overflow-hidden">
             <div className="absolute -right-12 -top-12 w-48 h-48 bg-[#E66A48]/10 rounded-full blur-2xl pointer-events-none" />
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
@@ -1197,7 +1182,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   Melindungi seluruh pihak kolaborator dengan klausul standar industri kreatif: larangan pelatihan AI (Anti-AI Training), hak moral atribusi kredit, batas maksimal revisi 2 kali, dan mufakat bagi hasil yang sah.
                 </p>
 
-                {/* Participant signature pills */}
                 <div className="flex flex-wrap gap-2 pt-1">
                   {participants.map((p: any) => {
                     const isSigned = Boolean(p.signedAt);
@@ -1394,7 +1378,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
           </div>
         </form>
 
-        {/* Sub-seksi: Buku Log Kesepakatan & Adendum Bersama */}
         <section className="pt-8 border-t border-stone-200/80 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
@@ -1499,12 +1482,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
       </div>
       )}
 
-
-
-
-
-
-      {/* TAB: CREDITS & SOCIAL TAGS */}
       {activeTab === "credits" && (
         <div className="space-y-8 animate-fade-in">
           <SocialCreditGenerator
@@ -1515,13 +1492,11 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         </div>
       )}
 
-      {/* ── MULTI-PARTY SPK MODAL ── */}
       {(() => {
-        // Build initiator from the first participant who is the plan creator
+
         const planCreator = collaboration.plan;
         const allP: any[] = participants;
 
-        // Map participants to SpkParticipant shape
         const buildParty = (p: any): SpkParticipant => ({
           id: p.actorId ?? p.id,
           name: p.actor?.name ?? "—",
@@ -1537,7 +1512,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
         if (allP.length === 0) return null;
 
-        // Determine initiator (Pihak I) by creator of plan/collaboration, fallback to first participant
         const creatorId = collaboration.plan?.createdByActorId || collaboration.initiatorActorId;
         const initiatorIndex = allP.findIndex((p: any) => (p.actorId ?? p.id) === creatorId);
         const initiatorRaw = initiatorIndex >= 0 ? allP[initiatorIndex] : allP[0];
@@ -1587,7 +1561,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
         );
       })()}
 
-      {/* TAB 6: OUTCOMES & EVALUATION */}
       {activeTab === "outcomes" && (
         <div className="space-y-8 animate-fade-in">
           <div className="p-6 sm:p-8 rounded-[32px] bg-amber-50/50 border border-amber-200/80 space-y-4">
@@ -1630,7 +1603,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
               </div>
             )}
 
-            {/* Direct Loop to Portfolio Showcase */}
             <div className="pt-3 border-t border-amber-200/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-xs text-stone-700">
                 <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
@@ -1706,7 +1678,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                         <p className="text-xs text-[#716B7E] leading-relaxed">{item.description}</p>
                       </div>
 
-                      {/* Prominent Evidence / Live Publication Link */}
                       {metrics.evidenceUrl && (
                         <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-200/80 flex items-center justify-between gap-3">
                           <div className="flex items-center gap-2 min-w-0">
@@ -1760,7 +1731,6 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
             )}
           </section>
 
-          {/* Social Media Publication Credit Banner */}
           <div className="p-6 sm:p-8 rounded-[32px] bg-gradient-to-r from-[#1E1B2E] via-[#2A243D] to-[#1E1B2E] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl shadow-[#1E1B2E]/5">
             <div className="space-y-1">
               <div className="flex items-center gap-2">

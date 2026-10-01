@@ -47,7 +47,6 @@ export async function login(formData: FormData) {
         oauthAvatar
       );
 
-      // Cek apakah user sudah memiliki Actor profile
       const existingActor = await prisma.actor.findFirst({
         where: { ownerUserId: data.user.id },
       });
@@ -76,7 +75,6 @@ export async function signup(formData: FormData) {
   const location = (formData.get("location") as string)?.trim();
   const actorType = (formData.get("actorType") as string)?.trim() || "STUDIO";
 
-  // Extended onboarding inputs
   const bio = (formData.get("bio") as string)?.trim();
   const address = (formData.get("address") as string)?.trim();
   const skillsRaw = formData.get("skills") as string;
@@ -95,7 +93,7 @@ export async function signup(formData: FormData) {
 
   const specialization = (formData.get("specialization") as string)?.trim();
   if (specialization && !parsedSkills.includes(specialization)) {
-    parsedSkills.unshift(specialization); // Add specialization as the first skill
+    parsedSkills.unshift(specialization);  
   }
 
   if (!email || !password || !displayName) {

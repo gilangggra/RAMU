@@ -9,8 +9,8 @@ export interface HotspotPin {
   creatorHandle: string;
   creatorAvatarBg?: string;
   creatorId?: string;
-  x: number; // Percentage 0 - 100
-  y: number; // Percentage 0 - 100
+  x: number;  
+  y: number;  
   details: {
     label: string;
     value: string;

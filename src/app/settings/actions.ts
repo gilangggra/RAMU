@@ -201,7 +201,7 @@ export async function updateServicePackagesAndRates(formData: FormData) {
       try {
         parsedTerms = JSON.parse(termsAndConditionsJson);
       } catch (e) {
-        // ignore format error
+
       }
     }
 
@@ -213,7 +213,6 @@ export async function updateServicePackagesAndRates(formData: FormData) {
       throw new Error("Profil kreator tidak ditemukan.");
     }
 
-    // Check if commercial service packages asset exists
     const existingAsset = await prisma.asset.findFirst({
       where: {
         actorId: actor.id,
@@ -492,4 +491,3 @@ export async function updateActorSpecs(formData: FormData) {
     return { success: false, error: error.message || "Gagal menyimpan spesifikasi." };
   }
 }
-

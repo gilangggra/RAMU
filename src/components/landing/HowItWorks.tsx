@@ -26,8 +26,7 @@ export function HowItWorks() {
   return (
     <section id="how-it-works" className="py-24 md:py-32 bg-white relative">
       <div className="max-w-7xl mx-auto px-6 md:px-10">
-        
-        {/* Header Section */}
+
         <div className="mb-20">
           <div className="inline-flex items-center gap-3 mb-6">
              <span className="w-8 h-px bg-stone-300"></span>
@@ -45,18 +44,17 @@ export function HowItWorks() {
           </div>
         </div>
 
-        {/* Steps Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16 border-t border-stone-200 pt-16">
           {steps.map((step) => (
             <div key={step.num} className="group relative">
               <div className="text-6xl md:text-7xl font-light text-stone-200 mb-6 font-serif tracking-tighter group-hover:text-[#1E1B2E] transition-colors duration-500">
                 {step.num}
               </div>
-              
+
               <h3 className="text-xl font-medium text-[#1E1B2E] mb-3 tracking-tight">
                 {step.title}
               </h3>
-              
+
               <div className="text-[10px] uppercase tracking-[0.2em] font-semibold text-stone-400 mb-4 pb-4 border-b border-stone-100">
                 {step.subtitle}
               </div>

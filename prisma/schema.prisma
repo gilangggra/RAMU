@@ -177,7 +177,7 @@ enum ActorType {
   INDIVIDUAL
   STUDIO
   COLLECTIVE
-  MSME
+  BRAND
 }
 
 enum AssetCategory {
@@ -817,6 +817,8 @@ model CollaborationInterest {
   actorId        String           @map("actor_id") @db.Uuid
   message        String?
   proposedAssets Json             @default("[]") @map("proposed_assets")
+  proposedBudget String?          @map("proposed_budget")
+  isInvited      Boolean          @default(false) @map("is_invited")
   status         InterestStatus   @default(PENDING)
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")

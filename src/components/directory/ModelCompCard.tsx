@@ -115,7 +115,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
 
   return (
     <div className="space-y-8">
-      {/* 1. Comp Card & Body Measurements Section */}
+
       <section className="p-7 sm:p-8 rounded-none bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
           <div className="space-y-1">
@@ -150,7 +150,6 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
           </div>
         </div>
 
-        {/* Polaroid Comp Card Grid (3 Angles) */}
         {compCardPhotos.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center justify-between text-xs font-bold text-stone-400 uppercase tracking-wider">
@@ -187,7 +186,6 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
           </div>
         )}
 
-        {/* Physical Measurements Grid */}
         <div className="space-y-3 pt-4 border-t border-stone-100">
           <div className="flex items-center gap-2 text-xs font-bold text-stone-400 uppercase tracking-wider">
             <Ruler className="w-3.5 h-3.5 text-[#E66A48]" />
@@ -228,7 +226,6 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
             </div>
           </div>
 
-          {/* Secondary Physical Attributes */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
             <div className="p-3 rounded-none bg-stone-50/50 border border-stone-200/60 text-xs flex items-center justify-between">
               <span className="text-stone-500">Warna Rambut:</span>
@@ -245,7 +242,6 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
           </div>
         </div>
 
-        {/* Specialties Tags */}
         {attributes.specialties && attributes.specialties.length > 0 && (
           <div className="space-y-2 pt-2 border-t border-stone-100">
             <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">
@@ -266,7 +262,6 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
         )}
       </section>
 
-      {/* 2. Visual Portfolio & Campaign Gallery */}
       {portfolioGallery.length > 0 && (
         <section className="p-7 sm:p-8 rounded-none bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-stone-100">
@@ -320,7 +315,6 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
         </section>
       )}
 
-      {/* Lightbox Image Modal */}
       {selectedImage && (
         <div
           onClick={() => setSelectedImage(null)}

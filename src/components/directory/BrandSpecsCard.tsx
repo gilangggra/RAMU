@@ -99,7 +99,6 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
         </div>
       </div>
 
-      {/* Brand Attributes Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {attributes.design_dna && (
           <div className="p-4 rounded-none bg-stone-50/80 border border-stone-200/70 space-y-1 sm:col-span-2">
@@ -124,7 +123,6 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
         )}
       </div>
 
-      {/* Materials / Fabric Tags */}
       {materials.length > 0 && (
         <div className="space-y-2">
           <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -145,7 +143,6 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
         </div>
       )}
 
-      {/* Brand / Styling Photo Gallery */}
       {gallery.length > 0 && (
         <div className="space-y-3 pt-2 border-t border-stone-100">
           <div className="flex items-center justify-between text-xs font-bold text-stone-400 uppercase tracking-wider">
@@ -186,7 +183,6 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
         </div>
       )}
 
-      {/* Lightbox Image Modal */}
       {selectedPhoto && (
         <div
           onClick={() => setSelectedPhoto(null)}

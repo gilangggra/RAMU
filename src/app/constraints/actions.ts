@@ -52,12 +52,11 @@ export async function createConstraint(formData: FormData) {
     redirect(`${baseUrl}${queryStr ? `${queryStr}&` : "?"}error=${encodeURIComponent("Tipe batasan tidak valid.")}`);
   }
 
-  // Nilai disimpan sebagai JSON — bisa string, angka, atau array
   let value: unknown;
   try {
     value = JSON.parse(valueRaw);
   } catch {
-    value = valueRaw; // simpan sebagai string biasa jika bukan JSON valid
+    value = valueRaw;  
   }
 
   try {

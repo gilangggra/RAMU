@@ -16,7 +16,6 @@ import {
 import type { CrewRecommendation } from "@/application/projectBriefService";
 import { inviteActorToRoleAction } from "@/app/projects/actions";
 
-// ── Asset category → human-readable label ────────────────────────────────────
 const CATEGORY_LABELS: Record<string, string> = {
   PORTFOLIO_WORK: "Karya & Portofolio",
   EQUIPMENT: "Peralatan & Gear",
@@ -34,7 +33,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   CREATIVE_ASSET: "Aset Kreatif",
 };
 
-// ── Score → display config ────────────────────────────────────────────────────
 function getScoreTier(score: number) {
   if (score >= 85)
     return {
@@ -55,7 +53,6 @@ function getScoreTier(score: number) {
   };
 }
 
-// ── Reason tag colors ─────────────────────────────────────────────────────────
 const REASON_COLORS: Record<string, string> = {
   "Kategori Aset Cocok": "bg-violet-50 text-violet-700 border-violet-200",
   "Gaya Visual Sesuai": "bg-pink-50 text-pink-700 border-pink-200",
@@ -63,7 +60,6 @@ const REASON_COLORS: Record<string, string> = {
   "Model Kompensasi Sesuai": "bg-teal-50 text-teal-700 border-teal-200",
 };
 
-// ── Invite button — per-actor state ──────────────────────────────────────────
 type InviteState = "idle" | "loading" | "invited" | "error";
 
 interface InviteButtonProps {
@@ -140,15 +136,13 @@ function InviteButton({ briefId, roleId, actorId, actorName }: InviteButtonProps
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-
 interface SmartCrewPanelProps {
   recommendations: CrewRecommendation[];
   briefId: string;
 }
 
 export function SmartCrewPanel({ recommendations, briefId }: SmartCrewPanelProps) {
-  // Filter out roles already filled or with no candidates
+
   const activeRecs = recommendations.filter(
     (r) => !r.isFilled && r.candidates.length > 0
   );
@@ -162,7 +156,7 @@ export function SmartCrewPanel({ recommendations, briefId }: SmartCrewPanelProps
 
   return (
     <section className="rounded-[28px] overflow-hidden border border-amber-300/40 shadow-[0_10px_40px_rgba(255,184,0,0.08)]">
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
+
       <div className="px-6 sm:px-8 py-5 bg-gradient-to-r from-[#FFF7ED] via-[#FFFBF0] to-white border-b border-amber-200/40 flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className="w-9 h-9 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center shrink-0">
@@ -184,11 +178,10 @@ export function SmartCrewPanel({ recommendations, briefId }: SmartCrewPanelProps
         </span>
       </div>
 
-      {/* ── Per-role blocks ─────────────────────────────────────────────────── */}
       <div className="bg-white divide-y divide-stone-100">
         {activeRecs.map((rec) => (
           <div key={rec.roleId} className="px-6 sm:px-8 py-6 space-y-4">
-            {/* Role header */}
+
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center shrink-0">
                 <Users className="w-4 h-4 text-stone-500" />
@@ -204,7 +197,6 @@ export function SmartCrewPanel({ recommendations, briefId }: SmartCrewPanelProps
               </div>
             </div>
 
-            {/* Candidate cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {rec.candidates.map((cand, idx) => {
                 const tier = getScoreTier(cand.matchScore);
@@ -213,14 +205,13 @@ export function SmartCrewPanel({ recommendations, briefId }: SmartCrewPanelProps
                     key={cand.actor.id}
                     className="relative p-4 rounded-2xl border border-stone-200/80 bg-white hover:border-amber-300/60 hover:shadow-[0_4px_20px_rgba(255,184,0,0.08)] transition-all duration-200 flex flex-col gap-3"
                   >
-                    {/* TOP MATCH badge */}
+
                     {idx === 0 && (
                       <span className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full text-[9px] font-black bg-[#1E1B2E] text-amber-400 border border-amber-400/20 tracking-wide">
                         TOP MATCH
                       </span>
                     )}
 
-                    {/* Actor info row */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-stone-100 to-stone-200 border border-stone-200 flex items-center justify-center font-black text-[#1E1B2E] text-sm shrink-0">
@@ -236,7 +227,6 @@ export function SmartCrewPanel({ recommendations, briefId }: SmartCrewPanelProps
                         </div>
                       </div>
 
-                      {/* Match score pill */}
                       <div
                         className={`flex items-center gap-1 px-2.5 py-1 rounded-full border text-[11px] font-extrabold shrink-0 ${tier.bg} ${tier.text} ${tier.border}`}
                       >
@@ -245,7 +235,6 @@ export function SmartCrewPanel({ recommendations, briefId }: SmartCrewPanelProps
                       </div>
                     </div>
 
-                    {/* Location */}
                     {cand.actor.location && (
                       <div className="flex items-center gap-1 text-[11px] text-stone-400 -mt-1">
                         <MapPin className="w-3 h-3 shrink-0" />
@@ -253,7 +242,6 @@ export function SmartCrewPanel({ recommendations, briefId }: SmartCrewPanelProps
                       </div>
                     )}
 
-                    {/* Match reason tags */}
                     {cand.matchReasons.length > 0 && (
                       <div className="flex flex-wrap gap-1.5">
                         {cand.matchReasons.map((reason) => (
@@ -270,9 +258,8 @@ export function SmartCrewPanel({ recommendations, briefId }: SmartCrewPanelProps
                       </div>
                     )}
 
-                    {/* Actions row */}
                     <div className="flex items-center gap-2 pt-1 border-t border-stone-100 mt-auto">
-                      {/* Lihat Profil — secondary */}
+
                       <Link
                         href={`/directory/${cand.actor.id}`}
                         target="_blank"
@@ -283,7 +270,6 @@ export function SmartCrewPanel({ recommendations, briefId }: SmartCrewPanelProps
                         <ChevronRight className="w-3 h-3" />
                       </Link>
 
-                      {/* Undang — primary CTA */}
                       <div className="flex-[2]">
                         <InviteButton
                           briefId={briefId}
@@ -301,7 +287,6 @@ export function SmartCrewPanel({ recommendations, briefId }: SmartCrewPanelProps
         ))}
       </div>
 
-      {/* ── Footer note ─────────────────────────────────────────────────────── */}
       <div className="px-6 sm:px-8 py-3 bg-stone-50 border-t border-stone-100">
         <p className="text-[11px] text-stone-400 text-center">
           Undangan dikirim atas nama kreator yang diundang · Mereka tetap bebas menerima

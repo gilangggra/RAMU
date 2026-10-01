@@ -27,7 +27,7 @@ export async function createActorProfile(formData: FormData) {
   const contactEmail = (formData.get("contactEmail") as string)?.trim() || user.email;
   const websiteUrl = (formData.get("websiteUrl") as string)?.trim();
   const contactPhone = (formData.get("contactPhone") as string)?.trim();
-  
+
   const aestheticStyles = formData.getAll("aestheticStyles") as string[];
   const compensationModels = formData.getAll("compensationModels") as string[];
   const experienceLevel = formData.get("experienceLevel") as string;
@@ -53,16 +53,15 @@ export async function createActorProfile(formData: FormData) {
     ActorType.INDIVIDUAL,
     ActorType.STUDIO,
     ActorType.COLLECTIVE,
-    ActorType.MSME,
+    ActorType.BRAND,
   ];
 
   const actorType = validTypes.includes(actorTypeStr as ActorType)
     ? (actorTypeStr as ActorType)
-    : ActorType.STUDIO;
+    : ActorType.INDIVIDUAL;
 
   const fullLocation = address ? `${address}, ${location}` : location;
 
-  // Pastikan profile user ada dan sinkron
   try {
     const oauthAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture;
     await syncUserProfile(
@@ -79,7 +78,6 @@ export async function createActorProfile(formData: FormData) {
       }).catch(() => {});
     }
 
-    // Simpan profil aktor pertama
     const newActor = await prisma.actor.create({
       data: {
         ownerUserId: user.id,
@@ -98,7 +96,6 @@ export async function createActorProfile(formData: FormData) {
       },
     });
 
-    // Daftarkan keahlian sebagai initial Asset CAPABILITY
     if (parsedSkills.length > 0) {
       for (const skill of parsedSkills) {
         await prisma.asset.create({

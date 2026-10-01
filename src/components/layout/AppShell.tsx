@@ -138,14 +138,13 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-[#27213D] font-sans selection:bg-[#FFB800]/40 selection:text-[#27213D] relative overflow-x-hidden">
-      {/* Ambient background blur glows */}
+
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute -top-32 -left-32 w-[550px] h-[550px] bg-[#FFE4D6] rounded-full blur-[140px] opacity-60" />
         <div className="absolute top-1/4 -right-32 w-[550px] h-[550px] bg-[#EDE8FF] rounded-full blur-[140px] opacity-70" />
         <div className="absolute -bottom-32 left-1/3 w-[500px] h-[500px] bg-[#E0F7F0] rounded-full blur-[130px] opacity-60" />
       </div>
 
-      {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-white/85 border-r border-stone-200/80 z-40 backdrop-blur-xl shadow-[4px_0_24px_rgba(39,33,61,0.02)]">
         <div className="p-5 border-b border-stone-200/80">
           <Link href="/dashboard" className="flex items-center gap-3 group">
@@ -231,7 +230,6 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
         </div>
       </aside>
 
-      {/* Mobile Top Header */}
       <header className="md:hidden sticky top-0 bg-white/90 backdrop-blur-md border-b border-stone-200/80 px-4 py-3 flex items-center justify-between z-30 shadow-xs">
         <Link href="/dashboard" className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-amber-400 flex items-center justify-center font-black text-stone-950 text-xs shadow-xs">
@@ -271,7 +269,6 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
         </div>
       </header>
 
-      {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-50 bg-[#27213D]/40 backdrop-blur-xs flex flex-col justify-end">
           <div className="bg-white border-t border-stone-200 p-5 rounded-t-3xl max-h-[85vh] overflow-y-auto space-y-5 shadow-2xl">
@@ -332,14 +329,12 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
         </div>
       )}
 
-      {/* Main Content Area */}
       <div className="md:pl-64 flex flex-col min-h-screen relative z-10">
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-6xl w-full mx-auto pb-24 md:pb-12 space-y-8 animate-fade-in">
           {children}
         </main>
       </div>
 
-      {/* Mobile Bottom Tab Bar */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-stone-200/90 px-3 py-2 flex items-center justify-around z-40 shadow-lg">
         {[
           { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },

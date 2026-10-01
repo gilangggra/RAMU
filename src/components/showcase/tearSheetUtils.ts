@@ -1,7 +1,6 @@
 import { ShowcaseItem } from "@/application/showcaseService";
 import { TearSheetData, HotspotPin, TearSheetCredit, TearSheetTechnicalSpecs } from "./tearSheetTypes";
 
-// Curated pool of realistic creative talents to complement the primary author
 const CURATED_COLLABORATORS = {
   wardrobe: [
     { name: "Nara Atelier", handle: "@atelier_nara", location: "Bandung", piece: "Deconstructed Silk Organza Drapes", fabric: "100% Mulberry Raw Silk" },
@@ -34,7 +33,6 @@ const CURATED_COLLABORATORS = {
   ]
 };
 
-// Deterministic hash based on ID
 function getHash(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -48,7 +46,6 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
   const hash = getHash(item.id + item.title);
   const primarySector = (item.actor.sector || "").toLowerCase();
 
-  // If availableActors from database is provided, pick real actors from the DB
   const actors = item.availableActors || [];
 
   const dbPhotographers = actors.filter(
@@ -84,14 +81,12 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
       a.sector.toLowerCase().includes("kreatif")
   );
 
-  // Deterministic fallbacks from curated pool
   const wardrobePick = CURATED_COLLABORATORS.wardrobe[hash % CURATED_COLLABORATORS.wardrobe.length];
   const photoPick = CURATED_COLLABORATORS.photography[(hash + 1) % CURATED_COLLABORATORS.photography.length];
   const hmuaPick = CURATED_COLLABORATORS.hmua[(hash + 2) % CURATED_COLLABORATORS.hmua.length];
   const talentPick = CURATED_COLLABORATORS.talent[(hash + 3) % CURATED_COLLABORATORS.talent.length];
   const artPick = CURATED_COLLABORATORS.art_direction[(hash + 4) % CURATED_COLLABORATORS.art_direction.length];
 
-  // Adjust who is primary creator
   const isPhotoPrimary =
     primarySector.includes("foto") ||
     primarySector.includes("visual") ||
@@ -106,7 +101,6 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
     primarySector.includes("mua") ||
     primarySector.includes("kecantikan");
 
-  // Real Database Collaborators Matching
   const photoActor = isPhotoPrimary
     ? item.actor
     : dbPhotographers.length > 0
@@ -158,7 +152,6 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
     ? `@${artActor.name.toLowerCase().replace(/[\s&.]+/g, "_")}`
     : artPick.handle;
 
-  // Technical Specs
   const technicalSpecs: TearSheetTechnicalSpecs = {
     camera: photoPick.camera,
     lens: photoPick.lens,
@@ -169,12 +162,10 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
     location: item.actor.location || artPick.location
   };
 
-  // Certificate ID & Issue number
   const issueNum = String((hash % 88) + 1).padStart(2, "0");
   const certHex = ((hash * 1337) % 65535 + 4096).toString(16).toUpperCase();
   const antiCatfishingCertificateId = `RAMU-VERIFIED-CRW-2026-${certHex}`;
 
-  // Editorial credits list with genuine database actorIds
   const credits: TearSheetCredit[] = [
     {
       role: "Photography & Lighting",
@@ -199,7 +190,7 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
       actorId: wardrobeActor?.id,
       location: wardrobeActor?.location || wardrobePick.location || undefined,
       details: wardrobePick.piece,
-      verified: isFashionPrimary || !isPhotoPrimary, // Verified if uploader or confirmed co-creator
+      verified: isFashionPrimary || !isPhotoPrimary,
       isUploader: isFashionPrimary,
       verificationTimestamp: "Maret 2026",
       verifiedBy: isFashionPrimary ? "Pemilik Portofolio (Uploader)" : "Dikonfirmasi Silang di Set",
@@ -229,7 +220,7 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
       actorId: talentActor?.id,
       location: talentActor?.location || undefined,
       details: talentPick.agency,
-      verified: false, // Pending confirmation by model
+      verified: false,
       isUploader: false,
       verificationMethod: "PEER_CONFIRMED",
       status: talentActor?.id ? "PENDING" : "EXTERNAL"
@@ -244,21 +235,18 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
       details: artPick.style,
       verified: false,
       isUploader: false,
-      status: "EXTERNAL" // External studio mention
+      status: "EXTERNAL"
     }
   ];
 
-  // Empty hotspots array since pins on images are removed per user request
   const hotspots: HotspotPin[] = [];
 
-  // If custom user-inputted tear-sheet is present, merge seamlessly
   if (item.tearSheet) {
     const custom = item.tearSheet;
     const rawCredits: TearSheetCredit[] = custom.credits && custom.credits.length > 0 ? custom.credits : credits;
-    
-    // Normalize verification status for user uploaded custom tear sheet
+
     const finalCredits: TearSheetCredit[] = rawCredits.map((c, idx) => {
-      // First credit or credit matching actor is the uploader
+
       const isActorUploader = c.actorId === item.actor.id || idx === 0 || c.isUploader;
       if (isActorUploader) {
         return {
@@ -365,13 +353,13 @@ export function formatInstagramCredits(item: ShowcaseItem, data: TearSheetData):
       if (c.category === "hmua") icon = "💄";
       if (c.category === "talent") icon = "👤";
       if (c.category === "art_direction") icon = "🎨";
-      
+
       let verifBadge = "";
       if (c.isUploader) verifBadge = " [✓ Pemilik Portofolio / Uploader]";
       else if (c.verified) verifBadge = " [✓ Peer-Verified di Set]";
       else if (c.status === "PENDING") verifBadge = " [⏳ Menunggu Konfirmasi Rekan]";
       else if (c.status === "EXTERNAL") verifBadge = " [🏷️ Kredit Eksternal]";
-      
+
       return `${icon} ${c.role}: ${c.handle} (${c.details})${verifBadge}`;
     })
     .join("\n");
@@ -397,4 +385,3 @@ Inisiasi kolaborasi serupa: ramu.id/showcase
 
 #RAMUEcosystem #AntiCatfishing #PeerVerified #CoCredit #IndonesianCreative #EditorialTearsheet #FashionEditorial #RAMUSynergy`;
 }
-

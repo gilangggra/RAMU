@@ -100,7 +100,6 @@ export default async function OpportunityDetailPage({
           </span>
         </div>
 
-        {/* Hero Section */}
         <section className="p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] relative overflow-hidden space-y-6">
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
             <div className="space-y-3">
@@ -162,7 +161,6 @@ export default async function OpportunityDetailPage({
           </div>
         </section>
 
-        {/* Participants */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
@@ -236,7 +234,6 @@ export default async function OpportunityDetailPage({
           </div>
         </section>
 
-        {/* 6 Dimension Scoring */}
         {latestScore && (
           <section className="p-6 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] space-y-6">
             <div className="flex items-center justify-between">
@@ -296,7 +293,6 @@ export default async function OpportunityDetailPage({
           </section>
         )}
 
-        {/* Explainable Output */}
         <section className="p-6 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] space-y-6">
           <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
             <Lightbulb className="w-5 h-5 text-amber-500" />
@@ -339,7 +335,6 @@ export default async function OpportunityDetailPage({
           </div>
         </section>
 
-        {/* Constraint Audit */}
         <section className="p-6 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] space-y-4">
           <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-amber-500" />
@@ -372,14 +367,12 @@ export default async function OpportunityDetailPage({
           </div>
         </section>
 
-        {/* Feedback Section */}
         <OpportunityFeedbackSection
           opportunityId={opp.id}
           feedbacks={(opp as any).feedbacks || []}
           currentActorId={actor.id}
         />
 
-        {/* CTA Banner */}
         <section className="p-8 rounded-[32px] bg-gradient-to-br from-[#FFF7ED] via-white to-amber-50/40 border border-[#F9D8C4] text-center space-y-4 shadow-sm">
           <div className="space-y-1">
             <h3 className="text-xl font-bold text-[#27213D]">Siap Mewujudkan Peluang Ini?</h3>

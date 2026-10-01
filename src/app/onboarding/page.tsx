@@ -297,7 +297,6 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
               </select>
             </div>
 
-            {/* Smart Matching Preferences */}
             <div className="pt-4 pb-2 border-t border-stone-200/60">
               <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-4 h-4 text-[#FFB800]" />
@@ -306,7 +305,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
               <p className="text-xs text-[#716B7E] mb-5 leading-relaxed">
                 Pilihan ini akan membantu Engine kami mencocokkan Anda dengan proyek kolaborasi yang paling relevan.
               </p>
-              
+
               <div className="space-y-6">
                 <div className="space-y-2">
                   <label className="block text-xs font-bold uppercase tracking-wider text-[#27213D]">
@@ -335,7 +334,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
                       <option value="EXPERT">Expert / Papan Atas</option>
                     </select>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="block text-xs font-bold uppercase tracking-wider text-[#27213D]">
                       Model Kompensasi

@@ -67,7 +67,6 @@ interface PhotographerSpecsCardProps {
   }>;
 }
 
-// Curated default high-end gear proof items
 const DEFAULT_GEAR_SHOWCASE: GearShowcaseItem[] = [
   {
     id: "gear-cam-1",
@@ -143,7 +142,7 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
   const portfolioGallery = (attributes.portfolio_gallery && attributes.portfolio_gallery.length > 0)
     ? attributes.portfolio_gallery
     : portfolioWorks;
-  
+
   const registeredGearItems: GearShowcaseItem[] = (actorAssets || [])
     .filter((a) => {
       if (a.category === "PORTFOLIO_WORK") return false;
@@ -180,7 +179,6 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
       };
     });
 
-  // Combine user-registered gear with base gear showcase
   const baseGear = (attributes.gear_showcase && attributes.gear_showcase.length > 0)
     ? attributes.gear_showcase
     : DEFAULT_GEAR_SHOWCASE;
@@ -202,7 +200,7 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
 
   return (
     <div className="space-y-10">
-      {/* 1. Header Overview & Rate Card */}
+
       <section className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
           <div className="space-y-1.5">
@@ -217,7 +215,7 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
               Seluruh optik kamera dan tata lampu di bawah ini telah terverifikasi fisik dan siap dipakai untuk produksi editorial maupun komersial.
             </p>
           </div>
-          
+
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             {attributes.rate_starting_at && (
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-none bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">
@@ -244,7 +242,6 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
           </div>
         </div>
 
-        {/* 4 Summary Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-4 rounded-none bg-stone-50/90 border border-stone-200/70 space-y-2">
             <div className="flex items-center gap-2 text-stone-500">
@@ -301,7 +298,6 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
         </div>
       </section>
 
-      {/* 2. PROMINENT SECTION: VISUAL GEAR PROOF GALLERY */}
       <section className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-stone-100">
           <div>
@@ -317,7 +313,6 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
             </p>
           </div>
 
-          {/* Filter Bar */}
           <div className="flex flex-wrap items-center gap-1.5 bg-stone-100 p-1 rounded-none">
             {categories.map((cat) => (
               <button
@@ -336,7 +331,6 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
           </div>
         </div>
 
-        {/* Gear Grid with Photos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredGear.map((gear) => (
             <div
@@ -344,7 +338,7 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
               onClick={() => setSelectedGear(gear)}
               className="group relative rounded-none bg-stone-50 border border-stone-200/80 overflow-hidden hover:border-[#1E1B2E] hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer"
             >
-              {/* Gear Photo */}
+
               <div className="relative aspect-[4/3] w-full bg-stone-200 overflow-hidden">
                 <img
                   src={gear.imageUrl}
@@ -352,8 +346,7 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   loading="lazy"
                 />
-                
-                {/* Badges on Image */}
+
                 <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
                   <span className="px-2.5 py-1 rounded-none bg-black/70 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider">
                     {gear.category}
@@ -371,7 +364,6 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
                   </div>
                 </div>
 
-                {/* Bottom Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
                   <span className="text-white text-xs font-bold flex items-center gap-1.5">
                     <Eye className="w-3.5 h-3.5" />
@@ -380,7 +372,6 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
                 </div>
               </div>
 
-              {/* Gear Card Content */}
               <div className="p-5 flex-1 flex flex-col justify-between space-y-3 bg-white">
                 <div>
                   <h4 className="text-base font-black text-[#1E1B2E] group-hover:text-amber-600 transition-colors leading-snug">
@@ -408,7 +399,6 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
         </div>
       </section>
 
-      {/* 3. Video Showreel & BTS Section */}
       <section className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
         <div className="flex items-center justify-between pb-4 border-b border-stone-100">
           <div className="flex items-center gap-2">
@@ -421,7 +411,7 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
             Dokumentasi Alur Kerja On-Set
           </span>
         </div>
-        
+
         <div className="w-full aspect-video rounded-none bg-stone-900 overflow-hidden relative group cursor-pointer border border-stone-200/50 shadow-md">
           <img
             src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&q=80"
@@ -444,7 +434,6 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
         </div>
       </section>
 
-      {/* 4. Portfolio Gallery Section */}
       {portfolioGallery.length > 0 && (
         <section className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-stone-100">
@@ -488,7 +477,6 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
         </section>
       )}
 
-      {/* Lightbox Modal for Gear Inspection */}
       {selectedGear && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
@@ -556,7 +544,6 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
         </div>
       )}
 
-      {/* Lightbox Modal for Portfolio Image */}
       {selectedImage && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 bg-black/90 backdrop-blur-md animate-in fade-in duration-200"

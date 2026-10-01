@@ -31,12 +31,10 @@ export function BookingModal({
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Common Fields
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [budget, setBudget] = useState("");
 
-  // Dynamic Fields
   const [details, setDetails] = useState<Record<string, string>>({});
 
   const todayStr = new Date().toISOString().split("T")[0];
@@ -93,9 +91,8 @@ export function BookingModal({
     }
   }
 
-  // Polymorphic rendering based on type/sector
   const renderDynamicFields = () => {
-    // 1. Studio / Space Rental
+
     if (targetType === "STUDIO") {
       return (
         <div className="space-y-4">
@@ -124,7 +121,6 @@ export function BookingModal({
       );
     }
 
-    // 2. Talent / Model
     if (targetSector.toLowerCase().includes("model") || targetSector.toLowerCase().includes("talent")) {
       return (
         <div className="space-y-4">
@@ -154,7 +150,6 @@ export function BookingModal({
       );
     }
 
-    // 3. Jasa Produksi (Fotografer, Videografer, MUA, dll) -> Default Fallback
     return (
       <div className="space-y-4">
         <div>
@@ -195,13 +190,11 @@ export function BookingModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
+
       <div className="absolute inset-0 bg-[#27213D]/40 backdrop-blur-sm" onClick={handleClose} />
 
-      {/* Modal */}
       <div className="relative w-full max-w-lg bg-white rounded-none border border-stone-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
-        
-        {/* Header */}
+
         <div className="px-6 py-5 border-b border-stone-200/60 flex items-center justify-between shrink-0">
           <div>
             <h2 className="text-lg font-black tracking-tight text-[#1E1B2E]">
@@ -214,7 +207,6 @@ export function BookingModal({
           </button>
         </div>
 
-        {/* Professional Assurance Banner */}
         <div className="bg-emerald-50/80 border-b border-emerald-200/60 px-6 py-2.5 text-xs text-emerald-950 flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span className="text-[11px] text-emerald-900 font-medium">
@@ -222,7 +214,6 @@ export function BookingModal({
           </span>
         </div>
 
-        {/* Body */}
         <div className="p-6 overflow-y-auto flex-1">
           {errorMessage && (
             <div className="mb-4 p-3 rounded-none bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold animate-fade-in">
@@ -260,8 +251,7 @@ export function BookingModal({
             </div>
           ) : (
             <form id="booking-form" onSubmit={handleSubmit} className="space-y-6">
-              
-              {/* Common Fields */}
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Mulai *</label>
@@ -304,11 +294,9 @@ export function BookingModal({
               </div>
 
               <hr className="border-stone-100" />
-              
-              {/* Dynamic Polymorphic Fields */}
+
               {renderDynamicFields()}
 
-              {/* Ringkasan Kesepakatan & Proteksi RAMU */}
               <div className="p-4 sm:p-5 rounded-none bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-stone-50 border border-amber-200/80 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -356,7 +344,6 @@ export function BookingModal({
                   </div>
                 </div>
 
-                {/* Role Specific Highlight if any */}
                 {effectiveTerms.roleSpecifics.wardrobeRestrictions && (
                   <p className="text-[11px] text-stone-600 bg-white/80 p-2.5 rounded-none border border-amber-100">
                     👗 <strong>Batasan Busana:</strong> {effectiveTerms.roleSpecifics.wardrobeRestrictions}
@@ -373,7 +360,6 @@ export function BookingModal({
                   </p>
                 )}
 
-                {/* Mandatory Checkbox */}
                 <div className="pt-2 border-t border-amber-200/60 flex items-start gap-2.5">
                   <input
                     type="checkbox"
@@ -393,7 +379,6 @@ export function BookingModal({
           )}
         </div>
 
-        {/* Footer */}
         {!isSuccess && (
           <div className="px-6 py-4 border-t border-stone-200/60 bg-stone-50/50 flex justify-end shrink-0 gap-3">
             <button

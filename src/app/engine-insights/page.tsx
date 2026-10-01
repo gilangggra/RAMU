@@ -60,7 +60,7 @@ export default async function EngineInsightsPage() {
   return (
     <AppShell actor={actor} activeRoute="/engine-insights">
       <div className="space-y-10 max-w-6xl mx-auto">
-        {/* Hero Section */}
+
         <section className="p-8 sm:p-10 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] relative overflow-hidden space-y-6">
           <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#E66A48]/5 rounded-full blur-3xl pointer-events-none" />
@@ -127,7 +127,6 @@ export default async function EngineInsightsPage() {
           </div>
         </section>
 
-        {/* Creator-Centric Value Impact (Dampak Nyata bagi Ekosistem Kreatif) */}
         <section className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
@@ -186,7 +185,6 @@ export default async function EngineInsightsPage() {
           </div>
         </section>
 
-        {/* 4-Dimension Satisfaction Ratings */}
         <section className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
@@ -278,7 +276,6 @@ export default async function EngineInsightsPage() {
           </div>
         </section>
 
-        {/* Pattern Performance Table */}
         <section className="space-y-4">
           <div>
             <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
@@ -336,7 +333,6 @@ export default async function EngineInsightsPage() {
           </div>
         </section>
 
-        {/* Recent Outcomes Portfolio */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
@@ -433,7 +429,6 @@ export default async function EngineInsightsPage() {
           )}
         </section>
 
-        {/* How Flywheel Works */}
         <section className="p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] space-y-4">
           <h2 className="text-base font-bold text-[#27213D] tracking-tight flex items-center gap-2">
             <RotateCcw className="w-5 h-5 text-amber-600" />

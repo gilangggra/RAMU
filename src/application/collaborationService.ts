@@ -277,7 +277,6 @@ function getCollaborationBlueprint(patternCode: string, opp: any, initiatorActor
     };
   }
 
-  // DEFAULT: FASHION_CAPSULE / PRODUCT_PHOTOSHOOT / PREMIUM_GIFT_SET (EDITORIAL LOOKBOOK)
   return {
     budget: {
       estimatedTotal: "Rp 15.000.000",

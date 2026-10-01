@@ -14,7 +14,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <div className="min-h-screen bg-[#0E0C15] text-stone-100 relative overflow-hidden selection:bg-amber-400/30 selection:text-amber-200 flex flex-col justify-between">
-      {/* Background ambient lighting */}
+
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute -top-32 -left-32 w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-[160px]" />
         <div className="absolute top-1/3 -right-32 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[180px]" />

@@ -108,7 +108,7 @@ export function ShowcaseManager({
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Category Filter Bar */}
+
           {categories.list.length > 1 && (
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
               <button

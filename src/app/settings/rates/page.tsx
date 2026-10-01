@@ -29,7 +29,6 @@ export default async function SettingsRatesPage() {
     redirect("/onboarding");
   }
 
-  // Look for custom commercial packages asset
   const serviceAsset = actor.assets.find(
     (a) =>
       a.subtype === "COMMERCIAL_SERVICE_PACKAGES" ||
@@ -42,7 +41,6 @@ export default async function SettingsRatesPage() {
   const customPackages: ServicePackage[] = Array.isArray(attrs.service_packages) ? attrs.service_packages : [];
   const customTerms = attrs.terms_and_conditions || null;
 
-  // Default baseline fallback if user hasn't set anything yet
   const sectorLower = actor.sector.toLowerCase();
   const isIndividualSector =
     sectorLower.includes("photographer") ||

@@ -12,7 +12,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
 
   return (
     <div className="min-h-screen bg-[#FAFAF9] relative overflow-hidden flex flex-col">
-      {/* Background ambient decoration */}
+
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute -top-40 -right-40 w-[700px] h-[700px] bg-amber-400/6 rounded-full blur-[160px]" />
         <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[180px]" />
@@ -23,7 +23,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
 
       <main className="relative z-10 flex-1 flex items-center justify-center px-4 sm:px-6 pt-28 pb-16">
         <div className="w-full">
-          {/* Branding Header */}
+
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-stone-200 shadow-sm text-xs font-bold text-stone-500 uppercase tracking-widest mb-4">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />

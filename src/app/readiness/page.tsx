@@ -56,7 +56,6 @@ interface ReadinessPageProps {
   }>;
 }
 
-// Category and Role labels for Assets
 const ASSET_CATEGORY_LABELS: Record<AssetCategory, string> = {
   PORTFOLIO_WORK: "Karya / Portofolio Visual",
   EQUIPMENT: "Peralatan (Kamera/Lighting/Gear)",
@@ -66,7 +65,6 @@ const ASSET_CATEGORY_LABELS: Record<AssetCategory, string> = {
   AUDIENCE_REACH: "Jangkauan Audiens / Komunitas",
 };
 
-// Filtered categories specifically for Physical Resource/Readiness Registration (Artworks are managed in /dashboard/showcase)
 const READINESS_ASSET_CATEGORY_LABELS: Partial<Record<AssetCategory, string>> = {
   EQUIPMENT: "Peralatan (Kamera/Lighting/Gear)",
   STUDIO_SPACE: "Ruang Studio / Lokasi",
@@ -75,7 +73,6 @@ const READINESS_ASSET_CATEGORY_LABELS: Partial<Record<AssetCategory, string>> = 
   AUDIENCE_REACH: "Jangkauan Audiens / Komunitas",
 };
 
-// Goal categories
 const GOAL_LABELS: Record<GoalCategory, { label: string; desc: string; icon: React.ReactNode }> = {
   EDITORIAL_PUBLICATION: { label: "Publikasi Editorial", desc: "Tampil di majalah/media fesyen ternama", icon: <Globe className="w-4 h-4 text-[#1E1B2E]" /> },
   COMMERCIAL_CAMPAIGN: { label: "Kampanye Komersial", desc: "Kampanye promosi produk/brand baru", icon: <Wrench className="w-4 h-4 text-[#1E1B2E]" /> },
@@ -85,7 +82,6 @@ const GOAL_LABELS: Record<GoalCategory, { label: string; desc: string; icon: Rea
   SKILL_DEVELOPMENT: { label: "Eksplorasi Kreatif & Skill", desc: "Eksperimen teknik visual dan estetika baru", icon: <Zap className="w-4 h-4 text-[#1E1B2E]" /> },
 };
 
-// Need categories
 const NEED_LABELS: Record<
   NeedCategory,
   { label: string; desc: string; icon: React.ComponentType<{ className?: string }> }
@@ -99,7 +95,6 @@ const NEED_LABELS: Record<
   PUBLICATION_NEED: { label: "Kanal Media & Publikasi", desc: "Akses liputan ke majalah fesyen atau portal berita", icon: Truck },
 };
 
-// Constraint categories (Humanized for creative ecosystem)
 const CONSTRAINT_LABELS: Record<
   ConstraintType,
   { label: string; desc: string; icon: React.ComponentType<{ className?: string }>; placeholder: string }
@@ -141,7 +136,6 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
   const params = await searchParams;
   const activeTab = params?.tab || "assets";
 
-  // Fetch all 4 pillars of the engine
   const [assets, goals, needs, constraints] = await Promise.all([
     prisma.asset.findMany({
       where: { actorId: actor.id, status: { not: "ARCHIVED" } },
@@ -162,7 +156,6 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
     }),
   ]);
 
-  // Calculate profile readiness percentage
   const pillarsFilled = [
     assets.length > 0,
     goals.length > 0,
@@ -181,8 +174,7 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
   return (
     <AppShell actor={actor} activeRoute="/readiness">
       <div className="space-y-8 max-w-6xl mx-auto pb-16">
-        
-        {/* Editorial Hero Header */}
+
         <section className="p-8 sm:p-10 rounded-[32px] bg-white border border-stone-200 shadow-xs relative overflow-hidden space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative">
             <div className="space-y-2">
@@ -198,7 +190,6 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
               </p>
             </div>
 
-            {/* Readiness Score Card */}
             <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200 flex items-center gap-4 shrink-0">
               <div className="relative w-14 h-14 flex items-center justify-center rounded-2xl bg-white border border-stone-200 shadow-2xs">
                 <span className="text-lg font-black text-[#1E1B2E]">{readinessPercent}%</span>
@@ -217,7 +208,6 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
             </div>
           </div>
 
-          {/* Quick Metrics */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-stone-100">
             <Link
               href="/readiness?tab=assets"
@@ -284,7 +274,6 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
           </div>
         )}
 
-        {/* Tab Navigation */}
         <div className="flex items-center gap-2 border-b border-stone-200/80 pb-3 overflow-x-auto no-scrollbar">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -313,14 +302,11 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
           })}
         </div>
 
-        {/* =========================================================================
-            TAB 1: ASSETS & CREATIVE RESOURCES
-           ========================================================================= */}
         {activeTab === "assets" && (
           <div className="grid grid-cols-1 xl:grid-cols-5 gap-8 animate-fade-in">
-            {/* Form */}
+
             <div className="xl:col-span-2 space-y-4">
-              {/* Notice Banner to clearly direct users looking to upload artworks */}
+
               <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 text-xs text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-xl bg-amber-200/60 text-amber-800 flex items-center justify-center shrink-0">
@@ -344,7 +330,7 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
               <div className="p-6 rounded-[28px] bg-white border border-stone-200 shadow-xs space-y-5">
                 <form action={createAsset} className="space-y-4">
                   <input type="hidden" name="returnTo" value="/readiness?tab=assets" />
-                  
+
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold uppercase tracking-wider text-stone-500">Nama Aset / Peralatan *</label>
                     <input
@@ -380,10 +366,8 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
                     />
                   </div>
 
-                  {/* Upload Foto Bukti Fisik Langsung */}
                   <AssetUploadField />
 
-                  {/* Spesifikasi Teknis */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold uppercase tracking-wider text-stone-500">Spesifikasi Kunci (Opsional)</label>
                     <input
@@ -394,7 +378,6 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
                     />
                   </div>
 
-                  {/* Kondisi Fisik */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold uppercase tracking-wider text-stone-500">Kondisi Alat &amp; Kesiapan</label>
                     <select
@@ -430,7 +413,6 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
               </div>
             </div>
 
-            {/* List */}
             <div className="xl:col-span-3 space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest">Daftar Aset Aktif ({assets.length})</h2>
@@ -449,8 +431,7 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
                 <div className="space-y-3">
                   {assets.map((asset) => {
                     const attrs = (asset.attributes && typeof asset.attributes === "object") ? (asset.attributes as Record<string, unknown>) : null;
-                    
-                    // Determine photo from attributes or fallback
+
                     let photoUrl = (attrs?.image_url as string) || (attrs?.photo_url as string) || null;
                     if (!photoUrl) {
                       if (asset.category === "EQUIPMENT" || asset.name.toLowerCase().includes("kamera") || asset.name.toLowerCase().includes("lensa")) {
@@ -474,7 +455,7 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
                         key={asset.id}
                         className="p-4 sm:p-5 rounded-2xl bg-white border border-stone-200 hover:border-stone-300 transition-all shadow-xs group flex flex-col sm:flex-row items-start gap-4"
                       >
-                        {/* Visual Thumbnail */}
+
                         <div className="w-full sm:w-24 h-24 rounded-xl bg-stone-100 border border-stone-200 shrink-0 overflow-hidden relative">
                           <img
                             src={photoUrl}
@@ -489,7 +470,6 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
                           )}
                         </div>
 
-                        {/* Content */}
                         <div className="space-y-1.5 flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-100 text-[#1E1B2E] border border-stone-200 uppercase">
@@ -516,7 +496,6 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
                           )}
                         </div>
 
-                        {/* Delete Action */}
                         <form action={archiveAsset.bind(null, asset.id)} className="shrink-0 self-start sm:self-center">
                           <button
                             type="submit"
@@ -535,12 +514,9 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
           </div>
         )}
 
-        {/* =========================================================================
-            TAB 2: GOALS / COLLABORATION TARGETS
-           ========================================================================= */}
         {activeTab === "goals" && (
           <div className="grid grid-cols-1 xl:grid-cols-5 gap-8 animate-fade-in">
-            {/* Form */}
+
             <div className="xl:col-span-2 space-y-4">
               <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest">+ Pasang Target Capaian</h2>
               <div className="p-6 rounded-[28px] bg-white border border-stone-200 shadow-xs space-y-5">
@@ -607,7 +583,6 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
               </div>
             </div>
 
-            {/* List */}
             <div className="xl:col-span-3 space-y-4">
               <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest">Daftar Target Kolaborasi ({goals.length})</h2>
               {goals.length === 0 ? (
@@ -659,12 +634,9 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
           </div>
         )}
 
-        {/* =========================================================================
-            TAB 3: NEEDS / RESOURCE DEMANDS
-           ========================================================================= */}
         {activeTab === "needs" && (
           <div className="space-y-6 animate-fade-in">
-            {/* Real-World Industry Project Bridge Banner */}
+
             <div className="p-6 sm:p-8 rounded-[32px] bg-gradient-to-r from-amber-500/10 via-[#E66A48]/10 to-transparent border border-amber-200/80 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xs">
               <div className="space-y-2 max-w-2xl">
                 <div className="flex items-center gap-2">
@@ -700,7 +672,7 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
-              {/* Form */}
+
               <div className="xl:col-span-2 space-y-4">
                 <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest">+ Catat Kebutuhan Profil</h2>
                 <div className="p-6 rounded-[28px] bg-white border border-stone-200 shadow-xs space-y-5">
@@ -767,7 +739,6 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
                 </div>
               </div>
 
-              {/* List */}
               <div className="xl:col-span-3 space-y-4">
                 <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest">Kebutuhan Terbuka ({needs.length})</h2>
                 {needs.length === 0 ? (
@@ -815,7 +786,6 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
                             </form>
                           </div>
 
-                          {/* Quick Bridge to Project */}
                           <div className="pt-2 border-t border-stone-100 flex items-center justify-between text-xs">
                             <span className="text-[11px] text-stone-500">Siap rekrut untuk proyek nyata?</span>
                             <Link
@@ -836,12 +806,9 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
           </div>
         )}
 
-        {/* =========================================================================
-            TAB 4: CONSTRAINTS & OPERATIONAL TERMS
-           ========================================================================= */}
         {activeTab === "constraints" && (
           <div className="grid grid-cols-1 xl:grid-cols-5 gap-8 animate-fade-in">
-            {/* Form */}
+
             <div className="xl:col-span-2 space-y-4">
               <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest">+ Pasang Preferensi &amp; Ketentuan Kerja</h2>
               <div className="p-6 rounded-[28px] bg-white border border-stone-200 shadow-xs space-y-5">
@@ -851,7 +818,6 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
               </div>
             </div>
 
-            {/* List */}
             <div className="xl:col-span-3 space-y-4">
               <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest">
                 Ketentuan &amp; Batasan Terdaftar ({constraints.length})

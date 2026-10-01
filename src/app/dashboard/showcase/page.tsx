@@ -37,7 +37,6 @@ export default async function DashboardShowcasePage() {
     redirect("/onboarding");
   }
 
-  // Fetch only PORTFOLIO_WORK assets for the current user
   const portfolioAssets = await prisma.asset.findMany({
     where: {
       actorId: primaryActor.id,
@@ -48,7 +47,6 @@ export default async function DashboardShowcasePage() {
     },
   });
 
-  // Fetch active registered actors in RAMU to enable live collaborator tagging
   const registeredActors = await prisma.actor.findMany({
     where: { status: { not: "ARCHIVED" } },
     select: {

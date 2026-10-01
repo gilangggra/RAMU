@@ -25,7 +25,7 @@ export function LoginClientForm({ error, message, redirectTo = "/dashboard" }: L
 
   return (
     <div className="w-full max-w-lg mx-auto bg-[#171523]/90 backdrop-blur-xl border border-stone-800/90 rounded-[32px] p-8 sm:p-10 shadow-[0_32px_80px_rgba(0,0,0,0.6)] relative overflow-hidden transition-all space-y-6">
-      {/* Precision corner marks */}
+
       <div className="absolute top-4 left-4 text-[10px] font-mono font-bold text-stone-700 select-none">┌</div>
       <div className="absolute top-4 right-4 text-[10px] font-mono font-bold text-stone-700 select-none">┐</div>
       <div className="absolute bottom-4 left-4 text-[10px] font-mono font-bold text-stone-700 select-none">└</div>
@@ -44,7 +44,6 @@ export function LoginClientForm({ error, message, redirectTo = "/dashboard" }: L
         </p>
       </div>
 
-      {/* Quick Demo Helper for Competition / Jury */}
       <div className="p-3.5 rounded-2xl bg-stone-900/80 border border-stone-800 space-y-2">
         <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-stone-400">
           <span className="flex items-center gap-1.5 text-amber-300">

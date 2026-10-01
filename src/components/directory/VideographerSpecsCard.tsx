@@ -145,7 +145,7 @@ export function VideographerSpecsCard({ attributes, actorName, isCurrentActor, a
 
   return (
     <div className="space-y-8">
-      {/* 1. Cinema Gear & Audio Section */}
+
       <section className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
           <div className="space-y-1">
@@ -178,9 +178,8 @@ export function VideographerSpecsCard({ attributes, actorName, isCurrentActor, a
           </div>
         </div>
 
-        {/* 4 Metric Columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Col 1: Cinema Cameras */}
+
           <div className="p-5 rounded-none bg-stone-50/70 border border-stone-200/80 space-y-3">
             <div className="flex items-center gap-2 text-stone-500">
               <Camera className="w-4 h-4 text-cyan-600" />
@@ -198,7 +197,6 @@ export function VideographerSpecsCard({ attributes, actorName, isCurrentActor, a
             </ul>
           </div>
 
-          {/* Col 2: Cine Lenses */}
           <div className="p-5 rounded-none bg-stone-50/70 border border-stone-200/80 space-y-3">
             <div className="flex items-center gap-2 text-stone-500">
               <Film className="w-4 h-4 text-indigo-600" />
@@ -216,7 +214,6 @@ export function VideographerSpecsCard({ attributes, actorName, isCurrentActor, a
             </ul>
           </div>
 
-          {/* Col 3: Stabilization & Transmit */}
           <div className="p-5 rounded-none bg-stone-50/70 border border-stone-200/80 space-y-3">
             <div className="flex items-center gap-2 text-stone-500">
               <Sliders className="w-4 h-4 text-amber-600" />
@@ -234,7 +231,6 @@ export function VideographerSpecsCard({ attributes, actorName, isCurrentActor, a
             </ul>
           </div>
 
-          {/* Col 4: Post-Production */}
           <div className="p-5 rounded-none bg-stone-50/70 border border-stone-200/80 space-y-3">
             <div className="flex items-center gap-2 text-stone-500">
               <Volume2 className="w-4 h-4 text-purple-600" />
@@ -254,7 +250,6 @@ export function VideographerSpecsCard({ attributes, actorName, isCurrentActor, a
         </div>
       </section>
 
-      {/* 2. Visual Video Gallery */}
       {videos.length > 0 && (
         <section className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-5">
           <div className="flex items-center justify-between pb-3 border-b border-stone-100">
@@ -281,7 +276,6 @@ export function VideographerSpecsCard({ attributes, actorName, isCurrentActor, a
                   className="w-full h-auto object-cover rounded-none block transition-transform duration-700 group-hover:scale-[1.02] opacity-90 group-hover:opacity-100"
                 />
 
-                {/* Play Button Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="w-12 h-12 rounded-none bg-white/95 text-[#1E1B2E] flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-[#E66A48] group-hover:text-white transition-all backdrop-blur-xs">
                     <Play className="w-5 h-5 ml-0.5 fill-current" />
@@ -305,7 +299,6 @@ export function VideographerSpecsCard({ attributes, actorName, isCurrentActor, a
         </section>
       )}
 
-      {/* Video Detail Modal */}
       {selectedVideo && (
         <div
           className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6"

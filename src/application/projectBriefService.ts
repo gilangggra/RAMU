@@ -412,7 +412,6 @@ export async function formCollaborationFromBrief(
     });
   }
 
-  // Pre-seed Milestones
   const initialMilestones = [
     { title: 'Konsep & Peran Disepakati', status: MilestoneStatus.IN_PROGRESS },
     { title: 'Proses Produksi Dimulai', status: MilestoneStatus.PENDING },
@@ -430,7 +429,6 @@ export async function formCollaborationFromBrief(
     });
   }
 
-  // Decision log awal
   await prisma.decision.create({
     data: {
       collaborationId: collaboration.id,
@@ -441,7 +439,6 @@ export async function formCollaborationFromBrief(
     },
   });
 
-  // Update brief -> link ke collaboration & status FILLED
   await prisma.projectBrief.update({
     where: { id: briefId },
     data: {
@@ -452,10 +449,6 @@ export async function formCollaborationFromBrief(
 
   return { success: true, collaborationId: collaboration.id, isNew: true };
 }
-
-// ----------------------------------------------------------------------------
-// GET INTERESTS FOR ACTOR (minat yang pernah dinyatakan)
-// ----------------------------------------------------------------------------
 
 export async function getInterestsForActor(actorId: string) {
   return prisma.collaborationInterest.findMany({
@@ -471,10 +464,6 @@ export async function getInterestsForActor(actorId: string) {
     orderBy: { createdAt: 'desc' },
   });
 }
-
-// ----------------------------------------------------------------------------
-// GET COUNTS FOR DASHBOARD WIDGETS
-// ----------------------------------------------------------------------------
 
 export async function getProjectBriefDashboardStats(actorId: string) {
   const [openBriefCount, pendingInterestCount, myBriefCount] = await Promise.all([
@@ -500,10 +489,6 @@ export async function getProjectBriefDashboardStats(actorId: string) {
   return { openBriefCount, pendingInterestCount, myBriefCount, recentOpenBriefs };
 }
 
-// ----------------------------------------------------------------------------
-// SMART CREW BUILDER — Per-role crew recommendation engine
-// ----------------------------------------------------------------------------
-
 export interface CrewCandidate {
   actor: {
     id: string;
@@ -526,18 +511,13 @@ export interface CrewRecommendation {
   candidates: CrewCandidate[];
 }
 
-/**
- * Per-role Smart Crew Builder.
- * Returns one `CrewRecommendation` per `neededRole` in the brief,
- * each containing up to 4 ranked candidate actors for that specific role.
- */
 const recommendationsCache = new Map<string, { data: CrewRecommendation[]; timestamp: number }>();
 
 export async function getCrewRecommendationsForBrief(
   briefId: string
 ): Promise<CrewRecommendation[]> {
   const cached = recommendationsCache.get(briefId);
-  // Cache for 5 minutes
+
   if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) {
     return cached.data;
   }
@@ -545,7 +525,6 @@ export async function getCrewRecommendationsForBrief(
   const brief = await getProjectBriefById(briefId);
   if (!brief) return [];
 
-  // Fetch all active actors except the brief creator
   const actors = await prisma.actor.findMany({
     where: {
       status: 'ACTIVE',
@@ -566,7 +545,6 @@ export async function getCrewRecommendationsForBrief(
     },
   });
 
-  // Pre-build a set of actor IDs already accepted per role (exclude them from candidates)
   const acceptedByRole = new Map<string, Set<string>>();
   for (const role of brief.neededRoles) {
     const accepted = new Set(
@@ -589,13 +567,11 @@ export async function getCrewRecommendationsForBrief(
         const matchReasons: string[] = [];
         const actorCategories = actor.assets.map((a) => a.category);
 
-        // ── 1. Role / Asset Category Match (50 pts — mandatory gate) ──────────
         if (actorCategories.includes(role.assetCategory)) {
           score += 50;
           matchReasons.push('Kategori Aset Cocok');
         }
 
-        // ── 2. Aesthetic Style Match (20 pts) ─────────────────────────────────
         if (
           brief.aestheticStyle &&
           actor.aestheticStyles.includes(brief.aestheticStyle)
@@ -604,7 +580,6 @@ export async function getCrewRecommendationsForBrief(
           matchReasons.push('Gaya Visual Sesuai');
         }
 
-        // ── 3. Location Match (15 pts) ────────────────────────────────────────
         if (brief.location && actor.location) {
           const briefLoc = brief.location.toLowerCase();
           const actorLoc = actor.location.toLowerCase();
@@ -618,7 +593,6 @@ export async function getCrewRecommendationsForBrief(
           }
         }
 
-        // ── 4. Compensation Model Match (15 pts) ──────────────────────────────
         if (
           brief.compensationModel &&
           actor.compensationModels.includes(brief.compensationModel)
@@ -629,10 +603,10 @@ export async function getCrewRecommendationsForBrief(
 
         return { actor, matchScore: score, matchReasons };
       })
-      // Must at least match the role's asset category
+
       .filter((c) => c.matchScore >= 50)
       .sort((a, b) => b.matchScore - a.matchScore)
-      .slice(0, 4); // Top 4 candidates per role
+      .slice(0, 4);
 
     results.push({
       roleId: role.id,
@@ -647,13 +621,9 @@ export async function getCrewRecommendationsForBrief(
   return results;
 }
 
-/**
- * Legacy wrapper — kept for backward compatibility with older callers.
- * Prefer `getCrewRecommendationsForBrief` for new features.
- */
 export async function getRecommendedActorsForBrief(briefId: string) {
   const perRole = await getCrewRecommendationsForBrief(briefId);
-  // Flatten to a deduplicated, globally sorted list (legacy format)
+
   const seen = new Set<string>();
   const flat: { actor: CrewCandidate['actor']; matchScore: number; matchReasons: string[] }[] = [];
   for (const rec of perRole) {

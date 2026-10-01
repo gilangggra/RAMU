@@ -40,6 +40,8 @@ interface RoleSlotProps {
   isInitiator: boolean;
   currentActorInterestStatus?: string | null;
   actorAssets: ActorAsset[];
+  initialOpen?: boolean;
+  isMatched?: boolean;
 }
 
 export function RoleSlot({
@@ -54,8 +56,10 @@ export function RoleSlot({
   isInitiator,
   currentActorInterestStatus,
   actorAssets,
+  initialOpen = false,
+  isMatched = false,
 }: RoleSlotProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(initialOpen);
   const [message, setMessage] = useState("");
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
@@ -92,9 +96,12 @@ export function RoleSlot({
 
   return (
     <div
-      className={`p-5 rounded-2xl border transition-all space-y-4 ${
+      id={`role-${roleId}`}
+      className={`p-5 rounded-2xl border transition-all space-y-4 scroll-mt-28 ${
         isFilled
           ? "bg-emerald-50/40 border-emerald-200/80"
+          : isMatched
+          ? "bg-gradient-to-r from-emerald-50/30 via-white to-white border-emerald-400 shadow-md ring-2 ring-emerald-400/20"
           : "bg-white/95 border-stone-200/80 hover:border-amber-400/60 shadow-2xs"
       }`}
     >
@@ -104,17 +111,31 @@ export function RoleSlot({
             className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black shrink-0 ${
               isFilled
                 ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                : isMatched
+                ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
                 : "bg-stone-100 text-stone-600 border border-stone-200"
             }`}
           >
-            {isFilled ? <Check className="w-5 h-5 text-emerald-600" /> : <Circle className="w-3.5 h-3.5 text-stone-400" />}
+            {isFilled ? (
+              <Check className="w-5 h-5 text-emerald-600" />
+            ) : isMatched ? (
+              <Sparkles className="w-4 h-4 text-emerald-600" />
+            ) : (
+              <Circle className="w-3.5 h-3.5 text-stone-400" />
+            )}
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h4 className="font-bold text-[#1E1B2E] text-sm">{roleLabel}</h4>
               <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-stone-100 text-stone-600 border border-stone-200">
                 {CATEGORY_LABELS[assetCategory] || assetCategory}
               </span>
+              {isMatched && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  <Sparkles className="w-2.5 h-2.5 text-emerald-600" />
+                  <span>Sangat Cocok Untuk Anda</span>
+                </span>
+              )}
             </div>
             {description && (
               <p className="text-xs text-stone-500 mt-1 line-clamp-2 leading-relaxed">
@@ -147,10 +168,10 @@ export function RoleSlot({
           {canApply && (
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-extrabold text-xs shadow-[0_4px_16px_rgba(251,191,36,0.25)] transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5"
             >
-              <Sparkles className="w-3.5 h-3.5 text-stone-950" />
-              <span>Ajukan Kolaborasi</span>
+              <Sparkles className="w-3.5 h-3.5 text-white" />
+              <span>{isOpen ? "Tutup Form Lamar" : "Lamar / Ajukan Kolaborasi"}</span>
               <span className="text-[10px]">{isOpen ? "▲" : "▼"}</span>
             </button>
           )}

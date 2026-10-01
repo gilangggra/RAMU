@@ -60,7 +60,6 @@ export function SpkAgreementModal({ isOpen, onClose, booking }: SpkAgreementModa
 
   if (!isOpen) return null;
 
-  // Extract or fallback terms
   const agreedTermsRaw = booking.details?.agreedTerms;
   const defaultFallback = getDefaultTerms(booking.target.sector, booking.target.actorType);
   const terms: TermsAndConditionsConfig = agreedTermsRaw
@@ -143,9 +142,9 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/70 backdrop-blur-xs overflow-y-auto">
-      {/* Container */}
+
       <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-stone-300 overflow-hidden my-auto max-h-[94vh] flex flex-col font-sans">
-        {/* Top Control Bar (Hidden on print) */}
+
         <div className="print:hidden flex items-center justify-between px-6 py-3.5 border-b border-stone-200 bg-stone-100/80">
           <div className="flex items-center gap-2.5">
             <span className="p-1.5 rounded-lg bg-stone-900 text-amber-400">
@@ -194,9 +193,8 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
           </div>
         </div>
 
-        {/* Printable Official Document Body */}
         <div id="spk-printable-area" className="p-8 sm:p-12 overflow-y-auto space-y-6 text-stone-900 bg-white">
-          {/* 1. KOP SURAT FORMAL */}
+
           <div className="flex items-center justify-between border-b-2 border-stone-900 pb-5">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-stone-900 text-amber-400 flex items-center justify-center font-black text-2xl tracking-tighter shadow-xs">
@@ -227,7 +225,6 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
             </div>
           </div>
 
-          {/* 2. JUDUL DOKUMEN & KONSIDERAN */}
           <div className="text-center pt-2 pb-1">
             <h1 className="text-base sm:text-lg font-black uppercase tracking-wider text-stone-950 border-b border-stone-200 pb-2 inline-block">
               SURAT PERJANJIAN KERJA SAMA PELAKSANAAN JASA
@@ -237,14 +234,13 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
             </p>
           </div>
 
-          {/* 3. KOMPARISI (IDENTITAS PARA PIHAK) */}
           <div className="text-xs text-stone-700 space-y-3 leading-relaxed">
             <p>
               Pada hari ini, <strong>{createdFullDate}</strong>, telah dibuat dan disepakati perjanjian kerja sama pelaksanaan jasa secara elektronik melalui platform RAMU oleh dan antara pihak-pihak di bawah ini:
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
-              {/* Pihak Pertama */}
+
               <div className="p-4 rounded-xl border border-stone-300 bg-stone-50/70 space-y-1.5">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500 flex items-center gap-1.5 border-b border-stone-200 pb-1">
                   <Building2 className="w-3 h-3 text-stone-500" />
@@ -263,7 +259,6 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
                 )}
               </div>
 
-              {/* Pihak Kedua */}
               <div className="p-4 rounded-xl border border-amber-300 bg-amber-50/40 space-y-1.5">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5 border-b border-amber-200 pb-1">
                   <User className="w-3 h-3 text-amber-700" />
@@ -290,9 +285,8 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
             </p>
           </div>
 
-          {/* 4. PASAL-PASAL RESMI (BATANG TUBUH KONTRAK) */}
           <div className="space-y-5 text-xs text-stone-800 leading-relaxed border-t border-stone-200 pt-4">
-            {/* PASAL 1 */}
+
             <div className="space-y-1.5">
               <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
                 PASAL 1: RUANG LINGKUP PEKERJAAN &amp; JADWAL PELAKSANAAN
@@ -322,7 +316,6 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
               </ol>
             </div>
 
-            {/* PASAL 2 */}
             <div className="space-y-1.5">
               <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
                 PASAL 2: BIAYA JASA &amp; TATA CARA PEMBAYARAN BERTAHAP
@@ -346,7 +339,6 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
               </ol>
             </div>
 
-            {/* PASAL 3 */}
             <div className="space-y-1.5">
               <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
                 PASAL 3: WAKTU KERJA, TOLERANSI, DAN KETENTUAN LEMBUR (OVERTIME)
@@ -364,7 +356,6 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
               </ol>
             </div>
 
-            {/* PASAL 4 */}
             <div className="space-y-1.5">
               <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
                 PASAL 4: HASIL KARYA, BATAS REVISI, DAN KETENTUAN KHUSUS PROFESI
@@ -373,7 +364,7 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
                 <li>
                   Pekerjaan mencakup maksimal <strong>{terms.maxRevisions} (dua) kali putaran revisi minor</strong> yang relevan dengan brief awal. Revisi besar di luar konsep awal akan dikenakan biaya penyesuaian tersendiri.
                 </li>
-                {/* Profession specific subclauses */}
+
                 {isModel && (
                   <li>
                     <strong>Ketentuan Khusus Talenta/Model</strong>: Konsep busana wajib mematuhi kesepakatan awal ({terms.roleSpecifics.wardrobeRestrictions || "Konsep sopan terverifikasi"}). Talenta {terms.roleSpecifics.chaperoneAllowed ? "berhak didampingi 1 orang pendamping di lokasi" : "bekerja bersama kru resmi"}. Hak tayang citra diri terbatas pada media digital selama {terms.roleSpecifics.usageRightsPeriod || "1 (satu) tahun"}.
@@ -407,7 +398,6 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
               </ol>
             </div>
 
-            {/* PASAL 5 */}
             <div className="space-y-1.5">
               <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
                 PASAL 5: PEMBATALAN, KETIDAKHADIRAN, DAN JAMINAN REFUND DUA ARAH
@@ -422,7 +412,6 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
               </ol>
             </div>
 
-            {/* PASAL 6 */}
             <div className="space-y-1.5">
               <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
                 PASAL 6: KEADAAN MEMAKSA (FORCE MAJEURE)
@@ -432,7 +421,6 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
               </p>
             </div>
 
-            {/* PASAL 7 */}
             <div className="space-y-1.5">
               <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
                 PASAL 7: PENYELESAIAN PERSELISIHAN &amp; KETENTUAN HUKUM
@@ -448,14 +436,13 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
             </div>
           </div>
 
-          {/* 5. PENUTUP & TANDA TANGAN DIGITAL DUA PIHAK */}
           <div className="pt-6 border-t-2 border-stone-900 space-y-4">
             <p className="text-[11px] text-stone-600 leading-relaxed">
               Demikian Surat Perjanjian Kerja Sama Jasa ini dibuat dan disetujui secara sadar, sukarela, dan tanpa paksaan oleh PARA PIHAK melalui persetujuan digital di platform RAMU. Dokumen elektronik ini memiliki kekuatan hukum yang sah dan mengikat kedua belah pihak sejak tanggal diterbitkan.
             </p>
 
             <div className="grid grid-cols-2 gap-8 pt-4">
-              {/* Kolom Tanda Tangan Pihak I */}
+
               <div className="text-center space-y-2">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
                   PIHAK PERTAMA (Pemberi Kerja)
@@ -474,7 +461,6 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
                 <div className="text-[10px] text-stone-500">Pemberi Kerja / Klien</div>
               </div>
 
-              {/* Kolom Tanda Tangan Pihak II */}
               <div className="text-center space-y-2">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
                   PIHAK KEDUA (Pelaksana Jasa)
@@ -494,7 +480,6 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
               </div>
             </div>
 
-            {/* Seal & Footer note */}
             <div className="pt-4 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between text-[10px] text-stone-400">
               <div className="flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-stone-400" />
@@ -505,7 +490,6 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
           </div>
         </div>
 
-        {/* Modal Bottom Footer (Hidden on print) */}
         <div className="print:hidden px-6 py-3 border-t border-stone-200 bg-stone-50 flex items-center justify-between text-xs text-stone-600">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />

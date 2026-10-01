@@ -42,7 +42,6 @@ export default async function ProjectInterestsPage({
   const filledRoles = brief.neededRoles.filter((r) => r.isFilled).length;
   const allFilled = totalRoles > 0 && filledRoles === totalRoles;
 
-  // Flatten & count interests
   const allInterests = brief.neededRoles.flatMap((r) =>
     r.interests.map((i) => ({ ...i, roleLabel: r.roleLabel, isRoleFilled: r.isFilled }))
   );
@@ -74,7 +73,6 @@ export default async function ProjectInterestsPage({
           </Link>
         </div>
 
-        {/* Header Hero */}
         <div className="p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] space-y-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2.5">
@@ -144,7 +142,6 @@ export default async function ProjectInterestsPage({
           </div>
         </div>
 
-        {/* Roles and Interests */}
         <div className="space-y-6">
           {brief.neededRoles.map((role, idx) => {
             const roleInterests = role.interests;

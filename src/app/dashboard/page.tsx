@@ -117,7 +117,6 @@ export default async function DashboardPage() {
     }
   }
 
-  // If no DB request exists, seed a realistic simulation if another actor exists
   if (pendingCoCredits.length === 0) {
     const otherActor = await prisma.actor.findFirst({
       where: {
@@ -159,9 +158,9 @@ export default async function DashboardPage() {
   return (
     <AppShell actor={{ ...primaryActor, avatarUrl: profile.avatarUrl }} activeRoute="/dashboard">
       <div className="space-y-10 pb-12">
-        {/* Welcome Hero Banner */}
+
         <section className="relative p-8 md:p-12 rounded-[32px] overflow-hidden bg-[#1E1B2E] border border-stone-800 shadow-2xl group">
-          {/* Ambient Lighting */}
+
           <div className="absolute inset-0 opacity-40 mix-blend-screen pointer-events-none">
             <div className="absolute -top-[40%] -left-[10%] w-[70%] h-[140%] rounded-full bg-gradient-to-tr from-amber-500/20 to-transparent blur-[120px] group-hover:opacity-60 transition-opacity duration-1000" />
             <div className="absolute top-[20%] -right-[20%] w-[60%] h-[120%] rounded-full bg-gradient-to-bl from-purple-500/20 to-transparent blur-[120px] group-hover:opacity-60 transition-opacity duration-1000" />
@@ -184,7 +183,6 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* Quick Commercial Actions */}
         <section className="flex flex-wrap items-center gap-3">
           <Link
             href="/settings/rates"
@@ -216,10 +214,8 @@ export default async function DashboardPage() {
           </Link>
         </section>
 
-        {/* ── PERMINTAAN KONFIRMASI CO-CREDIT PORTOFOLIO (ANTI-CATFISHING) ── */}
         <CoCreditRequestsCard requests={pendingCoCredits} />
 
-        {/* Rate Packages Notice if 0 */}
         {servicePackageCount === 0 && (
           <div className="p-6 rounded-[28px] bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
             <div className="space-y-1">
@@ -243,17 +239,15 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {/* Ruang Kendali Komersial Grid */}
         <section className="space-y-4">
           <div className="flex items-center justify-between px-2">
             <h2 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-widest">
               Ruang Kendali Komersial
             </h2>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
-            
-            {/* Project Briefs */}
+
             <Link href="/projects" className="group flex flex-col justify-between p-5 rounded-3xl bg-white border border-stone-200 hover:border-stone-300 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="space-y-4">
                 <div className="w-10 h-10 rounded-2xl bg-stone-50 flex items-center justify-center text-stone-600 group-hover:bg-[#1E1B2E] group-hover:text-white transition-colors">
@@ -279,7 +273,6 @@ export default async function DashboardPage() {
               </div>
             </Link>
 
-            {/* Pesanan Masuk (Bookings) */}
             <Link href="/dashboard/bookings" className="group flex flex-col justify-between p-5 rounded-3xl bg-[#1E1B2E] border border-stone-800 shadow-sm hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-1 transition-all duration-300">
               <div className="space-y-4">
                 <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-white/90 group-hover:bg-amber-400 group-hover:text-stone-950 transition-colors">
@@ -304,7 +297,6 @@ export default async function DashboardPage() {
               </div>
             </Link>
 
-            {/* Paket Layanan & Tarif */}
             <Link href="/settings/rates" className="group flex flex-col justify-between p-5 rounded-3xl bg-white border border-stone-200 hover:border-emerald-300 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="space-y-4">
                 <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
@@ -325,7 +317,6 @@ export default async function DashboardPage() {
               </div>
             </Link>
 
-            {/* Portofolio Showcase */}
             <Link href="/dashboard/showcase" className="group flex flex-col justify-between p-5 rounded-3xl bg-white border border-stone-200 hover:border-amber-300 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="space-y-4">
                 <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors">
@@ -344,7 +335,6 @@ export default async function DashboardPage() {
               </div>
             </Link>
 
-            {/* Direktori Talenta & Studio */}
             <Link href="/directory" className="group flex flex-col justify-between p-5 rounded-3xl bg-white border border-stone-200 hover:border-indigo-300 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="space-y-4">
                 <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
@@ -366,7 +356,6 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* Recent Bookings & Direct Leads */}
         <section className="space-y-4 pt-2">
           <div className="flex items-center justify-between px-2">
             <div>
@@ -489,7 +478,6 @@ export default async function DashboardPage() {
           )}
         </section>
 
-        {/* Commercial Ecosystem Stats */}
         <section className="space-y-4 pt-2">
           <div className="flex items-center justify-between px-2">
             <h2 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-widest">

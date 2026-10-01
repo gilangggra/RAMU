@@ -137,9 +137,8 @@ export default async function OpportunitiesPage({
           </div>
         )}
 
-        {/* Filter Bar: Scope + Feasibility */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200/80 pb-4">
-          {/* Scope Selector */}
+
           <div className="inline-flex p-1 rounded-2xl bg-stone-100/90 border border-stone-200/80 text-xs font-bold">
             <Link
               href={`/opportunities?scope=my${feasibilityFilter !== "ALL" ? `&feasibility=${feasibilityFilter}` : ""}`}
@@ -163,7 +162,6 @@ export default async function OpportunitiesPage({
             </Link>
           </div>
 
-          {/* Feasibility Tabs */}
           <div className="flex flex-wrap items-center gap-1.5">
             {[
               { key: "ALL", label: "Semua" },

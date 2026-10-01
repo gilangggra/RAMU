@@ -25,7 +25,6 @@ export function evaluateOpportunityFeasibility(
     }
   }
 
-  // 2. Location & Logistical Feasibility
   const locations = actors
     .map((a) => a.location?.toLowerCase().trim())
     .filter((loc): loc is string => Boolean(loc));
@@ -41,7 +40,6 @@ export function evaluateOpportunityFeasibility(
     unknowns.push('Sebagian lokasi partisipan belum terverifikasi secara lengkap.');
   }
 
-  // 3. Actor Constraints Inspection
   for (const actor of actors) {
     for (const constraint of actor.constraints) {
       const type = constraint.type.toUpperCase();
@@ -50,7 +48,7 @@ export function evaluateOpportunityFeasibility(
 
       if (type === 'BUDGET' || type === 'MINIMUM_ORDER') {
         if (severity === 'HARD') {
-          // Verify negotiability
+
           if (constraint.negotiability === 'FIXED') {
             warnings.push(`${actor.name} memiliki batasan anggaran/minimum order kaku: ${valStr} ${constraint.unit || ''}.`);
           }
@@ -65,7 +63,6 @@ export function evaluateOpportunityFeasibility(
     }
   }
 
-  // 4. Determine Overall Feasibility Status
   let status: EngineFeasibilityStatus = 'FEASIBLE';
 
   if (missingRoles.length > 0) {

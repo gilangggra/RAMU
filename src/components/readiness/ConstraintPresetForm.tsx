@@ -117,7 +117,7 @@ export function ConstraintPresetForm({ action, constraintLabels = DEFAULT_CONSTR
 
   return (
     <div className="space-y-5">
-      {/* 1-Click Quick Presets for Creative Industry */}
+
       <div className="space-y-2">
         <div className="flex items-center gap-1.5 text-xs font-bold text-amber-800">
           <Sparkles className="w-3.5 h-3.5 text-amber-600" />

@@ -101,7 +101,7 @@ export async function updateCollaborationTerms(planId: string, formData: FormDat
         revenueModel: revenueModel as unknown as Prisma.InputJsonValue,
         ownershipRules: ownershipRules as unknown as Prisma.InputJsonValue,
         ipRules: ipRules as unknown as Prisma.InputJsonValue,
-        // Status plan dipertahankan sesuai nilai saat ini — perubahan status dilakukan terpisah
+
         status: plan.status,
       },
     });
@@ -282,17 +282,12 @@ export async function updateSharedProjectLinks(planId: string, formData: FormDat
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// signSpkAction — record digital SPK signature for current actor
-// ─────────────────────────────────────────────────────────────────────
-
 export async function signSpkAction(
   collaborationId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const actor = await getPrimaryActor();
 
-    // Verify the actor is a participant of this collaboration
     const participant = await prisma.collaborationParticipant.findFirst({
       where: {
         collaborationId,
@@ -308,7 +303,6 @@ export async function signSpkAction(
       };
     }
 
-    // Prevent double-signing
     if (participant.signedAt) {
       return {
         success: false,
@@ -316,7 +310,6 @@ export async function signSpkAction(
       };
     }
 
-    // Record the digital signature timestamp
     await prisma.collaborationParticipant.update({
       where: { id: participant.id },
       data: { signedAt: new Date() },

@@ -31,7 +31,7 @@ export function ShowcaseCard({ item, onOpenTearSheet }: ShowcaseCardProps) {
     setIsHovered(true);
     if (isDirectVideo && videoRef.current) {
       videoRef.current.play().catch(() => {
-        // Autoplay may be restricted by browser until interacted
+
       });
     }
   };
@@ -51,12 +51,11 @@ export function ShowcaseCard({ item, onOpenTearSheet }: ShowcaseCardProps) {
       onMouseLeave={handleMouseLeave}
       className="group break-inside-avoid mb-1.5 sm:mb-2 w-full relative block overflow-hidden rounded-none bg-stone-100 cursor-pointer select-none"
     >
-      {/* Loading Skeleton */}
+
       {!imgLoaded && (
         <div className="w-full aspect-[3/4] bg-stone-200/70 animate-pulse" />
       )}
 
-      {/* Direct Video Silent Hover Loop */}
       {isDirectVideo && item.videoUrl && (
         <video
           ref={videoRef}
@@ -71,7 +70,6 @@ export function ShowcaseCard({ item, onOpenTearSheet }: ShowcaseCardProps) {
         />
       )}
 
-      {/* Main Visual Poster Image */}
       <img
         src={item.imageUrl}
         alt={item.title}
@@ -82,7 +80,6 @@ export function ShowcaseCard({ item, onOpenTearSheet }: ShowcaseCardProps) {
         loading="lazy"
       />
 
-      {/* Minimalist Cinema Indicator Badge (Discreet top-right, visible on hover) */}
       {isVideo && (
         <div className="absolute top-2 right-2 z-20 w-6 h-6 bg-black/50 backdrop-blur-xs flex items-center justify-center text-white/95 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
           <Play className="w-3 h-3 fill-current ml-0.5" />

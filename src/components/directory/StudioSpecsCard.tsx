@@ -69,7 +69,7 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
 
   return (
     <div className="space-y-8">
-      {/* 1. Dimension & Cyclorama Specifications Card */}
+
       <section className="p-7 sm:p-8 rounded-none bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
           <div className="space-y-1">
@@ -102,7 +102,6 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
           </div>
         </div>
 
-        {/* 4 Primary Room Metrics */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="p-4 rounded-none bg-stone-50/80 border border-stone-200/70 space-y-1">
             <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
@@ -148,7 +147,6 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
           </div>
         </div>
 
-        {/* 2. Photo Gallery of the Studio */}
         {gallery.length > 0 && (
           <div className="space-y-3 pt-2">
             <div className="flex items-center justify-between text-xs font-bold text-stone-400 uppercase tracking-wider">
@@ -189,7 +187,6 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
           </div>
         )}
 
-        {/* 3. Included Lighting & Gear List */}
         {gearList.length > 0 && (
           <div className="space-y-3 pt-4 border-t border-stone-100">
             <div className="flex items-center gap-2 text-xs font-bold text-stone-400 uppercase tracking-wider">
@@ -213,7 +210,6 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
           </div>
         )}
 
-        {/* 4. On-Site Amenities & Facilities */}
         {facilities.length > 0 && (
           <div className="space-y-3 pt-4 border-t border-stone-100">
             <div className="flex items-center gap-2 text-xs font-bold text-stone-400 uppercase tracking-wider">
@@ -236,7 +232,6 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
         )}
       </section>
 
-      {/* Lightbox Image Modal */}
       {selectedPhoto && (
         <div
           onClick={() => setSelectedPhoto(null)}

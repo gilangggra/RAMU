@@ -69,9 +69,6 @@ export default async function DirectoryPage({
     }),
   ]);
 
-  // ── Complementarity Score computation ─────────────────────────────────────
-  // Build a flat list of "wanted" asset categories from the current actor's
-  // active needs + unfilled roles from their open project briefs.
   const actorNeeds = actor!.needs ?? [];
   const actorBriefs = actor!.createdProjectBriefs ?? [];
   const wantedCategories = new Set<string>([
@@ -81,13 +78,10 @@ export default async function DirectoryPage({
     ),
   ]);
 
-  // For each directory actor, score how many of their active asset categories
-  // overlap with what the current actor wants.
-  // Score = (matches / wantedCategories.size) * 100, capped at 100.
   const scoreMap = new Map<string, number>();
   if (wantedCategories.size > 0) {
     for (const a of actors) {
-      if (a.id === actor!.id) continue; // exclude self
+      if (a.id === actor!.id) continue;
       const actorCats = new Set<string>(a.assets.map((asset) => asset.category as string));
       let matches = 0;
       for (const cat of wantedCategories) {
@@ -102,13 +96,12 @@ export default async function DirectoryPage({
   const totalActors = allActors.length;
   const totalStudios = allActors.filter((a) => a.actorType === "STUDIO").length;
   const totalIndividuals = allActors.filter((a) => a.actorType === "INDIVIDUAL").length;
-  const totalBrands = allActors.filter((a) => a.actorType === "MSME").length;
+  const totalBrands = allActors.filter((a) => a.actorType === "BRAND" || (a.actorType as string) === "MSME").length;
 
   return (
     <AppShell actor={actor} activeRoute="/directory">
       <div className="space-y-12 pb-24">
-        
-        {/* Editorial Hero Section */}
+
         <section className="pt-12 pb-8 border-b border-stone-200">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
             <div className="max-w-2xl">
@@ -123,12 +116,11 @@ export default async function DirectoryPage({
                 <span className="font-serif italic text-stone-500">studio foto</span> untuk proyek Anda.
               </h1>
               <p className="text-base text-stone-500 font-light leading-relaxed max-w-lg">
-                Katalog kurasi fotografer, videografer, model, desainer, dan studio visual terverifikasi di Indonesia. 
+                Katalog kurasi fotografer, videografer, model, desainer, dan studio visual terverifikasi di Indonesia.
                 Siap disewa langsung untuk kampanye komersial, lookbook, dan produksi kreatif Anda.
               </p>
             </div>
-            
-            {/* Minimalist Metrics */}
+
             <div className="flex flex-wrap items-center gap-8 lg:gap-12 pb-2">
               <div className="space-y-1">
                 <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{totalActors}</div>
@@ -148,7 +140,6 @@ export default async function DirectoryPage({
           </div>
         </section>
 
-        {/* Filter & Search Bar */}
         <DirectoryFilterBar
           currentSearch={search}
           currentType={actorType}
@@ -156,7 +147,6 @@ export default async function DirectoryPage({
           currentLocation={location}
         />
 
-        {/* Actors Grid */}
         <div className="space-y-6">
           <div className="flex items-center justify-between text-[11px] uppercase tracking-widest text-stone-400 font-semibold px-2">
             <span>
