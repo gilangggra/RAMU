@@ -34,7 +34,7 @@ export function ShowcaseGalleryClient({ items, currentActorId }: ShowcaseGallery
 
   return (
     <>
-      {/* ── MASONRY GRID (PURE HIGH-DENSITY VISUAL WALL) ── */}
+
       <div className="columns-2 sm:columns-3 md:columns-4 xl:columns-5 gap-1.5 sm:gap-2">
         {items.map((item) => (
           <ShowcaseCard
@@ -45,7 +45,6 @@ export function ShowcaseGalleryClient({ items, currentActorId }: ShowcaseGallery
         ))}
       </div>
 
-      {/* ── INTERACTIVE HOTSPOT TEAR-SHEET MODAL ── */}
       <TearSheetModal
         item={currentItem}
         items={items}

@@ -361,7 +361,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
     return portfolioAssets.filter((a) => (a.subtype || "Karya") === portfolioFilter);
   }, [portfolioAssets, portfolioFilter]);
 
-  // Curate true skills and specialties
   const explicitSpecialties: string[] = [];
   if (modelAttrs?.specialties) explicitSpecialties.push(...modelAttrs.specialties);
   if (photographerAttrs?.specialties) explicitSpecialties.push(...photographerAttrs.specialties);
@@ -390,7 +389,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
   const totalReviews = actor.feedbacks.length;
   const avgRating = totalReviews > 0 ? "5.0" : "5.0";
 
-  // Dynamic Commercial Packages tailored to Indonesian Creative Industry
   interface ServicePackage {
     title: string;
     subtitle: string;
@@ -400,7 +398,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
     features: string[];
   }
 
-  // Check if actor has custom service packages configured in their assets
   const customServiceAsset = actor.assets.find(
     (a) =>
       a.subtype === "COMMERCIAL_SERVICE_PACKAGES" ||
@@ -1028,15 +1025,12 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
         })}
       </div>
 
-      {/* ────────────────────────────────────────────────────────── */}
-      {/* TAB 1: PORTOFOLIO KARYA (Visual Proof First!) */}
-      {/* ────────────────────────────────────────────────────────── */}
       {activeTab === "portfolio" && (
         <div className="space-y-8">
-          {/* Portfolio Masonry Grid (Visuals) */}
+
           {portfolioAssets.length > 0 ? (
             <div className="space-y-4">
-              {/* Anti-Catfishing Trust Banner */}
+
               <div className="p-3.5 rounded-none bg-gradient-to-r from-emerald-500/10 via-amber-500/5 to-transparent border border-emerald-300/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-none bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
@@ -1134,7 +1128,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                   )}
                 </div>
               )}
-              
+
               {filteredPortfolioAssets.length > 0 ? (
                 <div
                   className={
@@ -1249,7 +1243,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
             </div>
           )}
 
-          {/* Featured Comp Card / Lookbook Visuals if available */}
           {isModel && modelAttrs?.comp_card && modelAttrs.comp_card.length > 0 && (
             <div className="space-y-4 pt-6 border-t border-stone-200">
               <div className="flex items-center justify-between">
@@ -1306,9 +1299,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
         </div>
       )}
 
-      {/* ────────────────────────────────────────────────────────── */}
-      {/* TAB 2: PAKET LAYANAN & TARIF (Commercial Rate Card) */}
-      {/* ────────────────────────────────────────────────────────── */}
       {activeTab === "rates" && (
         <div className="space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
@@ -1338,7 +1328,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
             </div>
           </div>
 
-          {/* Pricing Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {packages.map((pkg, idx) => (
               <div
@@ -1370,7 +1359,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                     </div>
                   </div>
 
-                  {/* Feature list */}
                   <div className="space-y-2.5 pt-2">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
                       Rincian Layanan &amp; Output:
@@ -1415,7 +1403,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
             ))}
           </div>
 
-          {/* Custom Quote Note */}
           <div className="p-5 rounded-none bg-stone-50 border border-stone-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
             <div className="space-y-0.5">
               <span className="font-bold text-[#1E1B2E] block">Butuh paket khusus atau brief di luar daftar?</span>
@@ -1436,12 +1423,9 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
         </div>
       )}
 
-      {/* ────────────────────────────────────────────────────────── */}
-      {/* TAB 3: SPESIFIKASI & ALAT KERJA */}
-      {/* ────────────────────────────────────────────────────────── */}
       {activeTab === "specs" && (
         <div className="space-y-8">
-          {/* Section Header */}
+
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
             <div className="flex items-center gap-2">
               <Sliders className="w-4 h-4 text-stone-400" />
@@ -1495,7 +1479,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
             <BrandSpecsCard attributes={brandAttrs || {}} brandName={actor.name} isCurrentActor={isCurrentActor} actorAssets={actor.assets} />
           )}
 
-          {/* Hardware & Tools Inventory */}
           {otherAssets.length > 0 && (
             <div className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-5">
               <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
@@ -1535,12 +1518,9 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
         </div>
       )}
 
-      {/* ────────────────────────────────────────────────────────── */}
-      {/* TAB 4: TENTANG & KETENTUAN KERJA (Working Terms) */}
-      {/* ────────────────────────────────────────────────────────── */}
       {activeTab === "about" && (
         <div className="space-y-8">
-          {/* Section Header */}
+
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-stone-400" />
@@ -1563,7 +1543,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Bio & Professional Profile */}
+
             <div className="lg:col-span-2 space-y-6">
               <div className="p-7 sm:p-8 bg-white border border-stone-200/80 rounded-none space-y-4">
                 <div className="flex items-center justify-between pb-2 border-b border-stone-100">
@@ -1575,7 +1555,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                   {actor.description || "Kreator dan pelaku industri terverifikasi di ekosistem RAMU Indonesia."}
                 </div>
 
-                {/* Specialties */}
                 <div className="pt-4 border-t border-stone-100 space-y-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
                     Bidang Keahlian &amp; Layanan Utama:
@@ -1593,7 +1572,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
                 </div>
               </div>
 
-              {/* Standard Working Terms (Ketentuan Kerja Sederhana) */}
               <div className="p-7 sm:p-8 bg-white border border-stone-200/80 rounded-none space-y-5">
                 <div className="flex items-center justify-between pb-2 border-b border-stone-100">
                   <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
@@ -1623,7 +1601,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
               </div>
             </div>
 
-            {/* Sidebar Details */}
             <div className="space-y-6">
               <div className="p-6 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-4">
                 <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider">
@@ -1696,12 +1673,9 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
         </div>
       )}
 
-      {/* ────────────────────────────────────────────────────────── */}
-      {/* TAB 5: REVIEWS & REPUTATION (Ulasan Klien) */}
-      {/* ────────────────────────────────────────────────────────── */}
       {activeTab === "reviews" && (
         <div className="space-y-8">
-          {/* Section Header */}
+
           <div className="flex items-center gap-2 pb-4 border-b border-stone-100">
             <Star className="w-4 h-4 text-stone-400" />
             <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
@@ -1747,7 +1721,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
               </div>
             </div>
 
-            {/* Testimonials List */}
             <div className="space-y-4">
               <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider">
                 Testimoni dari Klien &amp; Mitra Terverifikasi
@@ -1807,7 +1780,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
         </div>
       )}
 
-      {/* Tear Sheet Lightbox Modal */}
       {selectedShowcaseIndex !== null && showcaseItems[selectedShowcaseIndex] && (
         <TearSheetModal
           item={showcaseItems[selectedShowcaseIndex]}
@@ -1821,7 +1793,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
         />
       )}
 
-      {/* Booking Modal Integrated */}
       <BookingModal
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
@@ -1831,8 +1802,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
         targetType={actor.actorType}
         termsConfig={customTermsConfig}
       />
-
-
 
       {isCurrentActor && (
         <ProfileSlideOverDrawer

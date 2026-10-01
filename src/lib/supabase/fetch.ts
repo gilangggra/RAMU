@@ -101,7 +101,7 @@ export async function devSupabaseFetch(
   input: RequestInfo | URL,
   init?: RequestInit
 ): Promise<Response> {
-  // Always try standard native fetch first (fast ~250ms)
+
   try {
     return await fetch(input, init);
   } catch (err: any) {
@@ -119,4 +119,3 @@ export async function devSupabaseFetch(
     throw err;
   }
 }
-

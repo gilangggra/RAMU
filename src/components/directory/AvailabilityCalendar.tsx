@@ -18,20 +18,15 @@ export function AvailabilityCalendar() {
   ];
   const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
-  // Mock availability logic:
-  // - Weekends (0, 6) are mostly free
-  // - Some random weekdays are booked
   const getDayStatus = (day: number) => {
     const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
     const dayOfWeek = date.getDay();
     const today = new Date();
-    
-    // Past dates
+
     if (date < new Date(today.getFullYear(), today.getMonth(), today.getDate())) {
       return "past";
     }
 
-    // Mock booked dates (e.g., multiples of 5 or 7 just for demo)
     if (day % 5 === 0 || day % 7 === 0) {
       return "booked";
     }
@@ -46,7 +41,7 @@ export function AvailabilityCalendar() {
           <CalendarIcon className="w-4 h-4 text-emerald-600" />
           <span>Kalender Ketersediaan Jadwal</span>
         </h3>
-        
+
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5 text-[10px] font-bold text-stone-500 uppercase tracking-wider">
             <span className="w-2 h-2 rounded-none bg-emerald-500"></span> Tersedia
@@ -58,7 +53,7 @@ export function AvailabilityCalendar() {
       </div>
 
       <div className="bg-stone-50 rounded-none border border-stone-200/70 p-4">
-        {/* Calendar Header */}
+
         <div className="flex items-center justify-between mb-4 px-2">
           <button onClick={prevMonth} className="p-1.5 rounded-none hover:bg-stone-200 text-stone-500 transition-colors cursor-pointer">
             <ChevronLeft className="w-5 h-5" />
@@ -71,7 +66,6 @@ export function AvailabilityCalendar() {
           </button>
         </div>
 
-        {/* Days of Week */}
         <div className="grid grid-cols-7 mb-2">
           {dayNames.map(day => (
             <div key={day} className="text-center text-[10px] font-bold text-stone-400 uppercase tracking-wider py-1">
@@ -80,18 +74,16 @@ export function AvailabilityCalendar() {
           ))}
         </div>
 
-        {/* Calendar Grid */}
         <div className="grid grid-cols-7 gap-1 sm:gap-2">
-          {/* Empty slots for first days */}
+
           {Array.from({ length: firstDayOfMonth }).map((_, i) => (
             <div key={`empty-${i}`} className="aspect-square"></div>
           ))}
-          
-          {/* Days */}
+
           {Array.from({ length: daysInMonth }).map((_, i) => {
             const day = i + 1;
             const status = getDayStatus(day);
-            
+
             let statusClasses = "";
             if (status === "past") {
               statusClasses = "bg-stone-50 text-stone-300 border-transparent opacity-50 cursor-not-allowed";
@@ -102,8 +94,8 @@ export function AvailabilityCalendar() {
             }
 
             return (
-              <div 
-                key={day} 
+              <div
+                key={day}
                 className={`relative aspect-square flex flex-col items-center justify-center rounded-none border transition-all duration-200 ${statusClasses}`}
                 title={status === "available" ? `Tersedia pada ${day} ${monthNames[currentDate.getMonth()]}` : status === "booked" ? "Sudah dipesan" : ""}
               >

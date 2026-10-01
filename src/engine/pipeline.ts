@@ -64,16 +64,12 @@ export function runOpportunityPipeline(
     return pairwiseMap.get(`${idA}:${idB}`) || [];
   }
 
-  // --------------------------------------------------------------------------
-  // STAGE 5 & 6: GROUP FORMATION & PATTERN MATCHING
-  // --------------------------------------------------------------------------
   const candidateOpportunities: EngineOpportunity[] = [];
   const deduplicationSet = new Set<string>();
 
   for (const pattern of OPPORTUNITY_PATTERNS) {
     let countForPattern = 0;
 
-    // We search for candidate combinations of size minParticipants to maxParticipants
     const combinations = generateActorCombinations(
       candidatePool,
       pattern.minParticipants,
@@ -84,7 +80,6 @@ export function runOpportunityPipeline(
     for (const group of combinations) {
       if (countForPattern >= maxPerPattern) break;
 
-      // Check if group members have relevant complementarity
       const groupComplementarities: PairwiseComplementarity[] = [];
       for (let i = 0; i < group.length; i++) {
         for (let j = i + 1; j < group.length; j++) {
@@ -93,19 +88,17 @@ export function runOpportunityPipeline(
         }
       }
 
-      // Check role assignment for each pattern required role
       const assignedParticipants: EngineParticipantAssignment[] = [];
       const assignedAssets: EngineAssetUsage[] = [];
       const assignedActorIds = new Set<string>();
 
-      // Try assigning each required role to a suitable actor in the group
       let canSatisfyRequiredRoles = true;
 
       for (const requiredRole of pattern.requiredRoles) {
         let assigned = false;
 
         for (const actor of group) {
-          // Find if this actor has assets matching the role
+
           const matchingAsset = actor.assets.find((as) => {
             const catMatches = requiredRole.acceptedCategories.includes(as.category);
             const roleMatches =
@@ -145,16 +138,13 @@ export function runOpportunityPipeline(
         }
       }
 
-      // If required roles couldn't be satisfied and group doesn't cover it, skip or mark partial
-      // We want to generate high-quality candidates
       if (!canSatisfyRequiredRoles && pattern.code !== 'FASHION_CAPSULE') {
         continue;
       }
 
-      // Assign remaining actors to optional roles or complementary roles
       for (const actor of group) {
         if (!assignedActorIds.has(actor.id)) {
-          // Check if matches optional role
+
           let assignedOptional = false;
           for (const optRole of pattern.optionalRoles) {
             const optAsset = actor.assets.find((as) =>
@@ -186,7 +176,7 @@ export function runOpportunityPipeline(
           }
 
           if (!assignedOptional) {
-            // General collaborator
+
             const firstAsset = actor.assets[0];
             assignedParticipants.push({
               actorId: actor.id,
@@ -210,12 +200,8 @@ export function runOpportunityPipeline(
         }
       }
 
-      // Ensure every participant in assignedParticipants is unique by actorId
       const uniqueParticipants = deduplicateParticipants(assignedParticipants);
 
-      // ----------------------------------------------------------------------
-      // STAGE 7: OPPORTUNITY CONSTRUCTION
-      // ----------------------------------------------------------------------
       const titleContext = {
         actors: group,
         assets: assignedAssets.map((a) => {
@@ -228,7 +214,6 @@ export function runOpportunityPipeline(
       const title = pattern.generateTitle(titleContext);
       const description = pattern.generateDescription(titleContext);
 
-      // Find goals supported and needs addressed
       const goalsSupported: string[] = [];
       const goalTitles: string[] = [];
       for (const act of group) {
@@ -255,14 +240,8 @@ export function runOpportunityPipeline(
         }
       }
 
-      // ----------------------------------------------------------------------
-      // STAGE 8: CONSTRAINT EVALUATION
-      // ----------------------------------------------------------------------
       const feasibility = evaluateOpportunityFeasibility(pattern, group, uniqueParticipants);
 
-      // ----------------------------------------------------------------------
-      // STAGE 9: EXPLANATION GENERATION
-      // ----------------------------------------------------------------------
       const explanation = generateOpportunityExplanation({
         pattern,
         title,
@@ -274,9 +253,6 @@ export function runOpportunityPipeline(
         needsAddressedTitles: needTitles,
       });
 
-      // ----------------------------------------------------------------------
-      // STAGE 10: DEDUPLICATION
-      // ----------------------------------------------------------------------
       const sortedActorIds = group.map((a) => a.id).sort().join(':');
       const deduplicationKey = `${pattern.code}_${sortedActorIds}`;
 
@@ -285,9 +261,6 @@ export function runOpportunityPipeline(
       }
       deduplicationSet.add(deduplicationKey);
 
-      // ----------------------------------------------------------------------
-      // SCORING
-      // ----------------------------------------------------------------------
       const score = calculateOpportunityScore({
         pattern,
         actors: group,
@@ -324,19 +297,11 @@ export function runOpportunityPipeline(
     }
   }
 
-  // --------------------------------------------------------------------------
-  // STAGE 11: DIVERSIFICATION & LIMITING
-  // --------------------------------------------------------------------------
-  // Sort by displayScore descending
   candidateOpportunities.sort((a, b) => b.score.displayScore - a.score.displayScore);
 
-  // Take top maxTotal
   return candidateOpportunities.slice(0, maxTotal);
 }
 
-// ----------------------------------------------------------------------------
-// Helper to generate actor combinations
-// ----------------------------------------------------------------------------
 function generateActorCombinations(
   actors: EngineActor[],
   min: number,
@@ -345,13 +310,12 @@ function generateActorCombinations(
 ): EngineActor[][] {
   const result: EngineActor[][] = [];
 
-  // If focusActorId is provided, the focus actor must always be present
   const focusActor = focusActorId ? actors.find((a) => a.id === focusActorId) : undefined;
   const pool = focusActor ? actors.filter((a) => a.id !== focusActorId) : actors;
 
   for (let k = min; k <= Math.min(max, actors.length); k++) {
     if (focusActor) {
-      // Pick k - 1 from pool, plus focusActor
+
       const otherCombos = kCombinations(pool, k - 1);
       for (const c of otherCombos) {
         result.push([focusActor, ...c]);
@@ -396,7 +360,7 @@ function deduplicateParticipants(
     if (!map.has(p.actorId)) {
       map.set(p.actorId, p);
     } else {
-      // Merge assetIds
+
       const existing = map.get(p.actorId)!;
       for (const aid of p.assetIds) {
         if (!existing.assetIds.includes(aid)) {

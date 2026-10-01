@@ -45,7 +45,6 @@ export default async function CollaborationDetailPage({
     );
   }
 
-  // Check if this collaboration was converted from an accepted booking
   const allAcceptedBookings = await prisma.bookingRequest.findMany({
     where: { status: "ACCEPTED" },
     include: { requester: true, target: true },

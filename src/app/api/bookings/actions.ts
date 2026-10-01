@@ -19,7 +19,6 @@ export async function createBookingRequest(data: BookingFormData) {
 
     if (!user) return { success: false, error: "Unauthorized" };
 
-    // Get current user's active actor (requester)
     const requester = await prisma.actor.findFirst({
       where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
       orderBy: { createdAt: "asc" },
@@ -53,7 +52,6 @@ export async function createBookingRequest(data: BookingFormData) {
       }
     }
 
-    // Create the booking request
     const booking = await prisma.bookingRequest.create({
       data: {
         requesterId: requester.id,
@@ -87,7 +85,6 @@ export async function updateBookingStatus(bookingId: string, status: "ACCEPTED" 
     const userActorIds = profile?.actors?.map((a) => a.id) || [];
     if (userActorIds.length === 0) return { success: false, error: "Profil aktor tidak ditemukan." };
 
-    // Verify ownership of the target actor
     const booking = await prisma.bookingRequest.findUnique({
       where: { id: bookingId }
     });
@@ -137,7 +134,6 @@ export async function convertBookingToCollaboration(bookingId: string) {
 
     if (!booking) return { success: false, error: "Booking tidak ditemukan." };
 
-    // Verify user is either target or requester
     if (!userActorIds.includes(booking.targetId) && !userActorIds.includes(booking.requesterId)) {
       return { success: false, error: "Anda tidak memiliki izin untuk mengonversi pesanan ini." };
     }
@@ -150,7 +146,6 @@ export async function convertBookingToCollaboration(bookingId: string) {
       ? (booking.details as Record<string, any>)
       : {};
 
-    // If collaboration already exists, return it
     if (details.collaborationId) {
       return { success: true, collaborationId: details.collaborationId };
     }
@@ -159,7 +154,6 @@ export async function convertBookingToCollaboration(bookingId: string) {
     const scheduleDate = booking.startDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
     const objective = `Eksekusi pesanan terkonfirmasi untuk ${booking.target.sector}. Tanggal: ${scheduleDate}. Anggaran: ${booking.budget || "Sesuai kesepakatan"}.`;
 
-    // Create CollaborationPlan
     const plan = await prisma.collaborationPlan.create({
       data: {
         createdByActorId: primaryActor.id,
@@ -189,7 +183,6 @@ export async function convertBookingToCollaboration(bookingId: string) {
       },
     });
 
-    // Create CollaborationRoles
     await prisma.collaborationRole.create({
       data: {
         collaborationPlanId: plan.id,
@@ -212,7 +205,6 @@ export async function convertBookingToCollaboration(bookingId: string) {
       },
     });
 
-    // Create Collaboration
     const collaboration = await prisma.collaboration.create({
       data: {
         collaborationPlanId: plan.id,
@@ -223,7 +215,6 @@ export async function convertBookingToCollaboration(bookingId: string) {
       },
     });
 
-    // Add Participants
     await prisma.collaborationParticipant.createMany({
       data: [
         {
@@ -241,7 +232,6 @@ export async function convertBookingToCollaboration(bookingId: string) {
       ],
     });
 
-    // Create starter tasks
     await prisma.task.createMany({
       data: [
         {
@@ -271,7 +261,6 @@ export async function convertBookingToCollaboration(bookingId: string) {
       ],
     });
 
-    // Update booking details with collaborationId
     const updatedDetails = {
       ...details,
       collaborationId: collaboration.id,
@@ -292,4 +281,3 @@ export async function convertBookingToCollaboration(bookingId: string) {
     return { success: false, error: "Gagal mengonversi pesanan ke ruang kolaborasi." };
   }
 }
-

@@ -154,14 +154,12 @@ export function RatesForm({
   const [isPending, setIsPending] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  // Helper to update a package field
   function handlePackageChange(index: number, field: keyof ServicePackage, value: any) {
     const updated = [...packages];
     updated[index] = { ...updated[index], [field]: value };
     setPackages(updated);
   }
 
-  // Helper to add a deliverable feature to a package
   function handleAddFeature(pkgIndex: number) {
     const updated = [...packages];
     updated[pkgIndex] = {
@@ -171,7 +169,6 @@ export function RatesForm({
     setPackages(updated);
   }
 
-  // Helper to update a feature
   function handleFeatureChange(pkgIndex: number, featIndex: number, value: string) {
     const updated = [...packages];
     const newFeatures = [...updated[pkgIndex].features];
@@ -180,7 +177,6 @@ export function RatesForm({
     setPackages(updated);
   }
 
-  // Helper to remove a feature
   function handleRemoveFeature(pkgIndex: number, featIndex: number) {
     const updated = [...packages];
     const newFeatures = updated[pkgIndex].features.filter((_, i) => i !== featIndex);
@@ -188,7 +184,6 @@ export function RatesForm({
     setPackages(updated);
   }
 
-  // Helper to add a new package
   function handleAddNewPackage() {
     if (packages.length >= 4) return;
     setPackages([
@@ -204,12 +199,10 @@ export function RatesForm({
     ]);
   }
 
-  // Helper to remove a package
   function handleRemovePackage(index: number) {
     setPackages(packages.filter((_, i) => i !== index));
   }
 
-  // Load Industry Recommended Benchmark Template
   function handleLoadTemplate() {
     const sectorLower = actorSector.toLowerCase();
     if (sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema")) {
@@ -418,7 +411,7 @@ export function RatesForm({
 
   return (
     <div className="bg-white rounded-3xl border border-stone-200 shadow-[0_8px_30px_rgba(39,33,61,0.04)] overflow-hidden">
-      {/* Header */}
+
       <div className="p-6 sm:p-8 border-b border-stone-100 bg-stone-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 mb-2">
@@ -460,7 +453,6 @@ export function RatesForm({
           </div>
         )}
 
-        {/* 1. Global Baseline Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-2xl bg-stone-50/70 border border-stone-200/80">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -499,7 +491,6 @@ export function RatesForm({
           </div>
         </div>
 
-        {/* 2. Custom Packages List */}
         <div className="space-y-6">
           <div className="flex items-center justify-between pb-2 border-b border-stone-100">
             <div>
@@ -548,7 +539,7 @@ export function RatesForm({
                   }`}
                 >
                   <div className="space-y-4">
-                    {/* Top Row: Package Number & Delete */}
+
                     <div className="flex items-center justify-between">
                       <span className="px-2.5 py-0.5 rounded-full bg-stone-100 text-[10px] font-bold text-stone-600 uppercase tracking-widest">
                         Paket {idx + 1}
@@ -576,7 +567,6 @@ export function RatesForm({
                       </div>
                     </div>
 
-                    {/* Title & Subtitle */}
                     <div className="space-y-3">
                       <div>
                         <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
@@ -606,7 +596,6 @@ export function RatesForm({
                       </div>
                     </div>
 
-                    {/* Price & Unit */}
                     <div className="grid grid-cols-2 gap-3 pt-2 border-t border-stone-100">
                       <div>
                         <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
@@ -637,7 +626,6 @@ export function RatesForm({
                       </div>
                     </div>
 
-                    {/* Features Deliverables List */}
                     <div className="space-y-2 pt-2 border-t border-stone-100">
                       <div className="flex items-center justify-between">
                         <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
@@ -683,7 +671,6 @@ export function RatesForm({
           )}
         </div>
 
-        {/* 3. Ketentuan Standar Kerja & Proteksi Layanan (Terms & Conditions) */}
         <div className="space-y-6 pt-6 border-t border-stone-100">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-200">
             <div className="space-y-1">
@@ -700,7 +687,6 @@ export function RatesForm({
             </div>
           </div>
 
-          {/* General Terms: DP, Shift Hours, Revisions, Overtime */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-5 rounded-2xl bg-stone-50 border border-stone-200/80">
             <div>
               <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
@@ -766,7 +752,6 @@ export function RatesForm({
             </div>
           </div>
 
-          {/* Role-Specific Specialized Terms */}
           <div className="p-5 rounded-2xl bg-white border border-stone-200 space-y-4 shadow-2xs">
             <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <span className="text-xs font-bold text-[#1E1B2E] uppercase tracking-wider flex items-center gap-2">
@@ -780,7 +765,6 @@ export function RatesForm({
               </span>
             </div>
 
-            {/* Model / Talent specifics */}
             {isModel && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -837,7 +821,6 @@ export function RatesForm({
               </div>
             )}
 
-            {/* MUA specifics */}
             {isMUA && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -894,7 +877,6 @@ export function RatesForm({
               </div>
             )}
 
-            {/* Stylist specifics */}
             {isStylist && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -934,7 +916,6 @@ export function RatesForm({
               </div>
             )}
 
-            {/* Videographer specifics */}
             {isVideographer && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -991,7 +972,6 @@ export function RatesForm({
               </div>
             )}
 
-            {/* Studio specifics */}
             {isStudio && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -1048,7 +1028,6 @@ export function RatesForm({
               </div>
             )}
 
-            {/* Photographer specifics */}
             {isPhotographer && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -1090,7 +1069,6 @@ export function RatesForm({
           </div>
         </div>
 
-        {/* Submit Button */}
         <div className="flex items-center justify-end gap-4 pt-6 border-t border-stone-100">
           <button
             type="submit"

@@ -62,7 +62,6 @@ export async function recordOutcomeAction(collaborationId: string, formData: For
       },
     });
 
-    // Otomatis integrasikan luaran ke Portofolio & Showcase partisipan jika ada bukti visual (evidenceUrl / image)
     const collab = await prisma.collaboration.findUnique({
       where: { id: collaborationId },
       include: {

@@ -51,7 +51,6 @@ export async function createAsset(formData: FormData) {
   const validRoles = Object.values(AssetRole);
   const roles = rolesRaw.filter((r) => validRoles.includes(r as AssetRole)) as AssetRole[];
 
-  // 1. Handle file foto langsung dari pengguna (Direct Upload)
   const imageFile = formData.get("imageFile") as File | null;
   let finalImageUrl: string | null = null;
 
@@ -71,13 +70,11 @@ export async function createAsset(formData: FormData) {
     }
   }
 
-  // Fallback jika ada URL
   if (!finalImageUrl) {
     const rawUrl = (formData.get("imageUrl") as string)?.trim();
     if (rawUrl) finalImageUrl = rawUrl;
   }
 
-  // Parse atribut teknis opsional
   const gearSpecs = (formData.get("gearSpecs") as string)?.trim();
   const condition = (formData.get("condition") as string)?.trim();
   const capacity = formData.get("capacity") as string;

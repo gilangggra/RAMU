@@ -141,12 +141,10 @@ export function TearSheetModal({
   const [claimSuccessMessage, setClaimSuccessMessage] = useState<string | null>(null);
   const [showGuaranteeModal, setShowGuaranteeModal] = useState(false);
 
-  // Persona & Co-Credit interactive states
   const [isConfirming, setIsConfirming] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<{ type: "success" | "rejected" | "info"; msg: string } | null>(null);
   const [localConfirmedActorIds, setLocalConfirmedActorIds] = useState<string[]>([]);
 
-  // Video parsing
   const isVideo = item?.mediaType === "VIDEO" || !!item?.videoUrl;
   const parsedVideo = isVideo && item?.videoUrl ? parseVideoUrl(item.videoUrl) : null;
 
@@ -154,7 +152,6 @@ export function TearSheetModal({
     setMounted(true);
   }, []);
 
-  // Reset states on item change & read localStorage
   useEffect(() => {
     setImgLoaded(false);
     setActivePinId(null);
@@ -190,7 +187,6 @@ export function TearSheetModal({
     window.open(url, "_blank");
   };
 
-  // Keyboard navigation: Escape, ArrowLeft, ArrowRight
   useEffect(() => {
     if (!isOpen) return;
 
@@ -219,7 +215,6 @@ export function TearSheetModal({
 
   const tearSheetData = getTearSheetData(item);
 
-  // Determine owner and actor persona
   const realActorId = item.actor.id.split("-copy-")[0];
   const isOwner = Boolean(
     currentActorId &&
@@ -251,7 +246,6 @@ export function TearSheetModal({
     return c;
   });
 
-  // Contributor persona
   const myCredit = activeCredits.find((c) => c.actorId === currentActorId);
   const isCoCreditor = Boolean(myCredit);
   const isPendingCoCredit = isCoCreditor && (!myCredit?.verified || myCredit?.status === "PENDING") && !localConfirmedActorIds.includes(currentActorId || "");
@@ -363,15 +357,14 @@ export function TearSheetModal({
       className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 md:p-8 bg-stone-950/45 backdrop-blur-md animate-fade-in"
       onClick={onClose}
     >
-      {/* ── MODAL CONTAINER (CLEAN PRISTINE WHITE GALLERY AESTHETIC) ── */}
+
       <div
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-6xl h-full md:h-[90vh] max-h-[880px] bg-white border border-stone-200/90 rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.16)] flex flex-col overflow-hidden text-stone-900"
       >
-        {/* ── TOP EDITORIAL HEADER BAR ── */}
+
         <div className="h-14 shrink-0 px-4 sm:px-6 bg-white border-b border-stone-100 flex items-center justify-between gap-4">
-          
-          {/* Issue Branding */}
+
           <div className="flex items-center gap-2.5">
             <span className="w-2 h-2 rounded-full bg-stone-900" />
             <div className="flex items-center gap-2">
@@ -390,7 +383,6 @@ export function TearSheetModal({
             </div>
           </div>
 
-          {/* Center Navigation & Anti-Catfishing Status */}
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               type="button"
@@ -408,7 +400,6 @@ export function TearSheetModal({
               <span className="text-stone-400 text-[10px]">↗</span>
             </button>
 
-            {/* Gallery Index Navigation */}
             <div className="flex items-center gap-1 bg-stone-50 border border-stone-200/80 rounded-full px-2 py-0.5 shadow-2xs">
               <button
                 type="button"
@@ -432,7 +423,6 @@ export function TearSheetModal({
             </div>
           </div>
 
-          {/* Close Button */}
           <button
             type="button"
             onClick={onClose}
@@ -443,13 +433,10 @@ export function TearSheetModal({
           </button>
         </div>
 
-        {/* ── MAIN WORKSPACE: SPLIT STAGE (IMAGE VIEWPORT + EDITORIAL TEAR-SHEET) ── */}
         <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
-          
-          {/* ── LEFT: INTERACTIVE PHOTO / CINEMA VIEWPORT ── */}
+
           <div className="flex-1 min-h-0 relative bg-[#0D0D0C] lg:bg-[#FBFBFA] border-b lg:border-b-0 lg:border-r border-stone-100 flex items-center justify-center overflow-hidden p-3 sm:p-6 md:p-8 select-none">
-            
-            {/* Navigation Arrows (Hover on Desktop) */}
+
             <button
               type="button"
               onClick={handlePrev}
@@ -518,13 +505,10 @@ export function TearSheetModal({
             )}
           </div>
 
-          {/* ── RIGHT: VOGUE EDITORIAL DOSSIER SIDEBAR ── */}
           <div className="w-full lg:w-[420px] xl:w-[460px] shrink-0 bg-white flex flex-col h-full min-h-0 overflow-hidden">
-            
-            {/* Scrollable Content Container */}
+
             <div className="flex-1 min-h-0 overflow-y-auto p-6 sm:p-7 space-y-6">
-              
-              {/* ── EDITORIAL HEADER SECTION ── */}
+
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-[10px] font-mono tracking-[0.2em] text-stone-400 uppercase">
                   <span>{item.category}</span>
@@ -535,7 +519,6 @@ export function TearSheetModal({
                   {tearSheetData.title}
                 </h2>
 
-                {/* Creator Byline & Minimalist Certificate Stamp */}
                 <div className="flex items-center justify-between gap-3 pt-2 pb-3.5 border-b border-stone-100">
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div
@@ -568,7 +551,6 @@ export function TearSheetModal({
                     </div>
                   </div>
 
-                  {/* Chic Minimalist Certificate Pill */}
                   <button
                     type="button"
                     onClick={() => setShowGuaranteeModal(true)}
@@ -581,13 +563,11 @@ export function TearSheetModal({
                   </button>
                 </div>
 
-                {/* Concept Narrative */}
                 <p className="text-[13px] text-stone-600 leading-relaxed font-sans pt-1">
                   {tearSheetData.concept}
                 </p>
               </div>
 
-              {/* ── ACTION FEEDBACK BANNER (IF ANY) ── */}
               {actionFeedback && (
                 <div
                   className={`p-3 rounded-xl border text-xs font-semibold flex items-center gap-2 animate-fade-in ${
@@ -605,7 +585,6 @@ export function TearSheetModal({
                 </div>
               )}
 
-              {/* ── CASE 1: OWNER PENDING CREW NUDGE ── */}
               {isOwner && pendingCredits.length > 0 && (
                 <div className="p-3 rounded-xl bg-amber-50/90 border border-amber-200/90 text-amber-950 text-xs flex items-center justify-between gap-3 animate-fade-in">
                   <div className="flex items-center gap-2 min-w-0">
@@ -626,7 +605,6 @@ export function TearSheetModal({
                 </div>
               )}
 
-              {/* ── CASE 2: CO-CREDITOR INVITATION BANNER ── */}
               {isCoCreditor && isPendingCoCredit && (
                 <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 to-emerald-500/10 border border-amber-300/80 text-xs text-stone-900 space-y-2 animate-fade-in">
                   <div className="flex items-center justify-between">
@@ -644,7 +622,6 @@ export function TearSheetModal({
                 </div>
               )}
 
-              {/* ── CASE 2B: CO-CREDITOR VERIFIED BADGE ── */}
               {isCoCreditor && isVerifiedCoCredit && (
                 <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs flex items-center justify-between gap-2 animate-fade-in">
                   <div className="flex items-center gap-2 min-w-0">
@@ -659,7 +636,6 @@ export function TearSheetModal({
                 </div>
               )}
 
-              {/* ── MASTHEAD PRODUCTION CREDITS (VOGUE ROSTER) ── */}
               <div className="space-y-2 pt-4 border-t border-stone-100">
                 <div className="flex items-center justify-between pb-1">
                   <span className="font-mono text-[10px] font-bold tracking-[0.25em] text-stone-400 uppercase">
@@ -687,14 +663,13 @@ export function TearSheetModal({
                         }`}
                         title={`Buka profil ${credit.name} (${credit.role})`}
                       >
-                        {/* Left: Role */}
+
                         <div className="w-[42%] shrink-0 min-w-0">
                           <span className="font-mono text-[10px] uppercase tracking-wider text-stone-400 group-hover:text-stone-700 truncate block">
                             {credit.role}
                           </span>
                         </div>
 
-                        {/* Right: Contributor Name, Handle & Status Dot */}
                         <div className="w-[58%] flex items-center justify-end gap-2 min-w-0">
                           <div className="text-right min-w-0">
                             <span className="font-medium text-stone-900 group-hover:text-stone-950 truncate block">
@@ -707,7 +682,6 @@ export function TearSheetModal({
                             )}
                           </div>
 
-                          {/* Elegant Status Indicator */}
                           {credit.isUploader ? (
                             <span
                               className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"
@@ -736,7 +710,6 @@ export function TearSheetModal({
                 </div>
               </div>
 
-              {/* ── CASE 3: EXTERNAL VISITOR CLAIM ACCORDION (ONLY IF NOT OWNER & NOT CO-CREDITOR) ── */}
               {!isOwner && !isCoCreditor && (
                 <div className="pt-4 border-t border-stone-100 space-y-2">
                   {claimSuccessMessage && (
@@ -811,7 +784,6 @@ export function TearSheetModal({
                 </div>
               )}
 
-              {/* ── TECHNICAL RIG SPECIFICATIONS ── */}
               {tearSheetData.technicalSpecs && (
                 <div className="pt-4 border-t border-stone-100 text-[10px] font-mono text-stone-500 space-y-1.5">
                   <span className="font-bold uppercase tracking-wider text-stone-400 block">
@@ -827,7 +799,6 @@ export function TearSheetModal({
                 </div>
               )}
 
-              {/* ── AESTHETIC TAGS ── */}
               <div className="flex flex-wrap gap-1.5 pt-2">
                 {tearSheetData.tags.map((tag, idx) => (
                   <span
@@ -839,7 +810,6 @@ export function TearSheetModal({
                 ))}
               </div>
 
-              {/* ── LEGAL ASSURANCE FOOTER LINK ── */}
               <div className="pt-4 border-t border-stone-100 flex items-center justify-between text-[10px] font-mono text-stone-400">
                 <span>RAMU PROTOCOL • UU NO. 28/2014</span>
                 <button
@@ -853,10 +823,8 @@ export function TearSheetModal({
 
             </div>
 
-            {/* ── CONTEXT-AWARE 1-ROW ACTION FOOTER ── */}
             <div className="p-4 sm:p-5 bg-white border-t border-stone-100 flex items-center gap-2.5 shrink-0">
-              
-              {/* CASE 1: OWNER FOOTER */}
+
               {isOwner ? (
                 <>
                   <button
@@ -892,7 +860,7 @@ export function TearSheetModal({
                   </Link>
                 </>
               ) : isCoCreditor && isPendingCoCredit ? (
-                /* CASE 2: CO-CREDITOR PENDING CONFIRMATION FOOTER */
+
                 <>
                   <button
                     type="button"
@@ -920,7 +888,7 @@ export function TearSheetModal({
                   </button>
                 </>
               ) : isCoCreditor && isVerifiedCoCredit ? (
-                /* CASE 2B: CO-CREDITOR VERIFIED FOOTER */
+
                 <>
                   <button
                     type="button"
@@ -961,7 +929,7 @@ export function TearSheetModal({
                   </Link>
                 </>
               ) : (
-                /* CASE 3: EXTERNAL VISITOR / CLIENT FOOTER */
+
                 <>
                   <button
                     type="button"
@@ -1025,7 +993,6 @@ export function TearSheetModal({
 
         </div>
 
-        {/* ── ANTI-CATFISHING CERTIFICATE MODAL DIALOG ── */}
         {showGuaranteeModal && (
           <div
             className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-stone-950/60 backdrop-blur-sm animate-fade-in"
@@ -1061,7 +1028,6 @@ export function TearSheetModal({
                 </button>
               </div>
 
-              {/* Certificate Details */}
               <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-[10px] uppercase font-bold text-stone-500">
@@ -1089,7 +1055,6 @@ export function TearSheetModal({
                 </div>
               </div>
 
-              {/* Verified Crew List in Certificate */}
               <div className="space-y-2">
                 <h4 className="text-[11px] font-mono font-black text-stone-700 uppercase">
                   Daftar Kru Produksi Terverifikasi Bersama:
@@ -1150,7 +1115,6 @@ export function TearSheetModal({
             </div>
           </div>
         )}
-
 
       </div>
     </div>

@@ -85,7 +85,7 @@ export default async function ProjectsPage({
   return (
     <AppShell actor={actor} activeRoute="/projects">
       <div className="space-y-8">
-        {/* Editorial Hero Section */}
+
         <section className="pt-10 pb-8 border-b border-stone-200">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-4">
             <div className="max-w-2xl">
@@ -105,7 +105,7 @@ export default async function ProjectsPage({
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center gap-6 lg:gap-8 pb-2">
-              {/* Minimalist Metrics */}
+
               <div className="flex items-center gap-6 sm:gap-8">
                 <div className="space-y-1">
                   <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{openBriefsCount}</div>
@@ -137,7 +137,6 @@ export default async function ProjectsPage({
           </div>
         </section>
 
-        {/* Minimalist Editorial Tabs */}
         <div className="flex items-center gap-8 border-b border-stone-200 text-xs">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.key;

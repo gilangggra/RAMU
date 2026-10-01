@@ -46,18 +46,17 @@ export interface DirectoryActorItem {
 
 interface ActorCardProps {
   actor: DirectoryActorItem;
-  /** Complementarity score 0-100. Undefined = no match context available. */
+
   complementarityScore?: number;
 }
 
 export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
   const [imageError, setImageError] = useState(false);
 
-  // Extract a preview image from assets (Prioritize creative portfolio/comp-card, strictly exclude equipment)
   let previewImage = null;
 
   for (const asset of actor.assets) {
-    if (asset.category === "EQUIPMENT") continue; // Never use camera/equipment for cover
+    if (asset.category === "EQUIPMENT") continue;
     if (actor.actorType !== "STUDIO" && asset.category === "STUDIO_SPACE") continue;
 
     if (asset.attributes) {
@@ -85,12 +84,10 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
     }
   }
 
-  // Fallback to real profile avatar uploaded by the user if no portfolio work image exists
   if (!previewImage && actor.owner?.avatarUrl) {
     previewImage = actor.owner.avatarUrl;
   }
 
-  // Fallback beautiful images based on sector only if no portfolio and no avatar
   if (!previewImage) {
     if (actor.actorType === "STUDIO") {
       previewImage = "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd08?q=80&w=800&auto=format&fit=crop";
@@ -103,7 +100,6 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
     }
   }
 
-  // Calculate Starting Estimated Rate Card for Indonesian creative market
   const sectorLower = actor.sector.toLowerCase();
   const isIndividualSector =
     sectorLower.includes("photographer") ||
@@ -138,11 +134,10 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
     startingRate = "Mulai Rp 2,5 Jt / koleksi";
   } else if (sectorLower.includes("fotografi") || sectorLower.includes("photographer")) {
     startingRate = "Mulai Rp 1,5 Jt / sesi";
-  } else if (actor.actorType === "MSME") {
+  } else if (actor.actorType === "BRAND" || (actor.actorType as string) === "MSME") {
     startingRate = "Katalog & Produksi";
   }
 
-  // Override with actor's custom configured starting rate if available
   const customServiceAsset = actor.assets.find(
     (a) =>
       a.subtype === "COMMERCIAL_SERVICE_PACKAGES" ||
@@ -159,7 +154,6 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
     .map((w) => w[0]?.toUpperCase())
     .join("");
 
-  // ── Complementarity badge config ─────────────────────────────────────
   const hasScore = complementarityScore !== undefined && complementarityScore > 0;
   const scoreLabel =
     !hasScore ? null
@@ -175,11 +169,11 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
   const scoreText = complementarityScore! >= 80 ? "text-white" : "text-stone-950";
 
   return (
-    <Link 
+    <Link
       href={`/directory/${actor.id}`}
       className="group flex flex-col gap-3 cursor-pointer bg-white p-3 border border-stone-200/80 hover:border-[#1E1B2E] transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.06)]"
     >
-      {/* Visual Cover */}
+
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-stone-100">
         {!imageError && previewImage ? (
           <img
@@ -195,16 +189,14 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
             <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">{actor.name}</span>
           </div>
         )}
-        
+
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        
-        {/* Top Badges */}
+
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
           <div className="px-2.5 py-1 bg-white/95 backdrop-blur-md text-[9px] font-bold uppercase tracking-wider text-[#1E1B2E] shadow-xs">
-            {isStudio ? "Studio Foto" : actor.actorType === "MSME" ? "Brand" : "Kreator"}
+            {isStudio ? "Studio Foto" : actor.actorType === "BRAND" || (actor.actorType as string) === "MSME" ? "Brand" : "Kreator"}
           </div>
 
-          {/* Complementarity badge (replaces static green dot when available) */}
           {hasScore ? (
             <div
               className={`px-2.5 py-1 ${scoreBg} backdrop-blur-md text-[9px] font-extrabold ${scoreText} flex items-center gap-1 shadow-xs`}
@@ -221,7 +213,6 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
           )}
         </div>
 
-        {/* Hover Action Overlay Bottom */}
         <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
           <div className="w-full py-2 bg-white text-[#1E1B2E] text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-md">
             <span>Lihat Portofolio & Sewa</span>
@@ -230,7 +221,6 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
         </div>
       </div>
 
-      {/* Typography & Commercial Details Section */}
       <div className="flex flex-col gap-1.5 pt-1">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
@@ -258,12 +248,11 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
             </span>
           )}
         </div>
-        
+
         <div className="text-[11px] font-light text-stone-500 truncate pl-8">
           {actor.sector}
         </div>
 
-        {/* Rate Card & Complementarity row */}
         <div className="pt-2 mt-1 border-t border-stone-100 space-y-1.5">
           <div className="flex items-center justify-between text-[11px]">
             <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Estimasi Tarif</span>
@@ -273,7 +262,7 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-stone-300">Relevansi Untukmu</span>
               <div className="flex items-center gap-1.5">
-                {/* Mini progress bar */}
+
                 <div className="w-16 h-1 bg-stone-100 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
@@ -305,4 +294,3 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
     </Link>
   );
 }
-

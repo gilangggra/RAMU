@@ -107,32 +107,29 @@ export default async function ProjectBriefDetailPage({
   const currentBadge = statusBadges[brief.status] || statusBadges.OPEN;
   const pendingInterestsCount = brief.interests.filter((i) => i.status === "PENDING").length;
 
-  // ── MATCH CONTEXT ENGINE (For Non-Initiators) ──────────────────────────────────
   let matchContext: { roleLabel: string; roleId: string; reasons: string[]; score: number } | null = null;
-  
+
   if (!isInitiator && brief.status === "OPEN") {
     let bestScore = 0;
     for (const role of brief.neededRoles) {
       if (role.isFilled) continue;
-      
+
       let score = 0;
       const reasons: string[] = [];
       const actorCategories = actorAssets.map((a) => a.category);
 
-      // 1. Mandatory Gate: Asset Category Match (50 pts)
       if (actorCategories.includes(role.assetCategory)) {
         score += 50;
         reasons.push("Kategori Aset Cocok");
       }
 
       if (score >= 50) {
-        // 2. Aesthetic Match (20 pts)
+
         if (brief.aestheticStyle && actor.aestheticStyles.includes(brief.aestheticStyle)) {
           score += 20;
           reasons.push("Gaya Visual Sesuai");
         }
-        
-        // 3. Location Match (15 pts)
+
         if (brief.location && actor.location) {
           const bLoc = brief.location.toLowerCase();
           const aLoc = actor.location.toLowerCase();
@@ -141,13 +138,12 @@ export default async function ProjectBriefDetailPage({
             reasons.push("Lokasi Relevan");
           }
         }
-        
-        // 4. Compensation Match (15 pts)
+
         if (brief.compensationModel && actor.compensationModels.includes(brief.compensationModel)) {
           score += 15;
           reasons.push("Model Kompensasi Sesuai");
         }
-        
+
         if (score > bestScore) {
           bestScore = score;
           matchContext = { roleLabel: role.roleLabel, roleId: role.id, reasons, score };
@@ -184,7 +180,6 @@ export default async function ProjectBriefDetailPage({
           )}
         </div>
 
-        {/* PERSONALIZED MATCH CONTEXT BANNER */}
         {matchContext && (
           <div className="p-6 bg-stone-900 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 border border-stone-800">
             <div className="flex items-start gap-4">
@@ -225,7 +220,6 @@ export default async function ProjectBriefDetailPage({
           </div>
         )}
 
-        {/* Project Lifecycle Bar */}
         <div className="p-6 bg-white border border-stone-200 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -297,7 +291,6 @@ export default async function ProjectBriefDetailPage({
           </div>
         </div>
 
-        {/* Editorial Spec Header */}
         <div className="p-8 sm:p-10 bg-white border border-stone-200 space-y-6">
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">
@@ -373,7 +366,6 @@ export default async function ProjectBriefDetailPage({
           </div>
         </div>
 
-        {/* Initiator Panel */}
         {isInitiator && (
           <div className="p-6 sm:p-8 rounded-[28px] bg-stone-50/50 border border-stone-200/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-xs">
             <div className="space-y-1">
@@ -516,7 +508,7 @@ export default async function ProjectBriefDetailPage({
           </div>
 
           <div className="space-y-6">
-            {/* Editorial Production Specs Card */}
+
             <div className="bg-white border border-stone-200 divide-y divide-stone-100 text-xs">
               <div className="p-5 bg-stone-50/70 border-b border-stone-100 flex items-center gap-2">
                 <span className="w-1.5 h-1.5 bg-stone-900" />
@@ -525,7 +517,6 @@ export default async function ProjectBriefDetailPage({
                 </h3>
               </div>
 
-              {/* Linimasa */}
               <div className="p-5 space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400 flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-stone-600" />
@@ -543,7 +534,6 @@ export default async function ProjectBriefDetailPage({
                 </div>
               </div>
 
-              {/* Skema Nilai */}
               <div className="p-5 space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400 flex items-center gap-1.5">
                   <CircleDollarSign className="w-3.5 h-3.5 text-stone-600" />
@@ -563,7 +553,6 @@ export default async function ProjectBriefDetailPage({
                 </div>
               </div>
 
-              {/* Hak Cipta */}
               <div className="p-5 space-y-2 font-light">
                 <div className="flex items-center gap-2">
                   <Handshake className="w-3.5 h-3.5 text-stone-600" />

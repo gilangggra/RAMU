@@ -58,8 +58,7 @@ export function DirectoryFilterBar({
 
   return (
     <div className="space-y-6 pb-6 border-b border-stone-200">
-      
-      {/* Top Row: Search & Location */}
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <form onSubmit={handleSearchSubmit} className="relative w-full max-w-md group">
           <Search className="w-4 h-4 text-stone-400 absolute left-0 top-1/2 -translate-y-1/2 group-focus-within:text-[#1E1B2E] transition-colors pointer-events-none" />
@@ -100,7 +99,7 @@ export function DirectoryFilterBar({
               <option value="Bali">Bali</option>
             </select>
           </div>
-          
+
           {hasActiveFilters && (
             <button
               type="button"
@@ -113,10 +112,8 @@ export function DirectoryFilterBar({
         </div>
       </div>
 
-      {/* Bottom Row: Tabs */}
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-        
-        {/* Actor Types */}
+
         <div className="flex items-center gap-6 overflow-x-auto w-full sm:w-auto no-scrollbar">
           {[
             { id: "ALL", label: "All Entities" },
@@ -138,7 +135,6 @@ export function DirectoryFilterBar({
           ))}
         </div>
 
-        {/* Sectors */}
         <div className="flex items-center gap-4 overflow-x-auto w-full sm:w-auto no-scrollbar">
           {[
             { id: "ALL", label: "All Sectors" },

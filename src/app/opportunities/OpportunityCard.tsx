@@ -209,7 +209,6 @@ export function OpportunityCard({
           </div>
         )}
 
-        {/* Transparency Accordion */}
         <div className="border border-stone-200 rounded-2xl overflow-hidden bg-stone-50/50">
           <button
             type="button"

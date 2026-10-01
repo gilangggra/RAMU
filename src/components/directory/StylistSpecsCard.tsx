@@ -119,7 +119,7 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
 
   return (
     <div className="space-y-8">
-      {/* 1. Header & Quick Kit Overview */}
+
       <section className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
           <div className="space-y-1">
@@ -152,9 +152,8 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
           </div>
         </div>
 
-        {/* 3 Metric Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Card 1: Styling Specialties */}
+
           <div className="p-5 rounded-none bg-stone-50/70 border border-stone-200/80 space-y-3">
             <div className="flex items-center gap-2 text-stone-500">
               <Compass className="w-4 h-4 text-violet-600" />
@@ -172,7 +171,6 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
             </ul>
           </div>
 
-          {/* Card 2: On-set Equipment */}
           <div className="p-5 rounded-none bg-stone-50/70 border border-stone-200/80 space-y-3">
             <div className="flex items-center gap-2 text-stone-500">
               <Scissors className="w-4 h-4 text-amber-600" />
@@ -190,7 +188,6 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
             </ul>
           </div>
 
-          {/* Card 3: Showroom & Pulling Network */}
           <div className="p-5 rounded-none bg-stone-50/70 border border-stone-200/80 space-y-3">
             <div className="flex items-center gap-2 text-stone-500">
               <Sparkles className="w-4 h-4 text-pink-600" />
@@ -209,7 +206,6 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
           </div>
         </div>
 
-        {/* Aesthetic DNA Banner */}
         <div className="p-5 rounded-none bg-violet-50/50 border border-violet-200/80 flex items-start gap-3">
           <Sparkles className="w-4 h-4 text-violet-600 shrink-0 mt-0.5" />
           <div className="text-xs space-y-1">
@@ -222,7 +218,6 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
         </div>
       </section>
 
-      {/* 2. Visual Looks Gallery */}
       {gallery.length > 0 && (
         <section className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-5">
           <div className="flex items-center justify-between pb-3 border-b border-stone-100">
@@ -265,7 +260,6 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
         </section>
       )}
 
-      {/* Lightbox Modal */}
       {selectedImage && (
         <div
           className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6"

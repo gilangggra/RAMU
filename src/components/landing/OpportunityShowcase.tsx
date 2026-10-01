@@ -45,8 +45,7 @@ export function OpportunityShowcase() {
   return (
     <section id="opportunities" className="py-24 md:py-32 bg-stone-50 relative">
       <div className="max-w-7xl mx-auto px-6 md:px-10">
-        
-        {/* Header Section */}
+
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
           <div className="max-w-2xl space-y-4">
             <div className="inline-flex items-center gap-3">
@@ -69,7 +68,6 @@ export function OpportunityShowcase() {
           </Link>
         </div>
 
-        {/* Opportunities Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {opportunities.map((opp) => (
             <div
@@ -87,7 +85,7 @@ export function OpportunityShowcase() {
                 <h3 className="text-2xl font-light text-[#1E1B2E] tracking-tight mb-4 group-hover:text-stone-500 transition-colors">
                   {opp.title}
                 </h3>
-                
+
                 <p className="text-sm text-stone-500 leading-relaxed font-light mb-8">
                   {opp.desc}
                 </p>

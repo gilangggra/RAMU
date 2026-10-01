@@ -27,14 +27,12 @@ export async function createShowcaseAsset(formData: FormData) {
     const projectUrl = formData.get("projectUrl") as string;
     const imageFile = formData.get("imageFile") as File | null;
 
-    // Video metadata & direct video upload handling
     const mediaType = (formData.get("mediaType") as string) || "IMAGE";
     let videoSource = (formData.get("videoSource") as string) || null;
     let videoUrl = (formData.get("videoUrl") as string) || "";
     const aspectRatio = (formData.get("aspectRatio") as string) || "16:9";
     const videoFile = formData.get("videoFile") as File | null;
 
-    // Handle direct video upload
     if (videoFile && videoFile.size > 0) {
       const videoBytes = await videoFile.arrayBuffer();
       const videoBuffer = Buffer.from(videoBytes);
@@ -44,7 +42,7 @@ export async function createShowcaseAsset(formData: FormData) {
       try {
         await mkdir(videoUploadDir, { recursive: true });
       } catch (e) {
-        // ignore if exists
+
       }
 
       const videoFilePath = path.join(videoUploadDir, cleanVideoName);
@@ -53,17 +51,16 @@ export async function createShowcaseAsset(formData: FormData) {
       videoSource = "DIRECT_UPLOAD";
     }
 
-    // Handle poster cover image upload
     if (imageFile && imageFile.size > 0) {
       const bytes = await imageFile.arrayBuffer();
       const buffer = Buffer.from(bytes);
       const filename = `${Date.now()}-${imageFile.name.replace(/\s+/g, '-')}`;
       const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'portfolios');
-      
+
       try {
         await mkdir(uploadDir, { recursive: true });
       } catch (e) {
-        // ignore if exists
+
       }
 
       const filepath = path.join(uploadDir, filename);
@@ -71,7 +68,6 @@ export async function createShowcaseAsset(formData: FormData) {
       imageUrl = `/uploads/portfolios/${filename}`;
     }
 
-    // Auto-detect YouTube thumbnail if cover image wasn't uploaded manually
     if (mediaType === "VIDEO" && !imageUrl && videoUrl) {
       const ytMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/);
       if (ytMatch && ytMatch[1]) {
@@ -92,7 +88,7 @@ export async function createShowcaseAsset(formData: FormData) {
     }
 
     if (!imageUrl) {
-      // Fallback poster for video or general portfolio
+
       imageUrl = "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=800&auto=format&fit=crop";
     }
 
@@ -113,7 +109,7 @@ export async function createShowcaseAsset(formData: FormData) {
         subtype,
         name,
         description,
-        roles: ["OUTPUT"], // Default role for portfolio works
+        roles: ["OUTPUT"],
         attributes: {
           image_url: imageUrl,
           media_type: mediaType,
@@ -153,7 +149,6 @@ export async function deleteShowcaseAsset(assetId: string) {
 
     if (!actor) throw new Error("Actor profile not found");
 
-    // Verify ownership
     const asset = await prisma.asset.findUnique({
       where: { id: assetId },
     });
@@ -208,7 +203,6 @@ export async function confirmCoCredit(assetId: string) {
 
     const existingCredits = Array.isArray(tearSheet.credits) ? [...tearSheet.credits] : [];
 
-    // Update the credit entry for this actor
     let updated = false;
     const newCredits = existingCredits.map((c: any) => {
       if (c.actorId === actor.id) {

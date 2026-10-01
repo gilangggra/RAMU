@@ -25,7 +25,7 @@ export function parseSocialLinks(websiteUrl?: string | null): ParsedSocialLinks 
       const web = parsed.website ? formatWebsite(parsed.website) : null;
       return { instagram: ig, website: web };
     } catch {
-      // Fall through
+
     }
   }
 

@@ -31,7 +31,7 @@ export function ShowcaseFilterBar({ myCount = 0 }: ShowcaseFilterBarProps) {
 
   const updateQuery = (updates: { scope?: string; category?: string; q?: string }) => {
     const params = new URLSearchParams(searchParams.toString());
-    
+
     if (updates.scope !== undefined) {
       if (updates.scope === "all") params.delete("scope");
       else params.set("scope", updates.scope);
@@ -41,7 +41,7 @@ export function ShowcaseFilterBar({ myCount = 0 }: ShowcaseFilterBarProps) {
       if (updates.category === "ALL") params.delete("category");
       else params.set("category", updates.category);
     }
-    
+
     if (updates.q !== undefined) {
       if (!updates.q) params.delete("q");
       else params.set("q", updates.q);
@@ -64,9 +64,9 @@ export function ShowcaseFilterBar({ myCount = 0 }: ShowcaseFilterBarProps) {
 
   return (
     <div className="relative mb-6 z-20 space-y-3">
-      {/* ── ROW 1: DUAL-SCOPE SWITCHER + SLIM SEARCH COMMAND (UNIFIED ROW) ── */}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        {/* Cosmos.so / VSCO Editorial Dual Scope Switcher */}
+
         <div className="inline-flex items-center p-1 bg-white/80 backdrop-blur-xl border border-stone-200/70 rounded-full shadow-[0_2px_10px_rgba(39,33,61,0.03)] w-fit shrink-0">
           <button
             type="button"
@@ -80,7 +80,7 @@ export function ShowcaseFilterBar({ myCount = 0 }: ShowcaseFilterBarProps) {
             <Compass className="w-3.5 h-3.5" />
             <span>Jelajah Ekosistem</span>
           </button>
-          
+
           <button
             type="button"
             onClick={() => updateQuery({ scope: "mine" })}
@@ -102,7 +102,6 @@ export function ShowcaseFilterBar({ myCount = 0 }: ShowcaseFilterBarProps) {
           </button>
         </div>
 
-        {/* Minimalist Slim Search Bar */}
         <div className="relative flex-1 sm:max-w-xs md:max-w-sm">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
             <Search className={`w-4 h-4 transition-colors ${isPending ? 'text-amber-500 animate-pulse' : 'text-stone-400'}`} />
@@ -130,7 +129,6 @@ export function ShowcaseFilterBar({ myCount = 0 }: ShowcaseFilterBarProps) {
         </div>
       </div>
 
-      {/* ── ROW 2: SLEEK EDITORIAL CATEGORY FILTERS ── */}
       <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5">
         {SHOWCASE_CATEGORIES.map((category) => (
           <button

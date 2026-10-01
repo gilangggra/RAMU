@@ -43,7 +43,6 @@ export function generateOpportunityExplanation(params: {
     why.push(`Menjawab kebutuhan nyata: ${needsAddressedTitles.slice(0, 3).join(', ')}.`);
   }
 
-  // 2. Who list
   const who = participants.map((p) => {
     const actorAssets = assetsUsed
       .filter((a) => a.actorId === p.actorId)
@@ -58,10 +57,8 @@ export function generateOpportunityExplanation(params: {
     };
   });
 
-  // 3. What (Concrete Outputs)
   const what = pattern.expectedOutputs.join(' • ');
 
-  // 4. How (Action Steps)
   const how: string[] = [
     'Penyelarasan konsep desain, spesifikasi teknis, dan sampel produk awal.',
     'Pembagian porsi kerja, peran produksi, dan penentuan skema pembagian nilai.',
@@ -69,7 +66,6 @@ export function generateOpportunityExplanation(params: {
     'Peluncuran bersama ke kanal pasar terpilih (pameran, e-commerce, atau pembeli korporat).',
   ];
 
-  // 5. Can (Feasibility Notes)
   const canNotes: string[] = [];
   if (feasibility.notes.length > 0) canNotes.push(...feasibility.notes);
   if (feasibility.warnings.length > 0) canNotes.push(...feasibility.warnings);

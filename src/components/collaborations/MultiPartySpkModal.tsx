@@ -18,10 +18,6 @@ import {
   Zap,
 } from "lucide-react";
 
-// ─────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────
-
 export interface SpkParticipant {
   id: string;
   name: string;
@@ -60,10 +56,6 @@ interface Props {
   onSign: (collaborationId: string) => Promise<{ success: boolean; error?: string }>;
 }
 
-// ─────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────
-
 function toRomanMonth(m: number): string {
   return ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"][m] ?? "I";
 }
@@ -82,10 +74,6 @@ function roman(n: number): string {
   return ["I","II","III","IV","V","VI","VII","VIII","IX","X"][n - 1] ?? String(n);
 }
 
-// ─────────────────────────────────────────
-// Article Header
-// ─────────────────────────────────────────
-
 function ArticleHead({ n, title }: { n: number | React.ReactNode; title: string }) {
   return (
     <h3 className="font-black text-stone-950 text-xs uppercase tracking-wide flex items-center gap-1.5">
@@ -96,10 +84,6 @@ function ArticleHead({ n, title }: { n: number | React.ReactNode; title: string 
     </h3>
   );
 }
-
-// ─────────────────────────────────────────
-// Main Component
-// ─────────────────────────────────────────
 
 export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSign }: Props) {
   const [copied, setCopied] = useState(false);
@@ -176,7 +160,6 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/75 backdrop-blur-sm overflow-y-auto">
       <div className="relative w-full max-w-5xl bg-white shadow-2xl border border-stone-200 overflow-hidden my-auto max-h-[95vh] flex flex-col font-sans">
 
-        {/* ── TOP BAR ── */}
         <div className="print:hidden flex items-center justify-between px-6 py-3.5 border-b border-stone-200 bg-stone-50 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <span className="p-1.5 rounded-lg bg-stone-900 text-amber-400 shrink-0">
@@ -212,7 +195,6 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
           </div>
         </div>
 
-        {/* ── SIGNATURE PROGRESS ── */}
         <div className="print:hidden px-6 py-3 border-b border-stone-100 bg-stone-50/50 shrink-0">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-[11px] font-bold text-stone-600 uppercase tracking-wider">
@@ -243,10 +225,8 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
           </div>
         </div>
 
-        {/* ── DOCUMENT BODY ── */}
         <div id="spk-collab-printable" className="overflow-y-auto p-8 sm:p-12 space-y-7 bg-white flex-1">
 
-          {/* KOP SURAT */}
           <div className="flex items-start justify-between border-b-2 border-stone-900 pb-5">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-stone-900 text-amber-400 flex items-center justify-center font-black text-2xl tracking-tighter">R</div>
@@ -268,7 +248,6 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
             </div>
           </div>
 
-          {/* JUDUL */}
           <div className="text-center pb-2">
             <h1 className="text-base sm:text-lg font-black uppercase tracking-wider text-stone-950 border-b border-stone-200 pb-3 inline-block">
               PERJANJIAN KERJA SAMA KOLABORASI KREATIF (PKSK) MULTI-PIHAK
@@ -276,7 +255,6 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
             <p className="text-xs font-mono text-stone-600 mt-2 font-semibold">Nomor: {spkNo}</p>
           </div>
 
-          {/* KONSIDERAN */}
           <div className="text-xs text-stone-700 leading-relaxed space-y-2">
             <p>Pada hari ini, <strong>{formatDateId(data.createdAt)}</strong>, telah dibuat dan disepakati Perjanjian Kerja Sama Kolaborasi Kreatif Multi-Pihak secara elektronik melalui platform RAMU oleh dan antara:</p>
             <p className="text-[11px] italic text-stone-500">
@@ -285,7 +263,6 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
             </p>
           </div>
 
-          {/* IDENTITAS PARA PIHAK */}
           <div className="space-y-3">
             <div className="flex items-center gap-2 pb-1 border-b border-stone-200">
               <Users className="w-4 h-4 text-amber-600" />
@@ -329,10 +306,8 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
             </p>
           </div>
 
-          {/* PASAL-PASAL */}
           <div className="space-y-6 text-xs text-stone-800 leading-relaxed border-t border-stone-200 pt-5">
 
-            {/* PASAL 1 */}
             <div className="space-y-2">
               <ArticleHead n={1} title="PASAL 1: RUANG LINGKUP DAN TUJUAN KOLABORASI" />
               <ol className="list-decimal pl-6 space-y-1.5 text-stone-700 text-[11px]">
@@ -343,7 +318,6 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
               </ol>
             </div>
 
-            {/* PASAL 2 */}
             <div className="space-y-2">
               <ArticleHead n={2} title="PASAL 2: ANGGARAN, PEMBAGIAN BIAYA, DAN ALOKASI INVESTASI" />
               <ol className="list-decimal pl-6 space-y-1.5 text-stone-700 text-[11px]">
@@ -354,7 +328,6 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
               </ol>
             </div>
 
-            {/* PASAL 3 */}
             <div className="space-y-2">
               <ArticleHead n={3} title="PASAL 3: PEMBAGIAN PENDAPATAN DAN BAGI HASIL" />
               <ol className="list-decimal pl-6 space-y-1.5 text-stone-700 text-[11px]">
@@ -365,7 +338,6 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
               </ol>
             </div>
 
-            {/* PASAL 4 */}
             <div className="space-y-2">
               <ArticleHead n={4} title="PASAL 4: HAK KEKAYAAN INTELEKTUAL (HKI) DAN KEPEMILIKAN KARYA" />
               <ol className="list-decimal pl-6 space-y-1.5 text-stone-700 text-[11px]">
@@ -376,7 +348,6 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
               </ol>
             </div>
 
-            {/* PASAL 5 — ANTI-AI */}
             <div className="space-y-2 border border-amber-300 p-4 bg-amber-50/60">
               <h3 className="font-black text-amber-900 text-xs uppercase tracking-wide flex items-center gap-1.5">
                 <span className="w-5 h-5 bg-amber-600 text-white font-black flex items-center justify-center shrink-0">
@@ -391,7 +362,6 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
               </div>
             </div>
 
-            {/* PASAL 6 */}
             <div className="space-y-2">
               <ArticleHead n={6} title="PASAL 6: KEWAJIBAN PEMBERIAN KREDIT (CO-CREDIT PROTOCOL)" />
               <ol className="list-decimal pl-6 space-y-1.5 text-stone-700 text-[11px]">
@@ -401,7 +371,6 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
               </ol>
             </div>
 
-            {/* PASAL 7 */}
             <div className="space-y-2">
               <ArticleHead n={7} title="PASAL 7: PENGUNDURAN DIRI, PENGGANTIAN PERAN, DAN KONSEKUENSI" />
               <ol className="list-decimal pl-6 space-y-1.5 text-stone-700 text-[11px]">
@@ -412,7 +381,6 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
               </ol>
             </div>
 
-            {/* PASAL 8 */}
             <div className="space-y-2">
               <ArticleHead n={8} title="PASAL 8: KEADAAN MEMAKSA (FORCE MAJEURE)" />
               <p className="text-[11px] text-stone-700 pl-1">
@@ -420,7 +388,6 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
               </p>
             </div>
 
-            {/* PASAL 9 */}
             <div className="space-y-2">
               <ArticleHead n={9} title="PASAL 9: PENYELESAIAN SENGKETA DAN KETENTUAN HUKUM" />
               <ol className="list-decimal pl-6 space-y-1.5 text-stone-700 text-[11px]">
@@ -431,7 +398,6 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
             </div>
           </div>
 
-          {/* PENUTUP & TANDA TANGAN */}
           <div className="pt-6 border-t-2 border-stone-900 space-y-5">
             <p className="text-[11px] text-stone-600 leading-relaxed">
               Demikian Perjanjian Kerja Sama Kolaborasi Kreatif Multi-Pihak ini dibuat dan disetujui secara sadar, sukarela, dan tanpa paksaan melalui persetujuan digital di platform RAMU. Dokumen ini memiliki kekuatan hukum yang sah dan mengikat seluruh pihak sejak ditandatangani digital oleh semua pihak.
@@ -476,7 +442,6 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
           </div>
         </div>
 
-        {/* ── BOTTOM ACTION BAR ── */}
         <div className="print:hidden px-6 py-4 border-t border-stone-200 bg-stone-50 shrink-0 space-y-3">
           {signMsg && (
             <div className={`p-3 rounded-xl text-xs font-bold border ${

@@ -131,7 +131,7 @@ export function MuaSpecsCard({ attributes, actorName, isCurrentActor, actorAsset
 
   return (
     <div className="space-y-8">
-      {/* 1. Header & Quick Kit Overview */}
+
       <section className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
           <div className="space-y-1">
@@ -164,9 +164,8 @@ export function MuaSpecsCard({ attributes, actorName, isCurrentActor, actorAsset
           </div>
         </div>
 
-        {/* 3 Metric Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Card 1: Makeup Styles */}
+
           <div className="p-5 rounded-none bg-stone-50/70 border border-stone-200/80 space-y-3">
             <div className="flex items-center gap-2 text-stone-500">
               <Eye className="w-4 h-4 text-rose-600" />
@@ -184,7 +183,6 @@ export function MuaSpecsCard({ attributes, actorName, isCurrentActor, actorAsset
             </ul>
           </div>
 
-          {/* Card 2: Hair Specialties */}
           <div className="p-5 rounded-none bg-stone-50/70 border border-stone-200/80 space-y-3">
             <div className="flex items-center gap-2 text-stone-500">
               <Scissors className="w-4 h-4 text-amber-600" />
@@ -202,7 +200,6 @@ export function MuaSpecsCard({ attributes, actorName, isCurrentActor, actorAsset
             </ul>
           </div>
 
-          {/* Card 3: Kit Brands */}
           <div className="p-5 rounded-none bg-stone-50/70 border border-stone-200/80 space-y-3">
             <div className="flex items-center gap-2 text-stone-500">
               <Sparkles className="w-4 h-4 text-purple-600" />
@@ -223,7 +220,6 @@ export function MuaSpecsCard({ attributes, actorName, isCurrentActor, actorAsset
           </div>
         </div>
 
-        {/* Hygiene and Sanitation Assurance */}
         <div className="p-5 rounded-none bg-emerald-50/50 border border-emerald-200/80 space-y-2">
           <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
@@ -240,7 +236,6 @@ export function MuaSpecsCard({ attributes, actorName, isCurrentActor, actorAsset
         </div>
       </section>
 
-      {/* 2. Visual Looks Gallery */}
       {gallery.length > 0 && (
         <section className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-5">
           <div className="flex items-center justify-between pb-3 border-b border-stone-100">
@@ -283,7 +278,6 @@ export function MuaSpecsCard({ attributes, actorName, isCurrentActor, actorAsset
         </section>
       )}
 
-      {/* Lightbox Modal */}
       {selectedImage && (
         <div
           className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6"

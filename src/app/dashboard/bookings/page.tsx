@@ -56,7 +56,7 @@ export default async function BookingManagementPage() {
   return (
     <AppShell actor={{ ...primaryActor, avatarUrl: profile.avatarUrl }} activeRoute="/dashboard/bookings">
       <div className="space-y-8 pb-12">
-        {/* Header */}
+
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 sm:p-8 rounded-[28px] border border-stone-200 shadow-xs">
           <div>
             <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-500 hover:text-[#1E1B2E] transition-colors mb-3">
@@ -82,13 +82,13 @@ export default async function BookingManagementPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Incoming Bookings */}
+
           <div className="space-y-4">
             <div className="flex items-center gap-2 px-2">
               <Inbox className="w-5 h-5 text-[#1E1B2E]" />
               <h2 className="text-lg font-bold text-[#1E1B2E]">Pesanan Masuk</h2>
             </div>
-            
+
             {incomingBookings.length === 0 ? (
               <div className="p-8 bg-white border border-stone-200 rounded-[24px] text-center shadow-xs">
                 <p className="text-sm text-stone-500">Belum ada pesanan masuk.</p>
@@ -176,13 +176,12 @@ export default async function BookingManagementPage() {
             )}
           </div>
 
-          {/* Outgoing Bookings */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 px-2">
               <Send className="w-5 h-5 text-stone-400" />
               <h2 className="text-lg font-bold text-stone-600">Permintaan Saya</h2>
             </div>
-            
+
             {outgoingBookings.length === 0 ? (
               <div className="p-8 bg-white border border-stone-200 rounded-[24px] text-center shadow-xs">
                 <p className="text-sm text-stone-500">Anda belum mengajukan sewa / booking.</p>
@@ -333,7 +332,6 @@ function BookingDetailsBadgeList({ details }: { details: any }) {
     </div>
   );
 }
-
 
 function StatusBadge({ status }: { status: string }) {
   if (status === "ACCEPTED") {

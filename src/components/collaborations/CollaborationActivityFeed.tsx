@@ -18,8 +18,6 @@ import {
   Loader2,
 } from "lucide-react";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
 type ActivityKind =
   | "task_created"
   | "task_completed"
@@ -40,8 +38,6 @@ interface ActivityEntry {
   actorName?: string;
   timestamp: Date;
 }
-
-// ── Icon & color config per activity kind ────────────────────────────────────
 
 const KIND_CONFIG: Record<
   ActivityKind,
@@ -109,8 +105,6 @@ const KIND_CONFIG: Record<
   },
 };
 
-// ── Relative time helper ──────────────────────────────────────────────────────
-
 function relativeTime(date: Date): string {
   const now = Date.now();
   const diffMs = now - new Date(date).getTime();
@@ -128,8 +122,6 @@ function relativeTime(date: Date): string {
     year: diffDay > 365 ? "numeric" : undefined,
   });
 }
-
-// ── Props ─────────────────────────────────────────────────────────────────────
 
 interface CollaborationActivityFeedProps {
   collaboration: {
@@ -174,15 +166,12 @@ interface CollaborationActivityFeedProps {
   };
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
-
 export function CollaborationActivityFeed({
   collaboration,
 }: CollaborationActivityFeedProps) {
   const activities = useMemo<ActivityEntry[]>(() => {
     const entries: ActivityEntry[] = [];
 
-    // ── Collaboration start ──────────────────────────────────────────────────
     entries.push({
       id: "collab-start",
       kind: "collaboration_started",
@@ -191,7 +180,6 @@ export function CollaborationActivityFeed({
       timestamp: new Date(collaboration.createdAt),
     });
 
-    // ── Participants joined ──────────────────────────────────────────────────
     for (const p of collaboration.participants ?? []) {
       entries.push({
         id: `participant-${p.actorId}`,
@@ -202,9 +190,8 @@ export function CollaborationActivityFeed({
       });
     }
 
-    // ── Tasks ────────────────────────────────────────────────────────────────
     for (const task of collaboration.tasks ?? []) {
-      // Record creation
+
       entries.push({
         id: `task-created-${task.id}`,
         kind: "task_created",
@@ -213,7 +200,6 @@ export function CollaborationActivityFeed({
         timestamp: new Date(task.createdAt),
       });
 
-      // Record status change if it moved (updatedAt differs from createdAt)
       const createdMs = new Date(task.createdAt).getTime();
       const updatedMs = new Date(task.updatedAt).getTime();
       if (updatedMs - createdMs > 30_000) {
@@ -237,7 +223,6 @@ export function CollaborationActivityFeed({
       }
     }
 
-    // ── Milestones ───────────────────────────────────────────────────────────
     for (const ms of collaboration.milestones ?? []) {
       const updatedMs = new Date(ms.updatedAt).getTime();
       const createdMs = new Date(ms.createdAt).getTime();
@@ -259,7 +244,6 @@ export function CollaborationActivityFeed({
       }
     }
 
-    // ── Decisions ────────────────────────────────────────────────────────────
     for (const d of collaboration.decisions ?? []) {
       entries.push({
         id: `decision-${d.id}`,
@@ -269,7 +253,6 @@ export function CollaborationActivityFeed({
       });
     }
 
-    // ── Outcomes ─────────────────────────────────────────────────────────────
     for (const o of collaboration.outcomes ?? []) {
       entries.push({
         id: `outcome-${o.id}`,
@@ -279,7 +262,6 @@ export function CollaborationActivityFeed({
       });
     }
 
-    // ── Feedbacks ────────────────────────────────────────────────────────────
     for (const f of collaboration.feedbacks ?? []) {
       const stars = f.rating ? "★".repeat(f.rating) + "☆".repeat(5 - f.rating) : null;
       entries.push({
@@ -291,13 +273,11 @@ export function CollaborationActivityFeed({
       });
     }
 
-    // Sort newest first
     return entries.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }, [collaboration]);
 
   if (activities.length === 0) return null;
 
-  // Group by date (today / yesterday / older)
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const yesterday = new Date(today);
@@ -324,7 +304,7 @@ export function CollaborationActivityFeed({
 
   return (
     <section className="rounded-[24px] overflow-hidden border border-stone-200/80 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-      {/* Header */}
+
       <div className="px-6 py-4 border-b border-stone-100 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-[#1E1B2E] flex items-center justify-center">
@@ -340,18 +320,16 @@ export function CollaborationActivityFeed({
           </div>
         </div>
 
-        {/* Live pulse indicator */}
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-100">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-[9px] font-bold text-emerald-700 uppercase tracking-wider">Live</span>
         </div>
       </div>
 
-      {/* Timeline */}
       <div className="px-6 py-4 space-y-5 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-transparent">
         {groups.map((group) => (
           <div key={group.label} className="space-y-3">
-            {/* Date divider */}
+
             <div className="flex items-center gap-3">
               <div className="h-px flex-1 bg-stone-100" />
               <span className="text-[9px] font-extrabold uppercase tracking-widest text-stone-400 shrink-0">
@@ -360,9 +338,8 @@ export function CollaborationActivityFeed({
               <div className="h-px flex-1 bg-stone-100" />
             </div>
 
-            {/* Activity entries */}
             <div className="relative space-y-1 pl-5">
-              {/* Vertical connector line */}
+
               <div className="absolute left-[7px] top-4 bottom-4 w-px bg-stone-100" />
 
               {group.items.map((activity) => {
@@ -374,19 +351,17 @@ export function CollaborationActivityFeed({
                     key={activity.id}
                     className="relative flex items-start gap-3 py-2 group"
                   >
-                    {/* Timeline dot */}
+
                     <div
                       className={`absolute left-[-13px] w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm shrink-0 mt-1 ${cfg.dot}`}
                     />
 
-                    {/* Icon chip */}
                     <div
                       className={`w-7 h-7 rounded-xl ${cfg.bg} flex items-center justify-center shrink-0`}
                     >
                       <Icon className={`w-3.5 h-3.5 ${cfg.iconColor}`} />
                     </div>
 
-                    {/* Content */}
                     <div className="flex-1 min-w-0 pt-0.5">
                       <p className="text-[12px] font-semibold text-[#1E1B2E] leading-snug truncate">
                         {activity.title}
@@ -402,7 +377,6 @@ export function CollaborationActivityFeed({
                       )}
                     </div>
 
-                    {/* Timestamp */}
                     <span className="text-[10px] text-stone-300 shrink-0 pt-0.5 font-medium">
                       {relativeTime(activity.timestamp)}
                     </span>
@@ -414,7 +388,6 @@ export function CollaborationActivityFeed({
         ))}
       </div>
 
-      {/* Footer */}
       <div className="px-6 py-3 bg-stone-50 border-t border-stone-100">
         <p className="text-[10px] text-stone-400 text-center">
           Aktivitas diperbarui secara otomatis setiap kali ada perubahan di workspace ini

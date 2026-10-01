@@ -114,7 +114,6 @@ export function ProjectBriefCard({
 
       <p className="text-xs text-stone-500 font-light leading-relaxed line-clamp-2">{description}</p>
 
-      {/* Target Output Row */}
       <div className="pt-2 border-t border-stone-100 flex items-center gap-2 text-xs">
         <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">
           Target Luaran:
@@ -122,7 +121,6 @@ export function ProjectBriefCard({
         <span className="text-xs font-medium text-stone-800 truncate">{targetOutput}</span>
       </div>
 
-      {/* Roles Row */}
       <div className="space-y-2 pt-2 border-t border-stone-100">
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">
@@ -160,7 +158,6 @@ export function ProjectBriefCard({
         </div>
       </div>
 
-      {/* Creator & Meta Footer */}
       <div className="flex items-center justify-between pt-3 border-t border-stone-100 text-xs">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-6 h-6 overflow-hidden bg-stone-100 border border-stone-200 flex items-center justify-center text-[10px] font-bold text-[#1E1B2E] shrink-0">

@@ -73,9 +73,6 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     },
   },
 
-  // --------------------------------------------------------------------------
-  // PATTERN 2: PREMIUM GIFT SET
-  // --------------------------------------------------------------------------
   {
     code: 'PREMIUM_GIFT_SET',
     name: 'Produksi Lookbook & E-Commerce Studio',
@@ -138,9 +135,6 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     },
   },
 
-  // --------------------------------------------------------------------------
-  // PATTERN 3: CREATIVE CAMPAIGN & VISUAL STORYTELLING
-  // --------------------------------------------------------------------------
   {
     code: 'CREATIVE_CAMPAIGN',
     name: 'Fashion Film & Creative Direction',

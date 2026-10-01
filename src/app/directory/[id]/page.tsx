@@ -60,7 +60,6 @@ export default async function DirectoryDetailPage({
 
   const isCurrentActor = currentActor.id === actor.id;
 
-  // Fetch confirmed co-credit works where this actor was confirmed as a collaborator
   const potentialOtherAssets = await prisma.asset.findMany({
     where: {
       category: "PORTFOLIO_WORK",
@@ -106,10 +105,9 @@ export default async function DirectoryDetailPage({
     assets: [...actor.assets, ...confirmedCoCredits],
   };
 
-  // Extract a preview image from assets for the cover/hero (Prioritize portfolio/comp-card, strictly exclude equipment)
   let previewImage = null;
   for (const asset of actorWithCoCredits.assets) {
-    if (asset.category === "EQUIPMENT") continue; // Never use camera/equipment for hero
+    if (asset.category === "EQUIPMENT") continue;
     if (actor.actorType !== "STUDIO" && asset.category === "STUDIO_SPACE") continue;
 
     if (asset.attributes) {
@@ -136,20 +134,17 @@ export default async function DirectoryDetailPage({
       }
     }
   }
-  
-  // Fallback to real profile avatar uploaded by the user if no portfolio work image exists
+
   if (!previewImage && actor.owner?.avatarUrl) {
     previewImage = actor.owner.avatarUrl;
   }
 
-  // Fallback images tailored to sector/type only if no portfolio and no avatar
   if (!previewImage) {
     if (actor.actorType === "STUDIO") previewImage = "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd08?q=80&w=2000&auto=format&fit=crop";
-    else if (actor.actorType === "MSME") previewImage = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2000&auto=format&fit=crop";
-    else previewImage = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop"; // Model/Portrait fallback
+    else if (actor.actorType === "BRAND" || (actor.actorType as string) === "MSME") previewImage = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2000&auto=format&fit=crop";
+    else previewImage = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop";
   }
 
-  // Calculate Starting Estimated Rate Card & Turnaround for Indonesian creative market
   const sectorLower = actor.sector.toLowerCase();
   const isVideo = sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema");
   const isModel = sectorLower.includes("model") || sectorLower.includes("talent");
@@ -163,7 +158,7 @@ export default async function DirectoryDetailPage({
     (a) => a.category === "STUDIO_SPACE" || a.subtype?.toLowerCase().includes("studio")
   );
   const isStudio = !isIndividualSector && (actor.actorType === "STUDIO" || sectorLower.includes("studio") || hasStudioSpaceAsset);
-  const isBrand = !isIndividualSector && !isStudio && (actor.actorType === "MSME" || actor.actorType === "COLLECTIVE" || sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("umkm"));
+  const isBrand = !isIndividualSector && !isStudio && (actor.actorType === "BRAND" || (actor.actorType as string) === "MSME" || actor.actorType === "COLLECTIVE" || sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("umkm"));
   const isIndividual = !isStudio && !isBrand;
 
   let startingRate = "Mulai Rp 1,5 Jt / sesi";
@@ -195,7 +190,6 @@ export default async function DirectoryDetailPage({
     turnaroundTime = "Sesuai Timeline Proyek";
   }
 
-  // Override with actor's custom configured rates & turnaround if available
   const customServiceAsset = actor.assets.find(
     (a) =>
       a.subtype === "COMMERCIAL_SERVICE_PACKAGES" ||
@@ -219,7 +213,7 @@ export default async function DirectoryDetailPage({
   return (
     <AppShell actor={currentActor} activeRoute="/directory">
       <div className="max-w-6xl mx-auto pb-24">
-        {/* Navigation Breadcrumb */}
+
         <div className="mb-8">
           <Link
             href="/directory"
@@ -230,11 +224,6 @@ export default async function DirectoryDetailPage({
           </Link>
         </div>
 
-        {/* =========================================================================
-            DYNAMIC HEADER BASED ON ACTOR TYPE
-           ========================================================================= */}
-
-        {/* --- 1. INDIVIDUAL (Minimalist Luxury Editorial - Vogue / Kinfolk / SSENSE Style) --- */}
         {isIndividual && (
           <section className="mb-14 pt-2">
             <div className="flex flex-col md:flex-row items-start gap-8 lg:gap-12 pb-10 border-b border-stone-200">
@@ -439,7 +428,6 @@ export default async function DirectoryDetailPage({
           </section>
         )}
 
-        {/* --- 2. STUDIO (Real-Estate / Architectural Style) --- */}
         {isStudio && (
           <section className="mb-16">
             <div className="flex flex-col lg:flex-row justify-between items-end gap-6 mb-8">
@@ -496,15 +484,14 @@ export default async function DirectoryDetailPage({
                 </div>
               </div>
 
-              {/* Streamlined Action Buttons */}
               {!isCurrentActor ? (
                 <div className="flex flex-wrap items-center gap-3">
-                  <BookingButton 
-                    targetId={actor.id} 
-                    targetName={actor.name} 
-                    targetSector={actor.sector} 
-                    targetType={actor.actorType} 
-                    label="Sewa Studio Sekarang" 
+                  <BookingButton
+                    targetId={actor.id}
+                    targetName={actor.name}
+                    targetSector={actor.sector}
+                    targetType={actor.actorType}
+                    label="Sewa Studio Sekarang"
                     termsConfig={customTermsConfig}
                   />
                   {waLink ? (
@@ -545,7 +532,6 @@ export default async function DirectoryDetailPage({
               )}
             </div>
 
-            {/* Quick Working Terms Bar for Studio */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-stone-50 border border-stone-200/80 mb-6">
               <div className="space-y-0.5">
                 <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Tarif Sewa</div>
@@ -565,9 +551,8 @@ export default async function DirectoryDetailPage({
               </div>
             </div>
 
-            {/* Wide Panoramic Image */}
             <div className="w-full h-[40vh] sm:h-[60vh] bg-stone-100 overflow-hidden">
-               <img 
+               <img
                   src={previewImage}
                   alt={actor.name}
                   className="w-full h-full object-cover"
@@ -576,13 +561,12 @@ export default async function DirectoryDetailPage({
           </section>
         )}
 
-        {/* --- 3. MSME & COLLECTIVE (Brand Deck / Agency Style) --- */}
         {isBrand && (
           <section className="flex flex-col items-center text-center max-w-4xl mx-auto mb-20 pt-10">
             <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-stone-400 mb-6">
-              {actor.actorType === "MSME" ? "Brand & Label Busana" : "Creative Collective"}
+              {actor.actorType === "BRAND" || (actor.actorType as string) === "MSME" ? "Brand & Label Busana" : "Creative Collective"}
             </div>
-            
+
             {actor.owner?.avatarUrl && (
               <div className="w-20 h-20 rounded-none overflow-hidden bg-stone-100 border border-stone-200 mx-auto mb-4 shadow-xs">
                 <img src={actor.owner.avatarUrl} alt={actor.name} className="w-full h-full object-cover" />
@@ -591,12 +575,11 @@ export default async function DirectoryDetailPage({
             <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif italic text-[#1E1B2E] leading-tight mb-6">
               {actor.name}
             </h1>
-            
+
             <p className="text-base md:text-lg font-light text-stone-500 leading-relaxed max-w-2xl mb-8">
               {actor.description || "Kami adalah entitas yang fokus pada penciptaan nilai visual tinggi melalui sinergi komersial."}
             </p>
 
-            {/* Quick Working Terms Bar for Brand */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-stone-50 border border-stone-200/80 mb-8 w-full text-left">
               <div className="space-y-0.5">
                 <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Produksi & Katalog</div>
@@ -616,7 +599,6 @@ export default async function DirectoryDetailPage({
               </div>
             </div>
 
-            {/* Minimalist Contact & Location */}
             <div className="flex flex-wrap items-center justify-center gap-8 text-[11px] font-bold uppercase tracking-widest text-[#1E1B2E] mb-8 border-y border-stone-200 py-4 w-full">
                {actor.location && (
                  <span className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5 text-stone-400" />{actor.location}</span>
@@ -640,15 +622,14 @@ export default async function DirectoryDetailPage({
                )}
             </div>
 
-            {/* Streamlined Action Buttons */}
             {!isCurrentActor ? (
               <div className="flex flex-wrap items-center justify-center gap-3">
-                <BookingButton 
-                  targetId={actor.id} 
-                  targetName={actor.name} 
-                  targetSector={actor.sector} 
-                  targetType={actor.actorType} 
-                  label="Pesan Jasa / Pengadaan" 
+                <BookingButton
+                  targetId={actor.id}
+                  targetName={actor.name}
+                  targetSector={actor.sector}
+                  targetType={actor.actorType}
+                  label="Pesan Jasa / Pengadaan"
                   termsConfig={customTermsConfig}
                 />
                 {waLink ? (
@@ -690,9 +671,6 @@ export default async function DirectoryDetailPage({
           </section>
         )}
 
-        {/* =========================================================================
-            TABS SECTION (Re-designed internally in ActorDetailTabs with Co-Credits)
-           ========================================================================= */}
         <div className="border-t border-stone-200 pt-12">
           <ActorDetailTabs
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -67,7 +67,7 @@ export function DesignerSpecsCard({ attributes, actorName, isCurrentActor, actor
 
   return (
     <div className="space-y-8">
-      {/* 1. Design DNA & Skills Section */}
+
       <section className="p-7 sm:p-8 rounded-none bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
           <div className="space-y-1">
@@ -79,7 +79,7 @@ export function DesignerSpecsCard({ attributes, actorName, isCurrentActor, actor
               Kapabilitas Desain {actorName}
             </h2>
           </div>
-          
+
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             {attributes.rate_starting_at && (
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-none bg-stone-50 border border-stone-200/80 text-xs font-semibold text-[#27213D]">
@@ -159,7 +159,6 @@ export function DesignerSpecsCard({ attributes, actorName, isCurrentActor, actor
         )}
       </section>
 
-      {/* 2. Portfolio Gallery Section */}
       {portfolioGallery.length > 0 && (
         <section className="p-7 sm:p-8 rounded-none bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
           <div className="flex items-center gap-2 pb-4 border-b border-stone-100">
@@ -198,7 +197,6 @@ export function DesignerSpecsCard({ attributes, actorName, isCurrentActor, actor
         </section>
       )}
 
-      {/* Lightbox Modal */}
       {selectedImage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 bg-black/90 backdrop-blur-sm" onClick={() => setSelectedImage(null)}>
           <div className="relative max-w-5xl w-full max-h-full flex flex-col items-center justify-center" onClick={e => e.stopPropagation()}>

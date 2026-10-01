@@ -99,14 +99,12 @@ function checkProductCombination(
       const textA = `${a.name} ${a.subtype || ''}`.toLowerCase();
       const textB = `${b.name} ${b.subtype || ''}`.toLowerCase();
 
-      // Fashion Apparel + Accessories / Leather / Shoes
       const isApparelAndAccessory =
         ((textA.includes('busana') || textA.includes('pakaian') || textA.includes('koleksi') || textA.includes('dress') || textA.includes('batik') || textA.includes('kain')) &&
          (textB.includes('aksesori') || textB.includes('perhiasan') || textB.includes('tas') || textB.includes('sepatu') || textB.includes('kulit') || textB.includes('perak'))) ||
         ((textB.includes('busana') || textB.includes('pakaian') || textB.includes('koleksi') || textB.includes('dress') || textB.includes('batik') || textB.includes('kain')) &&
          (textA.includes('aksesori') || textA.includes('perhiasan') || textA.includes('tas') || textA.includes('sepatu') || textA.includes('kulit') || textA.includes('perak')));
 
-      // Wardrobe + Jewelry Accent
       const isWardrobeAndJewelry =
         ((textA.includes('busana') || textA.includes('wardrobe')) && (textB.includes('perak') || textB.includes('perhiasan') || textB.includes('jewelry'))) ||
         ((textA.includes('perak') || textA.includes('perhiasan') || textA.includes('jewelry')) && (textB.includes('busana') || textB.includes('wardrobe')));

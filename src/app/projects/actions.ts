@@ -87,8 +87,6 @@ export async function createProjectBriefAction(formData: FormData) {
     revalidatePath("/projects");
     revalidatePath("/dashboard");
 
-    // Auto-trigger the matching engine to warm the cache in the background.
-    // We don't await it to ensure the UI can redirect instantly.
     getCrewRecommendationsForBrief(brief.id).catch((err) =>
       console.error("Failed to auto-trigger engine:", err)
     );
@@ -135,10 +133,6 @@ export async function expressInterestAction(formData: FormData) {
   }
 }
 
-// ----------------------------------------------------------------------------
-// ACCEPT COLLABORATOR
-// ----------------------------------------------------------------------------
-
 export async function acceptCollaboratorAction(interestId: string, briefId: string) {
   const actor = await getPrimaryActor();
 
@@ -158,10 +152,6 @@ export async function acceptCollaboratorAction(interestId: string, briefId: stri
   }
 }
 
-// ----------------------------------------------------------------------------
-// DECLINE COLLABORATOR
-// ----------------------------------------------------------------------------
-
 export async function declineCollaboratorAction(interestId: string, briefId: string) {
   const actor = await getPrimaryActor();
 
@@ -178,10 +168,6 @@ export async function declineCollaboratorAction(interestId: string, briefId: str
   }
 }
 
-// ----------------------------------------------------------------------------
-// WITHDRAW INTEREST
-// ----------------------------------------------------------------------------
-
 export async function withdrawInterestAction(interestId: string, briefId: string) {
   const actor = await getPrimaryActor();
 
@@ -196,10 +182,6 @@ export async function withdrawInterestAction(interestId: string, briefId: string
     };
   }
 }
-
-// ----------------------------------------------------------------------------
-// FORM COLLABORATION FROM BRIEF
-// ----------------------------------------------------------------------------
 
 export async function formCollaborationAction(briefId: string) {
   const actor = await getPrimaryActor();
@@ -219,10 +201,6 @@ export async function formCollaborationAction(briefId: string) {
   }
 }
 
-// ----------------------------------------------------------------------------
-// INVITE ACTOR TO ROLE (dari Smart Crew Builder — hanya untuk inisiator)
-// ----------------------------------------------------------------------------
-
 export async function inviteActorToRoleAction(
   targetActorId: string,
   briefId: string,
@@ -230,7 +208,6 @@ export async function inviteActorToRoleAction(
 ) {
   const initiator = await getPrimaryActor();
 
-  // Pastikan hanya initiator brief yang bisa mengundang
   const brief = await prisma.projectBrief.findUnique({
     where: { id: briefId },
     select: { creatorActorId: true, title: true },
@@ -241,7 +218,6 @@ export async function inviteActorToRoleAction(
     return { success: false, error: "Hanya inisiator proyek yang dapat mengundang." };
   }
 
-  // Cek apakah target actor sudah ada interest di role ini
   const existing = await prisma.collaborationInterest.findUnique({
     where: { briefId_actorId_roleId: { briefId, actorId: targetActorId, roleId } },
   });

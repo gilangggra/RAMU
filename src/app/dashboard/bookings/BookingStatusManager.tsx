@@ -22,7 +22,7 @@ export function BookingStatusManager({ bookingId }: BookingStatusManagerProps) {
     setErrorMessage(null);
 
     const result = await updateBookingStatus(bookingId, status);
-    
+
     setIsLoading(false);
     if (!result.success) {
       setErrorMessage(result.error || "Gagal memperbarui status.");
@@ -278,13 +278,12 @@ export function BookingMilestoneTracker({ status, dpPercentage = 50 }: { status:
       </div>
 
       <div className="grid grid-cols-3 gap-2 text-center">
-        {/* Step 1 */}
+
         <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">
           <div className="text-[10px] font-bold">1. SPK & T&C</div>
           <div className="text-[9px] text-emerald-600">Disepakati</div>
         </div>
 
-        {/* Step 2 */}
         <div
           className={`p-2 rounded-lg border ${
             isAccepted
@@ -300,7 +299,6 @@ export function BookingMilestoneTracker({ status, dpPercentage = 50 }: { status:
           </div>
         </div>
 
-        {/* Step 3 */}
         <div className="p-2 rounded-lg bg-white border border-stone-200 text-stone-500">
           <div className="text-[10px] font-bold">3. Pelunasan {100 - dpPercentage}%</div>
           <div className="text-[9px]">Serah Terima Aset</div>
@@ -309,5 +307,3 @@ export function BookingMilestoneTracker({ status, dpPercentage = 50 }: { status:
     </div>
   );
 }
-
-

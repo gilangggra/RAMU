@@ -143,13 +143,13 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
   const [actorType, setActorType] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
   const [specialization, setSpecialization] = useState("");
-  
+
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [location, setLocation] = useState(POPULAR_LOCATIONS[0]);
-  
+
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const avatarInputRef = React.useRef<HTMLInputElement>(null);
@@ -161,7 +161,7 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
   const [website, setWebsite] = useState("");
   const [phone, setPhone] = useState("");
   const [receiveNotifications, setReceiveNotifications] = useState(true);
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stepError, setStepError] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -197,21 +197,20 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
     setStepError("");
     if (step === 1 && !actorType) { setStepError("Pilih satu tipe akun untuk melanjutkan."); return; }
     if (step === 2 && !selectedRole) { setStepError("Pilih peran yang menggambarkan Anda."); return; }
-    
-    // Skip Step 3 if no specializations defined for the selected role
+
     if (step === 2 && !hasSpecializationStep) {
       setStep(4);
       return;
     }
-    
+
     if (step === 3 && !specialization) { setStepError("Pilih setidaknya satu spesialisasi utama."); return; }
-    
+
     if (step === 4) {
       if (!displayName.trim()) { setStepError("Nama profil wajib diisi."); return; }
       if (!email.trim() || !email.includes("@")) { setStepError("Alamat email tidak valid."); return; }
       if (password.length < 6) { setStepError("Kata sandi minimal 6 karakter."); return; }
     }
-    
+
     setStep((prev) => (prev + 1) as Step);
   };
 
@@ -265,7 +264,7 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
         await signup(formData);
       } catch (err: any) {
         if (err?.message?.includes("NEXT_REDIRECT")) {
-          // Normal Next.js redirect
+
           return;
         }
         setIsSubmitting(false);
@@ -278,18 +277,17 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
 
   return (
     <div className="w-full max-w-xl mx-auto">
-      {/* Progress Stepper */}
+
       <div className="mb-8 sm:mb-10">
         <div className="flex items-center justify-between mb-3">
           {(() => {
-            const visualLabels = hasSpecializationStep 
-              ? STEP_LABELS 
+            const visualLabels = hasSpecializationStep
+              ? STEP_LABELS
               : STEP_LABELS.filter(l => l !== "Spesialisasi");
 
             return visualLabels.map((label, index) => {
-              const visualStepNum = index + 1; // 1, 2, 3, 4 (or 5)
-              
-              // Map visual step back to actual step state
+              const visualStepNum = index + 1;
+
               let actualStepForVisual = visualStepNum as Step;
               if (!hasSpecializationStep && visualStepNum > 2) {
                 actualStepForVisual = (visualStepNum + 1) as Step;
@@ -324,10 +322,8 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
         </div>
       </div>
 
-      {/* Card */}
       <div className="bg-white rounded-[28px] shadow-[0_16px_48px_rgba(39,33,61,0.10)] border border-stone-100 overflow-hidden">
 
-        {/* Card Header */}
         <div className="px-8 pt-8 pb-6 border-b border-stone-100">
           <h1 className="text-xl sm:text-2xl font-black text-[#1E1B2E] tracking-tight">
             {step === 1 && "Pilih Tipe Akun"}
@@ -345,9 +341,8 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
           </p>
         </div>
 
-        {/* Card Body */}
         <div className="px-8 py-7">
-          {/* Step Error */}
+
           {(stepError || (step === 4 && initialError)) && (
             <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
@@ -356,7 +351,7 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
           )}
 
           <form onSubmit={(e) => e.preventDefault()}>
-            {/* ─── STEP 1: TIPE AKUN ─── */}
+
             {step === 1 && (
               <div className="space-y-3">
                 {ACTOR_TYPES.map((type) => {
@@ -397,7 +392,6 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
               </div>
             )}
 
-            {/* ─── STEP 2: PERAN ─── */}
             {step === 2 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {rolesForType.map((role) => {
@@ -429,7 +423,6 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
               </div>
             )}
 
-            {/* ─── STEP 3: SPESIALISASI ─── */}
             {step === 3 && hasSpecializationStep && (
               <div className="space-y-3">
                 {specializationsForRole.map((spec) => {
@@ -464,7 +457,6 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
               </div>
             )}
 
-            {/* ─── STEP 4: KREDENSIAL ─── */}
             {step === 4 && (
               <div className="space-y-5">
                 <div className="space-y-1.5">
@@ -564,7 +556,6 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
               </div>
             )}
 
-            {/* ─── STEP 5: DETAIL PROFIL ─── */}
             {step === 5 && (
               <div className="space-y-5">
                 <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 leading-relaxed">
@@ -694,10 +685,10 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
                     <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider">Website / Portofolio</label>
                     <div className="relative">
                       <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
-                      <input 
-                        type="url" 
-                        value={website} 
-                        onChange={(e) => setWebsite(e.target.value)} 
+                      <input
+                        type="url"
+                        value={website}
+                        onChange={(e) => setWebsite(e.target.value)}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
@@ -705,7 +696,7 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
                           }
                         }}
                         placeholder="https://instagram.com/..."
-                        className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-stone-50 border-2 border-stone-200 text-sm text-[#1E1B2E] placeholder-stone-400 focus:outline-none focus:border-[#1E1B2E] focus:bg-white transition-all font-medium" 
+                        className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-stone-50 border-2 border-stone-200 text-sm text-[#1E1B2E] placeholder-stone-400 focus:outline-none focus:border-[#1E1B2E] focus:bg-white transition-all font-medium"
                       />
                     </div>
                   </div>
@@ -713,10 +704,10 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
                     <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider">WhatsApp / Telepon</label>
                     <div className="relative">
                       <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
-                      <input 
-                        type="tel" 
-                        value={phone} 
-                        onChange={(e) => setPhone(e.target.value)} 
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
@@ -724,7 +715,7 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
                           }
                         }}
                         placeholder="+62 812-3456-7890"
-                        className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-stone-50 border-2 border-stone-200 text-sm text-[#1E1B2E] placeholder-stone-400 focus:outline-none focus:border-[#1E1B2E] focus:bg-white transition-all font-medium" 
+                        className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-stone-50 border-2 border-stone-200 text-sm text-[#1E1B2E] placeholder-stone-400 focus:outline-none focus:border-[#1E1B2E] focus:bg-white transition-all font-medium"
                       />
                     </div>
                   </div>
@@ -751,7 +742,6 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
               </div>
             )}
 
-            {/* ─── NAVIGATION BUTTONS ─── */}
             <div className="flex items-center justify-between gap-3 pt-6 mt-6 border-t border-stone-100">
               <div className="flex items-center gap-2">
                 {step > 1 ? (
@@ -770,11 +760,11 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
                   </Link>
                 )}
                 {step === 5 && (
-                  <button 
+                  <button
                     key="skip-btn-step-5"
-                    type="button" 
-                    onClick={() => handleFinalSubmit(true)} 
-                    disabled={isSubmitting || isPending} 
+                    type="button"
+                    onClick={() => handleFinalSubmit(true)}
+                    disabled={isSubmitting || isPending}
                     className="text-xs font-semibold text-stone-400 hover:text-stone-700 px-3 py-2 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
                   >
                     Lewati Tahap Ini
@@ -807,7 +797,6 @@ export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
         </div>
       </div>
 
-      {/* Login link */}
       <p className="text-center text-sm text-stone-500 mt-6">
         Sudah punya akun?{" "}
         <Link href="/login" className="font-bold text-[#1E1B2E] hover:text-amber-600 transition-colors underline decoration-stone-300">

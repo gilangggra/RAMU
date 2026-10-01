@@ -119,7 +119,7 @@ export function SocialCreditGenerator({
   plan,
   className = "",
 }: SocialCreditGeneratorProps) {
-  // 1. Initial Credits Generation
+
   const initialCredits: ParticipantCredit[] = useMemo(() => {
     return participants.map((p, idx) => ({
       id: p.id || `credit-${idx}`,
@@ -142,21 +142,18 @@ export function SocialCreditGenerator({
   const [copied, setCopied] = useState<boolean>(false);
   const [showConfig, setShowConfig] = useState<boolean>(false);
 
-  // Update credits if participants prop changes and local credits are empty
   const resetToDefault = () => {
     setCredits(initialCredits);
     setProjectTitle(collaborationTitle);
     setActiveHashtags(DEFAULT_HASHTAGS);
   };
 
-  // Helper to update a credit item
   const updateCredit = (id: string, field: keyof ParticipantCredit, value: string) => {
     setCredits((prev) =>
       prev.map((c) => (c.id === id ? { ...c, [field]: value } : c))
     );
   };
 
-  // Add custom credit item
   const addCreditItem = () => {
     const newId = `custom-${Date.now()}`;
     setCredits((prev) => [
@@ -172,19 +169,16 @@ export function SocialCreditGenerator({
     ]);
   };
 
-  // Remove credit item
   const removeCreditItem = (id: string) => {
     setCredits((prev) => prev.filter((c) => c.id !== id));
   };
 
-  // Toggle hashtag
   const toggleHashtag = (tag: string) => {
     setActiveHashtags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   };
 
-  // Add custom hashtag
   const handleAddCustomTag = (e: React.FormEvent) => {
     e.preventDefault();
     const clean = newTagInput.trim().replace(/^#+/, "").replace(/\s+/g, "");
@@ -194,11 +188,9 @@ export function SocialCreditGenerator({
     }
   };
 
-  // Generate output text based on active format
   const generatedText = useMemo(() => {
     const title = projectTitle || "Fashion Collaboration Project";
 
-    // 1. STORY / REEL MENTION STICKER (Single-line space-separated)
     if (formatType === "story") {
       const handles = credits
         .map((c) => (c.handle.startsWith("@") ? c.handle : `@${c.handle}`))
@@ -209,7 +201,6 @@ export function SocialCreditGenerator({
       return handles.join(" ");
     }
 
-    // 2. INSTAGRAM / TIKTOK FEED CAPTION
     if (formatType === "instagram") {
       const lines: string[] = [];
       lines.push(`✨ ${title}`);
@@ -238,13 +229,11 @@ export function SocialCreditGenerator({
       return lines.join("\n");
     }
 
-    // 3. EDITORIAL PRESS / LOOKBOOK (High-fashion standard)
     if (formatType === "editorial") {
       const lines: string[] = [];
       lines.push(`EDITORIAL CREDITS: "${title.toUpperCase()}"`);
       lines.push("━".repeat(48));
 
-      // Calculate max length for aligned colon
       const maxRoleLength = Math.max(...credits.map((c) => c.role.length), 18);
 
       credits.forEach((c) => {
@@ -262,7 +251,6 @@ export function SocialCreditGenerator({
       return lines.join("\n");
     }
 
-    // 4. CALL SHEET PRODUCTION ROSTER (On-set shooting day)
     if (formatType === "callsheet") {
       const lines: string[] = [];
       lines.push(`PRODUCTION CALL SHEET ROSTER`);
@@ -287,13 +275,12 @@ export function SocialCreditGenerator({
     return "";
   }, [credits, projectTitle, formatType, includePlatformTag, includeHashtags, activeHashtags]);
 
-  // Copy to clipboard
   const handleCopy = async () => {
     try {
       if (navigator?.clipboard?.writeText) {
         await navigator.clipboard.writeText(generatedText);
       } else {
-        // Fallback for older browsers
+
         const textarea = document.createElement("textarea");
         textarea.value = generatedText;
         document.body.appendChild(textarea);
@@ -308,7 +295,6 @@ export function SocialCreditGenerator({
     }
   };
 
-  // Download as text file
   const handleDownloadTxt = () => {
     const element = document.createElement("a");
     const file = new Blob([generatedText], { type: "text/plain;charset=utf-8" });
@@ -321,16 +307,15 @@ export function SocialCreditGenerator({
     document.body.removeChild(element);
   };
 
-  // Count stats
   const charCount = generatedText.length;
   const mentionMatches = generatedText.match(/@[a-zA-Z0-9_.]+/g);
   const mentionCount = mentionMatches ? mentionMatches.length : 0;
 
   return (
     <div className={`space-y-6 ${className}`}>
-      {/* Header Banner */}
+
       <div className="p-6 sm:p-8 rounded-[32px] bg-gradient-to-br from-[#1E1B2E] via-[#2A243D] to-[#1E1B2E] text-white shadow-xl shadow-[#1E1B2E]/10 relative overflow-hidden">
-        {/* Subtle decorative circles */}
+
         <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#E66A48]/10 rounded-full blur-2xl pointer-events-none" />
 
@@ -373,7 +358,6 @@ export function SocialCreditGenerator({
             </div>
           </div>
 
-          {/* Format Selector Pills */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-white/10">
             {[
               {
@@ -431,7 +415,6 @@ export function SocialCreditGenerator({
         </div>
       </div>
 
-      {/* Editor Panel: Customize Team Roles & Handles */}
       {showConfig && (
         <div className="p-6 rounded-[28px] bg-white border border-stone-200/90 shadow-sm space-y-6 animate-fade-in">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-100 pb-4">
@@ -455,7 +438,6 @@ export function SocialCreditGenerator({
             </button>
           </div>
 
-          {/* Project Title Field */}
           <div className="space-y-1.5 max-w-lg">
             <label className="text-xs font-bold uppercase tracking-wider text-stone-600">
               Judul Proyek / Kampanye
@@ -469,7 +451,6 @@ export function SocialCreditGenerator({
             />
           </div>
 
-          {/* List of Team Members */}
           <div className="space-y-3">
             <div className="grid grid-cols-12 gap-3 text-[11px] font-bold uppercase tracking-wider text-stone-400 px-2 hidden sm:grid">
               <div className="col-span-4">Peran Mode / Produksi</div>
@@ -483,7 +464,7 @@ export function SocialCreditGenerator({
                 key={item.id}
                 className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 p-3 rounded-2xl bg-stone-50/70 border border-stone-200/80 items-center hover:bg-stone-50 transition-colors"
               >
-                {/* Role */}
+
                 <div className="sm:col-span-4">
                   <div className="text-[10px] font-bold text-stone-500 uppercase sm:hidden mb-1">Peran</div>
                   <div className="relative">
@@ -503,7 +484,6 @@ export function SocialCreditGenerator({
                   </div>
                 </div>
 
-                {/* Name */}
                 <div className="sm:col-span-4">
                   <div className="text-[10px] font-bold text-stone-500 uppercase sm:hidden mb-1">Nama</div>
                   <input
@@ -515,7 +495,6 @@ export function SocialCreditGenerator({
                   />
                 </div>
 
-                {/* Handle */}
                 <div className="sm:col-span-3">
                   <div className="text-[10px] font-bold text-stone-500 uppercase sm:hidden mb-1">Handle</div>
                   <input
@@ -527,7 +506,6 @@ export function SocialCreditGenerator({
                   />
                 </div>
 
-                {/* Action */}
                 <div className="sm:col-span-1 flex justify-end sm:justify-center">
                   <button
                     type="button"
@@ -542,7 +520,6 @@ export function SocialCreditGenerator({
             ))}
           </div>
 
-          {/* Hashtag & Platform Tags Configuration */}
           <div className="pt-4 border-t border-stone-100 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-3">
               <label className="text-xs font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
@@ -563,7 +540,6 @@ export function SocialCreditGenerator({
                 ))}
               </div>
 
-              {/* Add custom tag */}
               <form onSubmit={handleAddCustomTag} className="flex gap-2 pt-1">
                 <input
                   type="text"
@@ -612,7 +588,6 @@ export function SocialCreditGenerator({
         </div>
       )}
 
-      {/* Live Preview & One-Click Copy Card */}
       <div className="p-6 sm:p-8 rounded-[32px] bg-white border border-stone-200/90 shadow-[0_15px_40px_rgba(30,27,46,0.04)] space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -668,9 +643,8 @@ export function SocialCreditGenerator({
           </div>
         </div>
 
-        {/* Text Preview Box Styled Like High-End Lookbook / Terminal */}
         <div className="relative rounded-2xl bg-[#1E1B2E] text-stone-100 p-5 sm:p-6 border border-stone-800 shadow-inner group">
-          {/* Header dots */}
+
           <div className="flex items-center justify-between pb-3 mb-3 border-b border-stone-800 text-[11px] text-stone-400 font-mono">
             <div className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
@@ -687,7 +661,6 @@ export function SocialCreditGenerator({
             {generatedText}
           </pre>
 
-          {/* Quick Floating Copy button inside box */}
           <button
             type="button"
             onClick={handleCopy}
@@ -698,7 +671,6 @@ export function SocialCreditGenerator({
           </button>
         </div>
 
-        {/* Tip for creators */}
         <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 flex items-start gap-3">
           <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
           <div className="text-xs text-amber-950 font-light leading-relaxed">

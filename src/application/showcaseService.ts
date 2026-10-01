@@ -34,7 +34,6 @@ export interface ShowcaseItem {
   };
 }
 
-// Helper to determine background colors based on sector
 function getAvatarBg(sector: string) {
   if (sector.toLowerCase().includes("fotografi") || sector.toLowerCase().includes("visual")) {
     return "from-amber-400 to-[#E66A48]";
@@ -51,7 +50,6 @@ function getAvatarBg(sector: string) {
   return "from-stone-500 to-stone-700";
 }
 
-// Fallback high-quality Unsplash images for the masonry grid
 const FALLBACK_IMAGES = [
   "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1600508774634-4e11d34730e2?q=80&w=800&auto=format&fit=crop",
@@ -83,7 +81,6 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
     ];
   }
 
-  // Fetch assets with their actors
   const assets = await prisma.asset.findMany({
     where: whereClause,
     include: {
@@ -106,7 +103,6 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
     }
   });
 
-  // Fetch all active actors to populate genuine collaborative credits
   const allActors = await prisma.actor.findMany({
     where: { status: { not: "ARCHIVED" } },
     select: {
@@ -120,9 +116,8 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
 
   const showcaseItems: ShowcaseItem[] = [];
 
-  // Map database assets to visual showcase items
   assets.forEach((asset, index) => {
-    // Extract media attributes
+
     const attrs = (asset.attributes as any) || {};
     const tearSheet = attrs.tear_sheet || null;
 
@@ -131,19 +126,16 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
       ? tearSheet.credits.some((c: any) => c.actorId === currentActorId)
       : false;
 
-    // Filter by scope (mine)
     if (scope === "mine") {
       if (!isOwner && !isCoCreditor) {
-        return; // Skip if not owner and not co-creditor
+        return;
       }
     }
 
-    // Use the actual subtype inputted by the user
     let displayCategory = asset.subtype || "Lainnya";
 
-    // Apply category filter if specified
     if (category && category !== "ALL" && displayCategory !== category) {
-      return; // Skip this item
+      return;
     }
 
     let imageUrl = null;
@@ -157,12 +149,10 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
     const videoSource = attrs.video_source || (videoUrl ? "EXTERNAL" : null);
     const aspectRatio = attrs.aspect_ratio || "16:9";
 
-    // Fallback to random beautiful images only if asset has no image
     if (!imageUrl) {
       imageUrl = FALLBACK_IMAGES[index % FALLBACK_IMAGES.length];
     }
 
-    // Calculate initials
     const initials = asset.actor.name
       .split(" ")
       .map((word) => word[0])
@@ -198,13 +188,9 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
     });
   });
 
-  // Return real database assets in true chronological order
   return showcaseItems;
 }
 
-/**
- * Helper to count total portfolio items for a specific actor (both authored and co-credited)
- */
 export async function getActorShowcaseCount(actorId: string): Promise<number> {
   if (!actorId) return 0;
 
