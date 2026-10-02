@@ -6,10 +6,12 @@ export interface DirectoryFilterParams {
   actorType?: string;
   sector?: string;
   location?: string;
+  style?: string;
+  compensation?: string;
 }
 
 export async function getDirectoryActors(params: DirectoryFilterParams = {}) {
-  const { search, actorType, sector, location } = params;
+  const { search, actorType, sector, location, style, compensation } = params;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const whereClause: any = {
@@ -26,6 +28,14 @@ export async function getDirectoryActors(params: DirectoryFilterParams = {}) {
 
   if (location && location !== "ALL") {
     whereClause.location = { contains: location, mode: "insensitive" };
+  }
+
+  if (style && style !== "ALL") {
+    whereClause.aestheticStyles = { has: style };
+  }
+
+  if (compensation && compensation !== "ALL") {
+    whereClause.compensationModels = { has: compensation };
   }
 
   if (search && search.trim() !== "") {
@@ -147,6 +157,28 @@ export async function getDirectoryActorById(id: string) {
           },
           opportunity: {
             select: { title: true },
+          },
+        },
+      },
+      collaborationParticipations: {
+        orderBy: { joinedAt: "desc" },
+        take: 6,
+        include: {
+          collaboration: {
+            select: {
+              id: true,
+              title: true,
+              description: true,
+              status: true,
+              startedAt: true,
+              completedAt: true,
+              outcomes: true,
+              participants: {
+                include: {
+                  actor: { select: { id: true, name: true, sector: true } },
+                },
+              },
+            },
           },
         },
       },

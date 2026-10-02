@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { ShowcaseItem } from "@/application/showcaseService";
 import { getTearSheetData, formatInstagramCredits } from "./tearSheetUtils";
 import { HotspotCategory } from "./tearSheetTypes";
-import { confirmCoCredit, rejectCoCredit } from "@/app/api/assets/actions";
+import { confirmCoCredit, rejectCoCredit, claimCoCreditAction } from "@/app/api/assets/actions";
 import { parseVideoUrl } from "@/lib/videoUtils";
 import {
   X,
@@ -138,6 +138,10 @@ export function TearSheetModal({
   const [userClaimedRole, setUserClaimedRole] = useState<string | null>(null);
   const [isClaiming, setIsClaiming] = useState(false);
   const [claimedRoleInput, setClaimedRoleInput] = useState("Fashion Stylist / Wardrobe Designer");
+  const [customRoleInput, setCustomRoleInput] = useState("");
+  const [claimDetailsInput, setClaimDetailsInput] = useState("");
+  const [isClaimSubmitting, setIsClaimSubmitting] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
   const [claimSuccessMessage, setClaimSuccessMessage] = useState<string | null>(null);
   const [showGuaranteeModal, setShowGuaranteeModal] = useState(false);
 
@@ -158,6 +162,7 @@ export function TearSheetModal({
     setHoveredPinId(null);
     setIsClaiming(false);
     setClaimSuccessMessage(null);
+    setClaimError(null);
     setActionFeedback(null);
     if (item?.id && typeof window !== "undefined") {
       const saved = localStorage.getItem(`ramu_verified_role_${item.id}`);
@@ -165,13 +170,35 @@ export function TearSheetModal({
     }
   }, [item?.id]);
 
-  const handleConfirmClaim = (role: string) => {
+  const handleConfirmClaim = async () => {
     if (!item?.id) return;
-    localStorage.setItem(`ramu_verified_role_${item.id}`, role);
-    setUserClaimedRole(role);
-    setIsClaiming(false);
-    setClaimSuccessMessage(`Peran Anda sebagai "${role}" berhasil diverifikasi silang.`);
-    setTimeout(() => setClaimSuccessMessage(null), 4500);
+    const finalRole = claimedRoleInput === "LAINNYA" ? customRoleInput.trim() : claimedRoleInput;
+    if (!finalRole) {
+      setClaimError("Silakan tentukan nama peran Anda.");
+      return;
+    }
+    setIsClaimSubmitting(true);
+    setClaimError(null);
+    try {
+      const res = await claimCoCreditAction({
+        assetId: item.id,
+        role: finalRole,
+        details: claimDetailsInput.trim() || undefined,
+      });
+      if (res.success) {
+        setUserClaimedRole(finalRole);
+        setIsClaiming(false);
+        setClaimSuccessMessage(`Klaim peran "${finalRole}" berhasil diajukan! Menunggu persetujuan pemilik karya.`);
+        router.refresh();
+        setTimeout(() => setClaimSuccessMessage(null), 5000);
+      } else {
+        setClaimError(res.error || "Gagal mengajukan klaim kredit.");
+      }
+    } catch (err: any) {
+      setClaimError(err?.message || "Terjadi kesalahan saat mengajukan klaim.");
+    } finally {
+      setIsClaimSubmitting(false);
+    }
   };
 
   const handleRevokeClaim = () => {
@@ -606,19 +633,49 @@ export function TearSheetModal({
               )}
 
               {isCoCreditor && isPendingCoCredit && (
-                <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 to-emerald-500/10 border border-amber-300/80 text-xs text-stone-900 space-y-2 animate-fade-in">
+                <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-white border border-amber-300/80 text-xs text-stone-900 space-y-2.5 animate-fade-in shadow-2xs">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <ShieldCheck className="w-4 h-4 text-amber-600" />
-                      <span className="font-bold">Permintaan Verifikasi Co-Credit</span>
+                      <span className="font-bold">
+                        {myCredit?.claimedByActorId === currentActorId
+                          ? "Pengajuan Klaim Co-Credit Terkirim"
+                          : "Permintaan Verifikasi Co-Credit"}
+                      </span>
                     </div>
-                    <span className="text-[9px] font-mono font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded">
-                      Menunggu Anda
+                    <span className="text-[9px] font-mono font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded border border-amber-200">
+                      {myCredit?.claimedByActorId === currentActorId
+                        ? "Menunggu Persetujuan Pemilik"
+                        : "Menunggu Konfirmasi Anda"}
                     </span>
                   </div>
                   <p className="text-[11px] text-stone-600 leading-snug">
-                    Kreator menyematkan Anda sebagai <strong>{myCredit?.role}</strong>. Konfirmasi sekarang untuk mengaktifkan stempel anti-catfishing dan menyinkronkan karya ini ke portofolio profil Anda.
+                    {myCredit?.claimedByActorId === currentActorId
+                      ? `Anda telah mengajukan klaim peran sebagai ${myCredit?.role}. Pemilik portofolio akan meninjau dan memvalidasi kontribusi Anda.`
+                      : `Kreator menyematkan Anda sebagai ${myCredit?.role}. Konfirmasi sekarang untuk mengaktifkan sertifikat anti-catfishing dan menyinkronkan karya ini ke portofolio profil Anda.`}
                   </p>
+
+                  {myCredit?.claimedByActorId !== currentActorId && (
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={handleConfirmMyCredit}
+                        disabled={isConfirming}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        {isConfirming ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                        <span>Konfirmasi Keterlibatan</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleRejectMyCredit}
+                        disabled={isConfirming}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 font-semibold text-xs transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        <span>Tolak</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -713,68 +770,129 @@ export function TearSheetModal({
               {!isOwner && !isCoCreditor && (
                 <div className="pt-4 border-t border-stone-100 space-y-2">
                   {claimSuccessMessage && (
-                    <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold flex items-center gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold flex items-center gap-2 animate-fade-in shadow-2xs">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                       <span>{claimSuccessMessage}</span>
                     </div>
                   )}
 
                   {userClaimedRole ? (
-                    <div className="flex items-center justify-between text-xs py-1 text-emerald-900">
-                      <div className="flex items-center gap-1.5 min-w-0">
+                    <div className="flex items-center justify-between text-xs py-1.5 px-3 rounded-xl bg-emerald-50/60 border border-emerald-200/80 text-emerald-900">
+                      <div className="flex items-center gap-2 min-w-0">
                         <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        <span className="truncate">Peran Anda: <strong>{userClaimedRole}</strong></span>
+                        <span className="truncate">Peran Anda: <strong>{userClaimedRole}</strong> (Pending Verifikasi)</span>
                       </div>
                       <button
                         type="button"
                         onClick={handleRevokeClaim}
                         className="text-[10px] text-stone-400 hover:text-stone-700 underline shrink-0 cursor-pointer ml-2"
                       >
-                        Ubah
+                        Reset
                       </button>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between text-xs text-stone-500 py-1">
-                      <span>Terlibat dalam karya ini?</span>
-                      <button
-                        type="button"
-                        onClick={() => setIsClaiming(!isClaiming)}
-                        className="font-bold text-stone-900 hover:text-amber-800 underline text-xs cursor-pointer"
-                      >
-                        {isClaiming ? "Tutup" : "Klaim Kontribusi ↗"}
-                      </button>
+                      <span>Terlibat dalam produksi karya ini?</span>
+                      {currentActorId ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsClaiming(!isClaiming);
+                            setClaimError(null);
+                          }}
+                          className="font-bold text-[#1E1B2E] hover:text-amber-800 underline text-xs cursor-pointer inline-flex items-center gap-1"
+                        >
+                          <Sparkles className="w-3 h-3 text-amber-500" />
+                          <span>{isClaiming ? "Tutup Form" : "Klaim Kredit Kru ↗"}</span>
+                        </button>
+                      ) : (
+                        <Link
+                          href="/login"
+                          className="font-bold text-[#1E1B2E] hover:text-amber-800 underline text-xs"
+                        >
+                          Masuk untuk Klaim ↗
+                        </Link>
+                      )}
                     </div>
                   )}
 
                   {isClaiming && (
-                    <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/80 space-y-2 animate-fade-in text-xs">
-                      <label className="block text-[10px] font-mono uppercase font-bold text-stone-600">
-                        Pilih Peran Anda di Tim Produksi:
-                      </label>
-                      <select
-                        value={claimedRoleInput}
-                        onChange={(e) => setClaimedRoleInput(e.target.value)}
-                        className="w-full text-xs p-2 rounded-lg bg-white border border-stone-300 text-stone-900 focus:outline-hidden focus:ring-1 focus:ring-stone-400"
-                      >
-                        <option value="Fotografi / Asisten Lighting">Fotografi / Asisten Lighting</option>
-                        <option value="Fashion Stylist / Wardrobe Designer">Fashion Stylist / Wardrobe Designer</option>
-                        <option value="Hair & Makeup Artist (HMUA)">Hair & Makeup Artist (HMUA)</option>
-                        <option value="Model / Talent">Model / Talent</option>
-                        <option value="Art Director / Set Designer">Art Director / Set Designer</option>
-                        <option value="Studio / Location Provider">Studio / Location Provider</option>
-                      </select>
+                    <div className="p-4 rounded-xl bg-stone-50 border border-stone-200/90 space-y-3 animate-fade-in text-xs shadow-inner">
+                      <div>
+                        <label className="block text-[10px] font-mono uppercase font-bold text-stone-700 mb-1">
+                          Pilih Peran Anda di Tim Produksi:
+                        </label>
+                        <select
+                          value={claimedRoleInput}
+                          onChange={(e) => setClaimedRoleInput(e.target.value)}
+                          className="w-full text-xs p-2.5 rounded-lg bg-white border border-stone-300 text-stone-900 focus:outline-none focus:ring-1 focus:ring-stone-400 font-medium"
+                        >
+                          <option value="Fotografi / Asisten Lighting">Fotografi / Asisten Lighting</option>
+                          <option value="Fashion Stylist / Wardrobe Designer">Fashion Stylist / Wardrobe Designer</option>
+                          <option value="Hair & Makeup Artist (HMUA)">Hair & Makeup Artist (HMUA)</option>
+                          <option value="Model / Talent">Model / Talent</option>
+                          <option value="Art Director / Set Designer">Art Director / Set Designer</option>
+                          <option value="Videografer / Colorist">Videografer / Colorist</option>
+                          <option value="Studio / Location Provider">Studio / Location Provider</option>
+                          <option value="LAINNYA">Peran Lainnya (Kustom)...</option>
+                        </select>
+                      </div>
+
+                      {claimedRoleInput === "LAINNYA" && (
+                        <div>
+                          <label className="block text-[10px] font-mono uppercase font-bold text-stone-700 mb-1">
+                            Tuliskan Nama Peran Anda:
+                          </label>
+                          <input
+                            type="text"
+                            value={customRoleInput}
+                            onChange={(e) => setCustomRoleInput(e.target.value)}
+                            placeholder="Contoh: Digital Imaging Specialist, Gaffer..."
+                            className="w-full text-xs p-2.5 rounded-lg bg-white border border-stone-300 text-stone-900 focus:outline-none focus:ring-1 focus:ring-stone-400 font-medium"
+                          />
+                        </div>
+                      )}
+
+                      <div>
+                        <label className="block text-[10px] font-mono uppercase font-bold text-stone-700 mb-1">
+                          Catatan Kontribusi / Bukti Terlibat (Opsional):
+                        </label>
+                        <textarea
+                          value={claimDetailsInput}
+                          onChange={(e) => setClaimDetailsInput(e.target.value)}
+                          placeholder="Jelaskan secara singkat peran atau kapabilitas Anda dalam produksi bersama ini..."
+                          rows={2}
+                          className="w-full text-xs p-2.5 rounded-lg bg-white border border-stone-300 text-stone-900 focus:outline-none focus:ring-1 focus:ring-stone-400 font-medium resize-none"
+                        />
+                      </div>
+
+                      {claimError && (
+                        <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold">
+                          {claimError}
+                        </div>
+                      )}
+
                       <div className="flex gap-2 pt-1">
                         <button
                           type="button"
-                          onClick={() => handleConfirmClaim(claimedRoleInput)}
-                          className="flex-1 py-1.5 px-3 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-bold transition-all cursor-pointer"
+                          onClick={handleConfirmClaim}
+                          disabled={isClaimSubmitting}
+                          className="flex-1 py-2 px-3 rounded-lg bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 shadow-xs"
                         >
-                          Konfirmasi
+                          {isClaimSubmitting ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                          ) : (
+                            <Check className="w-3.5 h-3.5 text-white" />
+                          )}
+                          <span>{isClaimSubmitting ? "Mengirim..." : "Kirim Pengajuan Klaim"}</span>
                         </button>
                         <button
                           type="button"
-                          onClick={() => setIsClaiming(false)}
-                          className="py-1.5 px-3 rounded-lg bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs cursor-pointer"
+                          onClick={() => {
+                            setIsClaiming(false);
+                            setClaimError(null);
+                          }}
+                          className="py-2 px-3 rounded-lg bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-semibold cursor-pointer"
                         >
                           Batal
                         </button>

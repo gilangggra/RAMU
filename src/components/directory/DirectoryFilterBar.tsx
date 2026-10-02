@@ -9,6 +9,8 @@ interface DirectoryFilterBarProps {
   currentType?: string;
   currentSector?: string;
   currentLocation?: string;
+  currentStyle?: string;
+  currentCompensation?: string;
 }
 
 export function DirectoryFilterBar({
@@ -16,6 +18,8 @@ export function DirectoryFilterBar({
   currentType = "ALL",
   currentSector = "ALL",
   currentLocation = "ALL",
+  currentStyle = "ALL",
+  currentCompensation = "ALL",
 }: DirectoryFilterBarProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -54,7 +58,9 @@ export function DirectoryFilterBar({
     Boolean(currentSearch) ||
     currentType !== "ALL" ||
     currentSector !== "ALL" ||
-    currentLocation !== "ALL";
+    currentLocation !== "ALL" ||
+    currentStyle !== "ALL" ||
+    currentCompensation !== "ALL";
 
   return (
     <div className="space-y-6 pb-6 border-b border-stone-200">
@@ -66,7 +72,7 @@ export function DirectoryFilterBar({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search portfolios, studios, roles..."
+            placeholder="Cari talenta, studio, keahlian..."
             className="w-full pl-8 pr-8 py-2 bg-transparent border-b border-stone-200 text-sm text-[#1E1B2E] placeholder-stone-400 focus:outline-none focus:border-[#1E1B2E] transition-all rounded-none"
           />
           {search && (
@@ -83,15 +89,15 @@ export function DirectoryFilterBar({
           )}
         </form>
 
-        <div className="flex items-center gap-6 shrink-0">
-          <div className="flex items-center gap-3 border-b border-stone-200 pb-2">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">City</span>
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6 shrink-0">
+          <div className="flex items-center gap-2 border-b border-stone-200 pb-2">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Kota</span>
             <select
               value={currentLocation}
               onChange={(e) => updateQuery({ location: e.target.value })}
-              className="bg-transparent text-sm text-[#1E1B2E] font-medium focus:outline-none cursor-pointer appearance-none pr-4"
+              className="bg-transparent text-xs text-[#1E1B2E] font-medium focus:outline-none cursor-pointer appearance-none pr-3"
             >
-              <option value="ALL">Worldwide</option>
+              <option value="ALL">Semua Kota</option>
               <option value="Jakarta">Jakarta</option>
               <option value="Bandung">Bandung</option>
               <option value="Yogyakarta">Yogyakarta</option>
@@ -100,13 +106,45 @@ export function DirectoryFilterBar({
             </select>
           </div>
 
+          <div className="flex items-center gap-2 border-b border-stone-200 pb-2">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Estetika</span>
+            <select
+              value={currentStyle}
+              onChange={(e) => updateQuery({ style: e.target.value })}
+              className="bg-transparent text-xs text-[#1E1B2E] font-medium focus:outline-none cursor-pointer appearance-none pr-3"
+            >
+              <option value="ALL">Semua Gaya</option>
+              <option value="Minimalist">Minimalist</option>
+              <option value="Editorial">Editorial</option>
+              <option value="Streetwear">Streetwear</option>
+              <option value="Vintage">Vintage / Analog</option>
+              <option value="Avant-Garde">Avant-Garde</option>
+              <option value="Commercial">Commercial Clean</option>
+              <option value="Traditional">Traditional Fusion</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2 border-b border-stone-200 pb-2">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Skema</span>
+            <select
+              value={currentCompensation}
+              onChange={(e) => updateQuery({ compensation: e.target.value })}
+              className="bg-transparent text-xs text-[#1E1B2E] font-medium focus:outline-none cursor-pointer appearance-none pr-3"
+            >
+              <option value="ALL">Semua Skema</option>
+              <option value="PAID">Paid Commercial</option>
+              <option value="BARTER">Barter / TFP</option>
+              <option value="REVENUE_SHARE">Bagi Hasil</option>
+            </select>
+          </div>
+
           {hasActiveFilters && (
             <button
               type="button"
               onClick={handleClearAll}
-              className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-[#1E1B2E] transition-colors pb-2"
+              className="text-[10px] font-bold uppercase tracking-widest text-amber-600 hover:text-amber-800 transition-colors pb-2 cursor-pointer"
             >
-              Clear Filters
+              Reset Filter
             </button>
           )}
         </div>

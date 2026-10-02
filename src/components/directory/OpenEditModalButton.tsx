@@ -12,7 +12,7 @@ interface OpenEditModalButtonProps {
 }
 
 export function OpenEditModalButton({
-  initialTab = "specs",
+  initialTab = "profile",
   label = "Edit Halaman Profil",
   className,
   iconClassName = "text-purple-300",

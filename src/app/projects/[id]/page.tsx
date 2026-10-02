@@ -11,6 +11,7 @@ import { SmartCrewPanel } from "@/components/projects/SmartCrewPanel";
 import { RoleSlot } from "@/components/projects/RoleSlot";
 import { InterestCard } from "@/components/projects/InterestCard";
 import { FormCollaborationButton } from "@/components/projects/FormCollaborationButton";
+import { BriefManageMenu } from "@/components/projects/BriefManageMenu";
 import { AppShell } from "@/components/layout/AppShell";
 import {
   Target,
@@ -179,6 +180,41 @@ export default async function ProjectBriefDetailPage({
             </Link>
           )}
         </div>
+
+        {brief.collaborationId && (
+          <div className="p-6 bg-gradient-to-r from-[#1E1B2E] via-[#2A2440] to-[#1E1B2E] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 border border-purple-900/50 shadow-md rounded-2xl">
+            <div className="flex items-start gap-4">
+              <div className="w-11 h-11 bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center shrink-0 rounded-xl">
+                <Handshake className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-400">
+                    Workspace Proyek Aktif
+                  </span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full">
+                    ● Sedang Berjalan
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-white tracking-tight">
+                  Ruang Kolaborasi Telah Resmi Dibentuk
+                </h3>
+                <p className="text-xs text-stone-300">
+                  Pantau pembagian peran, roadmap tugas bersama tim, milestone produksi, dan aturan hak cipta (IP).
+                </p>
+              </div>
+            </div>
+            <div className="shrink-0">
+              <Link
+                href={`/collaborations/${brief.collaborationId}`}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-sm"
+              >
+                <span>Buka Workspace Proyek</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        )}
 
         {matchContext && (
           <div className="p-6 bg-stone-900 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 border border-stone-800">
@@ -401,6 +437,22 @@ export default async function ProjectBriefDetailPage({
                 acceptedCount={acceptedCount}
                 collaborationId={brief.collaboration?.id}
               />
+
+              <BriefManageMenu
+                briefId={brief.id}
+                briefStatus={brief.status}
+                initialTitle={brief.title}
+                initialDescription={brief.description}
+                initialProjectType={brief.projectType}
+                initialTargetOutput={brief.targetOutput}
+                initialLocation={brief.location || ""}
+                initialEstimatedDuration={timeline.estimatedDuration || ""}
+                initialTargetLaunch={timeline.targetLaunch || ""}
+                initialCompensationModel={brief.compensationModel || "PAID"}
+                initialEstimatedTotal={budget.estimatedTotal || ""}
+                initialBudgetNotes={budget.notes || ""}
+                initialAestheticStyle={brief.aestheticStyle || ""}
+              />
             </div>
           </div>
         )}
@@ -452,6 +504,7 @@ export default async function ProjectBriefDetailPage({
                       interestCount={role.interests.length}
                       isInitiator={isInitiator}
                       currentActorInterestStatus={status}
+                      userInterestId={userInterest?.id}
                       actorAssets={actorAssets}
                       initialOpen={isMatched}
                       isMatched={isMatched}

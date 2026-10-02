@@ -15,6 +15,8 @@ import {
   Calendar,
   Tag,
   ShieldCheck,
+  CheckCircle2,
+  Zap,
 } from "lucide-react";
 import { CoCreditRequestsCard, PendingCoCredit } from "@/components/dashboard/CoCreditRequestsCard";
 
@@ -48,6 +50,7 @@ export default async function DashboardPage() {
   const [
     portfolioCount,
     serviceAsset,
+    specsAsset,
     briefStats,
     pendingBookingCount,
     totalIncomingBookings,
@@ -55,6 +58,7 @@ export default async function DashboardPage() {
     activeTalentsCount,
     recentBookings,
     potentialCoCreditAssets,
+    myPortfolioAssets,
   ] = await Promise.all([
     prisma.asset.count({ where: { actorId: primaryActor.id, category: "PORTFOLIO_WORK", status: { not: "ARCHIVED" } } }),
     prisma.asset.findFirst({
@@ -62,6 +66,14 @@ export default async function DashboardPage() {
         actorId: primaryActor.id,
         subtype: "COMMERCIAL_SERVICE_PACKAGES",
         status: { not: "ARCHIVED" },
+      },
+    }),
+    prisma.asset.findFirst({
+      where: {
+        actorId: primaryActor.id,
+        status: { not: "ARCHIVED" },
+        NOT: { category: "PORTFOLIO_WORK" },
+        subtype: { not: "COMMERCIAL_SERVICE_PACKAGES" },
       },
     }),
     getProjectBriefDashboardStats(primaryActor.id),
@@ -93,9 +105,25 @@ export default async function DashboardPage() {
       orderBy: { createdAt: "desc" },
       take: 20,
     }),
+    prisma.asset.findMany({
+      where: {
+        category: "PORTFOLIO_WORK",
+        status: "ACTIVE",
+        actorId: primaryActor.id,
+      },
+      select: {
+        id: true,
+        name: true,
+        attributes: true,
+      },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    }),
   ]);
 
   const pendingCoCredits: PendingCoCredit[] = [];
+
+  // 1. Check if other creators tagged primaryActor in their credits
   for (const asset of potentialCoCreditAssets) {
     const ts = (asset.attributes as any)?.tear_sheet;
     if (ts && Array.isArray(ts.credits)) {
@@ -113,6 +141,27 @@ export default async function DashboardPage() {
           roleTagged: match.role || "Kolaborator Kreatif",
           details: match.details,
         });
+      }
+    }
+  }
+
+  // 2. Check if crew members claimed credits on primaryActor's own artwork
+  for (const myAsset of myPortfolioAssets) {
+    const ts = (myAsset.attributes as any)?.tear_sheet;
+    if (ts && Array.isArray(ts.credits)) {
+      for (const c of ts.credits) {
+        if ((c.status === "PENDING" || !c.verified) && c.actorId !== primaryActor.id) {
+          pendingCoCredits.push({
+            assetId: myAsset.id,
+            assetName: myAsset.name,
+            assetImage: (myAsset.attributes as any)?.image_url || "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800",
+            uploaderId: c.actorId,
+            uploaderName: c.name,
+            uploaderSector: "Kandidat Kru",
+            roleTagged: c.role || "Kolaborator Kreatif",
+            details: c.details || `Mengajukan klaim kontribusi peran sebagai ${c.role}`,
+          });
+        }
       }
     }
   }
@@ -150,10 +199,25 @@ export default async function DashboardPage() {
     }
   }
 
+  const isBrand = primaryActor.actorType === "BRAND" || (primaryActor.actorType as string) === "ORGANIZATION";
+  const specsAttrs = (specsAsset?.attributes && typeof specsAsset.attributes === "object") ? (specsAsset.attributes as any) : {};
+  const hasBrandCollab = Boolean(specsAttrs.collab_types || specsAttrs.budget_range || briefStats.myBriefCount > 0);
+
   const servicePackages = Array.isArray((serviceAsset?.attributes as any)?.service_packages)
     ? ((serviceAsset?.attributes as any).service_packages as any[])
     : [];
   const servicePackageCount = servicePackages.length;
+
+  const hasBasicProfile = Boolean(primaryActor.description && primaryActor.location);
+  const hasPortfolio = portfolioCount > 0;
+  const hasRates = isBrand ? hasBrandCollab : servicePackageCount > 0;
+  const hasSpecs = Boolean(specsAsset);
+
+  const readinessScore =
+    (hasBasicProfile ? 25 : 0) +
+    (hasPortfolio ? 25 : 0) +
+    (hasRates ? 25 : 0) +
+    (hasSpecs ? 25 : 0);
 
   return (
     <AppShell actor={{ ...primaryActor, avatarUrl: profile.avatarUrl }} activeRoute="/dashboard">
@@ -216,28 +280,104 @@ export default async function DashboardPage() {
 
         <CoCreditRequestsCard requests={pendingCoCredits} />
 
-        {servicePackageCount === 0 && (
-          <div className="p-6 rounded-[28px] bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Tag className="w-4 h-4 text-amber-600" />
-                <h3 className="text-sm font-bold text-[#1E1B2E]">Tentukan Paket Layanan &amp; Tarif Anda</h3>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">Penting</span>
-              </div>
-              <p className="text-xs text-stone-600 font-light max-w-2xl">
-                Profil Anda belum memiliki paket tarif aktif. Kreator dengan paket harga yang jelas mendapatkan peluang dihubungi dan di-booking langsung 4x lebih cepat oleh agensi dan brand.
-              </p>
+        <div className="p-6 md:p-8 rounded-[30px] bg-white border border-stone-200 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+          <div className="space-y-3 max-w-2xl">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
+                Indikator Sinergi AI &amp; Kesiapan Komersial
+              </span>
+              <span
+                className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                  readinessScore === 100
+                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                    : "bg-amber-50 text-amber-800 border-amber-200"
+                }`}
+              >
+                {readinessScore}% Lengkap
+              </span>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <h3 className="text-base sm:text-lg font-bold text-[#1E1B2E]">
+              {readinessScore === 100
+                ? "Profil Anda 100% Siap untuk Rekomendasi AI & Booking Klien"
+                : "Tingkatkan Kesiapan Profil Anda untuk Memaksimalkan Rekomendasi AI"}
+            </h3>
+            <p className="text-xs text-stone-500 leading-relaxed font-light">
+              {isBrand
+                ? "Brand dengan profil perusahaan, katalog showcase, preferensi kerjasama & budget, serta panduan aset yang lengkap mendapatkan prioritas pencocokan 4x lebih tinggi oleh AI Opportunity Engine untuk menjaring talenta kreatif terbaik."
+                : "Kreator dengan bio, portofolio visual, paket tarif, dan spesifikasi gear yang terisi lengkap mendapatkan prioritas pencocokan 4x lebih tinggi oleh AI Opportunity Engine serta direct booking dari brand."}
+            </p>
+
+            {/* Checklist navigasi interaktif */}
+            <div className="flex flex-wrap gap-2 pt-1 text-xs">
+              <Link
+                href="/settings/profile"
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all hover:scale-102 ${
+                  hasBasicProfile
+                    ? "bg-emerald-50/70 border-emerald-200 text-emerald-800"
+                    : "bg-stone-50 border-stone-200 text-stone-600 hover:border-amber-400 hover:bg-amber-50/40"
+                }`}
+              >
+                <span className={hasBasicProfile ? "text-emerald-600 font-bold" : "text-stone-400"}>
+                  {hasBasicProfile ? "✓" : "○"}
+                </span>
+                <span>{isBrand ? "Profil & Domisili" : "Bio & Domisili"}</span>
+              </Link>
+
+              <Link
+                href="/dashboard/showcase"
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all hover:scale-102 ${
+                  hasPortfolio
+                    ? "bg-emerald-50/70 border-emerald-200 text-emerald-800"
+                    : "bg-stone-50 border-stone-200 text-stone-600 hover:border-amber-400 hover:bg-amber-50/40"
+                }`}
+              >
+                <span className={hasPortfolio ? "text-emerald-600 font-bold" : "text-stone-400"}>
+                  {hasPortfolio ? "✓" : "○"}
+                </span>
+                <span>{isBrand ? `Katalog Showcase (${portfolioCount})` : `Portofolio (${portfolioCount})`}</span>
+              </Link>
+
               <Link
                 href="/settings/rates"
-                className="px-5 py-2.5 rounded-xl bg-[#1E1B2E] text-white text-xs font-bold hover:bg-black transition-colors shadow-xs"
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all hover:scale-102 ${
+                  hasRates
+                    ? "bg-emerald-50/70 border-emerald-200 text-emerald-800"
+                    : "bg-amber-50/70 border-amber-300 text-amber-900 animate-pulse"
+                }`}
               >
-                + Pasang Paket &amp; Tarif Sekarang
+                <span className={hasRates ? "text-emerald-600 font-bold" : "text-amber-600 font-bold"}>
+                  {hasRates ? "✓" : "+"}
+                </span>
+                <span>{isBrand ? "Skema Kerjasama & Budget" : `Paket Tarif (${servicePackageCount})`}</span>
+              </Link>
+
+              <Link
+                href="/settings/specs"
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all hover:scale-102 ${
+                  hasSpecs
+                    ? "bg-emerald-50/70 border-emerald-200 text-emerald-800"
+                    : "bg-stone-50 border-stone-200 text-stone-600 hover:border-purple-400 hover:bg-purple-50/40"
+                }`}
+              >
+                <span className={hasSpecs ? "text-emerald-600 font-bold" : "text-stone-400"}>
+                  {hasSpecs ? "✓" : "○"}
+                </span>
+                <span>{isBrand ? "Pedoman & Aset Brand" : "Spesifikasi Gear & Comp Card"}</span>
               </Link>
             </div>
           </div>
-        )}
+
+          <div className="flex sm:flex-col items-center justify-between sm:justify-center gap-3 shrink-0 w-full sm:w-44 p-4 rounded-2xl bg-stone-50/80 border border-stone-200/80 text-center">
+            <div className="w-16 h-16 rounded-full bg-white border-4 border-amber-400 flex items-center justify-center font-black text-lg text-stone-900 shadow-xs">
+              {readinessScore}%
+            </div>
+            <div className="text-left sm:text-center">
+              <p className="text-xs font-bold text-[#1E1B2E]">Skor Kesiapan</p>
+              <p className="text-[10px] text-stone-500 font-light">Terbuka untuk AI Match</p>
+            </div>
+          </div>
+        </div>
 
         <section className="space-y-4">
           <div className="flex items-center justify-between px-2">
@@ -474,6 +614,122 @@ export default async function DashboardPage() {
                   <span>Lengkapi Paket Tarif Sekarang</span>
                 </Link>
               </div>
+            </div>
+          )}
+        </section>
+
+        {/* Pekerjaan & Brief Proyek Terbuka Yang Sedang Tren */}
+        <section className="space-y-4 pt-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-2">
+            <div>
+              <div className="flex items-center gap-2">
+                <Megaphone className="w-4 h-4 text-amber-500" />
+                <h2 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-widest">
+                  Pekerjaan &amp; Brief Proyek Terbuka
+                </h2>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200">
+                  Sedang Tren
+                </span>
+              </div>
+              <p className="text-xs text-[#716B7E] mt-0.5">
+                Proyek komersial terbaru yang sedang membuka lowongan peran kru kreatif untuk kampanye mendatang.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Link
+                href="/projects/new"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white hover:bg-stone-50 text-[#1E1B2E] text-xs font-bold transition-all border border-stone-200/80 shadow-2xs"
+              >
+                <Plus className="w-3.5 h-3.5 text-amber-500" />
+                <span>Inisiasi Brief Baru</span>
+              </Link>
+              <Link
+                href="/projects"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100/70 border border-amber-200/80 px-3.5 py-1.5 rounded-xl transition-all"
+              >
+                <span>Lihat Semua ({briefStats.openBriefCount})</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          {briefStats.recentOpenBriefs.length === 0 ? (
+            <div className="p-8 rounded-3xl bg-white border border-dashed border-stone-200 text-center space-y-3 shadow-xs">
+              <div className="w-12 h-12 rounded-2xl bg-stone-50 flex items-center justify-center mx-auto text-stone-400">
+                <Megaphone className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-[#1E1B2E]">Belum ada brief terbuka dari kreator lain</p>
+                <p className="text-xs text-[#716B7E] mt-1 max-w-md mx-auto">
+                  Mulai inisiasi project brief Anda sendiri untuk mengundang kolaborator seperti videografer, fotografer, muse, atau fashion stylist.
+                </p>
+              </div>
+              <div className="pt-2">
+                <Link
+                  href="/projects/new"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1E1B2E] hover:bg-black text-white font-bold text-xs shadow-xs transition-all"
+                >
+                  <Plus className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Buat Project Brief Pertama Anda</span>
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {briefStats.recentOpenBriefs.map((brief: any) => {
+                const openRoles = brief.neededRoles.filter((r: any) => !r.isFilled);
+                return (
+                  <Link
+                    key={brief.id}
+                    href={`/projects/${brief.id}`}
+                    className="group p-5 rounded-2xl bg-white hover:bg-stone-50/50 border border-stone-200 hover:border-amber-300 transition-all shadow-xs hover:shadow-md space-y-4 flex flex-col justify-between"
+                  >
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-bold text-[#716B7E] bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200 truncate max-w-[140px]">
+                          {brief.creatorActor.name}
+                        </span>
+                        <span className="text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/80 shrink-0">
+                          {openRoles.length} peran terbuka
+                        </span>
+                      </div>
+
+                      <h3 className="font-bold text-sm text-[#1E1B2E] group-hover:text-amber-600 transition-colors line-clamp-2">
+                        {brief.title}
+                      </h3>
+
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {brief.neededRoles.slice(0, 3).map((role: any) => (
+                          <span
+                            key={role.id}
+                            className={`text-[10px] px-2 py-0.5 rounded-md font-medium border ${
+                              role.isFilled
+                                ? "bg-stone-50 text-stone-400 border-stone-200 line-through"
+                                : "bg-stone-50 text-stone-700 border-stone-200/90"
+                            }`}
+                          >
+                            {role.roleLabel}
+                          </span>
+                        ))}
+                        {brief.neededRoles.length > 3 && (
+                          <span className="text-[10px] text-stone-400 py-0.5">
+                            +{brief.neededRoles.length - 3} lainnya
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-[#716B7E]">
+                      <span className="text-[11px] truncate max-w-[150px]">{brief.creatorActor.sector}</span>
+                      <span className="text-amber-600 font-semibold group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1 text-[11px]">
+                        <span>Tinjau Brief</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           )}
         </section>

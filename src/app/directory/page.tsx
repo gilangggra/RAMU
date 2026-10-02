@@ -21,6 +21,8 @@ export default async function DirectoryPage({
     actorType?: string;
     sector?: string;
     location?: string;
+    style?: string;
+    compensation?: string;
   }>;
 }) {
   const supabase = await createClient();
@@ -60,9 +62,11 @@ export default async function DirectoryPage({
   const actorType = params?.actorType || "ALL";
   const sector = params?.sector || "ALL";
   const location = params?.location || "ALL";
+  const style = params?.style || "ALL";
+  const compensation = params?.compensation || "ALL";
 
   const [actors, allActors] = await Promise.all([
-    getDirectoryActors({ search, actorType, sector, location }),
+    getDirectoryActors({ search, actorType, sector, location, style, compensation }),
     prisma.actor.findMany({
       where: { status: { not: "ARCHIVED" } },
       select: { actorType: true },
@@ -145,6 +149,8 @@ export default async function DirectoryPage({
           currentType={actorType}
           currentSector={sector}
           currentLocation={location}
+          currentStyle={style}
+          currentCompensation={compensation}
         />
 
         <div className="space-y-6">

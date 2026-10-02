@@ -32,6 +32,8 @@ export interface TearSheetCredit {
   verificationMethod?: "PEER_CONFIRMED" | "CONTRACT_MATCHED" | "DIRECT_CLAIM";
   status?: "VERIFIED" | "PENDING" | "EXTERNAL" | "REJECTED";
   isUploader?: boolean;
+  claimedByActorId?: string;
+  claimedAt?: string;
 }
 
 export interface TearSheetTechnicalSpecs {

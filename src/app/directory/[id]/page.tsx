@@ -105,6 +105,19 @@ export default async function DirectoryDetailPage({
     assets: [...actor.assets, ...confirmedCoCredits],
   };
 
+  const registeredActors = await prisma.actor.findMany({
+    where: { status: { not: "ARCHIVED" } },
+    select: {
+      id: true,
+      name: true,
+      sector: true,
+      location: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+
   let previewImage = null;
   for (const asset of actorWithCoCredits.assets) {
     if (asset.category === "EQUIPMENT") continue;
@@ -146,19 +159,19 @@ export default async function DirectoryDetailPage({
   }
 
   const sectorLower = actor.sector.toLowerCase();
-  const isVideo = sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema");
-  const isModel = sectorLower.includes("model") || sectorLower.includes("talent");
-  const isMua = sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair");
-  const isStylist = sectorLower.includes("stylist") || sectorLower.includes("wardrobe");
-  const isPhotog = sectorLower.includes("fotografi") || sectorLower.includes("photographer");
-  const isDesigner = sectorLower.includes("designer") || sectorLower.includes("desain");
+  const isBrand = actor.actorType === "BRAND" || (actor.actorType as string) === "MSME" || actor.actorType === "COLLECTIVE" || sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("umkm");
+  const isVideo = !isBrand && (sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema"));
+  const isModel = !isBrand && (sectorLower.includes("model") || sectorLower.includes("talent"));
+  const isMua = !isBrand && (sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair"));
+  const isStylist = !isBrand && (sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));
+  const isPhotog = !isBrand && (sectorLower.includes("fotografi") || sectorLower.includes("photographer"));
+  const isDesigner = !isBrand && (sectorLower.includes("designer") || sectorLower.includes("desain"));
 
   const isIndividualSector = isVideo || isModel || isMua || isStylist || isPhotog || isDesigner;
   const hasStudioSpaceAsset = actor.assets.some(
     (a) => a.category === "STUDIO_SPACE" || a.subtype?.toLowerCase().includes("studio")
   );
-  const isStudio = !isIndividualSector && (actor.actorType === "STUDIO" || sectorLower.includes("studio") || hasStudioSpaceAsset);
-  const isBrand = !isIndividualSector && !isStudio && (actor.actorType === "BRAND" || (actor.actorType as string) === "MSME" || actor.actorType === "COLLECTIVE" || sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("umkm"));
+  const isStudio = !isIndividualSector && !isBrand && (actor.actorType === "STUDIO" || sectorLower.includes("studio") || hasStudioSpaceAsset);
   const isIndividual = !isStudio && !isBrand;
 
   let startingRate = "Mulai Rp 1,5 Jt / sesi";
@@ -209,6 +222,101 @@ export default async function DirectoryDetailPage({
   const waLink = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Halo ${actor.name}, saya melihat profil Anda di RAMU dan tertarik bekerjasama untuk proyek.`)}` : null;
 
   const socialLinks = parseSocialLinks(actor.websiteUrl);
+
+  // Dynamic role-specific specs tags for profile header
+  const specsAsset = actor.assets.find(
+    (a) =>
+      (isModel && (a.subtype.toLowerCase().includes("model") || (a.attributes && typeof a.attributes === "object" && "comp_card" in (a.attributes as any)))) ||
+      (isStudio && (a.subtype.toLowerCase().includes("studio") || (a.attributes && typeof a.attributes === "object" && "cyclorama_type" in (a.attributes as any)))) ||
+      (isPhotog && a.attributes && typeof a.attributes === "object" && "primary_camera" in (a.attributes as any)) ||
+      (isVideo && a.attributes && typeof a.attributes === "object" && ("primary_cinema_camera" in (a.attributes as any) || "stabilizer_gimbal" in (a.attributes as any))) ||
+      (isMua && a.attributes && typeof a.attributes === "object" && ("makeup_styles" in (a.attributes as any) || "primary_kit_brands" in (a.attributes as any))) ||
+      (isStylist && a.attributes && typeof a.attributes === "object" && ("styling_specialties" in (a.attributes as any) || "onset_equipment" in (a.attributes as any))) ||
+      (isDesigner && a.attributes && typeof a.attributes === "object" && ("design_disciplines" in (a.attributes as any) || "primary_software" in (a.attributes as any)))
+  );
+  const specsAttrs = (specsAsset?.attributes && typeof specsAsset.attributes === "object")
+    ? (specsAsset.attributes as Record<string, any>)
+    : {};
+
+  const headerTags: string[] = [];
+  if (isModel) {
+    if (specsAttrs.height_cm) headerTags.push(`Tinggi ${specsAttrs.height_cm} cm`);
+    if (specsAttrs.bust_waist_hips) headerTags.push(`Vital ${specsAttrs.bust_waist_hips}`);
+    if (specsAttrs.clothing_size) headerTags.push(`Size ${specsAttrs.clothing_size}`);
+    if (Array.isArray(specsAttrs.specialties) && specsAttrs.specialties.length > 0) {
+      headerTags.push(...specsAttrs.specialties.slice(0, 2));
+    } else {
+      headerTags.push("Editorial & Lookbook", "Comp Card Resmi");
+    }
+  } else if (isPhotog && !isVideo) {
+    if (specsAttrs.primary_camera) headerTags.push(specsAttrs.primary_camera);
+    if (Array.isArray(specsAttrs.lenses) && specsAttrs.lenses.length > 0) {
+      headerTags.push(specsAttrs.lenses[0]);
+    }
+    if (specsAttrs.drone_aerial) headerTags.push("Drone Aerial Certified");
+    if (headerTags.length < 3) headerTags.push("Editorial & Lookbook", "Studio & On-Location");
+  } else if (isVideo && !isPhotog) {
+    if (specsAttrs.primary_cinema_camera) headerTags.push(specsAttrs.primary_cinema_camera);
+    if (specsAttrs.max_resolution) headerTags.push(specsAttrs.max_resolution);
+    if (specsAttrs.drone_aerial) headerTags.push("Drone 4K Cinema");
+    if (headerTags.length < 3) headerTags.push("Fashion Film & TVC", "Color Grading 10-Bit");
+  } else if (isPhotog && isVideo) {
+    if (specsAttrs.primary_camera || specsAttrs.primary_cinema_camera) {
+      headerTags.push(specsAttrs.primary_camera || specsAttrs.primary_cinema_camera);
+    }
+    headerTags.push("Foto & Cinema Hybrid");
+    if (specsAttrs.drone_aerial) headerTags.push("Drone Aerial Siap Terbang");
+    headerTags.push("Editorial & Campaign");
+  } else if (isMua) {
+    if (Array.isArray(specsAttrs.makeup_styles) && specsAttrs.makeup_styles.length > 0) {
+      headerTags.push(specsAttrs.makeup_styles[0]);
+    } else {
+      headerTags.push("High-Fashion Lookbook");
+    }
+    if (Array.isArray(specsAttrs.primary_kit_brands) && specsAttrs.primary_kit_brands.length > 0) {
+      headerTags.push(`Pro Kit: ${specsAttrs.primary_kit_brands[0]}`);
+    } else {
+      headerTags.push("Pro Kit Luxury Brands");
+    }
+    if (specsAttrs.touchup_standby_hours) {
+      headerTags.push(`Standby ${specsAttrs.touchup_standby_hours} Jam`);
+    }
+    headerTags.push("Higienitas Steril On-Set");
+  } else if (isStylist) {
+    if (Array.isArray(specsAttrs.styling_specialties) && specsAttrs.styling_specialties.length > 0) {
+      headerTags.push(specsAttrs.styling_specialties[0]);
+    } else {
+      headerTags.push("Editorial Fashion Stylist");
+    }
+    if (specsAttrs.wardrobe_archive_count) {
+      headerTags.push(`Arsip ${specsAttrs.wardrobe_archive_count}+ Busana`);
+    }
+    if (specsAttrs.aesthetic_dna) {
+      headerTags.push(specsAttrs.aesthetic_dna.length > 28 ? specsAttrs.aesthetic_dna.slice(0, 28) + "..." : specsAttrs.aesthetic_dna);
+    }
+    headerTags.push("Garment Steamer & Fitting Kit");
+  } else if (isDesigner) {
+    if (Array.isArray(specsAttrs.design_disciplines) && specsAttrs.design_disciplines.length > 0) {
+      headerTags.push(specsAttrs.design_disciplines[0]);
+    } else {
+      headerTags.push("Visual Identity & Fashion");
+    }
+    if (Array.isArray(specsAttrs.primary_software) && specsAttrs.primary_software.length > 0) {
+      headerTags.push(specsAttrs.primary_software.slice(0, 2).join(" & "));
+    }
+    if (specsAttrs.style_dna) {
+      headerTags.push(specsAttrs.style_dna.length > 28 ? specsAttrs.style_dna.slice(0, 28) + "..." : specsAttrs.style_dna);
+    }
+    headerTags.push("Deliverables Siap Rilis");
+  } else {
+    if (Array.isArray(specsAttrs.specialties) && specsAttrs.specialties.length > 0) {
+      headerTags.push(...specsAttrs.specialties.slice(0, 3));
+    } else {
+      headerTags.push("Editorial & Lookbook", "High-Fashion Campaign", "Komersial Terkurasi");
+    }
+  }
+
+  const displayHeaderTags = Array.from(new Set(headerTags)).filter(Boolean).slice(0, 4);
 
   return (
     <AppShell actor={currentActor} activeRoute="/directory">
@@ -323,18 +431,14 @@ export default async function DirectoryDetailPage({
                   </p>
 
                   <div className="flex flex-wrap items-center gap-2 mb-8">
-                    <span className="px-3 py-1 bg-white border border-stone-200 text-[10px] font-bold uppercase tracking-wider text-stone-600">
-                      Editorial &amp; Lookbook
-                    </span>
-                    <span className="px-3 py-1 bg-white border border-stone-200 text-[10px] font-bold uppercase tracking-wider text-stone-600">
-                      High-Fashion Campaign
-                    </span>
-                    <span className="px-3 py-1 bg-white border border-stone-200 text-[10px] font-bold uppercase tracking-wider text-stone-600">
-                      Studio &amp; On-Location
-                    </span>
-                    <span className="px-3 py-1 bg-white border border-stone-200 text-[10px] font-bold uppercase tracking-wider text-stone-600">
-                      Canon EOS R5 Production Kit
-                    </span>
+                    {displayHeaderTags.map((tag, idx) => (
+                      <span
+                        key={idx}
+                        className="px-3 py-1 bg-white border border-stone-200 text-[10px] font-bold uppercase tracking-wider text-stone-600 shadow-2xs"
+                      >
+                        {tag}
+                      </span>
+                    ))}
                   </div>
                 </div>
 
@@ -382,7 +486,19 @@ export default async function DirectoryDetailPage({
                           targetName={actor.name}
                           targetSector={actor.sector}
                           targetType={actor.actorType}
-                          label="Sewa Jasa / Rekrut Sekarang"
+                          label={
+                            isModel
+                              ? "Booking Model / Fitting"
+                              : isMua
+                              ? "Booking MUA / Hair Artist"
+                              : isStylist
+                              ? "Booking Fashion Stylist"
+                              : isVideo
+                              ? "Sewa Jasa Videografi"
+                              : isDesigner
+                              ? "Mulai Proyek Desain"
+                              : "Sewa Jasa / Rekrut Sekarang"
+                          }
                           termsConfig={customTermsConfig}
                         />
                         {waLink && (
@@ -410,7 +526,7 @@ export default async function DirectoryDetailPage({
                     ) : (
                       <div className="flex flex-wrap items-center gap-3">
                         <OpenEditModalButton
-                          initialTab="specs"
+                          initialTab="profile"
                           label="Edit Halaman Profil"
                         />
                         <Link
@@ -518,7 +634,7 @@ export default async function DirectoryDetailPage({
               ) : (
                 <div className="flex flex-wrap items-center gap-3">
                   <OpenEditModalButton
-                    initialTab="specs"
+                    initialTab="profile"
                     label="Edit Fasilitas & Profil"
                     iconClassName="text-blue-300"
                   />
@@ -587,7 +703,7 @@ export default async function DirectoryDetailPage({
               </div>
               <div className="space-y-0.5 sm:border-l border-stone-200/60 sm:pl-3">
                 <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Status Kerjasama</div>
-                <div className="text-xs font-semibold text-emerald-700">Menerima Pengadaan / Sewa</div>
+                <div className="text-xs font-semibold text-emerald-700">Menerima Kolaborasi &amp; Pengadaan</div>
               </div>
               <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/60 sm:pl-3 pt-2 sm:pt-0">
                 <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Domisili</div>
@@ -629,7 +745,7 @@ export default async function DirectoryDetailPage({
                   targetName={actor.name}
                   targetSector={actor.sector}
                   targetType={actor.actorType}
-                  label="Pesan Jasa / Pengadaan"
+                  label="Pitch Kolaborasi / Pengadaan Brand"
                   termsConfig={customTermsConfig}
                 />
                 {waLink ? (
@@ -676,6 +792,7 @@ export default async function DirectoryDetailPage({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             actor={actorWithCoCredits as any}
             isCurrentActor={isCurrentActor}
+            registeredActors={registeredActors}
           />
         </div>
       </div>

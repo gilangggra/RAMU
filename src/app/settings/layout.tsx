@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { AppShell } from "@/components/layout/AppShell";
-import { UserCircle, Sliders, Image as ImageIcon, Package, Target, Search, ShieldAlert, CreditCard, Camera } from "lucide-react";
+import { UserCircle, Sliders, Image as ImageIcon, Camera, CreditCard, Briefcase } from "lucide-react";
 
 export const metadata = {
   title: "Pengaturan | RAMU",
@@ -43,6 +43,8 @@ export default async function SettingsLayout({
     redirect("/onboarding");
   }
 
+  const isBrand = actor.actorType === "BRAND";
+
   return (
     <AppShell actor={actor} activeRoute="/settings">
       <div className="max-w-5xl mx-auto space-y-8">
@@ -77,8 +79,12 @@ export default async function SettingsLayout({
               href="/settings/rates"
               className="flex items-center gap-3 px-4 py-3 rounded-none text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
             >
-              <CreditCard className="w-4 h-4 shrink-0 text-emerald-600" />
-              <span>Paket Layanan &amp; Tarif</span>
+              {isBrand ? (
+                <Briefcase className="w-4 h-4 shrink-0 text-emerald-600" />
+              ) : (
+                <CreditCard className="w-4 h-4 shrink-0 text-emerald-600" />
+              )}
+              <span>{isBrand ? "Kerjasama & Brief" : "Paket Layanan & Tarif"}</span>
             </Link>
             
             <Link

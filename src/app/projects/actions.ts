@@ -6,6 +6,9 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import {
   createProjectBrief,
+  updateProjectBrief,
+  closeProjectBrief,
+  deleteProjectBrief,
   expressInterest,
   acceptCollaborator,
   declineCollaborator,
@@ -13,6 +16,7 @@ import {
   formCollaborationFromBrief,
   getCrewRecommendationsForBrief,
 } from "@/application/projectBriefService";
+
 
 async function getPrimaryActor() {
   const supabase = await createClient();
@@ -137,12 +141,17 @@ export async function acceptCollaboratorAction(interestId: string, briefId: stri
   const actor = await getPrimaryActor();
 
   try {
-    await acceptCollaborator(interestId, actor.id);
+    const result = await acceptCollaborator(interestId, actor.id);
     revalidatePath(`/projects/${briefId}`);
     revalidatePath(`/projects/${briefId}/interests`);
     revalidatePath("/projects");
     revalidatePath("/dashboard");
-    return { success: true };
+    revalidatePath("/collaborations");
+    return {
+      success: true,
+      collaborationId: result.collaborationId,
+      isFilled: result.isFilled,
+    };
   } catch (error) {
     console.error("Error accepting collaborator:", error);
     return {
@@ -174,6 +183,8 @@ export async function withdrawInterestAction(interestId: string, briefId: string
   try {
     await withdrawInterest(interestId, actor.id);
     revalidatePath(`/projects/${briefId}`);
+    revalidatePath("/projects");
+    revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
     return {
@@ -247,6 +258,83 @@ export async function inviteActorToRoleAction(
     return {
       success: false,
       error: error instanceof Error ? error.message : "Gagal mengirim undangan.",
+    };
+  }
+}
+
+export async function updateProjectBriefAction(formData: FormData) {
+  const actor = await getPrimaryActor();
+
+  const briefId = formData.get("briefId") as string;
+  const title = (formData.get("title") as string)?.trim();
+  const description = (formData.get("description") as string)?.trim();
+  const projectType = (formData.get("projectType") as string)?.trim();
+  const targetOutput = (formData.get("targetOutput") as string)?.trim();
+  const location = (formData.get("location") as string)?.trim() || undefined;
+  const estimatedDuration = (formData.get("estimatedDuration") as string)?.trim();
+  const targetLaunch = (formData.get("targetLaunch") as string)?.trim();
+  const compensationModel = (formData.get("compensationModel") as string)?.trim();
+  const estimatedTotal = (formData.get("estimatedTotal") as string)?.trim();
+  const budgetNotes = (formData.get("budgetNotes") as string)?.trim();
+  const aestheticStyle = (formData.get("aestheticStyle") as string)?.trim();
+
+  if (!briefId) return { success: false, error: "ID brief tidak valid." };
+
+  try {
+    await updateProjectBrief(briefId, actor.id, {
+      title,
+      description,
+      projectType,
+      targetOutput,
+      location,
+      timeline: { estimatedDuration, targetLaunch },
+      budget: { estimatedTotal, notes: budgetNotes },
+      aestheticStyle,
+      compensationModel,
+      neededRoles: [],
+    });
+
+    revalidatePath(`/projects/${briefId}`);
+    revalidatePath("/projects");
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Gagal memperbarui brief.",
+    };
+  }
+}
+
+export async function closeProjectBriefAction(briefId: string) {
+  const actor = await getPrimaryActor();
+
+  try {
+    await closeProjectBrief(briefId, actor.id);
+    revalidatePath(`/projects/${briefId}`);
+    revalidatePath("/projects");
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Gagal menutup brief.",
+    };
+  }
+}
+
+export async function deleteProjectBriefAction(briefId: string) {
+  const actor = await getPrimaryActor();
+
+  try {
+    await deleteProjectBrief(briefId, actor.id);
+    revalidatePath("/projects");
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Gagal menghapus brief.",
     };
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useTransition, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -23,15 +23,121 @@ import {
   ArrowRight,
   ImageIcon,
   Phone,
+  Link2,
+  Film,
+  Play,
+  Users,
+  Star,
+  Sliders,
+  MapPin,
+  Clock,
+  Briefcase,
+  ShieldCheck,
+  Package,
+  Scissors,
+  HelpCircle,
+  Layers,
+  Check,
+  Video,
+  PenTool,
+  Shirt,
+  PackageCheck,
+  Eye,
 } from "lucide-react";
 import {
   updateActorSpecs,
   updateProfileBasicInfo,
   updateServicePackagesAndRates,
+  updatePreferences,
 } from "@/app/settings/actions";
+import { createShowcaseAsset, deleteShowcaseAsset } from "@/app/api/assets/actions";
 import { parseSocialLinks, InstagramIcon } from "@/lib/socialUtils";
+import { parseVideoUrl, captureVideoFrame } from "@/lib/videoUtils";
+import { ShowcaseUploadModal, RegisteredActor } from "@/components/showcase/ShowcaseUploadModal";
+import { HotspotCategory } from "@/components/showcase/tearSheetTypes";
 
-export type DrawerTabType = "specs" | "rates" | "profile" | "contact" | "portfolio";
+export interface QuickUploadCredit {
+  id: string;
+  category: HotspotCategory;
+  role: string;
+  name: string;
+  handle: string;
+  details: string;
+  actorId?: string;
+  isUploader?: boolean;
+}
+
+export const CREDIT_CATEGORIES: { category: HotspotCategory; label: string; defaultRole: string }[] = [
+  { category: "cinematography", label: "Sinematografi & Video", defaultRole: "Film Director / DoP" },
+  { category: "photography", label: "Fotografi & Kamera", defaultRole: "Lead Photographer" },
+  { category: "wardrobe", label: "Wardrobe & Styling", defaultRole: "Fashion Stylist / Designer" },
+  { category: "hmua", label: "Makeup & Hair (HMUA)", defaultRole: "Lead Beauty & Hair Stylist" },
+  { category: "talent", label: "Model & Muse", defaultRole: "Editorial Model" },
+  { category: "art_direction", label: "Art Direction & Desain", defaultRole: "Art Director" },
+  { category: "sound", label: "Penata Suara & Audio", defaultRole: "Sound Designer" },
+];
+
+export const CREDIT_CATEGORY_COLORS: Record<HotspotCategory, { bg: string; text: string; badge: string }> = {
+  cinematography: { bg: "bg-purple-500", text: "text-purple-700", badge: "bg-purple-50 text-purple-800 border-purple-200" },
+  photography: { bg: "bg-emerald-500", text: "text-emerald-700", badge: "bg-emerald-50 text-emerald-800 border-emerald-200" },
+  wardrobe: { bg: "bg-indigo-500", text: "text-indigo-700", badge: "bg-indigo-50 text-indigo-800 border-indigo-200" },
+  hmua: { bg: "bg-rose-500", text: "text-rose-700", badge: "bg-rose-50 text-rose-800 border-rose-200" },
+  talent: { bg: "bg-amber-500", text: "text-amber-800", badge: "bg-amber-50 text-amber-900 border-amber-200" },
+  art_direction: { bg: "bg-sky-500", text: "text-sky-700", badge: "bg-sky-50 text-sky-800 border-sky-200" },
+  sound: { bg: "bg-cyan-500", text: "text-cyan-700", badge: "bg-cyan-50 text-cyan-800 border-cyan-200" },
+};
+
+function detectCategoryFromSector(sector: string): HotspotCategory {
+  const s = sector.toLowerCase();
+  if (s.includes("video") || s.includes("film") || s.includes("sinema") || s.includes("sutradara")) return "cinematography";
+  if (s.includes("suara") || s.includes("musik") || s.includes("audio") || s.includes("sound")) return "sound";
+  if (s.includes("foto") || s.includes("visual") || s.includes("kamera")) return "photography";
+  if (s.includes("fashion") || s.includes("desain") || s.includes("busana") || s.includes("stylist") || s.includes("label")) return "wardrobe";
+  if (s.includes("makeup") || s.includes("mua") || s.includes("kecantikan")) return "hmua";
+  if (s.includes("model") || s.includes("talent") || s.includes("aktor")) return "talent";
+  if (s.includes("art") || s.includes("director") || s.includes("studio") || s.includes("kreatif")) return "art_direction";
+  return "wardrobe";
+}
+
+function dataURLtoFile(dataurl: string, filename: string): File {
+  const arr = dataurl.split(",");
+  const mime = arr[0].match(/:(.*?);/)?.[1] || "image/jpeg";
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+}
+
+export type DrawerTabType =
+  | "profile"
+  | "portfolio"
+  | "rates"
+  | "specs"
+  | "about"
+  | "reviews"
+  | "contact"
+  | "porto"
+  | "tarif"
+  | "spesifikasi"
+  | "tentang"
+  | "usulan"
+  | "ulasan";
+
+export type NormalizedDrawerTab = "profile" | "portfolio" | "rates" | "specs" | "about" | "reviews";
+
+export function normalizeDrawerTab(tab?: string | null): NormalizedDrawerTab {
+  if (!tab) return "profile";
+  const t = tab.toLowerCase();
+  if (t === "portfolio" || t === "porto") return "portfolio";
+  if (t === "rates" || t === "tarif") return "rates";
+  if (t === "specs" || t === "spesifikasi") return "specs";
+  if (t === "about" || t === "contact" || t === "tentang") return "about";
+  if (t === "reviews" || t === "usulan" || t === "ulasan") return "reviews";
+  return "profile";
+}
 
 interface ServicePackageItem {
   title: string;
@@ -42,7 +148,7 @@ interface ServicePackageItem {
   features: string[];
 }
 
-interface ProfileSlideOverDrawerProps {
+export interface ProfileSlideOverDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   defaultTab?: DrawerTabType;
@@ -69,20 +175,49 @@ interface ProfileSlideOverDrawerProps {
       description?: string | null;
       attributes?: Record<string, unknown> | null;
     }>;
+    feedbacks?: Array<{
+      id: string;
+      relevanceScore?: number | null;
+      feasibilityScore?: number | null;
+      noveltyScore?: number | null;
+      usefulnessScore?: number | null;
+      comments?: string | null;
+      createdAt: Date | string;
+    }>;
+    opportunityParticipations?: Array<{
+      opportunity: {
+        id: string;
+        title: string;
+        patternCode: string;
+        feasibilityStatus: string;
+        scores: Array<{ overallScore: number }>;
+      };
+    }>;
+    experienceLevel?: string | null;
+    aestheticStyles?: string[];
+    compensationModels?: string[];
   };
+  registeredActors?: RegisteredActor[];
 }
 
 export function ProfileSlideOverDrawer({
   isOpen,
   onClose,
-  defaultTab = "specs",
+  defaultTab = "profile",
   actor,
+  registeredActors = [],
 }: ProfileSlideOverDrawerProps) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [activeDrawerTab, setActiveDrawerTab] = useState<DrawerTabType>(defaultTab);
+  const [activeDrawerTab, setActiveDrawerTab] = useState<NormalizedDrawerTab>(normalizeDrawerTab(defaultTab));
   const [isPending, setIsPending] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Local assets state for instantaneous portfolio addition/removal
+  const [localAssets, setLocalAssets] = useState(actor.assets);
+  useEffect(() => {
+    setLocalAssets(actor.assets);
+  }, [actor.assets]);
 
   useEffect(() => {
     setMounted(true);
@@ -90,7 +225,7 @@ export function ProfileSlideOverDrawer({
 
   useEffect(() => {
     if (isOpen) {
-      setActiveDrawerTab(defaultTab);
+      setActiveDrawerTab(normalizeDrawerTab(defaultTab));
       setMessage(null);
       document.body.style.overflow = "hidden";
     } else {
@@ -104,37 +239,74 @@ export function ProfileSlideOverDrawer({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
-        onClose();
+        handleModalClose();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen]);
+
+  const handleTabChange = (targetTab: NormalizedDrawerTab) => {
+    setActiveDrawerTab(targetTab);
+    setMessage(null);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("edit", targetTab);
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
+
+  const handleModalClose = () => {
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("edit")) {
+        url.searchParams.delete("edit");
+        window.history.replaceState({}, "", url.toString());
+      }
+    }
+    onClose();
+  };
 
   const sectorLower = actor.sector.toLowerCase();
-  const isStudio = actor.actorType === "STUDIO" || sectorLower.includes("studio");
-  const isModel = sectorLower.includes("model") || sectorLower.includes("talent");
-  const isPhotographer = sectorLower.includes("photographer") || sectorLower.includes("fotografi");
-  const isVideographer = sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema");
-  const isMUA = sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair");
-  const isStylist = sectorLower.includes("stylist") || sectorLower.includes("wardrobe");
-  const isDesigner = sectorLower.includes("designer") || sectorLower.includes("desain");
+  const isBrand =
+    actor.actorType === "BRAND" ||
+    (actor.actorType as string) === "MSME" ||
+    actor.actorType === "COLLECTIVE" ||
+    sectorLower.includes("brand") ||
+    sectorLower.includes("label") ||
+    sectorLower.includes("agency") ||
+    sectorLower.includes("umkm");
+  const isModel = !isBrand && (sectorLower.includes("model") || sectorLower.includes("talent"));
+  const isPhotographer = !isBrand && (sectorLower.includes("photographer") || sectorLower.includes("fotografi"));
+  const isVideographer = !isBrand && (sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema"));
+  const isMUA = !isBrand && (sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair"));
+  const isStylist = !isBrand && (sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));
+  const isDesigner = !isBrand && (sectorLower.includes("designer") || sectorLower.includes("desain"));
+  const isIndividualSector = isModel || isPhotographer || isVideographer || isMUA || isStylist || isDesigner;
 
+  const hasStudioSpaceAsset = actor.assets.some(
+    (a) => a.category === "STUDIO_SPACE" || a.subtype?.toLowerCase().includes("studio")
+  );
+  const isStudio = !isIndividualSector && !isBrand && (actor.actorType === "STUDIO" || sectorLower.includes("studio") || hasStudioSpaceAsset);
+
+  // Specs assets & attributes
   const existingAsset = actor.assets.find(
     (a) =>
       (isModel && (a.subtype.toLowerCase().includes("model") || (a.attributes && typeof a.attributes === "object" && "comp_card" in a.attributes))) ||
       (isStudio && (a.subtype.toLowerCase().includes("studio") || (a.attributes && typeof a.attributes === "object" && "cyclorama_type" in a.attributes))) ||
       (isPhotographer && a.attributes && typeof a.attributes === "object" && "primary_camera" in a.attributes) ||
-      (isVideographer && a.attributes && typeof a.attributes === "object" && "primary_cinema_camera" in a.attributes) ||
-      (isMUA && a.attributes && typeof a.attributes === "object" && "makeup_styles" in a.attributes) ||
-      (isStylist && a.attributes && typeof a.attributes === "object" && "styling_specialties" in a.attributes) ||
-      (isDesigner && a.attributes && typeof a.attributes === "object" && "design_disciplines" in a.attributes)
+      (isVideographer && a.attributes && typeof a.attributes === "object" && ("primary_cinema_camera" in a.attributes || "stabilizer_gimbal" in a.attributes)) ||
+      (isMUA && a.attributes && typeof a.attributes === "object" && ("makeup_styles" in a.attributes || "primary_kit_brands" in a.attributes)) ||
+      (isStylist && a.attributes && typeof a.attributes === "object" && ("styling_specialties" in a.attributes || "onset_equipment" in a.attributes)) ||
+      (isDesigner && a.attributes && typeof a.attributes === "object" && ("design_disciplines" in a.attributes || "primary_software" in a.attributes)) ||
+      (isBrand && a.attributes && typeof a.attributes === "object" && ("design_dna" in a.attributes || "sample_sizes_ready" in a.attributes || "fabric_materials" in a.attributes || "brand_gallery" in a.attributes))
   );
 
   const attrs = (existingAsset?.attributes && typeof existingAsset.attributes === "object")
     ? (existingAsset.attributes as Record<string, any>)
     : {};
 
+  // Comp Card Polaroids for Models
   const existingCompCard = Array.isArray(attrs.comp_card) ? attrs.comp_card : [];
   const [polaroidPreviews, setPolaroidPreviews] = useState<Array<{ url: string; type: string; caption: string }>>([
     {
@@ -209,11 +381,29 @@ export function ProfileSlideOverDrawer({
     }
   };
 
+  // Profile basic fields synchronization
   const [avatarPreview, setAvatarPreview] = useState<string | null>(actor.owner?.avatarUrl || null);
   const [removeAvatar, setRemoveAvatar] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const initialSocials = parseSocialLinks(actor.websiteUrl);
+  const [profileName, setProfileName] = useState(actor.name || "");
+  const [profileLocation, setProfileLocation] = useState(actor.location || "");
+  const [profileDescription, setProfileDescription] = useState(actor.description || "");
+
+  const [contactInstagram, setContactInstagram] = useState(initialSocials.instagram?.handle || "");
+  const [contactWebsite, setContactWebsite] = useState(initialSocials.website?.url || "");
+  const [contactPhone, setContactPhone] = useState(actor.contactPhone || "");
+  const [contactEmail, setContactEmail] = useState(actor.contactEmail || "");
+
+  useEffect(() => {
+    setProfileName(actor.name || "");
+    setProfileLocation(actor.location || "");
+    setProfileDescription(actor.description || "");
+    setContactPhone(actor.contactPhone || "");
+    setContactEmail(actor.contactEmail || "");
+    setAvatarPreview(actor.owner?.avatarUrl || null);
+  }, [actor]);
 
   const handleAvatarFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -236,6 +426,7 @@ export function ProfileSlideOverDrawer({
     }
   };
 
+  // Rates & Packages state
   const serviceAsset = actor.assets.find(
     (a) =>
       a.subtype === "COMMERCIAL_SERVICE_PACKAGES" ||
@@ -244,10 +435,36 @@ export function ProfileSlideOverDrawer({
   const serviceAttrs = (serviceAsset?.attributes as any) || {};
 
   const [startingRate, setStartingRate] = useState<string>(
-    serviceAttrs.starting_rate || (isModel ? "Mulai Rp 1,0 Jt / sesi" : isStudio ? "Mulai Rp 200rb / jam" : "Mulai Rp 1,5 Jt / sesi")
+    serviceAttrs.starting_rate ||
+      (isStudio
+        ? "Mulai Rp 200rb / jam (Shift Rp 750rb)"
+        : isModel
+        ? "Mulai Rp 1,0 Jt / sesi"
+        : isMUA
+        ? "Mulai Rp 800rb / sesi"
+        : isStylist
+        ? "Mulai Rp 1,2 Jt / sesi"
+        : isVideographer
+        ? "Mulai Rp 1,8 Jt / video"
+        : isDesigner
+        ? "Mulai Rp 2,5 Jt / koleksi"
+        : isBrand
+        ? "Sesuai Brief & Volume"
+        : "Mulai Rp 1,5 Jt / sesi")
   );
   const [turnaroundTime, setTurnaroundTime] = useState<string>(
-    serviceAttrs.turnaround_time || (isModel ? "Selesai Sesi Pemotretan" : isStudio ? "Instan / Slot Booking" : "3 – 5 Hari Kerja")
+    serviceAttrs.turnaround_time ||
+      (isStudio
+        ? "Instan / Slot Booking"
+        : isModel
+        ? "Selesai Sesi Pemotretan"
+        : isMUA || isStylist
+        ? "Selesai On-Set Hari-H"
+        : isDesigner
+        ? "7 – 14 Hari Kerja"
+        : isBrand
+        ? "Sesuai Timeline Proyek"
+        : "3 – 5 Hari Kerja")
   );
 
   const initialServicePackages: ServicePackageItem[] = Array.isArray(serviceAttrs.service_packages) && serviceAttrs.service_packages.length > 0
@@ -272,6 +489,68 @@ export function ProfileSlideOverDrawer({
       ];
 
   const [packages, setPackages] = useState<ServicePackageItem[]>(initialServicePackages);
+
+  // Brand Collaboration State
+  const brandCollabAsset = actor.assets.find(
+    (a) => a.attributes && typeof a.attributes === "object" && "collab_types" in (a.attributes as any)
+  );
+  const brandCollabAttrs = (brandCollabAsset?.attributes as any) || {};
+
+  const COLLAB_TYPE_OPTIONS = [
+    "Paid Campaign",
+    "Product Seeding / Gifting",
+    "Revenue Share / Affiliate",
+    "Barter / Trade for Content",
+    "Co-Branding & Kolaborasi Koleksi",
+    "Casting Open",
+  ];
+
+  const [brandCollabTypes, setBrandCollabTypes] = useState<string[]>(
+    Array.isArray(brandCollabAttrs.collab_types) && brandCollabAttrs.collab_types.length > 0
+      ? brandCollabAttrs.collab_types
+      : ["Paid Campaign", "Product Seeding / Gifting"]
+  );
+  const [brandBudgetRange, setBrandBudgetRange] = useState<string>(
+    brandCollabAttrs.budget_range || "Sesuai brief & scope proyek"
+  );
+  const [brandCollabTimeline, setBrandCollabTimeline] = useState<string>(
+    brandCollabAttrs.collab_timeline || "2 – 4 Minggu per Kampanye"
+  );
+  const [brandCreatorRequirements, setBrandCreatorRequirements] = useState<string>(
+    brandCollabAttrs.creator_requirements || "Fotografer & Model Fashion dengan portofolio editorial"
+  );
+  const [brandCollabNotes, setBrandCollabNotes] = useState<string>(
+    brandCollabAttrs.collab_notes || ""
+  );
+
+  const toggleBrandCollabType = (type: string) => {
+    setBrandCollabTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    );
+  };
+
+  async function handleBrandCollabSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setIsPending(true);
+    setMessage(null);
+
+    const formData = new FormData();
+    formData.append("collab_types", JSON.stringify(brandCollabTypes));
+    formData.append("budget_range", brandBudgetRange);
+    formData.append("collab_timeline", brandCollabTimeline);
+    formData.append("creator_requirements", brandCreatorRequirements);
+    formData.append("collab_notes", brandCollabNotes);
+
+    const result = await updateActorSpecs(formData);
+
+    if (result.success) {
+      setMessage({ type: "success", text: "Preferensi kerjasama berhasil disimpan." });
+      router.refresh();
+    } else {
+      setMessage({ type: "error", text: result.error || "Gagal menyimpan preferensi kerjasama." });
+    }
+    setIsPending(false);
+  }
 
   const handleAddPackage = () => {
     setPackages((prev) => [
@@ -304,6 +583,7 @@ export function ProfileSlideOverDrawer({
     handlePackageChange(index, "features", featureList);
   };
 
+  // Submit handlers
   async function handleSpecsSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsPending(true);
@@ -313,11 +593,8 @@ export function ProfileSlideOverDrawer({
     const result = await updateActorSpecs(formData);
 
     if (result.success) {
-      setMessage({ type: "success", text: result.message || "Spesifikasi berhasil disimpan." });
+      setMessage({ type: "success", text: result.message || "Spesifikasi teknis berhasil disimpan." });
       router.refresh();
-      setTimeout(() => {
-        onClose();
-      }, 1200);
     } else {
       setMessage({ type: "error", text: result.error || "Gagal menyimpan spesifikasi." });
     }
@@ -336,9 +613,6 @@ export function ProfileSlideOverDrawer({
     if (result.success) {
       setMessage({ type: "success", text: result.message || "Profil berhasil diperbarui." });
       router.refresh();
-      setTimeout(() => {
-        onClose();
-      }, 1200);
     } else {
       setMessage({ type: "error", text: result.error || "Gagal menyimpan profil." });
     }
@@ -361,14 +635,415 @@ export function ProfileSlideOverDrawer({
     if (result.success) {
       setMessage({ type: "success", text: result.message || "Paket tarif berhasil diperbarui." });
       router.refresh();
-      setTimeout(() => {
-        onClose();
-      }, 1200);
     } else {
       setMessage({ type: "error", text: result.error || "Gagal menyimpan tarif." });
     }
 
     setIsPending(false);
+  }
+
+  // Usulan & Kolaborasi Preferences State
+  const [experienceLevel, setExperienceLevel] = useState<string>(
+    actor.experienceLevel || "OPEN_FOR_COMMISSION"
+  );
+  const [selectedStyles, setSelectedStyles] = useState<string[]>(
+    actor.aestheticStyles && actor.aestheticStyles.length > 0
+      ? actor.aestheticStyles
+      : ["Lookbook Editorial", "Kampanye Komersial", "Fashion Film"]
+  );
+  const [selectedCompModels, setSelectedCompModels] = useState<string[]>(
+    actor.compensationModels && actor.compensationModels.length > 0
+      ? actor.compensationModels
+      : ["Paid Commercial Project", "Standard Production Rate"]
+  );
+
+  async function handlePreferencesSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setIsPending(true);
+    setMessage(null);
+
+    const formData = new FormData();
+    formData.append("experienceLevel", experienceLevel);
+    formData.append("aestheticStyles", selectedStyles.join(", "));
+    formData.append("compensationModels", selectedCompModels.join(", "));
+
+    const result = await updatePreferences(formData);
+    if (result.success) {
+      setMessage({ type: "success", text: result.message || "Preferensi usulan & kolaborasi berhasil diperbarui." });
+      router.refresh();
+    } else {
+      setMessage({ type: "error", text: result.error || "Gagal menyimpan preferensi usulan." });
+    }
+    setIsPending(false);
+  }
+
+  const toggleStyleTag = (tag: string) => {
+    setSelectedStyles((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const toggleCompModel = (model: string) => {
+    setSelectedCompModels((prev) =>
+      prev.includes(model) ? prev.filter((m) => m !== model) : [...prev, model]
+    );
+  };
+
+  // ── Portfolio Management & Studio Upload State ─────────────────────────────
+  const [isStudioUploadOpen, setIsStudioUploadOpen] = useState(false);
+  const [showQuickUpload, setShowQuickUpload] = useState(false);
+  const [selectedFilterCategory, setSelectedFilterCategory] = useState<string>("ALL");
+
+  const [portfolioIsPending, startPortfolioTransition] = useTransition();
+  const [portfolioMediaType, setPortfolioMediaType] = useState<"IMAGE" | "VIDEO">("IMAGE");
+  const [portfolioMode, setPortfolioMode] = useState<"file" | "url">("file");
+  const [portfolioImageUrl, setPortfolioImageUrl] = useState("");
+  const [portfolioName, setPortfolioName] = useState("");
+  const [portfolioDesc, setPortfolioDesc] = useState("");
+  const [portfolioSubtype, setPortfolioSubtype] = useState("Editorial / Lookbook");
+  const [portfolioProjectUrl, setPortfolioProjectUrl] = useState("");
+  const [portfolioImagePreview, setPortfolioImagePreview] = useState<string | null>(null);
+  const portfolioFileRef = useRef<HTMLInputElement>(null);
+
+  // Video specific state
+  const [portfolioVideoSource, setPortfolioVideoSource] = useState<"FILE" | "URL">("FILE");
+  const [portfolioVideoFile, setPortfolioVideoFile] = useState<File | null>(null);
+  const [portfolioVideoUrl, setPortfolioVideoUrl] = useState("");
+  const [portfolioVideoPreviewUrl, setPortfolioVideoPreviewUrl] = useState<string | null>(null);
+  const [portfolioAspectRatio, setPortfolioAspectRatio] = useState<"16:9" | "9:16" | "1:1">("16:9");
+  const [portfolioPosterPreview, setPortfolioPosterPreview] = useState<string | null>(null);
+  const [portfolioPosterFile, setPortfolioPosterFile] = useState<File | null>(null);
+  const [isCapturingPoster, setIsCapturingPoster] = useState(false);
+  const portfolioVideoFileRef = useRef<HTMLInputElement>(null);
+  const portfolioPosterFileRef = useRef<HTMLInputElement>(null);
+
+  // Collaborator Credits State
+  const initialUploaderCredit: QuickUploadCredit = useMemo(() => ({
+    id: `uploader-${actor.id}`,
+    category: detectCategoryFromSector(actor.sector),
+    role: isModel
+      ? "Editorial Model"
+      : isPhotographer
+      ? "Lead Photographer"
+      : isVideographer
+      ? "Director of Photography"
+      : isMUA
+      ? "Lead Makeup Artist"
+      : isStylist
+      ? "Fashion Stylist"
+      : isDesigner
+      ? "Lead Visual / Fashion Designer"
+      : isBrand
+      ? "Creative Director / Brand Principal"
+      : isStudio
+      ? "Studio & Set Production"
+      : "Kreator Utama (Uploader)",
+    name: actor.name,
+    handle: `@${actor.name.toLowerCase().replace(/[\s&.]+/g, "_")}`,
+    details: "Pemilik Portofolio & Uploader",
+    actorId: actor.id,
+    isUploader: true,
+  }), [actor.id, actor.name, actor.sector, isModel, isPhotographer, isVideographer, isMUA, isStylist, isDesigner, isBrand, isStudio]);
+
+  const [portfolioCredits, setPortfolioCredits] = useState<QuickUploadCredit[]>([initialUploaderCredit]);
+  const [showAddCredit, setShowAddCredit] = useState(false);
+  const [creditCategory, setCreditCategory] = useState<HotspotCategory>("photography");
+  const [creditName, setCreditName] = useState("");
+  const [creditHandle, setCreditHandle] = useState("");
+  const [creditRole, setCreditRole] = useState("Lead Photographer");
+  const [creditSelectedActorId, setCreditSelectedActorId] = useState<string | null>(null);
+  const [showActorSuggestions, setShowActorSuggestions] = useState(false);
+
+  const cleanActorQuery = creditName.trim().toLowerCase();
+  const filteredActorSuggestions = cleanActorQuery.length >= 2
+    ? registeredActors
+        .filter(
+          (ra) =>
+            ra.id !== actor.id &&
+            (ra.name.toLowerCase().includes(cleanActorQuery) ||
+             ra.sector.toLowerCase().includes(cleanActorQuery))
+        )
+        .slice(0, 5)
+    : [];
+
+  const handleSelectSuggestedActor = (ra: RegisteredActor) => {
+    setCreditName(ra.name);
+    setCreditHandle(`@${ra.name.toLowerCase().replace(/[\s&.]+/g, "_")}`);
+    setCreditSelectedActorId(ra.id);
+    const detected = detectCategoryFromSector(ra.sector);
+    setCreditCategory(detected);
+    const matchedRole = CREDIT_CATEGORIES.find((c) => c.category === detected)?.defaultRole || ra.sector;
+    setCreditRole(matchedRole);
+    setShowActorSuggestions(false);
+  };
+
+  const handleAddCredit = () => {
+    if (!creditName.trim()) return;
+    const newCredit: QuickUploadCredit = {
+      id: `credit-${Date.now()}`,
+      category: creditCategory,
+      role: creditRole.trim() || CREDIT_CATEGORIES.find((c) => c.category === creditCategory)?.defaultRole || "Kolaborator",
+      name: creditName.trim(),
+      handle: creditHandle.trim()
+        ? (creditHandle.startsWith("@") ? creditHandle : `@${creditHandle}`)
+        : `@${creditName.toLowerCase().replace(/[\s&.]+/g, "_")}`,
+      details: creditSelectedActorId ? "Kreator Terdaftar di RAMU" : "Kontributor Eksternal",
+      actorId: creditSelectedActorId || undefined,
+    };
+    setPortfolioCredits((prev) => [...prev, newCredit]);
+    setCreditName("");
+    setCreditHandle("");
+    setCreditRole("");
+    setCreditSelectedActorId(null);
+    setShowActorSuggestions(false);
+  };
+
+  const handleRemoveCredit = (id: string) => {
+    setPortfolioCredits((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  const [portfolioMessage, setPortfolioMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [deletingAssetId, setDeletingAssetId] = useState<string | null>(null);
+
+  // Categories and filtering for portfolio works
+  const portfolioCategories = useMemo(() => {
+    const counts: Record<string, number> = {};
+    let videoCount = 0;
+    const portfolioAssets = localAssets.filter((a) => a.category === "PORTFOLIO_WORK");
+    portfolioAssets.forEach((a) => {
+      const aAttrs = (a.attributes as any) || {};
+      const isVid = aAttrs.media_type === "VIDEO" || Boolean(aAttrs.video_url) || a.subtype?.toLowerCase().includes("video");
+      if (isVid) videoCount++;
+      const sub = a.subtype || "Karya";
+      counts[sub] = (counts[sub] || 0) + 1;
+    });
+
+    return {
+      list: Object.entries(counts).map(([name, count]) => ({ id: name, label: name, count })),
+      videoCount,
+      totalCount: portfolioAssets.length,
+    };
+  }, [localAssets]);
+
+  const filteredPortfolioAssets = useMemo(() => {
+    const portfolioAssets = localAssets.filter((a) => a.category === "PORTFOLIO_WORK");
+    if (selectedFilterCategory === "ALL") return portfolioAssets;
+    if (selectedFilterCategory === "VIDEO") {
+      return portfolioAssets.filter((a) => {
+        const aAttrs = (a.attributes as any) || {};
+        return aAttrs.media_type === "VIDEO" || Boolean(aAttrs.video_url) || a.subtype?.toLowerCase().includes("video");
+      });
+    }
+    return portfolioAssets.filter((a) => (a.subtype || "Karya") === selectedFilterCategory);
+  }, [localAssets, selectedFilterCategory]);
+
+  const handlePortfolioImageFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 15 * 1024 * 1024) {
+      setPortfolioMessage({ type: "error", text: "Ukuran berkas gambar maksimal 15 MB." });
+      return;
+    }
+    setPortfolioImagePreview(URL.createObjectURL(file));
+    setPortfolioMessage(null);
+  };
+
+  const handlePortfolioVideoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 200 * 1024 * 1024) {
+      setPortfolioMessage({ type: "error", text: "Ukuran berkas video maksimal 200 MB." });
+      return;
+    }
+    setPortfolioVideoFile(file);
+    const blobUrl = URL.createObjectURL(file);
+    setPortfolioVideoPreviewUrl(blobUrl);
+    setPortfolioMessage(null);
+
+    // Otomatis ekstrak frame pertama sebagai cover thumbnail video jika belum diset manual
+    if (!portfolioPosterFile) {
+      setIsCapturingPoster(true);
+      try {
+        const snapshot = await captureVideoFrame(file);
+        if (snapshot) {
+          setPortfolioPosterPreview(snapshot);
+        }
+      } catch (err) {
+        console.warn("Video snapshot frame generation failed:", err);
+      } finally {
+        setIsCapturingPoster(false);
+      }
+    }
+  };
+
+  const handlePortfolioVideoUrlChange = (val: string) => {
+    setPortfolioVideoUrl(val);
+    const parsed = parseVideoUrl(val.trim());
+    if (parsed && parsed.thumbnailUrl && !portfolioPosterFile && !portfolioPosterPreview) {
+      setPortfolioPosterPreview(parsed.thumbnailUrl);
+    }
+  };
+
+  const handlePortfolioPosterFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      setPortfolioMessage({ type: "error", text: "Ukuran cover poster maksimal 10 MB." });
+      return;
+    }
+    setPortfolioPosterFile(file);
+    setPortfolioPosterPreview(URL.createObjectURL(file));
+  };
+
+  async function handleInlinePortfolioSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!portfolioName.trim()) {
+      setPortfolioMessage({ type: "error", text: "Judul karya tidak boleh kosong." });
+      return;
+    }
+
+    if (portfolioMediaType === "IMAGE") {
+      if (portfolioMode === "url" && !portfolioImageUrl.trim()) {
+        setPortfolioMessage({ type: "error", text: "Masukkan tautan URL gambar karya." });
+        return;
+      }
+      if (portfolioMode === "file" && !portfolioFileRef.current?.files?.[0] && !portfolioImagePreview) {
+        setPortfolioMessage({ type: "error", text: "Pilih berkas foto karya terlebih dahulu." });
+        return;
+      }
+    } else {
+      if (portfolioVideoSource === "FILE" && !portfolioVideoFile && !portfolioVideoPreviewUrl) {
+        setPortfolioMessage({ type: "error", text: "Pilih berkas video (MP4/WebM) portofolio Anda." });
+        return;
+      }
+      if (portfolioVideoSource === "URL" && !portfolioVideoUrl.trim()) {
+        setPortfolioMessage({ type: "error", text: "Masukkan tautan video (YouTube/Vimeo/URL streaming) portofolio Anda." });
+        return;
+      }
+    }
+
+    setPortfolioMessage(null);
+
+    const formData = new FormData(e.currentTarget);
+    formData.set("actorId", actor.id);
+    formData.set("name", portfolioName.trim());
+    formData.set("description", portfolioDesc.trim());
+    formData.set("subtype", portfolioSubtype);
+    formData.set("mediaType", portfolioMediaType);
+
+    if (portfolioProjectUrl.trim()) {
+      formData.set("projectUrl", portfolioProjectUrl.trim());
+    }
+
+    if (portfolioMediaType === "IMAGE") {
+      if (portfolioMode === "url" && portfolioImageUrl.trim()) {
+        formData.set("imageUrl", portfolioImageUrl.trim());
+      }
+      if (portfolioMode === "file" && portfolioFileRef.current?.files?.[0]) {
+        formData.set("imageFile", portfolioFileRef.current.files[0]);
+      }
+    } else {
+      // VIDEO fields
+      formData.set("aspectRatio", portfolioAspectRatio);
+      if (portfolioVideoSource === "FILE" && portfolioVideoFile) {
+        formData.set("videoFile", portfolioVideoFile);
+        formData.set("videoSource", "DIRECT_UPLOAD");
+      } else if (portfolioVideoSource === "URL" && portfolioVideoUrl.trim()) {
+        formData.set("videoUrl", portfolioVideoUrl.trim());
+        const parsed = parseVideoUrl(portfolioVideoUrl.trim());
+        formData.set("videoSource", parsed?.platform || "EXTERNAL");
+      }
+
+      // Video Cover Poster
+      if (portfolioPosterFile) {
+        formData.set("imageFile", portfolioPosterFile);
+      } else if (portfolioPosterPreview && portfolioPosterPreview.startsWith("data:")) {
+        const poster = dataURLtoFile(portfolioPosterPreview, `poster-${Date.now()}.jpg`);
+        formData.set("imageFile", poster);
+      } else if (portfolioPosterPreview && portfolioPosterPreview.startsWith("http")) {
+        formData.set("imageUrl", portfolioPosterPreview);
+      }
+    }
+
+    // Collaborator Credits (Tear-Sheet)
+    if (portfolioCredits.length > 0) {
+      const tearSheetPayload = {
+        credits: portfolioCredits.map((c, index) => {
+          const isUploader = index === 0;
+          return {
+            role: c.role,
+            category: c.category,
+            name: c.name,
+            handle: c.handle,
+            details: c.details,
+            actorId: c.actorId || undefined,
+            verified: isUploader,
+            status: isUploader ? "VERIFIED" : (c.actorId ? "PENDING" : "EXTERNAL"),
+            isUploader,
+            verifiedBy: isUploader ? "Pemilik Portofolio (Uploader)" : undefined,
+            verificationTimestamp: isUploader ? new Date().toISOString() : undefined,
+          };
+        }),
+      };
+      formData.set("tearSheet", JSON.stringify(tearSheetPayload));
+    }
+
+    startPortfolioTransition(async () => {
+      try {
+        const res = await createShowcaseAsset(formData);
+        if (res.success && res.asset) {
+          setLocalAssets((prev) => [res.asset as any, ...prev]);
+          setPortfolioMessage({
+            type: "success",
+            text: portfolioMediaType === "VIDEO"
+              ? "Video portofolio berhasil diunggah lengkap dengan kredit kru kolaborasi!"
+              : "Karya baru berhasil ditambahkan lengkap dengan kredit kru kolaborasi!",
+          });
+          setPortfolioName("");
+          setPortfolioDesc("");
+          setPortfolioProjectUrl("");
+          setPortfolioImageUrl("");
+          setPortfolioImagePreview(null);
+          setPortfolioVideoFile(null);
+          setPortfolioVideoUrl("");
+          setPortfolioVideoPreviewUrl(null);
+          setPortfolioPosterPreview(null);
+          setPortfolioPosterFile(null);
+          setPortfolioCredits([initialUploaderCredit]);
+          setShowAddCredit(false);
+          if (portfolioFileRef.current) portfolioFileRef.current.value = "";
+          if (portfolioVideoFileRef.current) portfolioVideoFileRef.current.value = "";
+          if (portfolioPosterFileRef.current) portfolioPosterFileRef.current.value = "";
+          setShowQuickUpload(false);
+          router.refresh();
+        } else {
+          setPortfolioMessage({ type: "error", text: res.error || "Gagal mengunggah karya." });
+        }
+      } catch (err: any) {
+        setPortfolioMessage({ type: "error", text: err.message || "Gagal mengunggah karya." });
+      }
+    });
+  }
+
+  async function handleDeleteAsset(assetId: string) {
+    if (!window.confirm("Apakah Anda yakin ingin menghapus karya ini dari portofolio?")) {
+      return;
+    }
+    setDeletingAssetId(assetId);
+    try {
+      const res = await deleteShowcaseAsset(assetId);
+      if (res.success) {
+        setLocalAssets((prev) => prev.filter((a) => a.id !== assetId));
+        setPortfolioMessage({ type: "success", text: "Karya berhasil dihapus dari portofolio." });
+        router.refresh();
+      } else {
+        setPortfolioMessage({ type: "error", text: res.error || "Gagal menghapus karya." });
+      }
+    } catch (err: any) {
+      setPortfolioMessage({ type: "error", text: err.message || "Gagal menghapus karya." });
+    } finally {
+      setDeletingAssetId(null);
+    }
   }
 
   if (!isOpen || !mounted) return null;
@@ -377,161 +1052,1611 @@ export function ProfileSlideOverDrawer({
     ? "Comp Card & Fisik"
     : isStudio
     ? "Fasilitas Studio"
-    : isPhotographer || isVideographer
-    ? "Kamera & Gear"
+    : isPhotographer && !isVideographer
+    ? "Kamera & Lensa"
+    : isVideographer && !isPhotographer
+    ? "Rig Cinema & Video"
+    : isPhotographer && isVideographer
+    ? "Gear Kamera & Cinema"
+    : isMUA
+    ? "Kit Makeup & Higienitas"
+    : isStylist
+    ? "Wardrobe & On-Set Kit"
+    : isDesigner
+    ? "Software & Desain"
+    : isBrand
+    ? "DNA & Karakter Brand"
     : "Spesifikasi Teknis";
+
+  const portfolioCount = localAssets.filter((a) => a.category === "PORTFOLIO_WORK").length;
+
+  // Exact Requested Tab Order: Profil -> Porto -> Tarif -> Spesifikasi -> Tentang -> Usulan
+  const tabs: Array<{
+    id: NormalizedDrawerTab;
+    label: string;
+    sublabel: string;
+    icon: React.ReactNode;
+    badge?: number;
+  }> = [
+    {
+      id: "profile",
+      label: "Profil",
+      sublabel: "Bio & Domisili",
+      icon: <User className="w-4 h-4 text-blue-600" />,
+    },
+    {
+      id: "portfolio",
+      label: "Porto",
+      sublabel: "Galeri & Studio",
+      icon: <ImageIcon className="w-4 h-4 text-rose-500" />,
+      badge: portfolioCount,
+    },
+    {
+      id: "rates",
+      label: isBrand ? "Kerjasama" : "Tarif",
+      sublabel: isBrand ? "Kolaborasi & Brief" : "Paket & Harga",
+      icon: isBrand ? <Briefcase className="w-4 h-4 text-emerald-600" /> : <CreditCard className="w-4 h-4 text-emerald-600" />,
+    },
+    {
+      id: "specs",
+      label: "Spesifikasi",
+      sublabel: specsTitle,
+      icon: <Camera className="w-4 h-4 text-purple-600" />,
+    },
+    {
+      id: "about",
+      label: "Tentang",
+      sublabel: "Kontak & SOP",
+      icon: <Phone className="w-4 h-4 text-amber-600" />,
+    },
+    {
+      id: "reviews",
+      label: "Usulan",
+      sublabel: "Ulasan & Brief",
+      icon: <Star className="w-4 h-4 text-amber-500" />,
+      badge: actor.feedbacks?.length || 0,
+    },
+  ];
 
   const modalContent = (
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-y-auto bg-stone-950/70 backdrop-blur-xs animate-in fade-in duration-150"
-      onClick={onClose}
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 overflow-y-auto bg-stone-950/80 backdrop-blur-xs animate-in fade-in duration-150"
+      onClick={handleModalClose}
     >
       <div
+        className="w-full max-w-5xl lg:max-w-6xl xl:max-w-7xl bg-white border border-stone-200 shadow-2xl flex flex-col h-[90vh] max-h-[92vh] rounded-none animate-in zoom-in-95 duration-150 relative my-auto overflow-hidden"
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-3xl bg-white shadow-2xl flex flex-col max-h-[90vh] rounded-none border border-stone-200 overflow-hidden z-10 animate-in zoom-in-95 duration-200 my-auto"
       >
-        <div className="px-6 py-5 bg-[#1E1B2E] text-white flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-white/10 flex items-center justify-center text-white shrink-0">
-              <Sparkles className="w-4 h-4 text-purple-300" />
+        {/* MODAL HEADER */}
+        <div className="px-6 sm:px-8 py-5 bg-[#1E1B2E] border-b border-stone-800 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="w-11 h-11 bg-white/10 flex items-center justify-center border border-white/20 shrink-0">
+              <Building2 className="w-5 h-5 text-amber-400" />
             </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-black text-white tracking-tight">
-                Edit Informasi Profil ({actor.name})
-              </h2>
-              <p className="text-xs text-stone-300 mt-0.5">
-                Perbarui data spesifikasi, tarif, bio, dan kontak Anda langsung di sini.
+            <div className="min-w-0">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h2 className="text-base sm:text-lg font-black text-white tracking-tight truncate">
+                  Pusat Kelola Profil &amp; Studio ({profileName || actor.name})
+                </h2>
+                <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-white/10 text-stone-200 border border-white/10 shrink-0">
+                  {actor.sector}
+                </span>
+                <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Terverifikasi
+                </span>
+              </div>
+              <p className="text-xs text-stone-300 mt-1 truncate">
+                Kelola profil bio, portofolio karya studio, paket tarif, spesifikasi teknis, kontak, serta usulan proyek dalam satu kendali terpadu.
               </p>
             </div>
           </div>
           <button
             type="button"
-            onClick={onClose}
-            className="p-2 text-stone-400 hover:text-white hover:bg-white/10 transition-colors rounded-none cursor-pointer"
+            onClick={handleModalClose}
+            className="p-2.5 text-stone-400 hover:text-white hover:bg-white/10 transition-colors rounded-none cursor-pointer shrink-0 ml-4 border border-transparent hover:border-white/20"
             aria-label="Tutup"
+            title="Tutup (Esc)"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex border-b border-stone-200 bg-stone-50 overflow-x-auto no-scrollbar shrink-0 px-3 sm:px-6">
-          <button
-            type="button"
-            onClick={() => {
-              setActiveDrawerTab("specs");
-              setMessage(null);
-            }}
-            className={`py-3.5 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer border-b-2 rounded-none ${
-              activeDrawerTab === "specs"
-                ? "border-[#1E1B2E] text-[#1E1B2E] bg-white shadow-2xs"
-                : "border-transparent text-stone-500 hover:text-stone-800"
-            }`}
-          >
-            <Camera className="w-3.5 h-3.5 text-purple-600" />
-            <span>{specsTitle}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveDrawerTab("rates");
-              setMessage(null);
-            }}
-            className={`py-3.5 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer border-b-2 rounded-none ${
-              activeDrawerTab === "rates"
-                ? "border-[#1E1B2E] text-[#1E1B2E] bg-white shadow-2xs"
-                : "border-transparent text-stone-500 hover:text-stone-800"
-            }`}
-          >
-            <CreditCard className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Paket &amp; Tarif</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveDrawerTab("profile");
-              setMessage(null);
-            }}
-            className={`py-3.5 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer border-b-2 rounded-none ${
-              activeDrawerTab === "profile"
-                ? "border-[#1E1B2E] text-[#1E1B2E] bg-white shadow-2xs"
-                : "border-transparent text-stone-500 hover:text-stone-800"
-            }`}
-          >
-            <User className="w-3.5 h-3.5 text-blue-600" />
-            <span>Profil &amp; Bio</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveDrawerTab("contact");
-              setMessage(null);
-            }}
-            className={`py-3.5 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer border-b-2 rounded-none ${
-              activeDrawerTab === "contact"
-                ? "border-[#1E1B2E] text-[#1E1B2E] bg-white shadow-2xs"
-                : "border-transparent text-stone-500 hover:text-stone-800"
-            }`}
-          >
-            <Phone className="w-3.5 h-3.5 text-amber-600" />
-            <span>Kontak &amp; Medsos</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveDrawerTab("portfolio");
-              setMessage(null);
-            }}
-            className={`py-3.5 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer border-b-2 rounded-none ${
-              activeDrawerTab === "portfolio"
-                ? "border-[#1E1B2E] text-[#1E1B2E] bg-white shadow-2xs"
-                : "border-transparent text-stone-500 hover:text-stone-800"
-            }`}
-          >
-            <ImageIcon className="w-3.5 h-3.5 text-rose-500" />
-            <span>Portofolio</span>
-          </button>
+        {/* TAB BAR NAVIGATION (Profil -> Porto -> Tarif -> Spesifikasi -> Tentang -> Usulan) */}
+        <div className="flex border-b border-stone-200 bg-stone-50 overflow-x-auto no-scrollbar shrink-0 px-4 sm:px-8 gap-1">
+          {tabs.map((tab) => {
+            const isActive = activeDrawerTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => handleTabChange(tab.id)}
+                className={`py-3.5 px-4 sm:px-5 text-left transition-all cursor-pointer border-b-2 rounded-none flex items-center gap-3 shrink-0 ${
+                  isActive
+                    ? "border-[#1E1B2E] text-[#1E1B2E] bg-white shadow-2xs font-extrabold"
+                    : "border-transparent text-stone-500 hover:text-stone-900 hover:bg-stone-100/60 font-semibold"
+                }`}
+              >
+                <div className={`p-1.5 rounded-none ${isActive ? "bg-[#1E1B2E]/5" : "bg-transparent"}`}>
+                  {tab.icon}
+                </div>
+                <div className="flex flex-col items-start leading-none">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-black uppercase tracking-wider">{tab.label}</span>
+                    {tab.badge !== undefined && (
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded-none font-mono font-bold ${
+                          isActive ? "bg-[#1E1B2E] text-white" : "bg-stone-200 text-stone-700"
+                        }`}
+                      >
+                        {tab.badge}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-stone-400 font-normal mt-0.5 hidden sm:inline-block">
+                    {tab.sublabel}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
+        {/* TAB CONTENT BODY */}
+        <div className="flex-1 overflow-y-auto p-6 sm:p-8 lg:p-10 space-y-6 bg-stone-50/40">
+          {/* GENERAL NOTIFICATION MESSAGE */}
           {message && (
             <div
-              className={`p-4 rounded-none flex items-start gap-3 text-sm font-semibold ${
+              className={`p-4 rounded-none flex items-center justify-between gap-3 text-sm font-semibold animate-in fade-in duration-200 ${
                 message.type === "success"
-                  ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                  : "bg-rose-50 text-rose-800 border border-rose-200"
+                  ? "bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs"
+                  : "bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs"
               }`}
             >
-              {message.type === "success" ? (
-                <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
-              ) : (
-                <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
+              <div className="flex items-center gap-2.5">
+                {message.type === "success" ? (
+                  <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
+                ) : (
+                  <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
+                )}
+                <p>{message.text}</p>
+              </div>
+              {message.type === "success" && (
+                <button
+                  type="button"
+                  onClick={handleModalClose}
+                  className="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold uppercase tracking-wider transition-colors shrink-0"
+                >
+                  Selesai
+                </button>
               )}
-              <p className="mt-0.5">{message.text}</p>
             </div>
           )}
 
+          {/* ══════════════════════════════════════════════════════════════════ */}
+          {/* TAB 1: PROFIL (Profil & Bio)                                       */}
+          {/* ══════════════════════════════════════════════════════════════════ */}
+          {activeDrawerTab === "profile" && (
+            <form onSubmit={handleProfileSubmit} className="space-y-6">
+              <input type="hidden" name="sector" value={actor.sector} />
+              <input type="hidden" name="removeAvatar" value={removeAvatar ? "true" : "false"} />
+              <input type="hidden" name="instagram" value={contactInstagram} />
+              <input type="hidden" name="websiteUrl" value={contactWebsite} />
+              <input type="hidden" name="contactEmail" value={contactEmail} />
+              <input type="hidden" name="contactPhone" value={contactPhone} />
+
+              {/* CARD 1: FOTO PROFIL */}
+              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-blue-600" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                      Foto Profil Resmi
+                    </h3>
+                  </div>
+                  <span className="text-[10px] text-stone-400 font-semibold">Identitas &amp; Lencana Terverifikasi</span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 bg-stone-100 border-2 border-stone-300 shrink-0 relative overflow-hidden flex items-center justify-center shadow-inner">
+                    {avatarPreview ? (
+                      <img
+                        src={avatarPreview}
+                        alt={profileName || actor.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User className="w-12 h-12 text-stone-300" />
+                    )}
+                  </div>
+
+                  <div className="space-y-3 flex-1">
+                    <input
+                      type="file"
+                      name="avatarFile"
+                      ref={avatarInputRef}
+                      accept="image/png, image/jpeg, image/jpg, image/webp"
+                      onChange={handleAvatarFile}
+                      className="hidden"
+                    />
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => avatarInputRef.current?.click()}
+                        className="px-4 py-2 bg-[#1E1B2E] text-white hover:bg-black text-xs font-bold uppercase tracking-wider transition-all rounded-none cursor-pointer shadow-xs inline-flex items-center gap-1.5"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Unggah Foto Baru</span>
+                      </button>
+                      {avatarPreview && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveAvatar}
+                          className="px-4 py-2 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 text-xs font-bold uppercase tracking-wider transition-all rounded-none cursor-pointer"
+                        >
+                          Hapus Foto
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-xs text-stone-400 leading-relaxed">
+                      Format berkas JPG, PNG, atau WebP resolusi tinggi dengan rasio 1:1 (persegi), ukuran berkas maksimal 5 MB.
+                    </p>
+
+                    <div className="p-3 bg-stone-50 border border-stone-200/90 flex items-start gap-2.5 text-xs text-stone-600">
+                      <User className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                      <div className="leading-relaxed text-[11px]">
+                        <strong className="text-stone-900 block font-bold mb-0.5">Tampilan Foto Profil di RAMU:</strong>
+                        Foto profil resmi ini menjadi wajah utama Anda di halaman profil publik Anda (serta otomatis menjadi foto sampul utama kartu direktori bagi talenta Model &amp; Muse).
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CARD 2: INFORMASI DASAR IDENTITAS */}
+              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
+                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-purple-600" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                      Identitas Publik &amp; Lokasi Kerja
+                    </h3>
+                  </div>
+                  <span className="text-[10px] text-stone-400 font-semibold">Wajib Diisi</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label htmlFor="popup_name_profile" className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center justify-between">
+                      <span>Nama Lengkap / Brand / Talenta <span className="text-rose-500">*</span></span>
+                    </label>
+                    <input
+                      type="text"
+                      id="popup_name_profile"
+                      name="name"
+                      value={profileName}
+                      onChange={(e) => setProfileName(e.target.value)}
+                      required
+                      placeholder="Nama profesional Anda"
+                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800 transition-colors"
+                    />
+                    <span className="text-[10px] text-stone-400 block">Nama resmi yang dikenal publik di industri</span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="popup_location_profile" className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-stone-500" />
+                      <span>Kota Domisili / Lokasi Kerja Utama</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="popup_location_profile"
+                      name="location"
+                      value={profileLocation}
+                      onChange={(e) => setProfileLocation(e.target.value)}
+                      placeholder="mis. Jakarta Selatan, Indonesia"
+                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800 transition-colors"
+                    />
+                    <span className="text-[10px] text-stone-400 block">Basis area operasional untuk penentuan ongkos produksi</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="popup_description_profile" className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center justify-between">
+                    <span>Bio Profil &amp; Ringkasan Keahlian Profesional</span>
+                    <span className="text-[10px] text-stone-400 font-normal">Disarankan 2 – 4 kalimat padat</span>
+                  </label>
+                  <textarea
+                    id="popup_description_profile"
+                    name="description"
+                    rows={5}
+                    value={profileDescription}
+                    onChange={(e) => setProfileDescription(e.target.value)}
+                    placeholder="Deskripsikan pendekatan visual, jam terbang, spesialisasi kreasi, dan portfolio DNA Anda yang relevan bagi calon klien brand..."
+                    className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800 resize-none transition-colors leading-relaxed"
+                  />
+                  <span className="text-[10px] text-stone-400 block">Narasi bio ini akan ditampilkan di kartu sorotan halaman profil Anda.</span>
+                </div>
+              </div>
+
+              {/* ACTION FOOTER */}
+              <div className="pt-4 border-t border-stone-200 flex items-center justify-between gap-4 shrink-0">
+                <span className="text-xs text-stone-500">Perubahan akan langsung disimpan ke profil publik Anda.</span>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleModalClose}
+                    className="px-5 py-2.5 rounded-none border border-stone-300 text-stone-700 font-bold text-xs uppercase tracking-wider hover:bg-stone-100 transition-colors cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isPending}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-none bg-[#1E1B2E] text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+                  >
+                    {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                    <span>{isPending ? "Menyimpan..." : "Simpan Profil"}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
+
+          {/* ══════════════════════════════════════════════════════════════════ */}
+          {/* TAB 2: PORTO (Portofolio & Studio)                                 */}
+          {/* ══════════════════════════════════════════════════════════════════ */}
+          {activeDrawerTab === "portfolio" && (
+            <div className="space-y-6">
+              {/* HERO CARD: STUDIO UNGGULAN UNGGAH KARYA */}
+              <div className="p-6 sm:p-7 bg-gradient-to-r from-[#1E1B2E] via-[#2D2845] to-[#1E1B2E] text-white border border-stone-800 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="space-y-2 max-w-2xl">
+                  <div className="flex items-center gap-2.5">
+                    <span className="px-2.5 py-0.5 bg-amber-400 text-[#1E1B2E] text-[10px] font-black uppercase tracking-wider">
+                      Studio Portofolio RAMU
+                    </span>
+                    <span className="text-stone-300 text-xs font-semibold">· Foto, Video &amp; Tear-Sheet Kolaborasi</span>
+                  </div>
+                  <h3 className="text-base sm:text-xl font-black tracking-tight text-white">
+                    Pusat Portofolio &amp; Kredit Kru Kolaborasi
+                  </h3>
+                  <p className="text-xs text-stone-300 leading-relaxed">
+                    Satu pusat untuk mengunggah karya resolusi tinggi, streaming video sinematik, menandai titik hotspot interaktif, serta menautkan kredit kru terverifikasi (MUA, Model, Stylist, DoP).
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setIsStudioUploadOpen(true)}
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-[#1E1B2E] text-xs font-black uppercase tracking-wider transition-all shadow-md hover:shadow-lg cursor-pointer"
+                  >
+                    <Sparkles className="w-4 h-4 text-[#1E1B2E]" />
+                    <span>+ Tambah Karya Studio</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowQuickUpload(!showQuickUpload)}
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-3.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-wider transition-colors border border-white/20 cursor-pointer"
+                  >
+                    <span>{showQuickUpload ? "Tutup Form Cepat" : "Unggah Cepat (Single)"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* NOTIFICATION MESSAGE */}
+              {portfolioMessage && (
+                <div
+                  className={`p-4 flex items-center justify-between gap-3 text-xs font-semibold rounded-none animate-in fade-in duration-200 ${
+                    portfolioMessage.type === "success"
+                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                      : "bg-rose-50 text-rose-800 border border-rose-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    {portfolioMessage.type === "success" ? (
+                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                    )}
+                    <span>{portfolioMessage.text}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPortfolioMessage(null)}
+                    className="text-stone-400 hover:text-stone-700 p-1 cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* COLLAPSIBLE QUICK UPLOAD FORM */}
+              {showQuickUpload && (
+                <div className="p-6 bg-white border border-stone-200 space-y-6 shadow-2xs animate-in fade-in duration-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-stone-200 gap-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 bg-amber-400/20 text-[#1E1B2E] flex items-center justify-center">
+                        {portfolioMediaType === "VIDEO" ? <Film className="w-4 h-4 text-purple-700" /> : <ImageIcon className="w-4 h-4 text-rose-500" />}
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                          Form Unggah Cepat Portofolio
+                        </h4>
+                        <p className="text-[11px] text-stone-500">
+                          {portfolioMediaType === "VIDEO" ? "Unggah berkas video MP4/WebM atau tautkan video streaming" : "Unggah foto karya editorial resolusi tinggi"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {/* MEDIA TYPE TOGGLE */}
+                      <div className="flex items-center border border-stone-300 p-0.5 bg-stone-100">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPortfolioMediaType("IMAGE");
+                            if (portfolioSubtype === "Video Fashion / Campaign") setPortfolioSubtype("Editorial / Lookbook");
+                          }}
+                          className={`px-3 py-1 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1.5 ${
+                            portfolioMediaType === "IMAGE" ? "bg-[#1E1B2E] text-white shadow-2xs" : "text-stone-600 hover:text-stone-900"
+                          }`}
+                        >
+                          <ImageIcon className="w-3.5 h-3.5" />
+                          <span>Foto</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPortfolioMediaType("VIDEO");
+                            if (portfolioSubtype === "Editorial / Lookbook") setPortfolioSubtype("Video Fashion / Campaign");
+                          }}
+                          className={`px-3 py-1 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1.5 ${
+                            portfolioMediaType === "VIDEO" ? "bg-[#1E1B2E] text-white shadow-2xs" : "text-stone-600 hover:text-stone-900"
+                          }`}
+                        >
+                          <Film className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Video</span>
+                        </button>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowQuickUpload(false)}
+                        className="text-xs text-stone-400 hover:text-stone-700 p-1 cursor-pointer"
+                        title="Tutup form"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleInlinePortfolioSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* LEFT COLUMN: METADATA */}
+                      <div className="space-y-4">
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                            Judul Karya / Proyek <span className="text-rose-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={portfolioName}
+                            onChange={(e) => setPortfolioName(e.target.value)}
+                            required
+                            placeholder={portfolioMediaType === "VIDEO" ? "mis. Fashion Film: Eternal Horizon 4K" : "mis. Spring/Summer 2026 Lookbook"}
+                            className="w-full px-4 py-3 bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-xs font-medium text-stone-800"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                              Kategori / Subtipe
+                            </label>
+                            <select
+                              value={portfolioSubtype}
+                              onChange={(e) => setPortfolioSubtype(e.target.value)}
+                              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-xs font-medium text-stone-800 cursor-pointer"
+                            >
+                              <option value="Editorial / Lookbook">Editorial / Lookbook</option>
+                              <option value="Video Fashion / Campaign">Video Fashion / Campaign</option>
+                              <option value="Komersial & Brand">Komersial &amp; Brand</option>
+                              <option value="Runway & Fashion Show">Runway &amp; Fashion Show</option>
+                              <option value="Beauty & Makeup">Beauty &amp; Makeup</option>
+                              <option value="Katalog E-Commerce">Katalog E-Commerce</option>
+                              <option value="Behind The Scenes (BTS)">Behind The Scenes (BTS)</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                              Tautan Proyek (Opsional)
+                            </label>
+                            <input
+                              type="url"
+                              value={portfolioProjectUrl}
+                              onChange={(e) => setPortfolioProjectUrl(e.target.value)}
+                              placeholder="https://..."
+                              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-xs font-medium text-stone-800"
+                            />
+                          </div>
+                        </div>
+
+                        {/* ASPECT RATIO SELECTOR (FOR VIDEO) */}
+                        {portfolioMediaType === "VIDEO" && (
+                          <div className="space-y-2 p-3 bg-stone-50 border border-stone-200">
+                            <label className="text-[11px] font-bold text-stone-700 uppercase tracking-wider block">
+                              Rasio Layar Video
+                            </label>
+                            <div className="grid grid-cols-3 gap-2">
+                              {[
+                                { id: "16:9", label: "16:9 Lanskap", desc: "YouTube / Bioskop" },
+                                { id: "9:16", label: "9:16 Vertikal", desc: "Reels / TikTok" },
+                                { id: "1:1", label: "1:1 Persegi", desc: "Feed Instagram" },
+                              ].map((ratio) => (
+                                <button
+                                  key={ratio.id}
+                                  type="button"
+                                  onClick={() => setPortfolioAspectRatio(ratio.id as any)}
+                                  className={`p-2 text-center border text-xs font-bold transition-all cursor-pointer ${
+                                    portfolioAspectRatio === ratio.id
+                                      ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
+                                      : "bg-white text-stone-700 border-stone-200 hover:bg-stone-100"
+                                  }`}
+                                >
+                                  <div>{ratio.label}</div>
+                                  <div className={`text-[10px] ${portfolioAspectRatio === ratio.id ? "text-stone-300" : "text-stone-400"}`}>
+                                    {ratio.desc}
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                            Deskripsi Karya / Konsep
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={portfolioDesc}
+                            onChange={(e) => setPortfolioDesc(e.target.value)}
+                            placeholder="Ceritakan konsep video/pemotretan, brand, atau gaya visual yang dieksplorasi..."
+                            className="w-full px-4 py-3 bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-xs font-medium text-stone-800 resize-none"
+                          />
+                        </div>
+                      </div>
+
+                      {/* RIGHT COLUMN: MEDIA UPLOAD & PREVIEW */}
+                      <div className="space-y-4">
+                        {portfolioMediaType === "IMAGE" ? (
+                          <>
+                            <div className="flex items-center justify-between">
+                              <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                                Berkas Foto Karya <span className="text-rose-500">*</span>
+                              </label>
+                              <div className="flex items-center gap-2 text-xs">
+                                <button
+                                  type="button"
+                                  onClick={() => setPortfolioMode("file")}
+                                  className={`px-2.5 py-1 font-bold ${portfolioMode === "file" ? "bg-[#1E1B2E] text-white" : "bg-stone-100 text-stone-600"}`}
+                                >
+                                  File
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setPortfolioMode("url")}
+                                  className={`px-2.5 py-1 font-bold ${portfolioMode === "url" ? "bg-[#1E1B2E] text-white" : "bg-stone-100 text-stone-600"}`}
+                                >
+                                  URL
+                                </button>
+                              </div>
+                            </div>
+
+                            {portfolioMode === "file" ? (
+                              <div className="space-y-3">
+                                <input
+                                  type="file"
+                                  name="imageFile"
+                                  ref={portfolioFileRef}
+                                  accept="image/png, image/jpeg, image/jpg, image/webp"
+                                  onChange={handlePortfolioImageFile}
+                                  className="hidden"
+                                />
+                                <div
+                                  onClick={() => portfolioFileRef.current?.click()}
+                                  className="border-2 border-dashed border-stone-300 hover:border-[#1E1B2E] p-6 text-center cursor-pointer transition-colors bg-stone-50 hover:bg-white aspect-[16/10] flex flex-col items-center justify-center relative overflow-hidden"
+                                >
+                                  {portfolioImagePreview ? (
+                                    <img
+                                      src={portfolioImagePreview}
+                                      alt="Preview Karya"
+                                      className="w-full h-full object-cover absolute inset-0"
+                                    />
+                                  ) : (
+                                    <div className="space-y-1">
+                                      <Upload className="w-8 h-8 text-stone-400 mx-auto" />
+                                      <p className="text-xs font-bold text-stone-700">Klik untuk memilih berkas foto</p>
+                                      <p className="text-[10px] text-stone-400">JPG, PNG, atau WebP maks 15 MB</p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                <input
+                                  type="url"
+                                  value={portfolioImageUrl}
+                                  onChange={(e) => {
+                                    setPortfolioImageUrl(e.target.value);
+                                    setPortfolioImagePreview(e.target.value);
+                                  }}
+                                  placeholder="https://images.unsplash.com/..."
+                                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                                />
+                                {portfolioImageUrl && (
+                                  <div className="aspect-[16/10] bg-stone-100 border border-stone-200 overflow-hidden">
+                                    <img
+                                      src={portfolioImageUrl}
+                                      alt="Preview Karya URL"
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          /* VIDEO UPLOAD & STREAMING UI */
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                                Sumber Video Karya <span className="text-rose-500">*</span>
+                              </label>
+                              <div className="flex items-center gap-1.5 text-xs">
+                                <button
+                                  type="button"
+                                  onClick={() => setPortfolioVideoSource("FILE")}
+                                  className={`px-2.5 py-1 font-bold ${
+                                    portfolioVideoSource === "FILE" ? "bg-[#1E1B2E] text-white" : "bg-stone-100 text-stone-600"
+                                  }`}
+                                >
+                                  Berkas Video
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setPortfolioVideoSource("URL")}
+                                  className={`px-2.5 py-1 font-bold ${
+                                    portfolioVideoSource === "URL" ? "bg-[#1E1B2E] text-white" : "bg-stone-100 text-stone-600"
+                                  }`}
+                                >
+                                  Tautan URL
+                                </button>
+                              </div>
+                            </div>
+
+                            {portfolioVideoSource === "FILE" ? (
+                              <div className="space-y-3">
+                                <input
+                                  type="file"
+                                  ref={portfolioVideoFileRef}
+                                  accept="video/mp4, video/webm, video/quicktime"
+                                  onChange={handlePortfolioVideoFile}
+                                  className="hidden"
+                                />
+
+                                {portfolioVideoPreviewUrl ? (
+                                  <div className="space-y-2">
+                                    <div className="aspect-video bg-black overflow-hidden relative border border-stone-800">
+                                      <video
+                                        src={portfolioVideoPreviewUrl}
+                                        controls
+                                        playsInline
+                                        className="w-full h-full object-contain"
+                                      />
+                                    </div>
+                                    <div className="flex items-center justify-between p-2.5 bg-stone-50 border border-stone-200 text-xs">
+                                      <div className="truncate max-w-[220px]">
+                                        <span className="font-bold text-stone-800 block truncate">
+                                          {portfolioVideoFile?.name || "Video Terpilih"}
+                                        </span>
+                                        <span className="text-[10px] text-stone-400">
+                                          {portfolioVideoFile ? `${(portfolioVideoFile.size / (1024 * 1024)).toFixed(1)} MB` : ""}
+                                        </span>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => portfolioVideoFileRef.current?.click()}
+                                        className="px-2.5 py-1 bg-white hover:bg-stone-100 border border-stone-300 text-stone-700 text-[11px] font-bold cursor-pointer"
+                                      >
+                                        Ganti Video
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div
+                                    onClick={() => portfolioVideoFileRef.current?.click()}
+                                    className="border-2 border-dashed border-stone-300 hover:border-[#1E1B2E] p-6 text-center cursor-pointer transition-colors bg-stone-50 hover:bg-white aspect-video flex flex-col items-center justify-center relative overflow-hidden group"
+                                  >
+                                    <div className="space-y-1.5">
+                                      <div className="w-12 h-12 bg-amber-400/20 text-[#1E1B2E] mx-auto flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <Film className="w-6 h-6 text-purple-700" />
+                                      </div>
+                                      <p className="text-xs font-bold text-stone-800">
+                                        Klik untuk memilih berkas video portofolio
+                                      </p>
+                                      <p className="text-[10px] text-stone-400">
+                                        Format MP4, WebM, atau MOV hingga 200 MB
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="space-y-3">
+                                <div className="space-y-1">
+                                  <input
+                                    type="url"
+                                    value={portfolioVideoUrl}
+                                    onChange={(e) => handlePortfolioVideoUrlChange(e.target.value)}
+                                    placeholder="https://www.youtube.com/watch?v=... atau Vimeo"
+                                    className="w-full px-4 py-3 bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                                  />
+                                  <span className="text-[10px] text-stone-400 block">
+                                    Mendukung YouTube, Vimeo, atau direct streaming MP4 link
+                                  </span>
+                                </div>
+
+                                {portfolioVideoUrl && (
+                                  <div className="aspect-video bg-black border border-stone-200 overflow-hidden relative flex items-center justify-center">
+                                    {portfolioPosterPreview ? (
+                                      <img
+                                        src={portfolioPosterPreview}
+                                        alt="Video Thumbnail"
+                                        className="w-full h-full object-cover"
+                                      />
+                                    ) : (
+                                      <div className="text-center text-white/70 space-y-1">
+                                        <Play className="w-8 h-8 mx-auto fill-white/20" />
+                                        <p className="text-xs font-bold">Tautan Video Terdeteksi</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* COVER POSTER THUMBNAIL (AUTO-CAPTURED OR CUSTOM) */}
+                            <div className="pt-2 border-t border-stone-200 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                  <label className="text-[11px] font-bold text-stone-700 uppercase tracking-wider block">
+                                    Sampul Poster Video
+                                  </label>
+                                  <span className="text-[10px] text-stone-400 block">
+                                    {isCapturingPoster
+                                      ? "Sedang mengekstrak frame otomatis..."
+                                      : portfolioPosterPreview
+                                      ? "Cover snapshot otomatis siap digunakan"
+                                      : "Otomatis dibuat saat memilih video, atau unggah cover kustom"}
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => portfolioPosterFileRef.current?.click()}
+                                  className="px-2.5 py-1 text-[11px] font-bold border border-stone-300 bg-white hover:bg-stone-50 text-stone-700 cursor-pointer"
+                                >
+                                  Ganti Sampul
+                                </button>
+                              </div>
+
+                              <input
+                                type="file"
+                                ref={portfolioPosterFileRef}
+                                accept="image/png, image/jpeg, image/jpg, image/webp"
+                                onChange={handlePortfolioPosterFile}
+                                className="hidden"
+                              />
+
+                              {isCapturingPoster && (
+                                <div className="p-3 bg-amber-50 border border-amber-200 flex items-center gap-2 text-xs text-amber-800">
+                                  <Loader2 className="w-4 h-4 animate-spin text-amber-600 shrink-0" />
+                                  <span>Sedang mengekstrak frame video untuk sampul poster...</span>
+                                </div>
+                              )}
+
+                              {portfolioPosterPreview && !isCapturingPoster && (
+                                <div className="flex items-center gap-3 p-2 bg-stone-50 border border-stone-200">
+                                  <img
+                                    src={portfolioPosterPreview}
+                                    alt="Cover Sampul"
+                                    className="w-16 h-12 object-cover border border-stone-300"
+                                  />
+                                  <div className="text-xs">
+                                    <span className="font-bold text-emerald-700 flex items-center gap-1">
+                                      <CheckCircle2 className="w-3.5 h-3.5" /> Sampul Siap
+                                    </span>
+                                    <span className="text-[10px] text-stone-400">
+                                      Ditampilkan di kartu galeri dan sebelum video diputar
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* ── COLLABORATOR CREDITS ENGINE (PEER-VERIFIED CO-CREDIT) ── */}
+                    <div className="pt-5 border-t border-stone-200 space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4 text-purple-700" />
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                              Kredit Kru &amp; Kolaborator Tim ({portfolioCredits.length})
+                            </h4>
+                            <span className="text-[10px] px-2 py-0.5 bg-purple-50 text-purple-700 font-bold border border-purple-200">
+                              Peer-Verified
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-stone-500 mt-0.5">
+                            Tandai kru, model, stylist, fotografer, atau studio yang berkolaborasi. Karya otomatis terhubung ke portofolio mereka.
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setShowAddCredit(!showAddCredit)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-300 transition-colors cursor-pointer self-start sm:self-auto"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>{showAddCredit ? "Tutup Form Kru" : "+ Tambah Kru / Kolaborator"}</span>
+                        </button>
+                      </div>
+
+                      {/* CREDITS CARDS / CHIPS */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                        {portfolioCredits.map((c, index) => {
+                          const col = CREDIT_CATEGORY_COLORS[c.category] || CREDIT_CATEGORY_COLORS.wardrobe;
+                          const isUploader = index === 0;
+                          return (
+                            <div
+                              key={c.id}
+                              className="p-3 bg-stone-50 border border-stone-200 flex items-start justify-between gap-2 text-xs relative group hover:border-stone-400 transition-colors"
+                            >
+                              <div className="min-w-0 flex-1 space-y-1">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className={`text-[9px] font-bold px-1.5 py-0.2 border uppercase tracking-wider ${col.badge}`}>
+                                    {CREDIT_CATEGORIES.find((cat) => cat.category === c.category)?.label || c.category}
+                                  </span>
+                                  {isUploader && (
+                                    <span className="text-[9px] font-bold px-1.5 py-0.2 bg-[#1E1B2E] text-white">
+                                      Uploader
+                                    </span>
+                                  )}
+                                  {c.actorId && !isUploader && (
+                                    <span className="text-[9px] font-bold px-1.5 py-0.2 bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-0.5">
+                                      <CheckCircle2 className="w-2.5 h-2.5" />
+                                      Terhubung
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="font-bold text-stone-900 truncate text-xs">
+                                  {c.name}
+                                </div>
+
+                                <div className="text-[11px] text-stone-500 truncate flex items-center gap-1.5">
+                                  <span className="font-medium text-stone-700">{c.role}</span>
+                                  <span>&bull;</span>
+                                  <span className="font-mono text-stone-400">{c.handle}</span>
+                                </div>
+                              </div>
+
+                              {!isUploader && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveCredit(c.id)}
+                                  className="p-1 text-stone-400 hover:text-rose-600 cursor-pointer transition-colors shrink-0"
+                                  title="Hapus kredit kru ini"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* INLINE ADD CREDIT SUBFORM */}
+                      {showAddCredit && (
+                        <div className="p-4 bg-amber-50/40 border border-amber-200/80 space-y-3 animate-in fade-in duration-150">
+                          <div className="flex items-center justify-between pb-2 border-b border-amber-200/60">
+                            <span className="text-xs font-bold uppercase tracking-wider text-amber-950 flex items-center gap-1.5">
+                              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                              Detail Kredit Kru Baru
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setShowAddCredit(false)}
+                              className="text-xs text-amber-800 hover:text-stone-900 cursor-pointer"
+                            >
+                              Batal
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                            {/* DEPT SELECTOR */}
+                            <div className="space-y-1">
+                              <label className="text-[10px] font-bold text-stone-600 uppercase tracking-wider block">
+                                Departemen
+                              </label>
+                              <select
+                                value={creditCategory}
+                                onChange={(e) => {
+                                  const cat = e.target.value as HotspotCategory;
+                                  setCreditCategory(cat);
+                                  const def = CREDIT_CATEGORIES.find((c) => c.category === cat)?.defaultRole;
+                                  if (def) setCreditRole(def);
+                                }}
+                                className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800 cursor-pointer"
+                              >
+                                {CREDIT_CATEGORIES.map((cat) => (
+                                  <option key={cat.category} value={cat.category}>
+                                    {cat.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* NAME INPUT WITH AUTOCOMPLETE */}
+                            <div className="space-y-1 relative">
+                              <label className="text-[10px] font-bold text-stone-600 uppercase tracking-wider block">
+                                Nama Kru / Cari di RAMU
+                              </label>
+                              <input
+                                type="text"
+                                value={creditName}
+                                onChange={(e) => {
+                                  setCreditName(e.target.value);
+                                  setShowActorSuggestions(true);
+                                  if (creditSelectedActorId) setCreditSelectedActorId(null);
+                                }}
+                                onFocus={() => setShowActorSuggestions(true)}
+                                placeholder="Ketik nama untuk mencari..."
+                                className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                              />
+
+                              {showActorSuggestions && filteredActorSuggestions.length > 0 && (
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-stone-200 shadow-xl z-50 divide-y divide-stone-100 max-h-48 overflow-y-auto">
+                                  {filteredActorSuggestions.map((ra) => (
+                                    <button
+                                      key={ra.id}
+                                      type="button"
+                                      onClick={() => handleSelectSuggestedActor(ra)}
+                                      className="w-full text-left px-3 py-2 hover:bg-purple-50 flex items-center justify-between text-xs transition-colors cursor-pointer"
+                                    >
+                                      <div>
+                                        <div className="font-bold text-stone-900 flex items-center gap-1.5">
+                                          <span>{ra.name}</span>
+                                          <span className="text-[9px] px-1.5 py-0.2 bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
+                                            Terdaftar
+                                          </span>
+                                        </div>
+                                        <div className="text-[10px] text-stone-400">
+                                          {ra.sector} &bull; {ra.location || "Indonesia"}
+                                        </div>
+                                      </div>
+                                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* INSTAGRAM HANDLE */}
+                            <div className="space-y-1">
+                              <label className="text-[10px] font-bold text-stone-600 uppercase tracking-wider block">
+                                Instagram Tag / Handle
+                              </label>
+                              <input
+                                type="text"
+                                value={creditHandle}
+                                onChange={(e) => setCreditHandle(e.target.value)}
+                                placeholder="@username"
+                                className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                              />
+                            </div>
+
+                            {/* SPECIFIC ROLE */}
+                            <div className="space-y-1">
+                              <label className="text-[10px] font-bold text-stone-600 uppercase tracking-wider block">
+                                Peran Spesifik
+                              </label>
+                              <input
+                                type="text"
+                                value={creditRole}
+                                onChange={(e) => setCreditRole(e.target.value)}
+                                placeholder="mis. Lead Stylist"
+                                className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-end gap-2 pt-2">
+                            <button
+                              type="button"
+                              onClick={handleAddCredit}
+                              disabled={!creditName.trim()}
+                              className="px-4 py-2 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer flex items-center gap-1.5 shadow-xs"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>Tambahkan Kru ke Daftar</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-4 border-t border-stone-200 flex items-center justify-end gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowQuickUpload(false)}
+                        className="px-5 py-2.5 border border-stone-300 text-stone-700 text-xs font-bold uppercase tracking-wider hover:bg-stone-100"
+                      >
+                        Batal
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={portfolioIsPending}
+                        className="px-6 py-2.5 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer flex items-center gap-2 shadow-xs"
+                      >
+                        {portfolioIsPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+                        <span>{portfolioIsPending ? "Mengunggah..." : portfolioMediaType === "VIDEO" ? "Terbitkan Video Portofolio" : "Terbitkan Karya"}</span>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {/* FILTER TABS & ASSET GALLERY GRID */}
+              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-200 gap-4">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-purple-600" />
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                      Koleksi Karya Portofolio ({filteredPortfolioAssets.length})
+                    </h4>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFilterCategory("ALL")}
+                      className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-none transition-colors cursor-pointer ${
+                        selectedFilterCategory === "ALL"
+                          ? "bg-[#1E1B2E] text-white"
+                          : "bg-stone-100 hover:bg-stone-200 text-stone-700"
+                      }`}
+                    >
+                      Semua ({portfolioCategories.totalCount})
+                    </button>
+                    {portfolioCategories.videoCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedFilterCategory("VIDEO")}
+                        className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-none transition-colors cursor-pointer flex items-center gap-1.5 ${
+                          selectedFilterCategory === "VIDEO"
+                            ? "bg-[#1E1B2E] text-white"
+                            : "bg-stone-100 hover:bg-stone-200 text-stone-700"
+                        }`}
+                      >
+                        <Film className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Video ({portfolioCategories.videoCount})</span>
+                      </button>
+                    )}
+                    {portfolioCategories.list.map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setSelectedFilterCategory(cat.id)}
+                        className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-none transition-colors cursor-pointer ${
+                          selectedFilterCategory === cat.id
+                            ? "bg-[#1E1B2E] text-white"
+                            : "bg-stone-100 hover:bg-stone-200 text-stone-700"
+                        }`}
+                      >
+                        {cat.label} ({cat.count})
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {filteredPortfolioAssets.length > 0 && (
+                  <div className="p-3 bg-amber-50/70 border border-amber-200/80 flex items-start gap-2.5 text-xs text-amber-950">
+                    <Star className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 fill-amber-400" />
+                    <div className="leading-relaxed text-[11px]">
+                      <strong className="font-bold">Karya Sampul Direktori:</strong> Karya paling pertama (paling kiri) otomatis diprioritaskan sebagai gambar sampul utama pada kartu direktori publik Anda.
+                    </div>
+                  </div>
+                )}
+
+                {filteredPortfolioAssets.length === 0 ? (
+                  <div className="py-16 px-4 text-center border-2 border-dashed border-stone-200 bg-stone-50/50 space-y-4">
+                    <ImageIcon className="w-12 h-12 text-stone-300 mx-auto" />
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-stone-700">Belum ada karya dalam kategori ini</p>
+                      <p className="text-xs text-stone-400 max-w-md mx-auto">
+                        Tampilkan keahlian terbaik Anda dengan mengunggah karya editorial, komersial, maupun video lookbook.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsStudioUploadOpen(true)}
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-wider rounded-none transition-all cursor-pointer shadow-xs"
+                    >
+                      <Sparkles className="w-4 h-4 text-amber-400" />
+                      <span>+ Tambah Karya Studio Pertama Anda</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {filteredPortfolioAssets.map((item, idx) => {
+                      const itemAttrs = (item.attributes as any) || {};
+                      const isVideo =
+                        itemAttrs.media_type === "VIDEO" ||
+                        Boolean(itemAttrs.video_url) ||
+                        item.subtype?.toLowerCase().includes("video");
+                      const hasTearSheet = Boolean(itemAttrs.tear_sheet && Array.isArray(itemAttrs.tear_sheet.credits) && itemAttrs.tear_sheet.credits.length > 0);
+                      const isDirectVideo =
+                        isVideo &&
+                        itemAttrs.video_url &&
+                        (/\.(mp4|webm|mov)(\?.*)?$/i.test(itemAttrs.video_url) ||
+                          itemAttrs.video_url.startsWith("/uploads/portfolios/videos/"));
+                      const isDeleting = deletingAssetId === item.id;
+                      const img =
+                        itemAttrs.image_url ||
+                        actor.owner?.avatarUrl ||
+                        "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400";
+
+                      return (
+                        <div
+                          key={item.id}
+                          className="aspect-[4/5] bg-stone-100 border border-stone-200 overflow-hidden relative group shadow-2xs"
+                        >
+                          {isDirectVideo && (
+                            <video
+                              src={itemAttrs.video_url}
+                              muted
+                              loop
+                              playsInline
+                              preload="none"
+                              onMouseEnter={(e) => e.currentTarget.play().catch(() => {})}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.pause();
+                                e.currentTarget.currentTime = 0;
+                              }}
+                              className="absolute inset-0 w-full h-full object-cover z-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                            />
+                          )}
+
+                          <img
+                            src={img}
+                            alt={item.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+
+                          {/* TOP BADGES */}
+                          <div className="absolute top-2 left-2 flex flex-col gap-1 items-start z-10 pointer-events-none">
+                            {idx === 0 && selectedFilterCategory === "ALL" && (
+                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 bg-amber-400 text-stone-950 border border-amber-300 shadow-xs">
+                                <Star className="w-2.5 h-2.5 fill-current text-stone-950" />
+                                Sampul Direktori
+                              </span>
+                            )}
+                            {isVideo && (
+                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 bg-black/85 text-amber-400 border border-amber-400/40 backdrop-blur-xs">
+                                <Play className="w-2.5 h-2.5 fill-current" />
+                                Video
+                              </span>
+                            )}
+                            {hasTearSheet && (
+                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 bg-[#1E1B2E]/90 text-white border border-white/20 backdrop-blur-xs shadow-xs">
+                                <Users className="w-2.5 h-2.5 text-amber-400" />
+                                Kru ({itemAttrs.tear_sheet.credits.length})
+                              </span>
+                            )}
+                          </div>
+
+                          {/* DELETE ACTION BUTTON */}
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteAsset(item.id)}
+                            disabled={isDeleting}
+                            title="Hapus Karya"
+                            className="absolute top-2 right-2 p-2 bg-black/75 hover:bg-rose-600 text-white transition-colors opacity-0 group-hover:opacity-100 cursor-pointer shadow-md disabled:opacity-50 z-20"
+                          >
+                            {isDeleting ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </button>
+
+                          {/* BOTTOM GRADIENT INFO */}
+                          <div className="absolute inset-x-0 bottom-0 p-3.5 bg-gradient-to-t from-black/90 via-black/50 to-transparent text-white z-10">
+                            <span className="inline-block text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 bg-white/20 backdrop-blur-xs mb-1">
+                              {item.subtype || "Karya"}
+                            </span>
+                            <p className="text-xs font-bold truncate leading-tight">
+                              {item.name}
+                            </p>
+                            {item.description && (
+                              <p className="text-[10px] text-stone-300 truncate mt-0.5">
+                                {item.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ══════════════════════════════════════════════════════════════════ */}
+          {/* TAB 3A: KERJASAMA (Khusus Brand)                                   */}
+          {/* ══════════════════════════════════════════════════════════════════ */}
+          {activeDrawerTab === "rates" && isBrand && (
+            <form onSubmit={handleBrandCollabSubmit} className="space-y-6">
+              {/* INFO BANNER */}
+              <div className="p-4 bg-emerald-50 border border-emerald-200 flex items-start gap-3">
+                <Briefcase className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+                <div className="text-xs text-emerald-900 leading-relaxed">
+                  <strong className="font-bold block mb-0.5">Halaman Kerjasama Brand</strong>
+                  Atur jenis kolaborasi yang terbuka, budget range, dan profil kreator ideal yang Anda cari. Informasi ini akan tampil di tab "Kerjasama" profil direktori Anda.
+                </div>
+              </div>
+
+              {/* JENIS KERJASAMA */}
+              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-emerald-700" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">Jenis Kerjasama yang Dibuka</h3>
+                  </div>
+                  <span className="text-[10px] text-stone-400 font-semibold">Pilih semua yang relevan</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {COLLAB_TYPE_OPTIONS.map((type) => (
+                    <label key={type} className="flex items-center gap-3 p-3 bg-stone-50 border border-stone-200 hover:border-[#1E1B2E] cursor-pointer transition-colors group">
+                      <input
+                        type="checkbox"
+                        checked={brandCollabTypes.includes(type)}
+                        onChange={() => toggleBrandCollabType(type)}
+                        className="w-4 h-4 rounded-none accent-[#1E1B2E] cursor-pointer"
+                      />
+                      <span className="text-xs font-bold text-stone-700 group-hover:text-[#1E1B2E] transition-colors">{type}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* BUDGET & TIMELINE */}
+              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-4">
+                <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
+                  <CreditCard className="w-4 h-4 text-blue-600" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">Budget & Timeline Kampanye</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                      Budget / Kompensasi Kreator
+                    </label>
+                    <input
+                      type="text"
+                      value={brandBudgetRange}
+                      onChange={(e) => setBrandBudgetRange(e.target.value)}
+                      placeholder="mis. Rp 1-5 Jt per campaign, atau Sesuai brief"
+                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800 transition-colors"
+                    />
+                    <span className="text-[10px] text-stone-400">Estimasi, bukan harga pasti. Bisa berupa range atau deskripsi.</span>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                      Timeline per Kampanye
+                    </label>
+                    <input
+                      type="text"
+                      value={brandCollabTimeline}
+                      onChange={(e) => setBrandCollabTimeline(e.target.value)}
+                      placeholder="mis. 2 – 4 Minggu per Kampanye"
+                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800 transition-colors"
+                    />
+                    <span className="text-[10px] text-stone-400">Dari pengiriman brief hingga konten dipublikasikan.</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* PROFIL KREATOR YANG DICARI */}
+              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-4">
+                <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
+                  <Users className="w-4 h-4 text-amber-600" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">Profil & Persyaratan Kreator Ideal</h3>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                    Deskripsi Kreator yang Dicari
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={brandCreatorRequirements}
+                    onChange={(e) => setBrandCreatorRequirements(e.target.value)}
+                    placeholder="mis. Fotografer fashion dengan estetika minimalis & lookbook editorial, pengalaman min. 1 tahun dengan fashion brand lokal"
+                    className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-none focus:bg-white focus:border-[#1E1B2E] text-xs font-medium text-stone-800 resize-none leading-relaxed"
+                  />
+                  <span className="text-[10px] text-stone-400">Niche, gaya, level pengalaman, atau follower minimum yang Anda harapkan.</span>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                    Catatan Tambahan (Opsional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={brandCollabNotes}
+                    onChange={(e) => setBrandCollabNotes(e.target.value)}
+                    placeholder="mis. Prioritas kreator berbasis Bandung & Jakarta. Tidak menerima konten yang mempromosikan brand kompetitor."
+                    className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-none focus:bg-white focus:border-[#1E1B2E] text-xs font-medium text-stone-800 resize-none leading-relaxed"
+                  />
+                </div>
+              </div>
+
+              {/* ACTION FOOTER */}
+              <div className="pt-4 border-t border-stone-200 flex items-center justify-between gap-4 shrink-0">
+                <span className="text-xs text-stone-500">Preferensi kerjasama ditampilkan di tab "Kerjasama" profil direktori brand Anda.</span>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleModalClose}
+                    className="px-5 py-2.5 rounded-none border border-stone-300 text-stone-700 font-bold text-xs uppercase tracking-wider hover:bg-stone-100 transition-colors cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isPending}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-none bg-[#1E1B2E] text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+                  >
+                    {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                    <span>{isPending ? "Menyimpan..." : "Simpan Preferensi Kerjasama"}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
+
+          {/* ══════════════════════════════════════════════════════════════════ */}
+          {/* TAB 3B: TARIF (Paket & Tarif Layanan — Hanya Non-Brand)            */}
+          {/* ══════════════════════════════════════════════════════════════════ */}
+          {activeDrawerTab === "rates" && !isBrand && (
+            <form onSubmit={handleRatesSubmit} className="space-y-6">
+              {/* TOP SUMMARY CARDS */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-2">
+                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                    Tarif Mulai Dari <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={startingRate}
+                    onChange={(e) => setStartingRate(e.target.value)}
+                    required
+                    placeholder="mis. Mulai Rp 1,5 Jt / sesi"
+                    className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800 transition-colors"
+                  />
+                  <span className="text-[10px] text-stone-400 block">Ditampilkan di header profil direktori</span>
+                </div>
+
+                <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-2">
+                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                    Estimasi Turnaround
+                  </label>
+                  <input
+                    type="text"
+                    value={turnaroundTime}
+                    onChange={(e) => setTurnaroundTime(e.target.value)}
+                    placeholder="mis. 3 – 5 Hari Kerja"
+                    className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800 transition-colors"
+                  />
+                  <span className="text-[10px] text-stone-400 block">Jadwal serah terima berkas hasil final</span>
+                </div>
+
+                <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-2 flex flex-col justify-center">
+                  <span className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                    Sistem Pembayaran
+                  </span>
+                  <div className="p-3 bg-stone-50 border border-stone-200 text-xs font-semibold text-[#1E1B2E]">
+                    DP 50% untuk penguncian tanggal, 50% pelunasan saat selesai pengerjaan.
+                  </div>
+                  <span className="text-[10px] text-emerald-700 font-bold block">Standar Komersial RAMU</span>
+                </div>
+              </div>
+
+              {/* LIST OF PACKAGES */}
+              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
+                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-emerald-700" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                      Daftar Paket Layanan Komersial ({packages.length})
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddPackage}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-wider rounded-none cursor-pointer transition-colors shadow-xs"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Tambah Paket Baru</span>
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  {packages.map((pkg, idx) => (
+                    <div key={idx} className="p-6 bg-stone-50 border border-stone-200 space-y-4 shadow-2xs">
+                      <div className="flex items-center justify-between pb-3 border-b border-stone-200">
+                        <div className="flex items-center gap-2.5">
+                          <span className="px-2.5 py-1 bg-[#1E1B2E] text-white text-xs font-black uppercase tracking-wider">
+                            Paket #{idx + 1}
+                          </span>
+                          <span className="text-xs font-bold text-stone-800">{pkg.title || "Paket Baru"}</span>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <label className="flex items-center gap-2 text-xs text-stone-700 font-bold cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={Boolean(pkg.popular)}
+                              onChange={(e) => handlePackageChange(idx, "popular", e.target.checked)}
+                              className="w-4 h-4 rounded-none accent-[#1E1B2E]"
+                            />
+                            <span>Paling Populer</span>
+                          </label>
+                          {packages.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemovePackage(idx)}
+                              className="p-1.5 text-stone-400 hover:text-rose-600 transition-colors cursor-pointer"
+                              title="Hapus Paket"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-bold text-stone-600 uppercase tracking-wider block">
+                            Nama Paket <span className="text-rose-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={pkg.title}
+                            onChange={(e) => handlePackageChange(idx, "title", e.target.value)}
+                            required
+                            placeholder="mis. Half-Day Editorial Lookbook"
+                            className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-none text-xs font-medium text-stone-800"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-bold text-stone-600 uppercase tracking-wider block">
+                            Harga &amp; Satuan Durasi <span className="text-rose-500">*</span>
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={pkg.price}
+                              onChange={(e) => handlePackageChange(idx, "price", e.target.value)}
+                              required
+                              placeholder="Rp 1.500.000"
+                              className="flex-1 px-4 py-2.5 bg-white border border-stone-200 rounded-none text-xs font-medium text-stone-800"
+                            />
+                            <input
+                              type="text"
+                              value={pkg.unit}
+                              onChange={(e) => handlePackageChange(idx, "unit", e.target.value)}
+                              placeholder="per 4 jam"
+                              className="w-32 px-4 py-2.5 bg-white border border-stone-200 rounded-none text-xs font-medium text-stone-800"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="md:col-span-2 space-y-1.5">
+                          <label className="text-[11px] font-bold text-stone-600 uppercase tracking-wider block">
+                            Deskripsi Singkat Paket
+                          </label>
+                          <input
+                            type="text"
+                            value={pkg.subtitle}
+                            onChange={(e) => handlePackageChange(idx, "subtitle", e.target.value)}
+                            placeholder="Untuk pemotretan katalog musiman atau peluncuran busana baru"
+                            className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-none text-xs font-medium text-stone-800"
+                          />
+                        </div>
+
+                        <div className="md:col-span-2 space-y-1.5">
+                          <label className="text-[11px] font-bold text-stone-600 uppercase tracking-wider block">
+                            Fitur Layanan yang Termasuk (Tulis 1 baris per poin fitur)
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={pkg.features.join("\n")}
+                            onChange={(e) => handleFeaturesChange(idx, e.target.value)}
+                            placeholder="Sesi 4 jam on-set&#10;Termasuk 15 foto high-res retouch&#10;Gratis 1x revisi minor"
+                            className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-none text-xs font-medium text-stone-800 resize-none leading-relaxed"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ACTION FOOTER */}
+              <div className="pt-4 border-t border-stone-200 flex items-center justify-between gap-4 shrink-0">
+                <span className="text-xs text-stone-500">Tarif dan paket akan langsung tampil pada kalkulator reservasi klien.</span>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleModalClose}
+                    className="px-5 py-2.5 rounded-none border border-stone-300 text-stone-700 font-bold text-xs uppercase tracking-wider hover:bg-stone-100 transition-colors cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isPending}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-none bg-[#1E1B2E] text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+                  >
+                    {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                    <span>{isPending ? "Menyimpan..." : "Simpan Paket & Tarif"}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
+
+          {/* ══════════════════════════════════════════════════════════════════ */}
+          {/* TAB 4: SPESIFIKASI (Spesifikasi Teknis / Comp Card / Fasilitas)    */}
+          {/* ══════════════════════════════════════════════════════════════════ */}
           {activeDrawerTab === "specs" && (
             <form onSubmit={handleSpecsSubmit} className="space-y-6">
               {isModel && (
                 <div className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 pb-2 border-b border-stone-100">
-                      <Ruler className="w-4 h-4 text-purple-700" />
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
-                        Ukuran Tubuh Vital (Fitting &amp; Sample Specs)
-                      </h3>
+                  {/* COMP CARD MEASUREMENTS CARD */}
+                  <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
+                    <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                      <div className="flex items-center gap-2">
+                        <Ruler className="w-4 h-4 text-purple-700" />
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                          Ukuran Tubuh Vital (Comp Card &amp; Fitting Specs)
+                        </h3>
+                      </div>
+                      <span className="text-[10px] text-stone-400 font-semibold">Standar Agensi Model</span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="space-y-1.5">
                         <label htmlFor="popup_height_cm" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                          Tinggi Badan (cm) <span className="text-rose-500">*</span>
+                          Tinggi (cm) <span className="text-rose-500">*</span>
                         </label>
                         <input
                           type="number"
@@ -546,7 +2671,7 @@ export function ProfileSlideOverDrawer({
 
                       <div className="space-y-1.5">
                         <label htmlFor="popup_weight_kg" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                          Berat Badan (kg)
+                          Berat (kg)
                         </label>
                         <input
                           type="number"
@@ -575,7 +2700,7 @@ export function ProfileSlideOverDrawer({
 
                       <div className="space-y-1.5">
                         <label htmlFor="popup_clothing_size" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                          Ukuran Baju Sampel <span className="text-rose-500">*</span>
+                          Ukuran Baju <span className="text-rose-500">*</span>
                         </label>
                         <input
                           type="text"
@@ -604,47 +2729,8 @@ export function ProfileSlideOverDrawer({
                       </div>
 
                       <div className="space-y-1.5">
-                        <label htmlFor="popup_experience_years" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                          Pengalaman Kerja (Tahun)
-                        </label>
-                        <input
-                          type="number"
-                          id="popup_experience_years"
-                          name="experience_years"
-                          defaultValue={attrs.experience_years || ""}
-                          placeholder="5"
-                          className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5 sm:col-span-2">
-                        <label htmlFor="popup_video_reel_title" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                          Judul Showreel Video (Opsional)
-                        </label>
-                        <input
-                          type="text"
-                          id="popup_video_reel_title"
-                          name="video_reel_title"
-                          defaultValue={attrs.video_reel_title || ""}
-                          placeholder="Runway & Motion Lookbook Showreel 2026"
-                          className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 pb-2 border-b border-stone-100">
-                      <Sparkles className="w-4 h-4 text-purple-700" />
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
-                        Karakteristik &amp; Fitur Fisik Alami
-                      </h3>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div className="space-y-1.5">
                         <label htmlFor="popup_hair_color" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                          Warna &amp; Tipe Rambut
+                          Warna Rambut
                         </label>
                         <input
                           type="text"
@@ -652,7 +2738,7 @@ export function ProfileSlideOverDrawer({
                           name="hair_color"
                           defaultValue={attrs.hair_color || "Hitam Alami"}
                           placeholder="Hitam Alami"
-                          className="w-full px-3 py-2.5 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-xs font-medium text-stone-800"
+                          className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
                         />
                       </div>
 
@@ -664,69 +2750,63 @@ export function ProfileSlideOverDrawer({
                           type="text"
                           id="popup_eye_color"
                           name="eye_color"
-                          defaultValue={attrs.eye_color || "Cokelat Tua"}
-                          placeholder="Cokelat Tua"
-                          className="w-full px-3 py-2.5 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-xs font-medium text-stone-800"
+                          defaultValue={attrs.eye_color || "Cokelat Gelap"}
+                          placeholder="Cokelat Gelap"
+                          className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
                         />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label htmlFor="popup_skin_undertone" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                          Skin Undertone
+                        <label htmlFor="popup_skin_tone" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                          Skin Tone
                         </label>
                         <input
                           type="text"
-                          id="popup_skin_undertone"
-                          name="skin_undertone"
-                          defaultValue={attrs.skin_undertone || "Warm Olive"}
-                          placeholder="Warm Olive"
-                          className="w-full px-3 py-2.5 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-xs font-medium text-stone-800"
+                          id="popup_skin_tone"
+                          name="skin_tone"
+                          defaultValue={attrs.skin_tone || "Sawo Matang / Warm Olive"}
+                          placeholder="Sawo Matang"
+                          className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                  {/* 3 POLAROID SLOTS */}
+                  <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-stone-100">
                       <div className="flex items-center gap-2">
                         <Camera className="w-4 h-4 text-purple-700" />
                         <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
-                          Foto Polaroid Comp Card (3 Sudut Pandang)
+                          3 Foto Polaroid Natural Wajib (Comp Card Resmi)
                         </h3>
                       </div>
-                      <span className="text-[10px] text-stone-400">Natural Lighting</span>
+                      <span className="text-[10px] text-stone-400 font-semibold">Tanpa Filter / Heavy Makeup</span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       {polaroidPreviews.map((slot, idx) => (
-                        <div key={idx} className="p-3 bg-stone-50 border border-stone-200 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-[#1E1B2E] truncate">
-                              Slot {idx + 1}: {slot.type}
-                            </span>
-                            {slot.url && (
-                              <button
-                                type="button"
-                                onClick={() => handleRemovePolaroid(idx)}
-                                className="text-[9px] text-rose-600 hover:underline flex items-center gap-1 cursor-pointer font-bold"
-                              >
-                                <Trash2 className="w-2.5 h-2.5" /> Hapus
-                              </button>
+                        <div key={idx} className="space-y-3 p-4 bg-stone-50 border border-stone-200 shadow-2xs">
+                          <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                            <span>Slot #{idx + 1}</span>
+                            <span className="text-[10px] text-stone-500 font-normal">{slot.type}</span>
+                          </div>
+
+                          <div className="aspect-[3/4] bg-stone-200 border border-stone-300 relative overflow-hidden flex items-center justify-center">
+                            {slot.url ? (
+                              <img src={slot.url} alt={`Polaroid ${idx + 1}`} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="text-center p-3 text-stone-400">
+                                <Camera className="w-8 h-8 mx-auto mb-1.5 opacity-40" />
+                                <span className="text-[11px] block font-semibold">Belum ada foto</span>
+                              </div>
                             )}
                           </div>
 
                           <input
-                            type="file"
-                            name={`polaroid_file_${idx}`}
-                            ref={fileInputRefs[idx]}
-                            accept="image/png, image/jpeg, image/jpg, image/webp"
-                            onChange={(e) => handlePolaroidFile(idx, e)}
-                            className="hidden"
-                          />
-                          <input
                             type="hidden"
                             name={`polaroid_url_${idx}`}
-                            value={slot.url}
+                            value={slot.url.startsWith("blob:") ? "" : slot.url}
                           />
                           <input
                             type="hidden"
@@ -734,28 +2814,31 @@ export function ProfileSlideOverDrawer({
                             value={slot.type}
                           />
 
-                          <div
-                            onClick={() => fileInputRefs[idx].current?.click()}
-                            className="aspect-[3/4] w-full bg-white border border-dashed border-stone-300 hover:border-[#1E1B2E] transition-all flex flex-col items-center justify-center cursor-pointer relative overflow-hidden group select-none"
-                          >
-                            {slot.url ? (
-                              <>
-                                <img
-                                  src={slot.url}
-                                  alt={slot.type}
-                                  className="w-full h-full object-cover"
-                                />
-                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold gap-1">
-                                  <Upload className="w-4 h-4" />
-                                  <span>Ganti Foto</span>
-                                </div>
-                              </>
-                            ) : (
-                              <div className="text-center p-2 space-y-1 text-stone-400">
-                                <Upload className="w-5 h-5 mx-auto text-stone-400" />
-                                <span className="text-[10px] font-bold block text-stone-600">Unggah Foto</span>
-                                <span className="text-[8px] text-stone-400 block">Maks 10 MB</span>
-                              </div>
+                          <input
+                            type="file"
+                            ref={fileInputRefs[idx]}
+                            name={`polaroid_file_${idx}`}
+                            accept="image/png, image/jpeg, image/jpg, image/webp"
+                            onChange={(e) => handlePolaroidFile(idx, e)}
+                            className="hidden"
+                          />
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => fileInputRefs[idx].current?.click()}
+                              className="flex-1 py-2 px-3 bg-white border border-stone-300 hover:border-[#1E1B2E] text-stone-700 text-xs font-bold rounded-none cursor-pointer text-center"
+                            >
+                              {slot.url ? "Ganti Foto" : "Pilih Berkas"}
+                            </button>
+                            {slot.url && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemovePolaroid(idx)}
+                                className="py-2 px-3 text-rose-600 hover:bg-rose-50 text-xs font-bold rounded-none cursor-pointer"
+                              >
+                                Hapus
+                              </button>
                             )}
                           </div>
 
@@ -763,17 +2846,18 @@ export function ProfileSlideOverDrawer({
                             type="text"
                             name={`polaroid_caption_${idx}`}
                             defaultValue={slot.caption}
-                            placeholder="Keterangan..."
-                            className="w-full px-2 py-1.5 rounded-none bg-white border border-stone-200 text-[11px] font-medium text-stone-800 focus:outline-none focus:border-[#1E1B2E]"
+                            placeholder="Keterangan foto..."
+                            className="w-full px-3 py-2 rounded-none bg-white border border-stone-200 text-xs font-medium text-stone-800 focus:outline-none focus:border-[#1E1B2E]"
                           />
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div className="space-y-1.5 pt-2 border-t border-stone-100">
+                  {/* SPECIALTIES */}
+                  <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-3">
                     <label htmlFor="popup_specialties" className="text-xs font-bold text-[#1E1B2E] uppercase tracking-wider block">
-                      Spesialisasi Modeling (Pisahkan koma)
+                      Spesialisasi Modeling (Pisahkan dengan koma)
                     </label>
                     <input
                       type="text"
@@ -791,83 +2875,20 @@ export function ProfileSlideOverDrawer({
                 </div>
               )}
 
-              {(isPhotographer || isVideographer) && (
-                <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label htmlFor="popup_primary_camera" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                      Kamera Utama
-                    </label>
-                    <input
-                      type="text"
-                      id="popup_primary_camera"
-                      name="primary_camera"
-                      defaultValue={attrs.primary_camera || ""}
-                      placeholder="Sony A7R V / Canon EOS R5"
-                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label htmlFor="popup_secondary_camera" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                      Kamera Cadangan
-                    </label>
-                    <input
-                      type="text"
-                      id="popup_secondary_camera"
-                      name="secondary_camera"
-                      defaultValue={attrs.secondary_camera || ""}
-                      placeholder="Sony FX3 / Fujifilm X-T5"
-                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label htmlFor="popup_lenses" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                      Lensa Andalan (Pisahkan koma)
-                    </label>
-                    <input
-                      type="text"
-                      id="popup_lenses"
-                      name="lenses"
-                      defaultValue={Array.isArray(attrs.lenses) ? attrs.lenses.join(", ") : ""}
-                      placeholder="FE 24-70mm f/2.8 GM II, FE 85mm f/1.4 GM"
-                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label htmlFor="popup_lighting_gear" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                      Lighting Kit (Pisahkan koma)
-                    </label>
-                    <input
-                      type="text"
-                      id="popup_lighting_gear"
-                      name="lighting_gear"
-                      defaultValue={Array.isArray(attrs.lighting_gear) ? attrs.lighting_gear.join(", ") : ""}
-                      placeholder="Profoto B10X, Godox AD600 Pro"
-                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
-                    />
-                  </div>
-
-                  <div className="flex items-center gap-3 pt-2">
-                    <input
-                      type="checkbox"
-                      id="popup_drone_aerial"
-                      name="drone_aerial"
-                      value="true"
-                      defaultChecked={Boolean(attrs.drone_aerial)}
-                      className="w-4 h-4 rounded-none accent-[#1E1B2E] cursor-pointer"
-                    />
-                    <label htmlFor="popup_drone_aerial" className="text-xs font-bold text-[#1E1B2E] cursor-pointer select-none">
-                      Layanan Drone Aerial Bersertifikat
-                    </label>
-                  </div>
-                </div>
-              )}
-
+              {/* STUDIO SPACES */}
               {isStudio && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
+                  <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-purple-700" />
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                        Fasilitas &amp; Spesifikasi Ruang Studio
+                      </h3>
+                    </div>
+                    <span className="text-[10px] text-stone-400 font-semibold">Informasi Teknis Ruangan</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-1.5">
                       <label htmlFor="popup_area_sqm" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
                         Luas Area Studio (m²)
@@ -896,6 +2917,20 @@ export function ProfileSlideOverDrawer({
                         className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
                       />
                     </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_electrical_capacity" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Kapasitas Listrik
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_electrical_capacity"
+                        name="electrical_capacity"
+                        defaultValue={attrs.electrical_capacity || "16.500 Watt"}
+                        placeholder="16.500 Watt"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-1.5">
@@ -913,514 +2948,1208 @@ export function ProfileSlideOverDrawer({
                   </div>
 
                   <div className="space-y-1.5">
-                    <label htmlFor="popup_electrical_capacity" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                      Kapasitas Listrik
-                    </label>
-                    <input
-                      type="text"
-                      id="popup_electrical_capacity"
-                      name="electrical_capacity"
-                      defaultValue={attrs.electrical_capacity || "16.500 Watt"}
-                      placeholder="16.500 Watt"
-                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
                     <label htmlFor="popup_facilities" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                      Fasilitas (Pisahkan koma)
+                      Fasilitas Pendukung (Pisahkan dengan koma)
                     </label>
                     <input
                       type="text"
                       id="popup_facilities"
                       name="facilities"
                       defaultValue={Array.isArray(attrs.facilities) ? attrs.facilities.join(", ") : ""}
-                      placeholder="Makeup Station, Garment Steamer, AC, Wi-Fi"
+                      placeholder="Makeup Station, Garment Steamer, AC, High-Speed Wi-Fi, Area Parkir Kru"
                       className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
                     />
                   </div>
                 </div>
               )}
 
-              {!isModel && !isStudio && !isPhotographer && !isVideographer && (
-                <div className="space-y-4">
+              {/* PHOTOGRAPHER ONLY */}
+              {isPhotographer && !isVideographer && (
+                <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
+                  <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                    <div className="flex items-center gap-2">
+                      <Camera className="w-4 h-4 text-purple-700" />
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                        Kamera, Lensa &amp; Peralatan Fotografi
+                      </h3>
+                    </div>
+                    <span className="text-[10px] text-stone-400 font-semibold">Spesifikasi Fotografi Komersial</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_primary_camera" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Kamera Utama (A-Cam)
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_primary_camera"
+                        name="primary_camera"
+                        defaultValue={attrs.primary_camera || ""}
+                        placeholder="Sony A7R V / Canon EOS R5 / Hasselblad"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_secondary_camera" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Kamera Cadangan (B-Cam)
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_secondary_camera"
+                        name="secondary_camera"
+                        defaultValue={attrs.secondary_camera || ""}
+                        placeholder="Sony A7 IV / Fujifilm X-T5"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="popup_lenses" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                      Lensa Andalan (Pisahkan dengan koma)
+                    </label>
+                    <input
+                      type="text"
+                      id="popup_lenses"
+                      name="lenses"
+                      defaultValue={Array.isArray(attrs.lenses) ? attrs.lenses.join(", ") : (attrs.lenses || "")}
+                      placeholder="FE 24-70mm f/2.8 GM II, FE 85mm f/1.4 GM, 50mm f/1.2"
+                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="popup_lighting_gear" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                      Lighting &amp; Strobe Kit (Pisahkan dengan koma)
+                    </label>
+                    <input
+                      type="text"
+                      id="popup_lighting_gear"
+                      name="lighting_gear"
+                      defaultValue={Array.isArray(attrs.lighting_gear) ? attrs.lighting_gear.join(", ") : (attrs.lighting_gear || "")}
+                      placeholder="Profoto B10X, Godox AD600 Pro, Aputure 300d II, Softbox Octa"
+                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <input
+                      type="checkbox"
+                      id="popup_drone_aerial"
+                      name="drone_aerial"
+                      value="true"
+                      defaultChecked={Boolean(attrs.drone_aerial)}
+                      className="w-4 h-4 rounded-none accent-[#1E1B2E] cursor-pointer"
+                    />
+                    <label htmlFor="popup_drone_aerial" className="text-xs font-bold text-[#1E1B2E] cursor-pointer select-none">
+                      Layanan Drone Aerial Bersertifikat Tersedia
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* VIDEOGRAPHER ONLY */}
+              {isVideographer && !isPhotographer && (
+                <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
+                  <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                    <div className="flex items-center gap-2">
+                      <Video className="w-4 h-4 text-purple-700" />
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                        Cinema Camera, Rig &amp; Audio Videografi
+                      </h3>
+                    </div>
+                    <span className="text-[10px] text-stone-400 font-semibold">Spesifikasi Video &amp; Cinema Line</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_primary_cinema_camera" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Kamera Cinema Utama (A-Cam)
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_primary_cinema_camera"
+                        name="primary_cinema_camera"
+                        defaultValue={attrs.primary_cinema_camera || attrs.primary_camera || ""}
+                        placeholder="Sony FX3 Cinema Line (4K 120p 10-Bit) / RED Komodo"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_secondary_camera_video" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Kamera Cadangan (B-Cam)
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_secondary_camera_video"
+                        name="secondary_camera"
+                        defaultValue={attrs.secondary_camera || ""}
+                        placeholder="Sony A7S III / FX30"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_cine_lenses" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Cine Lenses &amp; Zoom (Pisahkan dengan koma)
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_cine_lenses"
+                        name="cine_lenses"
+                        defaultValue={
+                          Array.isArray(attrs.cine_lenses)
+                            ? attrs.cine_lenses.join(", ")
+                            : Array.isArray(attrs.lenses)
+                            ? attrs.lenses.join(", ")
+                            : (attrs.cine_lenses || attrs.lenses || "")
+                        }
+                        placeholder="DZOFilm Vespis Cine Prime Kit (25, 35, 50, 75mm), Sony 24-70 GM II"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_max_resolution" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Resolusi &amp; Format Rekam Maksimal
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_max_resolution"
+                        name="max_resolution"
+                        defaultValue={attrs.max_resolution || "4K 60fps / 10-Bit 4:2:2 All-Intra"}
+                        placeholder="4K 120p / 10-Bit 4:2:2 All-Intra"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_stabilizer_gimbal" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Stabilizer, Gimbal &amp; Rigging (Pisahkan dengan koma)
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_stabilizer_gimbal"
+                        name="stabilizer_gimbal"
+                        defaultValue={
+                          Array.isArray(attrs.stabilization_rigs)
+                            ? attrs.stabilization_rigs.join(", ")
+                            : (attrs.stabilizer_gimbal || "")
+                        }
+                        placeholder="DJI RS3 Pro Gimbal dengan LiDAR Focus, Easyrig Minimax, Tilta Cage"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_audio_rig" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Audio Gear &amp; Field Recorder (Pisahkan dengan koma)
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_audio_rig"
+                        name="audio_rig"
+                        defaultValue={
+                          Array.isArray(attrs.audio_gear)
+                            ? attrs.audio_gear.join(", ")
+                            : (attrs.audio_rig || "")
+                        }
+                        placeholder="Sennheiser MKH416 Shotgun, DJI Mic 2 32-Bit Float, Zoom F6"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <input
+                      type="checkbox"
+                      id="popup_drone_aerial_video"
+                      name="drone_aerial"
+                      value="true"
+                      defaultChecked={Boolean(attrs.drone_aerial)}
+                      className="w-4 h-4 rounded-none accent-[#1E1B2E] cursor-pointer"
+                    />
+                    <label htmlFor="popup_drone_aerial_video" className="text-xs font-bold text-[#1E1B2E] cursor-pointer select-none">
+                      Layanan Drone Aerial 4K Cinema Siap Terbang
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* HYBRID PHOTOGRAPHER + VIDEOGRAPHER */}
+              {isPhotographer && isVideographer && (
+                <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
+                  <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                    <div className="flex items-center gap-2">
+                      <Camera className="w-4 h-4 text-purple-700" />
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                        Peralatan Produksi Foto &amp; Cinema Video
+                      </h3>
+                    </div>
+                    <span className="text-[10px] text-stone-400 font-semibold">Hybrid Production Rig</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_primary_camera_hybrid" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Kamera Utama (Foto / Cinema)
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_primary_camera_hybrid"
+                        name="primary_camera"
+                        defaultValue={attrs.primary_cinema_camera || attrs.primary_camera || ""}
+                        placeholder="Sony FX3 / Canon EOS R5 / Sony A7R V"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_secondary_camera_hybrid" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Kamera Cadangan (B-Cam)
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_secondary_camera_hybrid"
+                        name="secondary_camera"
+                        defaultValue={attrs.secondary_camera || ""}
+                        placeholder="Sony A7S III / FX30"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_lenses_hybrid" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Lensa Foto &amp; Cine Prime (Pisahkan dengan koma)
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_lenses_hybrid"
+                        name="lenses"
+                        defaultValue={Array.isArray(attrs.lenses) ? attrs.lenses.join(", ") : (attrs.lenses || "")}
+                        placeholder="FE 24-70mm f/2.8 GM II, FE 85mm f/1.4 GM, Cine 35mm T2.1"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_lighting_gear_hybrid" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Lighting Kit (Pisahkan dengan koma)
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_lighting_gear_hybrid"
+                        name="lighting_gear"
+                        defaultValue={Array.isArray(attrs.lighting_gear) ? attrs.lighting_gear.join(", ") : (attrs.lighting_gear || "")}
+                        placeholder="Profoto B10X, Godox AD600 Pro, Aputure 300d II"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_stabilizer_hybrid" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Stabilizer / Gimbal
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_stabilizer_hybrid"
+                        name="stabilizer_gimbal"
+                        defaultValue={attrs.stabilizer_gimbal || ""}
+                        placeholder="DJI RS3 Pro Gimbal dengan LiDAR Focus"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_audio_rig_hybrid" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Audio Rig &amp; Mic Lapel
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_audio_rig_hybrid"
+                        name="audio_rig"
+                        defaultValue={attrs.audio_rig || ""}
+                        placeholder="DJI Mic 2 Wireless System, Sennheiser MKE600"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <input
+                      type="checkbox"
+                      id="popup_drone_aerial_hybrid"
+                      name="drone_aerial"
+                      value="true"
+                      defaultChecked={Boolean(attrs.drone_aerial)}
+                      className="w-4 h-4 rounded-none accent-[#1E1B2E] cursor-pointer"
+                    />
+                    <label htmlFor="popup_drone_aerial_hybrid" className="text-xs font-bold text-[#1E1B2E] cursor-pointer select-none">
+                      Layanan Drone Aerial Bersertifikat Tersedia
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* MUA / MAKEUP ARTIST & HAIR */}
+              {isMUA && (
+                <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
+                  <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-purple-700" />
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                        Brand Makeup Kit &amp; Standar Higienitas On-Set
+                      </h3>
+                    </div>
+                    <span className="text-[10px] text-stone-400 font-semibold">Spesifikasi MUA &amp; Hair Artist</span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="popup_primary_kit_brands" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                      Brand Makeup Kit Utama (Pisahkan dengan koma)
+                    </label>
+                    <input
+                      type="text"
+                      id="popup_primary_kit_brands"
+                      name="primary_kit_brands"
+                      defaultValue={
+                        Array.isArray(attrs.primary_kit_brands)
+                          ? attrs.primary_kit_brands.join(", ")
+                          : (attrs.primary_kit_brands || "Dior Backstage, MAC Cosmetics Pro, Charlotte Tilbury, NARS, Make Up For Ever")
+                      }
+                      placeholder="Dior Backstage, MAC Cosmetics Pro, Charlotte Tilbury, NARS, Make Up For Ever"
+                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_makeup_styles" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Spesialisasi Gaya Riasan (Pisahkan dengan koma)
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_makeup_styles"
+                        name="makeup_styles"
+                        defaultValue={
+                          Array.isArray(attrs.makeup_styles)
+                            ? attrs.makeup_styles.join(", ")
+                            : (attrs.makeup_styles || "Editorial & Avant-Garde, High Fashion Lookbook, Clean Skin Dewy Finish, Commercial Beauty")
+                        }
+                        placeholder="Editorial & Avant-Garde, High Fashion Lookbook, Clean Skin Glow"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_hair_specialties" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Keahlian Tata Rambut / Hair Styling (Pisahkan dengan koma)
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_hair_specialties"
+                        name="hair_specialties"
+                        defaultValue={
+                          Array.isArray(attrs.hair_specialties)
+                            ? attrs.hair_specialties.join(", ")
+                            : (attrs.hair_specialties || "Sleek High Bun, Textured Waves, Modern Hijab Styling, Hairpiece Blending")
+                        }
+                        placeholder="Sleek High Bun, Textured Waves, Modern Hijab Styling"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_touchup_standby_hours" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Standby Touch-Up On-Set (Jam)
+                      </label>
+                      <input
+                        type="number"
+                        id="popup_touchup_standby_hours"
+                        name="touchup_standby_hours"
+                        defaultValue={attrs.touchup_standby_hours || 8}
+                        placeholder="8"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_experience_years_mua" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Pengalaman Profesional (Tahun)
+                      </label>
+                      <input
+                        type="number"
+                        id="popup_experience_years_mua"
+                        name="experience_years"
+                        defaultValue={attrs.experience_years || 5}
+                        placeholder="5"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="popup_sanitation_standards" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                      Standar Sanitasi &amp; Higienitas (Pisahkan dengan koma)
+                    </label>
+                    <input
+                      type="text"
+                      id="popup_sanitation_standards"
+                      name="sanitation_standards"
+                      defaultValue={
+                        Array.isArray(attrs.sanitation_standards)
+                          ? attrs.sanitation_standards.join(", ")
+                          : (attrs.sanitation_standards || "Sterilisasi kuas dengan alkohol 70%, Aplikator disposable sekali pakai, Palet stainless steel steril")
+                      }
+                      placeholder="Sterilisasi kuas dengan alkohol 70%, Aplikator sekali pakai, Palet stainless steel"
+                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* FASHION STYLIST & WARDROBE */}
+              {isStylist && (
+                <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
+                  <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                    <div className="flex items-center gap-2">
+                      <Scissors className="w-4 h-4 text-purple-700" />
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                        Spesialisasi Styling &amp; Peralatan On-Set
+                      </h3>
+                    </div>
+                    <span className="text-[10px] text-stone-400 font-semibold">Spesifikasi Fashion Stylist</span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="popup_styling_specialties" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                      Spesialisasi Pengarahan Gaya (Pisahkan dengan koma)
+                    </label>
+                    <input
+                      type="text"
+                      id="popup_styling_specialties"
+                      name="styling_specialties"
+                      defaultValue={
+                        Array.isArray(attrs.styling_specialties)
+                          ? attrs.styling_specialties.join(", ")
+                          : Array.isArray(attrs.specialties)
+                          ? attrs.specialties.join(", ")
+                          : (attrs.styling_specialties || attrs.specialties || "Editorial Lookbook & Campaign, Contemporary Wastra Nusantara, High-Fashion Streetwear, Commercial TVC")
+                      }
+                      placeholder="Editorial Lookbook & Campaign, Contemporary Wastra, High-Fashion Streetwear"
+                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="popup_onset_equipment" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                      Peralatan On-Set Stylist (Pisahkan dengan koma)
+                    </label>
+                    <input
+                      type="text"
+                      id="popup_onset_equipment"
+                      name="onset_equipment"
+                      defaultValue={
+                        Array.isArray(attrs.onset_equipment)
+                          ? attrs.onset_equipment.join(", ")
+                          : (attrs.onset_equipment || "Garment Steamer 2200W, Emergency Tailoring Kit, Clamps & Invisible Pins, Rolling Garment Rack")
+                      }
+                      placeholder="Garment Steamer Profesional 2200W, Emergency Tailoring Kit, Clamps & Invisible Pins"
+                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_wardrobe_archive_count" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Jumlah Koleksi Arsip Wardrobe (Pcs)
+                      </label>
+                      <input
+                        type="number"
+                        id="popup_wardrobe_archive_count"
+                        name="wardrobe_archive_count"
+                        defaultValue={attrs.wardrobe_archive_count || 150}
+                        placeholder="150"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_aesthetic_dna" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        DNA &amp; Pendekatan Estetika Visual
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_aesthetic_dna"
+                        name="aesthetic_dna"
+                        defaultValue={attrs.aesthetic_dna || "Contemporary Minimalist with Indonesian Cultural Subtleties"}
+                        placeholder="Contemporary Minimalist with Indonesian Cultural Subtleties"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="popup_showroom_partners" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                      Partner Showroom &amp; Jejaring Desainer (Pisahkan dengan koma)
+                    </label>
+                    <input
+                      type="text"
+                      id="popup_showroom_partners"
+                      name="showroom_partners"
+                      defaultValue={
+                        Array.isArray(attrs.showroom_partners)
+                          ? attrs.showroom_partners.join(", ")
+                          : (attrs.showroom_partners || "Showroom Desainer Mode Jakarta & Bandung, Arsip Vintage Pribadi, Pengrajin Tenun & Batik")
+                      }
+                      placeholder="Showroom Desainer Mode Jakarta, Arsip Vintage Koleksi Pribadi, Pengrajin Tenun & Batik"
+                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* DESIGNER */}
+              {isDesigner && (
+                <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
+                  <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                    <div className="flex items-center gap-2">
+                      <PenTool className="w-4 h-4 text-purple-700" />
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                        Disiplin Desain &amp; Software Produksi
+                      </h3>
+                    </div>
+                    <span className="text-[10px] text-stone-400 font-semibold">Spesifikasi Designer</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_design_disciplines" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Disiplin Desain Utama (Pisahkan dengan koma)
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_design_disciplines"
+                        name="design_disciplines"
+                        defaultValue={
+                          Array.isArray(attrs.design_disciplines)
+                            ? attrs.design_disciplines.join(", ")
+                            : (attrs.design_disciplines || "Brand Identity, Editorial Typography, Packaging, Campaign Art Direction")
+                        }
+                        placeholder="Brand Identity, Editorial Typography, Packaging, Campaign Art Direction"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_primary_software" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Software &amp; Creative Tools (Pisahkan dengan koma)
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_primary_software"
+                        name="primary_software"
+                        defaultValue={
+                          Array.isArray(attrs.primary_software)
+                            ? attrs.primary_software.join(", ")
+                            : (attrs.primary_software || "Adobe Illustrator, Photoshop, InDesign, Figma, Blender 3D")
+                        }
+                        placeholder="Adobe Illustrator, Photoshop, InDesign, Figma, Blender 3D"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_deliverables" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Format Luaran / Deliverables (Pisahkan dengan koma)
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_deliverables"
+                        name="deliverables"
+                        defaultValue={
+                          Array.isArray(attrs.deliverables)
+                            ? attrs.deliverables.join(", ")
+                            : (attrs.deliverables || "Vector Files (AI, SVG), Press-Ready PDF, Digital Web Assets, Brand Guidelines")
+                        }
+                        placeholder="Vector Files (AI, SVG), Press-Ready PDF, Digital Web Assets, Style Guide Book"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_style_dna" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Karakter &amp; Style DNA
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_style_dna"
+                        name="style_dna"
+                        defaultValue={attrs.style_dna || "Neo-Nusantara Typography, Clean Editorial Brutalism"}
+                        placeholder="Neo-Nusantara Typography, Clean Editorial Brutalism"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* BRAND */}
+              {isBrand && (
+                <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
+                  <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                    <div className="flex items-center gap-2">
+                      <Package className="w-4 h-4 text-purple-700" />
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                        DNA Desain, Sampel Busana &amp; Karakter Brand
+                      </h3>
+                    </div>
+                    <span className="text-[10px] text-stone-400 font-semibold">Spesifikasi Brand &amp; Label</span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="popup_design_dna" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                      DNA &amp; Filosofi Desain Brand
+                    </label>
+                    <input
+                      type="text"
+                      id="popup_design_dna"
+                      name="design_dna"
+                      defaultValue={attrs.design_dna || "Contemporary Modest & Sustainable Raw Silk with Architectural Silhouettes"}
+                      placeholder="Contemporary Modest, Sustainable Raw Silk, Architectural Silhouettes"
+                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_sample_sizes_ready" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Ketersediaan Busana Sampel Siap On-Set
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_sample_sizes_ready"
+                        name="sample_sizes_ready"
+                        defaultValue={attrs.sample_sizes_ready || "S, M, All Size (Fitting Ready)"}
+                        placeholder="S, M, All Size (Fitting Ready)"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="popup_capacity_monthly" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Kapasitas Produksi Bulanan
+                      </label>
+                      <input
+                        type="text"
+                        id="popup_capacity_monthly"
+                        name="capacity_monthly"
+                        defaultValue={attrs.capacity_monthly || "500 – 1.200 pcs / bulan"}
+                        placeholder="500 – 1.200 pcs / bulan"
+                        className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="popup_fabric_materials" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                      Material Kain Utama &amp; Keahlian Khusus (Pisahkan dengan koma)
+                    </label>
+                    <input
+                      type="text"
+                      id="popup_fabric_materials"
+                      name="fabric_materials"
+                      defaultValue={
+                        Array.isArray(attrs.fabric_materials)
+                          ? attrs.fabric_materials.join(", ")
+                          : (attrs.fabric_materials || "Organic Linen, Handwoven Tenun Jepara, Silk Chiffon, Heavy Cotton Twill")
+                      }
+                      placeholder="Organic Linen, Handwoven Tenun Jepara, Silk Chiffon, Heavy Cotton Twill"
+                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* GENERIC SPECIALTIES IF OTHER */}
+              {!isModel && !isStudio && !isPhotographer && !isVideographer && !isMUA && !isStylist && !isDesigner && !isBrand && (
+                <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-4">
                   <div className="space-y-1.5">
                     <label htmlFor="popup_specialties_gen" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                      Spesialisasi &amp; Bidang Layanan (Pisahkan koma)
+                      Spesialisasi &amp; Bidang Layanan (Pisahkan dengan koma)
                     </label>
                     <input
                       type="text"
                       id="popup_specialties_gen"
                       name="specialties"
                       defaultValue={Array.isArray(attrs.specialties) ? attrs.specialties.join(", ") : ""}
-                      placeholder="Editorial Styling, High-Fashion Makeup, Commercial"
+                      placeholder="Editorial Styling, High-Fashion Makeup, Commercial Brand"
                       className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
                     />
                   </div>
                 </div>
               )}
 
-              <div className="pt-4 border-t border-stone-200 flex items-center justify-end gap-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-5 py-2.5 rounded-none border border-stone-300 text-stone-700 font-bold text-xs uppercase tracking-wider hover:bg-stone-100 transition-colors cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-none bg-[#1E1B2E] text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                  <span>{isPending ? "Menyimpan..." : "Simpan Spesifikasi"}</span>
-                </button>
-              </div>
-            </form>
-          )}
-
-          {activeDrawerTab === "rates" && (
-            <form onSubmit={handleRatesSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                    Tarif Mulai Dari <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={startingRate}
-                    onChange={(e) => setStartingRate(e.target.value)}
-                    required
-                    placeholder="Mulai Rp 1,5 Jt / sesi"
-                    className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
-                  />
-                  <span className="text-[10px] text-stone-400">Muncul di header halaman profil</span>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                    Estimasi Turnaround
-                  </label>
-                  <input
-                    type="text"
-                    value={turnaroundTime}
-                    onChange={(e) => setTurnaroundTime(e.target.value)}
-                    placeholder="3 – 5 Hari Kerja"
-                    className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
-                  />
-                  <span className="text-[10px] text-stone-400">Waktu serah terima hasil kerja</span>
-                </div>
-              </div>
-
-              <div className="space-y-4 pt-2">
-                <div className="flex items-center justify-between pb-2 border-b border-stone-100">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-emerald-700" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
-                      Daftar Paket Layanan ({packages.length})
-                    </h3>
-                  </div>
+              {/* ACTION FOOTER */}
+              <div className="pt-4 border-t border-stone-200 flex items-center justify-between gap-4 shrink-0">
+                <span className="text-xs text-stone-500">Spesifikasi teknis membantu brand memastikan kompatibilitas proyek.</span>
+                <div className="flex items-center gap-3">
                   <button
                     type="button"
-                    onClick={handleAddPackage}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold uppercase tracking-wider rounded-none cursor-pointer"
+                    onClick={handleModalClose}
+                    className="px-5 py-2.5 rounded-none border border-stone-300 text-stone-700 font-bold text-xs uppercase tracking-wider hover:bg-stone-100 transition-colors cursor-pointer"
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Tambah Paket</span>
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isPending}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-none bg-[#1E1B2E] text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+                  >
+                    {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                    <span>{isPending ? "Menyimpan..." : "Simpan Spesifikasi"}</span>
                   </button>
                 </div>
-
-                <div className="space-y-4">
-                  {packages.map((pkg, idx) => (
-                    <div key={idx} className="p-4 bg-stone-50 border border-stone-200 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
-                          Paket #{idx + 1}
-                        </span>
-                        <div className="flex items-center gap-3">
-                          <label className="flex items-center gap-1.5 text-xs text-stone-600 font-semibold cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={Boolean(pkg.popular)}
-                              onChange={(e) => handlePackageChange(idx, "popular", e.target.checked)}
-                              className="w-3.5 h-3.5 rounded-none accent-[#1E1B2E]"
-                            />
-                            <span>Paling Populer</span>
-                          </label>
-                          {packages.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => handleRemovePackage(idx)}
-                              className="text-rose-600 text-xs font-bold hover:underline flex items-center gap-1 cursor-pointer"
-                            >
-                              <Trash2 className="w-3 h-3" /> Hapus
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
-                            Nama Paket
-                          </label>
-                          <input
-                            type="text"
-                            value={pkg.title}
-                            onChange={(e) => handlePackageChange(idx, "title", e.target.value)}
-                            placeholder="Nama Paket"
-                            className="w-full px-3 py-2 bg-white border border-stone-200 rounded-none text-xs font-medium text-stone-800"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
-                            Harga &amp; Satuan (contoh: Rp 1.500.000 / per 4 jam)
-                          </label>
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              value={pkg.price}
-                              onChange={(e) => handlePackageChange(idx, "price", e.target.value)}
-                              placeholder="Rp 1.500.000"
-                              className="w-2/3 px-3 py-2 bg-white border border-stone-200 rounded-none text-xs font-medium text-stone-800"
-                            />
-                            <input
-                              type="text"
-                              value={pkg.unit}
-                              onChange={(e) => handlePackageChange(idx, "unit", e.target.value)}
-                              placeholder="per sesi"
-                              className="w-1/3 px-3 py-2 bg-white border border-stone-200 rounded-none text-xs font-medium text-stone-800"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="sm:col-span-2">
-                          <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
-                            Keterangan Singkat
-                          </label>
-                          <input
-                            type="text"
-                            value={pkg.subtitle}
-                            onChange={(e) => handlePackageChange(idx, "subtitle", e.target.value)}
-                            placeholder="Deskripsi singkat paket"
-                            className="w-full px-3 py-2 bg-white border border-stone-200 rounded-none text-xs font-medium text-stone-800"
-                          />
-                        </div>
-
-                        <div className="sm:col-span-2">
-                          <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
-                            Fitur Paket (1 baris per fitur)
-                          </label>
-                          <textarea
-                            rows={3}
-                            value={pkg.features.join("\n")}
-                            onChange={(e) => handleFeaturesChange(idx, e.target.value)}
-                            placeholder="Fitur 1&#10;Fitur 2&#10;Fitur 3"
-                            className="w-full px-3 py-2 bg-white border border-stone-200 rounded-none text-xs font-medium text-stone-800 resize-none"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-stone-200 flex items-center justify-end gap-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-5 py-2.5 rounded-none border border-stone-300 text-stone-700 font-bold text-xs uppercase tracking-wider hover:bg-stone-100 transition-colors cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-none bg-[#1E1B2E] text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                  <span>{isPending ? "Menyimpan..." : "Simpan Paket & Tarif"}</span>
-                </button>
               </div>
             </form>
           )}
 
-          {activeDrawerTab === "profile" && (
+          {/* ══════════════════════════════════════════════════════════════════ */}
+          {/* TAB 5: TENTANG (Tentang, Kontak & SOP Medsos)                     */}
+          {/* ══════════════════════════════════════════════════════════════════ */}
+          {activeDrawerTab === "about" && (
             <form onSubmit={handleProfileSubmit} className="space-y-6">
+              <input type="hidden" name="name" value={profileName} />
               <input type="hidden" name="sector" value={actor.sector} />
-              <input type="hidden" name="removeAvatar" value={removeAvatar ? "true" : "false"} />
-              <input type="hidden" name="instagram" value={initialSocials.instagram?.handle || ""} />
-              <input type="hidden" name="websiteUrl" value={initialSocials.website?.url || ""} />
-              <input type="hidden" name="contactEmail" value={actor.contactEmail || ""} />
-              <input type="hidden" name="contactPhone" value={actor.contactPhone || ""} />
-
-              <div className="flex items-center gap-5 p-4 bg-stone-50 border border-stone-200">
-                <div className="w-20 h-20 bg-stone-200 border border-stone-300 shrink-0 relative overflow-hidden flex items-center justify-center">
-                  {avatarPreview ? (
-                    <img
-                      src={avatarPreview}
-                      alt={actor.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <User className="w-8 h-8 text-stone-400" />
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <span className="text-xs font-bold text-[#1E1B2E] block">Foto Profil Resmi</span>
-                  <input
-                    type="file"
-                    name="avatarFile"
-                    ref={avatarInputRef}
-                    accept="image/png, image/jpeg, image/jpg, image/webp"
-                    onChange={handleAvatarFile}
-                    className="hidden"
-                  />
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => avatarInputRef.current?.click()}
-                      className="px-3 py-1.5 bg-white border border-stone-300 hover:border-[#1E1B2E] text-stone-700 text-xs font-bold transition-all rounded-none cursor-pointer"
-                    >
-                      Unggah Foto
-                    </button>
-                    {avatarPreview && (
-                      <button
-                        type="button"
-                        onClick={handleRemoveAvatar}
-                        className="px-3 py-1.5 text-rose-600 hover:underline text-xs font-bold transition-all rounded-none cursor-pointer"
-                      >
-                        Hapus
-                      </button>
-                    )}
-                  </div>
-                  <span className="text-[10px] text-stone-400 block">JPG, PNG, atau WebP maks 5 MB</span>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label htmlFor="popup_name_profile" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                    Nama Publik / Profil <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="popup_name_profile"
-                    name="name"
-                    defaultValue={actor.name}
-                    required
-                    className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="popup_location_profile" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                    Kota Domisili / Lokasi Kerja
-                  </label>
-                  <input
-                    type="text"
-                    id="popup_location_profile"
-                    name="location"
-                    defaultValue={actor.location || ""}
-                    placeholder="Jakarta Selatan, Indonesia"
-                    className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="popup_description_profile" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                    Bio &amp; Ringkasan Keahlian
-                  </label>
-                  <textarea
-                    id="popup_description_profile"
-                    name="description"
-                    rows={4}
-                    defaultValue={actor.description || ""}
-                    placeholder="Deskripsikan gaya, jam terbang, dan fokus kerja Anda..."
-                    className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-stone-200 flex items-center justify-end gap-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-5 py-2.5 rounded-none border border-stone-300 text-stone-700 font-bold text-xs uppercase tracking-wider hover:bg-stone-100 transition-colors cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-none bg-[#1E1B2E] text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                  <span>{isPending ? "Menyimpan..." : "Simpan Profil"}</span>
-                </button>
-              </div>
-            </form>
-          )}
-
-          {activeDrawerTab === "contact" && (
-            <form onSubmit={handleProfileSubmit} className="space-y-6">
-              <input type="hidden" name="name" value={actor.name} />
-              <input type="hidden" name="sector" value={actor.sector} />
-              <input type="hidden" name="description" value={actor.description || ""} />
-              <input type="hidden" name="location" value={actor.location || ""} />
+              <input type="hidden" name="description" value={profileDescription} />
+              <input type="hidden" name="location" value={profileLocation} />
               <input type="hidden" name="removeAvatar" value="false" />
 
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label htmlFor="popup_instagram_contact" className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
-                    <InstagramIcon className="w-3.5 h-3.5 text-stone-600" />
-                    <span>Akun Instagram</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="popup_instagram_contact"
-                    name="instagram"
-                    defaultValue={initialSocials.instagram?.handle || ""}
-                    placeholder="username atau link profil"
-                    className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
-                  />
-                  <span className="text-[10px] text-stone-400 block">
-                    Bila dikosongkan, ikon dan informasi Instagram akan otomatis disembunyikan dari profil.
-                  </span>
+              {/* CONTACT & SOCIAL CARDS */}
+              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
+                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 text-amber-600" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                      Saluran Komunikasi &amp; Media Sosial Resmi
+                    </h3>
+                  </div>
+                  <span className="text-[10px] text-stone-400 font-semibold">Tautan Langsung</span>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label htmlFor="popup_websiteUrl_contact" className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
-                    <ExternalLink className="w-3.5 h-3.5 text-stone-600" />
-                    <span>Website / Portfolio URL</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="popup_websiteUrl_contact"
-                    name="websiteUrl"
-                    defaultValue={initialSocials.website?.url || ""}
-                    placeholder="https://portofolioanda.com"
-                    className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
-                  />
-                  <span className="text-[10px] text-stone-400 block">
-                    Bila dikosongkan, informasi website akan otomatis disembunyikan dari profil.
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1.5">
-                    <label htmlFor="popup_contactPhone_contact" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                      Nomor WhatsApp / HP
+                    <label htmlFor="popup_instagram_contact" className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <InstagramIcon className="w-3.5 h-3.5 text-stone-600" />
+                      <span>Akun Instagram</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="popup_instagram_contact"
+                      name="instagram"
+                      value={contactInstagram}
+                      onChange={(e) => setContactInstagram(e.target.value)}
+                      placeholder="@namaakun atau link instagram"
+                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                    />
+                    <span className="text-[10px] text-stone-400 block">
+                      Kosongkan bila tidak ingin menampilkan tombol Instagram di profil.
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="popup_websiteUrl_contact" className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <ExternalLink className="w-3.5 h-3.5 text-stone-600" />
+                      <span>Website / Portfolio Eksternal URL</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="popup_websiteUrl_contact"
+                      name="websiteUrl"
+                      value={contactWebsite}
+                      onChange={(e) => setContactWebsite(e.target.value)}
+                      placeholder="https://portofolioanda.com"
+                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                    />
+                    <span className="text-[10px] text-stone-400 block">
+                      Tautan website pribadi, Behance, atau showcase agensi Anda.
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="popup_contactPhone_contact" className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Nomor WhatsApp / HP Komersial</span>
                     </label>
                     <input
                       type="tel"
                       id="popup_contactPhone_contact"
                       name="contactPhone"
-                      defaultValue={actor.contactPhone || ""}
+                      value={contactPhone}
+                      onChange={(e) => setContactPhone(e.target.value)}
                       placeholder="08123456789"
                       className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
                     />
+                    <span className="text-[10px] text-stone-400 block">Untuk tombol Chat WhatsApp langsung bagi klien</span>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label htmlFor="popup_contactEmail_contact" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                      Email Kerjasama
+                    <label htmlFor="popup_contactEmail_contact" className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Email Kerjasama Proyek</span>
                     </label>
                     <input
                       type="email"
                       id="popup_contactEmail_contact"
                       name="contactEmail"
-                      defaultValue={actor.contactEmail || ""}
+                      value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
                       placeholder="kontak@domain.com"
                       className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
                     />
+                    <span className="text-[10px] text-stone-400 block">Alamat email pengiriman kontrak &amp; brief resmi</span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-stone-200 flex items-center justify-end gap-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-5 py-2.5 rounded-none border border-stone-300 text-stone-700 font-bold text-xs uppercase tracking-wider hover:bg-stone-100 transition-colors cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-none bg-[#1E1B2E] text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                  <span>{isPending ? "Menyimpan..." : "Simpan Kontak"}</span>
-                </button>
+              {/* SOP WORKING TERMS OVERVIEW */}
+              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-purple-600" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                      Standar Ketentuan Kerja (SOP) RAMU Indonesia
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-none border border-emerald-200">
+                    SOP Terverifikasi
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 bg-stone-50 border border-stone-200 space-y-1">
+                    <span className="text-xs font-bold text-[#1E1B2E] block">Jam Kerja &amp; Overtime</span>
+                    <p className="text-[11px] text-stone-500 leading-relaxed">
+                      Sesi standar 8 jam kerja termasuk 1 jam istirahat. Overtime dihitung proporsional per jam sesuai kesepakatan awal.
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-stone-50 border border-stone-200 space-y-1">
+                    <span className="text-xs font-bold text-[#1E1B2E] block">DP &amp; Pelunasan</span>
+                    <p className="text-[11px] text-stone-500 leading-relaxed">
+                      DP 50% untuk penguncian tanggal di kalender. Pelunasan 50% dituntaskan saat preview berkas final disetujui.
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-stone-50 border border-stone-200 space-y-1">
+                    <span className="text-xs font-bold text-[#1E1B2E] block">Revisi &amp; Serah Terima</span>
+                    <p className="text-[11px] text-stone-500 leading-relaxed">
+                      Termasuk 2x revisi minor. Seluruh file master resolusi tinggi diserahkan melalui tautan cloud resmi.
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-stone-50 border border-stone-200 space-y-1">
+                    <span className="text-xs font-bold text-[#1E1B2E] block">Hak Cipta Komersial</span>
+                    <p className="text-[11px] text-stone-500 leading-relaxed">
+                      Klien memperoleh lisensi komersial penuh untuk kebutuhan media sosial, website e-commerce, dan katalog promosi.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* ACTION FOOTER */}
+              <div className="pt-4 border-t border-stone-200 flex items-center justify-between gap-4 shrink-0">
+                <span className="text-xs text-stone-500">Saluran kontak akan langsung terlihat oleh klien yang ingin menyewa jasa.</span>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleModalClose}
+                    className="px-5 py-2.5 rounded-none border border-stone-300 text-stone-700 font-bold text-xs uppercase tracking-wider hover:bg-stone-100 transition-colors cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isPending}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-none bg-[#1E1B2E] text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+                  >
+                    {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                    <span>{isPending ? "Menyimpan..." : "Simpan Kontak"}</span>
+                  </button>
+                </div>
               </div>
             </form>
           )}
 
-          {activeDrawerTab === "portfolio" && (
+          {/* ══════════════════════════════════════════════════════════════════ */}
+          {/* TAB 6: USULAN (Usulan, Ulasan & Kolaborasi)                         */}
+          {/* ══════════════════════════════════════════════════════════════════ */}
+          {activeDrawerTab === "reviews" && (
             <div className="space-y-6">
-              <div className="p-6 bg-stone-50 border border-stone-200 space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#1E1B2E] text-white flex items-center justify-center shrink-0">
-                    <ImageIcon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-wider">
-                      Manajemen Karya &amp; Showcase Portofolio
+              {/* CARD 1: STATUS & PREFERENSI USULAN PROYEK */}
+              <form onSubmit={handlePreferencesSubmit} className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
+                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                  <div className="flex items-center gap-2">
+                    <Sliders className="w-4 h-4 text-purple-600" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                      Kesiapan &amp; Preferensi Penerimaan Usulan Proyek
                     </h3>
-                    <p className="text-xs text-stone-500 mt-0.5">
-                      Unggah foto resolusi tinggi, video reel catwalk, dan tag kolaborator produksi di Showcase.
-                    </p>
+                  </div>
+                  <span className="text-[10px] text-stone-400 font-semibold">Pengaturan Kolaborasi</span>
+                </div>
+
+                {/* STATUS TOGGLE */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                    Status Ketersediaan Menerima Usulan / Proyek Baru
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {[
+                      {
+                        value: "OPEN_FOR_COMMISSION",
+                        label: "🟢 Terbuka untuk Proyek Baru",
+                        desc: "Siap menerima tawaran komersial & brief baru",
+                      },
+                      {
+                        value: "SELECTIVE_COLLABORATION",
+                        label: "🟡 Kolaborasi Terpilih Saja",
+                        desc: "Hanya proyek lookbook & rilis khusus",
+                      },
+                      {
+                        value: "FULLY_BOOKED",
+                        label: "🔴 Jadwal Sedang Penuh",
+                        desc: "Sementara tidak menerima proyek dadakan",
+                      },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setExperienceLevel(opt.value)}
+                        className={`p-4 border text-left rounded-none transition-all cursor-pointer ${
+                          experienceLevel === opt.value
+                            ? "border-[#1E1B2E] bg-stone-50 shadow-xs"
+                            : "border-stone-200 bg-white hover:bg-stone-50/50"
+                        }`}
+                      >
+                        <span className="text-xs font-bold block text-[#1E1B2E]">{opt.label}</span>
+                        <span className="text-[10px] text-stone-500 mt-1 block">{opt.desc}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                <div className="pt-2 flex flex-col sm:flex-row gap-3">
-                  <Link
-                    href="/dashboard/showcase"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition-colors shadow-xs"
-                  >
-                    <span>Buka Studio Portofolio</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  <Link
-                    href="/dashboard/works/new"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white border border-stone-300 hover:border-[#1E1B2E] text-stone-800 text-xs font-bold uppercase tracking-wider transition-colors shadow-xs"
-                  >
-                    <span>+ Unggah Karya Baru</span>
-                  </Link>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <span className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
-                  Karya yang Sedang Ditampilkan ({actor.assets.filter((a) => a.category === "PORTFOLIO_WORK").length})
-                </span>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {actor.assets
-                    .filter((a) => a.category === "PORTFOLIO_WORK")
-                    .slice(0, 6)
-                    .map((item) => {
-                      const itemAttrs = (item.attributes as any) || {};
-                      const img = itemAttrs.image_url || actor.owner?.avatarUrl || "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400";
+                {/* FORMAT USULAN YANG DIMINATI */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                    Format Usulan yang Diutamakan (Pilih yang sesuai)
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      "Lookbook Editorial",
+                      "Kampanye Komersial",
+                      "Fashion Film Sinematik",
+                      "Runway & Fashion Show",
+                      "Katalog E-Commerce",
+                      "Co-Branding Activation",
+                      "Content Creation Reels",
+                    ].map((tag) => {
+                      const isSelected = selectedStyles.includes(tag);
                       return (
-                        <div key={item.id} className="aspect-[4/5] bg-stone-100 border border-stone-200 overflow-hidden relative group">
-                          <img src={img} alt={item.name} className="w-full h-full object-cover" />
-                          <div className="absolute inset-x-0 bottom-0 p-2 bg-black/60 backdrop-blur-2xs text-white text-[10px] truncate font-medium">
-                            {item.name}
-                          </div>
-                        </div>
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => toggleStyleTag(tag)}
+                          className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border rounded-none flex items-center gap-1.5 ${
+                            isSelected
+                              ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
+                              : "bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100"
+                          }`}
+                        >
+                          {isSelected && <Check className="w-3 h-3 text-amber-400" />}
+                          <span>{tag}</span>
+                        </button>
                       );
                     })}
+                  </div>
+                </div>
+
+                {/* MODEL KOMPENSASI */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                    Model Kompensasi / Skema Usulan Kerjasama
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      "Paid Commercial Project",
+                      "Standard Production Rate",
+                      "Day-Rate Shift Sesi",
+                      "Revenue Share / Co-Op",
+                      "Creative Portfolio Collab",
+                    ].map((model) => {
+                      const isSelected = selectedCompModels.includes(model);
+                      return (
+                        <button
+                          key={model}
+                          type="button"
+                          onClick={() => toggleCompModel(model)}
+                          className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border rounded-none flex items-center gap-1.5 ${
+                            isSelected
+                              ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
+                              : "bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100"
+                          }`}
+                        >
+                          {isSelected && <Check className="w-3 h-3 text-amber-400" />}
+                          <span>{model}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* SUBMIT BUTTON */}
+                <div className="pt-4 border-t border-stone-200 flex items-center justify-between gap-4">
+                  <Link
+                    href="/dashboard"
+                    className="inline-flex items-center gap-2 text-xs font-bold text-[#1E1B2E] hover:underline"
+                  >
+                    <span>Buka Dashboard Brief &amp; Peluang Proyek</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+
+                  <button
+                    type="submit"
+                    disabled={isPending}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-none bg-[#1E1B2E] text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+                  >
+                    {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                    <span>{isPending ? "Menyimpan..." : "Simpan Preferensi Usulan"}</span>
+                  </button>
+                </div>
+              </form>
+
+              {/* CARD 2: RINGKASAN REPUTASI & ULASAN KLIEN */}
+              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
+                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                  <div className="flex items-center gap-2">
+                    <Star className="w-4 h-4 text-amber-500" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                      Ringkasan Reputasi &amp; Ulasan Klien Terverifikasi
+                    </h3>
+                  </div>
+                  <span className="text-[10px] text-stone-400 font-semibold">Transparansi Kinerja</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                  <div className="flex items-center gap-4 p-4 bg-stone-50 border border-stone-200">
+                    <div className="text-4xl font-black text-[#1E1B2E]">5.0</div>
+                    <div>
+                      <div className="flex items-center gap-0.5 text-amber-500">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                      <span className="text-[11px] text-stone-500 font-bold block mt-1">
+                        {actor.feedbacks && actor.feedbacks.length > 0
+                          ? `${actor.feedbacks.length} Ulasan Klien Terverifikasi`
+                          : "Penilaian Standar Profesional RAMU"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                    <div className="p-3 bg-stone-50 border border-stone-200 text-center">
+                      <span className="text-[10px] text-stone-400 font-bold uppercase">Kualitas Output</span>
+                      <div className="font-bold text-[#1E1B2E] text-sm mt-0.5">98%</div>
+                    </div>
+                    <div className="p-3 bg-stone-50 border border-stone-200 text-center">
+                      <span className="text-[10px] text-stone-400 font-bold uppercase">Ketepatan Waktu</span>
+                      <div className="font-bold text-emerald-700 text-sm mt-0.5">97%</div>
+                    </div>
+                    <div className="p-3 bg-stone-50 border border-stone-200 text-center">
+                      <span className="text-[10px] text-stone-400 font-bold uppercase">Komunikasi</span>
+                      <div className="font-bold text-purple-700 text-sm mt-0.5">99%</div>
+                    </div>
+                    <div className="p-3 bg-stone-50 border border-stone-200 text-center">
+                      <span className="text-[10px] text-stone-400 font-bold uppercase">Kepuasan Klien</span>
+                      <div className="font-bold text-[#1E1B2E] text-sm mt-0.5">99%</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* TESTIMONIAL FEEDBACK LIST */}
+                <div className="space-y-3 pt-2">
+                  <h4 className="text-xs font-bold text-stone-600 uppercase tracking-wider">
+                    Ulasan &amp; Testimoni Publik Terkini
+                  </h4>
+
+                  {actor.feedbacks && actor.feedbacks.length > 0 ? (
+                    <div className="space-y-3">
+                      {actor.feedbacks.map((fb, idx) => (
+                        <div key={fb.id} className="p-4 bg-stone-50 border border-stone-200 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="w-7 h-7 bg-[#1E1B2E] text-white text-[10px] font-bold flex items-center justify-center">
+                                #{idx + 1}
+                              </span>
+                              <span className="text-xs font-bold text-[#1E1B2E]">Klien Mitra Terverifikasi</span>
+                            </div>
+                            <div className="flex items-center gap-0.5 text-amber-500">
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <Star key={s} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                              ))}
+                            </div>
+                          </div>
+                          {fb.comments && (
+                            <p className="text-xs text-stone-600 italic leading-relaxed">
+                              &ldquo;{fb.comments}&rdquo;
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center text-xs text-stone-400 bg-stone-50 border border-dashed border-stone-200">
+                      Ulasan klien akan otomatis terkumpul setelah proyek brief diselesaikan di sistem RAMU.
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* FULL STUDIO UPLOAD MODAL (TEAR-SHEET & MULTI-PARTY CREDITS ENGINE) */}
+      {isStudioUploadOpen && (
+        <ShowcaseUploadModal
+          isOpen={isStudioUploadOpen}
+          onClose={() => setIsStudioUploadOpen(false)}
+          registeredActors={registeredActors}
+          onSuccess={() => {
+            setIsStudioUploadOpen(false);
+            setPortfolioMessage({
+              type: "success",
+              text: "Karya baru berhasil diterbitkan lengkap dengan kredit tim kolaborasi!",
+            });
+            router.refresh();
+          }}
+        />
+      )}
     </div>
   );
 
