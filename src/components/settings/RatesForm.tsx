@@ -27,6 +27,65 @@ export interface ServicePackage {
   features: string[];
 }
 
+export type UsageRightsScope = "ORGANIC_SOCIAL" | "PAID_ADS_DIGITAL" | "COMMERCIAL_OOH" | "FULL_BUYOUT";
+export type UsageRightsDuration = "6_MONTHS" | "1_YEAR" | "2_YEARS" | "PERPETUAL";
+export type PaymentMilestoneScheme = "50_50_WATERMARK" | "30_40_30" | "100_ESCROW";
+
+export function getUsageScopeLabel(scope?: UsageRightsScope): string {
+  switch (scope) {
+    case "ORGANIC_SOCIAL":
+      return "Media Sosial Organik & Website (Instagram, TikTok, Portofolio Brand)";
+    case "PAID_ADS_DIGITAL":
+      return "Iklan Berbayar Digital (Meta Ads, TikTok Ads, Marketplace Shopee/Tokopedia)";
+    case "COMMERCIAL_OOH":
+      return "Komersial Cetak & Luar Ruang (Billboard, Baliho, Packaging Toko, Event/Bazaar)";
+    case "FULL_BUYOUT":
+      return "Hak Pakai Eksklusif Tanpa Batas (Full Buyout All Media Selamanya)";
+    default:
+      return "Media Sosial Organik & Website (Instagram, TikTok, Portofolio Brand)";
+  }
+}
+
+export function getUsageDurationLabel(duration?: UsageRightsDuration): string {
+  switch (duration) {
+    case "6_MONTHS":
+      return "6 (Enam) Bulan — Kampanye Musiman";
+    case "1_YEAR":
+      return "1 (Satu) Tahun — Standar Industri";
+    case "2_YEARS":
+      return "2 (Dua) Tahun";
+    case "PERPETUAL":
+      return "Selamanya / Perpetual (Arsip Digital)";
+    default:
+      return "1 (Satu) Tahun — Standar Industri";
+  }
+}
+
+export function getMilestoneSchemeLabel(scheme?: PaymentMilestoneScheme, dp: number = 50): { title: string; desc: string } {
+  switch (scheme) {
+    case "50_50_WATERMARK":
+      return {
+        title: `DP ${dp}% + Pelunasan ${100 - dp}% (Watermark Protected)`,
+        desc: `Tahap I: DP ${dp}% mengunci jadwal kerja. Tahap II: Pelunasan ${100 - dp}% wajib dilunasi setelah preview bertanda-air (watermark) disetujui, sebelum master file resolusi penuh diserahkan.`,
+      };
+    case "30_40_30":
+      return {
+        title: "Termin 30% - 40% - 30% (Proyek Produksi Bertahap)",
+        desc: "Tahap I: 30% Booking/DP awal. Tahap II: 40% saat produksi selesai on-set. Tahap III: 30% saat penyerahan aset final.",
+      };
+    case "100_ESCROW":
+      return {
+        title: "Full Upfront Escrow (100% Ditampung Aman di RAMU)",
+        desc: "Dana 100% disetorkan di awal ke rekening penampung resmi RAMU dan dicairkan ke kreator bertahap setelah milestone tervalidasi.",
+      };
+    default:
+      return {
+        title: `DP ${dp}% + Pelunasan ${100 - dp}% (Watermark Protected)`,
+        desc: `Tahap I: DP ${dp}% mengunci jadwal kerja. Tahap II: Pelunasan ${100 - dp}% wajib dilunasi setelah preview bertanda-air (watermark) disetujui, sebelum master file resolusi penuh diserahkan.`,
+      };
+  }
+}
+
 export interface TermsAndConditionsConfig {
   dpPercentage: number;
   maxRevisions: number;
@@ -34,6 +93,10 @@ export interface TermsAndConditionsConfig {
   overtimeRate: string;
   gracePeriodMinutes: number;
   safeSetCompliant: boolean;
+  usageRightsScope?: UsageRightsScope;
+  usageRightsDuration?: UsageRightsDuration;
+  extraRevisionFee?: string;
+  paymentMilestoneScheme?: PaymentMilestoneScheme;
   roleSpecifics: {
     wardrobeRestrictions?: string;
     chaperoneAllowed?: boolean;
@@ -51,6 +114,10 @@ export interface TermsAndConditionsConfig {
     overtimePerBlockFee?: string;
     colorAccuracyCommitment?: boolean;
     rawFilePolicy?: string;
+    fittingPolicy?: string;
+    dryCleaningResponsibility?: string;
+    noAlteringPolicy?: string;
+    brandCreditRequired?: boolean;
   };
 }
 
@@ -61,7 +128,8 @@ export function getDefaultTerms(sector: string, type: string): TermsAndCondition
   const isMUA = !isStudio && !isModel && (s.includes("mua") || s.includes("makeup") || s.includes("hair"));
   const isStylist = !isStudio && !isModel && !isMUA && (s.includes("stylist") || s.includes("wardrobe"));
   const isVideographer = !isStudio && !isModel && !isMUA && !isStylist && (s.includes("video") || s.includes("film") || s.includes("cinema"));
-  const isPhotographer = !isStudio && !isModel && !isMUA && !isStylist && !isVideographer;
+  const isDesigner = !isStudio && !isModel && !isMUA && !isStylist && !isVideographer && (s.includes("design") || s.includes("fashion") || s.includes("busana"));
+  const isPhotographer = !isStudio && !isModel && !isMUA && !isStylist && !isVideographer && !isDesigner;
 
   return {
     dpPercentage: 50,
@@ -70,6 +138,10 @@ export function getDefaultTerms(sector: string, type: string): TermsAndCondition
     overtimeRate: isStudio ? "Rp 150.000 / 30 menit" : "Rp 250.000 / jam",
     gracePeriodMinutes: 30,
     safeSetCompliant: true,
+    usageRightsScope: "ORGANIC_SOCIAL",
+    usageRightsDuration: "1_YEAR",
+    extraRevisionFee: isStudio ? "Rp 150.000 / jam tambahan" : "Rp 100.000 / foto tambahan",
+    paymentMilestoneScheme: "50_50_WATERMARK",
     roleSpecifics: {
       ...(isModel && {
         wardrobeRestrictions: "Casual, Formal, Modest / Hijab (Sesuai Moodboard Awal)",
@@ -89,6 +161,12 @@ export function getDefaultTerms(sector: string, type: string): TermsAndCondition
         aspectRatiosIncluded: "1x Vertikal Reels 9:16 (30-45 detik)",
         musicLicenseIncluded: true,
         majorRevisionFeeNote: "Ganti musik latar setelah final cut dikenakan biaya re-editing",
+      }),
+      ...(isDesigner && {
+        fittingPolicy: "Fitting busana dilakukan H-1 atau di lokasi sebelum sesi dimulai",
+        dryCleaningResponsibility: "Biaya laundry / dry cleaning busana pasca-sesi ditanggung oleh klien/peminjam",
+        noAlteringPolicy: "Dilarang memotong, mengubah jahitan, atau merusak siluet busana tanpa izin tertulis desainer",
+        brandCreditRequired: true,
       }),
       ...(isStudio && {
         maxCrewCapacity: 10,
@@ -142,14 +220,19 @@ export function RatesForm({
     sectorLower.includes("wardrobe") ||
     sectorLower.includes("video") ||
     sectorLower.includes("film") ||
-    sectorLower.includes("cinema");
+    sectorLower.includes("cinema") ||
+    sectorLower.includes("designer") ||
+    sectorLower.includes("design") ||
+    sectorLower.includes("busana") ||
+    sectorLower.includes("fashion");
 
   const isStudio = !isIndividualSector && (actorType === "STUDIO" || sectorLower.includes("studio"));
   const isModel = !isStudio && (sectorLower.includes("model") || sectorLower.includes("talent"));
   const isMUA = !isStudio && !isModel && (sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair"));
   const isStylist = !isStudio && !isModel && !isMUA && (sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));
   const isVideographer = !isStudio && !isModel && !isMUA && !isStylist && (sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema"));
-  const isPhotographer = !isStudio && !isModel && !isMUA && !isStylist && !isVideographer;
+  const isDesigner = !isStudio && !isModel && !isMUA && !isStylist && !isVideographer && (sectorLower.includes("designer") || sectorLower.includes("design") || sectorLower.includes("busana") || sectorLower.includes("fashion"));
+  const isPhotographer = !isStudio && !isModel && !isMUA && !isStylist && !isVideographer && !isDesigner;
 
   const [isPending, setIsPending] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -701,7 +784,23 @@ export function RatesForm({
                 <option value={50}>50% (Standar Industri - Rekomendasi)</option>
                 <option value={70}>70% (Proyek Produksi Berat)</option>
               </select>
-              <p className="text-[10px] text-stone-400 mt-1">DP mengikat jadwal talenta.</p>
+              <p className="text-[10px] text-stone-400 mt-1">DP mengikat slot jadwal talenta.</p>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                Skema Termin Pembayaran
+              </label>
+              <select
+                value={terms.paymentMilestoneScheme || "50_50_WATERMARK"}
+                onChange={(e) => setTerms({ ...terms, paymentMilestoneScheme: e.target.value as any })}
+                className="w-full px-3 py-2.5 rounded-xl bg-white border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E]"
+              >
+                <option value="50_50_WATERMARK">DP 50% + Pelunasan (Watermark Safe)</option>
+                <option value="30_40_30">Termin 30% - 40% - 30% (Bertahap)</option>
+                <option value="100_ESCROW">100% Full Escrow RAMU</option>
+              </select>
+              <p className="text-[10px] text-stone-400 mt-1">Pelunasan sebelum file master diserahkan.</p>
             </div>
 
             <div>
@@ -734,6 +833,42 @@ export function RatesForm({
               />
               <p className="text-[10px] text-stone-400 mt-1">Toleransi keterlambatan 30 menit.</p>
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-5 rounded-2xl bg-amber-50/40 border border-amber-200/70">
+            <div>
+              <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                Ruang Lingkup Lisensi (Usage Scope)
+              </label>
+              <select
+                value={terms.usageRightsScope || "ORGANIC_SOCIAL"}
+                onChange={(e) => setTerms({ ...terms, usageRightsScope: e.target.value as any })}
+                className="w-full px-3 py-2.5 rounded-xl bg-white border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E]"
+              >
+                <option value="ORGANIC_SOCIAL">Medsos Organik &amp; Web Brand</option>
+                <option value="PAID_ADS_DIGITAL">Iklan Berbayar Digital (+Meta/TikTok Ads)</option>
+                <option value="COMMERCIAL_OOH">Komersial Cetak &amp; Luar Ruang (Billboard/OOH)</option>
+                <option value="FULL_BUYOUT">Full Buyout (All Media Selamanya)</option>
+              </select>
+              <p className="text-[10px] text-amber-800/80 mt-1">Batas media tayang yang diizinkan.</p>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                Durasi Lisensi Hak Pakai
+              </label>
+              <select
+                value={terms.usageRightsDuration || "1_YEAR"}
+                onChange={(e) => setTerms({ ...terms, usageRightsDuration: e.target.value as any })}
+                className="w-full px-3 py-2.5 rounded-xl bg-white border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E]"
+              >
+                <option value="6_MONTHS">6 Bulan (Musiman / Seasonal)</option>
+                <option value="1_YEAR">1 Tahun (Standar Industri)</option>
+                <option value="2_YEARS">2 Tahun</option>
+                <option value="PERPETUAL">Selamanya / Perpetual</option>
+              </select>
+              <p className="text-[10px] text-amber-800/80 mt-1">Masa berlaku hak tayang karya.</p>
+            </div>
 
             <div>
               <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
@@ -749,6 +884,20 @@ export function RatesForm({
                 <option value={3}>3x Revisi Minor</option>
               </select>
               <p className="text-[10px] text-stone-400 mt-1">Ganti konsep = addendum baru.</p>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                Biaya Revisi Tambahan (Over-Limit)
+              </label>
+              <input
+                type="text"
+                value={terms.extraRevisionFee || "Rp 100.000 / foto tambahan"}
+                onChange={(e) => setTerms({ ...terms, extraRevisionFee: e.target.value })}
+                placeholder="Rp 100.000 / foto tambahan"
+                className="w-full px-3 py-2.5 rounded-xl bg-white border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E]"
+              />
+              <p className="text-[10px] text-stone-400 mt-1">Charge per foto/putaran ekstra.</p>
             </div>
           </div>
 
@@ -1024,6 +1173,62 @@ export function RatesForm({
                   <label htmlFor="cycloramaShoeTapeRequired" className="text-xs font-bold text-stone-700">
                     Wajib Lakban Khusus Sol Sepatu
                   </label>
+                </div>
+              </div>
+            )}
+
+            {isDesigner && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                    Kebijakan Sesi Fitting Busana
+                  </label>
+                  <input
+                    type="text"
+                    value={terms.roleSpecifics.fittingPolicy || ""}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, fittingPolicy: e.target.value },
+                      })
+                    }
+                    placeholder="Fitting busana dilakukan H-1 atau di lokasi sebelum sesi dimulai"
+                    className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                    Tanggung Jawab Laundry &amp; Dry Cleaning
+                  </label>
+                  <input
+                    type="text"
+                    value={terms.roleSpecifics.dryCleaningResponsibility || ""}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, dryCleaningResponsibility: e.target.value },
+                      })
+                    }
+                    placeholder="Biaya laundry/dry cleaning busana pasca-sesi ditanggung oleh klien/peminjam"
+                    className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                    Larangan Modifikasi / Perombakan Busana (No Alteration)
+                  </label>
+                  <input
+                    type="text"
+                    value={terms.roleSpecifics.noAlteringPolicy || ""}
+                    onChange={(e) =>
+                      setTerms({
+                        ...terms,
+                        roleSpecifics: { ...terms.roleSpecifics, noAlteringPolicy: e.target.value },
+                      })
+                    }
+                    placeholder="Dilarang memotong, mengubah jahitan, atau merusak siluet busana tanpa izin tertulis desainer"
+                    className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                  />
                 </div>
               </div>
             )}

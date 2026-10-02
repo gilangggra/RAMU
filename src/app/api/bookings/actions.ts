@@ -100,6 +100,7 @@ export async function updateBookingStatus(bookingId: string, status: "ACCEPTED" 
     });
 
     revalidatePath("/dashboard/bookings");
+    revalidatePath(`/dashboard/bookings/${bookingId}`);
     revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {

@@ -42,7 +42,7 @@ async function main() {
       id: "00000000-0000-0000-0000-000000000001",
       ownerUserId: demoProfile.id,
       name: "Nala The Label",
-      actorType: ActorType.STUDIO,
+      actorType: ActorType.BRAND,
       sector: "Fashion Designer / Label",
       location: "Jakarta Selatan",
       description:

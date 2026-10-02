@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { acceptCollaboratorAction, declineCollaboratorAction } from "@/app/projects/actions";
-import { MapPin, AlertCircle, Check, ArrowUpRight } from "lucide-react";
+import { MapPin, AlertCircle, Check, ArrowUpRight, Handshake, ArrowRight } from "lucide-react";
 
 const CATEGORY_LABELS: Record<string, string> = {
   PORTFOLIO_WORK: "Karya / Portofolio",
@@ -53,6 +53,7 @@ export function InterestCard({
 }: InterestCardProps) {
   const [isPending, startTransition] = useTransition();
   const [localStatus, setLocalStatus] = useState(status);
+  const [createdCollabId, setCreatedCollabId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const proposedActorAssets = actor.assets.filter((a) =>
@@ -74,6 +75,9 @@ export function InterestCard({
       const res = await acceptCollaboratorAction(interestId, briefId);
       if (res.success) {
         setLocalStatus("ACCEPTED");
+        if (res.collaborationId) {
+          setCreatedCollabId(res.collaborationId);
+        }
       } else {
         setError(res.error || "Gagal menerima.");
       }
@@ -205,6 +209,22 @@ export function InterestCard({
           >
             Tolak
           </button>
+        </div>
+      )}
+
+      {createdCollabId && (
+        <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between gap-3 text-xs animate-fade-in">
+          <div className="flex items-center gap-2 text-emerald-800 font-bold">
+            <Handshake className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Seluruh peran terisi! Ruang kolaborasi telah aktif.</span>
+          </div>
+          <Link
+            href={`/collaborations/${createdCollabId}`}
+            className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-bold text-[11px] inline-flex items-center gap-1 shrink-0 shadow-xs transition-colors"
+          >
+            <span>Buka Workspace</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       )}
     </div>

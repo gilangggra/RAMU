@@ -32,12 +32,12 @@ export function CoCreditRequestsCard({ requests }: CoCreditRequestsCardProps) {
 
   const handleConfirm = (req: PendingCoCredit) => {
     startTransition(async () => {
-      const res = await confirmCoCredit(req.assetId);
+      const res = await confirmCoCredit(req.assetId, req.uploaderId);
       if (res.success) {
         setFeedback({
           id: req.assetId,
           type: "success",
-          msg: `Keterlibatan Anda pada "${req.assetName}" berhasil diverifikasi! Karya ini sekarang resmi tersinkronisasi di profil portofolio Anda.`
+          msg: `Keterlibatan pada "${req.assetName}" berhasil diverifikasi! Karya ini sekarang resmi tersinkronisasi di profil portofolio.`
         });
         setTimeout(() => {
           setActiveList(prev => prev.filter(r => r.assetId !== req.assetId));
@@ -49,10 +49,10 @@ export function CoCreditRequestsCard({ requests }: CoCreditRequestsCardProps) {
   };
 
   const handleReject = (req: PendingCoCredit) => {
-    if (!confirm(`Apakah Anda yakin ingin menolak penyematan co-credit pada "${req.assetName}"? Tag nama Anda akan dihapus.`)) return;
+    if (!confirm(`Apakah Anda yakin ingin menolak penyematan/klaim co-credit pada "${req.assetName}"? Tag kredit akan dibatalkan.`)) return;
 
     startTransition(async () => {
-      const res = await rejectCoCredit(req.assetId);
+      const res = await rejectCoCredit(req.assetId, req.uploaderId);
       if (res.success) {
         setFeedback({
           id: req.assetId,

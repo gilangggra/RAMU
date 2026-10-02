@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { ActorType } from "@prisma/client";
-import { ArrowUpRight, MapPin, Zap } from "lucide-react";
+import { ArrowUpRight, MapPin, Zap, Play, Camera, User, Sparkles, Building2 } from "lucide-react";
 
 export interface DirectoryActorItem {
   id: string;
@@ -53,59 +53,19 @@ interface ActorCardProps {
 export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
   const [imageError, setImageError] = useState(false);
 
-  let previewImage = null;
-
-  for (const asset of actor.assets) {
-    if (asset.category === "EQUIPMENT") continue;
-    if (actor.actorType !== "STUDIO" && asset.category === "STUDIO_SPACE") continue;
-
-    if (asset.attributes) {
-      const attrs = asset.attributes as any;
-      if (asset.category === "PORTFOLIO_WORK" && attrs.image_url) {
-        previewImage = attrs.image_url;
-        break;
-      }
-      if (attrs.comp_card && attrs.comp_card.images && attrs.comp_card.images.length > 0) {
-        previewImage = attrs.comp_card.images[0];
-        break;
-      }
-      if (attrs.brand_gallery && attrs.brand_gallery.length > 0) {
-        previewImage = attrs.brand_gallery[0];
-        break;
-      }
-      if (attrs.styling_gallery && attrs.styling_gallery.length > 0) {
-        previewImage = attrs.styling_gallery[0];
-        break;
-      }
-      if (actor.actorType === "STUDIO" && attrs.image_url) {
-        previewImage = attrs.image_url;
-        break;
-      }
-    }
-  }
-
-  if (!previewImage && actor.owner?.avatarUrl) {
-    previewImage = actor.owner.avatarUrl;
-  }
-
-  if (!previewImage) {
-    if (actor.actorType === "STUDIO") {
-      previewImage = "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd08?q=80&w=800&auto=format&fit=crop";
-    } else if (actor.sector.includes("Fashion")) {
-      previewImage = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&auto=format&fit=crop";
-    } else if (actor.sector.includes("Kopi") || actor.sector.includes("F&B")) {
-      previewImage = "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=800&auto=format&fit=crop";
-    } else {
-      previewImage = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop";
-    }
-  }
-
+  // Sector detection
   const sectorLower = actor.sector.toLowerCase();
-  const isIndividualSector =
-    sectorLower.includes("photographer") ||
-    sectorLower.includes("fotografi") ||
+  const isModelOrTalent =
     sectorLower.includes("model") ||
     sectorLower.includes("talent") ||
+    sectorLower.includes("muse") ||
+    sectorLower.includes("aktor") ||
+    sectorLower.includes("aktris");
+
+  const isIndividualSector =
+    isModelOrTalent ||
+    sectorLower.includes("photographer") ||
+    sectorLower.includes("fotografi") ||
     sectorLower.includes("mua") ||
     sectorLower.includes("makeup") ||
     sectorLower.includes("hair") ||
@@ -114,10 +74,176 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
     sectorLower.includes("video") ||
     sectorLower.includes("film") ||
     sectorLower.includes("cinema") ||
+    sectorLower.includes("dop") ||
     sectorLower.includes("designer") ||
     sectorLower.includes("desain");
 
   const isStudio = !isIndividualSector && (actor.actorType === "STUDIO" || sectorLower.includes("studio"));
+  const isBrand = actor.actorType === "BRAND" || (actor.actorType as string) === "MSME" || sectorLower.includes("brand");
+
+  // Determine smart preview image and label
+  let previewImage: string | null = null;
+  let previewType: "PORTFOLIO" | "VIDEO" | "COMP_CARD" | "AVATAR" | "STUDIO" | "STOCK" = "STOCK";
+  let previewBadgeLabel = "";
+
+  // 1. Explicit featured cover check (if marked by user)
+  for (const asset of actor.assets) {
+    if (asset.attributes && typeof asset.attributes === "object") {
+      const attrs = asset.attributes as any;
+      if (attrs.is_featured_cover || attrs.is_cover) {
+        const isVid = attrs.media_type === "VIDEO" || Boolean(attrs.video_url);
+        if (isVid && (attrs.thumbnail_url || attrs.poster_url || attrs.image_url)) {
+          previewImage = attrs.thumbnail_url || attrs.poster_url || attrs.image_url;
+          previewType = "VIDEO";
+          previewBadgeLabel = "Video Showreel";
+          break;
+        } else if (attrs.image_url) {
+          previewImage = attrs.image_url;
+          previewType = "PORTFOLIO";
+          previewBadgeLabel = "Karya Unggulan";
+          break;
+        }
+      }
+    }
+  }
+
+  // 2. Context-aware prioritization by profession
+  if (!previewImage) {
+    if (isModelOrTalent) {
+      // Models & Talents: Comp Card or Headshot is primary
+      for (const asset of actor.assets) {
+        if (asset.attributes) {
+          const attrs = asset.attributes as any;
+          if (attrs.comp_card?.images && attrs.comp_card.images.length > 0) {
+            previewImage = attrs.comp_card.images[0];
+            previewType = "COMP_CARD";
+            previewBadgeLabel = "Comp Card Model";
+            break;
+          }
+        }
+      }
+
+      // If no comp card, prioritize official profile headshot (avatar)
+      if (!previewImage && actor.owner?.avatarUrl) {
+        previewImage = actor.owner.avatarUrl;
+        previewType = "AVATAR";
+        previewBadgeLabel = "Headshot Resmi";
+      }
+
+      // Fallback to portfolio work
+      if (!previewImage) {
+        for (const asset of actor.assets) {
+          if (asset.attributes) {
+            const attrs = asset.attributes as any;
+            if (asset.category === "PORTFOLIO_WORK" && (attrs.image_url || attrs.thumbnail_url)) {
+              previewImage = attrs.image_url || attrs.thumbnail_url;
+              previewType = attrs.media_type === "VIDEO" ? "VIDEO" : "PORTFOLIO";
+              previewBadgeLabel = previewType === "VIDEO" ? "Video Reel" : "Portofolio";
+              break;
+            }
+          }
+        }
+      }
+    } else if (isStudio) {
+      // Studio: Studio space image is primary
+      for (const asset of actor.assets) {
+        if (asset.category === "STUDIO_SPACE" && asset.attributes) {
+          const attrs = asset.attributes as any;
+          if (attrs.image_url) {
+            previewImage = attrs.image_url;
+            previewType = "STUDIO";
+            previewBadgeLabel = "Studio Space";
+            break;
+          }
+        }
+      }
+
+      if (!previewImage) {
+        for (const asset of actor.assets) {
+          if (asset.attributes) {
+            const attrs = asset.attributes as any;
+            if (attrs.image_url) {
+              previewImage = attrs.image_url;
+              previewType = "STUDIO";
+              previewBadgeLabel = "Area Studio";
+              break;
+            }
+          }
+        }
+      }
+
+      if (!previewImage && actor.owner?.avatarUrl) {
+        previewImage = actor.owner.avatarUrl;
+        previewType = "AVATAR";
+        previewBadgeLabel = "Profil Studio";
+      }
+    } else {
+      // Creative professionals (Photographers, Videographers, Stylists, HMUA, Designers, Brands):
+      // Portfolio work / video showcase is primary
+      for (const asset of actor.assets) {
+        if (asset.category === "EQUIPMENT") continue;
+        if (asset.category === "STUDIO_SPACE") continue;
+
+        if (asset.attributes) {
+          const attrs = asset.attributes as any;
+          const isVid = attrs.media_type === "VIDEO" || Boolean(attrs.video_url);
+
+          if (asset.category === "PORTFOLIO_WORK") {
+            if (isVid && (attrs.thumbnail_url || attrs.poster_url || attrs.image_url)) {
+              previewImage = attrs.thumbnail_url || attrs.poster_url || attrs.image_url;
+              previewType = "VIDEO";
+              previewBadgeLabel = "Video Showreel";
+              break;
+            } else if (attrs.image_url) {
+              previewImage = attrs.image_url;
+              previewType = "PORTFOLIO";
+              previewBadgeLabel = "Karya Portofolio";
+              break;
+            }
+          }
+
+          if (attrs.styling_gallery && attrs.styling_gallery.length > 0) {
+            previewImage = attrs.styling_gallery[0];
+            previewType = "PORTFOLIO";
+            previewBadgeLabel = "Lookbook Koleksi";
+            break;
+          }
+
+          if (attrs.brand_gallery && attrs.brand_gallery.length > 0) {
+            previewImage = attrs.brand_gallery[0];
+            previewType = "PORTFOLIO";
+            previewBadgeLabel = "Katalog Brand";
+            break;
+          }
+        }
+      }
+
+      // If no portfolio work uploaded yet, fallback to real profile avatar
+      if (!previewImage && actor.owner?.avatarUrl) {
+        previewImage = actor.owner.avatarUrl;
+        previewType = "AVATAR";
+        previewBadgeLabel = "Foto Profil Resmi";
+      }
+    }
+  }
+
+  // 3. Fallback: Only if NEITHER portfolio NOR profile avatar exists
+  if (!previewImage) {
+    previewType = "STOCK";
+    if (isStudio) {
+      previewImage = "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd08?q=80&w=800&auto=format&fit=crop";
+      previewBadgeLabel = "Studio";
+    } else if (actor.sector.includes("Fashion") || isModelOrTalent) {
+      previewImage = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&auto=format&fit=crop";
+      previewBadgeLabel = "Editorial";
+    } else if (actor.sector.includes("Kopi") || actor.sector.includes("F&B")) {
+      previewImage = "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=800&auto=format&fit=crop";
+      previewBadgeLabel = "Komersial";
+    } else {
+      previewImage = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop";
+      previewBadgeLabel = "Kreator";
+    }
+  }
 
   let startingRate = "Mulai Rp 1,5 Jt / sesi";
   if (isStudio) {
@@ -173,7 +299,6 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
       href={`/directory/${actor.id}`}
       className="group flex flex-col gap-3 cursor-pointer bg-white p-3 border border-stone-200/80 hover:border-[#1E1B2E] transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.06)]"
     >
-
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-stone-100">
         {!imageError && previewImage ? (
           <img
@@ -192,9 +317,10 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
+        {/* TOP BADGES */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
           <div className="px-2.5 py-1 bg-white/95 backdrop-blur-md text-[9px] font-bold uppercase tracking-wider text-[#1E1B2E] shadow-xs">
-            {isStudio ? "Studio Foto" : actor.actorType === "BRAND" || (actor.actorType as string) === "MSME" ? "Brand" : "Kreator"}
+            {isStudio ? "Studio Foto" : isBrand ? "Brand" : "Kreator"}
           </div>
 
           {hasScore ? (
@@ -213,6 +339,37 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
           )}
         </div>
 
+        {/* BOTTOM LEFT: CONTEXTUAL PREVIEW BADGE */}
+        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-black/65 backdrop-blur-md text-white text-[9.5px] font-semibold tracking-wider border border-white/15 transition-opacity duration-200 group-hover:opacity-0 pointer-events-none">
+          {previewType === "VIDEO" ? (
+            <>
+              <Play className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+              <span>{previewBadgeLabel || "Video Showreel"}</span>
+            </>
+          ) : previewType === "COMP_CARD" ? (
+            <>
+              <Sparkles className="w-2.5 h-2.5 text-amber-300" />
+              <span>{previewBadgeLabel || "Comp Card"}</span>
+            </>
+          ) : previewType === "AVATAR" ? (
+            <>
+              <User className="w-2.5 h-2.5 text-sky-300" />
+              <span>{previewBadgeLabel || "Foto Profil Resmi"}</span>
+            </>
+          ) : previewType === "STUDIO" ? (
+            <>
+              <Building2 className="w-2.5 h-2.5 text-stone-300" />
+              <span>{previewBadgeLabel || "Area Studio"}</span>
+            </>
+          ) : (
+            <>
+              <Camera className="w-2.5 h-2.5 text-stone-300" />
+              <span>{previewBadgeLabel || "Karya Portofolio"}</span>
+            </>
+          )}
+        </div>
+
+        {/* HOVER CALL TO ACTION */}
         <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
           <div className="w-full py-2 bg-white text-[#1E1B2E] text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-md">
             <span>Lihat Portofolio & Sewa</span>
@@ -221,39 +378,26 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-1.5 pt-1">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-6 h-6 rounded-none overflow-hidden bg-stone-100 border border-stone-200/80 shrink-0">
-              {actor.owner?.avatarUrl ? (
-                <img
-                  src={actor.owner.avatarUrl}
-                  alt={actor.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="w-full h-full flex items-center justify-center font-bold text-[9px] text-[#27213D] bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF]">
-                  {actor.name.charAt(0).toUpperCase()}
-                </span>
-              )}
-            </div>
-            <h2 className="text-sm font-semibold text-[#1E1B2E] tracking-tight group-hover:text-stone-600 transition-colors truncate">
+      {/* CREATOR IDENTITY & META */}
+      <div className="flex flex-col gap-2 pt-1">
+        <div>
+          <div className="flex items-start justify-between gap-2">
+            <h2 className="text-sm font-bold text-[#1E1B2E] tracking-tight group-hover:text-stone-700 transition-colors truncate">
               {actor.name}
             </h2>
+            {actor.location && (
+              <span className="text-[10px] font-medium text-stone-400 shrink-0 flex items-center gap-0.5 mt-0.5">
+                <MapPin className="w-2.5 h-2.5" />
+                {actor.location.split(",")[0]}
+              </span>
+            )}
           </div>
-          {actor.location && (
-            <span className="text-[10px] font-medium text-stone-400 shrink-0 flex items-center gap-0.5">
-              <MapPin className="w-2.5 h-2.5" />
-              {actor.location.split(",")[0]}
-            </span>
-          )}
+          <p className="text-[11px] font-medium text-stone-500 truncate mt-0.5">
+            {actor.sector}
+          </p>
         </div>
 
-        <div className="text-[11px] font-light text-stone-500 truncate pl-8">
-          {actor.sector}
-        </div>
-
-        <div className="pt-2 mt-1 border-t border-stone-100 space-y-1.5">
+        <div className="pt-2 mt-0.5 border-t border-stone-100 space-y-1.5">
           <div className="flex items-center justify-between text-[11px]">
             <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Estimasi Tarif</span>
             <span className="font-semibold text-[#1E1B2E] tracking-tight">{startingRate}</span>
@@ -262,7 +406,6 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-stone-300">Relevansi Untukmu</span>
               <div className="flex items-center gap-1.5">
-
                 <div className="w-16 h-1 bg-stone-100 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${

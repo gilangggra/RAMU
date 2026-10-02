@@ -96,7 +96,7 @@ export default async function BookingManagementPage() {
             ) : (
               <div className="space-y-3">
                 {incomingBookings.map((booking) => (
-                  <div key={booking.id} className="p-5 bg-white border border-stone-200 rounded-[24px] shadow-xs hover:border-amber-200 transition-colors">
+                  <div key={booking.id} className="p-5 bg-white border border-stone-200 rounded-[24px] shadow-xs hover:border-amber-200 hover:shadow-sm transition-all">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center overflow-hidden">
@@ -114,7 +114,16 @@ export default async function BookingManagementPage() {
                           <div className="text-xs text-stone-500">{booking.requester.sector}</div>
                         </div>
                       </div>
-                      <StatusBadge status={booking.status} />
+                      <div className="flex items-center gap-2">
+                        <StatusBadge status={booking.status} />
+                        <Link
+                          href={`/dashboard/bookings/${booking.id}`}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-50 hover:bg-[#1E1B2E] hover:text-white border border-stone-200 text-xs font-bold text-stone-600 transition-all"
+                        >
+                          <span>Detail</span>
+                          <ChevronRight className="w-3 h-3" />
+                        </Link>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 mb-4 bg-stone-50 p-4 rounded-xl border border-stone-100">
@@ -189,7 +198,7 @@ export default async function BookingManagementPage() {
             ) : (
               <div className="space-y-3">
                 {outgoingBookings.map((booking) => (
-                  <div key={booking.id} className="p-5 bg-white border border-stone-200 rounded-[24px] shadow-xs">
+                  <div key={booking.id} className="p-5 bg-white border border-stone-200 rounded-[24px] shadow-xs hover:shadow-sm transition-all">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center overflow-hidden">
@@ -208,7 +217,16 @@ export default async function BookingManagementPage() {
                           <div className="text-[11px] text-stone-400">{booking.target.sector}</div>
                         </div>
                       </div>
-                      <StatusBadge status={booking.status} />
+                      <div className="flex items-center gap-2">
+                        <StatusBadge status={booking.status} />
+                        <Link
+                          href={`/dashboard/bookings/${booking.id}`}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-50 hover:bg-[#1E1B2E] hover:text-white border border-stone-200 text-xs font-bold text-stone-600 transition-all"
+                        >
+                          <span>Detail</span>
+                          <ChevronRight className="w-3 h-3" />
+                        </Link>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 mb-4 bg-stone-50 p-4 rounded-xl border border-stone-100">

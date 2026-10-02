@@ -14,9 +14,19 @@ export async function createShowcaseAsset(formData: FormData) {
 
     if (!user) throw new Error("Unauthorized");
 
-    const actor = await prisma.actor.findFirst({
-      where: { ownerUserId: user.id },
-    });
+    const targetActorId = formData.get("actorId") as string | null;
+    let actor = null;
+    if (targetActorId) {
+      actor = await prisma.actor.findFirst({
+        where: { id: targetActorId, ownerUserId: user.id },
+      });
+    }
+    if (!actor) {
+      actor = await prisma.actor.findFirst({
+        where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
+        orderBy: { createdAt: "asc" },
+      });
+    }
 
     if (!actor) throw new Error("Actor profile not found");
 
@@ -33,10 +43,11 @@ export async function createShowcaseAsset(formData: FormData) {
     const aspectRatio = (formData.get("aspectRatio") as string) || "16:9";
     const videoFile = formData.get("videoFile") as File | null;
 
-    if (videoFile && videoFile.size > 0) {
+    if (videoFile && videoFile.size > 0 && typeof videoFile.arrayBuffer === "function") {
       const videoBytes = await videoFile.arrayBuffer();
       const videoBuffer = Buffer.from(videoBytes);
-      const cleanVideoName = `${Date.now()}-${videoFile.name.replace(/\s+/g, '-')}`;
+      const safeVideoName = videoFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const cleanVideoName = `${Date.now()}-${safeVideoName}`;
       const videoUploadDir = path.join(process.cwd(), 'public', 'uploads', 'portfolios', 'videos');
 
       try {
@@ -172,10 +183,111 @@ export async function deleteShowcaseAsset(assetId: string) {
   }
 }
 
-export async function confirmCoCredit(assetId: string) {
+export async function claimCoCreditAction(params: {
+  assetId: string;
+  role: string;
+  details?: string;
+}) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) throw new Error("Silakan masuk (login) terlebih dahulu untuk mengajukan klaim.");
+
+    const actor = await prisma.actor.findFirst({
+      where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
+    });
+
+    if (!actor) throw new Error("Profil kreator tidak ditemukan.");
+
+    const asset = await prisma.asset.findUnique({
+      where: { id: params.assetId },
+      include: { actor: true },
+    });
+
+    if (!asset) throw new Error("Karya tidak ditemukan.");
+
+    if (asset.actorId === actor.id) {
+      throw new Error("Anda adalah pemilik dan pengunggah portofolio ini.");
+    }
+
+    const attrs = (asset.attributes as any) || {};
+    const tearSheet = attrs.tear_sheet || {
+      verified: false,
+      verificationRate: "50%",
+      spkNumber: `RAMU-TS-${Date.now().toString().slice(-6)}`,
+      credits: [],
+    };
+
+    const credits = Array.isArray(tearSheet.credits) ? [...tearSheet.credits] : [];
+
+    const existingIndex = credits.findIndex((c: any) => c.actorId === actor.id);
+    if (existingIndex >= 0) {
+      const existing = credits[existingIndex];
+      if (existing.verified || existing.status === "VERIFIED") {
+        throw new Error("Anda sudah terdaftar sebagai kru terverifikasi pada karya ini.");
+      }
+      if (existing.status === "PENDING") {
+        throw new Error("Pengajuan klaim kredit Anda sedang menunggu persetujuan pemilik karya.");
+      }
+      credits[existingIndex] = {
+        ...existing,
+        role: params.role,
+        details: params.details || `Mengajukan klaim kontribusi peran sebagai ${params.role}`,
+        status: "PENDING",
+        verified: false,
+        claimedByActorId: actor.id,
+        claimedAt: new Date().toISOString(),
+      };
+    } else {
+      credits.push({
+        actorId: actor.id,
+        name: actor.name,
+        role: params.role,
+        details: params.details || `Mengajukan klaim kontribusi peran sebagai ${params.role}`,
+        handle: `@${actor.name.toLowerCase().replace(/[\s&.]+/g, "_")}`,
+        verified: false,
+        status: "PENDING",
+        isUploader: false,
+        claimedByActorId: actor.id,
+        claimedAt: new Date().toISOString(),
+      });
+    }
+
+    await prisma.asset.update({
+      where: { id: params.assetId },
+      data: {
+        attributes: {
+          ...attrs,
+          tear_sheet: {
+            ...tearSheet,
+            credits,
+          },
+        },
+      },
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/showcase");
+    revalidatePath(`/directory/${actor.id}`);
+    revalidatePath(`/directory/${asset.actorId}`);
+    revalidatePath("/dashboard/showcase");
+
+    return { success: true, assetName: asset.name };
+  } catch (error: any) {
+    console.error("Error claiming co-credit:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function confirmCoCredit(assetId: string, targetActorId?: string) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) throw new Error("Unauthorized");
 
@@ -203,27 +315,38 @@ export async function confirmCoCredit(assetId: string) {
 
     const existingCredits = Array.isArray(tearSheet.credits) ? [...tearSheet.credits] : [];
 
+    const isOwner = asset.actorId === actor.id;
+    const effectiveTargetId =
+      targetActorId ||
+      (isOwner
+        ? existingCredits.find((c: any) => c.status === "PENDING")?.actorId
+        : actor.id);
+
     let updated = false;
     const newCredits = existingCredits.map((c: any) => {
-      if (c.actorId === actor.id) {
+      if (c.actorId === effectiveTargetId) {
         updated = true;
         return {
           ...c,
           verified: true,
           status: "VERIFIED",
           verificationTimestamp: new Date().toISOString(),
-          verifiedBy: `Dikonfirmasi langsung oleh @${actor.name.toLowerCase().replace(/[\s&.]+/g, "_")}`,
-          verificationMethod: "PEER_CONFIRMED",
+          verifiedBy: isOwner
+            ? `Disetujui langsung oleh pemilik karya (@${actor.name.toLowerCase().replace(/[\s&.]+/g, "_")})`
+            : `Dikonfirmasi langsung oleh @${actor.name.toLowerCase().replace(/[\s&.]+/g, "_")}`,
+          verificationMethod: isOwner ? "OWNER_APPROVED" : "PEER_CONFIRMED",
         };
       }
       return c;
     });
 
-    if (!updated) {
+    if (!updated && effectiveTargetId === actor.id) {
       newCredits.push({
         actorId: actor.id,
         name: actor.name,
-        role: actor.sector.toLowerCase().includes("foto") ? "Director of Photography" : "Lead Creative Co-Collaborator",
+        role: actor.sector.toLowerCase().includes("foto")
+          ? "Director of Photography"
+          : "Lead Creative Co-Collaborator",
         handle: `@${actor.name.toLowerCase().replace(/[\s&.]+/g, "_")}`,
         verified: true,
         status: "VERIFIED",
@@ -234,6 +357,10 @@ export async function confirmCoCredit(assetId: string) {
       });
     }
 
+    const totalCr = newCredits.length;
+    const verifiedCr = newCredits.filter((c: any) => c.verified).length;
+    const newRate = totalCr > 0 ? `${Math.round((verifiedCr / totalCr) * 100)}%` : "100%";
+
     await prisma.asset.update({
       where: { id: assetId },
       data: {
@@ -241,6 +368,7 @@ export async function confirmCoCredit(assetId: string) {
           ...attrs,
           tear_sheet: {
             ...tearSheet,
+            verificationRate: newRate,
             credits: newCredits,
           },
         },
@@ -260,10 +388,12 @@ export async function confirmCoCredit(assetId: string) {
   }
 }
 
-export async function rejectCoCredit(assetId: string, reason?: string) {
+export async function rejectCoCredit(assetId: string, targetActorId?: string, reason?: string) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) throw new Error("Unauthorized");
 
@@ -283,14 +413,23 @@ export async function rejectCoCredit(assetId: string, reason?: string) {
     const tearSheet = attrs.tear_sheet || { credits: [] };
     const existingCredits = Array.isArray(tearSheet.credits) ? [...tearSheet.credits] : [];
 
+    const isOwner = asset.actorId === actor.id;
+    const effectiveTargetId =
+      targetActorId ||
+      (isOwner
+        ? existingCredits.find((c: any) => c.status === "PENDING")?.actorId
+        : actor.id);
+
     const newCredits = existingCredits.map((c: any) => {
-      if (c.actorId === actor.id) {
+      if (c.actorId === effectiveTargetId) {
         return {
           ...c,
           verified: false,
           status: "REJECTED",
           rejectedAt: new Date().toISOString(),
-          rejectionReason: reason || "Ditolak oleh pemilik nama",
+          rejectionReason:
+            reason ||
+            (isOwner ? "Ditolak oleh pemilik karya" : "Ditolak oleh pemilik nama"),
         };
       }
       return c;

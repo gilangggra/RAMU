@@ -304,24 +304,38 @@ export async function updateActorSpecs(formData: FormData) {
     }
 
     const sectorLower = actor.sector.toLowerCase();
-    const isStudio = actor.actorType === "STUDIO" || sectorLower.includes("studio");
     const isModel = sectorLower.includes("model") || sectorLower.includes("talent");
     const isPhotographer = sectorLower.includes("photographer") || sectorLower.includes("fotografi");
     const isVideographer = sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema");
     const isMUA = sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair");
     const isStylist = sectorLower.includes("stylist") || sectorLower.includes("wardrobe");
     const isDesigner = sectorLower.includes("designer") || sectorLower.includes("desain");
+    const isIndividualSector = isModel || isPhotographer || isVideographer || isMUA || isStylist || isDesigner;
+
+    const hasStudioSpaceAsset = actor.assets.some(
+      (a) => a.category === "STUDIO_SPACE" || a.subtype?.toLowerCase().includes("studio")
+    );
+    const isStudio = !isIndividualSector && (actor.actorType === "STUDIO" || sectorLower.includes("studio") || hasStudioSpaceAsset);
+    const isBrand =
+      actor.actorType === "BRAND" ||
+      (actor.actorType as string) === "MSME" ||
+      actor.actorType === "COLLECTIVE" ||
+      sectorLower.includes("brand") ||
+      sectorLower.includes("label") ||
+      sectorLower.includes("agency");
 
     const existingAsset = actor.assets.find(
       (a) =>
         (isModel && (a.subtype.toLowerCase().includes("model") || (a.attributes && typeof a.attributes === "object" && "comp_card" in (a.attributes as any)))) ||
         (isStudio && (a.subtype.toLowerCase().includes("studio") || (a.attributes && typeof a.attributes === "object" && "cyclorama_type" in (a.attributes as any)))) ||
         (isPhotographer && a.attributes && typeof a.attributes === "object" && "primary_camera" in (a.attributes as any)) ||
-        (isVideographer && a.attributes && typeof a.attributes === "object" && "primary_cinema_camera" in (a.attributes as any)) ||
-        (isMUA && a.attributes && typeof a.attributes === "object" && "makeup_styles" in (a.attributes as any)) ||
-        (isStylist && a.attributes && typeof a.attributes === "object" && "styling_specialties" in (a.attributes as any)) ||
-        (isDesigner && a.attributes && typeof a.attributes === "object" && "design_disciplines" in (a.attributes as any))
+        (isVideographer && a.attributes && typeof a.attributes === "object" && ("primary_cinema_camera" in (a.attributes as any) || "stabilizer_gimbal" in (a.attributes as any))) ||
+        (isMUA && a.attributes && typeof a.attributes === "object" && ("makeup_styles" in (a.attributes as any) || "primary_kit_brands" in (a.attributes as any))) ||
+        (isStylist && a.attributes && typeof a.attributes === "object" && ("styling_specialties" in (a.attributes as any) || "onset_equipment" in (a.attributes as any))) ||
+        (isDesigner && a.attributes && typeof a.attributes === "object" && ("design_disciplines" in (a.attributes as any) || "primary_software" in (a.attributes as any))) ||
+        (isBrand && a.attributes && typeof a.attributes === "object" && ("sample_sizes_ready" in (a.attributes as any) || "fabric_materials" in (a.attributes as any) || "design_dna" in (a.attributes as any) || "collab_types" in (a.attributes as any)))
     );
+
 
     const existingAttrs = (existingAsset?.attributes && typeof existingAsset.attributes === "object")
       ? (existingAsset.attributes as Record<string, unknown>)
@@ -400,7 +414,7 @@ export async function updateActorSpecs(formData: FormData) {
       if (compCardList.length > 0) {
         newAttributes.comp_card = compCardList;
       }
-    } else if (isPhotographer || isVideographer) {
+    } else if (isPhotographer) {
       const primary_camera = formData.get("primary_camera")?.toString().trim();
       const secondary_camera = formData.get("secondary_camera")?.toString().trim();
       const rawLenses = formData.get("lenses")?.toString().trim();
@@ -416,6 +430,129 @@ export async function updateActorSpecs(formData: FormData) {
         newAttributes.lighting_gear = rawLighting.split(",").map((s) => s.trim()).filter(Boolean);
       }
       newAttributes.drone_aerial = drone_aerial;
+    } else if (isVideographer) {
+      const primary_cinema_camera =
+        formData.get("primary_cinema_camera")?.toString().trim() ||
+        formData.get("primary_camera")?.toString().trim();
+      const rawLenses = formData.get("cine_lenses")?.toString().trim() || formData.get("lenses")?.toString().trim();
+      const secondary_camera = formData.get("secondary_camera")?.toString().trim();
+      const stabilizer_gimbal = formData.get("stabilizer_gimbal")?.toString().trim() || formData.get("stabilization_rigs")?.toString().trim();
+      const audio_rig = formData.get("audio_rig")?.toString().trim() || formData.get("audio_gear")?.toString().trim();
+      const max_resolution = formData.get("max_resolution")?.toString().trim() || "4K 60fps / 10-Bit 4:2:2";
+      const drone_aerial = formData.get("drone_aerial") === "true";
+
+      if (primary_cinema_camera) {
+        newAttributes.primary_cinema_camera = primary_cinema_camera;
+        newAttributes.primary_camera = primary_cinema_camera;
+      }
+      if (secondary_camera) {
+        newAttributes.secondary_camera = secondary_camera;
+      }
+      if (rawLenses) {
+        const parsedLenses = rawLenses.split(",").map((s) => s.trim()).filter(Boolean);
+        newAttributes.lenses = parsedLenses;
+        newAttributes.cine_lenses = parsedLenses;
+      }
+      if (stabilizer_gimbal) {
+        newAttributes.stabilizer_gimbal = stabilizer_gimbal;
+        newAttributes.stabilization_rigs = stabilizer_gimbal.split(",").map((s) => s.trim()).filter(Boolean);
+      }
+      if (audio_rig) {
+        newAttributes.audio_rig = audio_rig;
+        newAttributes.audio_gear = audio_rig.split(",").map((s) => s.trim()).filter(Boolean);
+      }
+      if (max_resolution) newAttributes.max_resolution = max_resolution;
+      newAttributes.drone_aerial = drone_aerial;
+    } else if (isMUA) {
+      const rawKitBrands = formData.get("primary_kit_brands")?.toString().trim();
+      const rawMakeupStyles = formData.get("makeup_styles")?.toString().trim();
+      const rawHairSpecialties = formData.get("hair_specialties")?.toString().trim();
+      const touchup_standby_hours = formData.get("touchup_standby_hours") ? Number(formData.get("touchup_standby_hours")) : undefined;
+      const experience_years = formData.get("experience_years") ? Number(formData.get("experience_years")) : undefined;
+      const sanitation = formData.get("sanitation_standards")?.toString().trim();
+
+      if (rawKitBrands) {
+        newAttributes.primary_kit_brands = rawKitBrands.split(",").map((s) => s.trim()).filter(Boolean);
+      }
+      if (rawMakeupStyles) {
+        newAttributes.makeup_styles = rawMakeupStyles.split(",").map((s) => s.trim()).filter(Boolean);
+      }
+      if (rawHairSpecialties) {
+        newAttributes.hair_specialties = rawHairSpecialties.split(",").map((s) => s.trim()).filter(Boolean);
+      }
+      if (touchup_standby_hours) newAttributes.touchup_standby_hours = touchup_standby_hours;
+      if (experience_years) newAttributes.experience_years = experience_years;
+      if (sanitation) {
+        newAttributes.sanitation_standards = sanitation.split(",").map((s) => s.trim()).filter(Boolean);
+      }
+    } else if (isStylist) {
+      const rawSpecialties =
+        formData.get("styling_specialties")?.toString().trim() ||
+        formData.get("specialties")?.toString().trim();
+      const rawOnsetEquipment = formData.get("onset_equipment")?.toString().trim();
+      const wardrobe_archive_count = formData.get("wardrobe_archive_count") ? Number(formData.get("wardrobe_archive_count")) : undefined;
+      const rawShowroom = formData.get("showroom_partners")?.toString().trim();
+      const aesthetic_dna = formData.get("aesthetic_dna")?.toString().trim();
+
+      if (rawSpecialties) {
+        newAttributes.styling_specialties = rawSpecialties.split(",").map((s) => s.trim()).filter(Boolean);
+      }
+      if (rawOnsetEquipment) {
+        newAttributes.onset_equipment = rawOnsetEquipment.split(",").map((s) => s.trim()).filter(Boolean);
+      }
+      if (wardrobe_archive_count) newAttributes.wardrobe_archive_count = wardrobe_archive_count;
+      if (rawShowroom) {
+        newAttributes.showroom_partners = rawShowroom.split(",").map((s) => s.trim()).filter(Boolean);
+      }
+      if (aesthetic_dna) newAttributes.aesthetic_dna = aesthetic_dna;
+    } else if (isDesigner) {
+      const rawDisciplines = formData.get("design_disciplines")?.toString().trim();
+      const style_dna = formData.get("style_dna")?.toString().trim();
+      const rawSoftware = formData.get("primary_software")?.toString().trim();
+      const rawDeliverables = formData.get("deliverables")?.toString().trim();
+
+      if (rawDisciplines) {
+        newAttributes.design_disciplines = rawDisciplines.split(",").map((s) => s.trim()).filter(Boolean);
+      }
+      if (style_dna) newAttributes.style_dna = style_dna;
+      if (rawSoftware) {
+        newAttributes.primary_software = rawSoftware.split(",").map((s) => s.trim()).filter(Boolean);
+      }
+      if (rawDeliverables) {
+        newAttributes.deliverables = rawDeliverables.split(",").map((s) => s.trim()).filter(Boolean);
+      }
+    } else if (isBrand) {
+      // Brand Specs (dari tab Spesifikasi)
+      const design_dna = formData.get("design_dna")?.toString().trim();
+      const sample_sizes_ready = formData.get("sample_sizes_ready")?.toString().trim();
+      const rawFabric = formData.get("fabric_materials")?.toString().trim();
+      const capacity_monthly = formData.get("capacity_monthly")?.toString().trim();
+
+      if (design_dna) newAttributes.design_dna = design_dna;
+      if (sample_sizes_ready) newAttributes.sample_sizes_ready = sample_sizes_ready;
+      if (rawFabric) {
+        newAttributes.fabric_materials = rawFabric.split(",").map((s) => s.trim()).filter(Boolean);
+      }
+      if (capacity_monthly) newAttributes.capacity_monthly = capacity_monthly;
+
+      // Brand Collaboration Preferences (dari tab Kerjasama)
+      const rawCollabTypes = formData.get("collab_types")?.toString().trim();
+      const budget_range = formData.get("budget_range")?.toString().trim();
+      const collab_timeline = formData.get("collab_timeline")?.toString().trim();
+      const creator_requirements = formData.get("creator_requirements")?.toString().trim();
+      const collab_notes = formData.get("collab_notes")?.toString().trim();
+
+      if (rawCollabTypes) {
+        try {
+          newAttributes.collab_types = JSON.parse(rawCollabTypes);
+        } catch {
+          newAttributes.collab_types = rawCollabTypes.split(",").map((s) => s.trim()).filter(Boolean);
+        }
+      }
+      if (budget_range) newAttributes.budget_range = budget_range;
+      if (collab_timeline) newAttributes.collab_timeline = collab_timeline;
+      if (creator_requirements) newAttributes.creator_requirements = creator_requirements;
+      if (collab_notes !== undefined) newAttributes.collab_notes = collab_notes;
     } else if (isStudio) {
       const area_sqm = formData.get("area_sqm") ? Number(formData.get("area_sqm")) : undefined;
       const ceiling_height_m = formData.get("ceiling_height_m") ? Number(formData.get("ceiling_height_m")) : undefined;
@@ -447,6 +584,8 @@ export async function updateActorSpecs(formData: FormData) {
     } else {
       const category = isStudio
         ? "STUDIO_SPACE"
+        : isBrand
+        ? "WARDROBE_PROP"
         : isPhotographer || isVideographer
         ? "EQUIPMENT"
         : "SKILL_TALENT";
@@ -455,12 +594,26 @@ export async function updateActorSpecs(formData: FormData) {
         ? "Model Lookbook & Commercial"
         : isPhotographer
         ? "Fotografi & Kamera Komersial"
+        : isVideographer
+        ? "Videografi & Cinema Gear"
         : isStudio
         ? "Studio Space & Facilities"
+        : isMUA
+        ? "Tata Rias & Hair Styling"
+        : isStylist
+        ? "Styling & Wardrobe"
+        : isDesigner
+        ? "Desain Busana & Atelier"
+        : isBrand
+        ? "Koleksi & Spesifikasi Brand"
         : "Spesifikasi Profesi";
 
       const assetName = isModel
         ? `Karakteristik Fisik & Comp Card ${actor.name}`
+        : isStudio
+        ? `Fasilitas & Ruang Studio ${actor.name}`
+        : isBrand
+        ? `Karakteristik Koleksi & Produksi ${actor.name}`
         : `Spesifikasi Teknis & Alat ${actor.name}`;
 
       await prisma.asset.create({

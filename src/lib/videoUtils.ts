@@ -73,7 +73,13 @@ export function captureVideoFrame(videoFile: File): Promise<string> {
     const fileUrl = URL.createObjectURL(videoFile);
     video.src = fileUrl;
 
+    const timer = setTimeout(() => {
+      cleanup();
+      resolve("");
+    }, 4000);
+
     const cleanup = () => {
+      clearTimeout(timer);
       URL.revokeObjectURL(fileUrl);
     };
 

@@ -97,7 +97,7 @@ export default async function CollaborationsPage({ searchParams }: Collaboration
               </p>
             </div>
             <Link
-              href="/opportunities"
+              href="/projects?tab=ai-opportunities"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white font-bold text-sm shadow-md shadow-[#E66A48]/20 transition-all cursor-pointer"
             >
               <span>Jelajahi Katalog Peluang</span>

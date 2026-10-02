@@ -118,26 +118,77 @@ interface ActorDetailTabsProps {
       feedbacks: number;
       collaborationParticipations: number;
     };
+    collaborationParticipations?: Array<{
+      id: string;
+      roleCode: string;
+      status: string;
+      joinedAt: Date | string;
+      collaboration: {
+        id: string;
+        title: string;
+        description?: string | null;
+        status: string;
+        startedAt?: Date | string | null;
+        completedAt?: Date | string | null;
+        outcomes?: Array<{
+          id: string;
+          title: string;
+          outcomeType: string;
+          description?: string | null;
+        }>;
+        participants?: Array<{
+          actor: {
+            id: string;
+            name: string;
+            sector: string;
+          };
+        }>;
+      };
+    }>;
   };
   isCurrentActor: boolean;
+  registeredActors?: Array<{
+    id: string;
+    name: string;
+    sector: string;
+    location: string | null;
+  }>;
 }
 
-export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps) {
-  const [activeTab, setActiveTab] = useState<"portfolio" | "rates" | "specs" | "about" | "reviews">("portfolio");
+export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: ActorDetailTabsProps) {
+  const [activeTab, setActiveTab] = useState<"portfolio" | "rates" | "specs" | "collaborations" | "about" | "reviews">("portfolio");
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [selectedShowcaseIndex, setSelectedShowcaseIndex] = useState<number | null>(null);
   const [portfolioFilter, setPortfolioFilter] = useState<string>("ALL");
 
   const searchParams = useSearchParams();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerTab, setDrawerTab] = useState<DrawerTabType>("specs");
+  const [drawerTab, setDrawerTab] = useState<DrawerTabType>("profile");
 
   useEffect(() => {
     if (isCurrentActor) {
       const editParam = searchParams.get("edit");
-      if (editParam === "specs" || editParam === "rates" || editParam === "profile" || editParam === "contact" || editParam === "portfolio") {
-        setDrawerTab(editParam as DrawerTabType);
-        setIsDrawerOpen(true);
+      if (editParam) {
+        const paramLower = editParam.toLowerCase();
+        if (paramLower === "profile") {
+          setDrawerTab("profile");
+          setIsDrawerOpen(true);
+        } else if (paramLower === "portfolio" || paramLower === "porto") {
+          setDrawerTab("portfolio");
+          setIsDrawerOpen(true);
+        } else if (paramLower === "rates" || paramLower === "tarif") {
+          setDrawerTab("rates");
+          setIsDrawerOpen(true);
+        } else if (paramLower === "specs" || paramLower === "spesifikasi") {
+          setDrawerTab("specs");
+          setIsDrawerOpen(true);
+        } else if (paramLower === "about" || paramLower === "contact" || paramLower === "tentang") {
+          setDrawerTab("about");
+          setIsDrawerOpen(true);
+        } else if (paramLower === "reviews" || paramLower === "usulan" || paramLower === "ulasan") {
+          setDrawerTab("reviews");
+          setIsDrawerOpen(true);
+        }
       }
     }
   }, [searchParams, isCurrentActor]);
@@ -175,7 +226,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
     (a) =>
       a.attributes &&
       typeof a.attributes === "object" &&
-      ("brand_gallery" in a.attributes || "design_dna" in a.attributes)
+      ("brand_gallery" in a.attributes || "design_dna" in a.attributes || "sample_sizes_ready" in a.attributes || "fabric_materials" in a.attributes || "capacity_monthly" in a.attributes)
   );
 
   const photographerAsset = actor.assets.find(
@@ -189,34 +240,35 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
     (a) =>
       a.attributes &&
       typeof a.attributes === "object" &&
-      ("primary_software" in a.attributes || "design_disciplines" in a.attributes || "deliverables" in a.attributes)
+      ("primary_software" in a.attributes || "design_disciplines" in a.attributes || "deliverables" in a.attributes || "style_dna" in a.attributes)
   );
 
   const stylistAsset = actor.assets.find(
     (a) =>
       a.subtype.toLowerCase().includes("styl") ||
-      (a.attributes && typeof a.attributes === "object" && ("styling_gallery" in a.attributes || "styling_specialties" in a.attributes))
+      (a.attributes && typeof a.attributes === "object" && ("styling_gallery" in a.attributes || "styling_specialties" in a.attributes || "onset_equipment" in a.attributes || "wardrobe_archive_count" in a.attributes))
   );
 
   const muaAsset = actor.assets.find(
     (a) =>
       a.subtype.toLowerCase().includes("mua") ||
       a.subtype.toLowerCase().includes("makeup") ||
-      (a.attributes && typeof a.attributes === "object" && ("makeup_styles" in a.attributes || "primary_kit_brands" in a.attributes))
+      (a.attributes && typeof a.attributes === "object" && ("makeup_styles" in a.attributes || "primary_kit_brands" in a.attributes || "hair_specialties" in a.attributes || "sanitation_standards" in a.attributes))
   );
 
   const videographerAsset = actor.assets.find(
     (a) =>
       a.subtype.toLowerCase().includes("video") ||
       a.subtype.toLowerCase().includes("film") ||
-      (a.attributes && typeof a.attributes === "object" && ("primary_cinema_camera" in a.attributes || "cine_lenses" in a.attributes))
+      (a.attributes && typeof a.attributes === "object" && ("primary_cinema_camera" in a.attributes || "cine_lenses" in a.attributes || "stabilizer_gimbal" in a.attributes || "stabilization_rigs" in a.attributes))
   );
 
   const sectorLower = actor.sector.toLowerCase();
   const hasStudioSpaceAsset = actor.assets.some(
     (a) => a.category === "STUDIO_SPACE" || a.subtype.toLowerCase().includes("studio")
   );
-  const isIndividualSector =
+  const isBrand = actor.actorType === "BRAND" || (actor.actorType as string) === "MSME" || actor.actorType === "COLLECTIVE" || Boolean(brandAsset) || sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("umkm");
+  const isIndividualSector = !isBrand && (
     sectorLower.includes("photographer") ||
     sectorLower.includes("fotografi") ||
     sectorLower.includes("model") ||
@@ -230,16 +282,16 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
     sectorLower.includes("stylist") ||
     sectorLower.includes("wardrobe") ||
     sectorLower.includes("designer") ||
-    sectorLower.includes("desain");
+    sectorLower.includes("desain")
+  );
 
-  const isStudio = !isIndividualSector && (hasStudioSpaceAsset || Boolean(studioAsset) || actor.actorType === "STUDIO" || sectorLower.includes("studio"));
-  const isModel = !isStudio && (Boolean(modelAsset) || sectorLower.includes("model") || sectorLower.includes("talent"));
-  const isMUA = !isStudio && !isModel && (Boolean(muaAsset) || sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair"));
-  const isStylist = !isStudio && !isModel && !isMUA && (Boolean(stylistAsset) || sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));
-  const isVideographer = !isStudio && !isModel && !isMUA && !isStylist && (Boolean(videographerAsset) || sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema"));
-  const isPhotographer = !isStudio && !isModel && !isMUA && !isStylist && !isVideographer && (Boolean(photographerAsset) || sectorLower.includes("photographer") || sectorLower.includes("fotografi"));
-  const isDesigner = !isStudio && !isModel && !isMUA && !isStylist && !isVideographer && !isPhotographer && (Boolean(designerAsset) || sectorLower.includes("designer") || sectorLower.includes("desain"));
-  const isBrand = !isIndividualSector && !isStudio && (actor.actorType === "MSME" || Boolean(brandAsset) || sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("umkm"));
+  const isStudio = !isIndividualSector && !isBrand && (hasStudioSpaceAsset || Boolean(studioAsset) || actor.actorType === "STUDIO" || sectorLower.includes("studio"));
+  const isModel = !isBrand && !isStudio && (Boolean(modelAsset) || sectorLower.includes("model") || sectorLower.includes("talent"));
+  const isMUA = !isBrand && !isStudio && !isModel && (Boolean(muaAsset) || sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair"));
+  const isStylist = !isBrand && !isStudio && !isModel && !isMUA && (Boolean(stylistAsset) || sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));
+  const isVideographer = !isBrand && !isStudio && !isModel && !isMUA && !isStylist && (Boolean(videographerAsset) || sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema"));
+  const isPhotographer = !isBrand && !isStudio && !isModel && !isMUA && !isStylist && !isVideographer && (Boolean(photographerAsset) || sectorLower.includes("photographer") || sectorLower.includes("fotografi"));
+  const isDesigner = !isBrand && !isStudio && !isModel && !isMUA && !isStylist && !isVideographer && !isPhotographer && (Boolean(designerAsset) || sectorLower.includes("designer") || sectorLower.includes("desain"));
 
   const modelAttrs = modelAsset?.attributes as ModelAttributes | undefined;
   const studioAttrs = studioAsset?.attributes as StudioAttributes | undefined;
@@ -693,46 +745,6 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
         ],
       },
     ];
-  } else if (isBrand) {
-    packages = [
-      {
-        title: "Katalog & Packshot Produk",
-        subtitle: "Produksi konten visual produk untuk katalog e-commerce",
-        price: "Rp 2.500.000",
-        unit: "per sesi",
-        features: [
-          "Pemotretan 10-15 produk katalog siap upload",
-          "Format foto rasio 1:1, 4:5, dan 16:9",
-          "Color accuracy terkalibrasi layar e-commerce",
-          "Hak guna promosi toko online & marketplace",
-        ],
-      },
-      {
-        title: "Kampanye Rilis Koleksi Baru",
-        subtitle: "Produksi terpadu kampanye lookbook dan peluncuran produk",
-        price: "Rp 5.000.000",
-        unit: "per kampanye",
-        popular: true,
-        features: [
-          "Lookbook editorial lengkap + video teaser",
-          "Kerjasama talenta kreator terverifikasi RAMU",
-          "Aset promosi digital ads siap tayang",
-          "Dukungan publikasi di ekosistem RAMU",
-        ],
-      },
-      {
-        title: "Kemitraan Co-Branding & Runway",
-        subtitle: "Aktivasi kolaborasi khusus antar-brand dan kreator",
-        price: "Mulai Rp 10.000.000",
-        unit: "kustom",
-        features: [
-          "Perancangan kampanye kolaboratif lintas sektor",
-          "Pengorganisasian showcase / event rilis",
-          "Liputan media & dokumentasi profesional",
-          "Perjanjian bagi hasil / kontrak komersial resmi",
-        ],
-      },
-    ];
   } else {
     packages = [
       {
@@ -987,11 +999,15 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
     },
     {
       id: "rates" as const,
-      label: "Tarif",
+      label: isBrand ? "Kerjasama" : "Tarif",
     },
     {
       id: "specs" as const,
-      label: "Spesifikasi",
+      label: isBrand ? "Identitas Brand" : "Spesifikasi",
+    },
+    {
+      id: "collaborations" as const,
+      label: `Kebutuhan & Proyek (${(actor.needs?.length || 0) + (actor.collaborationParticipations?.length || 0)})`,
     },
     {
       id: "about" as const,
@@ -1299,7 +1315,137 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
         </div>
       )}
 
-      {activeTab === "rates" && (
+      {activeTab === "rates" && isBrand && (
+        <div className="space-y-8">
+          {/* BRAND: Header Kerjasama */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-stone-400" />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                Jenis Kerjasama & Kolaborasi Terbuka
+              </h3>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              {isCurrentActor && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "rates" } }));
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span>Atur Preferensi Kerjasama</span>
+                </button>
+              )}
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Terbuka Kolaborasi</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Jenis Kerjasama Cards */}
+          {(() => {
+            const brandCollabAsset = actor.assets.find(
+              (a) => a.attributes && typeof a.attributes === "object" && "collab_types" in (a.attributes as any)
+            );
+            const collabAttrs = (brandCollabAsset?.attributes as any) || {};
+            const collabTypes: string[] = Array.isArray(collabAttrs.collab_types)
+              ? collabAttrs.collab_types
+              : ["Paid Campaign", "Product Seeding / Gifting", "Revenue Share / Affiliate"];
+            const budgetRange: string = collabAttrs.budget_range || "Sesuai brief & scope proyek";
+            const timeline: string = collabAttrs.collab_timeline || "2 – 4 Minggu per Kampanye";
+            const creatorRequirements: string = collabAttrs.creator_requirements || "Fotografer & Model Fashion, min. portofolio editorial";
+            const collabNotes: string = collabAttrs.collab_notes || "";
+
+            const collabTypeIcons: Record<string, string> = {
+              "Paid Campaign": "💰",
+              "Product Seeding / Gifting": "🎁",
+              "Revenue Share / Affiliate": "📊",
+              "Barter / Trade for Content": "🔄",
+              "Co-Branding & Kolaborasi Koleksi": "🤝",
+              "Casting Open": "🎯",
+            };
+
+            return (
+              <>
+                {/* Tipe Kerjasama */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {collabTypes.map((type, idx) => (
+                    <div key={idx} className="p-5 bg-white border border-stone-200/80 shadow-xs space-y-2 hover:border-[#1E1B2E] transition-colors">
+                      <div className="text-2xl">{collabTypeIcons[type] || "✦"}</div>
+                      <h4 className="text-xs font-black uppercase tracking-wider text-[#1E1B2E]">{type}</h4>
+                      <p className="text-[11px] text-stone-500 leading-relaxed">
+                        {type === "Paid Campaign" && "Kreator dibayar sesuai rate card. Cocok untuk campaign terstruktur dengan brief yang jelas."}
+                        {type === "Product Seeding / Gifting" && "Brand mengirimkan produk gratis kepada kreator pilihan untuk konten organik tanpa kewajiban posting."}
+                        {type === "Revenue Share / Affiliate" && "Kreator mendapatkan komisi dari setiap konversi/penjualan yang dihasilkan melalui kode unik mereka."}
+                        {type === "Barter / Trade for Content" && "Pertukaran nilai: brand menyediakan produk/jasa, kreator menyediakan konten berkualitas."}
+                        {type === "Co-Branding & Kolaborasi Koleksi" && "Kerjasama desain koleksi bersama antara brand dan kreator/desainer untuk rilis terbatas."}
+                        {type === "Casting Open" && "Brand membuka casting terbuka untuk model, fotografer, atau kreator untuk proyek tertentu."}
+                        {!["Paid Campaign", "Product Seeding / Gifting", "Revenue Share / Affiliate", "Barter / Trade for Content", "Co-Branding & Kolaborasi Koleksi", "Casting Open"].includes(type) && "Jenis kerjasama terbuka sesuai kesepakatan bersama."}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Detail Info */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-5 bg-stone-50 border border-stone-200/60 space-y-1">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400 block">Budget / Kompensasi</span>
+                    <p className="text-sm font-bold text-[#1E1B2E]">{budgetRange}</p>
+                    <p className="text-[11px] text-stone-500">Bervariasi per jenis kolaborasi</p>
+                  </div>
+                  <div className="p-5 bg-stone-50 border border-stone-200/60 space-y-1">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400 block">Timeline Kampanye</span>
+                    <p className="text-sm font-bold text-[#1E1B2E]">{timeline}</p>
+                    <p className="text-[11px] text-stone-500">Dari brief hingga publikasi konten</p>
+                  </div>
+                  <div className="p-5 bg-stone-50 border border-stone-200/60 space-y-1">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400 block">Sistem Kontrak</span>
+                    <p className="text-sm font-bold text-[#1E1B2E]">Invoice Resmi & PO</p>
+                    <p className="text-[11px] text-stone-500">Dilindungi perjanjian tertulis</p>
+                  </div>
+                </div>
+
+                {/* Persyaratan Kreator */}
+                <div className="p-5 bg-white border border-stone-200/80 shadow-xs space-y-3">
+                  <div className="flex items-center gap-2 pb-2 border-b border-stone-100">
+                    <Target className="w-4 h-4 text-amber-600" />
+                    <h4 className="text-xs font-black uppercase tracking-wider text-[#1E1B2E]">Profil Kreator yang Dicari</h4>
+                  </div>
+                  <p className="text-sm text-stone-600 leading-relaxed">{creatorRequirements}</p>
+                  {collabNotes && (
+                    <div className="p-3 bg-amber-50 border border-amber-200/60 text-[11px] text-amber-900 leading-relaxed">
+                      <strong className="font-bold">Catatan:</strong> {collabNotes}
+                    </div>
+                  )}
+                </div>
+
+                {/* CTA Ajukan Proposal */}
+                <div className="p-5 bg-[#1E1B2E] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-bold text-white">Tertarik berkolaborasi dengan {actor.name}?</h4>
+                    <p className="text-[11px] text-stone-300">Kirimkan portofolio dan proposal singkat Anda melalui fitur booking RAMU.</p>
+                  </div>
+                  {!isCurrentActor && (
+                    <button
+                      type="button"
+                      onClick={() => setIsBookingOpen(true)}
+                      className="shrink-0 px-6 py-3 bg-white text-[#1E1B2E] text-xs font-black uppercase tracking-widest hover:bg-stone-100 transition-colors cursor-pointer flex items-center gap-2"
+                    >
+                      <Briefcase className="w-4 h-4" />
+                      <span>Ajukan Proposal Kerjasama</span>
+                    </button>
+                  )}
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      )}
+
+      {activeTab === "rates" && !isBrand && (
         <div className="space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
             <div className="flex items-center gap-2">
@@ -1518,6 +1664,220 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
         </div>
       )}
 
+      {activeTab === "collaborations" && (
+        <div className="space-y-10 animate-fade-in">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-200">
+            <div>
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4 text-amber-600" />
+                <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                  Kebutuhan Terbuka, Target &amp; Rekam Jejak Proyek
+                </h3>
+              </div>
+              <p className="text-xs text-stone-500 mt-1">
+                Kebutuhan kolaborator dan arah karya yang sedang dicari, serta histori proyek bersama di ekosistem RAMU.
+              </p>
+            </div>
+            {isCurrentActor && (
+              <Link
+                href="/projects/new"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs"
+              >
+                <span>+ Buat Project Brief</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Seksi 1: Kebutuhan Mitra Kolaboratif Terbuka */}
+            <div className="p-7 sm:p-8 bg-white border border-stone-200/90 shadow-xs space-y-6">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                <div className="flex items-center gap-2">
+                  <Search className="w-4 h-4 text-amber-600" />
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                    Kebutuhan Kolaborator Terbuka
+                  </h4>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-50 text-amber-900 border border-amber-200">
+                  {actor.needs.length} Dicari
+                </span>
+              </div>
+
+              {actor.needs.length === 0 ? (
+                <div className="p-6 text-center text-xs text-stone-400 italic space-y-2 bg-stone-50 border border-dashed border-stone-200">
+                  <p>Saat ini belum ada kebutuhan mitra terbuka yang dicantumkan.</p>
+                  {!isCurrentActor && (
+                    <button
+                      type="button"
+                      onClick={() => setIsBookingOpen(true)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-stone-300 text-stone-900 font-semibold text-xs not-italic hover:bg-stone-50 cursor-pointer"
+                    >
+                      <span>Ajukan Penawaran Proyek Langsung</span>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {actor.needs.map((need) => (
+                    <div
+                      key={need.id}
+                      className="p-4 bg-stone-50/70 border border-stone-200/90 text-xs space-y-2 hover:border-amber-300 transition-colors"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-bold text-amber-700 bg-amber-100/60 px-2 py-0.5 uppercase tracking-wider">
+                          {need.category}
+                        </span>
+                        {!isCurrentActor && (
+                          <button
+                            type="button"
+                            onClick={() => setIsBookingOpen(true)}
+                            className="text-[11px] font-bold text-[#1E1B2E] hover:text-amber-600 inline-flex items-center gap-1 cursor-pointer"
+                          >
+                            <span>Tanggapi</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                      <h5 className="font-bold text-[#1E1B2E] text-sm leading-snug">{need.title}</h5>
+                      {need.description && (
+                        <p className="text-stone-500 text-xs leading-relaxed">{need.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Seksi 2: Target & Arah Pertumbuhan Kreatif */}
+            <div className="p-7 sm:p-8 bg-white border border-stone-200/90 shadow-xs space-y-6">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                <div className="flex items-center gap-2">
+                  <Target className="w-4 h-4 text-purple-600" />
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                    Target &amp; Arah Karya
+                  </h4>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-purple-50 text-purple-900 border border-purple-200">
+                  {actor.goals.length} Sasaran
+                </span>
+              </div>
+
+              {actor.goals.length === 0 ? (
+                <div className="p-6 text-center text-xs text-stone-400 italic space-y-2 bg-stone-50 border border-dashed border-stone-200">
+                  <p>Kreator belum mempublikasikan target karya spesifik.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {actor.goals.map((goal) => (
+                    <div
+                      key={goal.id}
+                      className="p-4 bg-stone-50/70 border border-stone-200/90 text-xs space-y-2 hover:border-purple-300 transition-colors"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-bold text-purple-700 bg-purple-100/60 px-2 py-0.5 uppercase tracking-wider">
+                          {goal.category}
+                        </span>
+                      </div>
+                      <h5 className="font-bold text-[#1E1B2E] text-sm leading-snug">{goal.title}</h5>
+                      {goal.description && (
+                        <p className="text-stone-500 text-xs leading-relaxed">{goal.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Seksi 3: Histori Proyek Kolaborasi & Luaran Terverifikasi */}
+          <div className="p-7 sm:p-8 bg-white border border-stone-200/90 shadow-xs space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-stone-100">
+              <div className="flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-emerald-600" />
+                <h4 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                  Rekam Jejak Proyek Kolaboratif Resmi RAMU
+                </h4>
+              </div>
+              <span className="text-xs text-stone-500 font-light">
+                {actor.collaborationParticipations?.length || 0} Proyek Terdaftar
+              </span>
+            </div>
+
+            {(!actor.collaborationParticipations || actor.collaborationParticipations.length === 0) ? (
+              <div className="p-8 text-center text-xs text-stone-400 italic space-y-2 bg-stone-50 border border-dashed border-stone-200">
+                <p>Belum ada proyek kolaborasi multi-pihak yang tercatat secara resmi di RAMU.</p>
+                <p className="not-italic text-stone-500 text-[11px]">
+                  Kolaborasi yang diinisiasi melalui Project Briefs dan disepakati dengan SPK Digital akan tercatat otomatis di sini.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {actor.collaborationParticipations.map((part) => (
+                  <div
+                    key={part.id}
+                    className="p-5 bg-stone-50/70 border border-stone-200/90 text-xs space-y-4 hover:border-emerald-300 transition-colors"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 uppercase tracking-wider">
+                        Peran: {part.roleCode}
+                      </span>
+                      <span className="text-[10px] font-bold text-stone-500">
+                        {part.collaboration.status}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h5 className="font-bold text-[#1E1B2E] text-base leading-snug">
+                        {part.collaboration.title}
+                      </h5>
+                      {part.collaboration.description && (
+                        <p className="text-stone-500 text-xs line-clamp-2 mt-1 leading-relaxed">
+                          {part.collaboration.description}
+                        </p>
+                      )}
+                    </div>
+
+                    {part.collaboration.outcomes && part.collaboration.outcomes.length > 0 && (
+                      <div className="pt-2 border-t border-stone-200 space-y-1">
+                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block">
+                          Luaran Nyata Terverifikasi:
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {part.collaboration.outcomes.map((o) => (
+                            <span
+                              key={o.id}
+                              className="text-[10px] font-bold bg-white border border-stone-200 px-2 py-0.5 text-stone-800"
+                            >
+                              ✓ {o.title} ({o.outcomeType})
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {part.collaboration.participants && part.collaboration.participants.length > 0 && (
+                      <div className="pt-2 border-t border-stone-200 flex items-center justify-between text-[11px] text-stone-500">
+                        <span className="truncate max-w-[200px]">
+                          Mitra: {part.collaboration.participants.map((p) => p.actor.name).join(", ")}
+                        </span>
+                        <Link
+                          href={`/collaborations/${part.collaboration.id}`}
+                          className="font-bold text-[#1E1B2E] hover:text-emerald-700 inline-flex items-center gap-1 shrink-0"
+                        >
+                          <span>Buka Workspace</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {activeTab === "about" && (
         <div className="space-y-8">
 
@@ -1532,7 +1892,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
               <button
                 type="button"
                 onClick={() => {
-                  window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "profile" } }));
+                  window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "about" } }));
                 }}
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
               >
@@ -1676,11 +2036,25 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
       {activeTab === "reviews" && (
         <div className="space-y-8">
 
-          <div className="flex items-center gap-2 pb-4 border-b border-stone-100">
-            <Star className="w-4 h-4 text-stone-400" />
-            <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
-              Ulasan &amp; Reputasi Klien
-            </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
+            <div className="flex items-center gap-2">
+              <Star className="w-4 h-4 text-stone-400" />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                Ulasan &amp; Reputasi Klien
+              </h3>
+            </div>
+            {isCurrentActor && (
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "reviews" } }));
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+              >
+                <Sliders className="w-3.5 h-3.5" />
+                <span>Atur Usulan &amp; Reputasi</span>
+              </button>
+            )}
           </div>
 
           <div className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
@@ -1818,6 +2192,7 @@ export function ActorDetailTabs({ actor, isCurrentActor }: ActorDetailTabsProps)
           }}
           defaultTab={drawerTab}
           actor={actor}
+          registeredActors={registeredActors}
         />
       )}
     </div>

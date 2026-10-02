@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { expressInterestAction } from "@/app/projects/actions";
-import { Clock, Send, Check, Circle, Sparkles } from "lucide-react";
+import { expressInterestAction, withdrawInterestAction } from "@/app/projects/actions";
+import { Clock, Send, Check, Circle, Sparkles, Undo2, Loader2 } from "lucide-react";
 
 const CATEGORY_LABELS: Record<string, string> = {
   PORTFOLIO_WORK: "Karya / Portofolio",
@@ -39,6 +39,7 @@ interface RoleSlotProps {
   interestCount: number;
   isInitiator: boolean;
   currentActorInterestStatus?: string | null;
+  userInterestId?: string | null;
   actorAssets: ActorAsset[];
   initialOpen?: boolean;
   isMatched?: boolean;
@@ -55,6 +56,7 @@ export function RoleSlot({
   interestCount,
   isInitiator,
   currentActorInterestStatus,
+  userInterestId,
   actorAssets,
   initialOpen = false,
   isMatched = false,
@@ -63,8 +65,26 @@ export function RoleSlot({
   const [message, setMessage] = useState("");
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
+  const [isWithdrawing, startWithdrawTransition] = useTransition();
   const [localStatus, setLocalStatus] = useState(currentActorInterestStatus);
+  const [activeInterestId, setActiveInterestId] = useState(userInterestId);
   const [error, setError] = useState<string | null>(null);
+
+  function handleWithdraw() {
+    if (!activeInterestId) return;
+    if (!confirm(`Batalkan pengajuan minat Anda untuk peran "${roleLabel}"? Inisiator proyek tidak akan lagi melihat lamaran ini.`)) return;
+
+    startWithdrawTransition(async () => {
+      const res = await withdrawInterestAction(activeInterestId, briefId);
+      if (res.success) {
+        setLocalStatus(null);
+        setActiveInterestId(null);
+        setIsOpen(false);
+      } else {
+        alert(res.error || "Gagal menarik lamaran.");
+      }
+    });
+  }
 
   function toggleAsset(id: string) {
     setSelectedAssets((prev) =>
@@ -177,10 +197,27 @@ export function RoleSlot({
           )}
 
           {alreadyApplied && (
-            <span className="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-amber-600" />
-              <span>Minat Anda Terkirim ({localStatus})</span>
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-amber-600" />
+                <span>Minat Terkirim ({localStatus === "PENDING" ? "Menunggu Review" : localStatus})</span>
+              </span>
+              {localStatus === "PENDING" && activeInterestId && (
+                <button
+                  type="button"
+                  onClick={handleWithdraw}
+                  disabled={isWithdrawing}
+                  className="px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-rose-700 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1"
+                >
+                  {isWithdrawing ? (
+                    <Loader2 className="w-3 h-3 animate-spin text-rose-600" />
+                  ) : (
+                    <Undo2 className="w-3 h-3 text-rose-600" />
+                  )}
+                  <span>{isWithdrawing ? "Menarik..." : "Tarik Lamaran"}</span>
+                </button>
+              )}
+            </div>
           )}
 
           {isInitiator && (

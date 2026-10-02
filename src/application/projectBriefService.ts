@@ -64,9 +64,84 @@ export async function createProjectBrief(
   return brief;
 }
 
+export async function updateProjectBrief(
+  briefId: string,
+  actorId: string,
+  input: Partial<CreateProjectBriefInput>
+) {
+  const brief = await prisma.projectBrief.findUnique({
+    where: { id: briefId },
+    select: { creatorActorId: true, status: true },
+  });
+
+  if (!brief) throw new Error('Brief tidak ditemukan.');
+  if (brief.creatorActorId !== actorId) throw new Error('Hanya inisiator yang dapat mengedit brief.');
+  if (brief.status === 'CLOSED' || brief.status === 'CANCELLED') {
+    throw new Error('Brief yang sudah ditutup tidak dapat diedit.');
+  }
+
+  return prisma.projectBrief.update({
+    where: { id: briefId },
+    data: {
+      ...(input.title && { title: input.title }),
+      ...(input.description && { description: input.description }),
+      ...(input.projectType && { projectType: input.projectType }),
+      ...(input.targetOutput && { targetOutput: input.targetOutput }),
+      ...(input.location !== undefined && { location: input.location || null }),
+      ...(input.timeline && { timeline: input.timeline as unknown as Prisma.InputJsonValue }),
+      ...(input.budget && { budget: input.budget as unknown as Prisma.InputJsonValue }),
+      ...(input.aestheticStyle !== undefined && { aestheticStyle: input.aestheticStyle || null }),
+      ...(input.compensationModel !== undefined && { compensationModel: input.compensationModel || null }),
+    },
+  });
+}
+
+export async function closeProjectBrief(briefId: string, actorId: string) {
+  const brief = await prisma.projectBrief.findUnique({
+    where: { id: briefId },
+    select: { creatorActorId: true, status: true },
+  });
+
+  if (!brief) throw new Error('Brief tidak ditemukan.');
+  if (brief.creatorActorId !== actorId) throw new Error('Hanya inisiator yang dapat menutup brief.');
+
+  return prisma.projectBrief.update({
+    where: { id: briefId },
+    data: { status: ProjectBriefStatus.CLOSED },
+  });
+}
+
+export async function deleteProjectBrief(briefId: string, actorId: string) {
+  const brief = await prisma.projectBrief.findUnique({
+    where: { id: briefId },
+    include: {
+      interests: { select: { status: true } },
+    },
+  });
+
+  if (!brief) throw new Error('Brief tidak ditemukan.');
+  if (brief.creatorActorId !== actorId) throw new Error('Hanya inisiator yang dapat menghapus brief.');
+
+  const hasAccepted = brief.interests.some((i) => i.status === 'ACCEPTED');
+  if (hasAccepted) {
+    throw new Error('Brief dengan kolaborator yang sudah diterima tidak dapat dihapus. Gunakan fitur "Tutup Brief" sebagai gantinya.');
+  }
+
+  // Hapus cascade: interests, roles, lalu brief
+  await prisma.collaborationInterest.deleteMany({ where: { briefId } });
+  await prisma.projectBriefRole.deleteMany({ where: { briefId } });
+  await prisma.projectBrief.delete({ where: { id: briefId } });
+
+  return { success: true };
+}
+
 export async function getProjectBriefs(filter?: {
   status?: ProjectBriefStatus;
   creatorActorId?: string;
+  search?: string;
+  roleCategory?: string;
+  location?: string;
+  compensationModel?: string;
 }) {
   const where: Prisma.ProjectBriefWhereInput = {};
 
@@ -75,6 +150,40 @@ export async function getProjectBriefs(filter?: {
   }
   if (filter?.creatorActorId) {
     where.creatorActorId = filter.creatorActorId;
+  }
+  if (filter?.location && filter.location !== "ALL") {
+    where.location = { contains: filter.location, mode: "insensitive" };
+  }
+  if (filter?.compensationModel && filter.compensationModel !== "ALL") {
+    where.compensationModel = filter.compensationModel;
+  }
+  if (filter?.search && filter.search.trim()) {
+    const term = filter.search.trim();
+    where.OR = [
+      { title: { contains: term, mode: "insensitive" } },
+      { description: { contains: term, mode: "insensitive" } },
+      { location: { contains: term, mode: "insensitive" } },
+      { targetOutput: { contains: term, mode: "insensitive" } },
+      {
+        neededRoles: {
+          some: {
+            roleLabel: { contains: term, mode: "insensitive" },
+          },
+        },
+      },
+      {
+        creatorActor: {
+          name: { contains: term, mode: "insensitive" },
+        },
+      },
+    ];
+  }
+  if (filter?.roleCategory && filter.roleCategory !== "ALL") {
+    where.neededRoles = {
+      some: {
+        roleLabel: { contains: filter.roleCategory, mode: "insensitive" },
+      },
+    };
   }
 
   return prisma.projectBrief.findMany({
@@ -95,7 +204,7 @@ export async function getProjectBriefs(filter?: {
         select: { id: true, actorId: true, status: true, roleId: true },
       },
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
   });
 }
 
@@ -207,14 +316,26 @@ export async function acceptCollaborator(interestId: string, initiatorActorId: s
     include: { neededRoles: true },
   });
 
-  if (brief && brief.neededRoles.every((r) => r.isFilled)) {
+  const isFilled = Boolean(brief && brief.neededRoles.every((r) => r.isFilled));
+  let collaborationId: string | null = null;
+
+  if (brief && isFilled) {
     await prisma.projectBrief.update({
       where: { id: interest.briefId },
       data: { status: ProjectBriefStatus.FILLED },
     });
+
+    try {
+      const colResult = await formCollaborationFromBrief(interest.briefId, initiatorActorId);
+      if (colResult?.collaborationId) {
+        collaborationId = colResult.collaborationId;
+      }
+    } catch (err) {
+      console.error("Auto formation of collaboration failed in acceptCollaborator:", err);
+    }
   }
 
-  return { success: true };
+  return { success: true, isFilled, collaborationId };
 }
 
 export async function declineCollaborator(interestId: string, initiatorActorId: string) {
