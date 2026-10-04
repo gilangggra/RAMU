@@ -1,4 +1,4 @@
-﻿import { redirect, notFound } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
@@ -79,6 +79,8 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
 
   const dpPercentage = details?.agreedTerms?.dpPercentage || 50;
   const refCode = `SPK-RAMU-${booking.id.slice(0, 8).toUpperCase()}`;
+  const collaborationId = (details?.collaborationId as string | undefined) || null;
+  const hasCollaboration = Boolean(collaborationId);
 
   const statusConfig = {
     PENDING: {
@@ -87,12 +89,19 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
       dot: "bg-amber-500 animate-pulse",
       icon: Clock,
     },
-    ACCEPTED: {
-      label: "Diterima",
-      badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      dot: "bg-emerald-500",
-      icon: CheckCircle2,
-    },
+    ACCEPTED: hasCollaboration
+      ? {
+          label: "Workspace Kolaborasi Aktif",
+          badge: "bg-purple-50 text-purple-700 border-purple-200",
+          dot: "bg-purple-600 animate-pulse",
+          icon: Handshake,
+        }
+      : {
+          label: "Diterima",
+          badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
+          dot: "bg-emerald-500",
+          icon: CheckCircle2,
+        },
     DECLINED: {
       label: "Ditolak",
       badge: "bg-rose-50 text-rose-700 border-rose-200",
@@ -103,6 +112,14 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
 
   const sc = statusConfig[booking.status as keyof typeof statusConfig] || statusConfig.PENDING;
   const StatusIcon = sc.icon;
+
+  const isBrandCollaboration =
+    Boolean(details.collaborationType) ||
+    Boolean(details.initiatorRole) ||
+    booking.target.actorType === "BRAND" ||
+    (booking.target.actorType as string) === "MSME" ||
+    (booking.target.sector?.toLowerCase() || "").includes("brand") ||
+    (booking.target.sector?.toLowerCase() || "").includes("label");
 
   const labelMap: Record<string, string> = {
     roomType: "Tipe Ruangan",
@@ -117,11 +134,34 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
     crew: "Jumlah Kru",
     concept: "Konsep Proyek",
     notes: "Catatan",
+    initiatorRole: "Peran / Tim Pengaju",
+    collaborationType: "Model Kerjasama",
+    conceptSummary: "Ringkasan Konsep & Sinergi",
+    deckUrl: "Tautan Pitch Deck / Moodboard",
+    initiatorType: "Tipe Pemrakarsa",
+  };
+
+  const collabTypeLabels: Record<string, string> = {
+    CAMPAIGN_PRODUCTION: "Produksi Kampanye Lookbook Koleksi Baru",
+    BARTER_SEEDING: "Barter / Product Seeding & Endorsement",
+    CO_BRANDING: "Kolaborasi Koleksi Kapsul (Co-Branding)",
+    SPONSORSHIP: "Sponsorship Event / Fashion Show / Editorial",
+    CUSTOM_BRIEF: "Brief Kemitraan Khusus",
   };
 
   const detailEntries = Object.entries(details).filter(
-    ([key, val]) => key !== "collaborationId" && key !== "agreedTerms" && val && String(val).trim() !== ""
+    ([key, val]) =>
+      key !== "collaborationId" &&
+      key !== "agreedTerms" &&
+      key !== "initiatorType" &&
+      val &&
+      String(val).trim() !== ""
   );
+
+  const agreedTerms =
+    details.agreedTerms && typeof details.agreedTerms === "object"
+      ? (details.agreedTerms as Record<string, any>)
+      : null;
 
   return (
     <AppShell actor={{ ...primaryActor, avatarUrl: profile.avatarUrl }} activeRoute="/dashboard/bookings">
@@ -146,7 +186,9 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5">
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Surat Perjanjian Kerja</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">
+                    {isBrandCollaboration ? "Proposal Kemitraan & Kolaborasi" : "Surat Perjanjian Kerja"}
+                  </span>
                   <span className="px-2 py-0.5 bg-stone-100 border border-stone-200 font-mono text-[11px] font-semibold text-stone-600">
                     {refCode}
                   </span>
@@ -160,13 +202,25 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                   <span className="text-xs text-stone-400">
                     Dibuat {new Date(booking.createdAt).toLocaleDateString("id-ID", { dateStyle: "long" })}
                   </span>
+                  {hasCollaboration && (
+                    <Link
+                      href={`/collaborations/${collaborationId}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition-colors shadow-2xs"
+                    >
+                      <Handshake className="w-3.5 h-3.5" />
+                      <span>Buka Workspace</span>
+                      <ArrowUpRight className="w-3 h-3" />
+                    </Link>
+                  )}
                 </div>
 
                 {isTarget && booking.status === "PENDING" && (
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
                     <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                     <span className="text-xs font-semibold text-amber-800">
-                      Pesanan ini menunggu respons Anda — mohon segera tinjau dan beri keputusan.
+                      {isBrandCollaboration
+                        ? "Proposal kemitraan ini menunggu tinjauan Anda — mohon beri keputusan."
+                        : "Pesanan ini menunggu respons Anda — mohon segera tinjau dan beri keputusan."}
                     </span>
                   </div>
                 )}
@@ -183,7 +237,7 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
           <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-stone-100">
             <div className="p-5 sm:p-6 space-y-2">
               <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-stone-400 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5" /> Pemesan / Requester
+                <User className="w-3.5 h-3.5" /> {isBrandCollaboration ? "Pemrakarsa / Inisiator" : "Pemesan / Requester"}
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-stone-100 border border-stone-200 flex items-center justify-center shrink-0 font-bold text-stone-700">
@@ -212,7 +266,7 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
 
             <div className="p-5 sm:p-6 space-y-2">
               <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-stone-400 flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5" /> Penyedia Jasa / Target
+                <Building2 className="w-3.5 h-3.5" /> {isBrandCollaboration ? "Mitra Kolaborasi / Brand" : "Penyedia Jasa / Target"}
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-[#1E1B2E] flex items-center justify-center shrink-0 font-bold text-white">
@@ -284,23 +338,33 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
               </div>
             </div>
 
-            {/* SPESIFIKASI */}
+            {/* SPESIFIKASI / PROPOSAL DETAIL */}
             {detailEntries.length > 0 && (
               <div className="bg-white border border-stone-200 shadow-xs divide-y divide-stone-100">
-                <div className="px-5 py-4 bg-stone-50 border-b border-stone-200 flex items-center gap-2">
-                  <FileText className="w-3.5 h-3.5 text-stone-500" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
-                    Spesifikasi & Kebutuhan
-                  </span>
+                <div className="px-5 py-4 bg-stone-50 border-b border-stone-200 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-3.5 h-3.5 text-stone-500" />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
+                      {isBrandCollaboration ? "Rincian Proposal Kemitraan & Sinergi" : "Spesifikasi & Kebutuhan Proyek"}
+                    </span>
+                  </div>
+                  {isBrandCollaboration && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-50 text-amber-800 border border-amber-200">
+                      Brand Pitch
+                    </span>
+                  )}
                 </div>
-                <div className="p-5">
+                <div className="p-5 space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {detailEntries.map(([key, val]) => {
                       const valStr = String(val);
-                      const isUrl = valStr.startsWith("http://") || valStr.startsWith("https://");
+                      const isUrl = valStr.startsWith("http://") || valStr.startsWith("https://") || key === "deckUrl";
+                      const isFullWidth = key === "conceptSummary" || key === "concept" || key === "notes";
+                      const displayVal = key === "collaborationType" ? (collabTypeLabels[valStr] || valStr) : valStr;
+
                       return (
-                        <div key={key} className="space-y-1">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                        <div key={key} className={`space-y-1.5 ${isFullWidth ? "sm:col-span-2" : ""}`}>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
                             {labelMap[key] || key}
                           </span>
                           {isUrl ? (
@@ -308,17 +372,48 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                               href={valStr}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-sm font-semibold text-amber-700 hover:underline inline-flex items-center gap-1"
+                              className="text-xs font-bold text-amber-900 bg-amber-50/70 hover:bg-amber-100 border border-amber-200/80 px-3.5 py-2 inline-flex items-center gap-2 transition-colors"
                             >
-                              Buka Referensi <ExternalLink className="w-3.5 h-3.5" />
+                              <span>{key === "deckUrl" ? "Buka Pitch Deck / Moodboard" : "Buka Tautan Referensi"}</span>
+                              <ExternalLink className="w-3.5 h-3.5 text-amber-700" />
                             </a>
                           ) : (
-                            <p className="text-sm font-semibold text-[#1E1B2E] leading-relaxed">{valStr}</p>
+                            <p className="text-sm font-semibold text-[#1E1B2E] leading-relaxed whitespace-pre-line bg-stone-50/60 p-3 border border-stone-100">
+                              {displayVal}
+                            </p>
                           )}
                         </div>
                       );
                     })}
                   </div>
+
+                  {agreedTerms && (agreedTerms.ndaAgreed || agreedTerms.coCreditsAgreed || agreedTerms.sampleCareAgreed) && (
+                    <div className="pt-4 border-t border-stone-100 space-y-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
+                        Komitmen &amp; Kepatuhan Hukum RAMU
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {agreedTerms.ndaAgreed && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                            Persetujuan Kerahasiaan (NDA) Aktif
+                          </span>
+                        )}
+                        {agreedTerms.coCreditsAgreed && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                            Hak Co-Credits &amp; Atribusi Karya
+                          </span>
+                        )}
+                        {agreedTerms.sampleCareAgreed && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                            Garansi Keamanan Sampel Busana
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -332,7 +427,7 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                 </span>
               </div>
               <div className="p-5">
-                <BookingMilestoneTracker status={booking.status} dpPercentage={dpPercentage} />
+                <BookingMilestoneTracker status={booking.status} dpPercentage={dpPercentage} collaborationId={collaborationId} />
               </div>
             </div>
 
@@ -360,6 +455,18 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
 
                 {booking.status === "ACCEPTED" && (
                   <div className="space-y-3">
+                    {hasCollaboration && (
+                      <div className="p-3 bg-purple-50/70 border border-purple-200/80 rounded-xl space-y-1">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-purple-900">
+                          <Handshake className="w-4 h-4 text-purple-600" />
+                          <span>Ruang Kerja Terhubung</span>
+                        </div>
+                        <p className="text-[11px] text-purple-700 leading-relaxed">
+                          Pesanan ini telah dibuka menjadi ruang kolaborasi resmi. Task board, roadmap, dan catatan kerja dapat diakses bersama mitra.
+                        </p>
+                      </div>
+                    )}
+
                     <div className="space-y-1">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Koordinasi Langsung</p>
                       <BookingContactActions
@@ -367,12 +474,13 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                         email={isTarget ? booking.requester.contactEmail : booking.target.contactEmail}
                         contactName={isTarget ? booking.requester.name : booking.target.name}
                         myRole={isTarget ? "target" : "requester"}
+                        partnerActorId={isTarget ? booking.requesterId : booking.targetId}
                       />
                     </div>
 
                     <ConvertBookingButton
                       bookingId={booking.id}
-                      collaborationId={details?.collaborationId}
+                      collaborationId={collaborationId}
                     />
                   </div>
                 )}

@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { AppShell } from "@/components/layout/AppShell";
-import { UserCircle, Sliders, Image as ImageIcon, Camera, CreditCard, Briefcase } from "lucide-react";
+import { SettingsNav } from "@/components/settings/SettingsNav";
 
 export const metadata = {
   title: "Pengaturan | RAMU",
@@ -43,7 +42,14 @@ export default async function SettingsLayout({
     redirect("/onboarding");
   }
 
-  const isBrand = actor.actorType === "BRAND";
+  const sectorLower = actor.sector?.toLowerCase() || "";
+  const isBrand =
+    actor.actorType === "BRAND" ||
+    (actor.actorType as string) === "MSME" ||
+    actor.actorType === "COLLECTIVE" ||
+    sectorLower.includes("brand") ||
+    sectorLower.includes("label") ||
+    sectorLower.includes("umkm");
 
   return (
     <AppShell actor={actor} activeRoute="/settings">
@@ -58,51 +64,7 @@ export default async function SettingsLayout({
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
-          <nav className="w-full lg:w-64 flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 scrollbar-none shrink-0 border-b lg:border-b-0 lg:border-r border-stone-200 lg:pr-6">
-            <Link
-              href="/settings/profile"
-              className="flex items-center gap-3 px-4 py-3 rounded-none text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
-            >
-              <UserCircle className="w-4 h-4 shrink-0" />
-              <span>Profil Dasar</span>
-            </Link>
-
-            <Link
-              href="/settings/specs"
-              className="flex items-center gap-3 px-4 py-3 rounded-none text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
-            >
-              <Camera className="w-4 h-4 shrink-0 text-purple-600" />
-              <span>Spesifikasi &amp; Comp Card</span>
-            </Link>
-
-            <Link
-              href="/settings/rates"
-              className="flex items-center gap-3 px-4 py-3 rounded-none text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
-            >
-              {isBrand ? (
-                <Briefcase className="w-4 h-4 shrink-0 text-emerald-600" />
-              ) : (
-                <CreditCard className="w-4 h-4 shrink-0 text-emerald-600" />
-              )}
-              <span>{isBrand ? "Kerjasama & Brief" : "Paket Layanan & Tarif"}</span>
-            </Link>
-            
-            <Link
-              href="/settings/preferences"
-              className="flex items-center gap-3 px-4 py-3 rounded-none text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
-            >
-              <Sliders className="w-4 h-4 shrink-0" />
-              <span>Preferensi Kolaborasi</span>
-            </Link>
-
-            <Link
-              href="/dashboard/showcase"
-              className="flex items-center gap-3 px-4 py-3 rounded-none text-sm font-semibold transition-colors text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 whitespace-nowrap lg:whitespace-normal"
-            >
-              <ImageIcon className="w-4 h-4 shrink-0 text-amber-500" />
-              <span>Kelola Portofolio & Karya</span>
-            </Link>
-          </nav>
+          <SettingsNav isBrand={isBrand} />
 
           <div className="flex-1 min-w-0 w-full">
             {children}

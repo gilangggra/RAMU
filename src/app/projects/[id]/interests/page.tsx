@@ -207,6 +207,7 @@ export default async function ProjectInterestsPage({
                         roleLabel={role.roleLabel}
                         status={interest.status}
                         message={interest.message}
+                        isInvited={Boolean(interest.isInvited)}
                         actor={{
                           id: interest.actor.id,
                           name: interest.actor.name,

@@ -22,7 +22,6 @@ import {
   Clock,
   Briefcase,
   Layers,
-  Scissors,
   Zap,
   PlusCircle,
   Sliders,
@@ -32,6 +31,11 @@ import {
   Film,
   Camera,
   Pencil,
+  Gift,
+  TrendingUp,
+  Repeat,
+  Handshake,
+  Users,
 } from "lucide-react";
 import { ModelCompCard, ModelAttributes } from "./ModelCompCard";
 import { StudioSpecsCard, StudioAttributes } from "./StudioSpecsCard";
@@ -439,7 +443,19 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
     : [actor.sector, "Layanan Komersial", "Produksi Terverifikasi"];
 
   const totalReviews = actor.feedbacks.length;
-  const avgRating = totalReviews > 0 ? "5.0" : "5.0";
+  const avgRating = totalReviews > 0
+    ? (
+        actor.feedbacks.reduce((sum, f) => {
+          const raw = (f as any).rating;
+          if (typeof raw === "number") return sum + raw;
+          const scores = [f.relevanceScore, f.feasibilityScore, f.noveltyScore, f.usefulnessScore].filter(
+            (s): s is number => typeof s === "number"
+          );
+          const feedbackAvg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 5;
+          return sum + feedbackAvg;
+        }, 0) / totalReviews
+      ).toFixed(1)
+    : null;
 
   interface ServicePackage {
     title: string;
@@ -457,6 +473,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
   );
   const customPackages = (customServiceAsset?.attributes as any)?.service_packages as ServicePackage[] | undefined;
   const customTermsConfig = (customServiceAsset?.attributes as any)?.terms_and_conditions || null;
+  const hasCustomPackages = Boolean(customPackages && Array.isArray(customPackages) && customPackages.length > 0);
 
   let packages: ServicePackage[] = [];
 
@@ -806,191 +823,9 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
     ? "Katalog & Identitas Brand"
     : "Spesifikasi Teknis & Alat";
 
-  let workingTerms = [
-    {
-      title: "Jam Kerja & Lembur",
-      icon: Clock,
-      desc: "Sesi standar 8 jam kerja (termasuk 1 jam istirahat). Kelebihan jam dihitung proporsional per jam sesuai kesepakatan awal.",
-    },
-    {
-      title: "Pembayaran & DP",
-      icon: CreditCard,
-      desc: "Uang Muka (DP) 50% untuk reservasi jadwal tanggal kerja. Pelunasan 50% dilakukan saat draft output disetujui.",
-    },
-    {
-      title: "Revisi & Pengiriman",
-      icon: Package,
-      desc: "Termasuk 2x revisi minor. Seluruh file master resolusi tinggi diserahkan melalui tautan cloud resmi.",
-    },
-    {
-      title: "Hak Cipta Komersial",
-      icon: CheckCircle2,
-      desc: "Klien memperoleh hak tayang komersial untuk kebutuhan pemasaran digital, website, dan katalog promosi.",
-    },
-  ];
 
-  if (isStudio) {
-    workingTerms = [
-      {
-        title: "Durasi Shift & Lembur",
-        icon: Clock,
-        desc: "Sesi shift 4 atau 8 jam termasuk persiapan. Toleransi lembur 15 menit, selanjutnya overtime dihitung proporsional per jam.",
-      },
-      {
-        title: "DP & Reservasi Slot",
-        icon: CreditCard,
-        desc: "DP 50% untuk penguncian tanggal dan jam studio di kalender. Pelunasan 50% sebelum atau saat kedatangan di lokasi.",
-      },
-      {
-        title: "Kebersihan Cyclorama Wall",
-        icon: Sparkles,
-        desc: "Cyclorama disediakan dalam kondisi bersih putih. Sepatu yang menginjak kurva cyclorama wajib dialasi shoe cover / lakban.",
-      },
-      {
-        title: "Daya Listrik & Asistensi",
-        icon: CheckCircle2,
-        desc: "Daya listrik 16.500W aman untuk lighting strobo/kontinu. 1-2 asisten studio standby membantu penataan c-stand & boom.",
-      },
-    ];
-  } else if (isModel) {
-    workingTerms = [
-      {
-        title: "Call Time & Waktu Sesi",
-        icon: Clock,
-        desc: "Hadir tepat waktu 30 menit sebelum sesi dimulai untuk fitting & makeup. Total 8 jam kerja termasuk 1 jam waktu istirahat.",
-      },
-      {
-        title: "Batas Outfit & Looks",
-        icon: Scissors,
-        desc: "Sesi katalog maksimal 15–20 pergantian outfit per hari untuk menjaga kesegaran pose dan konsistensi ekspresi visual.",
-      },
-      {
-        title: "Pembayaran Resmi",
-        icon: CreditCard,
-        desc: "DP 50% untuk reservasi jadwal di kalender RAMU, pelunasan 50% diselesaikan setelah sesi pemotretan hari-H berakhir.",
-      },
-      {
-        title: "Lisensi Hak Citra (Usage Rights)",
-        icon: CheckCircle2,
-        desc: "Hak tayang komersial foto untuk media sosial, webstore e-commerce, dan lookbook digital berlaku selama 1 tahun.",
-      },
-    ];
-  } else if (isMUA) {
-    workingTerms = [
-      {
-        title: "Waktu Aplikasi Riasan",
-        icon: Clock,
-        desc: "Alokasi waktu rias 45–60 menit per model untuk look katalog/natural, dan 75–90 menit untuk riasan editorial / avant-garde.",
-      },
-      {
-        title: "Higienitas & Alat Medis",
-        icon: Sparkles,
-        desc: "Sterilisasi kuas dengan alkohol 70%, penggunaan aplikator maskara & lip disposable, serta produk ramah kulit sensitif.",
-      },
-      {
-        title: "Standby Touch-Up On-Set",
-        icon: CheckCircle2,
-        desc: "Standby di samping set kamera selama pemotretan untuk mengontrol minyak/keringat dan memperbaiki helai rambut.",
-      },
-      {
-        title: "Ketentuan DP & Pelunasan",
-        icon: CreditCard,
-        desc: "DP 50% untuk mengunci tanggal pemotretan, pelunasan 50% dituntaskan di hari H setelah sesi selesai.",
-      },
-    ];
-  } else if (isStylist) {
-    workingTerms = [
-      {
-        title: "Fitting & Persiapan H-2",
-        icon: Clock,
-        desc: "Konfirmasi moodboard visual dan pengukuran ukuran badan model H-2 untuk penyesuaian baju desainer/klien.",
-      },
-      {
-        title: "Peralatan On-Set Lengkap",
-        icon: Package,
-        desc: "Stylist standby membawa garment steamer 2200W, rak gantungan, jepit peniti busana, dan emergency sewing kit.",
-      },
-      {
-        title: "Penjagaan Koleksi Busana",
-        icon: Sparkles,
-        desc: "Bertanggung jawab menjaga baju desainer/brand tetap bersih tanpa noda make-up, robek, atau kusut selama pemotretan.",
-      },
-      {
-        title: "Sistem Pembayaran",
-        icon: CreditCard,
-        desc: "DP 50% untuk biaya operasional pulling wardrobe, pelunasan 50% setelah seluruh busana di-return dengan aman.",
-      },
-    ];
-  } else if (isVideographer) {
-    workingTerms = [
-      {
-        title: "Brief & Storyboard Visual",
-        icon: Clock,
-        desc: "Penyusunan shot list, mood warna, dan alur adegan disepakati sebelum hari produksi untuk efisiensi waktu shooting.",
-      },
-      {
-        title: "Master 4K & Pengiriman",
-        icon: Package,
-        desc: "Master file resolusi 4K 10-bit dikirim via cloud storage dalam 4–5 hari kerja, lengkap dengan cutdowns format 9:16.",
-      },
-      {
-        title: "Revisi Color Grading & Cut",
-        icon: CheckCircle2,
-        desc: "Termasuk 2x revisi minor (penyesuaian pacing musik, teks tipografi, dan fine-tune color grading).",
-      },
-      {
-        title: "Lisensi Musik Komersial",
-        icon: CreditCard,
-        desc: "Semua audio dan lagu latar yang digunakan memiliki sertifikat lisensi komersial legal (bebas klaim hak cipta).",
-      },
-    ];
-  } else if (isPhotographer) {
-    workingTerms = [
-      {
-        title: "Live Tethering Preview",
-        icon: Clock,
-        desc: "Klien dapat melihat langsung hasil jepretan foto di layar monitor/iPad secara real-time on-set selama pemotretan.",
-      },
-      {
-        title: "Timeline Pengiriman",
-        icon: Package,
-        desc: "Preview seluruh foto mentah (JPEG/RAW) via Drive H+1. Hasil final high-resolution retouch dikirim dalam 3–5 hari kerja.",
-      },
-      {
-        title: "2x Revisi Retouching",
-        icon: Sparkles,
-        desc: "Termasuk 2x revisi minor untuk tone warna (skin tone, lighting, pembersihan noda minor pada busana).",
-      },
-      {
-        title: "Hak Cipta Komersial",
-        icon: CheckCircle2,
-        desc: "Klien memperoleh lisensi komersial penuh untuk kebutuhan media sosial, website e-commerce, dan materi promosi cetak.",
-      },
-    ];
-  } else if (isDesigner) {
-    workingTerms = [
-      {
-        title: "Konsultasi Konsep Siluet",
-        icon: Clock,
-        desc: "Sesi diskusi konsep desain, pemilihan material kain, dan pembuatan sketsa digital awal sebelum produksi sampel.",
-      },
-      {
-        title: "Pembuatan Sampel (Toille)",
-        icon: Package,
-        desc: "Proses pembuatan pola dan sampel fisik 7–14 hari kerja dengan 1x sesi fitting koreksi sebelum approval akhir.",
-      },
-      {
-        title: "DP Pengadaan Bahan",
-        icon: CreditCard,
-        desc: "DP 50% untuk pengadaan tekstil dan pengerjaan pola awal. Pelunasan 50% diselesaikan sebelum penyerahan busana sampel.",
-      },
-      {
-        title: "Eksklusivitas Orisinalitas",
-        icon: CheckCircle2,
-        desc: "Rancangan busana dijamin orisinal dan menjadi hak eksklusif pemesan sesuai dengan kontrak kemitraan.",
-      },
-    ];
-  }
+
+  const totalCollaborationsCount = (actor.needs?.length || 0) + (actor.collaborationParticipations?.length || 0);
 
   const tabs = [
     {
@@ -1005,17 +840,21 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
       id: "specs" as const,
       label: isBrand ? "Identitas Brand" : "Spesifikasi",
     },
-    {
-      id: "collaborations" as const,
-      label: `Kebutuhan & Proyek (${(actor.needs?.length || 0) + (actor.collaborationParticipations?.length || 0)})`,
-    },
+    ...(isBrand || totalCollaborationsCount > 0
+      ? [
+          {
+            id: "collaborations" as const,
+            label: `Kebutuhan & Proyek (${totalCollaborationsCount})`,
+          },
+        ]
+      : []),
     {
       id: "about" as const,
       label: "Tentang",
     },
     {
       id: "reviews" as const,
-      label: `Ulasan (${totalReviews})`,
+      label: totalReviews > 0 ? `Ulasan (${totalReviews})` : "Ulasan",
     },
   ];
 
@@ -1359,13 +1198,23 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
             const creatorRequirements: string = collabAttrs.creator_requirements || "Fotografer & Model Fashion, min. portofolio editorial";
             const collabNotes: string = collabAttrs.collab_notes || "";
 
-            const collabTypeIcons: Record<string, string> = {
-              "Paid Campaign": "💰",
-              "Product Seeding / Gifting": "🎁",
-              "Revenue Share / Affiliate": "📊",
-              "Barter / Trade for Content": "🔄",
-              "Co-Branding & Kolaborasi Koleksi": "🤝",
-              "Casting Open": "🎯",
+            const renderCollabIcon = (type: string) => {
+              switch (type) {
+                case "Paid Campaign":
+                  return <CreditCard className="w-5 h-5 text-stone-700" />;
+                case "Product Seeding / Gifting":
+                  return <Gift className="w-5 h-5 text-stone-700" />;
+                case "Revenue Share / Affiliate":
+                  return <TrendingUp className="w-5 h-5 text-stone-700" />;
+                case "Barter / Trade for Content":
+                  return <Repeat className="w-5 h-5 text-stone-700" />;
+                case "Co-Branding & Kolaborasi Koleksi":
+                  return <Handshake className="w-5 h-5 text-stone-700" />;
+                case "Casting Open":
+                  return <Users className="w-5 h-5 text-stone-700" />;
+                default:
+                  return <Target className="w-5 h-5 text-stone-700" />;
+              }
             };
 
             return (
@@ -1374,7 +1223,9 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {collabTypes.map((type, idx) => (
                     <div key={idx} className="p-5 bg-white border border-stone-200/80 shadow-xs space-y-2 hover:border-[#1E1B2E] transition-colors">
-                      <div className="text-2xl">{collabTypeIcons[type] || "✦"}</div>
+                      <div className="w-9 h-9 rounded bg-stone-100 flex items-center justify-center text-stone-700 mb-1">
+                        {renderCollabIcon(type)}
+                      </div>
                       <h4 className="text-xs font-black uppercase tracking-wider text-[#1E1B2E]">{type}</h4>
                       <p className="text-[11px] text-stone-500 leading-relaxed">
                         {type === "Paid Campaign" && "Kreator dibayar sesuai rate card. Cocok untuk campaign terstruktur dengan brief yang jelas."}
@@ -1422,22 +1273,65 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                   )}
                 </div>
 
-                {/* CTA Ajukan Proposal */}
+                {/* Kebutuhan Talenta & Brief Brand (Jika ada) */}
+                {actor.needs && actor.needs.length > 0 && (
+                  <div className="p-5 bg-white border border-stone-200/80 shadow-xs space-y-4">
+                    <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-amber-600" />
+                        <h4 className="text-xs font-black uppercase tracking-wider text-[#1E1B2E]">
+                          Kebutuhan Talenta &amp; Brief Terbuka ({actor.needs.length})
+                        </h4>
+                      </div>
+                      <Link
+                        href={`/projects?tab=browse&search=${encodeURIComponent(actor.name)}`}
+                        className="text-[11px] font-bold text-amber-700 hover:text-amber-800 uppercase tracking-wider inline-flex items-center gap-1"
+                      >
+                        <span>Jelajahi di Hub Proyek</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {actor.needs.map((need) => (
+                        <div key={need.id} className="p-3.5 bg-stone-50 border border-stone-200/70 space-y-1">
+                          <span className="text-[9px] font-bold uppercase tracking-widest text-amber-700 bg-amber-50 px-2 py-0.5 border border-amber-200 inline-block">
+                            {need.category}
+                          </span>
+                          <h5 className="text-xs font-bold text-[#1E1B2E]">{need.title}</h5>
+                          {need.description && (
+                            <p className="text-[11px] text-stone-500 line-clamp-2 leading-relaxed">{need.description}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* CTA Ajukan Proposal / Pitch */}
                 <div className="p-5 bg-[#1E1B2E] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">
                     <h4 className="text-sm font-bold text-white">Tertarik berkolaborasi dengan {actor.name}?</h4>
-                    <p className="text-[11px] text-stone-300">Kirimkan portofolio dan proposal singkat Anda melalui fitur booking RAMU.</p>
+                    <p className="text-[11px] text-stone-300">Kirimkan portofolio dan konsep proposal singkat Anda melalui formulir kemitraan resmi RAMU.</p>
                   </div>
-                  {!isCurrentActor && (
-                    <button
-                      type="button"
-                      onClick={() => setIsBookingOpen(true)}
-                      className="shrink-0 px-6 py-3 bg-white text-[#1E1B2E] text-xs font-black uppercase tracking-widest hover:bg-stone-100 transition-colors cursor-pointer flex items-center gap-2"
+                  <div className="flex flex-wrap items-center gap-3 shrink-0">
+                    {!isCurrentActor && (
+                      <button
+                        type="button"
+                        onClick={() => setIsBookingOpen(true)}
+                        className="px-6 py-3 bg-white text-[#1E1B2E] text-xs font-black uppercase tracking-widest hover:bg-stone-100 transition-colors cursor-pointer flex items-center gap-2 shadow-xs"
+                      >
+                        <Briefcase className="w-4 h-4" />
+                        <span>Ajukan Pitch Kolaborasi</span>
+                      </button>
+                    )}
+                    <Link
+                      href={`/projects?tab=browse&search=${encodeURIComponent(actor.name)}`}
+                      className="px-5 py-3 border border-white/30 text-white text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-colors flex items-center gap-2"
                     >
-                      <Briefcase className="w-4 h-4" />
-                      <span>Ajukan Proposal Kerjasama</span>
-                    </button>
-                  )}
+                      <Search className="w-4 h-4" />
+                      <span>Lihat Brief Proyek</span>
+                    </Link>
+                  </div>
                 </div>
               </>
             );
@@ -1467,12 +1361,28 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                   <span>Atur Paket &amp; Tarif Saya</span>
                 </button>
               )}
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Transparan &amp; Resmi</span>
-              </div>
+              {hasCustomPackages ? (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Tarif Terverifikasi Talenta</span>
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-stone-100 text-stone-600 text-xs font-semibold border border-stone-200">
+                  <Clock className="w-3.5 h-3.5 text-stone-400" />
+                  <span>Acuan Kisaran Industri</span>
+                </div>
+              )}
             </div>
           </div>
+
+          {!hasCustomPackages && (
+            <div className="p-3.5 bg-amber-50/70 border border-amber-200/60 text-xs text-amber-900 leading-relaxed flex items-start gap-2.5">
+              <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <span>
+                <strong>Catatan Klien:</strong> Paket di bawah merupakan acuan standar industri untuk sektor {actor.sector}. Nilai kompensasi final dapat disepakati secara langsung berdasarkan kebutuhan brief dan durasi sesi.
+              </span>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {packages.map((pkg, idx) => (
@@ -1847,9 +1757,10 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                           {part.collaboration.outcomes.map((o) => (
                             <span
                               key={o.id}
-                              className="text-[10px] font-bold bg-white border border-stone-200 px-2 py-0.5 text-stone-800"
+                              className="text-[10px] font-bold bg-white border border-stone-200 px-2 py-0.5 text-stone-800 inline-flex items-center gap-1"
                             >
-                              ✓ {o.title} ({o.outcomeType})
+                              <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
+                              <span>{o.title} ({o.outcomeType})</span>
                             </span>
                           ))}
                         </div>
@@ -1885,7 +1796,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-stone-400" />
               <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
-                Profil &amp; Ketentuan Kerja
+                Profil &amp; Pengalaman Profesional
               </h3>
             </div>
             {isCurrentActor && (
@@ -1932,33 +1843,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                 </div>
               </div>
 
-              <div className="p-7 sm:p-8 bg-white border border-stone-200/80 rounded-none space-y-5">
-                <div className="flex items-center justify-between pb-2 border-b border-stone-100">
-                  <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                    Ketentuan &amp; SOP Pelaksanaan Kerja ({actor.sector})
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-none border border-emerald-200">
-                    Standar Industri RAMU
-                  </span>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {workingTerms.map((term, tIdx) => {
-                    const TermIcon = term.icon;
-                    return (
-                      <div key={tIdx} className="p-4 rounded-none bg-stone-50 border border-stone-200/70 space-y-1.5">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-[#1E1B2E]">
-                          <TermIcon className="w-3.5 h-3.5 text-stone-600" />
-                          <span>{term.title}</span>
-                        </div>
-                        <p className="text-[11px] text-stone-500 leading-relaxed">
-                          {term.desc}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
             </div>
 
             <div className="space-y-6">
@@ -2024,7 +1909,13 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                     className="w-full mt-2 py-3 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-wider rounded-none transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
                   >
                     <Briefcase className="w-4 h-4" />
-                    <span>Sewa Jasa Sekarang</span>
+                    <span>
+                      {isBrand
+                        ? "Ajukan Kolaborasi Sekarang"
+                        : isStudio
+                        ? "Sewa Studio Sekarang"
+                        : "Sewa Jasa Sekarang"}
+                    </span>
                   </button>
                 )}
               </div>
@@ -2035,7 +1926,6 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
 
       {activeTab === "reviews" && (
         <div className="space-y-8">
-
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-stone-400" />
@@ -2052,63 +1942,67 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
               >
                 <Sliders className="w-3.5 h-3.5" />
-                <span>Atur Usulan &amp; Reputasi</span>
+                <span>Atur Ulasan &amp; Reputasi</span>
               </button>
             )}
           </div>
 
-          <div className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-stone-100">
-              <div className="flex items-center gap-4">
-                <div className="text-4xl sm:text-5xl font-black text-[#1E1B2E]">
-                  {avgRating}
-                </div>
-                <div>
-                  <div className="flex items-center gap-1 text-amber-500">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} className="w-5 h-5 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <div className="text-xs text-stone-500 font-semibold mt-1">
-                    Berdasarkan {totalReviews > 0 ? `${totalReviews} ulasan klien terverifikasi` : "penilaian standar profesional RAMU"}
-                  </div>
-                </div>
+          {totalReviews === 0 ? (
+            <div className="p-8 sm:p-12 text-center bg-white border border-stone-200/80 space-y-4">
+              <div className="w-12 h-12 mx-auto bg-stone-50 border border-stone-200/70 flex items-center justify-center text-stone-400">
+                <Star className="w-6 h-6 text-stone-300" />
               </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                <div className="p-3 rounded-none bg-stone-50 border border-stone-200/70 text-center">
-                  <span className="text-[10px] text-stone-400 font-bold uppercase">Kualitas Output</span>
-                  <div className="font-bold text-[#1E1B2E]">98%</div>
-                </div>
-                <div className="p-3 rounded-none bg-stone-50 border border-stone-200/70 text-center">
-                  <span className="text-[10px] text-stone-400 font-bold uppercase">Ketepatan Waktu</span>
-                  <div className="font-bold text-emerald-700">97%</div>
-                </div>
-                <div className="p-3 rounded-none bg-stone-50 border border-stone-200/70 text-center">
-                  <span className="text-[10px] text-stone-400 font-bold uppercase">Komunikasi</span>
-                  <div className="font-bold text-purple-700">99%</div>
-                </div>
-                <div className="p-3 rounded-none bg-stone-50 border border-stone-200/70 text-center">
-                  <span className="text-[10px] text-stone-400 font-bold uppercase">Kepuasan Klien</span>
-                  <div className="font-bold text-[#1E1B2E]">99%</div>
-                </div>
+              <div className="max-w-md mx-auto space-y-1">
+                <h4 className="text-sm font-bold text-[#1E1B2E]">Belum Ada Ulasan Publik</h4>
+                <p className="text-xs text-stone-500 leading-relaxed">
+                  Kreator ini belum memiliki ulasan dari proyek yang diselesaikan di RAMU. Jadilah brand atau mitra pertama yang berkolaborasi dan memberikan ulasan terverifikasi!
+                </p>
               </div>
+              {!isCurrentActor && (
+                <button
+                  type="button"
+                  onClick={() => setIsBookingOpen(true)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-xs"
+                >
+                  <Briefcase className="w-3.5 h-3.5" />
+                  <span>Mulai Kolaborasi Pertama</span>
+                </button>
+              )}
             </div>
+          ) : (
+            <div className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-stone-100">
+                <div className="flex items-center gap-4">
+                  <div className="text-4xl sm:text-5xl font-black text-[#1E1B2E]">
+                    {avgRating}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1 text-amber-500">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    <div className="text-xs text-stone-500 font-semibold mt-1">
+                      Berdasarkan {totalReviews} ulasan klien terverifikasi
+                    </div>
+                  </div>
+                </div>
+                <div className="px-3.5 py-1.5 bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>100% Ulasan Transaksi Asli</span>
+                </div>
+              </div>
 
-            <div className="space-y-4">
-              <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider">
-                Testimoni dari Klien &amp; Mitra Terverifikasi
-              </h3>
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider">
+                  Testimoni dari Klien &amp; Mitra Terverifikasi
+                </h3>
 
-              {actor.feedbacks.length > 0 ? (
                 <div className="space-y-3">
-                  {actor.feedbacks.map((fb, idx) => {
-                    const mockAuthors = [
-                      { name: "Kopi Senja Indonesia", role: "Brand F&B", initial: "KS", bg: "bg-amber-100 text-amber-800" },
-                      { name: "Aruna Studio", role: "Creative Agency", initial: "AS", bg: "bg-purple-100 text-purple-800" },
-                      { name: "Mitra Terverifikasi", role: "Klien RAMU", initial: "MT", bg: "bg-stone-200 text-stone-700" }
-                    ];
-                    const author = mockAuthors[idx % mockAuthors.length];
+                  {actor.feedbacks.map((fb) => {
+                    const authorName = (fb as any).authorActor?.name || (fb as any).authorName || "Klien RAMU Terverifikasi";
+                    const authorRole = (fb as any).authorActor?.sector || "Mitra Kolaborasi";
+                    const initial = authorName.slice(0, 2).toUpperCase();
 
                     return (
                       <div
@@ -2117,12 +2011,12 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-center gap-3">
-                            <div className={`w-9 h-9 rounded-none ${author.bg} flex items-center justify-center font-bold text-xs shrink-0`}>
-                              {author.initial}
+                            <div className="w-9 h-9 rounded-none bg-[#1E1B2E] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                              {initial}
                             </div>
                             <div>
-                              <h4 className="text-xs font-bold text-[#1E1B2E]">{author.name}</h4>
-                              <p className="text-[11px] text-stone-500">{author.role}</p>
+                              <h4 className="text-xs font-bold text-[#1E1B2E]">{authorName}</h4>
+                              <p className="text-[11px] text-stone-500">{authorRole}</p>
                             </div>
                           </div>
                           <div className="text-right space-y-0.5">
@@ -2144,13 +2038,9 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                     );
                   })}
                 </div>
-              ) : (
-                <div className="p-8 text-center text-xs text-stone-400 italic bg-stone-50/50 rounded-none border border-dashed border-stone-200">
-                  Belum ada ulasan publik. Jadilah klien pertama yang bekerjasama dengan kreator ini!
-                </div>
-              )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
 

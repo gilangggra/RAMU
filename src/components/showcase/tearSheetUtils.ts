@@ -347,40 +347,40 @@ export function getTearSheetData(item: ShowcaseItem): TearSheetData {
 export function formatInstagramCredits(item: ShowcaseItem, data: TearSheetData): string {
   const creditsLines = data.credits
     .map((c) => {
-      let icon = "✦";
-      if (c.category === "photography") icon = "📸";
-      if (c.category === "wardrobe") icon = "👗";
-      if (c.category === "hmua") icon = "💄";
-      if (c.category === "talent") icon = "👤";
-      if (c.category === "art_direction") icon = "🎨";
+      let icon = "•";
+      if (c.category === "photography") icon = "[FOTO]";
+      if (c.category === "wardrobe") icon = "[WARDROBE]";
+      if (c.category === "hmua") icon = "[HMUA]";
+      if (c.category === "talent") icon = "[TALENT]";
+      if (c.category === "art_direction") icon = "[ART]";
 
       let verifBadge = "";
-      if (c.isUploader) verifBadge = " [✓ Pemilik Portofolio / Uploader]";
-      else if (c.verified) verifBadge = " [✓ Peer-Verified di Set]";
-      else if (c.status === "PENDING") verifBadge = " [⏳ Menunggu Konfirmasi Rekan]";
-      else if (c.status === "EXTERNAL") verifBadge = " [🏷️ Kredit Eksternal]";
+      if (c.isUploader) verifBadge = " [Pemilik Portofolio / Uploader]";
+      else if (c.verified) verifBadge = " [Peer-Verified di Set]";
+      else if (c.status === "PENDING") verifBadge = " [Menunggu Konfirmasi Rekan]";
+      else if (c.status === "EXTERNAL") verifBadge = " [Kredit Eksternal]";
 
       return `${icon} ${c.role}: ${c.handle} (${c.details})${verifBadge}`;
     })
     .join("\n");
 
   const techLine = data.technicalSpecs
-    ? `\n⚙️ Camera & Rig: ${data.technicalSpecs.camera} | ${data.technicalSpecs.lens} | ${data.technicalSpecs.lighting}`
+    ? `\nCamera & Rig: ${data.technicalSpecs.camera} | ${data.technicalSpecs.lens} | ${data.technicalSpecs.lighting}`
     : "";
 
   return `EDITORIAL TEAR-SHEET: "${data.title}"
 ${data.edition}
 Curated on @ramu.creative • Creative Opportunity Engine
 
-🛡️ ANTI-CATFISHING STATUS: #${data.antiCatfishingCertificateId}
+ANTI-CATFISHING STATUS: #${data.antiCatfishingCertificateId}
 Status: ${data.verificationRate}
 Menjamin perlindungan hak atribusi karya asli produksi tim, terlindungi dari pencurian portofolio (catfishing) & penghapusan kredit talenta.
 
 CREDITS & STATUS KRU:
 ${creditsLines}${techLine}
 
-📍 Production: ${item.actor.location || "Indonesia"}
-✨ Collaboration engineered & verified via RAMU Ecosystem.
+Production: ${item.actor.location || "Indonesia"}
+Collaboration engineered & verified via RAMU Ecosystem.
 Inisiasi kolaborasi serupa: ramu.id/showcase
 
 #RAMUEcosystem #AntiCatfishing #PeerVerified #CoCredit #IndonesianCreative #EditorialTearsheet #FashionEditorial #RAMUSynergy`;

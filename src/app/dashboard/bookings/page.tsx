@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { AppShell } from "@/components/layout/AppShell";
-import { ArrowLeft, Clock, CheckCircle2, XCircle, ChevronRight, Inbox, Send, ArrowUpRight, ExternalLink } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle2, XCircle, ChevronRight, Inbox, Send, ArrowUpRight, ExternalLink, Handshake } from "lucide-react";
 import {
   BookingStatusManager,
   ConvertBookingButton,
@@ -115,7 +115,7 @@ export default async function BookingManagementPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <StatusBadge status={booking.status} />
+                        <StatusBadge status={booking.status} collaborationId={(booking.details as any)?.collaborationId} />
                         <Link
                           href={`/dashboard/bookings/${booking.id}`}
                           className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-50 hover:bg-[#1E1B2E] hover:text-white border border-stone-200 text-xs font-bold text-stone-600 transition-all"
@@ -149,6 +149,7 @@ export default async function BookingManagementPage() {
                     <BookingMilestoneTracker
                       status={booking.status}
                       dpPercentage={(booking.details as any)?.agreedTerms?.dpPercentage || 50}
+                      collaborationId={(booking.details as any)?.collaborationId}
                     />
 
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-stone-100">
@@ -163,12 +164,15 @@ export default async function BookingManagementPage() {
                     {booking.status === "ACCEPTED" && (
                       <div className="mt-4 pt-4 border-t border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Koordinasi Langsung</div>
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                            {(booking.details as any)?.collaborationId ? "Ruang Kolaborasi Aktif" : "Koordinasi Langsung"}
+                          </div>
                           <BookingContactActions
                             phone={booking.requester.contactPhone}
                             email={booking.requester.contactEmail}
                             contactName={booking.requester.name}
                             myRole="target"
+                            partnerActorId={booking.requesterId}
                           />
                         </div>
                         <div className="shrink-0 pt-2 sm:pt-0">
@@ -218,7 +222,7 @@ export default async function BookingManagementPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <StatusBadge status={booking.status} />
+                        <StatusBadge status={booking.status} collaborationId={(booking.details as any)?.collaborationId} />
                         <Link
                           href={`/dashboard/bookings/${booking.id}`}
                           className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-50 hover:bg-[#1E1B2E] hover:text-white border border-stone-200 text-xs font-bold text-stone-600 transition-all"
@@ -251,6 +255,7 @@ export default async function BookingManagementPage() {
                     <BookingMilestoneTracker
                       status={booking.status}
                       dpPercentage={(booking.details as any)?.agreedTerms?.dpPercentage || 50}
+                      collaborationId={(booking.details as any)?.collaborationId}
                     />
 
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-stone-100">
@@ -261,13 +266,20 @@ export default async function BookingManagementPage() {
                     {booking.status === "ACCEPTED" && (
                       <div className="mt-4 pt-4 border-t border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 mb-0.5">Pesanan Diterima!</div>
-                          <p className="text-[11px] text-stone-500 mb-1.5">Silakan hubungi penyedia jasa untuk konfirmasi pembayaran DP & lokasi.</p>
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 mb-0.5">
+                            {(booking.details as any)?.collaborationId ? "Workspace Kolaborasi Aktif!" : "Pesanan Diterima!"}
+                          </div>
+                          <p className="text-[11px] text-stone-500 mb-1.5">
+                            {(booking.details as any)?.collaborationId
+                              ? "Ruang kolaborasi telah aktif. Akses papan tugas & progress bersama mitra."
+                              : "Silakan hubungi penyedia jasa untuk konfirmasi pembayaran DP & lokasi."}
+                          </p>
                           <BookingContactActions
                             phone={booking.target.contactPhone}
                             email={booking.target.contactEmail}
                             contactName={booking.target.name}
                             myRole="requester"
+                            partnerActorId={booking.targetId}
                           />
                         </div>
                         {(booking.details as any)?.collaborationId && (
@@ -351,7 +363,21 @@ function BookingDetailsBadgeList({ details }: { details: any }) {
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({
+  status,
+  collaborationId,
+}: {
+  status: string;
+  collaborationId?: string | null;
+}) {
+  if (collaborationId) {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 text-[10px] font-bold uppercase tracking-wider border border-purple-200">
+        <Handshake className="w-3 h-3 text-purple-600" />
+        Workspace Aktif
+      </span>
+    );
+  }
   if (status === "ACCEPTED") {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-wider border border-emerald-200">

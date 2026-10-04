@@ -15,6 +15,9 @@ import {
   withdrawInterest,
   formCollaborationFromBrief,
   getCrewRecommendationsForBrief,
+  inviteActorToBriefRole,
+  respondToProjectInvitation,
+  clearRecommendationsCache,
 } from "@/application/projectBriefService";
 
 
@@ -219,45 +222,64 @@ export async function inviteActorToRoleAction(
 ) {
   const initiator = await getPrimaryActor();
 
-  const brief = await prisma.projectBrief.findUnique({
-    where: { id: briefId },
-    select: { creatorActorId: true, title: true },
-  });
-
-  if (!brief) return { success: false, error: "Brief tidak ditemukan." };
-  if (brief.creatorActorId !== initiator.id) {
-    return { success: false, error: "Hanya inisiator proyek yang dapat mengundang." };
-  }
-
-  const existing = await prisma.collaborationInterest.findUnique({
-    where: { briefId_actorId_roleId: { briefId, actorId: targetActorId, roleId } },
-  });
-
-  if (existing && existing.status === "PENDING") {
-    return { success: false, error: "Kreator ini sudah memiliki interest aktif di peran ini." };
-  }
-  if (existing && existing.status === "ACCEPTED") {
-    return { success: false, error: "Peran ini sudah diterima oleh kreator ini." };
-  }
-
   try {
-    await expressInterest(
+    const res = await inviteActorToBriefRole(
+      initiator.id,
       targetActorId,
       briefId,
-      roleId,
-      `🎯 Undangan Kolaborasi dari Inisiator\n\nAnda direkomendasikan oleh Smart Crew Builder RAMU dan secara khusus diundang oleh inisiator proyek "${brief.title}" untuk bergabung dalam peran ini. Silakan tinjau dan balas undangan ini.`,
-      []
+      roleId
     );
 
     revalidatePath(`/projects/${briefId}`);
     revalidatePath(`/projects/${briefId}/interests`);
+    revalidatePath("/projects");
     revalidatePath("/dashboard");
-    return { success: true };
+    return { success: true, interestId: res.interestId };
   } catch (error) {
     console.error("Error inviting actor:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Gagal mengirim undangan.",
+    };
+  }
+}
+
+export async function respondToInvitationAction(
+  interestId: string,
+  response: "ACCEPT" | "DECLINE"
+) {
+  const actor = await getPrimaryActor();
+
+  try {
+    const res = await respondToProjectInvitation(interestId, actor.id, response);
+    revalidatePath("/projects");
+    revalidatePath("/dashboard");
+    revalidatePath("/collaborations");
+    return {
+      success: true,
+      status: res.status,
+      collaborationId: res.collaborationId,
+      isFilled: res.isFilled,
+    };
+  } catch (error) {
+    console.error("Error responding to project invitation:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Gagal menanggapi undangan.",
+    };
+  }
+}
+
+export async function refreshCrewRecommendationsAction(briefId: string) {
+  try {
+    clearRecommendationsCache(briefId);
+    revalidatePath(`/projects/${briefId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error refreshing crew recommendations:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Gagal menyegarkan rekomendasi.",
     };
   }
 }

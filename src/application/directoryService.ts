@@ -8,53 +8,105 @@ export interface DirectoryFilterParams {
   location?: string;
   style?: string;
   compensation?: string;
+  sortBy?: string;
 }
 
 export async function getDirectoryActors(params: DirectoryFilterParams = {}) {
-  const { search, actorType, sector, location, style, compensation } = params;
+  const { search, actorType, sector, location, style, compensation, sortBy } = params;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const whereClause: any = {
-    status: { not: "ARCHIVED" },
-  };
+  const andConditions: any[] = [
+    { status: { not: "ARCHIVED" } },
+    {
+      NOT: [
+        { sector: { contains: "Administrator", mode: "insensitive" } },
+        { sector: { contains: "Admin", mode: "insensitive" } },
+      ],
+    },
+  ];
 
   if (actorType && actorType !== "ALL") {
-    whereClause.actorType = actorType as ActorType;
+    if (actorType === "BRAND" || actorType === "MSME") {
+      andConditions.push({
+        OR: [
+          { actorType: ActorType.BRAND },
+          { sector: { contains: "brand", mode: "insensitive" } },
+          { sector: { contains: "label", mode: "insensitive" } },
+          { sector: { contains: "umkm", mode: "insensitive" } },
+        ],
+      });
+    } else if (actorType === "STUDIO") {
+      andConditions.push({
+        OR: [
+          { actorType: ActorType.STUDIO },
+          { sector: { contains: "studio", mode: "insensitive" } },
+        ],
+      });
+    } else if (actorType === "INDIVIDUAL") {
+      andConditions.push({
+        actorType: ActorType.INDIVIDUAL,
+        NOT: [
+          { sector: { contains: "studio", mode: "insensitive" } },
+          { sector: { contains: "brand", mode: "insensitive" } },
+          { sector: { contains: "label", mode: "insensitive" } },
+        ],
+      });
+    } else if (actorType === "COLLECTIVE") {
+      andConditions.push({
+        actorType: ActorType.COLLECTIVE,
+      });
+    } else {
+      andConditions.push({
+        actorType: actorType as ActorType,
+      });
+    }
   }
 
   if (sector && sector !== "ALL") {
-    whereClause.sector = { contains: sector, mode: "insensitive" };
+    andConditions.push({
+      sector: { contains: sector, mode: "insensitive" },
+    });
   }
 
   if (location && location !== "ALL") {
-    whereClause.location = { contains: location, mode: "insensitive" };
+    andConditions.push({
+      location: { contains: location, mode: "insensitive" },
+    });
   }
 
   if (style && style !== "ALL") {
-    whereClause.aestheticStyles = { has: style };
+    andConditions.push({
+      aestheticStyles: { has: style },
+    });
   }
 
   if (compensation && compensation !== "ALL") {
-    whereClause.compensationModels = { has: compensation };
+    andConditions.push({
+      compensationModels: { has: compensation },
+    });
   }
 
   if (search && search.trim() !== "") {
     const term = search.trim();
-    whereClause.OR = [
-      { name: { contains: term, mode: "insensitive" } },
-      { sector: { contains: term, mode: "insensitive" } },
-      { description: { contains: term, mode: "insensitive" } },
-      { location: { contains: term, mode: "insensitive" } },
-      {
-        assets: {
-          some: {
-            name: { contains: term, mode: "insensitive" },
-            status: "ACTIVE",
+    andConditions.push({
+      OR: [
+        { name: { contains: term, mode: "insensitive" } },
+        { sector: { contains: term, mode: "insensitive" } },
+        { description: { contains: term, mode: "insensitive" } },
+        { location: { contains: term, mode: "insensitive" } },
+        {
+          assets: {
+            some: {
+              name: { contains: term, mode: "insensitive" },
+              status: "ACTIVE",
+            },
           },
         },
-      },
-    ];
+      ],
+    });
   }
+
+  const whereClause = { AND: andConditions };
 
   const actors = await prisma.actor.findMany({
     where: whereClause,
@@ -68,6 +120,7 @@ export async function getDirectoryActors(params: DirectoryFilterParams = {}) {
       },
       assets: {
         where: { status: "ACTIVE" },
+        orderBy: { createdAt: "desc" },
         take: 10,
         select: {
           id: true,
@@ -98,14 +151,14 @@ export async function getDirectoryActors(params: DirectoryFilterParams = {}) {
         },
       },
     },
-    orderBy: [{ createdAt: "desc" }],
+    orderBy: sortBy === "name" ? [{ name: "asc" }] : [{ createdAt: "desc" }],
   });
 
   return actors;
 }
 
 export async function getDirectoryActorById(id: string) {
-  return prisma.actor.findUnique({
+  const actor = await prisma.actor.findUnique({
     where: { id },
     include: {
       owner: {
@@ -193,4 +246,14 @@ export async function getDirectoryActorById(id: string) {
       },
     },
   });
+
+  if (
+    actor &&
+    (actor.sector?.toLowerCase().includes("administrator") ||
+      actor.sector?.toLowerCase().includes("admin"))
+  ) {
+    return null;
+  }
+
+  return actor;
 }

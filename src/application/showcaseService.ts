@@ -134,8 +134,19 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
 
     let displayCategory = asset.subtype || "Lainnya";
 
-    if (category && category !== "ALL" && displayCategory !== category) {
-      return;
+    if (category && category !== "ALL") {
+      const catLower = category.toLowerCase();
+      const dispLower = displayCategory.toLowerCase();
+      const isVideoMatch = catLower.includes("video") && (attrs.media_type === "VIDEO" || Boolean(attrs.video_url) || dispLower.includes("video"));
+      const isMatch =
+        dispLower.includes(catLower) ||
+        catLower.includes(dispLower) ||
+        isVideoMatch ||
+        (catLower.includes("foto") && dispLower.includes("foto")) ||
+        (catLower.includes("styling") && dispLower.includes("styl"));
+      if (!isMatch) {
+        return;
+      }
     }
 
     let imageUrl = null;

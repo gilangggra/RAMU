@@ -19,7 +19,7 @@ import {
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Menjalankan Seeding Dataset Golden Demo (Phase 1 + Phase 2)...");
+  console.log("[SEED] Menjalankan Seeding Dataset Golden Demo (Phase 1 + Phase 2)...");
 
   const demoProfile = await prisma.profile.upsert({
     where: { email: "demo@ramu.id" },
@@ -365,13 +365,13 @@ async function main() {
   });
   console.log(`✓ Aktor selesai: ${lensa.name}`);
 
-  console.log("\n✅ Seeding Phase 1 + 2 selesai!");
+  console.log("\n[SEED] Seeding Phase 1 + 2 selesai!");
   console.log("   4 Aktor | Assets, Goals, Needs, Constraints Golden Demo siap untuk Engine.");
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Gagal menjalankan seed:", e);
+    console.error("[ERROR] Gagal menjalankan seed:", e);
     process.exit(1);
   })
   .finally(async () => {

@@ -5,6 +5,7 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
+import { clearRecommendationsCache } from "@/application/projectBriefService";
 
 export async function updateProfileBasicInfo(formData: FormData) {
   try {
@@ -111,6 +112,7 @@ export async function updateProfileBasicInfo(formData: FormData) {
       },
     });
 
+    clearRecommendationsCache();
     revalidatePath("/settings");
     revalidatePath("/settings/profile");
     revalidatePath("/directory");
@@ -159,6 +161,7 @@ export async function updatePreferences(formData: FormData) {
       },
     });
 
+    clearRecommendationsCache();
     revalidatePath("/settings");
     revalidatePath("/directory");
 

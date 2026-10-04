@@ -84,20 +84,39 @@ export default async function OpportunityDetailPage({
   };
 
   return (
-    <AppShell actor={actor} activeRoute="/opportunities">
+    <AppShell actor={actor} activeRoute="/projects">
       <div className="space-y-8 max-w-5xl mx-auto">
-        <div className="flex items-center justify-between">
-          <Link
-            href="/opportunities"
-            className="inline-flex items-center gap-2 text-xs font-bold text-[#716B7E] hover:text-[#27213D] transition-colors group"
-          >
-            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
-            <span>Kembali ke Semua Peluang</span>
-          </Link>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-xs text-[#716B7E]">
+            <Link href="/projects" className="hover:text-[#27213D] font-bold transition-colors">
+              Proyek
+            </Link>
+            <span>/</span>
+            <Link
+              href="/projects?tab=ai-opportunities"
+              className="hover:text-[#27213D] font-bold transition-colors"
+            >
+              Peluang Kolaborasi AI
+            </Link>
+            <span>/</span>
+            <span className="text-[#27213D] font-bold truncate max-w-[200px] sm:max-w-md">
+              {opp.title}
+            </span>
+          </div>
 
-          <span className="px-3.5 py-1 rounded-full text-xs font-semibold bg-stone-100 text-[#27213D] border border-stone-200">
-            Status: {opp.status}
-          </span>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/projects?tab=ai-opportunities"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#E66A48] hover:underline transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Kembali ke Peluang AI</span>
+            </Link>
+
+            <span className="px-3.5 py-1 rounded-full text-xs font-semibold bg-stone-100 text-[#27213D] border border-stone-200">
+              Status: {opp.status}
+            </span>
+          </div>
         </div>
 
         <section className="p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] relative overflow-hidden space-y-6">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Sparkles,
@@ -12,9 +13,10 @@ import {
   Check,
   Loader2,
   AlertCircle,
+  RotateCw,
 } from "lucide-react";
 import type { CrewRecommendation } from "@/application/projectBriefService";
-import { inviteActorToRoleAction } from "@/app/projects/actions";
+import { inviteActorToRoleAction, refreshCrewRecommendationsAction } from "@/app/projects/actions";
 
 const CATEGORY_LABELS: Record<string, string> = {
   PORTFOLIO_WORK: "Karya & Portofolio",
@@ -142,6 +144,15 @@ interface SmartCrewPanelProps {
 }
 
 export function SmartCrewPanel({ recommendations, briefId }: SmartCrewPanelProps) {
+  const router = useRouter();
+  const [isRefreshing, startRefreshTransition] = useTransition();
+
+  const handleRefresh = () => {
+    startRefreshTransition(async () => {
+      await refreshCrewRecommendationsAction(briefId);
+      router.refresh();
+    });
+  };
 
   const activeRecs = recommendations.filter(
     (r) => !r.isFilled && r.candidates.length > 0
@@ -173,9 +184,22 @@ export function SmartCrewPanel({ recommendations, briefId }: SmartCrewPanelProps
             </p>
           </div>
         </div>
-        <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 shrink-0 self-start">
-          AI-POWERED
-        </span>
+
+        <div className="flex items-center gap-2 shrink-0 self-start">
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            title="Segarkan rekomendasi kru terbaru dari ekosistem"
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-white hover:bg-stone-50 border border-stone-200/80 text-stone-700 hover:text-stone-900 transition-all cursor-pointer disabled:opacity-50 shadow-2xs"
+          >
+            <RotateCw className={`w-3 h-3 ${isRefreshing ? "animate-spin text-amber-600" : "text-stone-500"}`} />
+            <span>{isRefreshing ? "Memperbarui..." : "Segarkan"}</span>
+          </button>
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">
+            AI-POWERED
+          </span>
+        </div>
       </div>
 
       <div className="bg-white divide-y divide-stone-100">
