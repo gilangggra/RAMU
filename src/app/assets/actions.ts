@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { AssetCategory, AssetRole, AssetStatus, SourceType, ConfidenceLevel, Prisma } from "@prisma/client";
+import { clearRecommendationsCache } from "@/application/projectBriefService";
 
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
@@ -110,6 +111,7 @@ export async function createAsset(formData: FormData) {
     redirect(`${baseUrl}${queryStr ? `${queryStr}&` : "?"}error=${encodeURIComponent("Gagal menyimpan aset: " + (e?.message?.split("\n")[0] || "Error"))}`);
   }
 
+  clearRecommendationsCache();
   revalidatePath("/readiness");
   revalidatePath("/assets");
   revalidatePath("/dashboard");
@@ -124,6 +126,7 @@ export async function archiveAsset(assetId: string) {
     data: { status: AssetStatus.ARCHIVED, archivedAt: new Date() },
   });
 
+  clearRecommendationsCache();
   revalidatePath("/readiness");
   revalidatePath("/assets");
   revalidatePath("/dashboard");

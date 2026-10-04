@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { updateActorSpecs } from "@/app/settings/actions";
@@ -12,42 +12,46 @@ import {
   Users,
   Sparkles,
   Info,
+  Gift,
+  TrendingUp,
+  Repeat,
+  Handshake,
 } from "lucide-react";
 
 const COLLAB_TYPE_OPTIONS = [
   {
     id: "Paid Campaign",
-    icon: "💰",
+    icon: CreditCard,
     title: "Paid Campaign",
     desc: "Kreator dibayar sesuai rate card mereka. Cocok untuk campaign terstruktur dengan brief yang jelas.",
   },
   {
     id: "Product Seeding / Gifting",
-    icon: "🎁",
+    icon: Gift,
     title: "Product Seeding / Gifting",
     desc: "Kirimkan produk gratis kepada kreator pilihan untuk konten organik tanpa kewajiban posting.",
   },
   {
     id: "Revenue Share / Affiliate",
-    icon: "📊",
+    icon: TrendingUp,
     title: "Revenue Share / Affiliate",
     desc: "Kreator mendapatkan komisi dari setiap konversi/penjualan via kode unik mereka.",
   },
   {
     id: "Barter / Trade for Content",
-    icon: "🔄",
+    icon: Repeat,
     title: "Barter / Trade for Content",
     desc: "Pertukaran nilai: brand menyediakan produk/jasa, kreator menyediakan konten berkualitas.",
   },
   {
     id: "Co-Branding & Kolaborasi Koleksi",
-    icon: "🤝",
+    icon: Handshake,
     title: "Co-Branding & Kolaborasi Koleksi",
     desc: "Kerjasama desain koleksi bersama antara brand dan kreator/desainer untuk rilis terbatas.",
   },
   {
     id: "Casting Open",
-    icon: "🎯",
+    icon: Users,
     title: "Casting Open",
     desc: "Buka casting terbuka untuk model, fotografer, atau kreator untuk proyek tertentu.",
   },
@@ -157,7 +161,7 @@ export function BrandCollabForm({
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xl">{option.icon}</span>
+                  <option.icon className={`w-5 h-5 ${isSelected ? "text-amber-400" : "text-stone-400"}`} />
                   {isSelected && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
                 </div>
                 <div>
@@ -261,9 +265,10 @@ export function BrandCollabForm({
             <div className="flex flex-wrap gap-2">
               {collabTypes.map((t) => {
                 const opt = COLLAB_TYPE_OPTIONS.find((o) => o.id === t);
+                const Icon = opt?.icon;
                 return (
                   <span key={t} className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-stone-300 text-xs font-bold text-[#1E1B2E]">
-                    <span>{opt?.icon}</span>
+                    {Icon && <Icon className="w-3.5 h-3.5 text-stone-600 shrink-0" />}
                     <span>{t}</span>
                   </span>
                 );

@@ -13,6 +13,7 @@ import {
   ExternalLink,
   ShieldCheck,
   Pencil,
+  Check,
 } from "lucide-react";
 
 interface StudioGalleryPhoto {
@@ -200,8 +201,8 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
                   key={i}
                   className="p-3 rounded-none bg-stone-50/90 border border-stone-200/70 text-xs text-[#27213D] flex items-start gap-2.5"
                 >
-                  <div className="w-5 h-5 rounded-none bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 text-[10px] font-bold mt-0.5">
-                    ✓
+                  <div className="w-5 h-5 rounded-none bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check className="w-3 h-3 stroke-[2.5]" />
                   </div>
                   <span className="font-medium leading-snug">{gear}</span>
                 </div>

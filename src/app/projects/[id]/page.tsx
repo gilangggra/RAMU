@@ -40,31 +40,32 @@ export default async function ProjectBriefDetailPage({
 
   if (!user) redirect("/login");
 
-  const actor = await prisma.actor.findFirst({
-    where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
-    orderBy: { createdAt: "asc" },
-  });
+  const { id } = await params;
+
+  // Stage 1: Fetch current actor and project brief in parallel
+  const [actor, brief] = await Promise.all([
+    prisma.actor.findFirst({
+      where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
+      orderBy: { createdAt: "asc" },
+    }),
+    getProjectBriefById(id),
+  ]);
 
   if (!actor) redirect("/onboarding");
-
-  const { id } = await params;
-  const brief = await getProjectBriefById(id);
-
   if (!brief) {
     notFound();
   }
 
   const isInitiator = brief.creatorActorId === actor.id;
 
-  let crewRecommendations: CrewRecommendation[] = [];
-  if (isInitiator) {
-    crewRecommendations = await getCrewRecommendationsForBrief(id);
-  }
-
-  const actorAssets = await prisma.asset.findMany({
-    where: { actorId: actor.id, status: "ACTIVE" },
-    select: { id: true, name: true, category: true, subtype: true },
-  });
+  // Stage 2: Fetch crew recommendations (passing preloaded brief) and actor assets in parallel
+  const [crewRecommendations, actorAssets] = await Promise.all([
+    isInitiator ? getCrewRecommendationsForBrief(id, brief) : Promise.resolve([]),
+    prisma.asset.findMany({
+      where: { actorId: actor.id, status: "ACTIVE" },
+      select: { id: true, name: true, category: true, subtype: true },
+    }),
+  ]);
 
   const totalRoles = brief.neededRoles.length;
   const filledRoles = brief.neededRoles.filter((r) => r.isFilled).length;
@@ -167,17 +168,34 @@ export default async function ProjectBriefDetailPage({
           </div>
 
           {isInitiator && (
-            <Link
-              href={`/projects/${brief.id}/interests`}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-50 hover:bg-amber-100 border border-stone-200 text-amber-900 text-xs font-bold transition-all"
-            >
-              <span>Review Peminat</span>
-              {pendingInterestsCount > 0 && (
-                <span className="px-1.5 py-0.5 text-[10px] font-black rounded-full bg-[#1E1B2E] text-white">
-                  {pendingInterestsCount} baru
-                </span>
-              )}
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/projects/${brief.id}/interests`}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-50 hover:bg-amber-100 border border-stone-200 text-amber-900 text-xs font-bold transition-all shadow-xs"
+              >
+                <span>Review Peminat</span>
+                {pendingInterestsCount > 0 && (
+                  <span className="px-1.5 py-0.5 text-[10px] font-black rounded-full bg-[#1E1B2E] text-white">
+                    {pendingInterestsCount} baru
+                  </span>
+                )}
+              </Link>
+              <BriefManageMenu
+                briefId={brief.id}
+                briefStatus={brief.status}
+                initialTitle={brief.title}
+                initialDescription={brief.description}
+                initialProjectType={brief.projectType}
+                initialTargetOutput={brief.targetOutput}
+                initialLocation={brief.location || ""}
+                initialEstimatedDuration={timeline.estimatedDuration || ""}
+                initialTargetLaunch={timeline.targetLaunch || ""}
+                initialCompensationModel={brief.compensationModel || "PAID"}
+                initialEstimatedTotal={budget.estimatedTotal || ""}
+                initialBudgetNotes={budget.notes || ""}
+                initialAestheticStyle={brief.aestheticStyle || ""}
+              />
+            </div>
           )}
         </div>
 
@@ -266,11 +284,11 @@ export default async function ProjectBriefDetailPage({
             </div>
             <span className="text-xs font-semibold text-stone-800">
               {brief.status === "CLOSED"
-                ? "✓ Proyek Selesai"
+                ? "Proyek Selesai"
                 : brief.status === "IN_REVIEW"
-                ? "⚡ Kolaborasi Sedang Berjalan"
+                ? "Kolaborasi Sedang Berjalan"
                 : brief.status === "FILLED"
-                ? "🎯 Tim Lengkap — Menuju Workspace"
+                ? "Tim Lengkap — Menuju Workspace"
                 : "Tahap 02: Kurasi Kru & Peminat"}
             </span>
           </div>
@@ -505,6 +523,7 @@ export default async function ProjectBriefDetailPage({
                       isInitiator={isInitiator}
                       currentActorInterestStatus={status}
                       userInterestId={userInterest?.id}
+                      isInvited={Boolean(userInterest?.isInvited)}
                       actorAssets={actorAssets}
                       initialOpen={isMatched}
                       isMatched={isMatched}
@@ -539,6 +558,7 @@ export default async function ProjectBriefDetailPage({
                       roleLabel={item.role.roleLabel}
                       status={item.status}
                       message={item.message}
+                      isInvited={Boolean(item.isInvited)}
                       actor={{
                         id: item.actor.id,
                         name: item.actor.name,

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
+import { createNotification } from "@/application/notificationService";
 
 export interface BookingFormData {
   targetId: string;
@@ -63,6 +64,34 @@ export async function createBookingRequest(data: BookingFormData) {
       },
     });
 
+    try {
+      const targetActor = await prisma.actor.findUnique({
+        where: { id: data.targetId },
+        select: { name: true, actorType: true, sector: true },
+      });
+
+      const isTargetBrand =
+        targetActor?.actorType === "BRAND" ||
+        (targetActor?.actorType as string) === "MSME" ||
+        targetActor?.actorType === "COLLECTIVE" ||
+        (targetActor?.sector?.toLowerCase() || "").includes("brand") ||
+        (targetActor?.sector?.toLowerCase() || "").includes("label") ||
+        Boolean(data.details && typeof data.details === "object" && "collaborationType" in data.details);
+
+      await createNotification({
+        actorId: data.targetId,
+        title: isTargetBrand ? "Proposal Kolaborasi Baru" : "Permintaan Booking Baru",
+        message: isTargetBrand
+          ? `${requester.name} mengajukan proposal kemitraan / pitch kolaborasi untuk brand Anda.`
+          : `${requester.name} mengirimkan permintaan booking jasa komersial untuk Anda.`,
+        type: "BOOKING_RECEIVED",
+        link: `/dashboard/bookings/${booking.id}`,
+        metadata: { bookingId: booking.id, requesterId: requester.id },
+      });
+    } catch (e) {
+      console.error("Failed to notify target of new booking:", e);
+    }
+
     return { success: true, bookingId: booking.id };
   } catch (error) {
     console.error("Error creating booking request:", error);
@@ -98,6 +127,44 @@ export async function updateBookingStatus(bookingId: string, status: "ACCEPTED" 
       where: { id: bookingId },
       data: { status }
     });
+
+    try {
+      const targetActor = await prisma.actor.findUnique({
+        where: { id: booking.targetId },
+        select: { name: true, actorType: true, sector: true },
+      });
+
+      const bookingDetails =
+        booking.details && typeof booking.details === "object"
+          ? (booking.details as Record<string, any>)
+          : {};
+      const isTargetBrand =
+        targetActor?.actorType === "BRAND" ||
+        (targetActor?.actorType as string) === "MSME" ||
+        targetActor?.actorType === "COLLECTIVE" ||
+        (targetActor?.sector?.toLowerCase() || "").includes("brand") ||
+        (targetActor?.sector?.toLowerCase() || "").includes("label") ||
+        Boolean(bookingDetails.collaborationType);
+
+      const notifTitle = isTargetBrand
+        ? status === "ACCEPTED" ? "Proposal Kolaborasi Disetujui" : "Proposal Kolaborasi Ditolak"
+        : status === "ACCEPTED" ? "Pesanan Booking Diterima" : "Pesanan Booking Ditolak";
+
+      const notifMsg = isTargetBrand
+        ? `${targetActor?.name || "Brand"} telah ${status === "ACCEPTED" ? "menyetujui" : "menolak"} proposal kemitraan kolaborasi Anda.`
+        : `${targetActor?.name || "Kreator"} telah ${status === "ACCEPTED" ? "menyetujui" : "menolak"} permintaan booking SPK Anda.`;
+
+      await createNotification({
+        actorId: booking.requesterId,
+        title: notifTitle,
+        message: notifMsg,
+        type: "BOOKING_UPDATE",
+        link: `/dashboard/bookings/${bookingId}`,
+        metadata: { bookingId, status },
+      });
+    } catch (e) {
+      console.error("Failed to notify requester of booking update:", e);
+    }
 
     revalidatePath("/dashboard/bookings");
     revalidatePath(`/dashboard/bookings/${bookingId}`);
@@ -273,6 +340,7 @@ export async function convertBookingToCollaboration(bookingId: string) {
     });
 
     revalidatePath("/dashboard/bookings");
+    revalidatePath(`/dashboard/bookings/${bookingId}`);
     revalidatePath("/collaborations");
     revalidatePath("/dashboard");
 

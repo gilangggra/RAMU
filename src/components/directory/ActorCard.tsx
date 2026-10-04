@@ -54,32 +54,27 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
   const [imageError, setImageError] = useState(false);
 
   // Sector detection
-  const sectorLower = actor.sector.toLowerCase();
+  const sectorLower = actor.sector?.toLowerCase() || "";
+  const isBrand =
+    actor.actorType === "BRAND" ||
+    (actor.actorType as string) === "MSME" ||
+    actor.actorType === "COLLECTIVE" ||
+    sectorLower.includes("brand") ||
+    sectorLower.includes("label") ||
+    sectorLower.includes("umkm");
+
+  const isStudio = !isBrand && (actor.actorType === "STUDIO" || sectorLower.includes("studio"));
+
   const isModelOrTalent =
-    sectorLower.includes("model") ||
-    sectorLower.includes("talent") ||
-    sectorLower.includes("muse") ||
-    sectorLower.includes("aktor") ||
-    sectorLower.includes("aktris");
+    !isBrand &&
+    !isStudio &&
+    (sectorLower.includes("model") ||
+      sectorLower.includes("talent") ||
+      sectorLower.includes("muse") ||
+      sectorLower.includes("aktor") ||
+      sectorLower.includes("aktris"));
 
-  const isIndividualSector =
-    isModelOrTalent ||
-    sectorLower.includes("photographer") ||
-    sectorLower.includes("fotografi") ||
-    sectorLower.includes("mua") ||
-    sectorLower.includes("makeup") ||
-    sectorLower.includes("hair") ||
-    sectorLower.includes("stylist") ||
-    sectorLower.includes("wardrobe") ||
-    sectorLower.includes("video") ||
-    sectorLower.includes("film") ||
-    sectorLower.includes("cinema") ||
-    sectorLower.includes("dop") ||
-    sectorLower.includes("designer") ||
-    sectorLower.includes("desain");
-
-  const isStudio = !isIndividualSector && (actor.actorType === "STUDIO" || sectorLower.includes("studio"));
-  const isBrand = actor.actorType === "BRAND" || (actor.actorType as string) === "MSME" || sectorLower.includes("brand");
+  const isIndividualSector = !isBrand && !isStudio;
 
   // Determine smart preview image and label
   let previewImage: string | null = null;
@@ -274,6 +269,19 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
     if (customRate) startingRate = customRate;
   }
 
+  const brandCollabAsset = isBrand
+    ? actor.assets.find(
+        (a) => a.attributes && typeof a.attributes === "object" && "collab_types" in (a.attributes as any)
+      )
+    : null;
+  const brandCollabTypes: string[] = Array.isArray((brandCollabAsset?.attributes as any)?.collab_types)
+    ? (brandCollabAsset?.attributes as any).collab_types
+    : [];
+  const brandCollabLabel =
+    brandCollabTypes.length > 0
+      ? `${brandCollabTypes.length} Skema Kerjasama`
+      : "Terbuka Kolaborasi";
+
   const initials = actor.name
     .split(" ")
     .slice(0, 2)
@@ -319,17 +327,24 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
 
         {/* TOP BADGES */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-          <div className="px-2.5 py-1 bg-white/95 backdrop-blur-md text-[9px] font-bold uppercase tracking-wider text-[#1E1B2E] shadow-xs">
-            {isStudio ? "Studio Foto" : isBrand ? "Brand" : "Kreator"}
+          <div className={`px-2.5 py-1 backdrop-blur-md text-[9px] font-bold uppercase tracking-wider shadow-xs ${
+            isBrand ? "bg-[#1E1B2E] text-amber-400" : "bg-white/95 text-[#1E1B2E]"
+          }`}>
+            {isStudio ? "Studio Foto" : isBrand ? "Brand Fashion" : "Kreator"}
           </div>
 
           {hasScore ? (
             <div
+              title={`Kecocokan AI ${complementarityScore}% dengan kebutuhan & brief aktif Anda`}
               className={`px-2.5 py-1 ${scoreBg} backdrop-blur-md text-[9px] font-extrabold ${scoreText} flex items-center gap-1 shadow-xs`}
             >
               <Zap className="w-2.5 h-2.5" />
-              <span>{complementarityScore}%</span>
-              <span className="opacity-80">{scoreLabel}</span>
+              <span>{complementarityScore}% Cocok</span>
+            </div>
+          ) : isBrand ? (
+            <div className="px-2 py-0.5 bg-amber-500/95 backdrop-blur-md text-[9px] font-bold text-stone-950 flex items-center gap-1 shadow-xs rounded-none">
+              <span className="w-1.5 h-1.5 bg-stone-950 animate-pulse" />
+              <span>Buka Kolaborasi</span>
             </div>
           ) : (
             <div className="px-2 py-0.5 bg-emerald-500/90 backdrop-blur-md text-[9px] font-bold text-white flex items-center gap-1 shadow-xs rounded-none">
@@ -372,7 +387,13 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
         {/* HOVER CALL TO ACTION */}
         <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
           <div className="w-full py-2 bg-white text-[#1E1B2E] text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-md">
-            <span>Lihat Portofolio & Sewa</span>
+            <span>
+              {isBrand
+                ? "Ajukan Usulan Kolaborasi"
+                : isStudio
+                ? "Lihat Studio & Sewa"
+                : "Lihat Portofolio & Sewa"}
+            </span>
             <ArrowUpRight className="w-3.5 h-3.5" />
           </div>
         </div>
@@ -398,13 +419,20 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
         </div>
 
         <div className="pt-2 mt-0.5 border-t border-stone-100 space-y-1.5">
-          <div className="flex items-center justify-between text-[11px]">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Estimasi Tarif</span>
-            <span className="font-semibold text-[#1E1B2E] tracking-tight">{startingRate}</span>
-          </div>
+          {isBrand ? (
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">Peluang Kolaborasi</span>
+              <span className="font-semibold text-stone-900 tracking-tight">{brandCollabLabel}</span>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Estimasi Tarif</span>
+              <span className="font-semibold text-[#1E1B2E] tracking-tight">{startingRate}</span>
+            </div>
+          )}
           {hasScore && (
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-300">Relevansi Untukmu</span>
+            <div className="flex items-center justify-between" title="Kecocokan aset talenta dengan brief atau kebutuhan proyek aktif Anda">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Kecocokan Brief</span>
               <div className="flex items-center gap-1.5">
                 <div className="w-16 h-1 bg-stone-100 rounded-full overflow-hidden">
                   <div

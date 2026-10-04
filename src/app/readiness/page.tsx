@@ -486,8 +486,9 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
                           <h3 className="font-bold text-[#1E1B2E] text-sm">{asset.name}</h3>
 
                           {gearSpecs && (
-                            <p className="text-xs font-semibold text-blue-700 bg-blue-50/70 border border-blue-100 px-2.5 py-1 rounded-lg">
-                              ⚙️ {gearSpecs}
+                            <p className="text-xs font-semibold text-blue-700 bg-blue-50/70 border border-blue-100 px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                              <Wrench className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                              <span>{gearSpecs}</span>
                             </p>
                           )}
 

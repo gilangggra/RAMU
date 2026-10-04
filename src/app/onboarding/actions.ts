@@ -56,9 +56,25 @@ export async function createActorProfile(formData: FormData) {
     ActorType.BRAND,
   ];
 
-  const actorType = validTypes.includes(actorTypeStr as ActorType)
+  let actorType = validTypes.includes(actorTypeStr as ActorType)
     ? (actorTypeStr as ActorType)
     : ActorType.INDIVIDUAL;
+
+  const sectorLower = (sector || "").toLowerCase();
+  const nameLower = (name || "").toLowerCase();
+
+  // Auto-detect STUDIO if sector or name mentions studio
+  if (
+    actorType === ActorType.INDIVIDUAL &&
+    (sectorLower.includes("studio") || nameLower.includes("studio"))
+  ) {
+    actorType = ActorType.STUDIO;
+  } else if (
+    actorType === ActorType.INDIVIDUAL &&
+    (sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("fashion designer / label"))
+  ) {
+    actorType = ActorType.BRAND;
+  }
 
   const fullLocation = address ? `${address}, ${location}` : location;
 

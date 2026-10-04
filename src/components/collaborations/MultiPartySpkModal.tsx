@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   FileText,
   Printer,
@@ -16,6 +16,8 @@ import {
   Clock,
   Brain,
   Zap,
+  PenTool,
+  RotateCcw,
 } from "lucide-react";
 
 export interface SpkParticipant {
@@ -109,14 +111,66 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
   const allSigned = allParties.every((p) => Boolean(p.signedAt));
   const signedCount = allParties.filter((p) => Boolean(p.signedAt)).length;
 
-  async function handleSign() {
+  const [isPadOpen, setIsPadOpen] = useState(false);
+  const [hasDrawn, setHasDrawn] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const isDrawingRef = useRef(false);
+
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    isDrawingRef.current = true;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = "touches" in e ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
+    const y = "touches" in e ? e.touches[0].clientY - rect.top : e.clientY - rect.top;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    setHasDrawn(true);
+  };
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDrawingRef.current) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = "touches" in e ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
+    const y = "touches" in e ? e.touches[0].clientY - rect.top : e.clientY - rect.top;
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = "#1E1B2E";
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.stroke();
+  };
+
+  const stopDrawing = () => {
+    isDrawingRef.current = false;
+  };
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setHasDrawn(false);
+  };
+
+  async function handleConfirmSignature() {
     setIsSigning(true);
     setSignMsg(null);
     try {
       const r = await onSign(data.collaborationId);
-      setSignMsg(r.success
-        ? "Tanda tangan digital Anda berhasil dicatat. SPK diperbarui."
-        : r.error ?? "Gagal menandatangani dokumen.");
+      if (r.success) {
+        setIsPadOpen(false);
+        setSignMsg("Tanda tangan digital Anda berhasil dibubuhkan secara sah pada SPK.");
+      } else {
+        setSignMsg(r.error ?? "Gagal menandatangani dokumen.");
+      }
     } catch {
       setSignMsg("Terjadi kesalahan teknis saat mencatat tanda tangan.");
     } finally {
@@ -420,12 +474,16 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
                 <div key={party.id} className="text-center space-y-2">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500">PIHAK {pihakLabel(idx)}</div>
                   <div className={`h-16 flex flex-col items-center justify-center border p-2 ${
-                    party.signedAt ? "border-emerald-300 bg-emerald-50" : "border-dashed border-stone-300 bg-stone-50"
+                    party.signedAt ? "border-emerald-300 bg-emerald-50/60" : "border-dashed border-stone-300 bg-stone-50"
                   }`}>
                     {party.signedAt ? (
                       <>
-                        <span className="text-[9px] font-mono text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300">DITANDATANGANI DIGITAL</span>
-                        <span className="text-[9px] text-emerald-600 font-mono mt-1">{new Date(party.signedAt).toLocaleDateString("id-ID")}</span>
+                        <div className="font-serif italic font-bold text-sm text-[#1E1B2E] tracking-wider select-none transform -rotate-1">
+                          {party.name}
+                        </div>
+                        <span className="text-[8px] font-mono text-emerald-800 font-bold bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300 mt-1">
+                          TERVERIFIKASI &bull; {new Date(party.signedAt).toLocaleDateString("id-ID")}
+                        </span>
                       </>
                     ) : (
                       <>
@@ -463,21 +521,22 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
               {!allSigned && <AlertTriangle className="w-4 h-4 text-amber-500" />}
               <span>
                 {allSigned
-                  ? "\u2705 Perjanjian berlaku penuh — seluruh pihak telah menandatangani."
+                  ? "✅ Perjanjian berlaku penuh — seluruh pihak telah membubuhkan tanda tangan sah."
                   : iSigned
                   ? `Anda telah menandatangani. Menunggu ${total - signedCount} pihak lainnya.`
-                  : "Tanda tangan Anda diperlukan untuk mengaktifkan perjanjian ini secara penuh."}
+                  : "Tanda tangan digital Anda diperlukan untuk mengaktifkan SPK ini secara penuh."}
               </span>
             </div>
             <div className="flex items-center gap-3 shrink-0">
               {!iSigned && !allSigned && (
-                <button onClick={handleSign} disabled={isSigning}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white font-bold text-sm shadow-md transition-all cursor-pointer disabled:opacity-50">
-                  {isSigning ? (
-                    <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /><span>Mencatat...</span></>
-                  ) : (
-                    <><Zap className="w-4 h-4" /><span>Tandatangani Perjanjian Ini</span></>
-                  )}
+                <button
+                  type="button"
+                  onClick={() => setIsPadOpen(true)}
+                  disabled={isSigning}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white font-bold text-sm shadow-md transition-all cursor-pointer disabled:opacity-50"
+                >
+                  <PenTool className="w-4 h-4" />
+                  <span>Bubuhkan Tanda Tangan Digital</span>
                 </button>
               )}
               <button onClick={onClose}
@@ -487,6 +546,91 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
             </div>
           </div>
         </div>
+
+        {/* ============================================================ */}
+        {/* MODAL KANVAS TANDA TANGAN ELEKTRONIK (CANVAS PAD)             */}
+        {/* ============================================================ */}
+        {isPadOpen && (
+          <div className="fixed inset-0 z-60 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white border border-stone-300 w-full max-w-md shadow-2xl p-6 space-y-4 rounded-2xl">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                <div className="flex items-center gap-2">
+                  <PenTool className="w-4 h-4 text-amber-600" />
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                    Papan Tanda Tangan Digital RAMU
+                  </h4>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsPadOpen(false)}
+                  className="text-stone-400 hover:text-stone-700"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="text-xs text-stone-600 space-y-1">
+                <p>
+                  Menandatangani sebagai: <strong>{me?.name}</strong> ({me?.roleLabel})
+                </p>
+                <p className="text-[11px] text-stone-400">
+                  Goreskan tanda tangan Anda pada kanvas di bawah menggunakan mouse atau jari:
+                </p>
+              </div>
+
+              <div className="border border-stone-300 rounded-xl bg-stone-50/50 p-2 relative overflow-hidden">
+                <canvas
+                  ref={canvasRef}
+                  width={380}
+                  height={150}
+                  onMouseDown={startDrawing}
+                  onMouseMove={draw}
+                  onMouseUp={stopDrawing}
+                  onMouseLeave={stopDrawing}
+                  onTouchStart={startDrawing}
+                  onTouchMove={draw}
+                  onTouchEnd={stopDrawing}
+                  className="w-full h-36 bg-white border border-dashed border-stone-300 rounded-lg cursor-crosshair touch-none"
+                />
+                {!hasDrawn && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-stone-300 text-xs italic">
+                    Goreskan tanda tangan Anda di sini
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  type="button"
+                  onClick={clearCanvas}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-stone-300 hover:bg-stone-100 text-stone-600 text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Hapus / Bersihkan</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsPadOpen(false)}
+                    className="px-3 py-1.5 text-xs font-bold text-stone-500 hover:text-stone-800"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmSignature}
+                    disabled={isSigning}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>{isSigning ? "Menyimpan..." : "Konfirmasi & Sahkan SPK"}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

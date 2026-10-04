@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { expressInterestAction, withdrawInterestAction } from "@/app/projects/actions";
 import { Clock, Send, Check, Circle, Sparkles, Undo2, Loader2 } from "lucide-react";
+import { InvitationResponseButtons } from "@/components/projects/InvitationResponseButtons";
 
 const CATEGORY_LABELS: Record<string, string> = {
   PORTFOLIO_WORK: "Karya / Portofolio",
@@ -40,6 +41,7 @@ interface RoleSlotProps {
   isInitiator: boolean;
   currentActorInterestStatus?: string | null;
   userInterestId?: string | null;
+  isInvited?: boolean;
   actorAssets: ActorAsset[];
   initialOpen?: boolean;
   isMatched?: boolean;
@@ -57,6 +59,7 @@ export function RoleSlot({
   isInitiator,
   currentActorInterestStatus,
   userInterestId,
+  isInvited = false,
   actorAssets,
   initialOpen = false,
   isMatched = false,
@@ -112,7 +115,8 @@ export function RoleSlot({
   }
 
   const canApply = !isInitiator && !isFilled && !localStatus;
-  const alreadyApplied = !isInitiator && !!localStatus;
+  const alreadyApplied = !isInitiator && !!localStatus && !isInvited;
+  const isInvitedUser = !isInitiator && isInvited;
 
   return (
     <div
@@ -120,6 +124,8 @@ export function RoleSlot({
       className={`p-5 rounded-2xl border transition-all space-y-4 scroll-mt-28 ${
         isFilled
           ? "bg-emerald-50/40 border-emerald-200/80"
+          : isInvitedUser && localStatus === "PENDING"
+          ? "bg-gradient-to-r from-purple-50/40 via-white to-white border-purple-300 ring-2 ring-purple-400/20 shadow-md"
           : isMatched
           ? "bg-gradient-to-r from-emerald-50/30 via-white to-white border-emerald-400 shadow-md ring-2 ring-emerald-400/20"
           : "bg-white/95 border-stone-200/80 hover:border-amber-400/60 shadow-2xs"
@@ -131,6 +137,8 @@ export function RoleSlot({
             className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black shrink-0 ${
               isFilled
                 ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                : isInvitedUser && localStatus === "PENDING"
+                ? "bg-purple-100 text-purple-800 border border-purple-300"
                 : isMatched
                 ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
                 : "bg-stone-100 text-stone-600 border border-stone-200"
@@ -138,6 +146,8 @@ export function RoleSlot({
           >
             {isFilled ? (
               <Check className="w-5 h-5 text-emerald-600" />
+            ) : isInvitedUser && localStatus === "PENDING" ? (
+              <Sparkles className="w-4 h-4 text-purple-600" />
             ) : isMatched ? (
               <Sparkles className="w-4 h-4 text-emerald-600" />
             ) : (
@@ -150,8 +160,14 @@ export function RoleSlot({
               <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-stone-100 text-stone-600 border border-stone-200">
                 {CATEGORY_LABELS[assetCategory] || assetCategory}
               </span>
-              {isMatched && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+              {isInvitedUser && localStatus === "PENDING" && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-300 animate-pulse">
+                  <Sparkles className="w-2.5 h-2.5 text-purple-600" />
+                  <span>Undangan Khusus untuk Anda</span>
+                </span>
+              )}
+              {isMatched && !isInvitedUser && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                   <Sparkles className="w-2.5 h-2.5 text-emerald-600" />
                   <span>Sangat Cocok Untuk Anda</span>
                 </span>
@@ -179,12 +195,43 @@ export function RoleSlot({
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-2 border-t border-stone-100 text-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-stone-100 text-xs">
         <div className="text-stone-500 text-[11px]">
           Kebutuhan: 1 Kolaborator • Sinergi Berbasis Aset & Portofolio
         </div>
 
         <div>
+          {isInvitedUser && localStatus === "PENDING" && activeInterestId && (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 p-2.5 rounded-xl bg-purple-50/80 border border-purple-200">
+              <div className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                <span className="text-[11px] font-bold text-purple-900">
+                  Inisiator mengundang Anda!
+                </span>
+              </div>
+              <InvitationResponseButtons
+                interestId={activeInterestId}
+                briefId={briefId}
+                roleLabel={roleLabel}
+                compact
+                onRespond={(newStatus) => setLocalStatus(newStatus)}
+              />
+            </div>
+          )}
+
+          {isInvitedUser && localStatus === "ACCEPTED" && (
+            <span className="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
+              <Check className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Undangan Diterima • Anda adalah Kolaborator Resmi</span>
+            </span>
+          )}
+
+          {isInvitedUser && localStatus === "DECLINED" && (
+            <span className="px-3 py-1.5 rounded-xl text-xs font-bold bg-stone-100 text-stone-600 border border-stone-200">
+              Undangan Telah Ditolak
+            </span>
+          )}
+
           {canApply && (
             <button
               onClick={() => setIsOpen(!isOpen)}

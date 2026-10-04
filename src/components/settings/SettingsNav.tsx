@@ -3,23 +3,36 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserCircle, Camera, CreditCard, Sliders } from "lucide-react";
+import { UserCircle, Camera, CreditCard, Briefcase, Sliders, Image as ImageIcon } from "lucide-react";
 
-export function SettingsNav() {
+interface SettingsNavProps {
+  isBrand?: boolean;
+}
+
+export function SettingsNav({ isBrand }: SettingsNavProps = {}) {
   const pathname = usePathname();
 
   const links = [
     { href: "/settings/profile", label: "Profil Dasar", icon: UserCircle },
     { href: "/settings/specs", label: "Spesifikasi & Comp Card", icon: Camera },
-    { href: "/settings/rates", label: "Paket Layanan & Tarif", icon: CreditCard },
+    {
+      href: "/settings/rates",
+      label: isBrand ? "Kerjasama & Brief" : "Paket Layanan & Tarif",
+      icon: isBrand ? Briefcase : CreditCard,
+    },
     { href: "/settings/preferences", label: "Preferensi Kolaborasi", icon: Sliders },
+    { href: "/dashboard/showcase", label: "Portofolio & Karya", icon: ImageIcon },
   ];
 
   return (
     <nav className="w-full lg:w-64 flex flex-row lg:flex-col gap-1.5 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 scrollbar-none shrink-0 border-b lg:border-b-0 lg:border-r border-stone-200 lg:pr-6">
       {links.map((item) => {
         const Icon = item.icon;
-        const isActive = pathname === item.href;
+        const isActive =
+          item.href === "/dashboard/showcase"
+            ? pathname?.startsWith("/dashboard/showcase")
+            : pathname === item.href || pathname?.startsWith(item.href + "/");
+
         return (
           <Link
             key={item.href}

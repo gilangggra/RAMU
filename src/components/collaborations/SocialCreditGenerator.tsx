@@ -203,7 +203,7 @@ export function SocialCreditGenerator({
 
     if (formatType === "instagram") {
       const lines: string[] = [];
-      lines.push(`✨ ${title}`);
+      lines.push(title);
       lines.push("");
       lines.push("Creative & Production Team:");
 
@@ -214,7 +214,7 @@ export function SocialCreditGenerator({
 
       if (includePlatformTag) {
         lines.push("");
-        lines.push("Facilitated via @ramu.ecosystem ✨");
+        lines.push("Facilitated via @ramu.ecosystem");
       }
 
       if (includeHashtags && activeHashtags.length > 0) {
@@ -631,7 +631,7 @@ export function SocialCreditGenerator({
               {copied ? (
                 <>
                   <Check className="w-4 h-4 stroke-[3]" />
-                  <span>Tersalin ke Clipboard! ✨</span>
+                  <span>Tersalin ke Clipboard!</span>
                 </>
               ) : (
                 <>

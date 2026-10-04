@@ -30,6 +30,7 @@ export async function runOpportunityEngine() {
 
   try {
     const result = await generateAndSaveOpportunities({ focusActorId: actor.id });
+    revalidatePath("/projects");
     revalidatePath("/opportunities");
     revalidatePath("/dashboard");
     return { success: true, count: result.count };
@@ -50,6 +51,7 @@ export async function updateOpportunityStatus(opportunityId: string, status: Opp
       where: { id: opportunityId },
       data: { status },
     });
+    revalidatePath("/projects");
     revalidatePath("/opportunities");
     revalidatePath(`/opportunities/${opportunityId}`);
     return { success: true };
@@ -88,6 +90,7 @@ export async function submitOpportunityFeedbackAction(
     });
 
     revalidatePath(`/opportunities/${opportunityId}`);
+    revalidatePath("/projects");
     revalidatePath("/dashboard");
     revalidatePath("/engine-insights");
     return { success: true };

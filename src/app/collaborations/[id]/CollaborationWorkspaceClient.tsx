@@ -54,6 +54,7 @@ import {
   Copy,
   ListTodo,
   Zap,
+  MessageSquare,
 } from "lucide-react";
 import { SocialCreditGenerator } from "@/components/collaborations/SocialCreditGenerator";
 import { CollaborationActivityFeed } from "@/components/collaborations/CollaborationActivityFeed";
@@ -120,7 +121,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
   function generateCallsheetWhatsAppText() {
     const lines: string[] = [];
-    lines.push(`📋 *CALL SHEET & RUNDOWN PRODUKSI*`);
+    lines.push(`*CALL SHEET & RUNDOWN PRODUKSI*`);
     lines.push(`*Proyek:* ${collaboration.title}`);
     if (timeline?.targetLaunch || timeline?.estimatedDuration) {
       lines.push(`*Jadwal/Target:* ${timeline.targetLaunch || timeline.estimatedDuration}`);
@@ -128,7 +129,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
     lines.push(``);
 
     if (participants.length > 0) {
-      lines.push(`👥 *TIM PRODUKSI & KONTAK:*`);
+      lines.push(`*TIM PRODUKSI & KONTAK:*`);
       participants.forEach((p: any) => {
         const waNumber = p.actor?.contactPhone
           ? ` (WA: https://wa.me/${p.actor.contactPhone.replace(/\\D/g, "").replace(/^0/, "62")})`
@@ -139,19 +140,19 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
     }
 
     if (projectLinks.moodboardUrl || projectLinks.assetsDriveUrl || projectLinks.notesUrl) {
-      lines.push(`📍 *TAUTAN KERJA & MOODBOARD:*`);
-      if (projectLinks.moodboardUrl) lines.push(`- 🎨 Moodboard: ${projectLinks.moodboardUrl}`);
-      if (projectLinks.assetsDriveUrl) lines.push(`- 📁 Google Drive: ${projectLinks.assetsDriveUrl}`);
-      if (projectLinks.notesUrl) lines.push(`- 📝 Catatan/Notion: ${projectLinks.notesUrl}`);
+      lines.push(`*TAUTAN KERJA & MOODBOARD:*`);
+      if (projectLinks.moodboardUrl) lines.push(`- Moodboard: ${projectLinks.moodboardUrl}`);
+      if (projectLinks.assetsDriveUrl) lines.push(`- Google Drive: ${projectLinks.assetsDriveUrl}`);
+      if (projectLinks.notesUrl) lines.push(`- Catatan/Notion: ${projectLinks.notesUrl}`);
       lines.push(``);
     }
 
     if (tasks.length > 0) {
-      lines.push(`⏰ *RUNDOWN SESI & DETAIL LOOK:*`);
+      lines.push(`*RUNDOWN SESI & DETAIL LOOK:*`);
       tasks.forEach((t: any, idx: number) => {
-        const statusIcon = t.status === "DONE" ? "✅" : "⏳";
+        const statusLabel = t.status === "DONE" ? "[SELESAI]" : "[PROSES]";
         const assigned = t.assignedActor ? ` (PJ: ${t.assignedActor.name})` : "";
-        lines.push(`${idx + 1}. ${statusIcon} *${t.title}*${assigned}`);
+        lines.push(`${idx + 1}. ${statusLabel} *${t.title}*${assigned}`);
         if (t.description) lines.push(`   Catatan: ${t.description}`);
       });
       lines.push(``);
@@ -407,6 +408,18 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                 </span>
               </button>
             </div>
+            <div className="w-px h-10 bg-stone-200 hidden sm:block"></div>
+            <div className="space-y-1">
+              <div className="text-[10px] text-stone-400 uppercase font-bold tracking-[0.2em]">Pesan Tim</div>
+              <Link
+                href="/messages"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#1E1B2E] hover:text-[#E66A48] transition-colors pt-1"
+                title="Buka Ruang Obrolan & Serah Terima Hasil Tim"
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                <span className="underline decoration-stone-300 underline-offset-4">Buka Chat Tim</span>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -508,6 +521,38 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
       {activeTab === "overview" && (
         <div className="space-y-8 animate-fade-in">
 
+          {/* Quick-Start Kickoff Guide */}
+          <div className="p-5 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-700" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                  Langkah Awal Memulai Kolaborasi
+                </h3>
+              </div>
+              <span className="text-[10px] font-bold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded-full">
+                Panduan Tim
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              <div className="p-3 bg-white border border-amber-200/60 rounded-xl space-y-1">
+                <span className="text-[10px] font-bold text-amber-600 block uppercase tracking-wider">01. Tanda Tangan SPK</span>
+                <p className="text-xs font-semibold text-[#1E1B2E]">Sah perlindungan hak cipta</p>
+                <p className="text-[11px] text-stone-500 font-light">Buka dokumen SPK di bawah dan tandatangani secara digital.</p>
+              </div>
+              <div className="p-3 bg-white border border-amber-200/60 rounded-xl space-y-1">
+                <span className="text-[10px] font-bold text-amber-600 block uppercase tracking-wider">02. Tautan Arah Gaya</span>
+                <p className="text-xs font-semibold text-[#1E1B2E]">Moodboard &amp; Folder Aset</p>
+                <p className="text-[11px] text-stone-500 font-light">Tautkan Pinterest/Canva dan Google Drive pada bagian Tautan Kerja.</p>
+              </div>
+              <div className="p-3 bg-white border border-amber-200/60 rounded-xl space-y-1">
+                <span className="text-[10px] font-bold text-amber-600 block uppercase tracking-wider">03. Koordinasi WhatsApp</span>
+                <p className="text-xs font-semibold text-[#1E1B2E]">Kirim Call Sheet &amp; Kontak</p>
+                <p className="text-[11px] text-stone-500 font-light">Gunakan tab Call Sheet untuk mengekspor rundown ke grup WhatsApp.</p>
+              </div>
+            </div>
+          </div>
+
           <section className="p-5 sm:p-6 rounded-[28px] bg-gradient-to-r from-stone-900 via-[#1E1B2E] to-stone-900 text-white border border-stone-800 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start sm:items-center gap-3.5">
               <div className="p-2.5 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
@@ -585,7 +630,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold uppercase tracking-wider text-stone-600 block">
-                      🎨 Moodboard / Arah Gaya
+                      Moodboard / Arah Gaya
                     </label>
                     <input
                       type="url"
@@ -597,7 +642,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold uppercase tracking-wider text-stone-600 block">
-                      📸 Folder Foto / Video Aset
+                      Folder Foto / Video Aset
                     </label>
                     <input
                       type="url"
@@ -609,7 +654,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold uppercase tracking-wider text-stone-600 block">
-                      📝 Dokumen / Call Sheet
+                      Dokumen / Call Sheet
                     </label>
                     <input
                       type="url"

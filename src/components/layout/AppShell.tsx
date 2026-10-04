@@ -20,7 +20,12 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Handshake,
+  Target,
+  BarChart3,
+  ShieldCheck,
+  MessageSquare,
 } from "lucide-react";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 interface ActorInfo {
   id: string;
@@ -108,17 +113,26 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
     });
   };
 
+  const isAdmin =
+    actor.sector === "Platform Administrator" ||
+    actor.sector?.toLowerCase().includes("administrator");
+
   const personalNav: NavItem[] = [
     { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" /> },
-    { href: `/directory/${actor.id}`, label: "Profil Publik Saya", icon: <User className="w-4 h-4" /> },
+    ...(isAdmin
+      ? []
+      : [{ href: `/directory/${actor.id}`, label: "Profil Publik Saya", icon: <User className="w-4 h-4" /> }]),
+    { href: "/messages", label: "Pesan & Negosiasi", icon: <MessageSquare className="w-4 h-4" /> },
     { href: "/dashboard/bookings", label: "Pesanan Masuk", icon: <Inbox className="w-4 h-4" /> },
-    { href: "/collaborations", label: "Ruang Kolaborasi & SPK", icon: <Handshake className="w-4 h-4" /> },
+    { href: "/collaborations", label: "Kontrak & Kolaborasi Proyek", icon: <Handshake className="w-4 h-4" /> },
+    { href: "/readiness", label: "Aset & Kriteria Kolaborasi", icon: <Target className="w-4 h-4" /> },
   ];
 
   const ecosystemNav: NavItem[] = [
     { href: "/directory", label: "Direktori Talenta & Studio", icon: <Users className="w-4 h-4" /> },
     { href: "/showcase", label: "Karya & Inspirasi", icon: <Sparkles className="w-4 h-4" /> },
     { href: "/projects", label: "Proyek & Peluang AI", icon: <Megaphone className="w-4 h-4" />, badge: "AI Match" },
+    { href: "/engine-insights", label: "Engine Insights AI", icon: <BarChart3 className="w-4 h-4" />, badge: "Signals" },
     { href: "/settings", label: "Pengaturan Akun", icon: <Settings className="w-4 h-4" /> },
   ];
 
@@ -232,15 +246,18 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                   </p>
                 </div>
               </Link>
-              <button
-                type="button"
-                onClick={toggleSidebar}
-                title="Perkecil menu sidebar"
-                className="p-1.5 rounded-xl text-stone-400 hover:text-stone-800 hover:bg-stone-100 transition-colors cursor-pointer shrink-0 ml-1"
-                aria-label="Perkecil menu sidebar"
-              >
-                <PanelLeftClose className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-1 shrink-0 ml-1">
+                <NotificationBell isCollapsed={false} />
+                <button
+                  type="button"
+                  onClick={toggleSidebar}
+                  title="Perkecil menu sidebar"
+                  className="p-1.5 rounded-xl text-stone-400 hover:text-stone-800 hover:bg-stone-100 transition-colors cursor-pointer shrink-0"
+                  aria-label="Perkecil menu sidebar"
+                >
+                  <PanelLeftClose className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center gap-2">
@@ -249,6 +266,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                   R
                 </div>
               </Link>
+              <NotificationBell isCollapsed={true} />
               <button
                 type="button"
                 onClick={toggleSidebar}
@@ -267,7 +285,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
           <div>
             {!isCollapsed ? (
               <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-[#9E98A8] mb-2 truncate">
-                Profil &amp; Bisnis Saya
+                {isAdmin ? "Panel Administrator" : "Profil & Bisnis Saya"}
               </p>
             ) : (
               <div className="my-2 border-t border-stone-200/60" />
@@ -292,11 +310,15 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
           {!isCollapsed ? (
             <div className="p-3 rounded-2xl bg-white border border-stone-200/80 shadow-xs flex items-center justify-between gap-3">
               <Link
-                href={`/directory/${actor.id}`}
+                href={isAdmin ? "/settings" : `/directory/${actor.id}`}
                 className="flex items-center gap-2.5 min-w-0 group hover:opacity-90 transition-opacity"
-                title="Lihat Profil Publik Saya"
+                title={isAdmin ? "Pengaturan Akun Administrator" : "Lihat Profil Publik Saya"}
               >
-                <div className="w-8 h-8 rounded-xl overflow-hidden bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] flex items-center justify-center font-bold text-xs text-[#27213D] shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                <div className={`w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center font-bold text-xs shrink-0 shadow-xs group-hover:scale-105 transition-transform ${
+                  isAdmin
+                    ? "bg-[#1E1B2E] text-amber-400 border border-amber-400/30"
+                    : "bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] text-[#27213D]"
+                }`}>
                   {avatar && !avatarError ? (
                     <img
                       src={avatar}
@@ -312,9 +334,16 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                   <p className="text-xs font-bold text-[#27213D] truncate group-hover:text-amber-600 transition-colors">
                     {actor.name}
                   </p>
-                  <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200 inline-block">
-                    Lihat Profil
-                  </span>
+                  {isAdmin ? (
+                    <span className="inline-flex items-center gap-1 text-[9px] font-black tracking-wider uppercase text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200 shadow-2xs">
+                      <ShieldCheck className="w-2.5 h-2.5 text-purple-600" />
+                      Admin
+                    </span>
+                  ) : (
+                    <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200 inline-block">
+                      Lihat Profil
+                    </span>
+                  )}
                 </div>
               </Link>
 
@@ -340,11 +369,15 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
           ) : (
             <div className="flex flex-col items-center gap-2 py-1">
               <Link
-                href={`/directory/${actor.id}`}
-                className="p-1"
-                title={`Profil Publik: ${actor.name}`}
+                href={isAdmin ? "/settings" : `/directory/${actor.id}`}
+                className="p-1 relative group"
+                title={isAdmin ? `Administrator: ${actor.name}` : `Profil Publik: ${actor.name}`}
               >
-                <div className="w-9 h-9 rounded-xl overflow-hidden bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] flex items-center justify-center font-bold text-xs text-[#27213D] shadow-xs hover:scale-105 transition-transform">
+                <div className={`w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center font-bold text-xs shadow-xs hover:scale-105 transition-transform ${
+                  isAdmin
+                    ? "bg-[#1E1B2E] text-amber-400 border border-amber-400/40"
+                    : "bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] text-[#27213D]"
+                }`}>
                   {avatar && !avatarError ? (
                     <img
                       src={avatar}
@@ -356,6 +389,11 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                     <span>{actor.name.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
+                {isAdmin && (
+                  <div className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-purple-600 border-2 border-white flex items-center justify-center text-[7px] text-white font-bold" title="Administrator">
+                    ★
+                  </div>
+                )}
               </Link>
 
               <div className="flex items-center gap-1 pt-1 border-t border-stone-200/80 w-full justify-center">
@@ -390,13 +428,18 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
           <span className="font-extrabold text-sm tracking-tight text-[#27213D]">RAMU</span>
         </Link>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
+          <NotificationBell />
           <Link
-            href={`/directory/${actor.id}`}
-            className="flex items-center gap-2 max-w-[150px] group"
-            title="Lihat Profil Publik Saya"
+            href={isAdmin ? "/settings" : `/directory/${actor.id}`}
+            className="flex items-center gap-2 max-w-[140px] group"
+            title={isAdmin ? "Pengaturan Akun Administrator" : "Lihat Profil Publik Saya"}
           >
-            <div className="w-7 h-7 rounded-lg overflow-hidden bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] flex items-center justify-center font-bold text-[11px] text-[#27213D] shrink-0">
+            <div className={`w-7 h-7 rounded-lg overflow-hidden flex items-center justify-center font-bold text-[11px] shrink-0 ${
+              isAdmin
+                ? "bg-[#1E1B2E] text-amber-400 border border-amber-400/30"
+                : "bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] text-[#27213D]"
+            }`}>
               {avatar && !avatarError ? (
                 <img
                   src={avatar}
@@ -408,9 +451,20 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                 <span>{actor.name.charAt(0).toUpperCase()}</span>
               )}
             </div>
-            <span className="text-xs text-[#27213D] font-bold truncate group-hover:text-amber-600 transition-colors">
-              {actor.name}
-            </span>
+            <div className="min-w-0">
+              <span className="text-xs font-bold text-[#27213D] block truncate">
+                {actor.name}
+              </span>
+              {isAdmin ? (
+                <span className="inline-block text-[8px] font-black text-purple-700 bg-purple-50 px-1 py-0.2 rounded border border-purple-200 uppercase">
+                  Admin
+                </span>
+              ) : (
+                <span className="text-[9px] text-[#716B7E] block truncate">
+                  {actor.sector}
+                </span>
+              )}
+            </div>
           </Link>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -427,11 +481,15 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
           <div className="bg-white border-t border-stone-200 p-5 rounded-t-3xl max-h-[85vh] overflow-y-auto space-y-5 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-stone-200">
               <Link
-                href={`/directory/${actor.id}`}
+                href={isAdmin ? "/settings" : `/directory/${actor.id}`}
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-2.5 min-w-0"
               >
-                <div className="w-8 h-8 rounded-xl overflow-hidden bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] flex items-center justify-center font-bold text-xs text-[#27213D] shrink-0 shadow-xs">
+                <div className={`w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center font-bold text-xs shrink-0 shadow-xs ${
+                  isAdmin
+                    ? "bg-[#1E1B2E] text-amber-400 border border-amber-400/30"
+                    : "bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] text-[#27213D]"
+                }`}>
                   {avatar && !avatarError ? (
                     <img
                       src={avatar}
@@ -445,7 +503,14 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-[#27213D] truncate">{actor.name}</p>
-                  <p className="text-[10px] text-[#716B7E] truncate">{actor.sector}</p>
+                  {isAdmin ? (
+                    <span className="inline-flex items-center gap-1 text-[9px] font-black text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200 uppercase tracking-wider">
+                      <ShieldCheck className="w-2.5 h-2.5 text-purple-600" />
+                      Platform Admin
+                    </span>
+                  ) : (
+                    <p className="text-[10px] text-[#716B7E] truncate">{actor.sector}</p>
+                  )}
                 </div>
               </Link>
               <button
@@ -458,7 +523,9 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
 
             <div className="space-y-4">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[#9E98A8] mb-2">Profil &amp; Bisnis Saya</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#9E98A8] mb-2">
+                  {isAdmin ? "Panel Administrator" : "Profil & Bisnis Saya"}
+                </p>
                 {renderNavLinks(personalNav)}
               </div>
               <div className="pt-2 border-t border-stone-100">
@@ -505,7 +572,9 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-stone-200/90 px-3 py-2 flex items-center justify-around z-40 shadow-lg">
         {[
           { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
-          { href: `/directory/${actor.id}`, label: "Profil Saya", icon: <User className="w-5 h-5" /> },
+          ...(isAdmin
+            ? [{ href: "/settings", label: "Admin", icon: <ShieldCheck className="w-5 h-5" /> }]
+            : [{ href: `/directory/${actor.id}`, label: "Profil Saya", icon: <User className="w-5 h-5" /> }]),
           { href: "/directory", label: "Direktori", icon: <Users className="w-5 h-5" /> },
           { href: "/projects", label: "Proyek", icon: <Megaphone className="w-5 h-5" /> },
           { href: "/dashboard/bookings", label: "Pesanan", icon: <Inbox className="w-5 h-5" /> },

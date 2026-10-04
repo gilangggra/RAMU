@@ -263,11 +263,10 @@ export function CollaborationActivityFeed({
     }
 
     for (const f of collaboration.feedbacks ?? []) {
-      const stars = f.rating ? "★".repeat(f.rating) + "☆".repeat(5 - f.rating) : null;
       entries.push({
         id: `feedback-${f.id}`,
         kind: "feedback_given",
-        title: `Ulasan diberikan${stars ? ` · ${stars}` : ""}`,
+        title: `Ulasan diberikan${f.rating ? ` · Rating ${f.rating}/5` : ""}`,
         actorName: f.actor?.name,
         timestamp: new Date(f.createdAt),
       });

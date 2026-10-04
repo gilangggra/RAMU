@@ -24,7 +24,14 @@ export default async function SettingsRatesPage() {
 
   if (!actor) redirect("/onboarding");
 
-  const isBrand = actor.actorType === "BRAND";
+  const sectorLower = actor.sector?.toLowerCase() || "";
+  const isBrand =
+    actor.actorType === "BRAND" ||
+    (actor.actorType as string) === "MSME" ||
+    actor.actorType === "COLLECTIVE" ||
+    sectorLower.includes("brand") ||
+    sectorLower.includes("label") ||
+    sectorLower.includes("umkm");
 
   if (isBrand) {
     const collabAsset = actor.assets.find(
@@ -64,7 +71,6 @@ export default async function SettingsRatesPage() {
   const attrs = (serviceAsset?.attributes as any) || {};
   const customPackages: ServicePackage[] = Array.isArray(attrs.service_packages) ? attrs.service_packages : [];
 
-  const sectorLower = actor.sector.toLowerCase();
   let defaultStartingRate = "Mulai Rp 1,5 Jt / sesi";
   let defaultTurnaround = "3 - 5 Hari Kerja";
 

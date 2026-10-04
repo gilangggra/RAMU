@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { getDirectoryActors } from "@/application/directoryService";
 import { AppShell } from "@/components/layout/AppShell";
 import { DirectoryFilterBar } from "@/components/directory/DirectoryFilterBar";
 import { ActorCard } from "@/components/directory/ActorCard";
-import { Inbox } from "lucide-react";
+import { Inbox, Zap } from "lucide-react";
 
 export const metadata = {
   title: "Direktori Talenta & Studio Fashion | RAMU",
@@ -23,6 +24,7 @@ export default async function DirectoryPage({
     location?: string;
     style?: string;
     compensation?: string;
+    sortBy?: string;
   }>;
 }) {
   const supabase = await createClient();
@@ -64,9 +66,10 @@ export default async function DirectoryPage({
   const location = params?.location || "ALL";
   const style = params?.style || "ALL";
   const compensation = params?.compensation || "ALL";
+  const sortBy = params?.sortBy || "recommended";
 
   const [actors, allActors] = await Promise.all([
-    getDirectoryActors({ search, actorType, sector, location, style, compensation }),
+    getDirectoryActors({ search, actorType, sector, location, style, compensation, sortBy }),
     prisma.actor.findMany({
       where: { status: { not: "ARCHIVED" } },
       select: { actorType: true },
@@ -97,6 +100,28 @@ export default async function DirectoryPage({
     }
   }
 
+  // Sort actors smartly
+  const sortedActors = [...actors].sort((a, b) => {
+    if (sortBy === "name") {
+      return a.name.localeCompare(b.name);
+    }
+    if (sortBy === "portfolio") {
+      return (b._count?.assets || b.assets.length) - (a._count?.assets || a.assets.length);
+    }
+    if (sortBy === "recent") {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+    // "recommended" (AI Complementarity Score first, then portfolio richness)
+    const scoreA = scoreMap.get(a.id) || 0;
+    const scoreB = scoreMap.get(b.id) || 0;
+    if (scoreB !== scoreA) {
+      return scoreB - scoreA;
+    }
+    return (b._count?.assets || b.assets.length) - (a._count?.assets || a.assets.length);
+  });
+
+  const matchedCount = Array.from(scoreMap.values()).filter((s) => s > 0).length;
+
   const totalActors = allActors.length;
   const totalStudios = allActors.filter((a) => a.actorType === "STUDIO").length;
   const totalIndividuals = allActors.filter((a) => a.actorType === "INDIVIDUAL").length;
@@ -123,9 +148,20 @@ export default async function DirectoryPage({
                 Katalog kurasi fotografer, videografer, model, desainer, dan studio visual terverifikasi di Indonesia.
                 Siap disewa langsung untuk kampanye komersial, lookbook, dan produksi kreatif Anda.
               </p>
+              <div className="mt-5 p-3.5 bg-stone-50 border border-stone-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-stone-600 max-w-xl">
+                <span>
+                  <strong className="text-[#1E1B2E]">Butuh Kru Lengkap?</strong> Lebih efisien buat 1 brief proyek untuk mengumpulkan Model, MUA, dan Studio sekaligus.
+                </span>
+                <Link
+                  href="/projects/new"
+                  className="shrink-0 font-bold text-[#E66A48] hover:text-[#d85c3b] hover:underline"
+                >
+                  Buka Brief Proyek &rarr;
+                </Link>
+              </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-8 lg:gap-12 pb-2">
+            <div className="flex flex-wrap items-center gap-6 lg:gap-10 pb-2">
               <div className="space-y-1">
                 <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{totalActors}</div>
                 <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Entitas Terdaftar</div>
@@ -133,12 +169,17 @@ export default async function DirectoryPage({
               <div className="w-px h-10 bg-stone-200 hidden sm:block"></div>
               <div className="space-y-1">
                 <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{totalStudios}</div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Studio Siap Booking</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Studio Foto</div>
               </div>
               <div className="w-px h-10 bg-stone-200 hidden sm:block"></div>
               <div className="space-y-1">
                 <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{totalIndividuals}</div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Talenta Siap Rekrut</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Talenta Kreatif</div>
+              </div>
+              <div className="w-px h-10 bg-stone-200 hidden sm:block"></div>
+              <div className="space-y-1">
+                <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{totalBrands}</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Brand &amp; Label</div>
               </div>
             </div>
           </div>
@@ -151,19 +192,29 @@ export default async function DirectoryPage({
           currentLocation={location}
           currentStyle={style}
           currentCompensation={compensation}
+          currentSort={sortBy}
         />
 
         <div className="space-y-6">
-          <div className="flex items-center justify-between text-[11px] uppercase tracking-widest text-stone-400 font-semibold px-2">
-            <span>
-              Menampilkan <span className="text-[#1E1B2E]">{actors.length}</span> Portofolio
-              {search && <span className="lowercase"> untuk <span className="text-[#1E1B2E] font-medium">&ldquo;{search}&rdquo;</span></span>}
-            </span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-2">
+            <div className="text-[11px] uppercase tracking-widest text-stone-400 font-semibold">
+              Menampilkan <span className="text-[#1E1B2E] font-bold">{sortedActors.length}</span> Portofolio
+              {search && <span className="lowercase"> untuk <span className="text-[#1E1B2E] font-bold">&ldquo;{search}&rdquo;</span></span>}
+            </div>
+
+            {matchedCount > 0 && sortBy === "recommended" && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-900 text-xs font-semibold self-start sm:self-auto">
+                <Zap className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                <span>
+                  <strong className="font-bold">{matchedCount} entitas</strong> cocok dengan brief &amp; kebutuhan aktif Anda
+                </span>
+              </div>
+            )}
           </div>
 
-          {actors.length > 0 ? (
+          {sortedActors.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
-              {actors.map((item) => (
+              {sortedActors.map((item) => (
                 <ActorCard
                   key={item.id}
                   actor={item}

@@ -8,6 +8,7 @@ import {
   Megaphone,
   Inbox,
   CreditCard,
+  Briefcase,
   Sparkles,
   Plus,
   Users,
@@ -17,8 +18,12 @@ import {
   ShieldCheck,
   CheckCircle2,
   Zap,
+  MapPin,
+  Circle,
 } from "lucide-react";
 import { CoCreditRequestsCard, PendingCoCredit } from "@/components/dashboard/CoCreditRequestsCard";
+import { RecentNotificationsCard } from "@/components/dashboard/RecentNotificationsCard";
+import { getNotificationsForActor } from "@/application/notificationService";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -49,8 +54,7 @@ export default async function DashboardPage() {
 
   const [
     portfolioCount,
-    serviceAsset,
-    specsAsset,
+    nonPortfolioAssets,
     briefStats,
     pendingBookingCount,
     totalIncomingBookings,
@@ -59,21 +63,14 @@ export default async function DashboardPage() {
     recentBookings,
     potentialCoCreditAssets,
     myPortfolioAssets,
+    recentNotifications,
   ] = await Promise.all([
     prisma.asset.count({ where: { actorId: primaryActor.id, category: "PORTFOLIO_WORK", status: { not: "ARCHIVED" } } }),
-    prisma.asset.findFirst({
-      where: {
-        actorId: primaryActor.id,
-        subtype: "COMMERCIAL_SERVICE_PACKAGES",
-        status: { not: "ARCHIVED" },
-      },
-    }),
-    prisma.asset.findFirst({
+    prisma.asset.findMany({
       where: {
         actorId: primaryActor.id,
         status: { not: "ARCHIVED" },
         NOT: { category: "PORTFOLIO_WORK" },
-        subtype: { not: "COMMERCIAL_SERVICE_PACKAGES" },
       },
     }),
     getProjectBriefDashboardStats(primaryActor.id),
@@ -119,6 +116,7 @@ export default async function DashboardPage() {
       orderBy: { createdAt: "desc" },
       take: 20,
     }),
+    getNotificationsForActor(primaryActor.id, 5),
   ]);
 
   const pendingCoCredits: PendingCoCredit[] = [];
@@ -200,8 +198,46 @@ export default async function DashboardPage() {
   }
 
   const isBrand = primaryActor.actorType === "BRAND" || (primaryActor.actorType as string) === "ORGANIZATION";
+
+  const serviceAsset = nonPortfolioAssets.find(
+    (a) =>
+      a.subtype === "COMMERCIAL_SERVICE_PACKAGES" ||
+      (a.attributes && typeof a.attributes === "object" && "service_packages" in (a.attributes as any))
+  );
+
+  const brandCollabAsset = nonPortfolioAssets.find(
+    (a) =>
+      a.attributes &&
+      typeof a.attributes === "object" &&
+      ("collab_types" in (a.attributes as any) ||
+        "budget_range" in (a.attributes as any) ||
+        "creator_requirements" in (a.attributes as any))
+  );
+
+  const specsAsset = nonPortfolioAssets.find(
+    (a) =>
+      a.id !== serviceAsset?.id &&
+      (isBrand
+        ? (a.attributes && typeof a.attributes === "object" && ("design_dna" in (a.attributes as any) || "sample_sizes_ready" in (a.attributes as any) || "fabric_materials" in (a.attributes as any) || "capacity_monthly" in (a.attributes as any)))
+        : a.subtype !== "COMMERCIAL_SERVICE_PACKAGES")
+  ) || nonPortfolioAssets.find((a) => a.id !== serviceAsset?.id);
+
+  const collabAttrs = (brandCollabAsset?.attributes && typeof brandCollabAsset.attributes === "object")
+    ? (brandCollabAsset.attributes as any)
+    : (specsAsset?.attributes && typeof specsAsset.attributes === "object" ? (specsAsset.attributes as any) : {});
   const specsAttrs = (specsAsset?.attributes && typeof specsAsset.attributes === "object") ? (specsAsset.attributes as any) : {};
-  const hasBrandCollab = Boolean(specsAttrs.collab_types || specsAttrs.budget_range || briefStats.myBriefCount > 0);
+
+  const brandCollabTypes: string[] = Array.isArray(collabAttrs.collab_types)
+    ? collabAttrs.collab_types
+    : [];
+
+  const hasCollabPreferences = Boolean(
+    brandCollabTypes.length > 0 ||
+    collabAttrs.budget_range ||
+    collabAttrs.creator_requirements ||
+    (primaryActor.compensationModels && primaryActor.compensationModels.length > 0) ||
+    briefStats.myBriefCount > 0
+  );
 
   const servicePackages = Array.isArray((serviceAsset?.attributes as any)?.service_packages)
     ? ((serviceAsset?.attributes as any).service_packages as any[])
@@ -210,13 +246,14 @@ export default async function DashboardPage() {
 
   const hasBasicProfile = Boolean(primaryActor.description && primaryActor.location);
   const hasPortfolio = portfolioCount > 0;
-  const hasRates = isBrand ? hasBrandCollab : servicePackageCount > 0;
+  // Relevansi metrik brand: Brand tidak membutuhkan rate card, melainkan "preferensi kerjasama"
+  const hasCommercialReadiness = isBrand ? hasCollabPreferences : servicePackageCount > 0;
   const hasSpecs = Boolean(specsAsset);
 
   const readinessScore =
     (hasBasicProfile ? 25 : 0) +
     (hasPortfolio ? 25 : 0) +
-    (hasRates ? 25 : 0) +
+    (hasCommercialReadiness ? 25 : 0) +
     (hasSpecs ? 25 : 0);
 
   return (
@@ -242,7 +279,9 @@ export default async function DashboardPage() {
               </span>
             </h1>
             <p className="text-sm md:text-base text-stone-300 leading-relaxed font-light">
-              Kelola pesanan booking jasa langsung, pantau respon tarif Anda, unggah portofolio showcase, dan temukan brief proyek komersial terbuka dari brand &amp; agensi di seluruh Indonesia.
+              {isBrand
+                ? "Kelola preferensi kerjasama brand, pantau respon minat pada brief proyek, tinjau pesanan booking jasa langsung, dan temukan mitra kreator terbaik di seluruh Indonesia."
+                : "Kelola pesanan booking jasa langsung, pantau respon tarif Anda, unggah portofolio showcase, dan temukan brief proyek komersial terbuka dari brand & agensi di seluruh Indonesia."}
             </p>
           </div>
         </section>
@@ -252,8 +291,12 @@ export default async function DashboardPage() {
             href="/settings/rates"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold shadow-sm transition-all hover:scale-[1.02]"
           >
-            <CreditCard className="w-4 h-4 text-emerald-400" />
-            <span>Kelola Paket &amp; Tarif Saya</span>
+            {isBrand ? (
+              <Briefcase className="w-4 h-4 text-emerald-400" />
+            ) : (
+              <CreditCard className="w-4 h-4 text-emerald-400" />
+            )}
+            <span>{isBrand ? "Atur Preferensi Kerjasama Brand" : "Kelola Paket & Tarif Saya"}</span>
           </Link>
           <Link
             href="/projects/new"
@@ -318,9 +361,11 @@ export default async function DashboardPage() {
                     : "bg-stone-50 border-stone-200 text-stone-600 hover:border-amber-400 hover:bg-amber-50/40"
                 }`}
               >
-                <span className={hasBasicProfile ? "text-emerald-600 font-bold" : "text-stone-400"}>
-                  {hasBasicProfile ? "✓" : "○"}
-                </span>
+                {hasBasicProfile ? (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                ) : (
+                  <Circle className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                )}
                 <span>{isBrand ? "Profil & Domisili" : "Bio & Domisili"}</span>
               </Link>
 
@@ -332,24 +377,36 @@ export default async function DashboardPage() {
                     : "bg-stone-50 border-stone-200 text-stone-600 hover:border-amber-400 hover:bg-amber-50/40"
                 }`}
               >
-                <span className={hasPortfolio ? "text-emerald-600 font-bold" : "text-stone-400"}>
-                  {hasPortfolio ? "✓" : "○"}
-                </span>
+                {hasPortfolio ? (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                ) : (
+                  <Circle className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                )}
                 <span>{isBrand ? `Katalog Showcase (${portfolioCount})` : `Portofolio (${portfolioCount})`}</span>
               </Link>
 
               <Link
                 href="/settings/rates"
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all hover:scale-102 ${
-                  hasRates
+                  hasCommercialReadiness
                     ? "bg-emerald-50/70 border-emerald-200 text-emerald-800"
                     : "bg-amber-50/70 border-amber-300 text-amber-900 animate-pulse"
                 }`}
               >
-                <span className={hasRates ? "text-emerald-600 font-bold" : "text-amber-600 font-bold"}>
-                  {hasRates ? "✓" : "+"}
+                {hasCommercialReadiness ? (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                ) : (
+                  <Plus className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                )}
+                <span>
+                  {isBrand
+                    ? hasCollabPreferences
+                      ? brandCollabTypes.length > 0
+                        ? `Preferensi Kerjasama (${brandCollabTypes.length})`
+                        : "Preferensi Kerjasama (Aktif)"
+                      : "Preferensi Kerjasama"
+                    : `Paket Tarif (${servicePackageCount})`}
                 </span>
-                <span>{isBrand ? "Skema Kerjasama & Budget" : `Paket Tarif (${servicePackageCount})`}</span>
               </Link>
 
               <Link
@@ -360,23 +417,36 @@ export default async function DashboardPage() {
                     : "bg-stone-50 border-stone-200 text-stone-600 hover:border-purple-400 hover:bg-purple-50/40"
                 }`}
               >
-                <span className={hasSpecs ? "text-emerald-600 font-bold" : "text-stone-400"}>
-                  {hasSpecs ? "✓" : "○"}
-                </span>
+                {hasSpecs ? (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                ) : (
+                  <Circle className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                )}
                 <span>{isBrand ? "Pedoman & Aset Brand" : "Spesifikasi Gear & Comp Card"}</span>
               </Link>
             </div>
           </div>
 
-          <div className="flex sm:flex-col items-center justify-between sm:justify-center gap-3 shrink-0 w-full sm:w-44 p-4 rounded-2xl bg-stone-50/80 border border-stone-200/80 text-center">
-            <div className="w-16 h-16 rounded-full bg-white border-4 border-amber-400 flex items-center justify-center font-black text-lg text-stone-900 shadow-xs">
+          <Link
+            href="/readiness"
+            className="flex sm:flex-col items-center justify-between sm:justify-center gap-3 shrink-0 w-full sm:w-48 p-4 rounded-2xl bg-stone-50/80 border border-stone-200/80 hover:border-amber-400 hover:bg-amber-50/40 transition-all text-center group cursor-pointer shadow-2xs"
+            title="Buka Pusat Kesiapan Kolaborasi & Aset"
+          >
+            <div className="w-16 h-16 rounded-full bg-white border-4 border-amber-400 flex items-center justify-center font-black text-lg text-stone-900 shadow-xs group-hover:scale-105 transition-transform">
               {readinessScore}%
             </div>
             <div className="text-left sm:text-center">
-              <p className="text-xs font-bold text-[#1E1B2E]">Skor Kesiapan</p>
-              <p className="text-[10px] text-stone-500 font-light">Terbuka untuk AI Match</p>
+              <p className="text-xs font-bold text-[#1E1B2E] group-hover:text-amber-800 transition-colors flex items-center justify-center gap-1">
+                <span>Skor Kesiapan</span>
+                <ArrowRight className="w-3 h-3 text-stone-400 group-hover:text-amber-800 group-hover:translate-x-0.5 transition-all" />
+              </p>
+              <p className="text-[10px] text-stone-500 font-medium mt-0.5">
+                {readinessScore >= 80
+                  ? "Prioritas Utama AI Match"
+                  : "Kelola 4 pilar kesiapan"}
+              </p>
             </div>
-          </div>
+          </Link>
         </div>
 
         <section className="space-y-4">
@@ -440,18 +510,30 @@ export default async function DashboardPage() {
             <Link href="/settings/rates" className="group flex flex-col justify-between p-5 rounded-3xl bg-white border border-stone-200 hover:border-emerald-300 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="space-y-4">
                 <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                  <CreditCard className="w-5 h-5" />
+                  {isBrand ? <Briefcase className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-wider mb-1">Paket &amp; Tarif</h3>
-                  <p className="text-[11px] text-stone-500 font-medium">Rate card &amp; paket layanan.</p>
+                  <h3 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-wider mb-1">
+                    {isBrand ? "Preferensi Kerjasama" : "Paket & Tarif"}
+                  </h3>
+                  <p className="text-[11px] text-stone-500 font-medium">
+                    {isBrand ? "Skema kolaborasi & budget brand." : "Rate card & paket layanan."}
+                  </p>
                 </div>
               </div>
               <div className="mt-8 flex items-center justify-between">
                 <span className={`px-2.5 py-1 rounded-full text-xs font-black ${
-                  servicePackageCount > 0 ? "bg-emerald-100 text-emerald-800" : "bg-stone-100 text-stone-600"
+                  hasCommercialReadiness ? "bg-emerald-100 text-emerald-800" : "bg-stone-100 text-stone-600"
                 }`}>
-                  {servicePackageCount > 0 ? `${servicePackageCount} Paket Aktif` : "Atur Tarif"}
+                  {isBrand
+                    ? hasCollabPreferences
+                      ? brandCollabTypes.length > 0
+                        ? `${brandCollabTypes.length} Skema Terbuka`
+                        : "Siap Kolaborasi"
+                      : "Atur Preferensi"
+                    : servicePackageCount > 0
+                    ? `${servicePackageCount} Paket Aktif`
+                    : "Atur Tarif"}
                 </span>
                 <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-emerald-600 transition-colors group-hover:translate-x-1" />
               </div>
@@ -494,6 +576,11 @@ export default async function DashboardPage() {
             </Link>
 
           </div>
+        </section>
+
+        {/* AKTIVITAS & NOTIFIKASI PROYEK TERBARU */}
+        <section className="pt-2">
+          <RecentNotificationsCard notifications={recentNotifications} />
         </section>
 
         <section className="space-y-4 pt-2">
@@ -553,8 +640,9 @@ export default async function DashboardPage() {
                           </span>
                         </div>
                         {b.requester.location && (
-                          <p className="text-[11px] text-stone-500 mt-0.5">
-                            📍 {b.requester.location}
+                          <p className="text-[11px] text-stone-500 mt-0.5 flex items-center gap-1">
+                            <MapPin className="w-3 h-3 text-stone-400 shrink-0" />
+                            <span>{b.requester.location}</span>
                           </p>
                         )}
                         <p className="text-xs text-stone-600 mt-2 font-medium line-clamp-2">

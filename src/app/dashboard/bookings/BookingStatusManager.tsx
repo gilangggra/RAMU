@@ -3,8 +3,20 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, XCircle, Loader2, Handshake, MessageCircle, Mail, ExternalLink } from "lucide-react";
+import {
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  Handshake,
+  MessageCircle,
+  MessageSquare,
+  Mail,
+  ExternalLink,
+  FileText,
+  ShieldCheck,
+} from "lucide-react";
 import { updateBookingStatus, convertBookingToCollaboration } from "@/app/api/bookings/actions";
+import { SpkAgreementModal, BookingSpkData } from "@/components/bookings/SpkAgreementModal";
 
 interface BookingStatusManagerProps {
   bookingId: string;
@@ -39,7 +51,7 @@ export function BookingStatusManager({ bookingId }: BookingStatusManagerProps) {
       <div className="mt-4 pt-4 border-t border-stone-100 flex items-center justify-between p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
         <div className="flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          <span>Pesanan Berhasil Diterima! Jadwal terkunci & SPK berlaku.</span>
+          <span>Pesanan Berhasil Diterima! Jadwal terkunci &amp; Kontrak Kolaborasi berlaku.</span>
         </div>
       </div>
     );
@@ -73,7 +85,7 @@ export function BookingStatusManager({ bookingId }: BookingStatusManagerProps) {
             </div>
             <p className="text-[11px] text-amber-800 mt-0.5">
               {confirmAction === "ACCEPTED"
-                ? "Dengan menerima, Anda menyetujui SPK dan jadwal kerja terkunci."
+                ? "Dengan menerima, Anda menyetujui Kontrak Kolaborasi dan jadwal kerja terkunci."
                 : "Permintaan sewa ini akan dibatalkan."}
             </p>
           </div>
@@ -140,7 +152,7 @@ export function ConvertBookingButton({ bookingId, collaborationId }: ConvertBook
     return (
       <Link
         href={`/collaborations/${collaborationId}`}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-bold text-xs shadow-xs transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition-colors"
       >
         <Handshake className="w-3.5 h-3.5" />
         <span>Buka Ruang Kolaborasi</span>
@@ -191,9 +203,10 @@ interface BookingContactActionsProps {
   email?: string | null;
   contactName: string;
   myRole: "requester" | "target";
+  partnerActorId?: string | null;
 }
 
-export function BookingContactActions({ phone, email, contactName, myRole }: BookingContactActionsProps) {
+export function BookingContactActions({ phone, email, contactName, myRole, partnerActorId }: BookingContactActionsProps) {
   const defaultText = myRole === "target"
     ? `Halo ${contactName}, saya menerima pesanan booking Anda melalui RAMU. Mari kita koordinasikan jadwal dan teknis produksinya.`
     : `Halo ${contactName}, saya telah mengajukan booking layanan melalui RAMU. Mohon konfirmasi jadwal dan teknis pembayarannya.`;
@@ -209,15 +222,25 @@ export function BookingContactActions({ phone, email, contactName, myRole }: Boo
 
   return (
     <div className="flex flex-wrap items-center gap-2 pt-2">
+      {partnerActorId && (
+        <Link
+          href={`/messages?with=${partnerActorId}`}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold transition-colors shadow-xs"
+        >
+          <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
+          <span>Chat RAMU (Escrow Safe)</span>
+        </Link>
+      )}
       {waUrl && (
         <a
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold transition-colors border border-emerald-200"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition-colors border border-emerald-200"
+          title="Gunakan WhatsApp hanya untuk koordinasi cepat di hari-H atau on-set darurat"
         >
-          <MessageCircle className="w-3.5 h-3.5" />
-          <span>WhatsApp</span>
+          <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+          <span>WhatsApp (Darurat On-Set)</span>
         </a>
       )}
       {email && (
@@ -232,9 +255,6 @@ export function BookingContactActions({ phone, email, contactName, myRole }: Boo
     </div>
   );
 }
-
-import { SpkAgreementModal, BookingSpkData } from "@/components/bookings/SpkAgreementModal";
-import { FileText, ShieldCheck } from "lucide-react";
 
 interface ViewSpkButtonProps {
   booking: BookingSpkData;
@@ -251,7 +271,7 @@ export function ViewSpkButton({ booking }: ViewSpkButtonProps) {
         title="Buka Surat Perjanjian Kerja & Slip Pembayaran"
       >
         <FileText className="w-3.5 h-3.5 text-amber-700" />
-        <span>Lihat SPK & Kesepakatan</span>
+        <span>Lihat Kontrak &amp; Kesepakatan</span>
       </button>
 
       <SpkAgreementModal
@@ -263,9 +283,20 @@ export function ViewSpkButton({ booking }: ViewSpkButtonProps) {
   );
 }
 
-export function BookingMilestoneTracker({ status, dpPercentage = 50 }: { status: string; dpPercentage?: number }) {
+interface BookingMilestoneTrackerProps {
+  status: string;
+  dpPercentage?: number;
+  collaborationId?: string | null;
+}
+
+export function BookingMilestoneTracker({
+  status,
+  dpPercentage = 50,
+  collaborationId,
+}: BookingMilestoneTrackerProps) {
   const isAccepted = status === "ACCEPTED";
   const isDeclined = status === "DECLINED";
+  const hasCollab = Boolean(collaborationId);
 
   return (
     <div className="p-3 bg-stone-50 rounded-xl border border-stone-100 space-y-2 mt-3">
@@ -278,15 +309,16 @@ export function BookingMilestoneTracker({ status, dpPercentage = 50 }: { status:
       </div>
 
       <div className="grid grid-cols-3 gap-2 text-center">
-
         <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">
-          <div className="text-[10px] font-bold">1. SPK & T&C</div>
+          <div className="text-[10px] font-bold">1. Kontrak Resmi</div>
           <div className="text-[9px] text-emerald-600">Disepakati</div>
         </div>
 
         <div
           className={`p-2 rounded-lg border ${
-            isAccepted
+            hasCollab
+              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+              : isAccepted
               ? "bg-amber-50 border-amber-200 text-amber-900"
               : isDeclined
               ? "bg-red-50 border-red-200 text-red-800"
@@ -295,13 +327,36 @@ export function BookingMilestoneTracker({ status, dpPercentage = 50 }: { status:
         >
           <div className="text-[10px] font-bold">2. DP {dpPercentage}%</div>
           <div className="text-[9px]">
-            {isAccepted ? "Kunci Jadwal" : isDeclined ? "Dibatalkan" : "Menunggu Konfirmasi"}
+            {hasCollab
+              ? "Terkunci & Aktif"
+              : isAccepted
+              ? "Kunci Jadwal"
+              : isDeclined
+              ? "Dibatalkan"
+              : "Menunggu Konfirmasi"}
           </div>
         </div>
 
-        <div className="p-2 rounded-lg bg-white border border-stone-200 text-stone-500">
-          <div className="text-[10px] font-bold">3. Pelunasan {100 - dpPercentage}%</div>
-          <div className="text-[9px]">Serah Terima Aset</div>
+        <div
+          className={`p-2 rounded-lg border transition-all ${
+            hasCollab
+              ? "bg-purple-50 border-purple-200 text-purple-900 shadow-2xs"
+              : "bg-white border-stone-200 text-stone-500"
+          }`}
+        >
+          <div className="text-[10px] font-bold">
+            {hasCollab ? "3. Ruang Kerja" : `3. Pelunasan ${100 - dpPercentage}%`}
+          </div>
+          <div className="text-[9px] flex items-center justify-center gap-1">
+            {hasCollab ? (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse" />
+                <span className="font-semibold text-purple-700">Workspace Aktif</span>
+              </>
+            ) : (
+              "Serah Terima Aset"
+            )}
+          </div>
         </div>
       </div>
     </div>

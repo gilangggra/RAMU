@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { acceptCollaboratorAction, declineCollaboratorAction } from "@/app/projects/actions";
-import { MapPin, AlertCircle, Check, ArrowUpRight, Handshake, ArrowRight } from "lucide-react";
+import { MapPin, AlertCircle, Check, ArrowUpRight, Handshake, ArrowRight, Sparkles } from "lucide-react";
 
 const CATEGORY_LABELS: Record<string, string> = {
   PORTFOLIO_WORK: "Karya / Portofolio",
@@ -38,6 +38,7 @@ interface InterestCardProps {
   };
   proposedAssets: string[];
   isInitiator: boolean;
+  isInvited?: boolean;
   onUpdate?: () => void;
 }
 
@@ -50,6 +51,7 @@ export function InterestCard({
   actor,
   proposedAssets,
   isInitiator,
+  isInvited = false,
 }: InterestCardProps) {
   const [isPending, startTransition] = useTransition();
   const [localStatus, setLocalStatus] = useState(status);
@@ -60,12 +62,19 @@ export function InterestCard({
     proposedAssets.includes(a.id)
   );
 
-  const statusConfig: Record<string, { label: string; color: string }> = {
-    PENDING: { label: "Menunggu Review", color: "text-amber-800 bg-amber-50 border-amber-200 font-bold" },
-    ACCEPTED: { label: "Diterima", color: "text-emerald-800 bg-emerald-50 border-emerald-200 font-bold" },
-    DECLINED: { label: "Ditolak", color: "text-rose-800 bg-rose-50 border-rose-200 font-bold" },
-    WITHDRAWN: { label: "Ditarik", color: "text-stone-700 bg-stone-100 border-stone-200 font-bold" },
-  };
+  const statusConfig: Record<string, { label: string; color: string }> = isInvited
+    ? {
+        PENDING: { label: "Undangan Terkirim", color: "text-purple-800 bg-purple-50 border-purple-200 font-bold" },
+        ACCEPTED: { label: "Undangan Diterima", color: "text-emerald-800 bg-emerald-50 border-emerald-200 font-bold" },
+        DECLINED: { label: "Undangan Ditolak Kreator", color: "text-stone-700 bg-stone-100 border-stone-200 font-bold" },
+        WITHDRAWN: { label: "Undangan Ditarik", color: "text-stone-700 bg-stone-100 border-stone-200 font-bold" },
+      }
+    : {
+        PENDING: { label: "Menunggu Review", color: "text-amber-800 bg-amber-50 border-amber-200 font-bold" },
+        ACCEPTED: { label: "Diterima", color: "text-emerald-800 bg-emerald-50 border-emerald-200 font-bold" },
+        DECLINED: { label: "Ditolak", color: "text-rose-800 bg-rose-50 border-rose-200 font-bold" },
+        WITHDRAWN: { label: "Ditarik", color: "text-stone-700 bg-stone-100 border-stone-200 font-bold" },
+      };
 
   const cfg = statusConfig[localStatus] || statusConfig.PENDING;
 
@@ -103,6 +112,8 @@ export function InterestCard({
           ? "bg-emerald-50/40 border-emerald-200"
           : localStatus === "DECLINED"
           ? "bg-stone-50 border-stone-200 opacity-60"
+          : isInvited && localStatus === "PENDING"
+          ? "bg-gradient-to-r from-purple-50/30 via-white to-white border-purple-200/80 shadow-2xs"
           : "bg-white/95 border-stone-200/80 shadow-2xs"
       }`}
     >
@@ -189,27 +200,46 @@ export function InterestCard({
       )}
 
       {isInitiator && localStatus === "PENDING" && (
-        <div className="flex items-center gap-2 pt-1">
-          <button
-            onClick={handleAccept}
-            disabled={isPending}
-            className="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
-          >
-            {isPending ? "..." : (
-              <>
-                <Check className="w-3.5 h-3.5" />
-                <span>Terima sebagai Kolaborator</span>
-              </>
-            )}
-          </button>
-          <button
-            onClick={handleDecline}
-            disabled={isPending}
-            className="px-4 py-2 rounded-xl bg-stone-100 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 disabled:opacity-50 text-[#716B7E] font-bold text-xs border border-stone-200 transition-colors cursor-pointer"
-          >
-            Tolak
-          </button>
-        </div>
+        isInvited ? (
+          <div className="p-3 rounded-xl bg-purple-50/70 border border-purple-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+              <span className="text-[11px] text-purple-900 font-medium">
+                Undangan telah dikirim ke kreator ini. Menunggu tanggapan dari mereka.
+              </span>
+            </div>
+            <button
+              onClick={handleDecline}
+              disabled={isPending}
+              className="px-3 py-1.5 rounded-lg bg-white hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 disabled:opacity-50 text-stone-600 font-bold text-[11px] border border-stone-200 transition-colors cursor-pointer shrink-0 shadow-2xs"
+              title="Batalkan undangan ini"
+            >
+              {isPending ? "..." : "Batalkan Undangan"}
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              onClick={handleAccept}
+              disabled={isPending}
+              className="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+            >
+              {isPending ? "..." : (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Terima sebagai Kolaborator</span>
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleDecline}
+              disabled={isPending}
+              className="px-4 py-2 rounded-xl bg-stone-100 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 disabled:opacity-50 text-[#716B7E] font-bold text-xs border border-stone-200 transition-colors cursor-pointer"
+            >
+              Tolak
+            </button>
+          </div>
+        )
       )}
 
       {createdCollabId && (

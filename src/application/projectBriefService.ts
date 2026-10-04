@@ -1,4 +1,5 @@
 import { prisma } from '@/infrastructure/database/prisma';
+import { createNotification } from '@/application/notificationService';
 import {
   ProjectBriefStatus,
   InterestStatus,
@@ -27,6 +28,38 @@ export interface CreateProjectBriefInput {
     description?: string;
     maxCollaborators?: number;
   }[];
+}
+
+export interface CrewCandidate {
+  actor: {
+    id: string;
+    name: string;
+    sector: string;
+    location: string | null;
+    description: string | null;
+    aestheticStyles: string[];
+    compensationModels: string[];
+  };
+  matchScore: number;
+  matchReasons: string[];
+}
+
+export interface CrewRecommendation {
+  roleId: string;
+  roleLabel: string;
+  assetCategory: string;
+  isFilled: boolean;
+  candidates: CrewCandidate[];
+}
+
+export const recommendationsCache = new Map<string, { data: CrewRecommendation[]; timestamp: number }>();
+
+export function clearRecommendationsCache(briefId?: string) {
+  if (briefId) {
+    recommendationsCache.delete(briefId);
+  } else {
+    recommendationsCache.clear();
+  }
 }
 
 export async function createProjectBrief(
@@ -80,6 +113,8 @@ export async function updateProjectBrief(
     throw new Error('Brief yang sudah ditutup tidak dapat diedit.');
   }
 
+  recommendationsCache.delete(briefId);
+
   return prisma.projectBrief.update({
     where: { id: briefId },
     data: {
@@ -105,6 +140,8 @@ export async function closeProjectBrief(briefId: string, actorId: string) {
   if (!brief) throw new Error('Brief tidak ditemukan.');
   if (brief.creatorActorId !== actorId) throw new Error('Hanya inisiator yang dapat menutup brief.');
 
+  recommendationsCache.delete(briefId);
+
   return prisma.projectBrief.update({
     where: { id: briefId },
     data: { status: ProjectBriefStatus.CLOSED },
@@ -127,6 +164,8 @@ export async function deleteProjectBrief(briefId: string, actorId: string) {
     throw new Error('Brief dengan kolaborator yang sudah diterima tidak dapat dihapus. Gunakan fitur "Tutup Brief" sebagai gantinya.');
   }
 
+  recommendationsCache.delete(briefId);
+
   // Hapus cascade: interests, roles, lalu brief
   await prisma.collaborationInterest.deleteMany({ where: { briefId } });
   await prisma.projectBriefRole.deleteMany({ where: { briefId } });
@@ -144,6 +183,7 @@ export async function getProjectBriefs(filter?: {
   compensationModel?: string;
 }) {
   const where: Prisma.ProjectBriefWhereInput = {};
+  const andConditions: Prisma.ProjectBriefWhereInput[] = [];
 
   if (filter?.status) {
     where.status = filter.status;
@@ -152,45 +192,123 @@ export async function getProjectBriefs(filter?: {
     where.creatorActorId = filter.creatorActorId;
   }
   if (filter?.location && filter.location !== "ALL") {
-    where.location = { contains: filter.location, mode: "insensitive" };
+    andConditions.push({
+      OR: [
+        { location: { contains: filter.location, mode: "insensitive" } },
+        { creatorActor: { location: { contains: filter.location, mode: "insensitive" } } },
+      ],
+    });
   }
   if (filter?.compensationModel && filter.compensationModel !== "ALL") {
-    where.compensationModel = filter.compensationModel;
+    const comp = filter.compensationModel.toUpperCase();
+    if (comp === "PAID") {
+      andConditions.push({
+        OR: [
+          { compensationModel: { equals: "PAID", mode: "insensitive" } },
+          { compensationModel: { contains: "Paid", mode: "insensitive" } },
+          { compensationModel: { contains: "Berbayar", mode: "insensitive" } },
+        ],
+      });
+    } else if (comp === "BARTER") {
+      andConditions.push({
+        OR: [
+          { compensationModel: { equals: "BARTER", mode: "insensitive" } },
+          { compensationModel: { contains: "Barter", mode: "insensitive" } },
+          { compensationModel: { equals: "VOLUNTEER", mode: "insensitive" } },
+          { compensationModel: { contains: "Gotong Royong", mode: "insensitive" } },
+        ],
+      });
+    } else if (comp === "TFP") {
+      andConditions.push({
+        OR: [
+          { compensationModel: { equals: "TFP", mode: "insensitive" } },
+          { compensationModel: { contains: "TFP", mode: "insensitive" } },
+          { compensationModel: { contains: "Trade for", mode: "insensitive" } },
+        ],
+      });
+    } else if (comp === "REVENUE_SHARE") {
+      andConditions.push({
+        OR: [
+          { compensationModel: { equals: "REVENUE_SHARE", mode: "insensitive" } },
+          { compensationModel: { contains: "Revenue", mode: "insensitive" } },
+          { compensationModel: { contains: "Bagi Hasil", mode: "insensitive" } },
+        ],
+      });
+    } else {
+      andConditions.push({
+        compensationModel: { contains: filter.compensationModel, mode: "insensitive" },
+      });
+    }
   }
   if (filter?.search && filter.search.trim()) {
     const term = filter.search.trim();
-    where.OR = [
-      { title: { contains: term, mode: "insensitive" } },
-      { description: { contains: term, mode: "insensitive" } },
-      { location: { contains: term, mode: "insensitive" } },
-      { targetOutput: { contains: term, mode: "insensitive" } },
-      {
-        neededRoles: {
-          some: {
-            roleLabel: { contains: term, mode: "insensitive" },
+    andConditions.push({
+      OR: [
+        { title: { contains: term, mode: "insensitive" } },
+        { description: { contains: term, mode: "insensitive" } },
+        { location: { contains: term, mode: "insensitive" } },
+        { targetOutput: { contains: term, mode: "insensitive" } },
+        {
+          neededRoles: {
+            some: {
+              roleLabel: { contains: term, mode: "insensitive" },
+            },
           },
         },
-      },
-      {
-        creatorActor: {
-          name: { contains: term, mode: "insensitive" },
+        {
+          creatorActor: {
+            name: { contains: term, mode: "insensitive" },
+          },
         },
-      },
-    ];
+      ],
+    });
   }
   if (filter?.roleCategory && filter.roleCategory !== "ALL") {
-    where.neededRoles = {
-      some: {
-        roleLabel: { contains: filter.roleCategory, mode: "insensitive" },
+    const rc = filter.roleCategory.toLowerCase();
+    const roleConditions: Prisma.ProjectBriefRoleWhereInput[] = [
+      { roleLabel: { contains: filter.roleCategory, mode: "insensitive" } },
+    ];
+
+    if (rc.includes("studio")) {
+      roleConditions.push({ assetCategory: "STUDIO_SPACE" });
+      roleConditions.push({ roleLabel: { contains: "venue", mode: "insensitive" } });
+    } else if (rc.includes("foto")) {
+      roleConditions.push({ roleLabel: { contains: "photographer", mode: "insensitive" } });
+    } else if (rc.includes("model")) {
+      roleConditions.push({ roleLabel: { contains: "talent", mode: "insensitive" } });
+      roleConditions.push({ roleLabel: { contains: "muse", mode: "insensitive" } });
+    } else if (rc.includes("props") || rc.includes("set")) {
+      roleConditions.push({ assetCategory: "WARDROBE_PROP" });
+      roleConditions.push({ roleLabel: { contains: "properti", mode: "insensitive" } });
+    } else if (rc.includes("director")) {
+      roleConditions.push({ roleLabel: { contains: "art", mode: "insensitive" } });
+    }
+
+    andConditions.push({
+      neededRoles: {
+        some: {
+          OR: roleConditions,
+        },
       },
-    };
+    });
+  }
+
+  if (andConditions.length > 0) {
+    where.AND = andConditions;
   }
 
   return prisma.projectBrief.findMany({
     where,
     include: {
       creatorActor: {
-        select: { id: true, name: true, sector: true, actorType: true, location: true },
+        select: {
+          id: true,
+          name: true,
+          sector: true,
+          actorType: true,
+          location: true,
+          owner: { select: { avatarUrl: true } },
+        },
       },
       neededRoles: {
         include: {
@@ -254,9 +372,10 @@ export async function expressInterest(
     where: { briefId_actorId_roleId: { briefId, actorId, roleId } },
   });
 
+  let result;
   if (existing) {
     if (existing.status === InterestStatus.WITHDRAWN || existing.status === InterestStatus.DECLINED) {
-      return prisma.collaborationInterest.update({
+      result = await prisma.collaborationInterest.update({
         where: { id: existing.id },
         data: {
           status: InterestStatus.PENDING,
@@ -264,32 +383,80 @@ export async function expressInterest(
           proposedAssets: (proposedAssetIds || []) as unknown as Prisma.InputJsonValue,
         },
       });
+    } else {
+      throw new Error('Anda sudah menyatakan minat untuk peran ini.');
     }
-    throw new Error('Anda sudah menyatakan minat untuk peran ini.');
+  } else {
+    result = await prisma.collaborationInterest.create({
+      data: {
+        briefId,
+        roleId,
+        actorId,
+        message: message || null,
+        proposedAssets: (proposedAssetIds || []) as unknown as Prisma.InputJsonValue,
+        status: InterestStatus.PENDING,
+      },
+    });
   }
 
-  return prisma.collaborationInterest.create({
-    data: {
-      briefId,
-      roleId,
-      actorId,
-      message: message || null,
-      proposedAssets: (proposedAssetIds || []) as unknown as Prisma.InputJsonValue,
-      status: InterestStatus.PENDING,
-    },
-  });
+  // Two-way notification: Notify brief initiator about the new applicant
+  try {
+    const brief = await prisma.projectBrief.findUnique({
+      where: { id: briefId },
+      select: { title: true, creatorActorId: true },
+    });
+    const candidate = await prisma.actor.findUnique({
+      where: { id: actorId },
+      select: { name: true },
+    });
+
+    if (brief && candidate && brief.creatorActorId !== actorId) {
+      await createNotification({
+        actorId: brief.creatorActorId,
+        title: "Peminat Kolaborasi Baru",
+        message: `${candidate.name} mengajukan minat untuk peran "${role.roleLabel}" pada brief proyek "${brief.title}".`,
+        type: "INTEREST_RECEIVED",
+        link: `/projects/${briefId}/interests`,
+        metadata: { briefId, roleId, candidateActorId: actorId },
+      });
+    }
+  } catch (notifErr) {
+    console.error("Failed to notify initiator of new interest:", notifErr);
+  }
+
+  return result;
 }
 
 export async function acceptCollaborator(interestId: string, initiatorActorId: string) {
   const interest = await prisma.collaborationInterest.findUnique({
     where: { id: interestId },
-    include: { brief: true, role: true },
+    include: {
+      brief: {
+        include: {
+          creatorActor: true,
+          neededRoles: true,
+        },
+      },
+      role: true,
+      actor: true,
+    },
   });
 
   if (!interest) throw new Error('Interest tidak ditemukan.');
   if (interest.brief.creatorActorId !== initiatorActorId) {
     throw new Error('Hanya pembuat brief yang dapat menerima kolaborator.');
   }
+
+  // Find other candidates for this role to notify them that the slot is filled
+  const otherPendingInterests = await prisma.collaborationInterest.findMany({
+    where: {
+      roleId: interest.roleId,
+      briefId: interest.briefId,
+      id: { not: interestId },
+      status: InterestStatus.PENDING,
+    },
+    select: { id: true, actorId: true },
+  });
 
   await prisma.$transaction([
     prisma.collaborationInterest.update({
@@ -311,20 +478,37 @@ export async function acceptCollaborator(interestId: string, initiatorActorId: s
     }),
   ]);
 
-  const brief = await prisma.projectBrief.findUnique({
+  const updatedBrief = await prisma.projectBrief.findUnique({
     where: { id: interest.briefId },
-    include: { neededRoles: true },
+    include: {
+      neededRoles: {
+        include: {
+          interests: {
+            where: { status: InterestStatus.ACCEPTED },
+            include: { actor: true },
+          },
+        },
+      },
+      creatorActor: true,
+    },
   });
 
-  const isFilled = Boolean(brief && brief.neededRoles.every((r) => r.isFilled));
-  let collaborationId: string | null = null;
+  const isAllRolesFilled = Boolean(
+    updatedBrief &&
+    updatedBrief.neededRoles.length > 0 &&
+    updatedBrief.neededRoles.every((r) => r.isFilled)
+  );
 
-  if (brief && isFilled) {
+  let collaborationId: string | null = updatedBrief?.collaborationId || null;
+
+  if (isAllRolesFilled) {
+    // 1. Brief status becomes FILLED
     await prisma.projectBrief.update({
       where: { id: interest.briefId },
       data: { status: ProjectBriefStatus.FILLED },
     });
 
+    // 2. AUTO-CREATE COLLABORATION WORKSPACE
     try {
       const colResult = await formCollaborationFromBrief(interest.briefId, initiatorActorId);
       if (colResult?.collaborationId) {
@@ -333,15 +517,128 @@ export async function acceptCollaborator(interestId: string, initiatorActorId: s
     } catch (err) {
       console.error("Auto formation of collaboration failed in acceptCollaborator:", err);
     }
+
+    // 3. TWO-WAY NOTIFICATIONS:
+    // a. Notify Initiator
+    try {
+      await createNotification({
+        actorId: initiatorActorId,
+        title: "Tim Kolaborasi Lengkap & Workspace Aktif!",
+        message: `Seluruh peran pada brief "${interest.brief.title}" telah terisi. Ruang kerja kolaborasi resmi telah dibentuk dan siap digunakan bersama seluruh tim.`,
+        type: "COLLABORATION_STARTED",
+        link: collaborationId ? `/collaborations/${collaborationId}` : `/projects/${interest.briefId}`,
+        metadata: { briefId: interest.briefId, collaborationId },
+      });
+    } catch (e) {
+      console.error("Failed to notify initiator:", e);
+    }
+
+    // b. Notify newly accepted collaborator
+    try {
+      await createNotification({
+        actorId: interest.actorId,
+        title: "Lamaran Diterima & Tim Lengkap!",
+        message: `Selamat! Anda resmi diterima sebagai ${interest.role.roleLabel} pada proyek "${interest.brief.title}" oleh ${interest.brief.creatorActor.name}. Seluruh peran tim telah lengkap dan ruang kolaborasi kini aktif.`,
+        type: "COLLABORATION_STARTED",
+        link: collaborationId ? `/collaborations/${collaborationId}` : `/projects/${interest.briefId}`,
+        metadata: { briefId: interest.briefId, collaborationId },
+      });
+    } catch (e) {
+      console.error("Failed to notify accepted candidate:", e);
+    }
+
+    // c. Notify all other previously accepted collaborators for other roles
+    const otherAcceptedActorIds = new Set<string>();
+    for (const role of updatedBrief?.neededRoles || []) {
+      for (const acceptedInt of role.interests) {
+        if (acceptedInt.actorId !== interest.actorId && acceptedInt.actorId !== initiatorActorId) {
+          otherAcceptedActorIds.add(acceptedInt.actorId);
+        }
+      }
+    }
+
+    for (const otherActorId of otherAcceptedActorIds) {
+      try {
+        await createNotification({
+          actorId: otherActorId,
+          title: "Tim Proyek Lengkap & Workspace Aktif!",
+          message: `Seluruh peran untuk proyek "${interest.brief.title}" telah terisi lengkap. Ruang kolaborasi resmi kini aktif dan siap dieksekusi bersama.`,
+          type: "COLLABORATION_STARTED",
+          link: collaborationId ? `/collaborations/${collaborationId}` : `/projects/${interest.briefId}`,
+          metadata: { briefId: interest.briefId, collaborationId },
+        });
+      } catch (e) {
+        console.error("Failed to notify existing accepted team member:", e);
+      }
+    }
+  } else {
+    // If not all roles are filled yet, but collaboration already existed from manual start, sync this new collaborator
+    if (updatedBrief?.collaborationId) {
+      try {
+        const colResult = await formCollaborationFromBrief(interest.briefId, initiatorActorId);
+        if (colResult?.collaborationId) {
+          collaborationId = colResult.collaborationId;
+        }
+      } catch (err) {
+        console.error("Sync to existing collaboration failed:", err);
+      }
+    }
+
+    // NOTIFICATION 1: Notify accepted candidate
+    try {
+      await createNotification({
+        actorId: interest.actorId,
+        title: "Lamaran Kolaborasi Diterima!",
+        message: `Selamat! Anda resmi diterima sebagai ${interest.role.roleLabel} pada proyek "${interest.brief.title}" oleh ${interest.brief.creatorActor.name}. Menunggu peran tim lainnya terisi sebelum ruang kolaborasi resmi dimulai.`,
+        type: "INTEREST_ACCEPTED",
+        link: collaborationId ? `/collaborations/${collaborationId}` : `/projects/${interest.briefId}`,
+        metadata: { briefId: interest.briefId, collaborationId },
+      });
+    } catch (e) {
+      console.error("Failed to notify accepted candidate:", e);
+    }
+
+    // NOTIFICATION 2: Notify initiator
+    const filledCount = updatedBrief?.neededRoles.filter((r) => r.isFilled).length || 1;
+    const totalCount = updatedBrief?.neededRoles.length || 1;
+    try {
+      await createNotification({
+        actorId: initiatorActorId,
+        title: `Kolaborator Diterima (${filledCount}/${totalCount})`,
+        message: `${interest.actor.name} telah diterima untuk peran ${interest.role.roleLabel} pada proyek "${interest.brief.title}". Masih menunggu sisa peran terisi.`,
+        type: "INFO",
+        link: `/projects/${interest.briefId}`,
+        metadata: { briefId: interest.briefId, candidateActorId: interest.actorId },
+      });
+    } catch (e) {
+      console.error("Failed to notify initiator:", e);
+    }
   }
 
-  return { success: true, isFilled, collaborationId };
+  // NOTIFICATION TO OTHER PENDING CANDIDATES THAT ROLE IS FILLED
+  for (const other of otherPendingInterests) {
+    try {
+      await createNotification({
+        actorId: other.actorId,
+        title: "Update Lamaran Proyek",
+        message: `Slot peran ${interest.role.roleLabel} pada proyek "${interest.brief.title}" telah terisi oleh kandidat lain. Terima kasih telah mengajukan minat.`,
+        type: "INTEREST_DECLINED",
+        link: `/projects/${interest.briefId}`,
+        metadata: { briefId: interest.briefId },
+      });
+    } catch (e) {
+      console.error("Failed to notify other candidate:", e);
+    }
+  }
+
+  recommendationsCache.delete(interest.briefId);
+  return { success: true, isFilled: isAllRolesFilled, collaborationId };
 }
 
 export async function declineCollaborator(interestId: string, initiatorActorId: string) {
   const interest = await prisma.collaborationInterest.findUnique({
     where: { id: interestId },
-    include: { brief: true },
+    include: { brief: true, role: true },
   });
 
   if (!interest) throw new Error('Interest tidak ditemukan.');
@@ -353,6 +650,21 @@ export async function declineCollaborator(interestId: string, initiatorActorId: 
     where: { id: interestId },
     data: { status: InterestStatus.DECLINED },
   });
+
+  recommendationsCache.delete(interest.briefId);
+
+  try {
+    await createNotification({
+      actorId: interest.actorId,
+      title: "Update Lamaran Proyek",
+      message: `Inisiator proyek "${interest.brief.title}" belum dapat melanjutkan kolaborasi untuk peran ${interest.role.roleLabel} saat ini.`,
+      type: "INTEREST_DECLINED",
+      link: `/projects/${interest.briefId}`,
+      metadata: { briefId: interest.briefId },
+    });
+  } catch (e) {
+    console.error("Failed to notify declined candidate:", e);
+  }
 
   return { success: true };
 }
@@ -368,7 +680,344 @@ export async function withdrawInterest(interestId: string, actorId: string) {
     data: { status: InterestStatus.WITHDRAWN },
   });
 
+  recommendationsCache.delete(interest.briefId);
   return { success: true };
+}
+
+export async function inviteActorToBriefRole(
+  initiatorActorId: string,
+  targetActorId: string,
+  briefId: string,
+  roleId: string,
+  customMessage?: string
+) {
+  const initiator = await prisma.actor.findUnique({
+    where: { id: initiatorActorId },
+    select: { id: true, name: true },
+  });
+  if (!initiator) throw new Error('Inisiator tidak ditemukan.');
+
+  const brief = await prisma.projectBrief.findUnique({
+    where: { id: briefId },
+    select: { id: true, title: true, creatorActorId: true },
+  });
+  if (!brief) throw new Error('Brief tidak ditemukan.');
+  if (brief.creatorActorId !== initiatorActorId) {
+    throw new Error('Hanya inisiator proyek yang dapat mengundang kolaborator.');
+  }
+
+  const role = await prisma.projectBriefRole.findUnique({
+    where: { id: roleId },
+  });
+  if (!role || role.isFilled) {
+    throw new Error('Peran ini sudah terisi atau tidak ditemukan.');
+  }
+
+  const targetActor = await prisma.actor.findUnique({
+    where: { id: targetActorId },
+    select: { id: true, name: true },
+  });
+  if (!targetActor) throw new Error('Kreator target tidak ditemukan.');
+
+  const existing = await prisma.collaborationInterest.findUnique({
+    where: { briefId_actorId_roleId: { briefId, actorId: targetActorId, roleId } },
+  });
+
+  const inviteMessage =
+    customMessage ||
+    `Undangan Kolaborasi dari Inisiator\n\nAnda direkomendasikan oleh Smart Crew Builder RAMU dan secara khusus diundang oleh inisiator proyek "${brief.title}" untuk bergabung dalam peran "${role.roleLabel}". Silakan tinjau dan tanggapi undangan ini.`;
+
+  let interestRecord;
+  if (existing) {
+    if (existing.status === InterestStatus.PENDING) {
+      throw new Error('Kreator ini sudah memiliki status minat/undangan aktif untuk peran ini.');
+    }
+    if (existing.status === InterestStatus.ACCEPTED) {
+      throw new Error('Kreator ini sudah resmi diterima dalam peran ini.');
+    }
+    interestRecord = await prisma.collaborationInterest.update({
+      where: { id: existing.id },
+      data: {
+        status: InterestStatus.PENDING,
+        isInvited: true,
+        message: inviteMessage,
+        proposedAssets: [] as unknown as Prisma.InputJsonValue,
+      },
+    });
+  } else {
+    interestRecord = await prisma.collaborationInterest.create({
+      data: {
+        briefId,
+        roleId,
+        actorId: targetActorId,
+        isInvited: true,
+        message: inviteMessage,
+        proposedAssets: [] as unknown as Prisma.InputJsonValue,
+        status: InterestStatus.PENDING,
+      },
+    });
+  }
+
+  recommendationsCache.delete(briefId);
+
+  try {
+    await createNotification({
+      actorId: targetActorId,
+      title: "Undangan Kolaborasi Proyek",
+      message: `${initiator.name} mengundang Anda untuk bergabung dalam peran "${role.roleLabel}" pada proyek "${brief.title}". Mari tinjau rincian proyek dan tanggapi undangan ini!`,
+      type: "INTEREST_RECEIVED",
+      link: `/projects/${briefId}`,
+      metadata: {
+        briefId,
+        roleId,
+        interestId: interestRecord.id,
+        isInvited: true,
+        initiatorActorId,
+      },
+    });
+  } catch (notifErr) {
+    console.error("Failed to notify invited actor:", notifErr);
+  }
+
+  return { success: true, interestId: interestRecord.id };
+}
+
+export async function respondToProjectInvitation(
+  interestId: string,
+  actorId: string,
+  response: "ACCEPT" | "DECLINE"
+) {
+  const interest = await prisma.collaborationInterest.findUnique({
+    where: { id: interestId },
+    include: {
+      brief: {
+        include: {
+          creatorActor: true,
+          neededRoles: true,
+        },
+      },
+      role: true,
+      actor: true,
+    },
+  });
+
+  if (!interest) throw new Error('Undangan tidak ditemukan.');
+  if (interest.actorId !== actorId) {
+    throw new Error('Anda tidak memiliki izin untuk menanggapi undangan ini.');
+  }
+  if (!interest.isInvited) {
+    throw new Error('Ini adalah pengajuan mandiri, bukan undangan inisiator.');
+  }
+  if (interest.status !== InterestStatus.PENDING) {
+    throw new Error('Undangan ini sudah tidak dalam status menunggu respon.');
+  }
+
+  if (response === 'DECLINE') {
+    await prisma.collaborationInterest.update({
+      where: { id: interestId },
+      data: { status: InterestStatus.DECLINED },
+    });
+
+    recommendationsCache.delete(interest.briefId);
+
+    try {
+      await createNotification({
+        actorId: interest.brief.creatorActorId,
+        title: "Undangan Kolaborasi Ditolak",
+        message: `${interest.actor.name} belum dapat menerima undangan untuk peran "${interest.role.roleLabel}" pada proyek "${interest.brief.title}".`,
+        type: "INTEREST_DECLINED",
+        link: `/projects/${interest.briefId}/interests`,
+        metadata: { briefId: interest.briefId, roleId: interest.roleId, candidateActorId: actorId },
+      });
+    } catch (e) {
+      console.error("Failed to notify initiator of declined invite:", e);
+    }
+
+    return { success: true, status: "DECLINED" };
+  }
+
+  // response === 'ACCEPT'
+  const currentRole = await prisma.projectBriefRole.findUnique({
+    where: { id: interest.roleId },
+  });
+  if (currentRole?.isFilled) {
+    throw new Error('Peran ini sayangnya telah terisi oleh kolaborator lain.');
+  }
+
+  const otherPendingInterests = await prisma.collaborationInterest.findMany({
+    where: {
+      roleId: interest.roleId,
+      briefId: interest.briefId,
+      id: { not: interestId },
+      status: InterestStatus.PENDING,
+    },
+    select: { id: true, actorId: true },
+  });
+
+  await prisma.$transaction([
+    prisma.collaborationInterest.update({
+      where: { id: interestId },
+      data: { status: InterestStatus.ACCEPTED },
+    }),
+    prisma.projectBriefRole.update({
+      where: { id: interest.roleId },
+      data: { isFilled: true },
+    }),
+    prisma.collaborationInterest.updateMany({
+      where: {
+        roleId: interest.roleId,
+        briefId: interest.briefId,
+        id: { not: interestId },
+        status: InterestStatus.PENDING,
+      },
+      data: { status: InterestStatus.DECLINED },
+    }),
+  ]);
+
+  recommendationsCache.delete(interest.briefId);
+
+  const updatedBrief = await prisma.projectBrief.findUnique({
+    where: { id: interest.briefId },
+    include: {
+      neededRoles: {
+        include: {
+          interests: {
+            where: { status: InterestStatus.ACCEPTED },
+            include: { actor: true },
+          },
+        },
+      },
+      creatorActor: true,
+    },
+  });
+
+  const isAllRolesFilled = Boolean(
+    updatedBrief &&
+    updatedBrief.neededRoles.length > 0 &&
+    updatedBrief.neededRoles.every((r) => r.isFilled)
+  );
+
+  let collaborationId: string | null = updatedBrief?.collaborationId || null;
+
+  if (isAllRolesFilled) {
+    await prisma.projectBrief.update({
+      where: { id: interest.briefId },
+      data: { status: ProjectBriefStatus.FILLED },
+    });
+
+    try {
+      const colResult = await formCollaborationFromBrief(interest.briefId, interest.brief.creatorActorId);
+      if (colResult?.collaborationId) {
+        collaborationId = colResult.collaborationId;
+      }
+    } catch (err) {
+      console.error("Auto formation of collaboration failed in respondToProjectInvitation:", err);
+    }
+
+    try {
+      await createNotification({
+        actorId: interest.brief.creatorActorId,
+        title: "Undangan Diterima & Tim Lengkap! 🚀",
+        message: `${interest.actor.name} menerima undangan Anda. Seluruh peran pada proyek "${interest.brief.title}" kini telah lengkap dan ruang kolaborasi resmi aktif!`,
+        type: "COLLABORATION_STARTED",
+        link: collaborationId ? `/collaborations/${collaborationId}` : `/projects/${interest.briefId}`,
+        metadata: { briefId: interest.briefId, collaborationId },
+      });
+    } catch (e) {
+      console.error("Failed to notify initiator:", e);
+    }
+
+    try {
+      await createNotification({
+        actorId: interest.actorId,
+        title: "Kolaborasi Resmi Dimulai!",
+        message: `Selamat! Anda resmi bergabung dalam peran ${interest.role.roleLabel} pada proyek "${interest.brief.title}". Seluruh tim telah lengkap dan workspace telah dibuka!`,
+        type: "COLLABORATION_STARTED",
+        link: collaborationId ? `/collaborations/${collaborationId}` : `/projects/${interest.briefId}`,
+        metadata: { briefId: interest.briefId, collaborationId },
+      });
+    } catch (e) {
+      console.error("Failed to notify accepted invitee:", e);
+    }
+
+    const otherAcceptedActorIds = new Set<string>();
+    for (const role of updatedBrief?.neededRoles || []) {
+      for (const acceptedInt of role.interests) {
+        if (acceptedInt.actorId !== interest.actorId && acceptedInt.actorId !== interest.brief.creatorActorId) {
+          otherAcceptedActorIds.add(acceptedInt.actorId);
+        }
+      }
+    }
+
+    for (const otherActorId of otherAcceptedActorIds) {
+      try {
+        await createNotification({
+          actorId: otherActorId,
+          title: "Tim Proyek Lengkap & Workspace Aktif!",
+          message: `Seluruh peran untuk proyek "${interest.brief.title}" telah terisi lengkap. Ruang kolaborasi resmi kini aktif dan siap dieksekusi bersama.`,
+          type: "COLLABORATION_STARTED",
+          link: collaborationId ? `/collaborations/${collaborationId}` : `/projects/${interest.briefId}`,
+          metadata: { briefId: interest.briefId, collaborationId },
+        });
+      } catch (e) {
+        console.error("Failed to notify existing team member:", e);
+      }
+    }
+  } else {
+    if (updatedBrief?.collaborationId) {
+      try {
+        const colResult = await formCollaborationFromBrief(interest.briefId, interest.brief.creatorActorId);
+        if (colResult?.collaborationId) {
+          collaborationId = colResult.collaborationId;
+        }
+      } catch (err) {
+        console.error("Sync to existing collaboration failed:", err);
+      }
+    }
+
+    try {
+      await createNotification({
+        actorId: interest.brief.creatorActorId,
+        title: "Undangan Kolaborasi Diterima! 🎉",
+        message: `${interest.actor.name} telah menerima undangan Anda untuk peran "${interest.role.roleLabel}" pada proyek "${interest.brief.title}".`,
+        type: "INTEREST_ACCEPTED",
+        link: `/projects/${interest.briefId}`,
+        metadata: { briefId: interest.briefId, candidateActorId: interest.actorId },
+      });
+    } catch (e) {
+      console.error("Failed to notify initiator of accepted invite:", e);
+    }
+
+    try {
+      await createNotification({
+        actorId: interest.actorId,
+        title: "Undangan Kolaborasi Berhasil Diterima!",
+        message: `Anda resmi bergabung sebagai ${interest.role.roleLabel} pada proyek "${interest.brief.title}". Menunggu peran tim lainnya terisi sebelum ruang kolaborasi resmi dimulai.`,
+        type: "INTEREST_ACCEPTED",
+        link: `/projects/${interest.briefId}`,
+        metadata: { briefId: interest.briefId },
+      });
+    } catch (e) {
+      console.error("Failed to notify invitee:", e);
+    }
+  }
+
+  for (const other of otherPendingInterests) {
+    try {
+      await createNotification({
+        actorId: other.actorId,
+        title: "Update Lamaran Proyek",
+        message: `Slot peran ${interest.role.roleLabel} pada proyek "${interest.brief.title}" telah terisi. Terima kasih telah mengajukan minat.`,
+        type: "INTEREST_DECLINED",
+        link: `/projects/${interest.briefId}`,
+        metadata: { briefId: interest.briefId },
+      });
+    } catch (e) {
+      console.error("Failed to notify other candidate:", e);
+    }
+  }
+
+  return { success: true, status: "ACCEPTED", isFilled: isAllRolesFilled, collaborationId };
 }
 
 export async function formCollaborationFromBrief(
@@ -394,7 +1043,45 @@ export async function formCollaborationFromBrief(
   if (brief.creatorActorId !== initiatorActorId) {
     throw new Error('Hanya pembuat brief yang dapat membentuk kolaborasi.');
   }
+
+  // If collaboration already exists, sync any newly accepted participants
   if (brief.collaborationId) {
+    const existingParticipants = await prisma.collaborationParticipant.findMany({
+      where: { collaborationId: brief.collaborationId },
+    });
+    const existingActorIds = new Set(existingParticipants.map((p) => p.actorId));
+
+    const plan = await prisma.collaborationPlan.findFirst({
+      where: { collaboration: { id: brief.collaborationId } },
+    });
+
+    for (const role of brief.neededRoles) {
+      for (const interest of role.interests) {
+        if (!existingActorIds.has(interest.actorId)) {
+          await prisma.collaborationParticipant.create({
+            data: {
+              collaborationId: brief.collaborationId,
+              actorId: interest.actorId,
+              roleCode: role.assetCategory,
+              status: ParticipantCollaborationStatus.ACTIVE,
+            },
+          });
+          if (plan) {
+            await prisma.collaborationRole.create({
+              data: {
+                collaborationPlanId: plan.id,
+                actorId: interest.actorId,
+                roleCode: role.assetCategory,
+                responsibility: role.roleLabel,
+                contribution: 'Menyediakan aset dan kapabilitas sesuai peran dalam kolaborasi',
+                status: 'ACCEPTED',
+              },
+            });
+          }
+          existingActorIds.add(interest.actorId);
+        }
+      }
+    }
     return { success: true, collaborationId: brief.collaborationId, isNew: false };
   }
 
@@ -560,13 +1247,32 @@ export async function formCollaborationFromBrief(
     },
   });
 
+  const isAllRolesFilled = brief.neededRoles.every((r) => r.isFilled);
+
   await prisma.projectBrief.update({
     where: { id: briefId },
     data: {
       collaborationId: collaboration.id,
-      status: ProjectBriefStatus.FILLED,
+      status: isAllRolesFilled ? ProjectBriefStatus.FILLED : brief.status,
     },
   });
+
+  for (const p of participants) {
+    if (p.actorId !== initiatorActorId) {
+      try {
+        await createNotification({
+          actorId: p.actorId,
+          title: "Ruang Kolaborasi Aktif!",
+          message: `${brief.creatorActor.name} telah meluncurkan ruang kerja kolaborasi untuk proyek "${brief.title}". Mari berkoordinasi bersama!`,
+          type: "COLLABORATION_STARTED",
+          link: `/collaborations/${collaboration.id}`,
+          metadata: { briefId, collaborationId: collaboration.id },
+        });
+      } catch (err) {
+        console.error("Failed to notify participant in formCollaborationFromBrief:", err);
+      }
+    }
+  }
 
   return { success: true, collaborationId: collaboration.id, isNew: true };
 }
@@ -610,32 +1316,9 @@ export async function getProjectBriefDashboardStats(actorId: string) {
   return { openBriefCount, pendingInterestCount, myBriefCount, recentOpenBriefs };
 }
 
-export interface CrewCandidate {
-  actor: {
-    id: string;
-    name: string;
-    sector: string;
-    location: string | null;
-    description: string | null;
-    aestheticStyles: string[];
-    compensationModels: string[];
-  };
-  matchScore: number;
-  matchReasons: string[];
-}
-
-export interface CrewRecommendation {
-  roleId: string;
-  roleLabel: string;
-  assetCategory: string;
-  isFilled: boolean;
-  candidates: CrewCandidate[];
-}
-
-const recommendationsCache = new Map<string, { data: CrewRecommendation[]; timestamp: number }>();
-
 export async function getCrewRecommendationsForBrief(
-  briefId: string
+  briefId: string,
+  preloadedBrief?: any
 ): Promise<CrewRecommendation[]> {
   const cached = recommendationsCache.get(briefId);
 
@@ -643,13 +1326,25 @@ export async function getCrewRecommendationsForBrief(
     return cached.data;
   }
 
-  const brief = await getProjectBriefById(briefId);
+  const brief = preloadedBrief ?? await getProjectBriefById(briefId);
   if (!brief) return [];
+
+  const neededCategories = Array.from(new Set(brief.neededRoles.map((r: any) => r.assetCategory).filter(Boolean)));
 
   const actors = await prisma.actor.findMany({
     where: {
       status: 'ACTIVE',
       id: { not: brief.creatorActorId },
+      ...(neededCategories.length > 0
+        ? {
+            assets: {
+              some: {
+                status: 'ACTIVE',
+                category: { in: neededCategories as any },
+              },
+            },
+          }
+        : {}),
     },
     select: {
       id: true,
@@ -666,23 +1361,23 @@ export async function getCrewRecommendationsForBrief(
     },
   });
 
-  const acceptedByRole = new Map<string, Set<string>>();
+  const activeByRole = new Map<string, Set<string>>();
   for (const role of brief.neededRoles) {
-    const accepted = new Set(
-      role.interests
-        .filter((i) => i.status === InterestStatus.ACCEPTED)
-        .map((i) => i.actorId)
+    const activeActorIds = new Set<string>(
+      (role.interests || [])
+        .filter((i: any) => i.status === InterestStatus.ACCEPTED || i.status === InterestStatus.PENDING)
+        .map((i: any) => String(i.actorId))
     );
-    acceptedByRole.set(role.id, accepted);
+    activeByRole.set(role.id, activeActorIds);
   }
 
   const results: CrewRecommendation[] = [];
 
   for (const role of brief.neededRoles) {
-    const alreadyAccepted = acceptedByRole.get(role.id) ?? new Set<string>();
+    const alreadyActive = activeByRole.get(role.id) ?? new Set<string>();
 
     const candidates = actors
-      .filter((actor) => !alreadyAccepted.has(actor.id))
+      .filter((actor) => !alreadyActive.has(actor.id))
       .map((actor) => {
         let score = 0;
         const matchReasons: string[] = [];

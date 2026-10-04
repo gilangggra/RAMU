@@ -37,6 +37,7 @@ export async function initiateCollaboration(opportunityId: string) {
   try {
     const res = await initiateCollaborationFromOpportunity(opportunityId, actor.id);
     revalidatePath("/collaborations");
+    revalidatePath("/projects");
     revalidatePath(`/opportunities/${opportunityId}`);
     revalidatePath("/dashboard");
     return { success: true, collaborationId: res.collaborationId };
