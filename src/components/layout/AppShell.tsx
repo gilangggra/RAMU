@@ -24,6 +24,7 @@ import {
   BarChart3,
   ShieldCheck,
   MessageSquare,
+  ArrowLeftRight,
 } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 
@@ -42,6 +43,7 @@ interface ActorInfo {
 interface AppShellProps {
   actor: ActorInfo;
   activeRoute: string;
+  isAdmin?: boolean;
   children: React.ReactNode;
 }
 
@@ -55,7 +57,11 @@ interface NavItem {
 // In-memory cache across client-side router page navigations
 let cachedSidebarCollapsed: boolean | null = null;
 
-export function AppShell({ actor, activeRoute, children }: AppShellProps) {
+// Module-level avatar resolution cache to prevent repeated server action calls on navigation
+let avatarResolutionAttempted = false;
+let cachedResolvedAvatar: string | null = null;
+
+export function AppShell({ actor, activeRoute, isAdmin = false, children }: AppShellProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -78,26 +84,11 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
   });
 
   // Track if user explicitly clicked the toggle button.
-  // We only animate with transition-all when the user clicks the toggle,
-  // NOT on page transitions / tab switches to eliminate flickering.
   const [hasInteracted, setHasInteracted] = useState(false);
 
   const initialAvatar = actor.avatarUrl || actor.owner?.avatarUrl || null;
-  const [avatar, setAvatar] = useState<string | null>(initialAvatar);
+  const [avatar, setAvatar] = useState<string | null>(() => initialAvatar || cachedResolvedAvatar);
   const [avatarError, setAvatarError] = useState(false);
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("ramu_sidebar_collapsed");
-      if (saved !== null) {
-        const val = saved === "true";
-        cachedSidebarCollapsed = val;
-        setIsCollapsed(val);
-      }
-    } catch {
-      // ignore
-    }
-  }, []);
 
   const toggleSidebar = () => {
     setHasInteracted(true);
@@ -113,9 +104,35 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
     });
   };
 
-  const isAdmin =
-    actor.sector === "Platform Administrator" ||
-    actor.sector?.toLowerCase().includes("administrator");
+  useEffect(() => {
+    if (initialAvatar) {
+      setAvatar(initialAvatar);
+      cachedResolvedAvatar = initialAvatar;
+      avatarResolutionAttempted = true;
+      setAvatarError(false);
+      return;
+    }
+
+    if (avatarResolutionAttempted) {
+      if (cachedResolvedAvatar) setAvatar(cachedResolvedAvatar);
+      return;
+    }
+
+    avatarResolutionAttempted = true;
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      const metaAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+      if (metaAvatar) {
+        cachedResolvedAvatar = metaAvatar;
+        setAvatar(metaAvatar);
+      } else {
+        getCurrentUserAvatar().then((url) => {
+          cachedResolvedAvatar = url;
+          if (url) setAvatar(url);
+        });
+      }
+    });
+  }, [initialAvatar]);
 
   const personalNav: NavItem[] = [
     { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" /> },
@@ -135,26 +152,6 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
     { href: "/engine-insights", label: "Engine Insights AI", icon: <BarChart3 className="w-4 h-4" />, badge: "Signals" },
     { href: "/settings", label: "Pengaturan Akun", icon: <Settings className="w-4 h-4" /> },
   ];
-
-  useEffect(() => {
-    if (initialAvatar) {
-      setAvatar(initialAvatar);
-      setAvatarError(false);
-      return;
-    }
-
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      const metaAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
-      if (metaAvatar) {
-        setAvatar(metaAvatar);
-      } else {
-        getCurrentUserAvatar().then((url) => {
-          if (url) setAvatar(url);
-        });
-      }
-    });
-  }, [initialAvatar]);
 
   function isItemActive(href: string) {
     const current = pathname || activeRoute;
@@ -348,6 +345,15 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
               </Link>
 
               <div className="flex items-center gap-1">
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    title="Switch ke Dashboard Admin"
+                    className="p-1.5 rounded-lg text-amber-600 hover:text-amber-700 hover:bg-amber-50 transition-colors"
+                  >
+                    <ArrowLeftRight className="w-3.5 h-3.5" />
+                  </Link>
+                )}
                 <Link
                   href="/settings"
                   title="Pengaturan Akun"
@@ -397,6 +403,15 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
               </Link>
 
               <div className="flex items-center gap-1 pt-1 border-t border-stone-200/80 w-full justify-center">
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    title="Switch ke Dashboard Admin"
+                    className="p-1.5 rounded-lg text-amber-600 hover:text-amber-700 hover:bg-amber-50 transition-colors"
+                  >
+                    <ArrowLeftRight className="w-3.5 h-3.5" />
+                  </Link>
+                )}
                 <Link
                   href="/settings"
                   title="Pengaturan Akun"
@@ -534,7 +549,16 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-stone-200">
+            <div className="pt-3 border-t border-stone-200 space-y-2">
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="w-full py-2.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold text-center flex items-center justify-center gap-2"
+                >
+                  <ArrowLeftRight className="w-3.5 h-3.5" />
+                  <span>Switch Role ke Admin</span>
+                </Link>
+              )}
               <form action={logout}>
                 <button
                   type="submit"

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import {
   getNotificationsForActor,
+  getNotificationsWithUnreadCount,
   getUnreadNotificationCount,
   markNotificationAsRead,
   markAllNotificationsAsRead,
@@ -21,6 +22,7 @@ async function getPrimaryActor() {
   const actor = await prisma.actor.findFirst({
     where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
     orderBy: { createdAt: "asc" },
+    select: { id: true },
   });
 
   if (!actor) throw new Error("Actor not found");
@@ -33,11 +35,7 @@ export async function fetchMyNotificationsAction(): Promise<{
 }> {
   try {
     const actor = await getPrimaryActor();
-    const [notifications, unreadCount] = await Promise.all([
-      getNotificationsForActor(actor.id, 20),
-      getUnreadNotificationCount(actor.id),
-    ]);
-    return { notifications, unreadCount };
+    return await getNotificationsWithUnreadCount(actor.id, 20);
   } catch (error) {
     return { notifications: [], unreadCount: 0 };
   }

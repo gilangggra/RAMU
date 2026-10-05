@@ -8,11 +8,12 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 
 import { syncUserProfile } from "@/lib/profileSync";
+import { isUserAdmin } from "@/lib/admin";
 
 export async function login(formData: FormData) {
   const email = (formData.get("email") as string)?.trim();
   const password = formData.get("password") as string;
-  const redirectTo = (formData.get("redirectTo") as string) || "/dashboard";
+  let redirectTo = (formData.get("redirectTo") as string) || "/dashboard";
 
   if (!email || !password) {
     redirect(`/login?error=${encodeURIComponent("Email dan password wajib diisi")}`);
@@ -35,6 +36,10 @@ export async function login(formData: FormData) {
   }
 
   if (data.user) {
+    if (isUserAdmin(data.user)) {
+      redirectTo = "/admin";
+    }
+
     try {
       const userMeta = data.user.user_metadata || {};
       const oauthAvatar = userMeta.avatar_url || userMeta.picture || null;
@@ -51,7 +56,7 @@ export async function login(formData: FormData) {
         where: { ownerUserId: data.user.id },
       });
 
-      if (!existingActor) {
+      if (!existingActor && !isUserAdmin(data.user)) {
         revalidatePath("/", "layout");
         redirect("/onboarding");
       }
@@ -133,13 +138,15 @@ export async function signup(formData: FormData) {
     email,
     password,
     options: {
+      // SECURITY: Only safe, non-privilege fields are written to Supabase
+      // user_metadata here. The `role` field is intentionally excluded —
+      // it is used only to seed actor.sector in our own Prisma DB (see below).
+      // Never trust or forward client-supplied role/admin values to Auth metadata.
       data: {
         display_name: displayName,
         avatar_url: finalAvatarUrl || undefined,
-        role: role || undefined,
         location: location || undefined,
         bio: bio || undefined,
-        skills: parsedSkills,
         website: website || undefined,
         phone: phone || undefined,
         notifications_enabled: receiveNotifications,

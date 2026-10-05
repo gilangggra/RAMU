@@ -52,6 +52,8 @@ export default async function DashboardPage() {
     redirect("/onboarding");
   }
 
+  const isAdmin = user.user_metadata?.is_admin === true;
+
   const [
     portfolioCount,
     nonPortfolioAssets,
@@ -94,9 +96,12 @@ export default async function DashboardPage() {
         status: "ACTIVE",
         actorId: { not: primaryActor.id },
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        attributes: true,
         actor: {
-          select: { id: true, name: true, sector: true, location: true },
+          select: { id: true, name: true, sector: true },
         },
       },
       orderBy: { createdAt: "desc" },
@@ -257,7 +262,7 @@ export default async function DashboardPage() {
     (hasSpecs ? 25 : 0);
 
   return (
-    <AppShell actor={{ ...primaryActor, avatarUrl: profile.avatarUrl }} activeRoute="/dashboard">
+    <AppShell actor={{ ...primaryActor, avatarUrl: profile.avatarUrl }} activeRoute="/dashboard" isAdmin={isAdmin}>
       <div className="space-y-10 pb-12">
 
         <section className="relative p-8 md:p-12 rounded-[32px] overflow-hidden bg-[#1E1B2E] border border-stone-800 shadow-2xl group">

@@ -53,30 +53,93 @@ function getNotificationIcon(type: string) {
   }
 }
 
+// Module-level shared store to prevent multiple mounted instances (desktop + mobile header) from firing duplicate requests
+interface NotificationStore {
+  notifications: NotificationItem[];
+  unreadCount: number;
+  lastFetched: number;
+}
+
+let sharedStore: NotificationStore = {
+  notifications: [],
+  unreadCount: 0,
+  lastFetched: 0,
+};
+
+let inFlightPromise: Promise<NotificationStore> | null = null;
+const storeListeners = new Set<(store: NotificationStore) => void>();
+let globalPollingInterval: NodeJS.Timeout | null = null;
+
+function notifyStoreListeners() {
+  for (const listener of storeListeners) {
+    listener({ ...sharedStore });
+  }
+}
+
+async function fetchNotificationsShared(force = false): Promise<NotificationStore> {
+  const now = Date.now();
+  // If fresh (within 45 seconds) and not forced, return cached data immediately
+  if (!force && sharedStore.lastFetched > 0 && now - sharedStore.lastFetched < 45000) {
+    return sharedStore;
+  }
+
+  // If a fetch is already in flight, reuse the same promise (eliminates thundering herd)
+  if (inFlightPromise) {
+    return inFlightPromise;
+  }
+
+  inFlightPromise = (async () => {
+    try {
+      const res = await fetchMyNotificationsAction();
+      sharedStore = {
+        notifications: res.notifications || [],
+        unreadCount: res.unreadCount ?? 0,
+        lastFetched: Date.now(),
+      };
+      notifyStoreListeners();
+      return sharedStore;
+    } catch {
+      return sharedStore;
+    } finally {
+      inFlightPromise = null;
+    }
+  })();
+
+  return inFlightPromise;
+}
+
+function ensureGlobalPolling() {
+  if (globalPollingInterval) return;
+  globalPollingInterval = setInterval(() => {
+    // Only poll when browser tab is active/visible
+    if (typeof document !== "undefined" && document.visibilityState === "visible") {
+      fetchNotificationsShared(true);
+    }
+  }, 90000); // 90 seconds
+}
+
 export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolean }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState<NotificationItem[]>(() => sharedStore.notifications);
+  const [unreadCount, setUnreadCount] = useState<number>(() => sharedStore.unreadCount);
   const [filter, setFilter] = useState<"all" | "unread">("all");
-  const [isPending, startTransition] = useTransition();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  async function loadNotifications() {
-    try {
-      const res = await fetchMyNotificationsAction();
-      setNotifications(res.notifications);
-      setUnreadCount(res.unreadCount);
-    } catch {
-      // ignore
-    }
-  }
-
   useEffect(() => {
-    loadNotifications();
-    // Poll every 25 seconds for new notifications
-    const interval = setInterval(loadNotifications, 25000);
-    return () => clearInterval(interval);
+    const listener = (store: NotificationStore) => {
+      setNotifications(store.notifications);
+      setUnreadCount(store.unreadCount);
+    };
+    storeListeners.add(listener);
+
+    // Initial load: uses cache if within TTL, else single deduplicated server action
+    fetchNotificationsShared();
+    ensureGlobalPolling();
+
+    return () => {
+      storeListeners.delete(listener);
+    };
   }, []);
 
   useEffect(() => {
@@ -93,10 +156,14 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
 
   async function handleNotificationClick(item: NotificationItem) {
     if (!item.is_read) {
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === item.id ? { ...n, is_read: true } : n))
-      );
-      setUnreadCount((c) => Math.max(0, c - 1));
+      sharedStore = {
+        ...sharedStore,
+        notifications: sharedStore.notifications.map((n) =>
+          n.id === item.id ? { ...n, is_read: true } : n
+        ),
+        unreadCount: Math.max(0, sharedStore.unreadCount - 1),
+      };
+      notifyStoreListeners();
       markNotificationReadAction(item.id);
     }
     setIsOpen(false);
@@ -106,8 +173,12 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
   }
 
   async function handleMarkAllAsRead() {
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-    setUnreadCount(0);
+    sharedStore = {
+      ...sharedStore,
+      notifications: sharedStore.notifications.map((n) => ({ ...n, is_read: true })),
+      unreadCount: 0,
+    };
+    notifyStoreListeners();
     await markAllNotificationsReadAction();
   }
 
@@ -122,8 +193,12 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
       <button
         type="button"
         onClick={() => {
-          setIsOpen(!isOpen);
-          if (!isOpen) loadNotifications();
+          const nextOpen = !isOpen;
+          setIsOpen(nextOpen);
+          // Only refresh when opening if data is older than 30s
+          if (nextOpen && Date.now() - sharedStore.lastFetched > 30000) {
+            fetchNotificationsShared(true);
+          }
         }}
         title="Notifikasi & Pembaruan"
         className={`relative p-2 rounded-xl text-stone-500 hover:text-[#1E1B2E] hover:bg-stone-100 transition-colors cursor-pointer flex items-center justify-center ${
