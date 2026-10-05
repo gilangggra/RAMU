@@ -40,8 +40,8 @@ export async function createNotification({
     const metaJson = JSON.stringify(metadata);
     const rows = await prisma.$queryRawUnsafe<Array<{ id: string }>>(
       `
-      INSERT INTO notifications (actor_id, title, message, type, link, metadata, is_read, created_at)
-      VALUES ($1::uuid, $2, $3, $4, $5, $6::jsonb, false, NOW())
+      INSERT INTO notifications (id, actor_id, title, message, type, link, metadata, is_read, created_at)
+      VALUES (gen_random_uuid(), $1::uuid, $2, $3, $4, $5, $6::jsonb, false, NOW())
       RETURNING id
       `,
       actorId,

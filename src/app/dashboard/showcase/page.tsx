@@ -64,9 +64,12 @@ export default async function DashboardShowcasePage() {
   return (
     <AppShell actor={primaryActor} activeRoute="/showcase">
       <div className="space-y-6 pb-12">
-        <Link href="/showcase" className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-500 hover:text-[#1E1B2E] transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-          Kembali ke Galeri Karya
+        <Link
+          href="/showcase"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-stone-900 transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Kembali ke Galeri Karya</span>
         </Link>
         <ShowcaseManager assets={portfolioAssets} registeredActors={registeredActors} />
       </div>

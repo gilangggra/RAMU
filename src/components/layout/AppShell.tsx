@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
 import { getCurrentUserAvatar } from "@/app/settings/actions";
-import { createClient } from "@/lib/supabase/client";
 import {
-  LayoutDashboard,
+  LayoutGrid,
   Megaphone,
   Menu,
   X,
@@ -24,8 +23,14 @@ import {
   BarChart3,
   ShieldCheck,
   MessageSquare,
+  Search,
+  Command,
+  ArrowRight,
+  PlusCircle,
+  Compass,
 } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { RamuLogo } from "@/components/brand/RamuLogo";
 
 interface ActorInfo {
   id: string;
@@ -52,12 +57,21 @@ interface NavItem {
   badge?: string;
 }
 
+interface NavSection {
+  title: string;
+  items: NavItem[];
+}
+
 // In-memory cache across client-side router page navigations
 let cachedSidebarCollapsed: boolean | null = null;
 
 export function AppShell({ actor, activeRoute, children }: AppShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Synchronous initialization from in-memory cache or localStorage
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
@@ -77,9 +91,6 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
     return false;
   });
 
-  // Track if user explicitly clicked the toggle button.
-  // We only animate with transition-all when the user clicks the toggle,
-  // NOT on page transitions / tab switches to eliminate flickering.
   const [hasInteracted, setHasInteracted] = useState(false);
 
   const initialAvatar = actor.avatarUrl || actor.owner?.avatarUrl || null;
@@ -117,24 +128,61 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
     actor.sector === "Platform Administrator" ||
     actor.sector?.toLowerCase().includes("administrator");
 
-  const personalNav: NavItem[] = [
-    { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" /> },
+  // Attio-inspired relational sections aligned with RAMU Collaborative Economy Core Flow
+  const navSections: NavSection[] = [
+    {
+      title: "Kolaborasi Utama",
+      items: [
+        { href: "/dashboard", label: "Dashboard", icon: <LayoutGrid className="w-4 h-4" /> },
+        { href: "/collaborate", label: "Kompatibilitas", icon: <Sparkles className="w-4 h-4" />, badge: "4 Pilar" },
+        { href: "/projects", label: "Papan Proyek (Briefs)", icon: <Megaphone className="w-4 h-4" /> },
+        { href: "/collaborations", label: "Ruang Proyek", icon: <Handshake className="w-4 h-4" /> },
+        { href: "/readiness", label: "Resource & Kapasitas Idle", icon: <Target className="w-4 h-4" /> },
+        { href: "/messages", label: "Pesan & Diskusi", icon: <MessageSquare className="w-4 h-4" /> },
+      ],
+    },
+    {
+      title: "Ekosistem & Pendukung",
+      items: [
+        { href: "/directory", label: "Direktori Talenta", icon: <Users className="w-4 h-4" /> },
+        { href: "/showcase", label: "Karya & Portofolio", icon: <Compass className="w-4 h-4" /> },
+        { href: "/dashboard/bookings", label: "Pesanan Masuk", icon: <Inbox className="w-4 h-4" /> },
+        { href: `/directory/${actor.id}`, label: "Profil Saya", icon: <User className="w-4 h-4" /> },
+      ],
+    },
     ...(isAdmin
-      ? []
-      : [{ href: `/directory/${actor.id}`, label: "Profil Publik Saya", icon: <User className="w-4 h-4" /> }]),
-    { href: "/messages", label: "Pesan & Negosiasi", icon: <MessageSquare className="w-4 h-4" /> },
-    { href: "/dashboard/bookings", label: "Pesanan Masuk", icon: <Inbox className="w-4 h-4" /> },
-    { href: "/collaborations", label: "Kontrak & Kolaborasi Proyek", icon: <Handshake className="w-4 h-4" /> },
-    { href: "/readiness", label: "Aset & Kriteria Kolaborasi", icon: <Target className="w-4 h-4" /> },
+      ? [
+          {
+            title: "Administrator",
+            items: [
+              { href: "/engine-insights", label: "Audit Kompatibilitas", icon: <BarChart3 className="w-4 h-4" />, badge: "Admin" },
+            ],
+          },
+        ]
+      : []),
   ];
 
-  const ecosystemNav: NavItem[] = [
-    { href: "/directory", label: "Direktori Talenta & Studio", icon: <Users className="w-4 h-4" /> },
-    { href: "/showcase", label: "Karya & Inspirasi", icon: <Sparkles className="w-4 h-4" /> },
-    { href: "/projects", label: "Proyek & Peluang AI", icon: <Megaphone className="w-4 h-4" />, badge: "AI Match" },
-    { href: "/engine-insights", label: "Engine Insights AI", icon: <BarChart3 className="w-4 h-4" />, badge: "Signals" },
-    { href: "/settings", label: "Pengaturan Akun", icon: <Settings className="w-4 h-4" /> },
-  ];
+  // Global Command Palette Shortcut (Cmd+K / Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      } else if (e.key === "Escape" && searchOpen) {
+        setSearchOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [searchOpen]);
+
+  useEffect(() => {
+    if (searchOpen) {
+      setTimeout(() => searchInputRef.current?.focus(), 50);
+    } else {
+      setSearchQuery("");
+    }
+  }, [searchOpen]);
 
   useEffect(() => {
     if (initialAvatar) {
@@ -143,18 +191,29 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
       return;
     }
 
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      const metaAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
-      if (metaAvatar) {
-        setAvatar(metaAvatar);
-      } else {
-        getCurrentUserAvatar().then((url) => {
-          if (url) setAvatar(url);
-        });
+    // Profile.avatarUrl di DB adalah sumber kebenaran tunggal (server action sudah fallback ke metadata bila profil belum ada)
+    let cancelled = false;
+    getCurrentUserAvatar().then((url) => {
+      if (!cancelled) {
+        setAvatar(url);
+        setAvatarError(false);
       }
     });
+    return () => {
+      cancelled = true;
+    };
   }, [initialAvatar]);
+
+  // Sinkronisasi instan saat user mengunggah / menghapus foto profil di drawer atau halaman pengaturan
+  useEffect(() => {
+    const handleAvatarUpdated = (e: Event) => {
+      const detail = (e as CustomEvent<{ avatarUrl: string | null }>).detail;
+      setAvatar(detail?.avatarUrl ?? null);
+      setAvatarError(false);
+    };
+    window.addEventListener("ramu:avatar-updated", handleAvatarUpdated);
+    return () => window.removeEventListener("ramu:avatar-updated", handleAvatarUpdated);
+  }, []);
 
   function isItemActive(href: string) {
     const current = pathname || activeRoute;
@@ -162,98 +221,114 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
     if (href === `/directory/${actor.id}`) return current === `/directory/${actor.id}` || current.startsWith("/dashboard/showcase");
     if (href === "/directory") return current === "/directory" || (current.startsWith("/directory") && current !== `/directory/${actor.id}`);
     if (href === "/settings") return current.startsWith("/settings");
+    if (href === "/readiness" || href === "/resources") return current.startsWith("/readiness") || current.startsWith("/resources");
     return current.startsWith(href);
   }
 
-  const renderNavLinks = (items: NavItem[]) => (
-    <ul className="space-y-1">
-      {items.map((item) => {
-        const active = isItemActive(item.href);
-        return (
-          <li key={item.href}>
-            <Link
-              href={item.href}
-              onClick={() => setMobileMenuOpen(false)}
-              title={isCollapsed ? item.label : undefined}
-              className={`flex items-center rounded-xl text-xs font-medium transition-colors ${
-                isCollapsed
-                  ? "justify-center p-3"
-                  : "justify-between px-3.5 py-2.5"
-              } ${
-                active
-                  ? "bg-[#1E1B2E] text-white font-bold shadow-xs"
-                  : "text-stone-500 hover:text-[#1E1B2E] hover:bg-stone-100/70 border border-transparent"
-              }`}
-            >
-              <div className={`flex items-center min-w-0 ${isCollapsed ? "justify-center" : "gap-3"}`}>
-                <span
-                  className={`text-base shrink-0 transition-transform ${
-                    active ? "scale-110 text-white" : "group-hover:scale-110 text-stone-400 group-hover:text-[#1E1B2E]"
-                  }`}
-                >
-                  {item.icon}
-                </span>
-                {!isCollapsed && <span className="truncate">{item.label}</span>}
-              </div>
-              {!isCollapsed && item.badge && (
-                <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-md bg-stone-100 text-[#1E1B2E] border border-stone-200 shrink-0">
-                  {item.badge}
-                </span>
-              )}
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
+  // Filter items for Attio-style Command Palette
+  const allNavItems = navSections.flatMap((s) => s.items);
+  const filteredNavItems = searchQuery.trim()
+    ? allNavItems.filter((item) =>
+        item.label.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : allNavItems;
+
+  const renderNavSection = (section: NavSection) => (
+    <div key={section.title} className="space-y-0.5">
+      {!isCollapsed && (
+        <div className="px-2.5 pt-2.5 pb-1 flex items-center justify-between text-[11px] font-semibold tracking-wider text-stone-400 uppercase select-none">
+          <span>{section.title}</span>
+        </div>
+      )}
+      {isCollapsed && <div className="my-1.5 border-t border-stone-200/50" />}
+
+      <ul className="space-y-0.5">
+        {section.items.map((item) => {
+          const active = isItemActive(item.href);
+          return (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                title={isCollapsed ? item.label : undefined}
+                className={`group flex items-center rounded-lg text-[13px] transition-all duration-150 relative ${
+                  isCollapsed ? "justify-center p-2.5" : "justify-between px-2.5 py-1.5"
+                } ${
+                  active
+                    ? "bg-white text-stone-900 font-semibold shadow-[0_1px_3px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.03)] border border-stone-200/90"
+                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-200/50 font-medium border border-transparent"
+                }`}
+              >
+                <div className={`flex items-center min-w-0 ${isCollapsed ? "justify-center" : "gap-2.5"}`}>
+                  <span
+                    className={`shrink-0 transition-colors ${
+                      active ? "text-stone-900" : "text-stone-400 group-hover:text-stone-800"
+                    }`}
+                  >
+                    {item.icon}
+                  </span>
+                  {!isCollapsed && <span className="truncate leading-none">{item.label}</span>}
+                </div>
+
+                {!isCollapsed && item.badge && (
+                  <span
+                    className={`px-1.5 py-0.5 text-[9px] font-bold rounded uppercase tracking-wider shrink-0 leading-none ${
+                      item.badge === "Admin"
+                        ? "bg-purple-50 text-purple-700 border border-purple-200/70"
+                        : "bg-stone-100 text-stone-600 border border-stone-200/80"
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
+                )}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#27213D] font-sans selection:bg-[#FFB800]/40 selection:text-[#27213D] relative overflow-x-hidden">
-      {/* Background gradients */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute -top-32 -left-32 w-[550px] h-[550px] bg-[#FFE4D6] rounded-full blur-[140px] opacity-60" />
-        <div className="absolute top-1/4 -right-32 w-[550px] h-[550px] bg-[#EDE8FF] rounded-full blur-[140px] opacity-70" />
-        <div className="absolute -bottom-32 left-1/3 w-[500px] h-[500px] bg-[#E0F7F0] rounded-full blur-[130px] opacity-60" />
-      </div>
-
-      {/* DESKTOP SIDEBAR WITH SMOOTH COLLAPSIBLE FUNCTIONALITY */}
+    <div className="min-h-screen bg-[#FDFDFC] text-stone-900 font-sans selection:bg-stone-200 selection:text-stone-900 relative overflow-x-hidden">
+      {/* ATTIO-GRADE DESKTOP SIDEBAR */}
       <aside
-        className={`hidden md:flex flex-col fixed left-0 top-0 bottom-0 bg-white/85 border-r border-stone-200/80 z-40 backdrop-blur-xl shadow-[4px_0_24px_rgba(39,33,61,0.02)] ${
-          hasInteracted ? "transition-all duration-300 ease-in-out" : ""
-        } ${
-          isCollapsed ? "w-20" : "w-64"
-        }`}
+        className={`hidden md:flex flex-col fixed left-0 top-0 bottom-0 bg-[#FBFBFA] border-r border-stone-200/75 z-40 ${
+          hasInteracted ? "transition-all duration-200 ease-in-out" : ""
+        } ${isCollapsed ? "w-[60px]" : "w-64"}`}
       >
-        {/* HEADER / LOGO & COLLAPSE TOGGLE */}
-        <div className={`border-b border-stone-200/80 ${hasInteracted ? "transition-all duration-300" : ""} ${isCollapsed ? "p-3" : "p-4"}`}>
+        {/* 1. CONTROL PANEL / WORKSPACE HEADER (ATTIO STYLE) */}
+        <div className={`border-b border-stone-200/75 ${isCollapsed ? "p-2.5" : "px-3 py-3"}`}>
           {!isCollapsed ? (
-            <div className="flex items-center justify-between">
-              <Link href="/dashboard" className="flex items-center gap-3 group min-w-0">
-                <div className="w-10 h-10 rounded-2xl bg-amber-400 flex items-center justify-center font-black text-stone-950 text-base shadow-[0_4px_16px_rgba(251,191,36,0.3)] group-hover:scale-105 transition-transform shrink-0">
-                  R
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-base tracking-tight text-[#1E1B2E] group-hover:text-amber-600 transition-colors">
+            <div className="flex items-center justify-between gap-2">
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2.5 group min-w-0 flex-1 hover:opacity-90 transition-opacity"
+              >
+                <RamuLogo size={24} className="shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-bold text-[13px] text-stone-900 tracking-tight leading-none">
                       RAMU
                     </span>
-                    <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-md bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
-                      Engine
+                    <span className="px-1.5 py-0.2 text-[9px] font-semibold bg-stone-100 text-stone-600 rounded border border-stone-200/60 leading-tight">
+                      Workspace
                     </span>
                   </div>
-                  <p className="text-[10px] text-[#716B7E] font-medium hidden lg:block truncate">
-                    Creative Opportunity
+                  <p className="text-[10px] text-stone-400 font-medium truncate mt-0.5 leading-none">
+                    {actor.name}
                   </p>
                 </div>
               </Link>
-              <div className="flex items-center gap-1 shrink-0 ml-1">
+
+              <div className="flex items-center gap-0.5 shrink-0">
                 <NotificationBell isCollapsed={false} />
                 <button
                   type="button"
                   onClick={toggleSidebar}
-                  title="Perkecil menu sidebar"
-                  className="p-1.5 rounded-xl text-stone-400 hover:text-stone-800 hover:bg-stone-100 transition-colors cursor-pointer shrink-0"
-                  aria-label="Perkecil menu sidebar"
+                  title="Perkecil sidebar"
+                  className="p-1 rounded-md text-stone-400 hover:text-stone-800 hover:bg-stone-200/60 transition-colors cursor-pointer"
+                  aria-label="Perkecil sidebar"
                 >
                   <PanelLeftClose className="w-4 h-4" />
                 </button>
@@ -261,18 +336,20 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center gap-2">
-              <Link href="/dashboard" className="group" title="RAMU Engine">
-                <div className="w-10 h-10 rounded-2xl bg-amber-400 flex items-center justify-center font-black text-stone-950 text-base shadow-[0_4px_16px_rgba(251,191,36,0.3)] group-hover:scale-105 transition-transform">
-                  R
-                </div>
+              <Link
+                href="/dashboard"
+                className="group p-1 flex items-center justify-center"
+                title="RAMU — Workspace"
+              >
+                <RamuLogo size={24} className="group-hover:scale-105 transition-transform" />
               </Link>
               <NotificationBell isCollapsed={true} />
               <button
                 type="button"
                 onClick={toggleSidebar}
-                title="Perluas menu sidebar"
-                className="p-1.5 rounded-xl text-stone-400 hover:text-stone-800 hover:bg-stone-100 transition-colors cursor-pointer"
-                aria-label="Perluas menu sidebar"
+                title="Perluas sidebar"
+                className="p-1 rounded-md text-stone-400 hover:text-stone-800 hover:bg-stone-200/60 transition-colors cursor-pointer"
+                aria-label="Perluas sidebar"
               >
                 <PanelLeftOpen className="w-4 h-4" />
               </button>
@@ -280,78 +357,62 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
           )}
         </div>
 
-        {/* NAVIGATION LINKS */}
-        <div className={`flex-1 overflow-y-auto py-4 space-y-6 no-scrollbar ${hasInteracted ? "transition-all duration-300" : ""} ${isCollapsed ? "px-2" : "px-3.5"}`}>
-          <div>
-            {!isCollapsed ? (
-              <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-[#9E98A8] mb-2 truncate">
-                {isAdmin ? "Panel Administrator" : "Profil & Bisnis Saya"}
-              </p>
-            ) : (
-              <div className="my-2 border-t border-stone-200/60" />
-            )}
-            {renderNavLinks(personalNav)}
-          </div>
-
-          <div className={!isCollapsed ? "pt-2 border-t border-stone-200/60" : ""}>
-            {!isCollapsed ? (
-              <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-[#9E98A8] mb-2 truncate">
-                Eksplorasi Ekosistem
-              </p>
-            ) : (
-              <div className="my-2 border-t border-stone-200/60" />
-            )}
-            {renderNavLinks(ecosystemNav)}
-          </div>
+        {/* 2. NAVIGATION SECTIONS */}
+        <div
+          className={`flex-1 overflow-y-auto py-2.5 space-y-3 no-scrollbar ${
+            isCollapsed ? "px-2" : "px-2.5"
+          }`}
+        >
+          {navSections.map(renderNavSection)}
         </div>
 
-        {/* USER PROFILE & FOOTER */}
-        <div className={`border-t border-stone-200/80 bg-stone-50/50 ${hasInteracted ? "transition-all duration-300" : ""} ${isCollapsed ? "p-2" : "p-3.5"}`}>
+        {/* 4. PINNED BOTTOM USER PROFILE (ATTIO CARD) */}
+        <div className={`border-t border-stone-200/75 bg-[#FBFBFA] ${isCollapsed ? "p-2" : "p-2.5"}`}>
           {!isCollapsed ? (
-            <div className="p-3 rounded-2xl bg-white border border-stone-200/80 shadow-xs flex items-center justify-between gap-3">
+            <div className="flex items-center justify-between p-1.5 rounded-lg hover:bg-stone-200/50 transition-colors group">
               <Link
                 href={isAdmin ? "/settings" : `/directory/${actor.id}`}
-                className="flex items-center gap-2.5 min-w-0 group hover:opacity-90 transition-opacity"
+                className="flex items-center gap-2.5 min-w-0 flex-1"
                 title={isAdmin ? "Pengaturan Akun Administrator" : "Lihat Profil Publik Saya"}
               >
-                <div className={`w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center font-bold text-xs shrink-0 shadow-xs group-hover:scale-105 transition-transform ${
-                  isAdmin
-                    ? "bg-[#1E1B2E] text-amber-400 border border-amber-400/30"
-                    : "bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] text-[#27213D]"
-                }`}>
-                  {avatar && !avatarError ? (
-                    <img
-                      src={avatar}
-                      alt={actor.name}
-                      onError={() => setAvatarError(true)}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span>{actor.name.charAt(0).toUpperCase()}</span>
-                  )}
+                <div className="relative shrink-0">
+                  <div
+                    className={`w-7 h-7 rounded-md overflow-hidden flex items-center justify-center font-bold text-[11px] border ${
+                      isAdmin
+                        ? "bg-stone-900 text-stone-200 border-stone-700"
+                        : "bg-stone-100 border-stone-300 text-stone-800"
+                    }`}
+                  >
+                    {avatar && !avatarError ? (
+                      <img
+                        src={avatar}
+                        alt={actor.name}
+                        onError={() => setAvatarError(true)}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span>{actor.name.charAt(0).toUpperCase()}</span>
+                    )}
+                  </div>
+                  {/* Presence indicator dot */}
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
                 </div>
+
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-[#27213D] truncate group-hover:text-amber-600 transition-colors">
+                  <p className="text-[12px] font-semibold text-stone-900 truncate leading-tight group-hover:text-stone-700">
                     {actor.name}
                   </p>
-                  {isAdmin ? (
-                    <span className="inline-flex items-center gap-1 text-[9px] font-black tracking-wider uppercase text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200 shadow-2xs">
-                      <ShieldCheck className="w-2.5 h-2.5 text-purple-600" />
-                      Admin
-                    </span>
-                  ) : (
-                    <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200 inline-block">
-                      Lihat Profil
-                    </span>
-                  )}
+                  <p className="text-[10px] text-stone-400 font-medium truncate leading-tight mt-0.5">
+                    {isAdmin ? "Platform Admin" : actor.sector}
+                  </p>
                 </div>
               </Link>
 
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-0.5 shrink-0 ml-1">
                 <Link
                   href="/settings"
                   title="Pengaturan Akun"
-                  className="p-1.5 rounded-lg text-[#716B7E] hover:text-[#1E1B2E] hover:bg-stone-100 transition-colors"
+                  className="p-1 rounded text-stone-400 hover:text-stone-800 hover:bg-stone-200/60 transition-colors"
                 >
                   <Settings className="w-3.5 h-3.5" />
                 </Link>
@@ -359,7 +420,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                   <button
                     type="submit"
                     title="Keluar dari akun"
-                    className="p-1.5 rounded-lg text-[#716B7E] hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                    className="p-1 rounded text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                   </button>
@@ -367,17 +428,19 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-2 py-1">
+            <div className="flex flex-col items-center gap-2 py-0.5">
               <Link
                 href={isAdmin ? "/settings" : `/directory/${actor.id}`}
-                className="p-1 relative group"
-                title={isAdmin ? `Administrator: ${actor.name}` : `Profil Publik: ${actor.name}`}
+                className="relative group p-0.5"
+                title={`${actor.name} (${actor.sector})`}
               >
-                <div className={`w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center font-bold text-xs shadow-xs hover:scale-105 transition-transform ${
-                  isAdmin
-                    ? "bg-[#1E1B2E] text-amber-400 border border-amber-400/40"
-                    : "bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] text-[#27213D]"
-                }`}>
+                <div
+                  className={`w-7 h-7 rounded-md overflow-hidden flex items-center justify-center font-bold text-[11px] border ${
+                    isAdmin
+                      ? "bg-stone-900 text-stone-200 border-stone-700"
+                      : "bg-stone-100 border-stone-300 text-stone-800"
+                  }`}
+                >
                   {avatar && !avatarError ? (
                     <img
                       src={avatar}
@@ -389,18 +452,14 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                     <span>{actor.name.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
-                {isAdmin && (
-                  <div className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-purple-600 border-2 border-white flex items-center justify-center text-[7px] text-white font-bold" title="Administrator">
-                    ★
-                  </div>
-                )}
+                <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
               </Link>
 
-              <div className="flex items-center gap-1 pt-1 border-t border-stone-200/80 w-full justify-center">
+              <div className="flex flex-col items-center gap-1 border-t border-stone-200/70 pt-1.5 w-full">
                 <Link
                   href="/settings"
                   title="Pengaturan Akun"
-                  className="p-1.5 rounded-lg text-stone-400 hover:text-stone-800 hover:bg-stone-200/60 transition-colors"
+                  className="p-1 rounded text-stone-400 hover:text-stone-800 hover:bg-stone-200/60 transition-colors"
                 >
                   <Settings className="w-3.5 h-3.5" />
                 </Link>
@@ -408,7 +467,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                   <button
                     type="submit"
                     title="Keluar dari akun"
-                    className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                    className="p-1 rounded text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                   </button>
@@ -420,76 +479,41 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
       </aside>
 
       {/* MOBILE HEADER */}
-      <header className="md:hidden sticky top-0 bg-white/90 backdrop-blur-md border-b border-stone-200/80 px-4 py-3 flex items-center justify-between z-30 shadow-xs">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-amber-400 flex items-center justify-center font-black text-stone-950 text-xs shadow-xs">
-            R
-          </div>
-          <span className="font-extrabold text-sm tracking-tight text-[#27213D]">RAMU</span>
+      <header className="md:hidden sticky top-0 bg-[#FBFBFA]/95 backdrop-blur-md border-b border-stone-200/80 px-4 py-2.5 flex items-center justify-between z-30">
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <RamuLogo size={22} className="shrink-0" />
+          <span className="font-bold text-sm tracking-tight text-stone-900">RAMU</span>
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <NotificationBell />
-          <Link
-            href={isAdmin ? "/settings" : `/directory/${actor.id}`}
-            className="flex items-center gap-2 max-w-[140px] group"
-            title={isAdmin ? "Pengaturan Akun Administrator" : "Lihat Profil Publik Saya"}
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="p-1.5 rounded-lg text-stone-500 hover:bg-stone-100"
+            title="Cari"
           >
-            <div className={`w-7 h-7 rounded-lg overflow-hidden flex items-center justify-center font-bold text-[11px] shrink-0 ${
-              isAdmin
-                ? "bg-[#1E1B2E] text-amber-400 border border-amber-400/30"
-                : "bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] text-[#27213D]"
-            }`}>
-              {avatar && !avatarError ? (
-                <img
-                  src={avatar}
-                  alt={actor.name}
-                  onError={() => setAvatarError(true)}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span>{actor.name.charAt(0).toUpperCase()}</span>
-              )}
-            </div>
-            <div className="min-w-0">
-              <span className="text-xs font-bold text-[#27213D] block truncate">
-                {actor.name}
-              </span>
-              {isAdmin ? (
-                <span className="inline-block text-[8px] font-black text-purple-700 bg-purple-50 px-1 py-0.2 rounded border border-purple-200 uppercase">
-                  Admin
-                </span>
-              ) : (
-                <span className="text-[9px] text-[#716B7E] block truncate">
-                  {actor.sector}
-                </span>
-              )}
-            </div>
-          </Link>
+            <Search className="w-4 h-4" />
+          </button>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-xl bg-stone-100 hover:bg-stone-200/80 border border-stone-200 text-[#27213D]"
+            className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200/80 border border-stone-200 text-stone-800"
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
       </header>
 
       {/* MOBILE SLIDE-OVER DRAWER MENU */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-[#27213D]/40 backdrop-blur-xs flex flex-col justify-end">
-          <div className="bg-white border-t border-stone-200 p-5 rounded-t-3xl max-h-[85vh] overflow-y-auto space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-200">
+        <div className="md:hidden fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex flex-col justify-end">
+          <div className="bg-[#FBFBFA] border-t border-stone-200 p-5 rounded-t-2xl max-h-[85vh] overflow-y-auto space-y-4 shadow-xl">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200/80">
               <Link
                 href={isAdmin ? "/settings" : `/directory/${actor.id}`}
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-2.5 min-w-0"
               >
-                <div className={`w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center font-bold text-xs shrink-0 shadow-xs ${
-                  isAdmin
-                    ? "bg-[#1E1B2E] text-amber-400 border border-amber-400/30"
-                    : "bg-gradient-to-br from-[#FFE9DE] to-[#F3EDFF] border border-[#F9D8C4] text-[#27213D]"
-                }`}>
+                <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center font-bold text-xs bg-stone-100 border border-stone-300 text-stone-800 shrink-0">
                   {avatar && !avatarError ? (
                     <img
                       src={avatar}
@@ -502,43 +526,29 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-[#27213D] truncate">{actor.name}</p>
-                  {isAdmin ? (
-                    <span className="inline-flex items-center gap-1 text-[9px] font-black text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200 uppercase tracking-wider">
-                      <ShieldCheck className="w-2.5 h-2.5 text-purple-600" />
-                      Platform Admin
-                    </span>
-                  ) : (
-                    <p className="text-[10px] text-[#716B7E] truncate">{actor.sector}</p>
-                  )}
+                  <p className="text-xs font-bold text-stone-900 truncate">{actor.name}</p>
+                  <p className="text-[10px] text-stone-500 truncate">
+                    {isAdmin ? "Platform Admin" : actor.sector}
+                  </p>
                 </div>
               </Link>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-[#716B7E] hover:text-[#27213D] p-1.5 rounded-xl hover:bg-stone-100"
+                className="text-stone-400 hover:text-stone-800 p-1.5 rounded-lg hover:bg-stone-200/60"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[#9E98A8] mb-2">
-                  {isAdmin ? "Panel Administrator" : "Profil & Bisnis Saya"}
-                </p>
-                {renderNavLinks(personalNav)}
-              </div>
-              <div className="pt-2 border-t border-stone-100">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[#9E98A8] mb-2">Eksplorasi Ekosistem</p>
-                {renderNavLinks(ecosystemNav)}
-              </div>
+            <div className="space-y-3">
+              {navSections.map(renderNavSection)}
             </div>
 
             <div className="pt-3 border-t border-stone-200">
               <form action={logout}>
                 <button
                   type="submit"
-                  className="w-full py-2.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-bold border border-rose-200 text-center flex items-center justify-center gap-2"
+                  className="w-full py-2 rounded-lg bg-rose-50 text-rose-600 text-xs font-semibold border border-rose-200/80 flex items-center justify-center gap-2"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Keluar dari Akun</span>
@@ -549,19 +559,15 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
         </div>
       )}
 
-      {/* DYNAMIC CONTENT WRAPPER: ADAPTS PADDING & MAX-WIDTH WHEN SIDEBAR COLLAPSES */}
+      {/* DYNAMIC CONTENT WRAPPER */}
       <div
         className={`flex flex-col min-h-screen relative z-10 ${
-          hasInteracted ? "transition-all duration-300 ease-in-out" : ""
-        } ${
-          isCollapsed ? "md:pl-20" : "md:pl-64"
-        }`}
+          hasInteracted ? "transition-all duration-200 ease-in-out" : ""
+        } ${isCollapsed ? "md:pl-[60px]" : "md:pl-64"}`}
       >
         <main
-          className={`flex-1 p-4 sm:p-6 lg:p-8 w-full mx-auto pb-24 md:pb-12 space-y-8 animate-fade-in ${
-            hasInteracted ? "transition-all duration-300 ease-in-out" : ""
-          } ${
-            isCollapsed ? "max-w-7xl xl:max-w-[1440px]" : "max-w-6xl"
+          className={`flex-1 px-4 py-6 sm:px-6 sm:py-6 lg:px-8 lg:py-6 w-full max-w-7xl xl:max-w-[1400px] mx-auto pb-24 md:pb-12 animate-fade-in ${
+            hasInteracted ? "transition-all duration-200 ease-in-out" : ""
           }`}
         >
           {children}
@@ -569,23 +575,21 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
       </div>
 
       {/* MOBILE BOTTOM NAVIGATION BAR */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-stone-200/90 px-3 py-2 flex items-center justify-around z-40 shadow-lg">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#FBFBFA]/95 backdrop-blur-md border-t border-stone-200 px-3 py-1.5 flex items-center justify-around z-40 shadow-md">
         {[
-          { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
-          ...(isAdmin
-            ? [{ href: "/settings", label: "Admin", icon: <ShieldCheck className="w-5 h-5" /> }]
-            : [{ href: `/directory/${actor.id}`, label: "Profil Saya", icon: <User className="w-5 h-5" /> }]),
-          { href: "/directory", label: "Direktori", icon: <Users className="w-5 h-5" /> },
-          { href: "/projects", label: "Proyek", icon: <Megaphone className="w-5 h-5" /> },
-          { href: "/dashboard/bookings", label: "Pesanan", icon: <Inbox className="w-5 h-5" /> },
+          { href: "/dashboard", label: "Dashboard", icon: <LayoutGrid className="w-4 h-4" /> },
+          { href: "/collaborate", label: "Matching", icon: <Sparkles className="w-4 h-4" /> },
+          { href: "/projects", label: "Proyek", icon: <Megaphone className="w-4 h-4" /> },
+          { href: "/directory", label: "Direktori", icon: <Users className="w-4 h-4" /> },
+          { href: "/dashboard/bookings", label: "Pesanan", icon: <Inbox className="w-4 h-4" /> },
         ].map((item) => {
           const active = isItemActive(item.href);
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-all ${
-                active ? "text-amber-600 font-bold" : "text-stone-500 hover:text-stone-900"
+              className={`flex flex-col items-center gap-1 py-1 px-2 rounded-lg transition-colors ${
+                active ? "text-stone-900 font-bold" : "text-stone-500 hover:text-stone-900"
               }`}
             >
               <span>{item.icon}</span>
@@ -594,6 +598,75 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
           );
         })}
       </nav>
+
+      {/* 5. ATTIO-STYLE COMMAND PALETTE (CMD+K) MODAL */}
+      {searchOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-start justify-center pt-24 px-4 animate-fade-in">
+          <div
+            className="w-full max-w-xl bg-white border border-stone-200/90 rounded-2xl shadow-[0_24px_64px_rgba(0,0,0,0.18)] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Search Input Bar */}
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-stone-200/80 bg-stone-50/50">
+              <Search className="w-4 h-4 text-stone-400 shrink-0" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari halaman, brief, direktori, atau navigasi..."
+                className="w-full bg-transparent text-sm text-stone-900 placeholder:text-stone-400 focus:outline-hidden"
+              />
+              <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-stone-400 bg-white border border-stone-200 rounded shadow-2xs shrink-0">
+                ESC
+              </kbd>
+            </div>
+
+            {/* Search Results */}
+            <div className="max-h-80 overflow-y-auto p-2 space-y-1">
+              {filteredNavItems.length > 0 ? (
+                filteredNavItems.map((item) => (
+                  <button
+                    key={item.href}
+                    type="button"
+                    onClick={() => {
+                      setSearchOpen(false);
+                      router.push(item.href);
+                    }}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left hover:bg-stone-100 text-stone-800 transition-colors group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-stone-400 group-hover:text-stone-800 transition-colors">
+                        {item.icon}
+                      </span>
+                      <span className="text-xs font-semibold">{item.label}</span>
+                      {item.badge && (
+                        <span className="px-1.5 py-0.2 text-[9px] font-bold rounded bg-stone-100 text-stone-600 border border-stone-200/70">
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-stone-300 group-hover:text-stone-700 transition-transform group-hover:translate-x-0.5" />
+                  </button>
+                ))
+              ) : (
+                <div className="py-8 text-center text-xs text-stone-400">
+                  Tidak ditemukan hasil untuk &quot;{searchQuery}&quot;
+                </div>
+              )}
+            </div>
+
+            {/* Quick Actions Footer in Command Palette */}
+            <div className="px-4 py-2.5 bg-stone-50 border-t border-stone-200/70 flex items-center justify-between text-[11px] text-stone-400">
+              <div className="flex items-center gap-2">
+                <Command className="w-3 h-3 text-stone-400" />
+                <span>Tekan <kbd className="font-mono font-medium text-stone-600">Enter</kbd> untuk memilih</span>
+              </div>
+              <span className="text-[10px]">RAMU Workspace Search</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

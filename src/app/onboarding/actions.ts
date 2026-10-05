@@ -60,20 +60,39 @@ export async function createActorProfile(formData: FormData) {
     ? (actorTypeStr as ActorType)
     : ActorType.INDIVIDUAL;
 
-  const sectorLower = (sector || "").toLowerCase();
-  const nameLower = (name || "").toLowerCase();
+  const ALLOWED_ACTOR_ROLES = [
+    "Fashion Brand/UMKM",
+    "Fashion Designer",
+    "Photographer",
+    "Model",
+    "MUA/Stylist",
+    "Studio",
+  ];
 
-  // Auto-detect STUDIO if sector or name mentions studio
-  if (
-    actorType === ActorType.INDIVIDUAL &&
-    (sectorLower.includes("studio") || nameLower.includes("studio"))
-  ) {
-    actorType = ActorType.STUDIO;
-  } else if (
-    actorType === ActorType.INDIVIDUAL &&
-    (sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("fashion designer / label"))
-  ) {
+  let canonicalSector = sector;
+  const sLower = (sector || "").toLowerCase();
+
+  if (sLower.includes("brand") || sLower.includes("label") || sLower.includes("umkm")) {
+    canonicalSector = "Fashion Brand/UMKM";
     actorType = ActorType.BRAND;
+  } else if (sLower.includes("designer") || sLower.includes("desain") || sLower.includes("perancang") || sLower.includes("pola")) {
+    canonicalSector = "Fashion Designer";
+    actorType = ActorType.INDIVIDUAL;
+  } else if (sLower.includes("studio") || sLower.includes("ruang") || sLower.includes("cyclorama")) {
+    canonicalSector = "Studio";
+    actorType = ActorType.STUDIO;
+  } else if (sLower.includes("model") || sLower.includes("talent") || sLower.includes("peraga") || sLower.includes("muse")) {
+    canonicalSector = "Model";
+    actorType = ActorType.INDIVIDUAL;
+  } else if (sLower.includes("mua") || sLower.includes("makeup") || sLower.includes("hair") || sLower.includes("stylist") || sLower.includes("wardrobe")) {
+    canonicalSector = "MUA/Stylist";
+    actorType = ActorType.INDIVIDUAL;
+  } else if (sLower.includes("foto") || sLower.includes("photo") || sLower.includes("kamera")) {
+    canonicalSector = "Photographer";
+    actorType = ActorType.INDIVIDUAL;
+  } else if (!ALLOWED_ACTOR_ROLES.includes(canonicalSector)) {
+    canonicalSector = "Photographer";
+    actorType = ActorType.INDIVIDUAL;
   }
 
   const fullLocation = address ? `${address}, ${location}` : location;
@@ -99,7 +118,7 @@ export async function createActorProfile(formData: FormData) {
         ownerUserId: user.id,
         name,
         actorType,
-        sector,
+        sector: canonicalSector,
         location: fullLocation,
         description: bio || null,
         contactEmail,

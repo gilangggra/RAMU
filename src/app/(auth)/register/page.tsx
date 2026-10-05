@@ -27,7 +27,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-stone-200 shadow-sm text-xs font-bold text-stone-500 uppercase tracking-widest mb-4">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-              RAMU — Creative Opportunity Engine
+              RAMU — Platform Kolaborasi Komplementaritas Resource
             </div>
             <p className="text-stone-400 text-sm max-w-sm mx-auto leading-relaxed">
               Bergabung dalam ekosistem kolaborasi fashion & visual terkurasi.

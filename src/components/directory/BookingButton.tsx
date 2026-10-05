@@ -19,10 +19,11 @@ export function BookingButton({ targetId, targetName, targetSector, targetType, 
   return (
     <>
       <button
+        type="button"
         onClick={() => setIsOpen(true)}
-        className="px-8 py-3 bg-[#1E1B2E] hover:bg-black text-white text-[11px] font-bold uppercase tracking-widest transition-colors flex items-center gap-2"
+        className="px-6 py-3 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer group"
       >
-        <PlusCircle className="w-4 h-4" />
+        <PlusCircle className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
         <span>{label || "Booking Request"}</span>
       </button>
 

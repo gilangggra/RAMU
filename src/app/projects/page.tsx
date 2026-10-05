@@ -12,21 +12,27 @@ import { WithdrawInterestButton } from "@/components/projects/WithdrawInterestBu
 import { InvitationResponseButtons } from "@/components/projects/InvitationResponseButtons";
 import { AppShell } from "@/components/layout/AppShell";
 import {
-  Palette,
-  Inbox,
-  ArrowRight,
-  Sparkles,
-  Zap,
+  Briefcase,
   Users,
-  Search,
+  CircleDollarSign,
+  Layers,
+  Sparkles,
+  Plus,
+  Send,
+  Clock,
   CheckCircle2,
+  ArrowRight,
+  ShieldCheck,
+  FileText,
+  Inbox,
   BarChart3,
+  Check,
 } from "lucide-react";
 
 export const metadata = {
-  title: "Papan Proyek & Peluang Kolaborasi AI | RAMU",
+  title: "Papan Proyek & Lowongan Kru | RAMU",
   description:
-    "Eksplorasi brief produksi komersial, temukan rekan kru, serta temukan peluang sinergi kolaborasi cerdas yang dihitung otomatis oleh AI Matching Engine RAMU.",
+    "Eksplorasi brief produksi komersial, temukan lowongan kru kreatif, serta ajukan minat kolaborasi dengan transparansi fee dan kompensasi terjamin.",
 };
 
 export default async function ProjectsPage({
@@ -52,7 +58,7 @@ export default async function ProjectsPage({
   if (!user) {
     redirect(
       `/login?redirectTo=/projects&message=${encodeURIComponent(
-        "Silakan masuk atau daftar untuk meninjau dan melamar ke project briefs serta rekomendasi peluang AI."
+        "Silakan masuk atau daftar untuk meninjau dan melamar ke project briefs serta rekomendasi kecocokan kolaborasi."
       )}`
     );
   }
@@ -81,18 +87,36 @@ export default async function ProjectsPage({
   const feasibilityFilter = params?.feasibility || "ALL";
   const currentView = (params?.view === "list" ? "list" : "grid") as "grid" | "list";
 
-  // Counts across all categories
-  const [openBriefsCount, myBriefsCount, pendingInterestCount, aiOpportunitiesCount] =
-    await Promise.all([
-      prisma.projectBrief.count({ where: { status: "OPEN" } }),
-      prisma.projectBrief.count({ where: { creatorActorId: actor.id } }),
-      prisma.collaborationInterest.count({
-        where: { actorId: actor.id, status: "PENDING" },
-      }),
-      prisma.opportunity.count({
-        where: { status: { not: "ARCHIVED" } },
-      }),
-    ]);
+  // Comprehensive analytics counts across database for job board ribbon
+  const [
+    openBriefsCount,
+    myBriefsCount,
+    myInterestsCount,
+    aiOpportunitiesCount,
+    openRolesCount,
+    commercialBriefsCount,
+  ] = await Promise.all([
+    prisma.projectBrief.count({ where: { status: "OPEN" } }),
+    prisma.projectBrief.count({ where: { creatorActorId: actor.id } }),
+    prisma.collaborationInterest.count({
+      where: { actorId: actor.id },
+    }),
+    prisma.opportunity.count({
+      where: { status: { not: "ARCHIVED" } },
+    }),
+    prisma.projectBriefRole.count({
+      where: { isFilled: false, brief: { status: "OPEN" } },
+    }),
+    prisma.projectBrief.count({
+      where: {
+        status: "OPEN",
+        OR: [
+          { compensationModel: { contains: "PAID", mode: "insensitive" } },
+          { compensationModel: { contains: "Berbayar", mode: "insensitive" } },
+        ],
+      },
+    }),
+  ]);
 
   // Data fetching tailored to active tab
   const [allBriefs, myBriefs, myInterests, opportunitiesData] = await Promise.all([
@@ -154,20 +178,18 @@ export default async function ProjectsPage({
       : Promise.resolve([]),
   ]);
 
-  const briefsToShow = activeTab === "mine" ? myBriefs : allBriefs;
-
   const tabs = [
     {
       key: "browse",
-      label: "Papan Proyek Terbuka",
+      label: "Papan Proyek (Job Board)",
       count: openBriefsCount,
       isAi: false,
     },
     {
       key: "ai-opportunities",
-      label: "Peluang Kolaborasi AI",
+      label: "Kompatibilitas Resource (Matches)",
       count: aiOpportunitiesCount || opportunitiesData.length,
-      isAi: true,
+      isAi: false,
     },
     {
       key: "mine",
@@ -177,123 +199,155 @@ export default async function ProjectsPage({
     },
     {
       key: "interests",
-      label: "Minat Saya",
-      count: pendingInterestCount,
+      label: "Lamaran & Minat Saya",
+      count: myInterestsCount,
       isAi: false,
     },
   ];
 
   return (
     <AppShell actor={actor} activeRoute="/projects">
-      <div className="space-y-8 pb-16">
-        {/* MASTHEAD HEADER */}
-        <section className="pt-10 pb-8 border-b border-stone-200">
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-4">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-3 mb-5">
-                <span className="w-8 h-px bg-stone-300"></span>
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500 flex items-center gap-1.5">
-                  <Sparkles className="w-3 h-3 text-amber-500" />
-                  Pusat Kolaborasi Proyek &amp; Matchmaking AI
-                </span>
+      <div className="space-y-6 w-full max-w-7xl mx-auto">
+        {/* 1. ATTIO HEADER BANNER */}
+        <section className="pb-6 border-b border-stone-200/80">
+          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 pb-6">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-stone-100 border border-stone-200/70 text-[11px] font-semibold text-stone-600">
+                <Briefcase className="w-3.5 h-3.5 text-stone-500" />
+                <span>Pusat Karir &amp; Lowongan Proyek Kreatif</span>
               </div>
-              <h1 className="text-4xl sm:text-5xl font-light text-[#1E1B2E] tracking-tight leading-[1.15] mb-5">
-                Inisiasi ide &amp; temukan <br className="hidden sm:block" />
-                <span className="font-serif italic text-stone-500">sinergi produksi</span> kreatif Anda.
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-stone-900">
+                Papan Proyek &amp; Lowongan Kru
               </h1>
-              <p className="text-sm text-stone-500 font-light leading-relaxed max-w-xl">
-                Jelajahi brief komersial terbuka, cari rekan kru terkurasi, atau manfaatkan kecerdasan buatan RAMU untuk menemukan peluang kolaborasi multi-pihak yang otomatis diselaraskan dengan keahlian Anda.
+              <p className="text-xs sm:text-sm text-stone-500 leading-relaxed font-normal">
+                Eksplorasi brief produksi komersial, temukan lowongan peran kreatif yang sesuai keahlian Anda, atau inisiasi proyek baru untuk merekrut kru talenta terbaik.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center gap-6 lg:gap-8 pb-2">
-              <div className="flex items-center gap-6 sm:gap-8">
-                <div className="space-y-1">
-                  <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">
-                    {openBriefsCount}
-                  </div>
-                  <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">
-                    Proyek Terbuka
-                  </div>
-                </div>
-                <div className="w-px h-8 bg-stone-200"></div>
-                <div className="space-y-1">
-                  <div className="text-3xl sm:text-4xl font-light text-amber-800 flex items-center gap-1">
-                    <span>{aiOpportunitiesCount || opportunitiesData.length}</span>
-                    <Sparkles className="w-4 h-4 text-amber-500" />
-                  </div>
-                  <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-800/80">
-                    Peluang AI
-                  </div>
-                </div>
-                <div className="w-px h-8 bg-stone-200"></div>
-                <div className="space-y-1">
-                  <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">
-                    {myBriefsCount}
-                  </div>
-                  <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">
-                    Brief Anda
-                  </div>
-                </div>
-              </div>
-
+            {/* Action buttons (Attio minimalist buttons) */}
+            <div className="flex items-center gap-2.5 shrink-0 self-start lg:self-center">
+              <Link
+                href="/directory"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-stone-700 bg-white hover:bg-stone-50 border border-stone-200 rounded-lg shadow-2xs transition-colors"
+              >
+                <Users className="w-3.5 h-3.5 text-stone-500" />
+                <span>Direktori Talenta</span>
+              </Link>
               <Link
                 href="/projects/new"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#1E1B2E] hover:bg-black text-white font-bold text-[10px] uppercase tracking-[0.15em] transition-all shadow-sm shrink-0"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 border border-stone-900 rounded-lg shadow-2xs transition-colors"
               >
-                <span>+ Inisiasi Project Brief</span>
+                <Plus className="w-3.5 h-3.5" />
+                <span>Inisiasi Brief Baru</span>
               </Link>
+            </div>
+          </div>
+
+          {/* 4-Tile Job Board Analytics Ribbon (Attio Metric Cards) */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+            {/* Tile 1: Brief Aktif */}
+            <div className="p-3.5 bg-white rounded-xl border border-stone-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-stone-400 mb-1.5">
+                <span className="text-[11px] font-medium text-stone-500">Brief Proyek Aktif</span>
+                <Briefcase className="w-4 h-4 text-stone-400" />
+              </div>
+              <div className="text-xl sm:text-2xl font-semibold text-stone-900 tracking-tight">
+                {openBriefsCount}
+              </div>
+              <div className="text-[10px] text-stone-400 mt-0.5">
+                Peluang produksi terbuka
+              </div>
+            </div>
+
+            {/* Tile 2: Slot Peran Terbuka */}
+            <div className="p-3.5 bg-white rounded-xl border border-stone-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-stone-400 mb-1.5">
+                <span className="text-[11px] font-medium text-stone-500">Slot Peran Terbuka</span>
+                <Users className="w-4 h-4 text-stone-400" />
+              </div>
+              <div className="text-xl sm:text-2xl font-semibold text-stone-900 tracking-tight">
+                {openRolesCount}
+              </div>
+              <div className="text-[10px] text-stone-400 mt-0.5">
+                Fotografer, MUA, Stylist, dll
+              </div>
+            </div>
+
+            {/* Tile 3: Brief Komersial Berbayar */}
+            <div className="p-3.5 bg-white rounded-xl border border-stone-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-stone-400 mb-1.5">
+                <span className="text-[11px] font-medium text-stone-500">Fee Komersial (Paid)</span>
+                <CircleDollarSign className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div className="text-xl sm:text-2xl font-semibold text-stone-900 tracking-tight">
+                {commercialBriefsCount}
+              </div>
+              <div className="text-[10px] text-emerald-700 font-medium mt-0.5">
+                Fee &amp; anggaran terjamin
+              </div>
+            </div>
+
+            {/* Tile 4: Aktivitas Saya */}
+            <div className="p-3.5 bg-white rounded-xl border border-stone-200/80 shadow-2xs">
+              <div className="flex items-center justify-between text-stone-400 mb-1.5">
+                <span className="text-[11px] font-medium text-stone-500">Aktivitas Saya</span>
+                <Send className="w-4 h-4 text-stone-400" />
+              </div>
+              <div className="text-xl sm:text-2xl font-semibold text-stone-900 tracking-tight">
+                {myInterestsCount} <span className="text-xs font-normal text-stone-400">Lamaran</span>
+              </div>
+              <div className="text-[10px] text-stone-400 mt-0.5">
+                {myBriefsCount} Brief diinisiasi Anda
+              </div>
             </div>
           </div>
         </section>
 
-        {/* UNIFIED NAVIGATION TABS */}
-        <div className="flex items-center gap-2 sm:gap-6 border-b border-stone-200 text-xs overflow-x-auto no-scrollbar">
+        {/* 2. ATTIO SEGMENTED TABS NAVIGATION */}
+        <div className="flex items-center gap-1 border-b border-stone-200/80 text-xs overflow-x-auto no-scrollbar">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.key;
             return (
               <Link
                 key={tab.key}
                 href={`/projects?tab=${tab.key}`}
-                className={`pb-3.5 font-semibold transition-all relative flex items-center gap-2 cursor-pointer shrink-0 ${
+                className={`pb-3 px-3 font-medium transition-all relative flex items-center gap-2 cursor-pointer shrink-0 ${
                   isActive
-                    ? "text-[#1E1B2E] font-bold"
-                    : "text-stone-400 hover:text-stone-700"
+                    ? "text-stone-900 font-semibold"
+                    : "text-stone-500 hover:text-stone-800"
                 }`}
               >
                 {tab.isAi && (
                   <Sparkles
                     className={`w-3.5 h-3.5 ${
-                      isActive ? "text-amber-500" : "text-stone-400"
+                      isActive ? "text-stone-900" : "text-stone-400"
                     }`}
                   />
                 )}
-                <span className="tracking-wide">{tab.label}</span>
+                <span>{tab.label}</span>
                 {tab.count > 0 && (
                   <span
-                    className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold transition-colors ${
                       isActive
-                        ? tab.isAi
-                          ? "bg-amber-400 text-stone-950 font-black"
-                          : "bg-stone-900 text-white"
-                        : "bg-stone-100 text-stone-500"
+                        ? "bg-stone-900 text-white"
+                        : "bg-stone-100 text-stone-600"
                     }`}
                   >
                     {tab.count}
                   </span>
                 )}
                 {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#1E1B2E]" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-stone-900" />
                 )}
               </Link>
             );
           })}
         </div>
 
-        {/* TAB 1: PAPAN PROYEK TERBUKA */}
+        {/* 3. TAB 1: PAPAN PROYEK TERBUKA (JOB BOARD) */}
         {activeTab === "browse" && (
-          <div className="space-y-6">
-            {/* PENCARIAN CERDAS & FILTER PERAN, LOKASI, KOMPENSASI */}
+          <div className="space-y-5">
+            {/* FILTER & DISCOVERY BAR */}
             <ProjectFilterBar
               currentSearch={search}
               currentRole={role}
@@ -303,65 +357,67 @@ export default async function ProjectsPage({
               userSector={actor.sector}
             />
 
-            <div className="flex items-center justify-between text-[11px] uppercase tracking-widest text-stone-400 font-semibold px-1">
+            {/* RESULTS METADATA BAR */}
+            <div className="flex items-center justify-between text-xs text-stone-500 px-0.5">
               <span>
-                Menampilkan <span className="text-[#1E1B2E] font-bold">{allBriefs.length}</span> Project Brief
+                Menampilkan <strong className="text-stone-900 font-semibold">{allBriefs.length}</strong> project brief
                 {search && (
                   <span>
                     {" "}
-                    untuk kata kunci{" "}
-                    <span className="text-[#1E1B2E] font-medium">&ldquo;{search}&rdquo;</span>
+                    untuk pencarian &ldquo;{search}&rdquo;
                   </span>
                 )}
                 {role !== "ALL" && (
                   <span>
                     {" "}
-                    dengan peran <span className="text-[#1E1B2E] font-medium">&ldquo;{role}&rdquo;</span>
+                    dengan peran &ldquo;{role}&rdquo;
                   </span>
                 )}
                 {compensation !== "ALL" && (
                   <span>
                     {" "}
-                    skema <span className="text-[#1E1B2E] font-medium">&ldquo;{compensation}&rdquo;</span>
+                    skema &ldquo;{compensation}&rdquo;
                   </span>
                 )}
                 {location !== "ALL" && (
                   <span>
                     {" "}
-                    di <span className="text-[#1E1B2E] font-medium">&ldquo;{location}&rdquo;</span>
+                    di &ldquo;{location}&rdquo;
                   </span>
                 )}
               </span>
             </div>
 
+            {/* EMPTY STATE OR CARDS */}
             {allBriefs.length === 0 ? (
-              <div className="p-12 text-center rounded-2xl bg-stone-50/50 border border-dashed border-stone-300 space-y-4">
-                <div className="w-14 h-14 bg-white rounded-xl border border-stone-200 flex items-center justify-center mx-auto text-stone-400">
-                  <Palette className="w-6 h-6 text-[#1E1B2E]" />
+              <div className="p-12 text-center rounded-xl bg-white border border-dashed border-stone-200 space-y-4">
+                <div className="w-12 h-12 bg-stone-50 rounded-xl border border-stone-200/80 flex items-center justify-center mx-auto text-stone-400">
+                  <Briefcase className="w-5 h-5 text-stone-600" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold text-[#1E1B2E]">
+                  <h3 className="text-sm font-semibold text-stone-900">
                     Tidak Ada Project Brief yang Sesuai
                   </h3>
                   <p className="text-xs text-stone-500 max-w-md mx-auto leading-relaxed">
-                    {search || role !== "ALL"
-                      ? "Coba ubah kata kunci pencarian atau bersihkan filter peran untuk melihat proyek kolaborasi lainnya."
-                      : "Jadilah yang pertama menginisiasi project brief dan undang kolaborator dari ekosistem kreatif."}
+                    {search || role !== "ALL" || compensation !== "ALL" || location !== "ALL"
+                      ? "Coba ubah kata kunci pencarian atau bersihkan filter peran & kompensasi untuk melihat lowongan proyek lainnya."
+                      : "Belum ada project brief terbuka saat ini. Jadilah yang pertama mempublikasikan kebutuhan kru kreatif Anda."}
                   </p>
                 </div>
                 <Link
                   href="/projects/new"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#1E1B2E] hover:bg-black text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-lg shadow-2xs transition-all cursor-pointer"
                 >
-                  + Buat Project Brief Baru
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Inisiasi Brief Baru</span>
                 </Link>
               </div>
             ) : (
               <div
                 className={
                   currentView === "grid"
-                    ? "grid grid-cols-1 md:grid-cols-2 gap-6"
-                    : "space-y-3"
+                    ? "grid grid-cols-1 md:grid-cols-2 gap-4"
+                    : "space-y-2.5"
                 }
               >
                 {allBriefs.map((brief) => (
@@ -391,21 +447,21 @@ export default async function ProjectsPage({
           </div>
         )}
 
-        {/* TAB 2: PELUANG KOLABORASI CERDAS AI */}
+        {/* 4. TAB 2: PELUANG KOLABORASI CERDAS AI */}
         {activeTab === "ai-opportunities" && (
-          <div className="space-y-6">
-            {/* AI OPPORTUNITY ENGINE BANNER */}
-            <div className="p-6 bg-gradient-to-br from-amber-50/80 via-white to-stone-50 border border-amber-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-5">
+            {/* ATTIO MATCH ENGINE HERO BANNER */}
+            <div className="p-5 bg-white rounded-xl border border-stone-200/90 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-5">
               <div className="space-y-1.5 max-w-2xl">
-                <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-amber-800 bg-amber-100/70 px-2 py-0.5 border border-amber-300">
-                  <Sparkles className="w-3 h-3 text-amber-600" />
-                  <span>AI Complementarity Matching Engine</span>
+                <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-stone-600 bg-stone-100 px-2 py-0.5 rounded border border-stone-200/70">
+                  <Sparkles className="w-3 h-3 text-stone-500" />
+                  <span>Deterministic Collaboration Match Engine</span>
                 </div>
-                <h3 className="text-lg font-bold text-[#1E1B2E] tracking-tight">
-                  Peluang Kolaborasi yang Dihitung Secara Cerdas
+                <h3 className="text-base sm:text-lg font-semibold text-stone-900 tracking-tight">
+                  Rekomendasi Kolaborasi &amp; Sinergi Resource Komplementer
                 </h3>
-                <p className="text-xs text-stone-600 leading-relaxed">
-                  Sistem AI RAMU menganalisis kompatibilitas aset, ketersediaan alat, dan estetika visual para kreator di ekosistem untuk membentuk tim produksi ideal secara otomatis tanpa perlu rekrutmen manual yang panjang.
+                <p className="text-xs text-stone-500 leading-relaxed font-normal">
+                  Sistem RAMU menganalisis kompatibilitas aset, ketersediaan alat, dan kebutuhan para kreator di ekosistem untuk membentuk tim produksi ideal secara objektif, terukur, dan transparan.
                 </p>
               </div>
 
@@ -415,16 +471,16 @@ export default async function ProjectsPage({
             </div>
 
             {/* AI SCOPE & FEASIBILITY CONTROLS */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200 pb-4">
-              <div className="inline-flex p-1 bg-stone-100 border border-stone-200 text-xs font-bold">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200/80 pb-3">
+              <div className="inline-flex p-0.5 bg-stone-100 rounded-lg border border-stone-200/70 text-xs font-medium">
                 <Link
                   href={`/projects?tab=ai-opportunities&scope=my${
                     feasibilityFilter !== "ALL" ? `&feasibility=${feasibilityFilter}` : ""
                   }`}
-                  className={`px-3.5 py-1.5 transition-all ${
+                  className={`px-3 py-1.5 rounded-md transition-all ${
                     scopeFilter === "my"
-                      ? "bg-[#1E1B2E] text-white shadow-2xs font-extrabold"
-                      : "text-stone-500 hover:text-[#1E1B2E]"
+                      ? "bg-white text-stone-900 shadow-2xs font-semibold"
+                      : "text-stone-500 hover:text-stone-900"
                   }`}
                 >
                   Relevan Untuk Saya
@@ -433,10 +489,10 @@ export default async function ProjectsPage({
                   href={`/projects?tab=ai-opportunities&scope=all${
                     feasibilityFilter !== "ALL" ? `&feasibility=${feasibilityFilter}` : ""
                   }`}
-                  className={`px-3.5 py-1.5 transition-all ${
+                  className={`px-3 py-1.5 rounded-md transition-all ${
                     scopeFilter === "all"
-                      ? "bg-[#1E1B2E] text-white shadow-2xs font-extrabold"
-                      : "text-stone-500 hover:text-[#1E1B2E]"
+                      ? "bg-white text-stone-900 shadow-2xs font-semibold"
+                      : "text-stone-500 hover:text-stone-900"
                   }`}
                 >
                   Seluruh Ekosistem
@@ -444,7 +500,7 @@ export default async function ProjectsPage({
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-1">
                   {[
                     { key: "ALL", label: "Semua Kelayakan" },
                     { key: "FEASIBLE", label: "Layak (Feasible)" },
@@ -458,10 +514,10 @@ export default async function ProjectsPage({
                         href={`/projects?tab=ai-opportunities&scope=${scopeFilter}${
                           item.key !== "ALL" ? `&feasibility=${item.key}` : ""
                         }`}
-                        className={`px-3 py-1.5 text-xs font-bold transition-all border ${
+                        className={`px-2.5 py-1 text-xs font-medium rounded-lg transition-all border ${
                           isActive
-                            ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
-                            : "bg-white text-stone-600 border-stone-200 hover:bg-stone-50"
+                            ? "bg-stone-900 text-white border-stone-900 shadow-2xs"
+                            : "bg-white text-stone-600 border-stone-200/90 hover:bg-stone-50"
                         }`}
                       >
                         {item.label}
@@ -472,11 +528,11 @@ export default async function ProjectsPage({
 
                 <Link
                   href="/engine-insights"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-[#E66A48] hover:text-[#c45233] bg-[#FFF7ED] hover:bg-[#ffeedb] border border-[#F9D8C4] transition-colors"
-                  title="Lihat sinyal pembelajaran dan validasi luaran engine AI"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-stone-700 hover:text-stone-900 bg-white hover:bg-stone-50 border border-stone-200 rounded-lg shadow-2xs transition-colors"
+                  title="Lihat sinyal evaluasi dan audit komplementaritas engine"
                 >
-                  <BarChart3 className="w-3.5 h-3.5" />
-                  <span>Sinyal Engine AI</span>
+                  <BarChart3 className="w-3.5 h-3.5 text-stone-500" />
+                  <span>Audit Engine</span>
                   <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
@@ -484,21 +540,21 @@ export default async function ProjectsPage({
 
             {/* AI OPPORTUNITY CARDS */}
             {opportunitiesData.length === 0 ? (
-              <div className="p-12 text-center rounded-none bg-stone-50/50 border border-dashed border-stone-300 space-y-4">
-                <div className="w-14 h-14 bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto text-amber-600">
-                  <Sparkles className="w-6 h-6" />
+              <div className="p-12 text-center rounded-xl bg-white border border-dashed border-stone-200 space-y-4">
+                <div className="w-12 h-12 bg-stone-50 rounded-xl border border-stone-200/80 flex items-center justify-center mx-auto text-stone-400">
+                  <Sparkles className="w-5 h-5 text-stone-500" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold text-[#1E1B2E]">
-                    Belum Ada Peluang AI yang Terdeteksi
+                  <h3 className="text-sm font-semibold text-stone-900">
+                    Belum Ada Kecocokan Resource yang Terdeteksi
                   </h3>
                   <p className="text-xs text-stone-500 max-w-md mx-auto leading-relaxed">
-                    Klik tombol &ldquo;Segarkan Rekomendasi AI&rdquo; di atas untuk menganalisis aset dan mempertemukan Anda dengan rekan kolaborator komplementer.
+                    Klik tombol &ldquo;Hitung Kompatibilitas Resource&rdquo; di atas untuk menganalisis aset dan mempertemukan Anda dengan rekan kolaborator komplementer.
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {opportunitiesData.map((opp) => {
                   const isCurrentUserParticipant = opp.participants.some(
                     (p) => p.actorId === actor.id
@@ -563,28 +619,29 @@ export default async function ProjectsPage({
           </div>
         )}
 
-        {/* TAB 3: BRIEF SAYA */}
+        {/* 5. TAB 3: BRIEF SAYA */}
         {activeTab === "mine" && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between text-[11px] uppercase tracking-widest text-stone-400 font-semibold px-1">
+          <div className="space-y-5">
+            <div className="flex items-center justify-between text-xs text-stone-500 px-0.5">
               <span>
-                Menampilkan <span className="text-[#1E1B2E] font-bold">{myBriefs.length}</span> Project Brief Anda
+                Menampilkan <strong className="text-stone-900 font-semibold">{myBriefs.length}</strong> project brief inisiasi Anda
               </span>
               <Link
                 href="/projects/new"
-                className="text-[10px] font-bold text-amber-700 hover:text-amber-800 uppercase tracking-wider"
+                className="text-xs font-semibold text-stone-900 hover:underline flex items-center gap-1"
               >
-                + Tambah Brief Baru
+                <Plus className="w-3 h-3" />
+                <span>Tambah Brief Baru</span>
               </Link>
             </div>
 
             {myBriefs.length === 0 ? (
-              <div className="p-12 text-center rounded-2xl bg-stone-50/50 border border-dashed border-stone-300 space-y-4">
-                <div className="w-14 h-14 bg-white rounded-xl border border-stone-200 flex items-center justify-center mx-auto text-stone-400">
-                  <Palette className="w-6 h-6 text-[#1E1B2E]" />
+              <div className="p-12 text-center rounded-xl bg-white border border-dashed border-stone-200 space-y-4">
+                <div className="w-12 h-12 bg-stone-50 rounded-xl border border-stone-200/80 flex items-center justify-center mx-auto text-stone-400">
+                  <FileText className="w-5 h-5 text-stone-600" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold text-[#1E1B2E]">
+                  <h3 className="text-sm font-semibold text-stone-900">
                     Belum Ada Project Brief yang Anda Buat
                   </h3>
                   <p className="text-xs text-stone-500 max-w-md mx-auto leading-relaxed">
@@ -593,17 +650,18 @@ export default async function ProjectsPage({
                 </div>
                 <Link
                   href="/projects/new"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#1E1B2E] hover:bg-black text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-lg shadow-2xs transition-all cursor-pointer"
                 >
-                  + Inisiasi Project Brief Baru
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Inisiasi Project Brief Baru</span>
                 </Link>
               </div>
             ) : (
               <div
                 className={
                   currentView === "grid"
-                    ? "grid grid-cols-1 md:grid-cols-2 gap-6"
-                    : "space-y-4"
+                    ? "grid grid-cols-1 md:grid-cols-2 gap-4"
+                    : "space-y-3"
                 }
               >
                 {myBriefs.map((brief) => (
@@ -627,19 +685,20 @@ export default async function ProjectsPage({
                       userSector={actor.sector}
                       viewMode={currentView}
                     />
-                    <div className="flex items-center justify-between px-1">
+                    <div className="flex items-center justify-between px-1 text-xs">
                       <Link
                         href={`/projects/${brief.id}#smart-crew`}
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-700 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-3 py-1.5 rounded-lg transition-colors"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-700 hover:text-stone-950 bg-stone-100 hover:bg-stone-200/70 border border-stone-200 px-3 py-1.5 rounded-lg transition-colors"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-                        <span>Buka Rekomendasi Kru AI</span>
+                        <Sparkles className="w-3 h-3 text-stone-500" />
+                        <span>Rekomendasi Kru AI</span>
                       </Link>
                       <Link
                         href={`/projects/${brief.id}`}
-                        className="text-xs font-semibold text-stone-500 hover:text-stone-800"
+                        className="text-xs font-medium text-stone-600 hover:text-stone-900 flex items-center gap-1"
                       >
-                        Kelola Lamaran &rarr;
+                        <span>Kelola Lamaran &amp; SPK</span>
+                        <ArrowRight className="w-3 h-3" />
                       </Link>
                     </div>
                   </div>
@@ -649,58 +708,58 @@ export default async function ProjectsPage({
           </div>
         )}
 
-        {/* TAB 4: MINAT SAYA */}
+        {/* 6. TAB 4: MINAT & LAMARAN SAYA */}
         {activeTab === "interests" && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between text-[11px] uppercase tracking-widest text-stone-400 font-semibold px-1">
+          <div className="space-y-5">
+            <div className="flex items-center justify-between text-xs text-stone-500 px-0.5">
               <span>
-                Menampilkan <span className="text-[#1E1B2E] font-bold">{myInterests.length}</span> Minat &amp; Lamaran Anda
+                Menampilkan <strong className="text-stone-900 font-semibold">{myInterests.length}</strong> lamaran &amp; minat yang Anda ajukan
               </span>
             </div>
 
             {myInterests.length === 0 ? (
-              <div className="p-12 text-center rounded-2xl bg-stone-50/50 border border-dashed border-stone-300 space-y-4">
-                <div className="w-14 h-14 bg-white rounded-xl border border-stone-200 flex items-center justify-center mx-auto text-stone-400">
-                  <Inbox className="w-6 h-6 text-[#1E1B2E]" />
+              <div className="p-12 text-center rounded-xl bg-white border border-dashed border-stone-200 space-y-4">
+                <div className="w-12 h-12 bg-stone-50 rounded-xl border border-stone-200/80 flex items-center justify-center mx-auto text-stone-400">
+                  <Inbox className="w-5 h-5 text-stone-600" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold text-[#1E1B2E]">
-                    Belum Ada Minat yang Dinyatakan
+                  <h3 className="text-sm font-semibold text-stone-900">
+                    Belum Ada Minat atau Lamaran yang Diajukan
                   </h3>
                   <p className="text-xs text-stone-500 max-w-md mx-auto leading-relaxed">
-                    Jelajahi proyek terbuka dan ajukan aset Anda untuk bergabung sebagai rekan kolaborator komersial.
+                    Jelajahi lowongan proyek terbuka di Papan Proyek dan ajukan aset serta keahlian Anda untuk bergabung sebagai rekan kru komersial.
                   </p>
                 </div>
                 <Link
                   href="/projects?tab=browse"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#1E1B2E] hover:bg-black text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-lg shadow-2xs transition-all cursor-pointer"
                 >
-                  <span>Jelajahi Proyek Terbuka</span>
+                  <span>Jelajahi Lowongan Proyek</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {myInterests.map((interest) => {
                   const isInvited = Boolean(interest.isInvited);
-                  const statusConfig: Record<string, { label: string; color: string }> = {
+                  const statusConfig: Record<string, { label: string; badge: string }> = {
                     PENDING: {
                       label: isInvited ? "Undangan Masuk" : "Menunggu Review",
-                      color: isInvited
-                        ? "text-purple-800 bg-purple-50 border-purple-200 font-bold"
-                        : "text-amber-800 bg-amber-50 border-amber-200 font-bold",
+                      badge: isInvited
+                        ? "text-purple-800 bg-purple-50 border-purple-200 font-semibold"
+                        : "text-amber-800 bg-amber-50 border-amber-200/80 font-semibold",
                     },
                     ACCEPTED: {
                       label: "Diterima (Siap SPK)",
-                      color: "text-emerald-800 bg-emerald-50 border-emerald-200 font-bold",
+                      badge: "text-emerald-800 bg-emerald-50 border-emerald-200/80 font-semibold",
                     },
                     DECLINED: {
                       label: isInvited ? "Undangan Ditolak" : "Ditolak",
-                      color: "text-rose-800 bg-rose-50 border-rose-200 font-bold",
+                      badge: "text-rose-800 bg-rose-50 border-rose-200 font-semibold",
                     },
                     WITHDRAWN: {
                       label: "Ditarik",
-                      color: "text-stone-700 bg-stone-100 border-stone-200 font-bold",
+                      badge: "text-stone-600 bg-stone-100 border-stone-200 font-semibold",
                     },
                   };
                   const cfg = statusConfig[interest.status] || statusConfig.PENDING;
@@ -708,43 +767,43 @@ export default async function ProjectsPage({
                   return (
                     <div
                       key={interest.id}
-                      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl border transition-all shadow-2xs hover:shadow-sm ${
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border transition-all shadow-2xs hover:shadow-xs ${
                         isInvited && interest.status === "PENDING"
-                          ? "bg-purple-50/20 border-purple-200 hover:border-purple-300"
-                          : "bg-white border-stone-200 hover:border-stone-800"
+                          ? "bg-purple-50/20 border-purple-200"
+                          : "bg-white border-stone-200/90 hover:border-stone-800"
                       }`}
                     >
                       <Link
                         href={`/projects/${interest.briefId}`}
-                        className="min-w-0 space-y-1.5 group block flex-1"
+                        className="min-w-0 space-y-1 group block flex-1"
                       >
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-[#1E1B2E] text-sm group-hover:text-amber-800 transition-colors truncate">
+                          <span className="font-semibold text-stone-900 text-sm group-hover:text-stone-950 transition-colors truncate">
                             {interest.brief.title}
                           </span>
                           {isInvited && interest.status === "PENDING" && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-purple-100 text-purple-800 border border-purple-200">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-100 text-purple-800 border border-purple-200">
                               <Sparkles className="w-2.5 h-2.5 text-purple-600" />
                               <span>Diundang Inisiator</span>
                             </span>
                           )}
                         </div>
                         <div className="text-xs text-stone-500">
-                          Peran:{" "}
-                          <span className="text-[#1E1B2E] font-semibold">
+                          Peran dilamar:{" "}
+                          <span className="text-stone-900 font-medium">
                             {interest.role.roleLabel}
                           </span>
                           {" · "}
                           Inisiator: {interest.brief.creatorActor.name}
                         </div>
                         {isInvited && interest.status === "PENDING" && interest.message && (
-                          <p className="text-xs text-stone-600 italic line-clamp-1 bg-white/80 p-2 rounded-lg border border-purple-100">
+                          <p className="text-xs text-stone-600 italic line-clamp-1 bg-white p-2 rounded-lg border border-purple-100 mt-1">
                             &ldquo;{interest.message}&rdquo;
                           </p>
                         )}
                       </Link>
 
-                      <div className="flex flex-wrap items-center gap-3 shrink-0">
+                      <div className="flex flex-wrap items-center gap-2.5 shrink-0">
                         {isInvited && interest.status === "PENDING" ? (
                           <InvitationResponseButtons
                             interestId={interest.id}
@@ -754,7 +813,7 @@ export default async function ProjectsPage({
                           />
                         ) : (
                           <>
-                            <span className={`px-3 py-1 text-xs rounded-full border ${cfg.color}`}>
+                            <span className={`px-2.5 py-1 text-xs rounded-full border ${cfg.badge}`}>
                               {cfg.label}
                             </span>
                             {interest.status === "PENDING" && (
@@ -769,7 +828,7 @@ export default async function ProjectsPage({
 
                         <Link
                           href={`/projects/${interest.briefId}`}
-                          className="text-xs font-semibold text-stone-500 hover:text-stone-800 transition-colors hidden sm:inline-block"
+                          className="text-xs font-medium text-stone-500 hover:text-stone-900 transition-colors hidden sm:inline-block"
                         >
                           Lihat Brief &rarr;
                         </Link>

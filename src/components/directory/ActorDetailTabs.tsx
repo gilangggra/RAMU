@@ -48,6 +48,7 @@ import { VideographerSpecsCard } from "./VideographerSpecsCard";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
 import { BookingModal } from "./BookingModal";
 import { TearSheetModal } from "@/components/showcase/TearSheetModal";
+import { ShowcaseCard } from "@/components/showcase/ShowcaseCard";
 import { ShowcaseItem } from "@/application/showcaseService";
 import { parseSocialLinks, InstagramIcon } from "@/lib/socialUtils";
 import { ProfileSlideOverDrawer, DrawerTabType } from "./ProfileSlideOverDrawer";
@@ -870,7 +871,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
               onClick={() => setActiveTab(tab.id)}
               className={`pb-4 whitespace-nowrap text-xs font-bold uppercase tracking-widest transition-all cursor-pointer ${
                 isActive
-                  ? "text-[#1E1B2E] border-b-2 border-[#1E1B2E]"
+                  ? "text-stone-900 border-b-2 border-stone-900"
                   : "text-stone-400 hover:text-stone-600 border-b-2 border-transparent"
               }`}
             >
@@ -886,9 +887,9 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
           {portfolioAssets.length > 0 ? (
             <div className="space-y-4">
 
-              <div className="p-3.5 rounded-none bg-gradient-to-r from-emerald-500/10 via-amber-500/5 to-transparent border border-emerald-300/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
+              <div className="p-3.5 rounded-xl bg-gradient-to-r from-emerald-500/10 via-amber-500/5 to-transparent border border-emerald-300/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-none bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                   <div>
@@ -900,7 +901,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                     </span>
                   </div>
                 </div>
-                <span className="self-start sm:self-auto px-2.5 py-1 rounded-none bg-emerald-100 text-emerald-900 font-mono text-[10px] font-black border border-emerald-300 shrink-0">
+                <span className="self-start sm:self-auto px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-900 font-mono text-[10px] font-black border border-emerald-300 shrink-0">
                   ANTI-CATFISHING CERTIFIED
                 </span>
               </div>
@@ -908,7 +909,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-100 gap-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-stone-400" />
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">
                     Galeri Hasil Karya &amp; Proyek Komersial ({portfolioAssets.length})
                   </h3>
                 </div>
@@ -920,7 +921,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                       onClick={() => {
                         window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "portfolio" } }));
                       }}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-semibold uppercase tracking-wider hover:bg-stone-800 transition-colors shadow-xs cursor-pointer"
                     >
                       <PlusCircle className="w-3.5 h-3.5" />
                       <span>Tambah Karya</span>
@@ -934,11 +935,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                   <button
                     type="button"
                     onClick={() => setPortfolioFilter("ALL")}
-                    className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-none ${
-                      portfolioFilter === "ALL"
-                        ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
-                        : "bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 border-stone-200"
-                    }`}
+                    className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-lg ${portfolioFilter === "ALL" ? "bg-stone-900 text-white border-stone-900 shadow-2xs" : "bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 border-stone-200"}`}
                   >
                     <span>Semua</span>
                     <span className={`text-[10px] font-mono px-1.5 py-0.5 ${portfolioFilter === "ALL" ? "bg-white/20 text-white" : "bg-stone-100 text-stone-600"}`}>
@@ -951,11 +948,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                       key={cat.id}
                       type="button"
                       onClick={() => setPortfolioFilter(cat.id)}
-                      className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-none whitespace-nowrap ${
-                        portfolioFilter === cat.id
-                          ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
-                          : "bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 border-stone-200"
-                      }`}
+                      className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-lg whitespace-nowrap ${portfolioFilter === cat.id ? "bg-stone-900 text-white border-stone-900 shadow-2xs" : "bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 border-stone-200"}`}
                     >
                       <span>{cat.label}</span>
                       <span className={`text-[10px] font-mono px-1.5 py-0.5 ${portfolioFilter === cat.id ? "bg-white/20 text-white" : "bg-stone-100 text-stone-600"}`}>
@@ -968,9 +961,9 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                     <button
                       type="button"
                       onClick={() => setPortfolioFilter("VIDEO")}
-                      className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-none whitespace-nowrap ${
+                      className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-xl whitespace-nowrap ${
                         portfolioFilter === "VIDEO"
-                          ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
+                          ? "bg-stone-900 text-white border-stone-900 shadow-2xs"
                           : "bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 border-stone-200"
                       }`}
                     >
@@ -997,67 +990,20 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                   {filteredPortfolioAssets.map((asset) => {
                     const originalIndex = showcaseItems.findIndex((item) => item.id === asset.id);
                     const targetIndex = originalIndex !== -1 ? originalIndex : 0;
-                    const attrs = (asset.attributes as any) || {};
-                    const isVideo =
-                      attrs.media_type === "VIDEO" ||
-                      Boolean(attrs.video_url) ||
-                      asset.subtype?.toLowerCase().includes("video") ||
-                      asset.subtype?.toLowerCase().includes("film") ||
-                      asset.subtype?.toLowerCase().includes("cinema") ||
-                      (attrs.image_url && attrs.image_url.includes("img.youtube.com"));
-
-                    const isDirectVideo =
-                      isVideo &&
-                      attrs.video_url &&
-                      (/\.(mp4|webm|mov)(\?.*)?$/i.test(attrs.video_url) ||
-                        attrs.video_url.startsWith("/uploads/portfolios/videos/"));
+                    const showcaseItem = showcaseItems[targetIndex];
+                    if (!showcaseItem) return null;
 
                     return (
-                      <div
+                      <ShowcaseCard
                         key={asset.id}
-                        onClick={() => setSelectedShowcaseIndex(targetIndex)}
-                        className="break-inside-avoid mb-4 group relative block overflow-hidden rounded-none bg-stone-100 border border-stone-200/80 shadow-xs hover:shadow-xl transition-all duration-500 cursor-pointer select-none"
-                      >
-                        {isDirectVideo && attrs.video_url && (
-                          <video
-                            src={attrs.video_url}
-                            muted
-                            loop
-                            playsInline
-                            preload="none"
-                            onMouseEnter={(e) => e.currentTarget.play().catch(() => {})}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.pause();
-                              e.currentTarget.currentTime = 0;
-                            }}
-                            className="absolute inset-0 w-full h-full object-cover z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-none"
-                          />
-                        )}
-
-                        {attrs?.image_url ? (
-                          <img
-                            src={attrs.image_url}
-                            alt={asset.name}
-                            className="w-full h-auto object-cover rounded-none block transition-transform duration-700 ease-out group-hover:scale-[1.02]"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full aspect-[4/3] flex items-center justify-center text-stone-400 bg-stone-100">
-                            <Sparkles className="w-8 h-8 opacity-50" />
-                          </div>
-                        )}
-
-                        {isVideo && (
-                          <div className="absolute top-2.5 right-2.5 z-20 w-7 h-7 bg-black/50 backdrop-blur-xs flex items-center justify-center text-white/95 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                            <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
-                          </div>
-                        )}
-                      </div>
+                        item={showcaseItem}
+                        onOpenTearSheet={() => setSelectedShowcaseIndex(targetIndex)}
+                      />
                     );
                   })}
                 </div>
               ) : (
-                <div className="text-center py-12 px-4 bg-stone-50 border border-stone-200 rounded-none space-y-2">
+                <div className="text-center py-12 px-4 bg-stone-50 border border-stone-200 rounded-xl space-y-2">
                   <p className="text-xs text-stone-500">Tidak ada karya yang sesuai dengan kategori ini.</p>
                   <button
                     type="button"
@@ -1070,9 +1016,9 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
               )}
             </div>
           ) : (
-            <div className="text-center py-16 px-6 bg-stone-50 border border-stone-200/80 rounded-none space-y-3">
+            <div className="text-center py-16 px-6 bg-stone-50 border border-stone-200/80 rounded-xl space-y-3">
               <Sparkles className="w-8 h-8 text-stone-300 mx-auto" />
-              <h4 className="text-base font-semibold text-[#1E1B2E]">Portofolio Terdaftar Sedang Diselaraskan</h4>
+              <h4 className="text-base font-semibold text-stone-900">Portofolio Terdaftar Sedang Diselaraskan</h4>
               <p className="text-xs text-stone-500 max-w-md mx-auto">
                 Karya portofolio resolusi tinggi dapat dilihat pada kartu spesifikasi teknis dan media sosial resmi kreator.
               </p>
@@ -1083,13 +1029,13 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                     onClick={() => {
                       window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "portfolio" } }));
                     }}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider rounded-none hover:bg-black transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-900 text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-black transition-colors cursor-pointer"
                   >
                     + Unggah Portofolio Sekarang
                   </button>
                   <Link
                     href="/dashboard/showcase"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-stone-300 text-[#1E1B2E] text-xs font-bold uppercase tracking-wider rounded-none hover:bg-stone-50 transition-colors"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-stone-300 text-stone-900 text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-stone-50 transition-colors"
                   >
                     Studio Showcase &rarr;
                   </Link>
@@ -1101,14 +1047,14 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
           {isModel && modelAttrs?.comp_card && modelAttrs.comp_card.length > 0 && (
             <div className="space-y-4 pt-6 border-t border-stone-200">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">Foto Comp-Card Editorial</h3>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Foto Comp-Card Editorial</h3>
                 {isCurrentActor && (
                   <button
                     type="button"
                     onClick={() => {
                       window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
                     }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-none bg-[#1E1B2E] text-white text-[11px] font-bold uppercase tracking-wider hover:bg-black transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-stone-900 text-white text-[11px] font-bold uppercase tracking-wider hover:bg-black transition-colors cursor-pointer"
                   >
                     <Pencil className="w-3 h-3" />
                     <span>Edit Comp Card</span>
@@ -1117,7 +1063,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {modelAttrs.comp_card.map((item, i) => (
-                  <div key={i} className="aspect-[3/4] rounded-none overflow-hidden bg-stone-100 border border-stone-200">
+                  <div key={i} className="aspect-[3/4] rounded-xl overflow-hidden bg-stone-100 border border-stone-200">
                     <img src={item.url} alt={item.caption || `Comp card ${i + 1}`} className="w-full h-full object-cover" />
                   </div>
                 ))}
@@ -1128,14 +1074,14 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
           {isBrand && brandAttrs?.brand_gallery && brandAttrs.brand_gallery.length > 0 && (
             <div className="space-y-4 pt-6 border-t border-stone-200">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">Galeri Koleksi Brand</h3>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Galeri Koleksi Brand</h3>
                 {isCurrentActor && (
                   <button
                     type="button"
                     onClick={() => {
                       window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
                     }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-none bg-[#1E1B2E] text-white text-[11px] font-bold uppercase tracking-wider hover:bg-black transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-stone-900 text-white text-[11px] font-bold uppercase tracking-wider hover:bg-black transition-colors cursor-pointer"
                   >
                     <Pencil className="w-3 h-3" />
                     <span>Edit Galeri Brand</span>
@@ -1144,7 +1090,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {brandAttrs.brand_gallery.map((item, i) => (
-                  <div key={i} className="aspect-[4/5] rounded-none overflow-hidden bg-stone-100 border border-stone-200">
+                  <div key={i} className="aspect-[4/5] rounded-xl overflow-hidden bg-stone-100 border border-stone-200">
                     <img src={item.url} alt={item.title || `Brand lookbook ${i + 1}`} className="w-full h-full object-cover" />
                   </div>
                 ))}
@@ -1160,7 +1106,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
             <div className="flex items-center gap-2">
               <Briefcase className="w-4 h-4 text-stone-400" />
-              <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">
                 Jenis Kerjasama & Kolaborasi Terbuka
               </h3>
             </div>
@@ -1171,13 +1117,13 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                   onClick={() => {
                     window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "rates" } }));
                   }}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                   <span>Atur Preferensi Kerjasama</span>
                 </button>
               )}
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Terbuka Kolaborasi</span>
               </div>
@@ -1222,11 +1168,11 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                 {/* Tipe Kerjasama */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {collabTypes.map((type, idx) => (
-                    <div key={idx} className="p-5 bg-white border border-stone-200/80 shadow-xs space-y-2 hover:border-[#1E1B2E] transition-colors">
+                    <div key={idx} className="p-5 bg-white border border-stone-200/80 shadow-xs space-y-2 hover:border-stone-900 transition-colors">
                       <div className="w-9 h-9 rounded bg-stone-100 flex items-center justify-center text-stone-700 mb-1">
                         {renderCollabIcon(type)}
                       </div>
-                      <h4 className="text-xs font-black uppercase tracking-wider text-[#1E1B2E]">{type}</h4>
+                      <h4 className="text-xs font-black uppercase tracking-wider text-stone-900">{type}</h4>
                       <p className="text-[11px] text-stone-500 leading-relaxed">
                         {type === "Paid Campaign" && "Kreator dibayar sesuai rate card. Cocok untuk campaign terstruktur dengan brief yang jelas."}
                         {type === "Product Seeding / Gifting" && "Brand mengirimkan produk gratis kepada kreator pilihan untuk konten organik tanpa kewajiban posting."}
@@ -1244,17 +1190,17 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="p-5 bg-stone-50 border border-stone-200/60 space-y-1">
                     <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400 block">Budget / Kompensasi</span>
-                    <p className="text-sm font-bold text-[#1E1B2E]">{budgetRange}</p>
+                    <p className="text-sm font-bold text-stone-900">{budgetRange}</p>
                     <p className="text-[11px] text-stone-500">Bervariasi per jenis kolaborasi</p>
                   </div>
                   <div className="p-5 bg-stone-50 border border-stone-200/60 space-y-1">
                     <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400 block">Timeline Kampanye</span>
-                    <p className="text-sm font-bold text-[#1E1B2E]">{timeline}</p>
+                    <p className="text-sm font-bold text-stone-900">{timeline}</p>
                     <p className="text-[11px] text-stone-500">Dari brief hingga publikasi konten</p>
                   </div>
                   <div className="p-5 bg-stone-50 border border-stone-200/60 space-y-1">
                     <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400 block">Sistem Kontrak</span>
-                    <p className="text-sm font-bold text-[#1E1B2E]">Invoice Resmi & PO</p>
+                    <p className="text-sm font-bold text-stone-900">Invoice Resmi & PO</p>
                     <p className="text-[11px] text-stone-500">Dilindungi perjanjian tertulis</p>
                   </div>
                 </div>
@@ -1263,7 +1209,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                 <div className="p-5 bg-white border border-stone-200/80 shadow-xs space-y-3">
                   <div className="flex items-center gap-2 pb-2 border-b border-stone-100">
                     <Target className="w-4 h-4 text-amber-600" />
-                    <h4 className="text-xs font-black uppercase tracking-wider text-[#1E1B2E]">Profil Kreator yang Dicari</h4>
+                    <h4 className="text-xs font-black uppercase tracking-wider text-stone-900">Profil Kreator yang Dicari</h4>
                   </div>
                   <p className="text-sm text-stone-600 leading-relaxed">{creatorRequirements}</p>
                   {collabNotes && (
@@ -1279,7 +1225,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                     <div className="flex items-center justify-between pb-2 border-b border-stone-100">
                       <div className="flex items-center gap-2">
                         <Sparkles className="w-4 h-4 text-amber-600" />
-                        <h4 className="text-xs font-black uppercase tracking-wider text-[#1E1B2E]">
+                        <h4 className="text-xs font-black uppercase tracking-wider text-stone-900">
                           Kebutuhan Talenta &amp; Brief Terbuka ({actor.needs.length})
                         </h4>
                       </div>
@@ -1297,7 +1243,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                           <span className="text-[9px] font-bold uppercase tracking-widest text-amber-700 bg-amber-50 px-2 py-0.5 border border-amber-200 inline-block">
                             {need.category}
                           </span>
-                          <h5 className="text-xs font-bold text-[#1E1B2E]">{need.title}</h5>
+                          <h5 className="text-xs font-bold text-stone-900">{need.title}</h5>
                           {need.description && (
                             <p className="text-[11px] text-stone-500 line-clamp-2 leading-relaxed">{need.description}</p>
                           )}
@@ -1308,7 +1254,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                 )}
 
                 {/* CTA Ajukan Proposal / Pitch */}
-                <div className="p-5 bg-[#1E1B2E] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="p-5 bg-stone-900 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">
                     <h4 className="text-sm font-bold text-white">Tertarik berkolaborasi dengan {actor.name}?</h4>
                     <p className="text-[11px] text-stone-300">Kirimkan portofolio dan konsep proposal singkat Anda melalui formulir kemitraan resmi RAMU.</p>
@@ -1318,7 +1264,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                       <button
                         type="button"
                         onClick={() => setIsBookingOpen(true)}
-                        className="px-6 py-3 bg-white text-[#1E1B2E] text-xs font-black uppercase tracking-widest hover:bg-stone-100 transition-colors cursor-pointer flex items-center gap-2 shadow-xs"
+                        className="px-6 py-3 bg-white text-stone-900 text-xs font-black uppercase tracking-widest hover:bg-stone-100 transition-colors cursor-pointer flex items-center gap-2 shadow-xs"
                       >
                         <Briefcase className="w-4 h-4" />
                         <span>Ajukan Pitch Kolaborasi</span>
@@ -1344,7 +1290,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
             <div className="flex items-center gap-2">
               <CreditCard className="w-4 h-4 text-stone-400" />
-              <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">
                 Pilihan Paket &amp; Estimasi Tarif
               </h3>
             </div>
@@ -1355,19 +1301,19 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                   onClick={() => {
                     window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "rates" } }));
                   }}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
                 >
                   <CreditCard className="w-3.5 h-3.5" />
                   <span>Atur Paket &amp; Tarif Saya</span>
                 </button>
               )}
               {hasCustomPackages ? (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Tarif Terverifikasi Talenta</span>
                 </div>
               ) : (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-stone-100 text-stone-600 text-xs font-semibold border border-stone-200">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 text-stone-600 text-xs font-semibold border border-stone-200">
                   <Clock className="w-3.5 h-3.5 text-stone-400" />
                   <span>Acuan Kisaran Industri</span>
                 </div>
@@ -1388,26 +1334,22 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
             {packages.map((pkg, idx) => (
               <div
                 key={idx}
-                className={`relative flex flex-col justify-between p-6 sm:p-7 rounded-none border transition-all duration-300 ${
-                  pkg.popular
-                    ? "bg-white border-[#1E1B2E] shadow-xl ring-1 ring-[#1E1B2E]"
-                    : "bg-white border-stone-200/80 shadow-xs hover:border-stone-400"
-                }`}
+                className={`relative flex flex-col justify-between p-6 sm:p-7 rounded-2xl border transition-all duration-300 ${pkg.popular ? "bg-white border-stone-900 shadow-lg ring-1 ring-stone-900" : "bg-white border-stone-200/80 shadow-xs hover:border-stone-400"}`}
               >
                 {pkg.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-[#1E1B2E] text-white text-[9px] font-bold uppercase tracking-widest rounded-none shadow-xs">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-stone-900 text-white text-[9px] font-bold uppercase tracking-wider rounded-full shadow-xs">
                     Paling Banyak Dipilih
                   </div>
                 )}
 
                 <div className="space-y-4">
                   <div>
-                    <h4 className="text-lg font-bold text-[#1E1B2E] tracking-tight">{pkg.title}</h4>
+                    <h4 className="text-lg font-bold text-stone-900 tracking-tight">{pkg.title}</h4>
                     <p className="text-xs text-stone-500 mt-1 leading-relaxed">{pkg.subtitle}</p>
                   </div>
 
                   <div className="pt-2 pb-4 border-y border-stone-100">
-                    <div className="text-2xl sm:text-3xl font-black text-[#1E1B2E] tracking-tight">
+                    <div className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
                       {pkg.price}
                     </div>
                     <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mt-0.5">
@@ -1433,11 +1375,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                     <button
                       type="button"
                       onClick={() => setIsBookingOpen(true)}
-                      className={`w-full py-3 text-xs font-bold uppercase tracking-widest rounded-none transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                        pkg.popular
-                          ? "bg-[#1E1B2E] hover:bg-black text-white shadow-sm"
-                          : "bg-stone-100 hover:bg-stone-200 text-[#1E1B2E]"
-                      }`}
+                      className={`w-full py-3 text-xs font-semibold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${pkg.popular ? "bg-stone-900 hover:bg-stone-800 text-white shadow-xs" : "bg-stone-100 hover:bg-stone-200 text-stone-800"}`}
                     >
                       <Briefcase className="w-4 h-4" />
                       <span>Sewa Paket Ini</span>
@@ -1448,7 +1386,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                       onClick={() => {
                         window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "rates" } }));
                       }}
-                      className="w-full py-3 text-xs font-bold uppercase tracking-widest rounded-none bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full py-3 text-xs font-semibold uppercase tracking-wider rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <CreditCard className="w-3.5 h-3.5" />
                       <span>Ubah Tarif Saya</span>
@@ -1459,9 +1397,9 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
             ))}
           </div>
 
-          <div className="p-5 rounded-none bg-stone-50 border border-stone-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+          <div className="p-5 rounded-xl bg-stone-50 border border-stone-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
             <div className="space-y-0.5">
-              <span className="font-bold text-[#1E1B2E] block">Butuh paket khusus atau brief di luar daftar?</span>
+              <span className="font-bold text-stone-900 block">Butuh paket khusus atau brief di luar daftar?</span>
               <p className="text-stone-500">
                 Anda dapat menentukan sendiri estimasi anggaran dan durasi kerja melalui formulir Sewa Jasa Langsung.
               </p>
@@ -1470,7 +1408,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
               <button
                 type="button"
                 onClick={() => setIsBookingOpen(true)}
-                className="px-5 py-2.5 bg-white border border-stone-300 hover:border-[#1E1B2E] text-[#1E1B2E] font-bold text-xs uppercase tracking-wider rounded-none transition-colors shrink-0 shadow-xs cursor-pointer"
+                className="px-5 py-2.5 bg-white border border-stone-300 hover:border-stone-900 text-stone-900 font-bold text-xs uppercase tracking-wider rounded-xl transition-colors shrink-0 shadow-xs cursor-pointer"
               >
                 Ajukan Brief Kustom &rarr;
               </button>
@@ -1485,7 +1423,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
             <div className="flex items-center gap-2">
               <Sliders className="w-4 h-4 text-stone-400" />
-              <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">
                 Kartu Spesifikasi Teknis
               </h3>
             </div>
@@ -1495,7 +1433,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
                 }}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
               >
                 <Sliders className="w-3.5 h-3.5" />
                 <span>Edit Spesifikasi</span>
@@ -1536,10 +1474,10 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
           )}
 
           {otherAssets.length > 0 && (
-            <div className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-5">
+            <div className="p-7 sm:p-8 rounded-xl bg-white border border-stone-200/80 shadow-xs space-y-5">
               <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
                 <Package className="w-4 h-4 text-stone-500" />
-                <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">
                   Inventaris Alat &amp; Fasilitas Terverifikasi ({otherAssets.length})
                 </h3>
               </div>
@@ -1550,18 +1488,18 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                   return (
                     <div
                       key={asset.id}
-                      className="p-4 rounded-none bg-stone-50/70 border border-stone-200/80 flex items-start justify-between gap-3 text-xs"
+                      className="p-4 rounded-xl bg-stone-50/70 border border-stone-200/80 flex items-start justify-between gap-3 text-xs"
                     >
                       <div className="space-y-1">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
                           {asset.category} • {asset.subtype}
                         </span>
-                        <h4 className="font-bold text-[#1E1B2E] text-sm">{asset.name}</h4>
+                        <h4 className="font-bold text-stone-900 text-sm">{asset.name}</h4>
                         {asset.description && (
                           <p className="text-stone-500 text-[11px] leading-relaxed line-clamp-2">{asset.description}</p>
                         )}
                       </div>
-                      <span className="px-2 py-0.5 rounded-none bg-white border border-stone-200 text-[10px] font-bold text-emerald-700 shrink-0 flex items-center gap-1 shadow-xs">
+                      <span className="px-2 py-0.5 rounded-xl bg-white border border-stone-200 text-[10px] font-bold text-emerald-700 shrink-0 flex items-center gap-1 shadow-xs">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                         Siap Pakai
                       </span>
@@ -1580,7 +1518,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
             <div>
               <div className="flex items-center gap-2">
                 <Target className="w-4 h-4 text-amber-600" />
-                <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">
                   Kebutuhan Terbuka, Target &amp; Rekam Jejak Proyek
                 </h3>
               </div>
@@ -1591,7 +1529,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
             {isCurrentActor && (
               <Link
                 href="/projects/new"
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-stone-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs"
               >
                 <span>+ Buat Project Brief</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -1605,7 +1543,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
               <div className="flex items-center justify-between pb-3 border-b border-stone-100">
                 <div className="flex items-center gap-2">
                   <Search className="w-4 h-4 text-amber-600" />
-                  <h4 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-stone-900">
                     Kebutuhan Kolaborator Terbuka
                   </h4>
                 </div>
@@ -1642,14 +1580,14 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                           <button
                             type="button"
                             onClick={() => setIsBookingOpen(true)}
-                            className="text-[11px] font-bold text-[#1E1B2E] hover:text-amber-600 inline-flex items-center gap-1 cursor-pointer"
+                            className="text-[11px] font-bold text-stone-900 hover:text-amber-600 inline-flex items-center gap-1 cursor-pointer"
                           >
                             <span>Tanggapi</span>
                             <ArrowRight className="w-3 h-3" />
                           </button>
                         )}
                       </div>
-                      <h5 className="font-bold text-[#1E1B2E] text-sm leading-snug">{need.title}</h5>
+                      <h5 className="font-bold text-stone-900 text-sm leading-snug">{need.title}</h5>
                       {need.description && (
                         <p className="text-stone-500 text-xs leading-relaxed">{need.description}</p>
                       )}
@@ -1664,7 +1602,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
               <div className="flex items-center justify-between pb-3 border-b border-stone-100">
                 <div className="flex items-center gap-2">
                   <Target className="w-4 h-4 text-purple-600" />
-                  <h4 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-stone-900">
                     Target &amp; Arah Karya
                   </h4>
                 </div>
@@ -1689,7 +1627,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                           {goal.category}
                         </span>
                       </div>
-                      <h5 className="font-bold text-[#1E1B2E] text-sm leading-snug">{goal.title}</h5>
+                      <h5 className="font-bold text-stone-900 text-sm leading-snug">{goal.title}</h5>
                       {goal.description && (
                         <p className="text-stone-500 text-xs leading-relaxed">{goal.description}</p>
                       )}
@@ -1705,7 +1643,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-stone-100">
               <div className="flex items-center gap-2">
                 <Briefcase className="w-4 h-4 text-emerald-600" />
-                <h4 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h4 className="text-sm font-bold uppercase tracking-wider text-stone-900">
                   Rekam Jejak Proyek Kolaboratif Resmi RAMU
                 </h4>
               </div>
@@ -1738,7 +1676,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                     </div>
 
                     <div>
-                      <h5 className="font-bold text-[#1E1B2E] text-base leading-snug">
+                      <h5 className="font-bold text-stone-900 text-base leading-snug">
                         {part.collaboration.title}
                       </h5>
                       {part.collaboration.description && (
@@ -1774,7 +1712,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                         </span>
                         <Link
                           href={`/collaborations/${part.collaboration.id}`}
-                          className="font-bold text-[#1E1B2E] hover:text-emerald-700 inline-flex items-center gap-1 shrink-0"
+                          className="font-bold text-stone-900 hover:text-emerald-700 inline-flex items-center gap-1 shrink-0"
                         >
                           <span>Buka Workspace</span>
                           <ArrowRight className="w-3 h-3" />
@@ -1795,7 +1733,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-stone-400" />
-              <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">
                 Profil &amp; Pengalaman Profesional
               </h3>
             </div>
@@ -1805,7 +1743,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "about" } }));
                 }}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
               >
                 <Pencil className="w-3.5 h-3.5" />
                 <span>Edit Profil</span>
@@ -1816,13 +1754,13 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             <div className="lg:col-span-2 space-y-6">
-              <div className="p-7 sm:p-8 bg-white border border-stone-200/80 rounded-none space-y-4">
+              <div className="p-7 sm:p-8 bg-white border border-stone-200/80 rounded-xl space-y-4">
                 <div className="flex items-center justify-between pb-2 border-b border-stone-100">
                   <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
                     Profil &amp; Pengalaman Profesional
                   </div>
                 </div>
-                <div className="text-sm font-light text-[#1E1B2E] leading-relaxed">
+                <div className="text-sm font-light text-stone-900 leading-relaxed">
                   {actor.description || "Kreator dan pelaku industri terverifikasi di ekosistem RAMU Indonesia."}
                 </div>
 
@@ -1834,7 +1772,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                     {displaySpecialties.map((s, idx) => (
                       <span
                         key={idx}
-                        className="px-3 py-1 rounded-none bg-stone-50 border border-stone-200 text-xs font-semibold text-stone-700"
+                        className="px-3 py-1 rounded-xl bg-stone-50 border border-stone-200 text-xs font-semibold text-stone-700"
                       >
                         {s}
                       </span>
@@ -1847,7 +1785,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
             </div>
 
             <div className="space-y-6">
-              <div className="p-6 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-4">
+              <div className="p-6 rounded-xl bg-white border border-stone-200/80 shadow-xs space-y-4">
                 <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider">
                   Informasi Verifikasi
                 </h3>
@@ -1855,15 +1793,15 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                 <div className="space-y-3 text-xs">
                   <div className="flex items-center justify-between pb-2 border-b border-stone-100">
                     <span className="text-stone-500">Tipe Entitas:</span>
-                    <span className="font-bold text-[#1E1B2E]">{actor.actorType}</span>
+                    <span className="font-bold text-stone-900">{actor.actorType}</span>
                   </div>
                   <div className="flex items-center justify-between pb-2 border-b border-stone-100">
                     <span className="text-stone-500">Sektor:</span>
-                    <span className="font-bold text-[#1E1B2E]">{actor.sector}</span>
+                    <span className="font-bold text-stone-900">{actor.sector}</span>
                   </div>
                   <div className="flex items-center justify-between pb-2 border-b border-stone-100">
                     <span className="text-stone-500">Domisili:</span>
-                    <span className="font-bold text-[#1E1B2E]">{actor.location || "Indonesia"}</span>
+                    <span className="font-bold text-stone-900">{actor.location || "Indonesia"}</span>
                   </div>
                   <div className="flex items-center justify-between pb-2 border-b border-stone-100">
                     <span className="text-stone-500">Status Akun:</span>
@@ -1879,7 +1817,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                         href={socialLinks.instagram.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="font-bold text-[#1E1B2E] hover:underline flex items-center gap-1.5"
+                        className="font-bold text-stone-900 hover:underline flex items-center gap-1.5"
                       >
                         <InstagramIcon className="w-3.5 h-3.5 text-stone-400" />
                         <span>Instagram</span>
@@ -1893,7 +1831,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                         href={socialLinks.website.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="font-bold text-[#1E1B2E] hover:underline flex items-center gap-1.5"
+                        className="font-bold text-stone-900 hover:underline flex items-center gap-1.5"
                       >
                         <Globe className="w-3.5 h-3.5 text-stone-400" />
                         <span>Website</span>
@@ -1906,7 +1844,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                   <button
                     type="button"
                     onClick={() => setIsBookingOpen(true)}
-                    className="w-full mt-2 py-3 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-wider rounded-none transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
+                    className="w-full mt-2 py-3 bg-stone-900 hover:bg-black text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
                   >
                     <Briefcase className="w-4 h-4" />
                     <span>
@@ -1929,7 +1867,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-stone-400" />
-              <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">
                 Ulasan &amp; Reputasi Klien
               </h3>
             </div>
@@ -1939,7 +1877,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "reviews" } }));
                 }}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
               >
                 <Sliders className="w-3.5 h-3.5" />
                 <span>Atur Ulasan &amp; Reputasi</span>
@@ -1953,7 +1891,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                 <Star className="w-6 h-6 text-stone-300" />
               </div>
               <div className="max-w-md mx-auto space-y-1">
-                <h4 className="text-sm font-bold text-[#1E1B2E]">Belum Ada Ulasan Publik</h4>
+                <h4 className="text-sm font-bold text-stone-900">Belum Ada Ulasan Publik</h4>
                 <p className="text-xs text-stone-500 leading-relaxed">
                   Kreator ini belum memiliki ulasan dari proyek yang diselesaikan di RAMU. Jadilah brand atau mitra pertama yang berkolaborasi dan memberikan ulasan terverifikasi!
                 </p>
@@ -1962,7 +1900,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                 <button
                   type="button"
                   onClick={() => setIsBookingOpen(true)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-xs"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-900 hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-xs"
                 >
                   <Briefcase className="w-3.5 h-3.5" />
                   <span>Mulai Kolaborasi Pertama</span>
@@ -1970,10 +1908,10 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
               )}
             </div>
           ) : (
-            <div className="p-7 sm:p-8 rounded-none bg-white border border-stone-200/80 shadow-xs space-y-6">
+            <div className="p-7 sm:p-8 rounded-xl bg-white border border-stone-200/80 shadow-xs space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-stone-100">
                 <div className="flex items-center gap-4">
-                  <div className="text-4xl sm:text-5xl font-black text-[#1E1B2E]">
+                  <div className="text-4xl sm:text-5xl font-black text-stone-900">
                     {avgRating}
                   </div>
                   <div>
@@ -2007,15 +1945,15 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                     return (
                       <div
                         key={fb.id}
-                        className="p-5 rounded-none bg-stone-50/60 border border-stone-200/80 space-y-3"
+                        className="p-5 rounded-xl bg-stone-50/60 border border-stone-200/80 space-y-3"
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-none bg-[#1E1B2E] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                            <div className="w-9 h-9 rounded-xl bg-stone-900 text-white flex items-center justify-center font-bold text-xs shrink-0">
                               {initial}
                             </div>
                             <div>
-                              <h4 className="text-xs font-bold text-[#1E1B2E]">{authorName}</h4>
+                              <h4 className="text-xs font-bold text-stone-900">{authorName}</h4>
                               <p className="text-[11px] text-stone-500">{authorRole}</p>
                             </div>
                           </div>
@@ -2031,7 +1969,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                           </div>
                         </div>
 
-                        <p className="text-xs text-[#1E1B2E] leading-relaxed italic pl-12">
+                        <p className="text-xs text-stone-900 leading-relaxed italic pl-12">
                           &ldquo;{fb.comments}&rdquo;
                         </p>
                       </div>

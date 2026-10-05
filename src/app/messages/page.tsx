@@ -4,6 +4,7 @@ import { prisma } from "@/infrastructure/database/prisma";
 import { AppShell } from "@/components/layout/AppShell";
 import { MessengerClient } from "@/components/messages/MessengerClient";
 import { getConversations, getMessages } from "@/application/messageService";
+import { ShieldCheck } from "lucide-react";
 
 interface MessagesPageProps {
   searchParams: Promise<{ with?: string }>;
@@ -11,7 +12,7 @@ interface MessagesPageProps {
 
 export const metadata = {
   title: "Pesan & Negosiasi Proyek | RAMU",
-  description: "Ruang perpesanan in-app resmi RAMU untuk negosiasi brief, tawaran proyek, dan proteksi transaksi berbasis escrow.",
+  description: "Ruang perpesanan in-app resmi RAMU untuk negosiasi brief, tawaran proyek, dan dokumentasi kesepakatan kolaborasi resmi.",
 };
 
 export default async function MessagesPage({ searchParams }: MessagesPageProps) {
@@ -82,7 +83,25 @@ export default async function MessagesPage({ searchParams }: MessagesPageProps) 
 
   return (
     <AppShell actor={actor} activeRoute="/messages">
-      <div className="max-w-7xl mx-auto space-y-4 pb-12">
+      <div className="space-y-6">
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-stone-200/70">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-stone-900">
+              Pesan &amp; Tawaran Proyek
+            </h1>
+            <p className="text-xs text-stone-500 mt-0.5">
+              Ruang negosiasi langsung, penawaran proyek resmi, dan serah terima hasil kolaborasi terverifikasi.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 text-stone-700 border border-stone-200/80 text-xs font-semibold shadow-2xs">
+              <ShieldCheck className="w-3.5 h-3.5 text-stone-500" />
+              <span>Kolaborasi Resmi Aktif</span>
+            </span>
+          </div>
+        </div>
+
         <MessengerClient
           currentActor={{
             id: actor.id,

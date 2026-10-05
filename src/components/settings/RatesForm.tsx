@@ -26,7 +26,7 @@ export type { ServicePackage };
 
 export type UsageRightsScope = "ORGANIC_SOCIAL" | "PAID_ADS_DIGITAL" | "COMMERCIAL_OOH" | "FULL_BUYOUT";
 export type UsageRightsDuration = "6_MONTHS" | "1_YEAR" | "2_YEARS" | "PERPETUAL";
-export type PaymentMilestoneScheme = "50_50_WATERMARK" | "30_40_30" | "100_ESCROW";
+export type PaymentMilestoneScheme = "50_50_WATERMARK" | "30_40_30" | "100_UPFRONT";
 
 export function getUsageScopeLabel(scope?: UsageRightsScope): string {
   switch (scope) {
@@ -70,10 +70,10 @@ export function getMilestoneSchemeLabel(scheme?: PaymentMilestoneScheme, dp: num
         title: "Termin 30% - 40% - 30% (Proyek Produksi Bertahap)",
         desc: "Tahap I: 30% Booking/DP awal. Tahap II: 40% saat produksi selesai on-set. Tahap III: 30% saat penyerahan aset final.",
       };
-    case "100_ESCROW":
+    case "100_UPFRONT":
       return {
-        title: "Full Upfront Escrow (100% Ditampung Aman di RAMU)",
-        desc: "Dana 100% disetorkan di awal ke rekening penampung resmi RAMU dan dicairkan ke kreator bertahap setelah milestone tervalidasi.",
+        title: "Full Upfront Settlement (100% Pembayaran di Awal)",
+        desc: "Kompensasi diselesaikan 100% di awal sebelum jadwal sesi dimulai sesuai lembar kesepakatan SPK resmi.",
       };
     default:
       return {
@@ -298,13 +298,12 @@ export function RatesForm({
                 onChange={(e) => handleApplyRolePreset(e.target.value as RoleCategory)}
                 className="flex-1 px-3 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:bg-white focus:border-[#1E1B2E] transition-colors cursor-pointer"
               >
-                <option value="PHOTOGRAPHER">Fotografer Fashion &amp; Katalog</option>
-                <option value="VIDEOGRAPHER">Videografer &amp; Fashion Film</option>
-                <option value="MODEL">Model / Talent Fashion</option>
-                <option value="MUA">MUA &amp; Hair Stylist</option>
-                <option value="STYLIST">Fashion Stylist &amp; Wardrobe</option>
-                <option value="DESIGNER">Desainer Busana &amp; Grafis</option>
-                <option value="STUDIO">Studio Foto &amp; Ruang Kreatif</option>
+                <option value="BRAND">Fashion Brand/UMKM</option>
+                <option value="DESIGNER">Fashion Designer</option>
+                <option value="PHOTOGRAPHER">Photographer</option>
+                <option value="MODEL">Model</option>
+                <option value="MUA_STYLIST">MUA/Stylist</option>
+                <option value="STUDIO">Studio</option>
               </select>
 
               <button
@@ -768,7 +767,7 @@ export function RatesForm({
                   >
                     <option value="50_50_WATERMARK">DP 50% + Pelunasan (Watermark Safe)</option>
                     <option value="30_40_30">Termin 30% - 40% - 30% (Bertahap)</option>
-                    <option value="100_ESCROW">100% Full Escrow RAMU</option>
+                    <option value="100_UPFRONT">100% Pembayaran di Awal (Full Upfront)</option>
                   </select>
                   <p className="text-[10px] text-stone-400 mt-1">Pelunasan sebelum file master diserahkan.</p>
                 </div>

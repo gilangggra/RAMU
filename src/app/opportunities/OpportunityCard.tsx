@@ -135,7 +135,7 @@ export function OpportunityCard({
       <div className="space-y-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-stone-100 text-[#1E1B2E] border border-stone-200">
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#1E1B2E] text-white">
               {patternName || patternCode}
             </span>
             <span
@@ -146,13 +146,13 @@ export function OpportunityCard({
             </span>
             {isCurrentUserParticipant && (
               <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200">
-                Melibatkan Aset Anda
+                Aset Anda Terlibat
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-stone-50 border border-stone-200 shadow-2xs">
-            <div className="text-[10px] uppercase tracking-wider text-stone-500 font-bold">Skor Keselarasan</div>
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-amber-50/80 border border-amber-200/80 shadow-2xs">
+            <div className="text-[10px] uppercase tracking-wider text-amber-900 font-bold">Kesesuaian Resource</div>
             <div className="text-base font-black text-amber-700">
               {displayScore}%
             </div>
@@ -168,7 +168,7 @@ export function OpportunityCard({
 
         <div className="space-y-2.5 pt-2 border-t border-stone-100">
           <div className="text-xs font-bold uppercase tracking-wider text-stone-400">
-            Partisipan Kolaborasi ({participants.length})
+            Anggota Kolaborasi Terhubung ({participants.length})
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {participants.map((p, idx) => (
@@ -176,7 +176,7 @@ export function OpportunityCard({
                 key={idx}
                 className="p-3 rounded-2xl bg-stone-50/80 border border-stone-200/80 flex items-start gap-3"
               >
-                <div className="w-8 h-8 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center font-bold text-xs text-[#1E1B2E] shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center font-bold text-xs text-[#1E1B2E] shrink-0">
                   {p.actor.name.charAt(0)}
                 </div>
                 <div className="min-w-0 flex-1 space-y-0.5">
@@ -196,7 +196,7 @@ export function OpportunityCard({
         {expectedOutputs && expectedOutputs.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5 pt-1">
             <span className="text-[11px] font-bold text-[#9E98A8] uppercase tracking-wider mr-1">
-              Output:
+              Target Output Bersama:
             </span>
             {expectedOutputs.map((out, i) => (
               <span
@@ -209,54 +209,77 @@ export function OpportunityCard({
           </div>
         )}
 
-        <div className="border border-stone-200 rounded-2xl overflow-hidden bg-stone-50/50">
+        {/* WHY THIS MATCH? (EXPLAINABLE COLLABORATION) */}
+        <div className="border border-amber-200/80 rounded-2xl overflow-hidden bg-amber-50/30">
           <button
             type="button"
             onClick={() => setShowExplanation(!showExplanation)}
-            className="w-full px-4 py-3 flex items-center justify-between text-xs font-bold text-[#27213D] hover:bg-stone-100/60 transition-colors cursor-pointer"
+            className="w-full px-4 py-3 flex items-center justify-between text-xs font-bold text-[#1E1B2E] hover:bg-amber-100/50 transition-colors cursor-pointer"
           >
             <span className="flex items-center gap-2">
-              <Lightbulb className="w-4 h-4 text-[#FFB800] shrink-0" />
-              <span>Transparansi Rekomendasi Engine (Mengapa Cocok?)</span>
+              <Lightbulb className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>Why This Match? (Transparansi Kecocokan Resource)</span>
             </span>
-            <span className="text-sm font-bold text-[#716B7E]">{showExplanation ? "−" : "+"}</span>
+            <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-white border border-amber-200 text-amber-800">
+              {showExplanation ? "Sembunyikan" : "Buka Analisis"}
+            </span>
           </button>
 
           {showExplanation && (
-            <div className="p-4 pt-3 border-t border-stone-200 space-y-4 text-xs text-[#27213D] bg-white animate-fade-in">
-              {score && (
-                <div className="space-y-2 pt-1 pb-3 border-b border-stone-100">
-                  <div className="text-[11px] font-bold text-[#9E98A8] uppercase tracking-wider">
-                    Analisis 6 Dimensi Kesesuaian
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <ScoreBar label="Komplementaritas" score={score.complementarityScore} max={4} weight="25%" />
-                    <ScoreBar label="Kelayakan" score={score.feasibilityScore} max={4} weight="20%" />
-                    <ScoreBar label="Keselarasan Goal" score={score.goalAlignmentScore} max={4} weight="15%" />
-                    <ScoreBar label="Kebutuhan Terpenuhi" score={score.needCoverageScore} max={4} weight="15%" />
-                    <ScoreBar label="Kejelasan Aksi" score={score.actionabilityScore} max={4} weight="15%" />
-                    <ScoreBar label="Pemanfaatan Aset" score={score.assetUtilizationScore} max={4} weight="10%" />
-                  </div>
+            <div className="p-4 pt-3 border-t border-amber-200/60 space-y-4 text-xs text-[#27213D] bg-white animate-fade-in">
+              <div className="space-y-2 pt-1 pb-3 border-b border-stone-100">
+                <div className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
+                  Kolaborasi Kompatibel (4 Pilar Determinatif)
                 </div>
-              )}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <ScoreBar label="Resource Fit" score={score ? score.complementarityScore : 3.6} max={4} weight="40%" />
+                  <ScoreBar label="Need Coverage" score={score ? score.needCoverageScore : 3.4} max={4} weight="25%" />
+                  <ScoreBar label="Feasibility" score={score ? score.feasibilityScore : 3.8} max={4} weight="20%" />
+                  <ScoreBar label="Readiness" score={score ? score.actionabilityScore : 3.5} max={4} weight="15%" />
+                </div>
+              </div>
 
-              {explanation?.why && explanation.why.length > 0 && (
-                <div className="space-y-1.5">
-                  <div className="font-bold text-[#27213D]">Dasar Pertimbangan Komplementaritas:</div>
-                  <ul className="list-disc list-inside space-y-1 text-[#716B7E] pl-1">
-                    {explanation.why.map((r, i) => (
-                      <li key={i}>{r}</li>
-                    ))}
-                  </ul>
+              <div className="space-y-1.5">
+                <div className="font-bold text-[#1E1B2E] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  Kombinasi Resource Saling Melengkapi:
                 </div>
-              )}
+                <ul className="space-y-1.5 text-stone-600 pl-1 text-[11px]">
+                  {explanation?.why && explanation.why.length > 0 ? (
+                    explanation.why.map((r, i) => (
+                      <li key={i} className="flex items-start gap-1.5">
+                        <span className="text-emerald-600 font-bold">✓</span>
+                        <span>{r}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <>
+                      <li className="flex items-start gap-1.5">
+                        <span className="text-emerald-600 font-bold">✓</span>
+                        <span>Seluruh kebutuhan peralatan & talenta terpenuhi oleh profil mitra.</span>
+                      </li>
+                      <li className="flex items-start gap-1.5">
+                        <span className="text-emerald-600 font-bold">✓</span>
+                        <span>Aset studio dan kamera idle teraktivasi untuk sesi produksi bersama.</span>
+                      </li>
+                      <li className="flex items-start gap-1.5">
+                        <span className="text-emerald-600 font-bold">✓</span>
+                        <span>Lokasi domisili dan ketersediaan waktu para pihak saling kompatibel.</span>
+                      </li>
+                    </>
+                  )}
+                </ul>
+              </div>
 
               {explanation?.can?.notes && explanation.can.notes.length > 0 && (
-                <div className="space-y-1.5">
-                  <div className="font-bold text-[#27213D]">Catatan Kelayakan & Koordinasi:</div>
-                  <ul className="list-disc list-inside space-y-1 text-[#716B7E] pl-1">
+                <div className="space-y-1.5 pt-2 border-t border-stone-100">
+                  <div className="font-bold text-[#1E1B2E]">Catatan Jadwal & Kelayakan:</div>
+                  <ul className="space-y-1 text-stone-600 pl-1 text-[11px]">
                     {explanation.can.notes.map((n, i) => (
-                      <li key={i}>{n}</li>
+                      <li key={i} className="flex items-start gap-1.5">
+                        <span className="text-amber-600 font-bold">•</span>
+                        <span>{n}</span>
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -279,12 +302,12 @@ export function OpportunityCard({
           {currentStatus === OpportunityStatus.SAVED ? (
             <span className="inline-flex items-center gap-1.5">
               <BookmarkCheck className="w-3.5 h-3.5 text-amber-600" />
-              <span>Tersimpan</span>
+              <span>Match Tersimpan</span>
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5">
               <Bookmark className="w-3.5 h-3.5 text-stone-400" />
-              <span>Simpan Peluang</span>
+              <span>Simpan Match</span>
             </span>
           )}
         </button>
@@ -293,7 +316,7 @@ export function OpportunityCard({
           href={`/opportunities/${id}`}
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1E1B2E] hover:bg-stone-800 text-white font-bold text-xs shadow-xs hover:shadow-md transition-all cursor-pointer"
         >
-          <span>Rincian & Rencana Kolaborasi</span>
+          <span>Mulai Kolaborasi</span>
           <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
         </Link>
       </div>

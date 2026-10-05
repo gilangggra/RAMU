@@ -32,6 +32,7 @@ export async function runOpportunityEngine() {
     const result = await generateAndSaveOpportunities({ focusActorId: actor.id });
     revalidatePath("/projects");
     revalidatePath("/opportunities");
+    revalidatePath("/collaborate");
     revalidatePath("/dashboard");
     return { success: true, count: result.count };
   } catch (error) {

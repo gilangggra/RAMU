@@ -84,70 +84,70 @@ export default async function OpportunityDetailPage({
   };
 
   return (
-    <AppShell actor={actor} activeRoute="/projects">
+    <AppShell actor={actor} activeRoute="/collaborate">
       <div className="space-y-8 max-w-5xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-xs text-[#716B7E]">
-            <Link href="/projects" className="hover:text-[#27213D] font-bold transition-colors">
-              Proyek
+          <div className="flex items-center gap-2 text-xs text-stone-500">
+            <Link href="/collaborate" className="hover:text-stone-900 font-semibold transition-colors">
+              Kompatibilitas
             </Link>
             <span>/</span>
             <Link
-              href="/projects?tab=ai-opportunities"
-              className="hover:text-[#27213D] font-bold transition-colors"
+              href="/collaborate"
+              className="hover:text-stone-900 font-semibold transition-colors"
             >
-              Peluang Kolaborasi AI
+              Kecocokan Resource
             </Link>
             <span>/</span>
-            <span className="text-[#27213D] font-bold truncate max-w-[200px] sm:max-w-md">
+            <span className="text-stone-900 font-bold truncate max-w-[200px] sm:max-w-md">
               {opp.title}
             </span>
           </div>
 
           <div className="flex items-center gap-3">
             <Link
-              href="/projects?tab=ai-opportunities"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#E66A48] hover:underline transition-colors"
+              href="/collaborate"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-600 hover:text-stone-900 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Kembali ke Peluang AI</span>
+              <span>Kembali ke Kompatibilitas</span>
             </Link>
 
-            <span className="px-3.5 py-1 rounded-full text-xs font-semibold bg-stone-100 text-[#27213D] border border-stone-200">
+            <span className="px-3.5 py-1 rounded-full text-xs font-semibold bg-stone-100 text-stone-700 border border-stone-200">
               Status: {opp.status}
             </span>
           </div>
         </div>
 
-        <section className="p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] relative overflow-hidden space-y-6">
+        <section className="p-8 rounded-[32px] bg-white border border-stone-200/90 shadow-xs relative overflow-hidden space-y-6">
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-stone-100 text-[#1E1B2E] border border-stone-200">
+                <span className="px-3 py-1 rounded-md text-xs font-bold bg-stone-100 text-stone-800 border border-stone-200">
                   {opp.pattern?.name || opp.patternCode}
                 </span>
                 <span
-                  className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold border ${feasibilityBadge.color}`}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold border ${feasibilityBadge.color}`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${feasibilityBadge.dot}`} />
                   {feasibilityBadge.label}
                 </span>
               </div>
 
-              <h1 className="text-3xl font-extrabold text-[#27213D] tracking-tight leading-tight">
+              <h1 className="text-3xl font-extrabold text-stone-900 tracking-tight leading-tight">
                 {opp.title}
               </h1>
-              <p className="text-sm text-[#716B7E] max-w-2xl leading-relaxed">
+              <p className="text-sm text-stone-600 max-w-2xl leading-relaxed">
                 {opp.description}
               </p>
             </div>
 
-            <div className="p-5 rounded-3xl bg-amber-50/80 border border-amber-200/80 text-center shrink-0 min-w-[140px] space-y-1 shadow-xs">
-              <div className="text-[11px] uppercase tracking-wider text-amber-800 font-bold">Kesesuaian</div>
-              <div className="text-4xl font-black text-[#27213D]">
+            <div className="p-5 rounded-2xl bg-amber-50/80 border border-amber-200 text-center shrink-0 min-w-[140px] space-y-1 shadow-2xs">
+              <div className="text-[11px] uppercase tracking-wider text-amber-900 font-bold">Kesesuaian 4 Pilar</div>
+              <div className="text-4xl font-black text-amber-700">
                 {displayScore}%
               </div>
-              <div className="text-[10px] text-emerald-700 font-bold">
+              <div className="text-[10px] text-emerald-800 font-bold">
                 {displayScore > 0 ? "Kecocokan Tinggi" : "Belum Dihitung"}
               </div>
             </div>
@@ -155,22 +155,22 @@ export default async function OpportunityDetailPage({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-stone-100">
             <div className="space-y-1.5">
-              <div className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">Target Pasar & Audiens</div>
-              <div className="text-xs font-semibold text-[#27213D]">
+              <div className="text-xs font-bold uppercase tracking-wider text-stone-400">Target Pasar & Audiens</div>
+              <div className="text-xs font-semibold text-stone-800">
                 {targetMarket.audience || "Pasar Urban & Penggemar Fashion Kontemporer"}
               </div>
-              <div className="text-[11px] text-[#716B7E]">
+              <div className="text-[11px] text-stone-500">
                 {targetMarket.segment || "Segmen Konsumen Fashion & Editorial Premium"}
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <div className="text-xs font-bold uppercase tracking-wider text-[#716B7E]">Hasil Output Nyata</div>
+              <div className="text-xs font-bold uppercase tracking-wider text-stone-400">Hasil Output Nyata</div>
               <div className="flex flex-wrap gap-1.5">
                 {expectedOutputs.map((out, idx) => (
                   <span
                     key={idx}
-                    className="px-3 py-1 rounded-lg text-xs bg-stone-100 text-[#27213D] border border-stone-200/80 font-medium"
+                    className="px-3 py-1 rounded-lg text-xs bg-stone-100 text-stone-800 border border-stone-200 font-medium"
                   >
                     • {out}
                   </span>
@@ -182,11 +182,11 @@ export default async function OpportunityDetailPage({
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
-              <Users className="w-5 h-5 text-amber-500" />
-              <span>Aktor Partisipan & Pembagian Peran</span>
+            <h2 className="text-lg font-bold text-stone-900 tracking-tight flex items-center gap-2">
+              <Users className="w-5 h-5 text-amber-600" />
+              <span>Aktor Partisipan &amp; Pembagian Peran</span>
             </h2>
-            <span className="text-xs font-medium text-[#716B7E]">{opp.participants.length} Pelaku Kreatif</span>
+            <span className="text-xs font-medium text-stone-500">{opp.participants.length} Pelaku Kreatif</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -197,28 +197,28 @@ export default async function OpportunityDetailPage({
               return (
                 <div
                   key={p.id}
-                  className="p-6 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-4"
+                  className="p-6 rounded-[28px] bg-white border border-stone-200/90 shadow-2xs space-y-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-0.5">
                       <Link
                         href={`/directory/${p.actor.id}`}
-                        className="text-base font-bold text-[#27213D] hover:text-amber-600 transition-colors inline-flex items-center gap-1.5 group/name"
+                        className="text-base font-bold text-stone-900 hover:text-amber-800 transition-colors inline-flex items-center gap-1.5 group/name"
                       >
                         <span>{p.actor.name}</span>
-                        <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover/name:opacity-100 transition-opacity text-amber-600" />
+                        <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover/name:opacity-100 transition-opacity text-amber-700" />
                       </Link>
-                      <div className="text-xs text-[#716B7E]">
+                      <div className="text-xs text-stone-500">
                         {p.actor.sector} • {p.actor.location || "Indonesia"}
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1.5 shrink-0">
-                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200">
                         {p.roleLabel || p.roleCode}
                       </span>
                       <Link
                         href={`/directory/${p.actor.id}`}
-                        className="text-[11px] font-bold text-stone-500 hover:text-[#1E1B2E] transition-colors inline-flex items-center gap-1"
+                        className="text-[11px] font-semibold text-stone-500 hover:text-stone-900 transition-colors inline-flex items-center gap-1"
                       >
                         <span>Profil &amp; Aset</span>
                         <ArrowUpRight className="w-3 h-3" />
@@ -227,20 +227,20 @@ export default async function OpportunityDetailPage({
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200/70 space-y-1">
-                    <div className="text-[11px] font-bold text-[#716B7E] uppercase tracking-wider">Kontribusi:</div>
-                    <div className="text-xs text-[#27213D] leading-relaxed">{p.contribution || "Menyediakan kapabilitas pendukung"}</div>
+                    <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Kontribusi:</div>
+                    <div className="text-xs text-stone-800 leading-relaxed">{p.contribution || "Menyediakan kapabilitas pendukung"}</div>
                   </div>
 
                   {actorAssetsUsed.length > 0 && (
                     <div className="space-y-1.5">
-                      <div className="text-[11px] font-bold text-[#716B7E] uppercase tracking-wider">Aset yang Digunakan:</div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Aset yang Digunakan:</div>
                       <div className="flex flex-wrap gap-1.5">
                         {actorAssetsUsed.map((as, i) => (
                           <span
                             key={i}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-white text-[#27213D] border border-stone-200 font-medium shadow-2xs"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-white text-stone-800 border border-stone-200 font-medium shadow-2xs"
                           >
-                            <Package className="w-3.5 h-3.5 text-amber-500" />
+                            <Package className="w-3.5 h-3.5 text-amber-600" />
                             <span>{as.asset.name}</span>
                           </span>
                         ))}
@@ -254,81 +254,67 @@ export default async function OpportunityDetailPage({
         </section>
 
         {latestScore && (
-          <section className="p-6 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] space-y-6">
+          <section className="p-6 sm:p-8 rounded-[32px] bg-white border border-stone-200/90 shadow-2xs space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
-                <BarChart2 className="w-5 h-5 text-amber-500" />
-                <span>Analisis 6 Dimensi Kesesuaian (Scoring Model)</span>
+              <h2 className="text-lg font-bold text-stone-900 tracking-tight flex items-center gap-2">
+                <BarChart2 className="w-5 h-5 text-amber-600" />
+                <span>Audit Kompatibilitas 4 Pilar (Deterministic Compatibility Engine)</span>
               </h2>
-              <span className="text-xs text-amber-800 font-bold bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
-                Skor Akhir: {displayScore}/100
+              <span className="text-xs text-amber-900 font-bold bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+                Skor Keseluruhan: {displayScore}/100
               </span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <DetailScoreCard
-                label="Komplementaritas"
+                label="Resource Fit"
                 score={latestScore.complementarityScore}
                 max={4}
-                weight="25%"
-                desc="Kekuatan sinergi perpaduan aset & bahan"
+                weight="40%"
+                desc="Kesesuaian kapabilitas & komplementaritas aset antar pihak"
               />
               <DetailScoreCard
-                label="Kelayakan (Feasibility)"
+                label="Need Coverage"
+                score={latestScore.needCoverageScore}
+                max={4}
+                weight="25%"
+                desc="Penyelesaian kebutuhan nyata & output proyek komersial"
+              />
+              <DetailScoreCard
+                label="Feasibility Check"
                 score={latestScore.feasibilityScore}
                 max={4}
                 weight="20%"
-                desc="Kesiapan peran wajib & batasan kapasitas"
+                desc="Kelayakan kapasitas waktu, lokasi, dan peran wajib"
               />
               <DetailScoreCard
-                label="Keselarasan Goal"
-                score={latestScore.goalAlignmentScore}
-                max={4}
-                weight="15%"
-                desc="Dukungan terhadap target usaha partisipan"
-              />
-              <DetailScoreCard
-                label="Kebutuhan Terpenuhi"
-                score={latestScore.needCoverageScore}
-                max={4}
-                weight="15%"
-                desc="Penyelesaian hambatan/kebutuhan nyata"
-              />
-              <DetailScoreCard
-                label="Kejelasan Aksi"
+                label="Readiness Score"
                 score={latestScore.actionabilityScore}
                 max={4}
                 weight="15%"
-                desc="Kejelasan luaran & pembagian peran"
-              />
-              <DetailScoreCard
-                label="Pemanfaatan Aset"
-                score={latestScore.assetUtilizationScore}
-                max={4}
-                weight="10%"
-                desc="Rasio optimalisasi aset yang tersedia"
+                desc="Kesiapan aset, portofolio terverifikasi, & draf kesepakatan"
               />
             </div>
           </section>
         )}
 
-        <section className="p-6 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] space-y-6">
-          <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
-            <Lightbulb className="w-5 h-5 text-amber-500" />
+        <section className="p-6 sm:p-8 rounded-[32px] bg-white border border-stone-200/90 shadow-2xs space-y-6">
+          <h2 className="text-lg font-bold text-stone-900 tracking-tight flex items-center gap-2">
+            <Lightbulb className="w-5 h-5 text-amber-600" />
             <span>Transparansi Rekomendasi (Explainable Output)</span>
           </h2>
 
-          <div className="space-y-4 text-xs text-[#716B7E]">
+          <div className="space-y-4 text-xs text-stone-600">
             {explanation.summary && (
-              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-[#27213D] font-medium leading-relaxed">
+              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-stone-900 font-medium leading-relaxed">
                 {explanation.summary}
               </div>
             )}
 
             {explanation.why && explanation.why.length > 0 && (
               <div className="space-y-2">
-                <div className="font-bold text-sm text-[#27213D]">Dasar Pertimbangan Komplementaritas:</div>
-                <ul className="list-disc list-inside space-y-1.5 text-[#27213D]/90 pl-1">
+                <div className="font-bold text-sm text-stone-900">Dasar Pertimbangan Komplementaritas:</div>
+                <ul className="list-disc list-inside space-y-1.5 text-stone-700 pl-1">
                   {explanation.why.map((r: string, i: number) => (
                     <li key={i}>{r}</li>
                   ))}
@@ -338,14 +324,14 @@ export default async function OpportunityDetailPage({
 
             {explanation.how && explanation.how.length > 0 && (
               <div className="space-y-3 pt-3 border-t border-stone-100">
-                <div className="font-bold text-sm text-[#27213D]">Tahapan Pelaksanaan yang Disarankan:</div>
+                <div className="font-bold text-sm text-stone-900">Tahapan Pelaksanaan yang Disarankan:</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {explanation.how.map((step: string, i: number) => (
                     <div key={i} className="p-3.5 rounded-xl bg-stone-50 border border-stone-200/70 flex items-start gap-3">
-                      <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs shrink-0">
+                      <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center font-bold text-xs shrink-0">
                         {i + 1}
                       </span>
-                      <span className="text-xs text-[#27213D] leading-relaxed">{step}</span>
+                      <span className="text-xs text-stone-800 leading-relaxed">{step}</span>
                     </div>
                   ))}
                 </div>
@@ -354,10 +340,10 @@ export default async function OpportunityDetailPage({
           </div>
         </section>
 
-        <section className="p-6 sm:p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] space-y-4">
-          <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-amber-500" />
-            <span>Audit Batasan & Kelayakan (Constraint Check)</span>
+        <section className="p-6 sm:p-8 rounded-[32px] bg-white border border-stone-200/90 shadow-2xs space-y-4">
+          <h2 className="text-lg font-bold text-stone-900 tracking-tight flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-amber-600" />
+            <span>Audit Batasan &amp; Kelayakan (Constraint Check)</span>
           </h2>
 
           <div className="space-y-2.5">
@@ -376,9 +362,9 @@ export default async function OpportunityDetailPage({
                   )}
                 </div>
                 <div className="text-xs space-y-0.5">
-                  <div className="text-[#27213D] font-medium">{ev.reason}</div>
+                  <div className="text-stone-900 font-medium">{ev.reason}</div>
                   {ev.possibleResolution && (
-                    <div className="text-[#716B7E] text-[11px]">Saran resolusi: {ev.possibleResolution}</div>
+                    <div className="text-stone-500 text-[11px]">Saran resolusi: {ev.possibleResolution}</div>
                   )}
                 </div>
               </div>
@@ -392,10 +378,10 @@ export default async function OpportunityDetailPage({
           currentActorId={actor.id}
         />
 
-        <section className="p-8 rounded-[32px] bg-gradient-to-br from-[#FFF7ED] via-white to-amber-50/40 border border-[#F9D8C4] text-center space-y-4 shadow-sm">
+        <section className="p-8 rounded-[32px] bg-stone-900 text-white border border-stone-800 text-center space-y-4 shadow-md relative overflow-hidden">
           <div className="space-y-1">
-            <h3 className="text-xl font-bold text-[#27213D]">Siap Mewujudkan Peluang Ini?</h3>
-            <p className="text-xs text-[#716B7E] max-w-md mx-auto">
+            <h3 className="text-xl font-bold text-white">Siap Mewujudkan Kolaborasi Ini?</h3>
+            <p className="text-xs text-stone-400 max-w-md mx-auto">
               Buka ruang kerja kolaborasi untuk menyepakati ketentuan kerja sama, anggaran, dan pembagian tugas bersama mitra.
             </p>
           </div>
@@ -426,8 +412,8 @@ function DetailScoreCard({
   return (
     <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/70 space-y-2.5">
       <div className="flex items-center justify-between text-xs">
-        <span className="font-bold text-[#27213D] truncate">{label}</span>
-        <span className="text-amber-800 font-black">{percentage}%</span>
+        <span className="font-bold text-stone-900 truncate">{label}</span>
+        <span className="text-amber-900 font-black">{percentage}%</span>
       </div>
       <div className="w-full h-2 rounded-full bg-stone-200 overflow-hidden">
         <div
@@ -435,11 +421,11 @@ function DetailScoreCard({
           style={{ width: `${percentage}%` }}
         />
       </div>
-      <div className="flex items-center justify-between text-[10px] text-[#716B7E]">
+      <div className="flex items-center justify-between text-[10px] text-stone-500">
         <span>Bobot: {weight}</span>
-        <span className="font-semibold text-[#27213D]">{score.toFixed(1)} / {max}</span>
+        <span className="font-semibold text-stone-800">{score.toFixed(1)} / {max}</span>
       </div>
-      <div className="text-[10px] text-[#716B7E] leading-tight line-clamp-2">{desc}</div>
+      <div className="text-[10px] text-stone-500 leading-tight line-clamp-2">{desc}</div>
     </div>
   );
 }

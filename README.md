@@ -77,25 +77,19 @@ src/
     └── utils/            # Helper formatting, classnames, dates
 ```
 
----
+## 📚 Dokumentasi Lengkap Proyek
 
-## 📚 Dokumentasi Lengkap
+Dokumentasi komprehensif seluruh sistem RAMU tersedia pada berkas panduan master:
 
-Seluruh dokumen spesifikasi teknis dan perancangan tersimpan rapi pada direktori [`docs/`](./docs/):
+👉 **[DOKUMENTASI_LENGKAP.md](./DOKUMENTASI_LENGKAP.md)**
 
-- 📋 [**PRD (Product Requirements Document)**](./docs/PRD.md)
-- 🏗️ [**System Architecture**](./docs/ARCHITECTURE.md)
-- 🎯 [**MVP Scope & Implementation Plan**](./docs/MVP_SCOPE.md)
-- 🧠 [**Domain Model**](./docs/DOMAIN_MODEL.md)
-- ⚙️ [**12-Stage Opportunity Engine Spec**](./docs/ENGINE_SPEC.md)
-- 📊 [**6-Dimension Scoring Model**](./docs/SCORING_MODEL.md)
-- 🗄️ [**PostgreSQL Data Model**](./docs/DATA_MODEL.md)
-- 🔌 [**REST API Specification**](./docs/API_SPEC.md)
-- 🎨 [**Design System & Tokens**](./docs/DESIGN_SYSTEM.md)
-- 🖥️ [**UI/UX Specification**](./docs/UI_UX_SPEC.md)
-- 🗺️ [**User Flowchart**](./docs/USER_FLOW.md)
-- 📝 [**Architectural Decision Records (ADR)**](./docs/DECISIONS.md)
-- 📖 [**Indeks Lengkap Dokumentasi**](./docs/README.md)
+Dokumen tersebut memuat rincian mendalam mengenai:
+- 🎯 **5 Core Pillars Ekonomi Kolaboratif** (Resource Profile & Idle Activation, Collaboration Matching "Why This Match?", Project Workspace, Commercial Agreement Generator, dan Economic Outcome Dashboard).
+- ⚖️ **Collaboration Agreement Generator Multi-Pihak** lengkap dengan klausul Termin 50:50, Batas Revisi Minor 2x, Pengaturan Hak Pakai Karya (Usage Rights), Anti-AI Training, dan Konfirmasi Digital Multi-Pihak.
+- 💼 **Manajemen Paket Tarif Komersial** (Day Rate, Overtime Fee, Matriks Durasi & Lingkup Hak Pakai/Usage Rights).
+- 🗄️ **Arsitektur Data & Model Database Prisma / PostgreSQL**.
+- 🛠️ **Daftar Lengkap Server Actions & API**.
+- 🚀 **Panduan Instalasi, Setup Lingkungan & Seeding Dataset Golden Demo**.
 
 ---
 

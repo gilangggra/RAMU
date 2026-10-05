@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { RamuLogo } from "@/components/brand/RamuLogo";
 
 export function Footer() {
   return (
@@ -8,27 +9,25 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-stone-100">
           <div className="md:col-span-5 space-y-4">
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-2xl bg-[#FFB800] flex items-center justify-center shadow-sm font-black text-[#1E1B2E] text-lg">
-                R
-              </div>
+              <RamuLogo size={32} className="shrink-0 group-hover:scale-105 transition-transform" />
               <div className="flex flex-col">
-                <span className="font-extrabold text-xl tracking-tight text-[#27213D]">
+                <span className="font-black text-xl tracking-wider text-stone-900">
                   RAMU
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#716B7E]">
-                  Fashion & Visual Production Engine
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-500">
+                  Platform Industri Kreatif
                 </span>
               </div>
             </Link>
 
             <p className="text-sm font-semibold text-[#27213D] pt-1">
-              Ramu aset. Ciptakan peluang.
+              Kombinasikan apa yang Anda miliki. Ciptakan nilai ekonomi bersama.
             </p>
 
             <p className="text-xs text-[#716B7E] leading-relaxed max-w-sm">
-              Platform sintesis kolaboratif industri fashion, fotografi, dan seni visual.
-              Meramu sinergi komplementer antar desainer, talenta model, fotografer, dan studio
-              melalui analisis terstruktur dan deterministik.
+              Platform kolaborasi berbasis komplementaritas resource industri fashion dan visual kreatif.
+              Mengaktivasi kapasitas menganggur dan meramu sinergi komplementer antar brand, desainer, fotografer, model, MUA, dan studio
+              melalui analisis deterministik 4 pilar.
             </p>
           </div>
 
@@ -39,22 +38,27 @@ export function Footer() {
             <ul className="space-y-2 text-xs font-medium text-[#716B7E]">
               <li>
                 <Link href="/dashboard" className="hover:text-[#27213D] transition-colors">
-                  Dashboard Kreator
+                  Dashboard Kolaborasi
+                </Link>
+              </li>
+              <li>
+                <Link href="/collaborate" className="hover:text-[#27213D] transition-colors font-semibold text-amber-700">
+                  Hub Kompatibilitas Resource
                 </Link>
               </li>
               <li>
                 <Link href="/directory" className="hover:text-[#27213D] transition-colors">
-                  Direktori Talenta & Studio
+                  Direktori Talenta &amp; Studio
                 </Link>
               </li>
               <li>
                 <Link href="/showcase" className="hover:text-[#27213D] transition-colors">
-                  Karya & Inspirasi
+                  Karya &amp; Inspirasi
                 </Link>
               </li>
               <li>
                 <Link href="/projects" className="hover:text-[#27213D] transition-colors">
-                  Papan Proyek Komersial
+                  Papan Proyek (Briefs)
                 </Link>
               </li>
               <li>
@@ -114,7 +118,7 @@ export function Footer() {
 
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#716B7E]">
           <div>
-            &copy; 2026 RAMU. Ramu aset. Ciptakan peluang.
+            &copy; {new Date().getFullYear()} RAMU — Platform Kolaborasi Berbasis Komplementaritas Resource.
           </div>
           <div className="flex items-center gap-6">
             <span>Next.js 16 • Tailwind CSS • Supabase • Prisma</span>

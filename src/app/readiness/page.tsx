@@ -173,7 +173,7 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
 
   return (
     <AppShell actor={actor} activeRoute="/readiness">
-      <div className="space-y-8 max-w-6xl mx-auto pb-16">
+      <div className="space-y-6 w-full">
 
         <section className="p-8 sm:p-10 rounded-[32px] bg-white border border-stone-200 shadow-xs relative overflow-hidden space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative">
@@ -186,7 +186,7 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
                 Kelola Modal, Target &amp; Ketentuan Kolaborasi
               </h1>
               <p className="text-xs sm:text-sm text-stone-500 max-w-2xl leading-relaxed">
-                Empat pilar data ini digunakan oleh Opportunity Engine untuk merekomendasikan rekan kolaborator yang memiliki aset komplementer, visi yang selaras, dan jadwal operasional yang realistis bagi <strong className="text-[#1E1B2E]">{actor.name}</strong>.
+                Empat pilar data ini digunakan oleh Resource Matching Engine untuk merekomendasikan rekan kolaborator yang memiliki aset komplementer, visi yang selaras, dan jadwal operasional yang realistis bagi <strong className="text-[#1E1B2E]">{actor.name}</strong>.
               </p>
             </div>
 
@@ -195,7 +195,7 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
                 <span className="text-lg font-black text-[#1E1B2E]">{readinessPercent}%</span>
               </div>
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Skor Kesiapan Engine</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Skor Kesiapan Resource</div>
                 <div className="text-sm font-extrabold text-[#1E1B2E] mt-0.5">
                   {readinessPercent === 100
                     ? "Profil Siap Maksimal"

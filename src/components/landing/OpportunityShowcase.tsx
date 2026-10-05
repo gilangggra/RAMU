@@ -51,19 +51,19 @@ export function OpportunityShowcase() {
             <div className="inline-flex items-center gap-3">
                <span className="w-8 h-px bg-stone-300"></span>
                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
-                 Blueprint Kolaborasi
+                 Templat Kolaborasi Produksi
                </span>
             </div>
             <h2 className="text-4xl md:text-5xl font-light text-[#1E1B2E] tracking-tight leading-[1.1]">
-              Peluang kampanye dari <br className="hidden md:block"/> tim produksi yang <span className="font-serif italic text-stone-500">melengkapi.</span>
+              Struktur proyek dari <br className="hidden md:block"/> sumber daya yang <span className="font-serif italic text-stone-500">saling melengkapi.</span>
             </h2>
           </div>
 
           <Link
-            href="/projects"
+            href="/collaborate"
             className="inline-flex items-center gap-3 px-6 py-3 rounded-full border border-stone-200 text-xs font-semibold uppercase tracking-widest text-[#1E1B2E] hover:bg-stone-200 transition-colors shrink-0 group"
           >
-            <span>Jelajahi Proyek</span>
+            <span>Buka Hub Kompatibilitas</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>

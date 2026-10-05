@@ -12,18 +12,18 @@ export function RunEngineButton({ actorName }: { actorName?: string }) {
 
   async function handleRunEngine() {
     setIsRunning(true);
-    setStatusMessage("Menyelaraskan profil dan portofolio Anda dengan ekosistem...");
+    setStatusMessage("Menyelaraskan profil dan kapabilitas resource dengan ekosistem...");
 
     try {
       const res = await runOpportunityEngine();
       if (res.success) {
-        setStatusMessage(`Rekomendasi berhasil diperbarui (${res.count} peluang sinergi)!`);
+        setStatusMessage(`Kompatibilitas berhasil dihitung (${res.count} kecocokan sinergi)!`);
         router.refresh();
       } else {
-        setStatusMessage(res.error || "Gagal memperbarui rekomendasi.");
+        setStatusMessage(res.error || "Gagal memperbarui kecocokan.");
       }
     } catch {
-      setStatusMessage("Terjadi kendala teknis saat menyegarkan peluang.");
+      setStatusMessage("Terjadi kendala teknis saat menyegarkan engine.");
     } finally {
       setIsRunning(false);
       setTimeout(() => setStatusMessage(null), 5000);
@@ -40,12 +40,12 @@ export function RunEngineButton({ actorName }: { actorName?: string }) {
         {isRunning ? (
           <>
             <RefreshCw className="w-4 h-4 animate-spin text-white" />
-            <span>Mencari Sinergi Baru...</span>
+            <span>Menghitung Komplementaritas...</span>
           </>
         ) : (
           <>
             <Sparkles className="w-4 h-4 text-amber-100 group-hover:scale-110 transition-transform" />
-            <span>Segarkan Rekomendasi AI</span>
+            <span>Hitung Kompatibilitas Resource</span>
           </>
         )}
       </button>

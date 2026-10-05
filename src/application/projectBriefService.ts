@@ -39,6 +39,7 @@ export interface CrewCandidate {
     description: string | null;
     aestheticStyles: string[];
     compensationModels: string[];
+    owner?: { avatarUrl: string | null } | null;
   };
   matchScore: number;
   matchReasons: string[];
@@ -330,13 +331,14 @@ export async function getProjectBriefById(id: string) {
   return prisma.projectBrief.findUnique({
     where: { id },
     include: {
-      creatorActor: true,
+      creatorActor: { include: { owner: { select: { avatarUrl: true } } } },
       neededRoles: {
         include: {
           interests: {
             include: {
               actor: {
                 include: {
+                  owner: { select: { avatarUrl: true } },
                   assets: { where: { status: 'ACTIVE' } },
                 },
               },
@@ -346,7 +348,7 @@ export async function getProjectBriefById(id: string) {
         },
       },
       interests: {
-        include: { actor: true, role: true },
+        include: { actor: { include: { owner: { select: { avatarUrl: true } } } }, role: true },
         orderBy: { createdAt: 'desc' },
       },
       collaboration: {
@@ -1354,6 +1356,7 @@ export async function getCrewRecommendationsForBrief(
       description: true,
       aestheticStyles: true,
       compensationModels: true,
+      owner: { select: { avatarUrl: true } },
       assets: {
         where: { status: 'ACTIVE' },
         select: { category: true, subtype: true },

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { login } from "@/app/(auth)/actions";
 import { AlertCircle, CheckCircle2, Mail, Lock, ArrowRight, Sparkles, KeyRound } from "lucide-react";
+import { RamuLogo } from "@/components/brand/RamuLogo";
 
 interface LoginClientFormProps {
   error?: string;
@@ -32,8 +33,11 @@ export function LoginClientForm({ error, message, redirectTo = "/dashboard" }: L
       <div className="absolute bottom-4 right-4 text-[10px] font-mono font-bold text-stone-700 select-none">┘</div>
 
       <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/25 text-xs font-bold uppercase tracking-wider text-amber-300 mb-1">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+        <div className="flex justify-center mb-2">
+          <RamuLogo size={44} theme="white" className="drop-shadow-[0_4px_16px_rgba(255,255,255,0.12)]" />
+        </div>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-wider text-stone-300 mb-1">
+          <Sparkles className="w-3.5 h-3.5 text-stone-300" />
           <span>Workspace Access</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-100 tracking-tight">
@@ -44,38 +48,37 @@ export function LoginClientForm({ error, message, redirectTo = "/dashboard" }: L
         </p>
       </div>
 
-      <div className="p-3.5 rounded-2xl bg-stone-900/80 border border-stone-800 space-y-2">
+      <div className="p-3.5 rounded-2xl bg-stone-900/80 border border-stone-800 space-y-2.5">
         <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-stone-400">
           <span className="flex items-center gap-1.5 text-amber-300">
             <KeyRound className="w-3.5 h-3.5" />
-            <span>Akses Cepat Pengujian / Demo</span>
+            <span>Pilih 1 Akun Resmi per Role (Demo &amp; Juri)</span>
           </span>
           <span className="text-[10px] text-stone-500 font-normal">Klik untuk mengisi</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => fillDemoAccount("demo@ramu.id", "Password123!", "Demo Curator")}
-            className="px-3 py-2 rounded-xl bg-stone-800/80 hover:bg-stone-800 hover:border-amber-400/40 border border-stone-700/60 text-left transition-all group cursor-pointer"
-          >
-            <div className="text-xs font-bold text-stone-200 group-hover:text-amber-300 flex items-center justify-between">
-              <span>Demo Curator</span>
-              <span className="text-[10px] text-stone-500">1-Klik</span>
-            </div>
-            <div className="text-[10px] text-stone-400 truncate">demo@ramu.id</div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => fillDemoAccount("studiodemo@ramu.id", "password123", "Studio Demo")}
-            className="px-3 py-2 rounded-xl bg-stone-800/80 hover:bg-stone-800 hover:border-amber-400/40 border border-stone-700/60 text-left transition-all group cursor-pointer"
-          >
-            <div className="text-xs font-bold text-stone-200 group-hover:text-amber-300 flex items-center justify-between">
-              <span>Studio Demo</span>
-              <span className="text-[10px] text-stone-500">1-Klik</span>
-            </div>
-            <div className="text-[10px] text-stone-400 truncate">studiodemo@ramu.id</div>
-          </button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-1">
+          {[
+            { email: "brand@ramu.id", pass: "password123", role: "Fashion Brand/UMKM", name: "Nala The Label" },
+            { email: "designer@ramu.id", pass: "password123", role: "Fashion Designer", name: "Atelier Nara" },
+            { email: "photographer@ramu.id", pass: "password123", role: "Photographer", name: "Lensa Kreatif" },
+            { email: "model@ramu.id", pass: "password123", role: "Model", name: "Go Young Jung" },
+            { email: "mua@ramu.id", pass: "password123", role: "MUA/Stylist", name: "Glow & Form" },
+            { email: "studio@ramu.id", pass: "password123", role: "Studio", name: "Studio Imaji" },
+            { email: "bernadya@gmail.com", pass: "password123", role: "Administrator", name: "bernadya (Admin)" },
+          ].map((acc) => (
+            <button
+              key={acc.email}
+              type="button"
+              onClick={() => fillDemoAccount(acc.email, acc.pass, `${acc.name} (${acc.role})`)}
+              className="px-3 py-2 rounded-xl bg-stone-800/70 hover:bg-stone-800 hover:border-amber-400/40 border border-stone-700/60 text-left transition-all group cursor-pointer"
+            >
+              <div className="text-xs font-bold text-stone-200 group-hover:text-amber-300 flex items-center justify-between">
+                <span className="truncate">{acc.name}</span>
+                <span className="text-[9px] text-amber-400/80 font-mono shrink-0 ml-1">{acc.role}</span>
+              </div>
+              <div className="text-[10px] text-stone-400 truncate">{acc.email}</div>
+            </button>
+          ))}
         </div>
       </div>
 

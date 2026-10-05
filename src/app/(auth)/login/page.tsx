@@ -29,7 +29,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
       <footer className="relative z-10 border-t border-stone-800/80 py-6 text-center text-xs text-stone-500 bg-[#0E0C15]/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>&copy; {new Date().getFullYear()} RAMU — Creative Visual Opportunity Engine. Hak cipta dilindungi.</span>
+          <span>&copy; {new Date().getFullYear()} RAMU — Platform Kolaborasi Berbasis Komplementaritas Resource. Hak cipta dilindungi.</span>
           <div className="flex items-center gap-4 text-[11px]">
             <Link href="/" className="hover:text-stone-300 transition-colors">Beranda</Link>
             <span>•</span>

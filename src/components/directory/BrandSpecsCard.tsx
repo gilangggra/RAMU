@@ -65,10 +65,10 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
   const materials = attributes.fabric_materials || attributes.styling_specialties || [];
 
   return (
-    <section className="p-7 sm:p-8 rounded-none bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
+    <section className="p-7 sm:p-8 rounded-2xl bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800">
             <Sparkles className="w-3.5 h-3.5 text-amber-600" />
             <span>Katalog Koleksi & Karakteristik Desain</span>
           </div>
@@ -79,7 +79,7 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
 
         <div className="flex flex-wrap items-center gap-2 shrink-0">
           {attributes.sample_sizes_ready && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-purple-50 border border-purple-200 text-purple-700 text-xs font-bold">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-700 text-xs font-bold">
               <Scissors className="w-3.5 h-3.5" />
               <span>Busana Sampel: {attributes.sample_sizes_ready}</span>
             </div>
@@ -90,7 +90,7 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
               onClick={() => {
                 window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
               }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
             >
               <Pencil className="w-3.5 h-3.5" />
               <span>Edit Spesifikasi</span>
@@ -101,7 +101,7 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {attributes.design_dna && (
-          <div className="p-4 rounded-none bg-stone-50/80 border border-stone-200/70 space-y-1 sm:col-span-2">
+          <div className="p-4 rounded-xl bg-stone-50/80 border border-stone-200/70 space-y-1 sm:col-span-2">
             <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
               DNA & Filosofi Desain
             </div>
@@ -112,7 +112,7 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
         )}
 
         {attributes.capacity_monthly && (
-          <div className="p-4 rounded-none bg-stone-50/80 border border-stone-200/70 space-y-1">
+          <div className="p-4 rounded-xl bg-stone-50/80 border border-stone-200/70 space-y-1">
             <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
               Kapasitas Produksi
             </div>
@@ -133,7 +133,7 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
             {materials.map((mat, i) => (
               <span
                 key={i}
-                className="px-3 py-1 rounded-none bg-stone-50 border border-stone-200/80 text-xs font-bold text-[#27213D] flex items-center gap-1.5"
+                className="px-3 py-1 rounded-xl bg-stone-50 border border-stone-200/80 text-xs font-bold text-[#27213D] flex items-center gap-1.5"
               >
                 <PackageCheck className="w-3.5 h-3.5 text-emerald-600" />
                 <span>{mat}</span>
@@ -155,12 +155,12 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
               <div
                 key={idx}
                 onClick={() => setSelectedPhoto(photo)}
-                className="break-inside-avoid mb-3 group cursor-pointer rounded-none bg-stone-100 border border-stone-200/80 overflow-hidden hover:shadow-xl transition-all relative block"
+                className="break-inside-avoid mb-3 group cursor-pointer rounded-xl bg-stone-100 border border-stone-200/80 overflow-hidden hover:shadow-xl transition-all relative block"
               >
                 <img
                   src={photo.url}
                   alt={photo.title}
-                  className="w-full h-auto object-cover rounded-none block transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                  className="w-full h-auto object-cover rounded-xl block transition-transform duration-700 ease-out group-hover:scale-[1.02]"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
@@ -190,12 +190,12 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative max-w-4xl w-full bg-[#1E1B2E] rounded-none overflow-hidden shadow-2xl border border-white/10"
+            className="relative max-w-4xl w-full bg-stone-900 rounded-xl overflow-hidden shadow-2xl border border-white/10"
           >
             <button
               type="button"
               onClick={() => setSelectedPhoto(null)}
-              className="absolute top-4 right-4 z-10 p-2.5 rounded-none bg-black/60 hover:bg-black text-white transition-colors cursor-pointer"
+              className="absolute top-4 right-4 z-10 p-2.5 rounded-xl bg-black/60 hover:bg-black text-white transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -217,7 +217,7 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
                 href={selectedPhoto.url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-none bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-colors shrink-0"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-colors shrink-0"
               >
                 <span>Buka Resolusi Penuh</span>
                 <ExternalLink className="w-3.5 h-3.5" />

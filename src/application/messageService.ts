@@ -1,5 +1,35 @@
 import { prisma } from "@/infrastructure/database/prisma";
 import { createNotification } from "@/application/notificationService";
+import {
+  MessengerFlowError,
+  OfferMetadata,
+  DeliveryMetadata,
+  createCollaborationFromAcceptedOffer,
+  completeCollaborationFromDelivery,
+  recordDeliveryRevision,
+  findActiveCollaborationBetween,
+} from "@/application/messageCollaborationBridge";
+
+const TX_OPTIONS = { maxWait: 10000, timeout: 30000 };
+
+type LockedMessageRow = {
+  id: string;
+  recipient_actor_id: string;
+  sender_actor_id: string;
+  message_type: string;
+  metadata: any;
+};
+
+function parseMeta<T>(raw: unknown): T {
+  if (typeof raw === "string") {
+    try {
+      return JSON.parse(raw) as T;
+    } catch {
+      return {} as T;
+    }
+  }
+  return ((raw as T) || {}) as T;
+}
 
 export type MessageType = "TEXT" | "OFFER" | "BRIEF_SHARE" | "DELIVERY" | "SYSTEM";
 
@@ -188,12 +218,14 @@ export async function sendMessage({
   content,
   messageType = "TEXT",
   metadata = {},
+  skipNotification = false,
 }: {
   senderId: string;
   recipientId: string;
   content: string;
   messageType?: MessageType;
   metadata?: Record<string, any>;
+  skipNotification?: boolean;
 }): Promise<{ success: boolean; message?: DirectMessageItem; error?: string }> {
   try {
     const metaJson = JSON.stringify(metadata);
@@ -227,24 +259,29 @@ export async function sendMessage({
       return { success: false, error: "Gagal menyimpan pesan ke database." };
     }
 
-    // Dapatkan nama pengirim untuk notifikasi
-    const sender = await prisma.actor.findUnique({
-      where: { id: senderId },
-      select: { name: true },
-    });
+    if (!skipNotification) {
+      // Dapatkan nama pengirim untuk notifikasi
+      const sender = await prisma.actor.findUnique({
+        where: { id: senderId },
+        select: { name: true },
+      });
 
-    const notifTitle =
-      messageType === "OFFER"
-        ? `Tawaran Proyek Baru dari ${sender?.name || "Kreator"}`
-        : `Pesan Baru dari ${sender?.name || "Kreator"}`;
+      const senderName = sender?.name || "Kreator";
+      const notifTitle =
+        messageType === "OFFER"
+          ? `Tawaran Proyek Baru dari ${senderName}`
+          : messageType === "DELIVERY"
+          ? `Serah Terima Hasil Proyek dari ${senderName}`
+          : `Pesan Baru dari ${senderName}`;
 
-    await createNotification({
-      actorId: recipientId,
-      title: notifTitle,
-      message: content.length > 80 ? content.slice(0, 80) + "..." : content,
-      type: "BOOKING_RECEIVED",
-      link: `/messages?with=${senderId}`,
-    });
+      await createNotification({
+        actorId: recipientId,
+        title: notifTitle,
+        message: content.length > 80 ? content.slice(0, 80) + "..." : content,
+        type: "BOOKING_RECEIVED",
+        link: `/messages?with=${senderId}`,
+      });
+    }
 
     return {
       success: true,
@@ -266,7 +303,10 @@ export async function sendMessage({
 }
 
 /**
- * Menanggapi penawaran proyek (Terima / Tolak tawaran deal)
+ * Menanggapi penawaran proyek (Terima / Tolak tawaran deal).
+ * Jika diterima, secara atomik membentuk:
+ * - Rencana & ruang kolaborasi aktif (CollaborationPlan + Collaboration + peserta + tugas + milestone)
+ * - SPK resmi (BookingRequest berstatus ACCEPTED) yang tampil di /dashboard/bookings
  */
 export async function respondToProjectOffer({
   messageId,
@@ -276,50 +316,113 @@ export async function respondToProjectOffer({
   messageId: string;
   actorId: string;
   responseStatus: "ACCEPTED" | "DECLINED";
-}): Promise<{ success: boolean; error?: string }> {
+}): Promise<{ success: boolean; error?: string; collaborationId?: string; bookingId?: string }> {
   try {
-    const messages = await prisma.$queryRawUnsafe<Array<{ id: string; recipient_actor_id: string; sender_actor_id: string; metadata: any }>>(
-      `SELECT id, recipient_actor_id, sender_actor_id, metadata FROM direct_messages WHERE id = $1::uuid`,
-      messageId
-    );
+    const result = await prisma.$transaction(async (tx) => {
+      // Kunci baris pesan agar klik ganda / respons bersamaan tidak membuat kolaborasi ganda
+      const rows = await tx.$queryRawUnsafe<LockedMessageRow[]>(
+        `SELECT id, recipient_actor_id, sender_actor_id, message_type, metadata
+         FROM direct_messages WHERE id = $1::uuid FOR UPDATE`,
+        messageId
+      );
 
-    const msg = messages[0];
-    if (!msg) return { success: false, error: "Pesan penawaran tidak ditemukan." };
-    if (msg.recipient_actor_id !== actorId) {
-      return { success: false, error: "Hanya penerima tawaran yang dapat merespons penawaran ini." };
-    }
+      const msg = rows[0];
+      if (!msg) throw new MessengerFlowError("Pesan penawaran tidak ditemukan.");
+      if (msg.message_type !== "OFFER") throw new MessengerFlowError("Pesan ini bukan tawaran proyek resmi.");
+      if (msg.recipient_actor_id !== actorId) {
+        throw new MessengerFlowError("Hanya penerima tawaran yang dapat merespons penawaran ini.");
+      }
 
-    const currentMeta = typeof msg.metadata === "string" ? JSON.parse(msg.metadata) : msg.metadata || {};
-    currentMeta.offerStatus = responseStatus;
-    currentMeta.respondedAt = new Date().toISOString();
+      const meta = parseMeta<OfferMetadata & { collaborationId?: string; bookingId?: string; respondedAt?: string }>(
+        msg.metadata
+      );
+      if (meta.offerStatus && meta.offerStatus !== "PENDING") {
+        throw new MessengerFlowError("Tawaran ini sudah direspons sebelumnya.");
+      }
 
-    await prisma.$executeRawUnsafe(
-      `UPDATE direct_messages SET metadata = $1::jsonb WHERE id = $2::uuid`,
-      JSON.stringify(currentMeta),
-      messageId
-    );
+      meta.offerStatus = responseStatus;
+      meta.respondedAt = new Date().toISOString();
 
-    // Kirim pesan sistem otomatis di chat
+      let collaborationId: string | undefined;
+      let bookingId: string | undefined;
+
+      if (responseStatus === "ACCEPTED") {
+        const created = await createCollaborationFromAcceptedOffer(tx, {
+          offerMessageId: msg.id,
+          senderId: msg.sender_actor_id,
+          recipientId: msg.recipient_actor_id,
+          meta,
+        });
+        collaborationId = created.collaborationId;
+        bookingId = created.bookingId;
+        meta.collaborationId = collaborationId;
+        meta.bookingId = bookingId;
+      }
+
+      await tx.$executeRawUnsafe(
+        `UPDATE direct_messages SET metadata = $1::jsonb WHERE id = $2::uuid`,
+        JSON.stringify(meta),
+        messageId
+      );
+
+      return { senderId: msg.sender_actor_id, title: meta.title, collaborationId, bookingId };
+    }, TX_OPTIONS);
+
+    // Efek samping non-kritis (pesan sistem & notifikasi) dijalankan setelah transaksi berhasil
     const respondent = await prisma.actor.findUnique({
       where: { id: actorId },
       select: { name: true },
     });
+    const respondentName = respondent?.name || "Mitra";
 
-    const statusText = responseStatus === "ACCEPTED" ? "menyetujui tawaran proyek resmi" : "menolak tawaran proyek";
-    const systemNotice = `${respondent?.name || "Mitra"} telah ${statusText}.`;
+    const systemNotice =
+      responseStatus === "ACCEPTED"
+        ? `${respondentName} telah menyetujui tawaran proyek resmi. Ruang kolaborasi dan SPK telah dibuat otomatis.`
+        : `${respondentName} telah menolak tawaran proyek.`;
 
     await sendMessage({
       senderId: actorId,
-      recipientId: msg.sender_actor_id,
+      recipientId: result.senderId,
       content: systemNotice,
       messageType: "SYSTEM",
-      metadata: { relatedOfferId: messageId, status: responseStatus },
+      metadata: {
+        relatedOfferId: messageId,
+        status: responseStatus,
+        collaborationId: result.collaborationId || null,
+        bookingId: result.bookingId || null,
+      },
+      skipNotification: true,
     });
 
-    return { success: true };
+    if (responseStatus === "ACCEPTED" && result.collaborationId) {
+      await createNotification({
+        actorId: result.senderId,
+        title: "Tawaran Proyek Disetujui",
+        message: `${respondentName} menyetujui tawaran "${result.title || "Proyek Kolaborasi"}". Ruang kolaborasi sudah aktif.`,
+        type: "COLLABORATION_STARTED",
+        link: `/collaborations/${result.collaborationId}`,
+        metadata: { collaborationId: result.collaborationId, bookingId: result.bookingId, offerMessageId: messageId },
+      });
+    } else {
+      await createNotification({
+        actorId: result.senderId,
+        title: "Tawaran Proyek Ditolak",
+        message: `${respondentName} menolak tawaran "${result.title || "Proyek Kolaborasi"}".`,
+        type: "BOOKING_UPDATE",
+        link: `/messages?with=${actorId}`,
+        metadata: { offerMessageId: messageId },
+      });
+    }
+
+    return { success: true, collaborationId: result.collaborationId, bookingId: result.bookingId };
   } catch (error: any) {
-    console.error("Error responding to offer:", error);
-    return { success: false, error: error.message };
+    if (!(error instanceof MessengerFlowError)) {
+      console.error("Error responding to offer:", error);
+    }
+    return {
+      success: false,
+      error: error instanceof MessengerFlowError ? error.message : "Gagal memproses tawaran. Silakan coba lagi.",
+    };
   }
 }
 
@@ -340,6 +443,9 @@ export async function sendProjectDelivery({
   deliverableNotes?: string;
 }): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
+    // Tautkan serah terima ke ruang kolaborasi aktif milik kedua pihak (jika ada)
+    const activeCollaboration = await findActiveCollaborationBetween(senderId, recipientId);
+
     const res = await sendMessage({
       senderId,
       recipientId,
@@ -351,6 +457,8 @@ export async function sendProjectDelivery({
         deliverableNotes: deliverableNotes || "Seluruh berkas hasil kerja telah diunggah untuk ditinjau.",
         deliveryStatus: "PENDING_APPROVAL",
         submittedAt: new Date().toISOString(),
+        collaborationId: activeCollaboration?.id || null,
+        collaborationTitle: activeCollaboration?.title || null,
       },
     });
 
@@ -363,7 +471,10 @@ export async function sendProjectDelivery({
 }
 
 /**
- * Merespons serah terima hasil proyek (Terima & Selesaikan atau Minta Revisi)
+ * Merespons serah terima hasil proyek (Terima & Selesaikan atau Minta Revisi).
+ * - Diterima: ruang kolaborasi terkait ditutup (COMPLETED), tugas & milestone dituntaskan,
+ *   luaran dicatat sebagai Outcome, dan status SPK ikut diperbarui.
+ * - Revisi: tugas revisi baru dibuat untuk pelaksana di ruang kolaborasi.
  */
 export async function respondToProjectDelivery({
   messageId,
@@ -375,56 +486,127 @@ export async function respondToProjectDelivery({
   actorId: string;
   responseStatus: "ACCEPTED" | "REVISION_REQUESTED";
   feedbackNotes?: string;
-}): Promise<{ success: boolean; error?: string }> {
+}): Promise<{ success: boolean; error?: string; collaborationId?: string | null }> {
   try {
-    const messages = await prisma.$queryRawUnsafe<
-      Array<{ id: string; recipient_actor_id: string; sender_actor_id: string; metadata: any }>
-    >(
-      `SELECT id, recipient_actor_id, sender_actor_id, metadata FROM direct_messages WHERE id = $1::uuid`,
-      messageId
-    );
+    const result = await prisma.$transaction(async (tx) => {
+      const rows = await tx.$queryRawUnsafe<LockedMessageRow[]>(
+        `SELECT id, recipient_actor_id, sender_actor_id, message_type, metadata
+         FROM direct_messages WHERE id = $1::uuid FOR UPDATE`,
+        messageId
+      );
 
-    const msg = messages[0];
-    if (!msg) return { success: false, error: "Pesan serah terima tidak ditemukan." };
-    if (msg.recipient_actor_id !== actorId) {
-      return { success: false, error: "Hanya penerima hasil kerja yang dapat menyetujui serah terima ini." };
-    }
+      const msg = rows[0];
+      if (!msg) throw new MessengerFlowError("Pesan serah terima tidak ditemukan.");
+      if (msg.message_type !== "DELIVERY") throw new MessengerFlowError("Pesan ini bukan serah terima hasil proyek.");
+      if (msg.recipient_actor_id !== actorId) {
+        throw new MessengerFlowError("Hanya penerima hasil kerja yang dapat menyetujui serah terima ini.");
+      }
 
-    const currentMeta = typeof msg.metadata === "string" ? JSON.parse(msg.metadata) : msg.metadata || {};
-    currentMeta.deliveryStatus = responseStatus;
-    currentMeta.approvedAt = new Date().toISOString();
-    if (feedbackNotes) currentMeta.clientFeedback = feedbackNotes;
+      const meta = parseMeta<DeliveryMetadata & Record<string, unknown>>(msg.metadata);
+      if (meta.deliveryStatus && meta.deliveryStatus !== "PENDING_APPROVAL") {
+        throw new MessengerFlowError("Serah terima ini sudah direspons sebelumnya.");
+      }
 
-    await prisma.$executeRawUnsafe(
-      `UPDATE direct_messages SET metadata = $1::jsonb WHERE id = $2::uuid`,
-      JSON.stringify(currentMeta),
-      messageId
-    );
+      // Serah terima lama (sebelum sinkronisasi) mungkin belum tertaut; cari ruang kolaborasi aktif keduanya
+      let collaborationId = (meta.collaborationId as string | null | undefined) || null;
+      if (!collaborationId) {
+        const active = await findActiveCollaborationBetween(msg.sender_actor_id, msg.recipient_actor_id, tx);
+        collaborationId = active?.id || null;
+      }
+
+      const now = new Date().toISOString();
+      meta.deliveryStatus = responseStatus;
+      meta.collaborationId = collaborationId;
+      if (responseStatus === "ACCEPTED") {
+        meta.approvedAt = now;
+      } else {
+        meta.revisionRequestedAt = now;
+      }
+      if (feedbackNotes) meta.clientFeedback = feedbackNotes;
+
+      let collaborationCompleted = false;
+      if (collaborationId) {
+        if (responseStatus === "ACCEPTED") {
+          const done = await completeCollaborationFromDelivery(tx, {
+            collaborationId,
+            deliveryMessageId: msg.id,
+            approverId: actorId,
+            providerId: msg.sender_actor_id,
+            meta,
+          });
+          collaborationCompleted = done.completed;
+        } else {
+          await recordDeliveryRevision(tx, {
+            collaborationId,
+            approverId: actorId,
+            providerId: msg.sender_actor_id,
+            feedbackNotes,
+            meta,
+          });
+        }
+      }
+
+      await tx.$executeRawUnsafe(
+        `UPDATE direct_messages SET metadata = $1::jsonb WHERE id = $2::uuid`,
+        JSON.stringify(meta),
+        messageId
+      );
+
+      return {
+        providerId: msg.sender_actor_id,
+        title: meta.title,
+        collaborationId,
+        collaborationCompleted,
+      };
+    }, TX_OPTIONS);
 
     const respondent = await prisma.actor.findUnique({
       where: { id: actorId },
       select: { name: true },
     });
+    const respondentName = respondent?.name || "Klien";
 
     const statusText =
       responseStatus === "ACCEPTED"
-        ? "menyetujui seluruh hasil proyek. Proyek dinyatakan SELESAI dan dana Escrow resmi dicairkan ke kreator."
+        ? result.collaborationCompleted
+          ? "menyetujui seluruh hasil kerja proyek. Proyek dinyatakan SELESAI dan ruang kolaborasi telah ditutup."
+          : "menyetujui seluruh hasil kerja proyek. Proyek dinyatakan SELESAI."
         : `meminta revisi terhadap hasil kerja: "${feedbackNotes || "Perlu penyesuaian detail"}".`;
-
-    const systemNotice = `${respondent?.name || "Klien"} telah ${statusText}`;
 
     await sendMessage({
       senderId: actorId,
-      recipientId: msg.sender_actor_id,
-      content: systemNotice,
+      recipientId: result.providerId,
+      content: `${respondentName} telah ${statusText}`,
       messageType: "SYSTEM",
-      metadata: { relatedDeliveryId: messageId, status: responseStatus },
+      metadata: {
+        relatedDeliveryId: messageId,
+        status: responseStatus,
+        collaborationId: result.collaborationId,
+      },
+      skipNotification: true,
     });
 
-    return { success: true };
+    await createNotification({
+      actorId: result.providerId,
+      title: responseStatus === "ACCEPTED" ? "Hasil Proyek Disetujui" : "Permintaan Revisi Hasil Proyek",
+      message:
+        responseStatus === "ACCEPTED"
+          ? `${respondentName} menyetujui serah terima "${result.title || "Hasil Proyek"}". Proyek selesai.`
+          : `${respondentName} meminta revisi untuk "${result.title || "Hasil Proyek"}".`,
+      type: "BOOKING_UPDATE",
+      link: result.collaborationId ? `/collaborations/${result.collaborationId}` : `/messages?with=${actorId}`,
+      metadata: { deliveryMessageId: messageId, collaborationId: result.collaborationId },
+    });
+
+    return { success: true, collaborationId: result.collaborationId };
   } catch (error: any) {
-    console.error("Error responding to delivery:", error);
-    return { success: false, error: error.message };
+    if (!(error instanceof MessengerFlowError)) {
+      console.error("Error responding to delivery:", error);
+    }
+    return {
+      success: false,
+      error: error instanceof MessengerFlowError ? error.message : "Gagal memproses serah terima. Silakan coba lagi.",
+    };
   }
 }
 

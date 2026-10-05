@@ -8,7 +8,7 @@ import {
   ExternalLink,
   Film,
   Camera,
-  Play
+  Play,
 } from "lucide-react";
 import { deleteShowcaseAsset } from "@/app/api/assets/actions";
 import { useRouter } from "next/navigation";
@@ -25,7 +25,7 @@ interface Asset {
 
 export function ShowcaseManager({
   assets,
-  registeredActors = []
+  registeredActors = [],
 }: {
   assets: Asset[];
   registeredActors?: RegisteredActor[];
@@ -40,7 +40,10 @@ export function ShowcaseManager({
     let videoCount = 0;
     assets.forEach((a) => {
       const attrs = (a.attributes as any) || {};
-      const isVid = attrs.media_type === "VIDEO" || Boolean(attrs.video_url) || a.subtype?.toLowerCase().includes("video");
+      const isVid =
+        attrs.media_type === "VIDEO" ||
+        Boolean(attrs.video_url) ||
+        a.subtype?.toLowerCase().includes("video");
       if (isVid) videoCount++;
       const sub = a.subtype || "Karya";
       counts[sub] = (counts[sub] || 0) + 1;
@@ -58,7 +61,11 @@ export function ShowcaseManager({
     if (filterCategory === "VIDEO") {
       return assets.filter((a) => {
         const attrs = (a.attributes as any) || {};
-        return attrs.media_type === "VIDEO" || Boolean(attrs.video_url) || a.subtype?.toLowerCase().includes("video");
+        return (
+          attrs.media_type === "VIDEO" ||
+          Boolean(attrs.video_url) ||
+          a.subtype?.toLowerCase().includes("video")
+        );
       });
     }
     return assets.filter((a) => (a.subtype || "Karya") === filterCategory);
@@ -77,51 +84,66 @@ export function ShowcaseManager({
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6">
+      {/* 1. HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-stone-200/70">
         <div>
-          <h2 className="text-xl font-black text-[#1E1B2E]">Manajemen Portofolio &amp; Karya</h2>
-          <p className="text-sm text-stone-500 mt-1">
-            Unggah dan kurasi karya visual terbaik Anda lengkap dengan kredit kolaborasi Tear-Sheet.
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-stone-900">
+            Manajemen Portofolio &amp; Karya
+          </h2>
+          <p className="text-xs text-stone-500 mt-0.5">
+            Unggah dan kurasi karya visual terbaik Anda lengkap dengan verifikasi tim dan spesifikasi Tear-Sheet.
           </p>
         </div>
         <button
+          type="button"
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#1E1B2E] text-white text-xs font-bold hover:bg-black transition-all shadow-xs shrink-0 cursor-pointer rounded-none border border-[#1E1B2E]"
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-semibold shadow-2xs transition-colors shrink-0 cursor-pointer"
         >
-          <Plus className="w-4 h-4 text-amber-400" />
+          <Plus className="w-3.5 h-3.5 text-stone-300" />
           <span>Unggah Karya Baru</span>
         </button>
       </div>
 
       {assets.length === 0 ? (
-        <div className="p-12 bg-white border border-stone-200 border-dashed flex flex-col items-center justify-center text-center space-y-4 rounded-none">
-          <div className="w-16 h-16 bg-stone-100 flex items-center justify-center text-stone-400 rounded-none">
-            <ImageIcon className="w-8 h-8" />
+        <div className="p-12 bg-white border border-stone-200/80 rounded-2xl flex flex-col items-center justify-center text-center space-y-4 shadow-2xs">
+          <div className="w-12 h-12 bg-stone-100 rounded-xl flex items-center justify-center text-stone-400">
+            <ImageIcon className="w-6 h-6 stroke-1" />
           </div>
           <div className="max-w-md space-y-1">
-            <h3 className="text-base font-extrabold text-[#1E1B2E]">Belum Ada Karya</h3>
+            <h3 className="text-sm font-bold text-stone-900">Belum Ada Karya Terunggah</h3>
             <p className="text-xs text-stone-500 leading-relaxed">
-              Tarik perhatian klien dan kolaborator dengan memamerkan mahakarya Anda. Tambahkan foto dan sematkan kredit tim sekarang.
+              Tarik perhatian klien dan calon mitra kolaborasi dengan memamerkan mahakarya visual Anda. Tambahkan foto atau video dan sematkan kredit tim sekarang.
             </p>
           </div>
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="px-3.5 py-1.5 rounded-lg bg-stone-900 text-white text-xs font-semibold hover:bg-black shadow-2xs transition-colors cursor-pointer"
+          >
+            Unggah Karya Pertama
+          </button>
         </div>
       ) : (
         <div className="space-y-4">
-
+          {/* CATEGORY FILTER PILLS */}
           {categories.list.length > 1 && (
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5">
               <button
                 type="button"
                 onClick={() => setFilterCategory("ALL")}
-                className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-none ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer select-none shrink-0 ${
                   filterCategory === "ALL"
-                    ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
-                    : "bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 border-stone-200"
+                    ? "bg-stone-900 text-white font-semibold shadow-2xs"
+                    : "bg-white hover:bg-stone-50 text-stone-600 border border-stone-200/80 shadow-2xs"
                 }`}
               >
                 <span>Semua</span>
-                <span className={`text-[10px] font-mono px-1.5 py-0.5 ${filterCategory === "ALL" ? "bg-white/20 text-white" : "bg-stone-100 text-stone-600"}`}>
+                <span
+                  className={`ml-1.5 text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
+                    filterCategory === "ALL" ? "bg-white/20 text-white" : "bg-stone-100 text-stone-600"
+                  }`}
+                >
                   {categories.totalCount}
                 </span>
               </button>
@@ -131,49 +153,53 @@ export function ShowcaseManager({
                   key={cat.id}
                   type="button"
                   onClick={() => setFilterCategory(cat.id)}
-                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-none whitespace-nowrap ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer select-none shrink-0 whitespace-nowrap ${
                     filterCategory === cat.id
-                      ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
-                      : "bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 border-stone-200"
+                      ? "bg-stone-900 text-white font-semibold shadow-2xs"
+                      : "bg-white hover:bg-stone-50 text-stone-600 border border-stone-200/80 shadow-2xs"
                   }`}
                 >
                   <span>{cat.label}</span>
-                  <span className={`text-[10px] font-mono px-1.5 py-0.5 ${filterCategory === cat.id ? "bg-white/20 text-white" : "bg-stone-100 text-stone-600"}`}>
+                  <span
+                    className={`ml-1.5 text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
+                      filterCategory === cat.id ? "bg-white/20 text-white" : "bg-stone-100 text-stone-600"
+                    }`}
+                  >
                     {cat.count}
                   </span>
                 </button>
               ))}
 
-              {categories.videoCount > 0 && !categories.list.some((c) => c.id.toLowerCase().includes("video")) && (
-                <button
-                  type="button"
-                  onClick={() => setFilterCategory("VIDEO")}
-                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-none whitespace-nowrap ${
-                    filterCategory === "VIDEO"
-                      ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
-                      : "bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 border-stone-200"
-                  }`}
-                >
-                  <Film className="w-3 h-3 text-amber-500" />
-                  <span>Video</span>
-                  <span className={`text-[10px] font-mono px-1.5 py-0.5 ${filterCategory === "VIDEO" ? "bg-white/20 text-white" : "bg-stone-100 text-stone-600"}`}>
-                    {categories.videoCount}
-                  </span>
-                </button>
-              )}
+              {categories.videoCount > 0 &&
+                !categories.list.some((c) => c.id.toLowerCase().includes("video")) && (
+                  <button
+                    type="button"
+                    onClick={() => setFilterCategory("VIDEO")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer select-none shrink-0 whitespace-nowrap inline-flex items-center gap-1 ${
+                      filterCategory === "VIDEO"
+                        ? "bg-stone-900 text-white font-semibold shadow-2xs"
+                        : "bg-white hover:bg-stone-50 text-stone-600 border border-stone-200/80 shadow-2xs"
+                    }`}
+                  >
+                    <Film className="w-3 h-3 text-stone-400" />
+                    <span>Video</span>
+                    <span
+                      className={`ml-1 text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
+                        filterCategory === "VIDEO"
+                          ? "bg-white/20 text-white"
+                          : "bg-stone-100 text-stone-600"
+                      }`}
+                    >
+                      {categories.videoCount}
+                    </span>
+                  </button>
+                )}
             </div>
           )}
 
+          {/* ASSETS GRID */}
           {filteredAssets.length > 0 ? (
-            <div
-              className={
-                filteredAssets.length === 1
-                  ? "max-w-xl mx-auto"
-                  : filteredAssets.length === 2
-                  ? "columns-1 sm:columns-2 gap-4 max-w-4xl mx-auto"
-                  : "columns-1 sm:columns-2 lg:columns-3 gap-4"
-              }
-            >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredAssets.map((asset) => {
                 const attrs = (asset.attributes as any) || {};
                 const isVideo =
@@ -193,104 +219,100 @@ export function ShowcaseManager({
                 return (
                   <div
                     key={asset.id}
-                    className="break-inside-avoid mb-4 relative group rounded-none overflow-hidden bg-stone-100 border border-stone-200/80 shadow-xs hover:shadow-xl transition-all duration-500"
+                    className="w-full rounded-2xl border border-stone-200/80 bg-white p-2.5 shadow-2xs hover:shadow-md hover:border-stone-300 transition-all duration-200 flex flex-col justify-between"
                   >
-                    {isDirectVideo && attrs.video_url && (
-                      <video
-                        src={attrs.video_url}
-                        muted
-                        loop
-                        playsInline
-                        preload="none"
-                        onMouseEnter={(e) => e.currentTarget.play().catch(() => {})}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.pause();
-                          e.currentTarget.currentTime = 0;
-                        }}
-                        className="absolute inset-0 w-full h-full object-cover z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-none"
-                      />
-                    )}
-
-                    {attrs?.image_url ? (
-                      <img
-                        src={attrs.image_url}
-                        alt={asset.name}
-                        className="w-full h-auto object-cover rounded-none block transition-transform duration-700 group-hover:scale-[1.02]"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full aspect-[4/3] flex items-center justify-center text-stone-400 bg-stone-100">
-                        <ImageIcon className="w-8 h-8 opacity-50" />
-                      </div>
-                    )}
-
-                    <div className="absolute top-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none gap-2">
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/95 backdrop-blur-md border border-stone-200 text-[10px] font-mono font-bold text-stone-800 shadow-xs">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                        <span>TEAR-SHEET AKTIF</span>
-                      </div>
-
-                      {isVideo ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-black/60 backdrop-blur-md text-[9px] font-bold text-amber-300 shadow-xs">
-                          <Film className="w-3 h-3" />
-                          <span>VIDEO</span>
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-black/50 backdrop-blur-md text-[9px] font-bold text-stone-200 shadow-xs">
-                          <Camera className="w-3 h-3 text-stone-300" />
-                          <span>FOTO</span>
-                        </span>
+                    {/* Media Container */}
+                    <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-stone-100 mb-2.5 group">
+                      {isDirectVideo && attrs.video_url && (
+                        <video
+                          src={attrs.video_url}
+                          muted
+                          loop
+                          playsInline
+                          preload="none"
+                          onMouseEnter={(e) => e.currentTarget.play().catch(() => {})}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.pause();
+                            e.currentTarget.currentTime = 0;
+                          }}
+                          className="absolute inset-0 w-full h-full object-cover z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                        />
                       )}
-                    </div>
 
-                    {isVideo && (
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-                        <div className="w-12 h-12 rounded-full bg-white/95 text-[#1E1B2E] flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:bg-[#E66A48] group-hover:text-white transition-all backdrop-blur-xs">
-                          <Play className="w-5 h-5 ml-0.5 fill-current" />
+                      {attrs?.image_url ? (
+                        <img
+                          src={attrs.image_url}
+                          alt={asset.name}
+                          className="w-full h-full object-cover object-center block transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-stone-400 bg-stone-100">
+                          <ImageIcon className="w-8 h-8 opacity-50" />
+                        </div>
+                      )}
+
+                      {/* Top Badges */}
+                      <div className="absolute top-2 left-2 right-2 z-20 flex items-center justify-between pointer-events-none gap-2">
+                        <span className="px-2 py-0.5 rounded-md bg-stone-900/80 backdrop-blur-md text-[10px] font-semibold text-white tracking-wide border border-white/10 shadow-2xs">
+                          {asset.subtype}
+                        </span>
+
+                        <div className="flex items-center gap-1">
+                          {isVideo ? (
+                            <span className="p-1 rounded-md bg-stone-900/80 backdrop-blur-md text-white border border-white/10 shadow-2xs">
+                              <Play className="w-2.5 h-2.5 fill-current" />
+                            </span>
+                          ) : (
+                            <span className="p-1 rounded-md bg-stone-900/80 backdrop-blur-md text-white border border-white/10 shadow-2xs">
+                              <Camera className="w-2.5 h-2.5" />
+                            </span>
+                          )}
                         </div>
                       </div>
-                    )}
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-between z-20">
-                      <div className="flex justify-end">
+                      {/* Quick Delete Overlay Button on Hover */}
+                      <div className="absolute top-2 right-2 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
+                          type="button"
                           onClick={() => handleDelete(asset.id)}
                           disabled={isPending}
-                          className="p-2 bg-white/20 hover:bg-rose-500/90 text-white backdrop-blur-md transition-colors shadow-xs cursor-pointer rounded-none border border-white/20"
+                          className="p-1.5 rounded-lg bg-stone-900/90 hover:bg-rose-600 text-white backdrop-blur-md transition-colors shadow-sm cursor-pointer"
                           title="Hapus Karya"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
+                    </div>
 
-                      <div className="space-y-1 text-white">
-                        <div className="inline-flex px-2 py-0.5 bg-white/20 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider">
-                          {asset.subtype}
-                        </div>
-                        <h3 className="font-extrabold text-sm line-clamp-2 text-white">{asset.name}</h3>
-                        {attrs?.project_url && (
-                          <a
-                            href={attrs.project_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-[11px] text-amber-300 font-semibold hover:text-amber-200"
-                          >
-                            Lihat Proyek <ExternalLink className="w-3 h-3" />
-                          </a>
-                        )}
-                      </div>
+                    {/* Metadata */}
+                    <div className="px-1 space-y-1">
+                      <h3 className="text-xs sm:text-[13px] font-bold text-stone-900 line-clamp-1">
+                        {asset.name}
+                      </h3>
+                      {attrs?.project_url && (
+                        <a
+                          href={attrs.project_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] text-stone-500 font-medium hover:text-stone-900 transition-colors"
+                        >
+                          <span>Tautan Proyek</span>
+                          <ExternalLink className="w-3 h-3 text-stone-400" />
+                        </a>
+                      )}
                     </div>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <div className="text-center py-12 px-4 bg-stone-50 border border-stone-200 rounded-none space-y-2">
-              <p className="text-xs text-stone-500">Tidak ada karya yang sesuai dengan kategori ini.</p>
+            <div className="text-center py-12 px-4 bg-white border border-stone-200/80 rounded-2xl shadow-2xs space-y-2">
+              <p className="text-xs text-stone-500">Tidak ada karya yang sesuai dengan filter ini.</p>
               <button
                 type="button"
                 onClick={() => setFilterCategory("ALL")}
-                className="text-xs font-bold text-[#E66A48] hover:underline cursor-pointer"
+                className="text-xs font-semibold text-stone-900 hover:underline cursor-pointer"
               >
                 Tampilkan Semua Karya
               </button>

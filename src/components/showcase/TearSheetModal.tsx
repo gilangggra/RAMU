@@ -1201,9 +1201,9 @@ export function TearSheetModal({
               </div>
 
               <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-[11px] text-amber-950 space-y-1">
-                <p className="font-bold">Perlindungan Klien &amp; Talenta:</p>
+                <p className="font-bold">Atribusi &amp; Catatan Hak Cipta Komunitas:</p>
                 <p className="text-[10px] leading-relaxed text-amber-900">
-                  Sertifikat ini membuktikan bahwa portofolio ini adalah karya asli produksi tim terdaftar di RAMU, bukan foto hasil unduhan dari Pinterest atau sumber tidak sah. Pelanggaran klaim sepihak tunduk pada UU No. 28/2014 &amp; UU ITE No. 1/2024.
+                  Catatan verifikasi rekan (Peer-Verification) mencatat kontribusi masing-masing talenta dalam sesi produksi ini untuk menjamin transparansi atribusi karya dan mencegah klaim portofolio sepihak.
                 </p>
               </div>
 

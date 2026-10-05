@@ -84,17 +84,26 @@ export async function sendProjectOfferAction({
   try {
     const currentActor = await getAuthenticatedActor();
 
+    const cleanTitle = (title || "").trim();
+    const cleanBudget = (budget || "").trim();
+    if (!cleanTitle || !cleanBudget) {
+      return { success: false, error: "Judul proyek dan nilai tawaran wajib diisi." };
+    }
+    if (currentActor.id === recipientId) {
+      return { success: false, error: "Tidak dapat mengirim tawaran ke diri sendiri." };
+    }
+
     const metadata = {
-      title,
-      budget,
-      sessionDate,
-      outputDetails,
-      notes,
+      title: cleanTitle,
+      budget: cleanBudget,
+      sessionDate: (sessionDate || "").trim(),
+      outputDetails: (outputDetails || "").trim(),
+      notes: (notes || "").trim(),
       offerStatus: "PENDING", // PENDING, ACCEPTED, DECLINED
       sentAt: new Date().toISOString(),
     };
 
-    const offerSummary = `📑 TAWARAN PROYEK RESMI: ${title} (${budget})`;
+    const offerSummary = `[TAWARAN PROYEK RESMI] ${cleanTitle} (${cleanBudget})`;
 
     const res = await sendMessage({
       senderId: currentActor.id,
@@ -130,6 +139,12 @@ export async function respondToOfferAction(
 
     if (res.success) {
       revalidatePath("/messages");
+      if (responseStatus === "ACCEPTED") {
+        revalidatePath("/collaborations");
+        if (res.collaborationId) revalidatePath(`/collaborations/${res.collaborationId}`);
+        revalidatePath("/dashboard");
+        revalidatePath("/dashboard/bookings");
+      }
     }
 
     return res;
@@ -188,6 +203,10 @@ export async function respondToDeliveryAction(
 
     if (res.success) {
       revalidatePath("/messages");
+      revalidatePath("/collaborations");
+      if (res.collaborationId) revalidatePath(`/collaborations/${res.collaborationId}`);
+      revalidatePath("/dashboard");
+      revalidatePath("/dashboard/bookings");
     }
 
     return res;

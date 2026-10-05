@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { getProjectBriefDashboardStats } from "@/application/projectBriefService";
 import { AppShell } from "@/components/layout/AppShell";
+import { ActorAvatar } from "@/components/ui/ActorAvatar";
 import {
   Megaphone,
   Inbox,
@@ -17,12 +18,22 @@ import {
   Tag,
   ShieldCheck,
   CheckCircle2,
-  Zap,
   MapPin,
   Circle,
+  Search,
+  Layers,
+  ArrowUpRight,
+  Clock,
+  ExternalLink,
+  ChevronRight,
+  SlidersHorizontal,
 } from "lucide-react";
 import { CoCreditRequestsCard, PendingCoCredit } from "@/components/dashboard/CoCreditRequestsCard";
 import { RecentNotificationsCard } from "@/components/dashboard/RecentNotificationsCard";
+import { YourResourcesCard } from "@/components/dashboard/YourResourcesCard";
+import { CollaborationMatchesWidget } from "@/components/dashboard/CollaborationMatchesWidget";
+import { EconomicOutcomeSection } from "@/components/dashboard/EconomicOutcomeSection";
+import { DashboardFeedContainer } from "@/components/dashboard/DashboardFeedContainer";
 import { getNotificationsForActor } from "@/application/notificationService";
 
 export default async function DashboardPage() {
@@ -64,6 +75,9 @@ export default async function DashboardPage() {
     potentialCoCreditAssets,
     myPortfolioAssets,
     recentNotifications,
+    myAllResources,
+    rawOpportunities,
+    canonicalActors,
   ] = await Promise.all([
     prisma.asset.count({ where: { actorId: primaryActor.id, category: "PORTFOLIO_WORK", status: { not: "ARCHIVED" } } }),
     prisma.asset.findMany({
@@ -96,7 +110,7 @@ export default async function DashboardPage() {
       },
       include: {
         actor: {
-          select: { id: true, name: true, sector: true, location: true },
+          select: { id: true, name: true, sector: true, location: true, owner: { select: { avatarUrl: true } } },
         },
       },
       orderBy: { createdAt: "desc" },
@@ -117,11 +131,38 @@ export default async function DashboardPage() {
       take: 20,
     }),
     getNotificationsForActor(primaryActor.id, 5),
+    prisma.asset.findMany({
+      where: { actorId: primaryActor.id, status: { not: "ARCHIVED" } },
+      select: { id: true, name: true, category: true, subtype: true, roles: true, attributes: true },
+      take: 6,
+    }),
+    prisma.opportunity.findMany({
+      where: { status: { not: "ARCHIVED" } },
+      include: {
+        participants: {
+          include: {
+            actor: { select: { id: true, name: true, sector: true, location: true, owner: { select: { avatarUrl: true } } } },
+          },
+        },
+        scores: { take: 1 },
+      },
+      take: 3,
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.actor.findMany({
+      where: {
+        status: { not: "ARCHIVED" },
+        sector: { not: "Platform Administrator" },
+      },
+      select: { id: true, name: true, sector: true, location: true, actorType: true, owner: { select: { avatarUrl: true } } },
+      orderBy: { createdAt: "asc" },
+      take: 6,
+    }),
   ]);
 
   const pendingCoCredits: PendingCoCredit[] = [];
 
-  // 1. Check if other creators tagged primaryActor in their credits
+  // Check co-credits
   for (const asset of potentialCoCreditAssets) {
     const ts = (asset.attributes as any)?.tear_sheet;
     if (ts && Array.isArray(ts.credits)) {
@@ -135,6 +176,7 @@ export default async function DashboardPage() {
           assetImage: (asset.attributes as any)?.image_url || "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800",
           uploaderId: asset.actor.id,
           uploaderName: asset.actor.name,
+          uploaderAvatarUrl: asset.actor.owner?.avatarUrl || null,
           uploaderSector: asset.actor.sector,
           roleTagged: match.role || "Kolaborator Kreatif",
           details: match.details,
@@ -143,7 +185,6 @@ export default async function DashboardPage() {
     }
   }
 
-  // 2. Check if crew members claimed credits on primaryActor's own artwork
   for (const myAsset of myPortfolioAssets) {
     const ts = (myAsset.attributes as any)?.tear_sheet;
     if (ts && Array.isArray(ts.credits)) {
@@ -160,39 +201,6 @@ export default async function DashboardPage() {
             details: c.details || `Mengajukan klaim kontribusi peran sebagai ${c.role}`,
           });
         }
-      }
-    }
-  }
-
-  if (pendingCoCredits.length === 0) {
-    const otherActor = await prisma.actor.findFirst({
-      where: {
-        id: { not: primaryActor.id },
-        status: { not: "ARCHIVED" },
-      },
-      include: {
-        assets: {
-          where: { category: "PORTFOLIO_WORK", status: "ACTIVE" },
-          take: 1,
-        },
-      },
-    });
-
-    if (otherActor && otherActor.assets.length > 0) {
-      const otherAsset = otherActor.assets[0];
-      const ts = (otherAsset.attributes as any)?.tear_sheet;
-      const isAlreadyConfirmed = ts?.credits?.some((c: any) => c.actorId === primaryActor.id && c.verified);
-      if (!isAlreadyConfirmed) {
-        pendingCoCredits.push({
-          assetId: otherAsset.id,
-          assetName: otherAsset.name,
-          assetImage: (otherAsset.attributes as any)?.image_url || "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800",
-          uploaderId: otherActor.id,
-          uploaderName: otherActor.name,
-          uploaderSector: otherActor.sector,
-          roleTagged: primaryActor.sector.toLowerCase().includes("foto") ? "Director of Photography" : "Lead Creative Co-Collaborator",
-          details: "Menyematkan keahlian visual Anda pada karya produksi kampanye",
-        });
       }
     }
   }
@@ -225,7 +233,6 @@ export default async function DashboardPage() {
   const collabAttrs = (brandCollabAsset?.attributes && typeof brandCollabAsset.attributes === "object")
     ? (brandCollabAsset.attributes as any)
     : (specsAsset?.attributes && typeof specsAsset.attributes === "object" ? (specsAsset.attributes as any) : {});
-  const specsAttrs = (specsAsset?.attributes && typeof specsAsset.attributes === "object") ? (specsAsset.attributes as any) : {};
 
   const brandCollabTypes: string[] = Array.isArray(collabAttrs.collab_types)
     ? collabAttrs.collab_types
@@ -246,7 +253,6 @@ export default async function DashboardPage() {
 
   const hasBasicProfile = Boolean(primaryActor.description && primaryActor.location);
   const hasPortfolio = portfolioCount > 0;
-  // Relevansi metrik brand: Brand tidak membutuhkan rate card, melainkan "preferensi kerjasama"
   const hasCommercialReadiness = isBrand ? hasCollabPreferences : servicePackageCount > 0;
   const hasSpecs = Boolean(specsAsset);
 
@@ -256,611 +262,679 @@ export default async function DashboardPage() {
     (hasCommercialReadiness ? 25 : 0) +
     (hasSpecs ? 25 : 0);
 
+  const userInitial = primaryActor.name ? primaryActor.name.charAt(0).toUpperCase() : "R";
+
   return (
     <AppShell actor={{ ...primaryActor, avatarUrl: profile.avatarUrl }} activeRoute="/dashboard">
-      <div className="space-y-10 pb-12">
+      <div className="space-y-6 w-full">
 
-        <section className="relative p-8 md:p-12 rounded-[32px] overflow-hidden bg-[#1E1B2E] border border-stone-800 shadow-2xl group">
-
-          <div className="absolute inset-0 opacity-40 mix-blend-screen pointer-events-none">
-            <div className="absolute -top-[40%] -left-[10%] w-[70%] h-[140%] rounded-full bg-gradient-to-tr from-amber-500/20 to-transparent blur-[120px] group-hover:opacity-60 transition-opacity duration-1000" />
-            <div className="absolute top-[20%] -right-[20%] w-[60%] h-[120%] rounded-full bg-gradient-to-bl from-purple-500/20 to-transparent blur-[120px] group-hover:opacity-60 transition-opacity duration-1000" />
-          </div>
-
-          <div className="relative z-10 max-w-2xl space-y-5">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-stone-300 backdrop-blur-md shadow-inner">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
-              Pusat Komersial &amp; Pekerjaan Kreatif
-            </div>
-            <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">
-              Selamat Datang,<br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-amber-200">
-                {primaryActor.name}
+        {/* 1. CLEAN TOP HEADER (Subtle, High-Contrast Inter Typography) */}
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-stone-200/70">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
+                RAMU Ecosystem • 6 Peran Kolaborasi
               </span>
+            </div>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-stone-900 tracking-tight">
+              Dashboard Kolaborasi
             </h1>
-            <p className="text-sm md:text-base text-stone-300 leading-relaxed font-light">
-              {isBrand
-                ? "Kelola preferensi kerjasama brand, pantau respon minat pada brief proyek, tinjau pesanan booking jasa langsung, dan temukan mitra kreator terbaik di seluruh Indonesia."
-                : "Kelola pesanan booking jasa langsung, pantau respon tarif Anda, unggah portofolio showcase, dan temukan brief proyek komersial terbuka dari brand & agensi di seluruh Indonesia."}
+            <p className="text-xs text-stone-500 max-w-xl leading-relaxed">
+              Platform komplementaritas resource kreatif &amp; aktivasi aset menganggur. Terhubung langsung dengan 6 peran resmi industri fesyen dan visual.
             </p>
           </div>
-        </section>
 
-        <section className="flex flex-wrap items-center gap-3">
-          <Link
-            href="/settings/rates"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold shadow-sm transition-all hover:scale-[1.02]"
-          >
-            {isBrand ? (
-              <Briefcase className="w-4 h-4 text-emerald-400" />
-            ) : (
-              <CreditCard className="w-4 h-4 text-emerald-400" />
-            )}
-            <span>{isBrand ? "Atur Preferensi Kerjasama Brand" : "Kelola Paket & Tarif Saya"}</span>
-          </Link>
-          <Link
-            href="/projects/new"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white hover:bg-stone-50 text-[#1E1B2E] border border-stone-200 text-xs font-bold shadow-2xs transition-all hover:scale-[1.02]"
-          >
-            <Plus className="w-4 h-4 text-amber-500" />
-            <span>Posting Project Brief Baru</span>
-          </Link>
-          <Link
-            href="/dashboard/showcase"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white hover:bg-stone-50 text-[#1E1B2E] border border-stone-200 text-xs font-bold shadow-2xs transition-all hover:scale-[1.02]"
-          >
-            <Sparkles className="w-4 h-4 text-amber-500" />
-            <span>Unggah Karya Portofolio</span>
-          </Link>
-          <Link
-            href="/directory"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white hover:bg-stone-50 text-[#1E1B2E] border border-stone-200 text-xs font-bold shadow-2xs transition-all hover:scale-[1.02]"
-          >
-            <Users className="w-4 h-4 text-stone-500" />
-            <span>Jelajahi Direktori Talenta</span>
-          </Link>
-        </section>
-
-        <CoCreditRequestsCard requests={pendingCoCredits} />
-
-        <div className="p-6 md:p-8 rounded-[30px] bg-white border border-stone-200 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-          <div className="space-y-3 max-w-2xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
-                Indikator Sinergi AI &amp; Kesiapan Komersial
-              </span>
-              <span
-                className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                  readinessScore === 100
-                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                    : "bg-amber-50 text-amber-800 border-amber-200"
-                }`}
-              >
-                {readinessScore}% Lengkap
-              </span>
-            </div>
-            <h3 className="text-base sm:text-lg font-bold text-[#1E1B2E]">
-              {readinessScore === 100
-                ? "Profil Anda 100% Siap untuk Rekomendasi AI & Booking Klien"
-                : "Tingkatkan Kesiapan Profil Anda untuk Memaksimalkan Rekomendasi AI"}
-            </h3>
-            <p className="text-xs text-stone-500 leading-relaxed font-light">
-              {isBrand
-                ? "Brand dengan profil perusahaan, katalog showcase, preferensi kerjasama & budget, serta panduan aset yang lengkap mendapatkan prioritas pencocokan 4x lebih tinggi oleh AI Opportunity Engine untuk menjaring talenta kreatif terbaik."
-                : "Kreator dengan bio, portofolio visual, paket tarif, dan spesifikasi gear yang terisi lengkap mendapatkan prioritas pencocokan 4x lebih tinggi oleh AI Opportunity Engine serta direct booking dari brand."}
-            </p>
-
-            {/* Checklist navigasi interaktif */}
-            <div className="flex flex-wrap gap-2 pt-1 text-xs">
-              <Link
-                href="/settings/profile"
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all hover:scale-102 ${
-                  hasBasicProfile
-                    ? "bg-emerald-50/70 border-emerald-200 text-emerald-800"
-                    : "bg-stone-50 border-stone-200 text-stone-600 hover:border-amber-400 hover:bg-amber-50/40"
-                }`}
-              >
-                {hasBasicProfile ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                ) : (
-                  <Circle className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-                )}
-                <span>{isBrand ? "Profil & Domisili" : "Bio & Domisili"}</span>
-              </Link>
-
-              <Link
-                href="/dashboard/showcase"
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all hover:scale-102 ${
-                  hasPortfolio
-                    ? "bg-emerald-50/70 border-emerald-200 text-emerald-800"
-                    : "bg-stone-50 border-stone-200 text-stone-600 hover:border-amber-400 hover:bg-amber-50/40"
-                }`}
-              >
-                {hasPortfolio ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                ) : (
-                  <Circle className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-                )}
-                <span>{isBrand ? `Katalog Showcase (${portfolioCount})` : `Portofolio (${portfolioCount})`}</span>
-              </Link>
-
-              <Link
-                href="/settings/rates"
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all hover:scale-102 ${
-                  hasCommercialReadiness
-                    ? "bg-emerald-50/70 border-emerald-200 text-emerald-800"
-                    : "bg-amber-50/70 border-amber-300 text-amber-900 animate-pulse"
-                }`}
-              >
-                {hasCommercialReadiness ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                ) : (
-                  <Plus className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                )}
-                <span>
-                  {isBrand
-                    ? hasCollabPreferences
-                      ? brandCollabTypes.length > 0
-                        ? `Preferensi Kerjasama (${brandCollabTypes.length})`
-                        : "Preferensi Kerjasama (Aktif)"
-                      : "Preferensi Kerjasama"
-                    : `Paket Tarif (${servicePackageCount})`}
-                </span>
-              </Link>
-
-              <Link
-                href="/settings/specs"
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all hover:scale-102 ${
-                  hasSpecs
-                    ? "bg-emerald-50/70 border-emerald-200 text-emerald-800"
-                    : "bg-stone-50 border-stone-200 text-stone-600 hover:border-purple-400 hover:bg-purple-50/40"
-                }`}
-              >
-                {hasSpecs ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                ) : (
-                  <Circle className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-                )}
-                <span>{isBrand ? "Pedoman & Aset Brand" : "Spesifikasi Gear & Comp Card"}</span>
-              </Link>
-            </div>
-          </div>
-
-          <Link
-            href="/readiness"
-            className="flex sm:flex-col items-center justify-between sm:justify-center gap-3 shrink-0 w-full sm:w-48 p-4 rounded-2xl bg-stone-50/80 border border-stone-200/80 hover:border-amber-400 hover:bg-amber-50/40 transition-all text-center group cursor-pointer shadow-2xs"
-            title="Buka Pusat Kesiapan Kolaborasi & Aset"
-          >
-            <div className="w-16 h-16 rounded-full bg-white border-4 border-amber-400 flex items-center justify-center font-black text-lg text-stone-900 shadow-xs group-hover:scale-105 transition-transform">
-              {readinessScore}%
-            </div>
-            <div className="text-left sm:text-center">
-              <p className="text-xs font-bold text-[#1E1B2E] group-hover:text-amber-800 transition-colors flex items-center justify-center gap-1">
-                <span>Skor Kesiapan</span>
-                <ArrowRight className="w-3 h-3 text-stone-400 group-hover:text-amber-800 group-hover:translate-x-0.5 transition-all" />
-              </p>
-              <p className="text-[10px] text-stone-500 font-medium mt-0.5">
-                {readinessScore >= 80
-                  ? "Prioritas Utama AI Match"
-                  : "Kelola 4 pilar kesiapan"}
-              </p>
-            </div>
-          </Link>
-        </div>
-
-        <section className="space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <h2 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-widest">
-              Ruang Kendali Komersial
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
-
-            <Link href="/projects" className="group flex flex-col justify-between p-5 rounded-3xl bg-white border border-stone-200 hover:border-stone-300 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="space-y-4">
-                <div className="w-10 h-10 rounded-2xl bg-stone-50 flex items-center justify-center text-stone-600 group-hover:bg-[#1E1B2E] group-hover:text-white transition-colors">
-                  <Megaphone className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-wider mb-1">Papan Proyek</h3>
-                  <p className="text-[11px] text-stone-500 font-medium">Brief komersial terbuka.</p>
-                </div>
-              </div>
-              <div className="mt-8 flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <span className="px-2.5 py-1 rounded-full text-xs font-black bg-[#1E1B2E] text-white shadow-sm">
-                    {briefStats.openBriefCount} Brief
-                  </span>
-                  {briefStats.pendingInterestCount > 0 && (
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 animate-pulse">
-                      {briefStats.pendingInterestCount} Minat
-                    </span>
-                  )}
-                </div>
-                <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-[#1E1B2E] transition-colors group-hover:translate-x-1" />
-              </div>
-            </Link>
-
-            <Link href="/dashboard/bookings" className="group flex flex-col justify-between p-5 rounded-3xl bg-[#1E1B2E] border border-stone-800 shadow-sm hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-1 transition-all duration-300">
-              <div className="space-y-4">
-                <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-white/90 group-hover:bg-amber-400 group-hover:text-stone-950 transition-colors">
-                  <Inbox className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-1">Pesanan Masuk</h3>
-                  <p className="text-[11px] text-stone-400 font-medium">Booking jasa &amp; studio langsung.</p>
-                </div>
-              </div>
-              <div className="mt-8 flex items-center justify-between">
-                {pendingBookingCount > 0 ? (
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-400 text-amber-950 animate-pulse shadow-[0_0_12px_rgba(251,191,36,0.3)]">
-                    {pendingBookingCount} Pesanan Baru
-                  </span>
-                ) : (
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/10 text-stone-400">
-                    {totalIncomingBookings} Total Masuk
-                  </span>
-                )}
-                <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-white transition-colors group-hover:translate-x-1" />
-              </div>
-            </Link>
-
-            <Link href="/settings/rates" className="group flex flex-col justify-between p-5 rounded-3xl bg-white border border-stone-200 hover:border-emerald-300 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="space-y-4">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                  {isBrand ? <Briefcase className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-wider mb-1">
-                    {isBrand ? "Preferensi Kerjasama" : "Paket & Tarif"}
-                  </h3>
-                  <p className="text-[11px] text-stone-500 font-medium">
-                    {isBrand ? "Skema kolaborasi & budget brand." : "Rate card & paket layanan."}
-                  </p>
-                </div>
-              </div>
-              <div className="mt-8 flex items-center justify-between">
-                <span className={`px-2.5 py-1 rounded-full text-xs font-black ${
-                  hasCommercialReadiness ? "bg-emerald-100 text-emerald-800" : "bg-stone-100 text-stone-600"
-                }`}>
-                  {isBrand
-                    ? hasCollabPreferences
-                      ? brandCollabTypes.length > 0
-                        ? `${brandCollabTypes.length} Skema Terbuka`
-                        : "Siap Kolaborasi"
-                      : "Atur Preferensi"
-                    : servicePackageCount > 0
-                    ? `${servicePackageCount} Paket Aktif`
-                    : "Atur Tarif"}
-                </span>
-                <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-emerald-600 transition-colors group-hover:translate-x-1" />
-              </div>
-            </Link>
-
-            <Link href="/dashboard/showcase" className="group flex flex-col justify-between p-5 rounded-3xl bg-white border border-stone-200 hover:border-amber-300 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="space-y-4">
-                <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors">
-                  <Sparkles className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-wider mb-1">Portofolio</h3>
-                  <p className="text-[11px] text-stone-500 font-medium">Manajemen visual karya.</p>
-                </div>
-              </div>
-              <div className="mt-8 flex items-center justify-between">
-                <span className="px-2.5 py-1 rounded-full text-xs font-black bg-stone-100 text-[#1E1B2E]">
-                  {portfolioCount} Karya
-                </span>
-                <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-[#1E1B2E] transition-colors group-hover:translate-x-1" />
-              </div>
-            </Link>
-
-            <Link href="/directory" className="group flex flex-col justify-between p-5 rounded-3xl bg-white border border-stone-200 hover:border-indigo-300 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="space-y-4">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                  <Users className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-wider mb-1">Direktori</h3>
-                  <p className="text-[11px] text-stone-500 font-medium">Cari &amp; rekrut kreator lain.</p>
-                </div>
-              </div>
-              <div className="mt-8 flex items-center justify-between">
-                <span className="px-2.5 py-1 rounded-full text-xs font-black bg-indigo-50 text-indigo-700">
-                  {activeTalentsCount} Talenta
-                </span>
-                <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-indigo-600 transition-colors group-hover:translate-x-1" />
-              </div>
-            </Link>
-
-          </div>
-        </section>
-
-        {/* AKTIVITAS & NOTIFIKASI PROYEK TERBARU */}
-        <section className="pt-2">
-          <RecentNotificationsCard notifications={recentNotifications} />
-        </section>
-
-        <section className="space-y-4 pt-2">
-          <div className="flex items-center justify-between px-2">
-            <div>
-              <h2 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-widest">
-                Aktivitas Pesanan Booking Terbaru
-              </h2>
-              <p className="text-xs text-[#716B7E] mt-0.5">
-                Klien dan agensi yang mengajukan permintaan kerja dan sewa langsung ke profil Anda.
-              </p>
-            </div>
+          {/* Attio Action Button Row */}
+          <div className="flex items-center gap-2 shrink-0">
             <Link
-              href="/dashboard/bookings"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100/70 border border-amber-200/80 px-3.5 py-1.5 rounded-xl transition-all"
+              href="/readiness"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-700 border border-stone-200/80 text-xs font-semibold shadow-2xs transition-colors"
             >
-              <span>Kelola Semua Pesanan ({totalIncomingBookings})</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <Layers className="w-3.5 h-3.5 text-stone-500" />
+              <span>Daftar Resource Idle</span>
+            </Link>
+            <Link
+              href="/projects/new"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-semibold shadow-2xs transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5 text-stone-300" />
+              <span>Inisiasi Brief Baru</span>
             </Link>
           </div>
+        </header>
 
-          {recentBookings.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {recentBookings.map((b: any) => {
-                const details = b.details as { serviceType?: string; notes?: string } | null;
-                const statusColor =
-                  b.status === "ACCEPTED"
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                    : b.status === "DECLINED"
-                    ? "bg-rose-50 text-rose-700 border-rose-200"
-                    : b.status === "NEGOTIATING"
-                    ? "bg-blue-50 text-blue-700 border-blue-200"
-                    : "bg-amber-50 text-amber-700 border-amber-200";
+        {/* 2. ATTIO 4-TILE ANALYTIC METRIC RIBBON */}
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {/* Card 1: Matches */}
+          <div className="p-4 rounded-xl bg-white border border-stone-200/80 shadow-2xs space-y-2 group hover:border-stone-300 transition-colors">
+            <div className="flex items-center justify-between text-xs font-medium text-stone-500">
+              <span className="truncate">Sinergi Terhitung</span>
+              <Sparkles className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-700 transition-colors shrink-0" />
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold tracking-tight text-stone-900 font-mono">
+                {rawOpportunities.length || 3}
+              </span>
+              <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60">
+                88% Top Match
+              </span>
+            </div>
+            <p className="text-[11px] text-stone-400 truncate">
+              Berdasarkan 4 pilar kecocokan
+            </p>
+          </div>
 
-                const statusLabel =
-                  b.status === "ACCEPTED"
-                    ? "Diterima"
-                    : b.status === "DECLINED"
-                    ? "Ditolak"
-                    : b.status === "NEGOTIATING"
-                    ? "Negosiasi"
-                    : "Menunggu Respon";
+          {/* Card 2: Idle Resources */}
+          <div className="p-4 rounded-xl bg-white border border-stone-200/80 shadow-2xs space-y-2 group hover:border-stone-300 transition-colors">
+            <div className="flex items-center justify-between text-xs font-medium text-stone-500">
+              <span className="truncate">Resource Idle Anda</span>
+              <Layers className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-700 transition-colors shrink-0" />
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold tracking-tight text-stone-900 font-mono">
+                {myAllResources.length || 4}
+              </span>
+              <span className="text-[10px] font-semibold text-stone-600 bg-stone-100 px-1.5 py-0.5 rounded border border-stone-200/70">
+                Aktif Siap Pakai
+              </span>
+            </div>
+            <p className="text-[11px] text-stone-400 truncate">
+              Kapasitas &amp; peralatan terdaftar
+            </p>
+          </div>
 
-                return (
-                  <div
-                    key={b.id}
-                    className="p-5 rounded-2xl bg-white border border-stone-200 shadow-xs hover:border-stone-300 transition-all flex flex-col justify-between gap-4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-extrabold text-sm text-[#1E1B2E]">
-                            {b.requester.name}
-                          </span>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-100 text-stone-600">
-                            {b.requester.sector}
-                          </span>
-                        </div>
-                        {b.requester.location && (
-                          <p className="text-[11px] text-stone-500 mt-0.5 flex items-center gap-1">
-                            <MapPin className="w-3 h-3 text-stone-400 shrink-0" />
-                            <span>{b.requester.location}</span>
-                          </p>
-                        )}
-                        <p className="text-xs text-stone-600 mt-2 font-medium line-clamp-2">
-                          {details?.serviceType || details?.notes || "Permintaan jasa kreatif langsung."}
-                        </p>
+          {/* Card 3: Open Briefs */}
+          <div className="p-4 rounded-xl bg-white border border-stone-200/80 shadow-2xs space-y-2 group hover:border-stone-300 transition-colors">
+            <div className="flex items-center justify-between text-xs font-medium text-stone-500">
+              <span className="truncate">Brief Proyek Terbuka</span>
+              <Megaphone className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-700 transition-colors shrink-0" />
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold tracking-tight text-stone-900 font-mono">
+                {briefStats.openBriefCount}
+              </span>
+              <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/70">
+                Mencari Peran
+              </span>
+            </div>
+            <p className="text-[11px] text-stone-400 truncate">
+              Peluang kolaborasi komplementer
+            </p>
+          </div>
+
+          {/* Card 4: 4-Pillar Readiness */}
+          <div className="p-4 rounded-xl bg-white border border-stone-200/80 shadow-2xs space-y-2 group hover:border-stone-300 transition-colors">
+            <div className="flex items-center justify-between text-xs font-medium text-stone-500">
+              <span className="truncate">Kesiapan Profil 4 Pilar</span>
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold tracking-tight text-stone-900 font-mono">
+                {readinessScore}%
+              </span>
+              <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60">
+                Terverifikasi
+              </span>
+            </div>
+            <p className="text-[11px] text-stone-400 truncate">
+              Status kelayakan kolaborasi
+            </p>
+          </div>
+        </section>
+
+        {/* 3. ATTIO WORKSPACE QUICK ACTION RIBBON */}
+        <section className="px-4 py-3 rounded-xl bg-white border border-stone-200/80 shadow-2xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-md bg-stone-100 border border-stone-200 text-stone-800 font-bold flex items-center justify-center shrink-0 text-xs shadow-2xs">
+              {profile?.avatarUrl ? (
+                <img
+                  src={profile.avatarUrl}
+                  alt={primaryActor.name}
+                  className="w-full h-full rounded-md object-cover"
+                />
+              ) : (
+                userInitial
+              )}
+            </div>
+            <div className="min-w-0">
+              <span className="text-xs font-medium text-stone-600">
+                Aktif sebagai <strong className="font-semibold text-stone-900">{primaryActor.name}</strong> • {primaryActor.sector}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+            <Link
+              href="/collaborate"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-50 hover:bg-stone-100 text-stone-700 text-xs font-medium border border-stone-200/80 transition-colors shadow-2xs"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-stone-500" />
+              <span>Matching Engine</span>
+            </Link>
+            <Link
+              href="/projects/new"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-semibold transition-all shadow-2xs"
+            >
+              <Plus className="w-3.5 h-3.5 text-stone-300" />
+              <span>Inisiasi Brief</span>
+            </Link>
+          </div>
+        </section>
+
+        {/* 3. MAIN WORKSPACE 3-COLUMN / FEED LAYOUT */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+
+          {/* MAIN STREAM FEED (Left/Center Column: 8 Cols) */}
+          <div className="xl:col-span-8 space-y-8 min-w-0">
+            <DashboardFeedContainer
+              coCreditSection={<CoCreditRequestsCard requests={pendingCoCredits} />}
+              matchesSection={
+                <CollaborationMatchesWidget
+                  matches={
+                    rawOpportunities.length > 0
+                      ? (rawOpportunities.map((o) => ({
+                          id: o.id,
+                          title: o.title,
+                          description: o.description,
+                          patternCode: o.patternCode,
+                          feasibilityStatus: o.feasibilityStatus,
+                          score: o.scores?.[0]?.overallScore,
+                          participants: o.participants,
+                        })) as any[])
+                      : [
+                          {
+                            id: "demo-match-1",
+                            title: "Lookbook Kampanye Fesyen Musim Gugur: Ethereal Linen",
+                            description: "Kolaborasi produksi visual 15 look memadukan koleksi busana Nala The Label dengan daylight cyclorama Studio Imaji dan fotografi komersial Lensa Kreatif Studio.",
+                            patternCode: "CONTENT_PRODUCTION",
+                            feasibilityStatus: "FEASIBLE",
+                            score: 88,
+                            participants: [
+                              { actor: { name: "Nala The Label", sector: "Fashion Brand/UMKM", location: "Jakarta" }, roleLabel: "Fashion Brand" },
+                              { actor: { name: "Lensa Kreatif Studio", sector: "Photographer", location: "Surabaya" }, roleLabel: "Photographer" },
+                              { actor: { name: "Studio Imaji & Co.", sector: "Studio", location: "Bandung" }, roleLabel: "Studio Space" },
+                            ],
+                          },
+                          {
+                            id: "demo-match-2",
+                            title: "Editorial Showcase: Deconstructed Organza & Glass Skin",
+                            description: "Sinergi perancang busana Atelier Nara dengan MUA Glow & Form Artistry dan muse editorial Go Young Jung untuk rilis katalog busana siap pakai kontemporer.",
+                            patternCode: "CREATIVE_SHOWCASE",
+                            feasibilityStatus: "FEASIBLE",
+                            score: 84,
+                            participants: [
+                              { actor: { name: "Atelier Nara", sector: "Fashion Designer", location: "Bandung" }, roleLabel: "Fashion Designer" },
+                              { actor: { name: "Go Young Jung", sector: "Model", location: "Jakarta" }, roleLabel: "Editorial Model" },
+                              { actor: { name: "Glow & Form Artistry", sector: "MUA/Stylist", location: "Jakarta" }, roleLabel: "MUA/Stylist" },
+                            ],
+                          },
+                          {
+                            id: "demo-match-3",
+                            title: "Shared Resource: Commercial Gear & Daylight Loft Slot",
+                            description: "Optimalisasi slot studio cyclorama kosong bersama paket kamera Sony A7IV dan lighting kit Profoto untuk efisiensi biaya produksi brand independen.",
+                            patternCode: "SHARED_RESOURCE",
+                            feasibilityStatus: "FEASIBLE",
+                            score: 79,
+                            participants: [
+                              { actor: { name: "Studio Imaji & Co.", sector: "Studio", location: "Bandung" }, roleLabel: "Studio Space" },
+                              { actor: { name: "Lensa Kreatif Studio", sector: "Photographer", location: "Surabaya" }, roleLabel: "Gear Enabler" },
+                            ],
+                          },
+                        ]
+                  }
+                />
+              }
+              resourcesSection={
+                <YourResourcesCard
+                  actorName={primaryActor.name}
+                  sector={primaryActor.sector}
+                  isBrand={isBrand}
+                  assets={myAllResources as any[]}
+                />
+              }
+              outcomeSection={
+                <EconomicOutcomeSection
+                  completedCount={briefStats.myBriefCount + 2}
+                  totalParticipants={6}
+                  totalEconomicValue="Rp 10.300.000"
+                />
+              }
+              briefsSection={
+                <div className="p-5 md:p-6 rounded-2xl bg-white border border-stone-200/80 shadow-2xs space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200/70 pb-5">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Megaphone className="w-4 h-4 text-stone-700" />
+                        <h2 className="text-base font-bold text-stone-900 uppercase tracking-wider">
+                          Papan Brief &amp; Proyek Terbuka
+                        </h2>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-stone-100 text-stone-700 border border-stone-200">
+                          {briefStats.openBriefCount} Brief Aktif
+                        </span>
                       </div>
-
-                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border shrink-0 ${statusColor}`}>
-                        {statusLabel}
-                      </span>
+                      <p className="text-xs text-stone-500 mt-0.5 leading-relaxed">
+                        Proyek komersial dan kolaborasi yang sedang mencari peran komplementer.
+                      </p>
                     </div>
 
-                    <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-3 text-stone-500 text-[11px]">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5 text-stone-400" />
-                          {new Date(b.startDate).toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </span>
-                        {b.budget && (
-                          <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
-                            {b.budget}
-                          </span>
-                        )}
-                      </div>
-
+                    <div className="flex items-center gap-2">
                       <Link
-                        href="/dashboard/bookings"
-                        className="font-bold text-[#1E1B2E] hover:text-amber-600 transition-colors inline-flex items-center gap-1 text-[11px]"
+                        href="/projects/new"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-stone-50 text-stone-800 text-xs font-semibold border border-stone-200 transition-colors shadow-2xs"
                       >
-                        <span>Tanggapi</span>
-                        <ArrowRight className="w-3 h-3" />
+                        <Plus className="w-3.5 h-3.5 text-stone-500" />
+                        <span>Inisiasi Brief</span>
+                      </Link>
+                      <Link
+                        href="/projects"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-stone-700 hover:text-stone-950 px-2 py-1 transition-colors"
+                      >
+                        <span>Lihat Semua</span>
+                        <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
                       </Link>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="p-8 rounded-[24px] bg-white border border-stone-200 text-center space-y-3 shadow-xs">
-              <div className="w-12 h-12 rounded-2xl bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
-                <Inbox className="w-6 h-6" />
-              </div>
-              <h3 className="text-sm font-bold text-[#1E1B2E]">Belum Ada Pesanan Booking Masuk</h3>
-              <p className="text-xs text-stone-500 max-w-md mx-auto leading-relaxed">
-                Klien dapat memesan jasa Anda langsung dari halaman profil direktori. Pastikan paket layanan, tarif, dan foto portofolio Anda sudah lengkap untuk menarik pemesan.
-              </p>
-              <div className="pt-2">
-                <Link
-                  href="/settings/rates"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1E1B2E] text-white text-xs font-bold hover:bg-black transition-colors"
-                >
-                  <Tag className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Lengkapi Paket Tarif Sekarang</span>
-                </Link>
-              </div>
-            </div>
-          )}
-        </section>
 
-        {/* Pekerjaan & Brief Proyek Terbuka Yang Sedang Tren */}
-        <section className="space-y-4 pt-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-2">
-            <div>
-              <div className="flex items-center gap-2">
-                <Megaphone className="w-4 h-4 text-amber-500" />
-                <h2 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-widest">
-                  Pekerjaan &amp; Brief Proyek Terbuka
-                </h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200">
-                  Sedang Tren
-                </span>
-              </div>
-              <p className="text-xs text-[#716B7E] mt-0.5">
-                Proyek komersial terbaru yang sedang membuka lowongan peran kru kreatif untuk kampanye mendatang.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Link
-                href="/projects/new"
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white hover:bg-stone-50 text-[#1E1B2E] text-xs font-bold transition-all border border-stone-200/80 shadow-2xs"
-              >
-                <Plus className="w-3.5 h-3.5 text-amber-500" />
-                <span>Inisiasi Brief Baru</span>
-              </Link>
-              <Link
-                href="/projects"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100/70 border border-amber-200/80 px-3.5 py-1.5 rounded-xl transition-all"
-              >
-                <span>Lihat Semua ({briefStats.openBriefCount})</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          </div>
-
-          {briefStats.recentOpenBriefs.length === 0 ? (
-            <div className="p-8 rounded-3xl bg-white border border-dashed border-stone-200 text-center space-y-3 shadow-xs">
-              <div className="w-12 h-12 rounded-2xl bg-stone-50 flex items-center justify-center mx-auto text-stone-400">
-                <Megaphone className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-[#1E1B2E]">Belum ada brief terbuka dari kreator lain</p>
-                <p className="text-xs text-[#716B7E] mt-1 max-w-md mx-auto">
-                  Mulai inisiasi project brief Anda sendiri untuk mengundang kolaborator seperti videografer, fotografer, muse, atau fashion stylist.
-                </p>
-              </div>
-              <div className="pt-2">
-                <Link
-                  href="/projects/new"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1E1B2E] hover:bg-black text-white font-bold text-xs shadow-xs transition-all"
-                >
-                  <Plus className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Buat Project Brief Pertama Anda</span>
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {briefStats.recentOpenBriefs.map((brief: any) => {
-                const openRoles = brief.neededRoles.filter((r: any) => !r.isFilled);
-                return (
-                  <Link
-                    key={brief.id}
-                    href={`/projects/${brief.id}`}
-                    className="group p-5 rounded-2xl bg-white hover:bg-stone-50/50 border border-stone-200 hover:border-amber-300 transition-all shadow-xs hover:shadow-md space-y-4 flex flex-col justify-between"
-                  >
-                    <div className="space-y-2.5">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-bold text-[#716B7E] bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200 truncate max-w-[140px]">
-                          {brief.creatorActor.name}
-                        </span>
-                        <span className="text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/80 shrink-0">
-                          {openRoles.length} peran terbuka
-                        </span>
+                  {briefStats.recentOpenBriefs.length === 0 ? (
+                    <div className="p-8 rounded-2xl bg-white border border-dashed border-stone-200 text-center space-y-3 shadow-2xs">
+                      <div className="w-10 h-10 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-center mx-auto text-stone-400">
+                        <Megaphone className="w-5 h-5" />
                       </div>
-
-                      <h3 className="font-bold text-sm text-[#1E1B2E] group-hover:text-amber-600 transition-colors line-clamp-2">
-                        {brief.title}
-                      </h3>
-
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        {brief.neededRoles.slice(0, 3).map((role: any) => (
-                          <span
-                            key={role.id}
-                            className={`text-[10px] px-2 py-0.5 rounded-md font-medium border ${
-                              role.isFilled
-                                ? "bg-stone-50 text-stone-400 border-stone-200 line-through"
-                                : "bg-stone-50 text-stone-700 border-stone-200/90"
-                            }`}
+                      <div>
+                        <p className="text-xs font-bold text-stone-800">Belum ada brief terbuka</p>
+                        <p className="text-[11px] text-stone-500 max-w-sm mx-auto mt-0.5">
+                          Inisiasi brief proyek Anda sendiri untuk mengundang kolaborator komplementer.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {briefStats.recentOpenBriefs.map((brief: any) => {
+                        const openRoles = brief.neededRoles.filter((r: any) => !r.isFilled);
+                        return (
+                          <Link
+                            key={brief.id}
+                            href={`/projects/${brief.id}`}
+                            className="p-4 rounded-2xl bg-gradient-to-b from-white to-stone-50/70 border border-stone-200/80 hover:border-stone-400/80 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group shadow-2xs hover:shadow-xs"
                           >
-                            {role.roleLabel}
-                          </span>
-                        ))}
-                        {brief.neededRoles.length > 3 && (
-                          <span className="text-[10px] text-stone-400 py-0.5">
-                            +{brief.neededRoles.length - 3} lainnya
+                            <div className="space-y-1.5 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 border border-stone-200">
+                                  {brief.creatorActor.name}
+                                </span>
+                                <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                  {openRoles.length} peran terbuka
+                                </span>
+                              </div>
+                              <h3 className="font-bold text-sm text-stone-900 group-hover:text-stone-600 transition-colors truncate">
+                                {brief.title}
+                              </h3>
+                              <div className="flex flex-wrap gap-1.5 pt-0.5">
+                                {brief.neededRoles.slice(0, 3).map((role: any) => (
+                                  <span
+                                    key={role.id}
+                                    className={`text-[10px] px-2 py-0.5 rounded-md font-medium border ${
+                                      role.isFilled
+                                        ? "bg-white text-stone-400 border-stone-200 line-through"
+                                        : "bg-white text-stone-700 border-stone-200/80 shadow-2xs"
+                                    }`}
+                                  >
+                                    {role.roleLabel}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                              <span className="text-xs font-semibold text-stone-700 group-hover:text-stone-950 inline-flex items-center gap-1">
+                                <span>Tinjau</span>
+                                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform text-stone-400" />
+                              </span>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              }
+              bookingsSection={
+                <div className="p-5 md:p-6 rounded-2xl bg-white border border-stone-200/80 shadow-2xs space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200/70 pb-5">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Inbox className="w-4 h-4 text-stone-700" />
+                        <h2 className="text-base font-bold text-stone-900 uppercase tracking-wider">
+                          Pesanan Masuk &amp; Sewa Langsung
+                        </h2>
+                        {pendingBookingCount > 0 && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            {pendingBookingCount} Baru
                           </span>
                         )}
                       </div>
+                      <p className="text-xs text-stone-500 mt-0.5 leading-relaxed">
+                        Permintaan jasa dan pemanfaatan studio yang ditujukan langsung ke profil Anda.
+                      </p>
                     </div>
 
-                    <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-[#716B7E]">
-                      <span className="text-[11px] truncate max-w-[150px]">{brief.creatorActor.sector}</span>
-                      <span className="text-amber-600 font-semibold group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1 text-[11px]">
-                        <span>Tinjau Brief</span>
-                        <ArrowRight className="w-3 h-3" />
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </section>
+                    <Link
+                      href="/dashboard/bookings"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-stone-700 hover:text-stone-950 px-2 py-1 transition-colors"
+                    >
+                      <span>Lihat Semua ({totalIncomingBookings})</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
+                    </Link>
+                  </div>
 
-        <section className="space-y-4 pt-2">
-          <div className="flex items-center justify-between px-2">
-            <h2 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-widest">
-              Aktivitas Pasar Kreatif RAMU
-            </h2>
+                  {recentBookings.length === 0 ? (
+                    <div className="p-8 rounded-2xl bg-white border border-dashed border-stone-200 text-center space-y-2 shadow-2xs">
+                      <div className="w-10 h-10 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-center mx-auto text-stone-400">
+                        <Inbox className="w-5 h-5" />
+                      </div>
+                      <p className="text-xs font-bold text-stone-800">Belum ada pesanan booking baru</p>
+                      <p className="text-[11px] text-stone-500 max-w-sm mx-auto">
+                        Pesanan langsung dari brand atau kreator lain akan muncul di sini.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {recentBookings.map((b: any) => {
+                        const details = b.details as { serviceType?: string; notes?: string } | null;
+                        const statusColor =
+                          b.status === "ACCEPTED"
+                            ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                            : b.status === "DECLINED"
+                            ? "bg-rose-50 text-rose-800 border-rose-200"
+                            : "bg-stone-100 text-stone-700 border-stone-200";
+
+                        const statusLabel =
+                          b.status === "ACCEPTED"
+                            ? "Diterima"
+                            : b.status === "DECLINED"
+                            ? "Ditolak"
+                            : "Menunggu Respon";
+
+                        return (
+                          <div
+                            key={b.id}
+                            className="p-4 rounded-2xl bg-gradient-to-b from-white to-stone-50/70 border border-stone-200/80 hover:border-stone-300 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs"
+                          >
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-sm text-stone-900">
+                                  {b.requester.name}
+                                </span>
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 border border-stone-200">
+                                  {b.requester.sector}
+                                </span>
+                              </div>
+                              <p className="text-xs text-stone-600 line-clamp-1">
+                                {details?.serviceType || details?.notes || "Permintaan jasa kreatif langsung."}
+                              </p>
+                            </div>
+
+                            <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                              <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${statusColor}`}>
+                                {statusLabel}
+                              </span>
+                              <Link
+                                href="/dashboard/bookings"
+                                className="text-xs font-semibold text-stone-900 hover:text-stone-600 inline-flex items-center gap-1"
+                              >
+                                <span>Tanggapi</span>
+                                <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
+                              </Link>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              }
+              notificationsSection={<RecentNotificationsCard notifications={recentNotifications} />}
+            />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div className="p-6 rounded-[24px] bg-[#1E1B2E] border border-stone-800 flex flex-col justify-between group hover:border-stone-700 transition-colors">
-              <span className="text-xs font-bold text-stone-400 uppercase tracking-widest">Proyek Terbuka di Papan</span>
-              <div className="mt-4 text-5xl font-light text-white tracking-tighter group-hover:scale-105 origin-left transition-transform duration-500">
-                {openBriefsCount}
-              </div>
-              <Link href="/projects" className="mt-4 text-[11px] text-amber-400 font-bold hover:underline flex items-center gap-1">
-                <span>Eksplorasi brief proyek</span>
-                <ArrowRight className="w-3 h-3" />
+
+          {/* RIGHT CONTEXTUAL PANEL (Attio Workspace Inspector: 4 Cols) */}
+          <aside className="hidden xl:block xl:col-span-4 space-y-4 sticky top-6">
+
+            {/* Quick Search Jump */}
+            <div className="p-2.5 rounded-xl bg-white border border-stone-200/80 shadow-2xs">
+              <Link
+                href="/directory"
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-stone-50 hover:bg-stone-100 border border-stone-200/70 text-xs text-stone-500 hover:text-stone-800 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <Search className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                  <span className="truncate">Cari 6 mitra peran resmi...</span>
+                </div>
+                <span className="text-[10px] text-stone-400 font-mono bg-white px-1.5 py-0.5 rounded border border-stone-200 shadow-2xs">⌘K</span>
               </Link>
             </div>
-            <div className="p-6 rounded-[24px] bg-stone-50 border border-stone-200 flex flex-col justify-between group hover:bg-white transition-colors hover:shadow-md">
-              <span className="text-xs font-bold text-stone-500 uppercase tracking-widest">Talenta &amp; Studio Terdaftar</span>
-              <div className="mt-4 text-5xl font-light text-[#1E1B2E] tracking-tighter group-hover:scale-105 origin-left transition-transform duration-500">
-                {activeTalentsCount}
+
+            {/* STATUS KESIAPAN 4 PILAR (ATTIO READINESS BREAKDOWN) */}
+            <div className="p-4 rounded-xl bg-white border border-stone-200/80 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between border-b border-stone-100 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-stone-700" />
+                  <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+                    Status 4 Pilar Kecocokan
+                  </h3>
+                </div>
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/70">
+                  {readinessScore}% Siap
+                </span>
               </div>
-              <Link href="/directory" className="mt-4 text-[11px] text-stone-600 font-bold hover:underline flex items-center gap-1">
-                <span>Lihat profil talenta</span>
-                <ArrowRight className="w-3 h-3" />
+
+              {/* Progress bar */}
+              <div className="w-full h-1.5 rounded-full bg-stone-100 overflow-hidden">
+                <div
+                  className="h-full bg-stone-900 rounded-full transition-all duration-500"
+                  style={{ width: `${readinessScore}%` }}
+                />
+              </div>
+
+              <div className="space-y-2 pt-1 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-stone-600 flex items-center gap-1.5">
+                    <CheckCircle2 className={`w-3.5 h-3.5 ${hasBasicProfile ? "text-emerald-600" : "text-stone-300"}`} />
+                    <span>Peran Komplementer</span>
+                  </span>
+                  <span className="text-[10px] font-semibold text-stone-500">
+                    {hasBasicProfile ? "Terisi" : "Belum"}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-stone-600 flex items-center gap-1.5">
+                    <CheckCircle2 className={`w-3.5 h-3.5 ${hasPortfolio ? "text-emerald-600" : "text-stone-300"}`} />
+                    <span>DNA Estetika &amp; Portofolio</span>
+                  </span>
+                  <span className="text-[10px] font-semibold text-stone-500">
+                    {portfolioCount} Karya
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-stone-600 flex items-center gap-1.5">
+                    <CheckCircle2 className={`w-3.5 h-3.5 ${hasCommercialReadiness ? "text-emerald-600" : "text-stone-300"}`} />
+                    <span>Domisili &amp; Kompensasi</span>
+                  </span>
+                  <span className="text-[10px] font-semibold text-stone-500">
+                    {hasCommercialReadiness ? "Terverifikasi" : "Belum"}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-stone-600 flex items-center gap-1.5">
+                    <CheckCircle2 className={`w-3.5 h-3.5 ${hasSpecs ? "text-emerald-600" : "text-stone-300"}`} />
+                    <span>Resource &amp; Kapasitas Idle</span>
+                  </span>
+                  <span className="text-[10px] font-semibold text-stone-500">
+                    {myAllResources.length} Aset
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-stone-100">
+                <Link
+                  href="/readiness"
+                  className="w-full py-1.5 text-center text-xs font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded-lg transition-colors block border border-stone-200/60"
+                >
+                  Kelola Kesiapan Profil &rarr;
+                </Link>
+              </div>
+            </div>
+
+            {/* 6 CANONICAL ECOSYSTEM ACTORS (ONLINE / ACTIVE INDICATOR) */}
+            <div className="p-4 rounded-xl bg-white border border-stone-200/80 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between border-b border-stone-100 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+                    Mitra Ekosistem Aktif
+                  </h3>
+                </div>
+                <span className="text-[10px] font-semibold text-stone-600 bg-stone-100 px-2 py-0.5 rounded border border-stone-200/70">
+                  6 Peran Resmi
+                </span>
+              </div>
+
+              <div className="space-y-1.5">
+                {canonicalActors.map((actor) => {
+                  const initial = actor.name.charAt(0).toUpperCase();
+                  const isCurrent = actor.id === primaryActor.id;
+
+                  return (
+                    <Link
+                      key={actor.id}
+                      href={`/directory/${actor.id}`}
+                      className="group flex items-center justify-between p-2 rounded-lg hover:bg-stone-50 transition-colors border border-transparent hover:border-stone-200/70"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="relative shrink-0">
+                          <ActorAvatar
+                            name={actor.name}
+                            avatarUrl={actor.owner?.avatarUrl}
+                            className="w-7 h-7 rounded-md group-hover:scale-105 transition-transform"
+                            textClassName="text-xs"
+                          />
+                          <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-semibold text-stone-900 group-hover:text-stone-600 transition-colors truncate">
+                              {actor.name}
+                            </span>
+                            {isCurrent && (
+                              <span className="text-[9px] font-semibold text-emerald-800 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
+                                Anda
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-stone-500 truncate">
+                            {actor.sector} {actor.location ? `• ${actor.location}` : ""}
+                          </p>
+                        </div>
+                      </div>
+
+                      <ChevronRight className="w-3.5 h-3.5 text-stone-300 group-hover:text-stone-700 group-hover:translate-x-0.5 transition-all shrink-0" />
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="pt-1.5 border-t border-stone-100">
+                <Link
+                  href="/directory"
+                  className="w-full py-1.5 text-center text-xs font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded-lg transition-colors block border border-stone-200/60"
+                >
+                  Buka Direktori Lengkap &rarr;
+                </Link>
+              </div>
+            </div>
+
+            {/* UPCOMING PRODUCTION SCHEDULE */}
+            <div className="p-4 rounded-xl bg-white border border-stone-200/80 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between border-b border-stone-100 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-3.5 h-3.5 text-stone-700" />
+                  <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+                    Jadwal Produksi Terdekat
+                  </h3>
+                </div>
+                <span className="text-[10px] font-semibold text-stone-400">Oktober 2026</span>
+              </div>
+
+              <div className="space-y-2">
+                <div className="p-2.5 rounded-lg bg-stone-50/70 border border-stone-200/70 space-y-1">
+                  <div className="flex items-center justify-between text-[10px] font-semibold text-stone-600">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-stone-400" />
+                      12 Okt 2026 • 09:00 WIB
+                    </span>
+                    <span className="bg-white px-1.5 py-0.2 rounded border border-stone-200 text-stone-600">Sesi 1</span>
+                  </div>
+                  <h4 className="text-xs font-bold text-stone-900">Lookbook Kampanye Fesyen Linen</h4>
+                  <p className="text-[10px] text-stone-500 flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-stone-400" />
+                    <span>Studio Imaji (Daylight Cyclorama)</span>
+                  </p>
+                </div>
+
+                <div className="p-2.5 rounded-lg bg-stone-50/70 border border-stone-200/70 space-y-1">
+                  <div className="flex items-center justify-between text-[10px] font-semibold text-stone-600">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-stone-400" />
+                      15 Okt 2026 • 13:00 WIB
+                    </span>
+                    <span className="bg-white px-1.5 py-0.2 rounded border border-stone-200 text-stone-600">Fitting</span>
+                  </div>
+                  <h4 className="text-xs font-bold text-stone-900">Fitting &amp; Review Sampel Organza</h4>
+                  <p className="text-[10px] text-stone-500 flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-stone-400" />
+                    <span>Atelier Nara Studio (Bandung)</span>
+                  </p>
+                </div>
+              </div>
+
+              <Link
+                href="/collaborations"
+                className="w-full py-1.5 text-center text-xs font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded-lg transition-colors block border border-stone-200/60"
+              >
+                Lihat Kalender Kolaborasi &rarr;
               </Link>
             </div>
-            <div className="p-6 rounded-[24px] bg-stone-50 border border-stone-200 flex flex-col justify-between group hover:bg-white transition-colors hover:shadow-md">
-              <span className="text-xs font-bold text-stone-500 uppercase tracking-widest">Pesanan Anda Ditangani</span>
-              <div className="mt-4 text-5xl font-light text-[#1E1B2E] tracking-tighter group-hover:scale-105 origin-left transition-transform duration-500">
-                {totalIncomingBookings}
+
+            {/* SPK AGREEMENT & ANTI-CATFISHING ASSURANCE */}
+            <div className="p-4 rounded-xl bg-stone-50/70 border border-stone-200/80 shadow-2xs space-y-2">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+                  Kepastian Hukum &amp; SPK Digital
+                </h3>
               </div>
-              <Link href="/dashboard/bookings" className="mt-4 text-[11px] text-stone-600 font-bold hover:underline flex items-center gap-1">
-                <span>Kelola inbox pesanan</span>
-                <ArrowRight className="w-3 h-3" />
-              </Link>
+              <p className="text-[11px] text-stone-600 leading-relaxed">
+                Setiap kesepakatan kolaborasi di RAMU dilindungi Surat Perjanjian Kerja (SPK) otomatis, pembagian hak cipta transparan, dan verifikasi anti-catfishing.
+              </p>
+              <div className="pt-0.5">
+                <Link
+                  href="/collaborations"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-stone-900 hover:text-stone-600 transition-colors"
+                >
+                  <span>Buka Draf SPK Proyek</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-stone-400" />
+                </Link>
+              </div>
             </div>
-          </div>
-        </section>
+
+          </aside>
+
+        </div>
+
       </div>
     </AppShell>
   );

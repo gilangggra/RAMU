@@ -2,12 +2,18 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { RamuLogo } from "@/components/brand/RamuLogo";
 
 export function Navbar() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const isAuthPage = pathname?.startsWith("/login") || pathname?.startsWith("/register");
+  const isDarkNavbar = isAuthPage;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,41 +36,45 @@ export function Navbar() {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-white/90 backdrop-blur-md shadow-[0_4px_24px_rgba(39,33,61,0.06)] border-b border-stone-200/60 py-3.5"
+          ? isDarkNavbar
+            ? "bg-[#0E0C15]/90 backdrop-blur-md shadow-[0_4px_24px_rgba(0,0,0,0.5)] border-b border-stone-800 py-3.5"
+            : "bg-white/90 backdrop-blur-md shadow-[0_4px_24px_rgba(39,33,61,0.06)] border-b border-stone-200/60 py-3.5"
           : "bg-transparent py-5"
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative w-10 h-10 rounded-2xl bg-[#FFB800] flex items-center justify-center shadow-[0_4px_16px_rgba(255,184,0,0.4)] transition-transform group-hover:scale-105">
-            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#D9D2FF]" />
-            <svg
-              viewBox="0 0 24 24"
-              className="w-5 h-5 text-[#27213D] stroke-[2.4]"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M16 16v1a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
-              <path d="M18 8l4 4-4 4" />
-              <path d="M8 12h14" />
-            </svg>
-          </div>
+          <RamuLogo
+            size={32}
+            theme={isDarkNavbar && !scrolled ? "white" : scrolled && isDarkNavbar ? "white" : "dark"}
+            className="shrink-0 group-hover:scale-105 transition-transform"
+          />
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-xl tracking-tight text-[#27213D]">
+              <span
+                className={`font-black text-xl tracking-wider transition-colors ${
+                  isDarkNavbar ? "text-white" : "text-stone-900"
+                }`}
+              >
                 RAMU
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FFD45A]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             </div>
-            <span className="text-[10px] font-semibold tracking-wider uppercase text-[#716B7E]">
-              Mesin Peluang Kolaborasi
+            <span
+              className={`text-[10px] font-semibold tracking-wider uppercase ${
+                isDarkNavbar ? "text-stone-400" : "text-stone-500"
+              }`}
+            >
+              Platform Industri Kreatif
             </span>
           </div>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-[#716B7E]">
+        <nav
+          className={`hidden md:flex items-center gap-7 text-sm font-medium ${
+            isDarkNavbar ? "text-stone-300" : "text-[#716B7E]"
+          }`}
+        >
           <Link
             href="/#hero"
             className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
@@ -104,7 +114,9 @@ export function Navbar() {
             <>
               <Link
                 href="/login"
-                className="text-sm font-semibold text-[#27213D] hover:text-[#27213D]/70 px-4 py-2 transition-colors"
+                className={`text-sm font-semibold px-4 py-2 transition-colors ${
+                  isDarkNavbar ? "text-stone-300 hover:text-white" : "text-[#27213D] hover:text-[#27213D]/70"
+                }`}
               >
                 Masuk
               </Link>

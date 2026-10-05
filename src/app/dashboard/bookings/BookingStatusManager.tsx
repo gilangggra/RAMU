@@ -14,6 +14,8 @@ import {
   ExternalLink,
   FileText,
   ShieldCheck,
+  ArrowUpRight,
+  ArrowRight,
 } from "lucide-react";
 import { updateBookingStatus, convertBookingToCollaboration } from "@/app/api/bookings/actions";
 import { SpkAgreementModal, BookingSpkData } from "@/components/bookings/SpkAgreementModal";
@@ -48,53 +50,49 @@ export function BookingStatusManager({ bookingId }: BookingStatusManagerProps) {
 
   if (successStatus === "ACCEPTED") {
     return (
-      <div className="mt-4 pt-4 border-t border-stone-100 flex items-center justify-between p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
-        <div className="flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          <span>Pesanan Berhasil Diterima! Jadwal terkunci &amp; Kontrak Kolaborasi berlaku.</span>
-        </div>
+      <div className="p-2.5 rounded-lg bg-emerald-50/80 border border-emerald-200/80 text-emerald-800 text-xs font-medium flex items-center gap-2">
+        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+        <span>Pesanan berhasil diterima. Kontrak kerja (SPK) resmi aktif.</span>
       </div>
     );
   }
 
   if (successStatus === "DECLINED") {
     return (
-      <div className="mt-4 pt-4 border-t border-stone-100 flex items-center gap-2 p-3 rounded-xl bg-stone-100 text-stone-600 text-xs font-bold">
-        <XCircle className="w-4 h-4 text-red-500" />
+      <div className="p-2.5 rounded-lg bg-stone-100 text-stone-600 border border-stone-200/70 text-xs font-medium flex items-center gap-2">
+        <XCircle className="w-4 h-4 text-stone-400 shrink-0" />
         <span>Pesanan telah ditolak.</span>
       </div>
     );
   }
 
   return (
-    <div className="mt-4 pt-4 border-t border-stone-100 space-y-2">
+    <div className="space-y-2">
       {errorMessage && (
-        <div className="p-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center justify-between">
+        <div className="p-2 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center justify-between">
           <span>{errorMessage}</span>
-          <button onClick={() => setErrorMessage(null)} className="text-red-500 hover:text-red-800 font-bold ml-2">×</button>
+          <button onClick={() => setErrorMessage(null)} className="text-rose-500 hover:text-rose-800 font-bold ml-2">×</button>
         </div>
       )}
 
       {confirmAction ? (
-        <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
           <div>
-            <div className="text-xs font-bold text-amber-950">
-              {confirmAction === "ACCEPTED"
-                ? "Konfirmasi Terima Pesanan?"
-                : "Konfirmasi Tolak Pesanan?"}
+            <div className="font-semibold text-stone-900">
+              {confirmAction === "ACCEPTED" ? "Konfirmasi Terima Pesanan?" : "Konfirmasi Tolak Pesanan?"}
             </div>
-            <p className="text-[11px] text-amber-800 mt-0.5">
+            <p className="text-[11px] text-stone-500 mt-0.5">
               {confirmAction === "ACCEPTED"
-                ? "Dengan menerima, Anda menyetujui Kontrak Kolaborasi dan jadwal kerja terkunci."
-                : "Permintaan sewa ini akan dibatalkan."}
+                ? "Dengan menerima, jadwal terkunci dan Kontrak SPK resmi mengikat kedua pihak."
+                : "Permintaan pemesanan ini akan dibatalkan."}
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => handleStatusUpdate(confirmAction)}
               disabled={isLoading}
-              className={`px-3.5 py-1.5 rounded-lg text-white text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
-                confirmAction === "ACCEPTED" ? "bg-stone-900 hover:bg-black" : "bg-red-600 hover:bg-red-700"
+              className={`px-3 py-1.5 rounded-lg text-white text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs ${
+                confirmAction === "ACCEPTED" ? "bg-stone-900 hover:bg-black" : "bg-rose-600 hover:bg-rose-700"
               }`}
             >
               {isLoading ? (
@@ -109,26 +107,26 @@ export function BookingStatusManager({ bookingId }: BookingStatusManagerProps) {
             <button
               onClick={() => setConfirmAction(null)}
               disabled={isLoading}
-              className="px-3 py-1.5 rounded-lg bg-white border border-stone-300 text-stone-700 text-xs font-bold hover:bg-stone-100 transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-white border border-stone-200/80 text-stone-700 text-xs font-medium hover:bg-stone-50 transition-colors cursor-pointer shadow-2xs"
             >
               Batal
             </button>
           </div>
         </div>
       ) : (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setConfirmAction("ACCEPTED")}
             disabled={isLoading}
-            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#1E1B2E] hover:bg-black text-white text-[11px] font-bold uppercase tracking-widest transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer shadow-2xs"
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Terima</span>
+            <span>Terima Pesanan</span>
           </button>
           <button
             onClick={() => setConfirmAction("DECLINED")}
             disabled={isLoading}
-            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-red-50 text-stone-600 hover:text-red-600 border border-stone-200 text-[11px] font-bold uppercase tracking-widest transition-colors disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-600 hover:text-rose-600 border border-stone-200/80 text-xs font-medium transition-colors disabled:opacity-50 cursor-pointer shadow-2xs"
           >
             <XCircle className="w-3.5 h-3.5" />
             <span>Tolak</span>
@@ -152,11 +150,11 @@ export function ConvertBookingButton({ bookingId, collaborationId }: ConvertBook
     return (
       <Link
         href={`/collaborations/${collaborationId}`}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition-colors"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white font-semibold text-xs shadow-2xs transition-colors"
       >
-        <Handshake className="w-3.5 h-3.5" />
+        <Handshake className="w-3.5 h-3.5 text-stone-300" />
         <span>Buka Ruang Kolaborasi</span>
-        <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
+        <ArrowUpRight className="w-3.5 h-3.5 opacity-70" />
       </Link>
     );
   }
@@ -181,7 +179,7 @@ export function ConvertBookingButton({ bookingId, collaborationId }: ConvertBook
     <button
       onClick={handleConvert}
       disabled={isLoading}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1E1B2E] hover:bg-black text-white font-bold text-xs shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-800 font-semibold text-xs border border-stone-200/80 shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
     >
       {isLoading ? (
         <>
@@ -190,8 +188,8 @@ export function ConvertBookingButton({ bookingId, collaborationId }: ConvertBook
         </>
       ) : (
         <>
-          <Handshake className="w-3.5 h-3.5 text-amber-400" />
-          <span>Inisiasi Ruang Kolaborasi Resmi</span>
+          <Handshake className="w-3.5 h-3.5 text-stone-500" />
+          <span>Inisiasi Ruang Kolaborasi</span>
         </>
       )}
     </button>
@@ -221,14 +219,14 @@ export function BookingContactActions({ phone, email, contactName, myRole, partn
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2 pt-2">
+    <div className="flex flex-wrap items-center gap-1.5">
       {partnerActorId && (
         <Link
           href={`/messages?with=${partnerActorId}`}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold transition-colors shadow-xs"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-medium transition-colors shadow-2xs"
         >
-          <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
-          <span>Chat RAMU (Escrow Safe)</span>
+          <MessageSquare className="w-3 h-3 text-stone-300" />
+          <span>Chat Resmi RAMU</span>
         </Link>
       )}
       {waUrl && (
@@ -236,19 +234,19 @@ export function BookingContactActions({ phone, email, contactName, myRole, partn
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition-colors border border-emerald-200"
-          title="Gunakan WhatsApp hanya untuk koordinasi cepat di hari-H atau on-set darurat"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-700 text-xs font-medium border border-stone-200/80 transition-colors shadow-2xs"
+          title="Gunakan WhatsApp untuk koordinasi on-set di hari pelaksanaan"
         >
-          <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-          <span>WhatsApp (Darurat On-Set)</span>
+          <MessageCircle className="w-3 h-3 text-emerald-600" />
+          <span>WhatsApp (On-Set)</span>
         </a>
       )}
       {email && (
         <a
           href={`mailto:${email}?subject=${encodeURIComponent("Konfirmasi Pesanan RAMU: " + contactName)}`}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition-colors border border-stone-200"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-700 text-xs font-medium border border-stone-200/80 transition-colors shadow-2xs"
         >
-          <Mail className="w-3.5 h-3.5" />
+          <Mail className="w-3 h-3 text-stone-400" />
           <span>Email</span>
         </a>
       )}
@@ -267,11 +265,11 @@ export function ViewSpkButton({ booking }: ViewSpkButtonProps) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold transition-colors border border-stone-200 cursor-pointer"
-        title="Buka Surat Perjanjian Kerja & Slip Pembayaran"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-700 hover:text-stone-900 text-xs font-semibold border border-stone-200/80 shadow-2xs transition-colors cursor-pointer"
+        title="Buka Surat Perjanjian Kerja & Lembar Kesepakatan Resmi"
       >
-        <FileText className="w-3.5 h-3.5 text-amber-700" />
-        <span>Lihat Kontrak &amp; Kesepakatan</span>
+        <FileText className="w-3.5 h-3.5 text-stone-500" />
+        <span>Lihat SPK Resmi</span>
       </button>
 
       <SpkAgreementModal
@@ -299,63 +297,66 @@ export function BookingMilestoneTracker({
   const hasCollab = Boolean(collaborationId);
 
   return (
-    <div className="p-3 bg-stone-50 rounded-xl border border-stone-100 space-y-2 mt-3">
-      <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-stone-400">
-        <span className="flex items-center gap-1">
-          <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
-          <span>Alur Proteksi Pembayaran RAMU</span>
+    <div className="p-3 bg-stone-50/80 rounded-xl border border-stone-200/70 space-y-2">
+      <div className="flex items-center justify-between text-[10px] font-semibold text-stone-400 uppercase tracking-wider">
+        <span className="flex items-center gap-1.5">
+          <ShieldCheck className="w-3.5 h-3.5 text-stone-500" />
+          <span>Tahapan Transaksi &amp; SPK Terverifikasi</span>
         </span>
-        <span className="font-mono text-[9px] text-stone-500">2-Tahap Aman</span>
+        <span className="font-mono text-[9px] text-stone-400 font-medium">Standar Ekosistem RAMU</span>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 text-center">
-        <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">
-          <div className="text-[10px] font-bold">1. Kontrak Resmi</div>
-          <div className="text-[9px] text-emerald-600">Disepakati</div>
+      <div className="grid grid-cols-3 gap-2 text-center text-xs">
+        {/* Step 1: Kontrak */}
+        <div className="p-2 rounded-lg bg-white border border-stone-200/80 shadow-2xs">
+          <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-stone-800">
+            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+            <span>1. Kontrak SPK</span>
+          </div>
+          <div className="text-[10px] text-stone-500 mt-0.5 font-medium">Disahkan Digital</div>
         </div>
 
+        {/* Step 2: DP / Jadwal */}
         <div
-          className={`p-2 rounded-lg border ${
-            hasCollab
-              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-              : isAccepted
-              ? "bg-amber-50 border-amber-200 text-amber-900"
+          className={`p-2 rounded-lg border transition-all ${
+            hasCollab || isAccepted
+              ? "bg-white border-stone-200/80 shadow-2xs"
               : isDeclined
-              ? "bg-red-50 border-red-200 text-red-800"
-              : "bg-white border-stone-200 text-stone-600"
+              ? "bg-stone-100 text-stone-400 border-stone-200/60"
+              : "bg-white/60 border-stone-200/60 text-stone-400"
           }`}
         >
-          <div className="text-[10px] font-bold">2. DP {dpPercentage}%</div>
-          <div className="text-[9px]">
-            {hasCollab
-              ? "Terkunci & Aktif"
-              : isAccepted
-              ? "Kunci Jadwal"
-              : isDeclined
-              ? "Dibatalkan"
-              : "Menunggu Konfirmasi"}
+          <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-stone-800">
+            {hasCollab || isAccepted ? (
+              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+            ) : (
+              <span className="w-3 h-3 rounded-full bg-stone-200 text-stone-600 text-[8px] flex items-center justify-center font-bold">2</span>
+            )}
+            <span>2. Jadwal &amp; DP</span>
+          </div>
+          <div className="text-[10px] text-stone-500 mt-0.5 font-medium">
+            {hasCollab || isAccepted ? "Terkunci & Aktif" : isDeclined ? "Dibatalkan" : "Menunggu Konfirmasi"}
           </div>
         </div>
 
+        {/* Step 3: Workspace & Pelunasan */}
         <div
           className={`p-2 rounded-lg border transition-all ${
             hasCollab
-              ? "bg-purple-50 border-purple-200 text-purple-900 shadow-2xs"
-              : "bg-white border-stone-200 text-stone-500"
+              ? "bg-stone-900 text-white border-stone-900 shadow-2xs"
+              : "bg-white/60 border-stone-200/60 text-stone-400"
           }`}
         >
-          <div className="text-[10px] font-bold">
-            {hasCollab ? "3. Ruang Kerja" : `3. Pelunasan ${100 - dpPercentage}%`}
-          </div>
-          <div className="text-[9px] flex items-center justify-center gap-1">
+          <div className={`flex items-center justify-center gap-1 text-[11px] font-semibold ${hasCollab ? "text-white" : "text-stone-700"}`}>
             {hasCollab ? (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse" />
-                <span className="font-semibold text-purple-700">Workspace Aktif</span>
-              </>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             ) : (
-              "Serah Terima Aset"
+              <span className="w-3 h-3 rounded-full bg-stone-200 text-stone-600 text-[8px] flex items-center justify-center font-bold">3</span>
             )}
+            <span>3. Workspace</span>
+          </div>
+          <div className={`text-[10px] mt-0.5 font-medium ${hasCollab ? "text-stone-300" : "text-stone-400"}`}>
+            {hasCollab ? "Tugas & Serah Terima" : "Pelunasan & Luaran"}
           </div>
         </div>
       </div>

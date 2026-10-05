@@ -14,6 +14,8 @@ import {
   User,
   ExternalLink,
   Award,
+  Download,
+  Loader2,
 } from "lucide-react";
 import {
   TermsAndConditionsConfig,
@@ -22,6 +24,7 @@ import {
   getUsageDurationLabel,
   getMilestoneSchemeLabel,
 } from "@/components/settings/RatesForm";
+import { exportElementToPdf } from "@/lib/export/pdfExporter";
 
 export interface BookingSpkData {
   id: string;
@@ -63,6 +66,7 @@ function toRomanMonth(month: number): string {
 
 export function SpkAgreementModal({ isOpen, onClose, booking }: SpkAgreementModalProps) {
   const [copied, setCopied] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
   if (!isOpen) return null;
 
@@ -115,6 +119,27 @@ export function SpkAgreementModal({ isOpen, onClose, booking }: SpkAgreementModa
   const isDesigner = !isStudio && !isModel && !isMua && !isStylist && !isVideographer && (targetSectorLower.includes("design") || targetSectorLower.includes("fashion") || targetSectorLower.includes("busana"));
   const isPhotographer = !isStudio && !isModel && !isMua && !isStylist && !isVideographer && !isDesigner;
 
+  async function handleExportPdf() {
+    setIsExportingPdf(true);
+    try {
+      const el = document.getElementById("spk-printable-area");
+      if (!el) {
+        window.print();
+        return;
+      }
+      const clientName = (booking.requester.name || "Klien").replace(/[^a-zA-Z0-9]/g, "-").slice(0, 20);
+      const talentName = (booking.target.name || "Talenta").replace(/[^a-zA-Z0-9]/g, "-").slice(0, 20);
+      await exportElementToPdf(el, {
+        filename: `SPK-${clientName}-${talentName}-${shortId}.pdf`,
+      });
+    } catch (err) {
+      console.error("Gagal ekspor PDF otomatis, beralih ke print dialog:", err);
+      window.print();
+    } finally {
+      setIsExportingPdf(false);
+    }
+  }
+
   function handlePrint() {
     window.print();
   }
@@ -153,7 +178,7 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
       `Skema: ${milestoneInfo.title}\n` +
       `Lisensi Hak Pakai: ${getUsageScopeLabel(terms.usageRightsScope).split(" (")[0]} (${getUsageDurationLabel(terms.usageRightsDuration).split(" —")[0]})\n` +
       `Batas Revisi: Maksimal ${terms.maxRevisions}x putaran minor\n\n` +
-      `Dokumen perikatan sah sesuai KUHPerdata Pasal 1320 & UU ITE tercatat di RAMU.`
+      `Dokumen kesepakatan kolaborasi terverifikasi di RAMU.`
   )}`;
 
   return (
@@ -175,12 +200,22 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
           </div>
           <div className="flex items-center gap-2">
             <button
+              type="button"
+              onClick={handleExportPdf}
+              disabled={isExportingPdf}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer disabled:opacity-50 shadow-xs"
+              title="Unduh Lembar SPK Resmi dalam Format Dokumen PDF"
+            >
+              <Download className={`w-3.5 h-3.5 ${isExportingPdf ? "animate-bounce" : ""}`} />
+              <span>{isExportingPdf ? "Mengunduh PDF..." : "Unduh PDF"}</span>
+            </button>
+            <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-stone-300 text-stone-700 text-xs font-semibold hover:bg-stone-50 transition-colors cursor-pointer shadow-xs"
               title="Cetak Dokumen Resmi A4"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Cetak / PDF A4</span>
+              <span className="hidden sm:inline">Cetak</span>
             </button>
             <a
               href={waShareUrl}
@@ -484,7 +519,7 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
                   Segala perselisihan yang timbul dari pelaksanaan Perjanjian ini akan diselesaikan terlebih dahulu melalui musyawarah mufakat secara kekeluargaan, dengan difasilitasi oleh platform RAMU sebagai penyedia catatan jejak digital (*audit trail*).
                 </li>
                 <li>
-                  Perjanjian ini tunduk pada hukum positif Negara Republik Indonesia, khususnya Kitab Undang-Undang Hukum Perdata (KUHPerdata) Pasal 1320 dan Pasal 1338, Undang-Undang No. 28 Tahun 2014 tentang Hak Cipta, serta Undang-Undang No. 11 Tahun 2008 jo. UU No. 1 Tahun 2024 tentang Informasi dan Transaksi Elektronik (UU ITE).
+                  Kesepakatan ini disusun atas persetujuan sadar dan sukarela PARA PIHAK sebagai acuan rujukan hak, kewajiban, dan ruang lingkup lisensi penggunaan karya dalam pelaksanaan kerja sama.
                 </li>
               </ol>
             </div>
@@ -492,8 +527,11 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
 
           <div className="pt-6 border-t-2 border-stone-900 space-y-4">
             <p className="text-[11px] text-stone-600 leading-relaxed">
-              Demikian Surat Perjanjian Kerja Sama Jasa ini dibuat dan disetujui secara sadar, sukarela, dan tanpa paksaan oleh PARA PIHAK melalui persetujuan digital di platform RAMU. Dokumen elektronik ini memiliki kekuatan hukum yang sah dan mengikat kedua belah pihak sejak tanggal diterbitkan.
+              Demikian Draf Surat Perjanjian Kerja Sama Jasa ini disusun dan disetujui secara sadar, sukarela, dan tanpa paksaan oleh PARA PIHAK melalui persetujuan digital di platform RAMU sebagai kesepakatan acuan bersama dalam pelaksanaan proyek.
             </p>
+            <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-900 text-[10px] leading-relaxed">
+              <strong>Catatan Platform:</strong> Draf kesepakatan ini disusun secara otomatis oleh <em>RAMU Collaboration Agreement Generator</em>. Dokumen ini disarankan untuk ditinjau dan disesuaikan oleh pihak yang berkompeten sebelum digunakan sebagai instrumen hukum formal.
+            </div>
 
             <div className="grid grid-cols-2 gap-8 pt-4">
 
