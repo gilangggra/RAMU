@@ -370,7 +370,7 @@ export function formatInstagramCredits(item: ShowcaseItem, data: TearSheetData):
 
   return `EDITORIAL TEAR-SHEET: "${data.title}"
 ${data.edition}
-Curated on @ramu.creative • Creative Opportunity Engine
+Curated on @ramu.creative • Platform Kolaborasi Komplementaritas Resource
 
 ANTI-CATFISHING STATUS: #${data.antiCatfishingCertificateId}
 Status: ${data.verificationRate}

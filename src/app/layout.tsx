@@ -15,9 +15,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "RAMU — Creative Opportunity Engine",
+  title: "RAMU — Platform Kolaborasi Berbasis Komplementaritas Resource",
   description:
-    "Platform analisis komplementaritas aset dan pembentuk peluang kolaborasi terstruktur untuk pelaku ekonomi kreatif Indonesia.",
+    "Ekosistem aktivasi kapasitas resource menganggur dan pencocokan komplementer terstruktur untuk industri fashion dan visual kreatif Indonesia.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -27,7 +32,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className={`${plusJakarta.variable} ${inter.variable}`}>
-      <body className="font-sans antialiased selection:bg-amber-500/30 selection:text-amber-900 min-h-screen">
+      <body className="font-sans antialiased selection:bg-stone-900 selection:text-white min-h-screen">
         {children}
       </body>
     </html>

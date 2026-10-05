@@ -33,44 +33,58 @@ interface OnboardingClientFormProps {
   error?: string;
 }
 
-const ACTOR_TYPES = [
+interface OfficialRoleOption {
+  role: string;
+  actorType: "BRAND" | "INDIVIDUAL" | "STUDIO";
+  icon: React.ElementType;
+  badge: string;
+  desc: string;
+}
+
+const SIX_OFFICIAL_ROLES: OfficialRoleOption[] = [
   {
-    id: "INDIVIDUAL",
-    icon: Sparkles,
-    title: "Kreatif & Talenta",
-    badge: "Penyedia Jasa & Fasilitas",
-    desc: "Fotografer, model, stylist, MUA, videografer, desainer, serta studio foto & ruang produksi.",
+    role: "Fashion Brand/UMKM",
+    actorType: "BRAND",
+    icon: Building,
+    badge: "Brand & Klien",
+    desc: "Brand mode, label busana, atau UMKM apparel yang merekrut kru & memproduksi kampanye.",
   },
   {
-    id: "BRAND",
-    icon: Building,
-    title: "Brand & Klien",
-    badge: "Pemberi Kerja / Klien",
-    desc: "Fashion brand, label busana, agensi periklanan, produser kampanye, atau bisnis yang merekrut kru.",
+    role: "Fashion Designer",
+    actorType: "INDIVIDUAL",
+    icon: Scissors,
+    badge: "Kreator Busana",
+    desc: "Perancang busana, pattern maker, dan desainer fesyen independen.",
+  },
+  {
+    role: "Photographer",
+    actorType: "INDIVIDUAL",
+    icon: Camera,
+    badge: "Fotografi Visual",
+    desc: "Fotografer fashion, editorial lookbook, katalog produk, dan kampanye komersial.",
+  },
+  {
+    role: "Model",
+    actorType: "INDIVIDUAL",
+    icon: Star,
+    badge: "Model & Muse",
+    desc: "Model peraga busana, editorial muse, talent runway & lookbook katalog.",
+  },
+  {
+    role: "MUA/Stylist",
+    actorType: "INDIVIDUAL",
+    icon: Brush,
+    badge: "Beauty & Style",
+    desc: "Makeup artist, hair stylist, dan penata gaya busana (wardrobe stylist) sesi pemotretan.",
+  },
+  {
+    role: "Studio",
+    actorType: "STUDIO",
+    icon: Package,
+    badge: "Studio Space",
+    desc: "Fasilitas studio foto sewa, cyclorama wall, lighting kit & ruang produksi.",
   },
 ];
-
-const ROLES_BY_TYPE: Record<string, { icon: React.ElementType; label: string; desc: string }[]> = {
-  INDIVIDUAL: [
-    { icon: Camera, label: "Fotografi Editorial & Fashion", desc: "Fotografi editorial, lookbook & kampanye" },
-    { icon: Star, label: "Model & Talent Visual", desc: "Pemodelan lookbook dan talent runway" },
-    { icon: Scissors, label: "Stylist & Wardrobe", desc: "Pengarah gaya, wardrobe & fitting busana" },
-    { icon: Brush, label: "Makeup & Hair Artist (MUA)", desc: "Riasan wajah editorial, hair styling & beauty" },
-    { icon: Video, label: "Videografi & Fashion Film", desc: "Dokumentasi bergerak, reels & short fashion film" },
-    { icon: Package, label: "Studio Foto & Ruang Kreatif", desc: "Studio foto sewa & fasilitas lighting cyclorama" },
-    { icon: Palette, label: "Creative & Art Director", desc: "Konsep, moodboard & visi artistik proyek" },
-    { icon: Package, label: "Set Design & Props", desc: "Tata panggung studio, instalasi & properti" },
-    { icon: Scissors, label: "Fashion Designer / Atelier", desc: "Perancang busana, pola & apparel independen" },
-    { icon: Sparkles, label: "Lainnya", desc: "Peran visual & kreatif lainnya" },
-  ],
-  BRAND: [
-    { icon: Scissors, label: "Fashion Designer / Label", desc: "Brand ready-to-wear, couture, atau modest fashion" },
-    { icon: Palette, label: "Fashion Agency / Producer", desc: "Agensi & penyelenggara acara fashion show" },
-    { icon: Star, label: "Model Agency", desc: "Agensi manajemen talent & model profesional" },
-    { icon: Package, label: "Textile & Material Brand", desc: "Penyedia kain, wastra nusantara, atau material" },
-    { icon: Sparkles, label: "Lainnya", desc: "Bisnis fashion, retail, atau UMKM kreatif" },
-  ],
-};
 
 const AESTHETIC_STYLES = [
   "Minimalist",
@@ -92,34 +106,29 @@ export function OnboardingClientForm({
   popularLocations,
   error,
 }: OnboardingClientFormProps) {
-
-  const getInitialActorType = (role: string) => {
-    const r = role.toLowerCase();
-    if (r.includes("brand") || r.includes("label") || r.includes("agency") || r.includes("produser") || r.includes("agensi")) {
-      return "BRAND";
+  const getInitialRole = (roleStr: string): OfficialRoleOption => {
+    const r = (roleStr || "").toLowerCase();
+    if (r.includes("brand") || r.includes("label") || r.includes("umkm")) {
+      return SIX_OFFICIAL_ROLES[0];
     }
-    return "INDIVIDUAL";
+    if (r.includes("designer") || r.includes("desain") || r.includes("perancang")) {
+      return SIX_OFFICIAL_ROLES[1];
+    }
+    if (r.includes("model") || r.includes("talent") || r.includes("muse")) {
+      return SIX_OFFICIAL_ROLES[3];
+    }
+    if (r.includes("mua") || r.includes("makeup") || r.includes("stylist") || r.includes("wardrobe")) {
+      return SIX_OFFICIAL_ROLES[4];
+    }
+    if (r.includes("studio") || r.includes("ruang")) {
+      return SIX_OFFICIAL_ROLES[5];
+    }
+    return SIX_OFFICIAL_ROLES[2]; // Default Photographer
   };
 
-  const [selectedActorType, setSelectedActorType] = useState<string>(
-    getInitialActorType(userInitialRole)
+  const [selectedRole, setSelectedRole] = useState<OfficialRoleOption>(() =>
+    getInitialRole(userInitialRole)
   );
-
-  const availableRoles = ROLES_BY_TYPE[selectedActorType] || ROLES_BY_TYPE.INDIVIDUAL;
-
-  const [selectedSector, setSelectedSector] = useState<string>(() => {
-    const match = availableRoles.find((r) => r.label === userInitialRole);
-    return match ? match.label : availableRoles[0].label;
-  });
-
-  const handleActorTypeChange = (typeId: string) => {
-    setSelectedActorType(typeId);
-    const newRoles = ROLES_BY_TYPE[typeId] || ROLES_BY_TYPE.INDIVIDUAL;
-    const exists = newRoles.some((r) => r.label === selectedSector);
-    if (!exists) {
-      setSelectedSector(newRoles[0].label);
-    }
-  };
 
   return (
     <form action={createActorProfile} className="space-y-8">
@@ -130,32 +139,36 @@ export function OnboardingClientForm({
         </div>
       )}
 
+      {/* 1. SELEKSI 6 PERAN RESMI */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <label className="block text-xs font-bold uppercase tracking-wider text-[#27213D]">
-            1. Bentuk Entitas Kreatif *
+            1. Peran Resmi Anda di RAMU *
           </label>
-          <span className="text-[11px] text-[#716B7E] font-medium">Pilih identitas utama Anda</span>
+          <span className="text-[11px] text-[#716B7E] font-medium">
+            Eksklusif 6 Entitas Ekosistem
+          </span>
         </div>
 
-        <input type="hidden" name="actorType" value={selectedActorType} />
+        <input type="hidden" name="sector" value={selectedRole.role} />
+        <input type="hidden" name="actorType" value={selectedRole.actorType} />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {ACTOR_TYPES.map((type) => {
-            const Icon = type.icon;
-            const isSelected = selectedActorType === type.id;
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {SIX_OFFICIAL_ROLES.map((item) => {
+            const Icon = item.icon;
+            const isSelected = selectedRole.role === item.role;
             return (
               <button
                 type="button"
-                key={type.id}
-                onClick={() => handleActorTypeChange(type.id)}
-                className={`p-4 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between ${
+                key={item.role}
+                onClick={() => setSelectedRole(item)}
+                className={`p-4 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between cursor-pointer ${
                   isSelected
-                    ? "bg-[#FFFDF7] border-[#FFB800] ring-2 ring-[#FFB800]/25 shadow-sm"
-                    : "bg-[#FAF8F5] border-stone-200/80 hover:border-stone-300 hover:bg-stone-50/80"
+                    ? "bg-[#27213D] text-white border-[#27213D] shadow-md ring-2 ring-[#FFB800]"
+                    : "bg-[#FAF8F5] border-stone-200/80 hover:border-stone-300 hover:bg-stone-50 text-[#27213D]"
                 }`}
               >
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-3">
                   <div
                     className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
                       isSelected
@@ -168,74 +181,28 @@ export function OnboardingClientForm({
                   <span
                     className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
                       isSelected
-                        ? "bg-[#27213D] text-[#FFFDFC]"
+                        ? "bg-white/20 text-[#FFB800]"
                         : "bg-stone-200/60 text-[#716B7E]"
                     }`}
                   >
-                    {type.badge}
+                    {item.badge}
                   </span>
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-[#27213D] leading-tight mb-1">
-                    {type.title}
+                  <h4
+                    className={`text-sm font-bold leading-tight mb-1 ${
+                      isSelected ? "text-white" : "text-[#27213D]"
+                    }`}
+                  >
+                    {item.role}
                   </h4>
-                  <p className="text-[11px] text-[#716B7E] leading-relaxed line-clamp-2">
-                    {type.desc}
-                  </p>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="space-y-3 pt-2">
-        <div className="flex items-center justify-between">
-          <label className="block text-xs font-bold uppercase tracking-wider text-[#27213D]">
-            2. Peran & Keahlian Spesifik *
-          </label>
-          <span className="text-[11px] text-[#716B7E] font-medium">
-            Tersedia untuk {ACTOR_TYPES.find((t) => t.id === selectedActorType)?.title}
-          </span>
-        </div>
-
-        <input type="hidden" name="sector" value={selectedSector} />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {availableRoles.map((role) => {
-            const RoleIcon = role.icon;
-            const isSelected = selectedSector === role.label;
-            return (
-              <button
-                type="button"
-                key={role.label}
-                onClick={() => setSelectedSector(role.label)}
-                className={`p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3 ${
-                  isSelected
-                    ? "bg-[#27213D] text-white border-[#27213D] shadow-md"
-                    : "bg-[#FAF8F5] border-stone-200/80 hover:border-stone-300 text-[#27213D] hover:bg-white"
-                }`}
-              >
-                <div
-                  className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                    isSelected
-                      ? "bg-white/20 text-[#FFB800]"
-                      : "bg-white border border-stone-200 text-[#716B7E]"
-                  }`}
-                >
-                  <RoleIcon className="w-4 h-4" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-bold leading-tight mb-0.5 truncate">
-                    {role.label}
-                  </div>
-                  <div
-                    className={`text-[10px] leading-tight line-clamp-1 ${
+                  <p
+                    className={`text-[11px] leading-relaxed line-clamp-2 ${
                       isSelected ? "text-stone-300" : "text-[#716B7E]"
                     }`}
                   >
-                    {role.desc}
-                  </div>
+                    {item.desc}
+                  </p>
                 </div>
               </button>
             );
@@ -258,7 +225,7 @@ export function OnboardingClientForm({
             required
             defaultValue={userInitialName}
             placeholder={
-              selectedActorType === "BRAND"
+              selectedRole.actorType === "BRAND"
                 ? "misal: Maison Nusantara / Svarga Wear"
                 : "misal: Alex Tan Photography / Studio Arkha"
             }

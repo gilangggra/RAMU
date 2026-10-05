@@ -15,17 +15,17 @@ export function Hero() {
             <div className="inline-flex items-center gap-3">
                <span className="w-8 h-px bg-stone-300"></span>
                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
-                 Ekosistem Kreatif Eksklusif
+                 Ekosistem Ekonomi Kolaboratif UMKM Kreatif
                </span>
             </div>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-light text-[#1E1B2E] tracking-tight leading-[1.05]">
-              Produksi <br />
-              <span className="font-serif italic text-stone-500">visual</span> kelas dunia.
+              Ubah apa yang Anda miliki <br />
+              menjadi <span className="font-serif italic text-stone-500">karya bisnis</span> bersama.
             </h1>
 
             <p className="text-base sm:text-lg text-stone-500 font-light leading-relaxed max-w-md">
-              Temukan dan kolaborasi dengan desainer busana, fotografer editorial, model, dan studio visual terverifikasi. RAMU merangkai produksi tingkat tinggi dengan transparansi mutlak.
+              RAMU menghubungkan aset, kapasitas idle, dan keahlian antar UMKM kreatif menjadi proyek kolaborasi komersial yang saling melengkapi dan terukur.
             </p>
 
             <div className="pt-4 flex flex-wrap items-center gap-5">

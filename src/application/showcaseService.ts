@@ -19,7 +19,7 @@ export interface ShowcaseItem {
   isOwner?: boolean;
   isCoCreditor?: boolean;
   tearSheet?: any;
-  availableActors?: { id: string; name: string; sector: string; location: string | null }[];
+  availableActors?: { id: string; name: string; sector: string; location: string | null; owner?: { avatarUrl: string | null } | null }[];
   actor: {
     id: string;
     name: string;
@@ -31,6 +31,7 @@ export interface ShowcaseItem {
     compensationModels: string[];
     initials: string;
     avatarBg: string;
+    avatarUrl?: string | null;
   };
 }
 
@@ -94,7 +95,10 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
           experienceLevel: true,
           aestheticStyles: true,
           compensationModels: true,
-          actorType: true
+          actorType: true,
+          owner: {
+            select: { avatarUrl: true }
+          }
         }
       }
     },
@@ -110,6 +114,9 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
       name: true,
       sector: true,
       location: true,
+      owner: {
+        select: { avatarUrl: true }
+      }
     },
     take: 50,
   });
@@ -122,9 +129,14 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
     const tearSheet = attrs.tear_sheet || null;
 
     const isOwner = currentActorId ? asset.actorId === currentActorId : false;
-    const isCoCreditor = currentActorId && tearSheet?.credits
-      ? tearSheet.credits.some((c: any) => c.actorId === currentActorId)
-      : false;
+    const isCoCreditor =
+      currentActorId && tearSheet?.credits
+        ? tearSheet.credits.some(
+            (c: any) =>
+              c.actorId === currentActorId &&
+              (c.verified === true || c.status === "VERIFIED")
+          )
+        : false;
 
     if (scope === "mine") {
       if (!isOwner && !isCoCreditor) {
@@ -194,7 +206,8 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
         aestheticStyles: asset.actor.aestheticStyles || [],
         compensationModels: asset.actor.compensationModels || [],
         initials,
-        avatarBg: getAvatarBg(asset.actor.sector)
+        avatarBg: getAvatarBg(asset.actor.sector),
+        avatarUrl: asset.actor.owner?.avatarUrl || null
       }
     });
   });
@@ -225,7 +238,13 @@ export async function getActorShowcaseCount(actorId: string): Promise<number> {
         count++;
       } else if (asset.attributes) {
         const attrs = asset.attributes as any;
-        if (attrs.tear_sheet?.credits?.some((c: any) => c.actorId === actorId)) {
+        if (
+          attrs.tear_sheet?.credits?.some(
+            (c: any) =>
+              c.actorId === actorId &&
+              (c.verified === true || c.status === "VERIFIED")
+          )
+        ) {
           count++;
         }
       }

@@ -9,14 +9,38 @@ export interface ServicePackage {
   features: string[];
 }
 
+/**
+ * 6 PERAN RESMI AKTOR DI PLATFORM RAMU:
+ * 1. Fashion Brand/UMKM
+ * 2. Fashion Designer
+ * 3. Photographer
+ * 4. Model
+ * 5. MUA/Stylist
+ * 6. Studio
+ * Tidak boleh ada yang lain.
+ */
+export const ALLOWED_ACTOR_ROLES = [
+  "Fashion Brand/UMKM",
+  "Fashion Designer",
+  "Photographer",
+  "Model",
+  "MUA/Stylist",
+  "Studio",
+] as const;
+
+export type AllowedActorRole = (typeof ALLOWED_ACTOR_ROLES)[number];
+
 export type RoleCategory =
+  | "BRAND"
+  | "DESIGNER"
   | "PHOTOGRAPHER"
-  | "VIDEOGRAPHER"
   | "MODEL"
+  | "MUA_STYLIST"
+  | "STUDIO"
+  // Legacy aliases untuk kompatibilitas ke belakang
   | "MUA"
   | "STYLIST"
-  | "DESIGNER"
-  | "STUDIO";
+  | "VIDEOGRAPHER";
 
 export interface RolePresetData {
   id: RoleCategory;
@@ -33,9 +57,186 @@ export interface RolePresetData {
 }
 
 export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
+  BRAND: {
+    id: "BRAND",
+    name: "Fashion Brand/UMKM",
+    roleBadge: "Brand / UMKM",
+    defaultStartingRate: "Sesuai Anggaran Brief",
+    quickRates: [
+      "Sesuai Anggaran Brief",
+      "Sistem Bagi Hasil Produk",
+      "Kompensasi Flat Fee",
+      "Barter / TFP Kolaborasi",
+    ],
+    defaultTurnaround: "Sesuai Timeline Kampanye",
+    quickTurnarounds: [
+      "1 – 2 Minggu",
+      "3 – 4 Minggu",
+      "1 Bulan Kampanye",
+      "Sesuai Kalender Musim",
+    ],
+    commonUnits: ["per proyek", "per kampanye", "per koleksi", "bagi hasil", "per bulan"],
+    quickDeliverableSuggestions: [
+      "Penyediaan Sampel Busana / Outfit",
+      "Dokumen Brief & Moodboard Resmi",
+      "Distribusi Promosi Omnichannel",
+      "Pemberian Co-Credit Seluruh Kru",
+      "Pembayaran Termin DP 50%",
+      "Listing Produk di E-Commerce",
+      "Akses Display Toko / Flagship",
+    ],
+    packages: [
+      {
+        title: "Kolaborasi Kampanye Lookbook",
+        subtitle: "Penyediaan sampel busana & pendanaan produksi lookbook koleksi baru",
+        price: "Sesuai Brief",
+        unit: "per kampanye",
+        popular: true,
+        features: [
+          "Penyediaan 10-15 look busana sampel siap fitting",
+          "Pembagian biaya produksi terstruktur (DP 50% di awal)",
+          "Pencantuman kredit resmi seluruh tim di lookbook & media sosial",
+          "Distribusi konten promosi di kanal resmi brand",
+        ],
+      },
+      {
+        title: "Co-Branding Koleksi Kapsul",
+        subtitle: "Kemitraan pembuatan lini produk eksklusif edisi terbatas dengan sistem bagi hasil",
+        price: "Bagi Hasil",
+        unit: "per koleksi",
+        popular: false,
+        features: [
+          "Pengembangan desain bersama desainer & kolaborator",
+          "Distribusi retail & penjualan di platform resmi brand",
+          "Bagi hasil transparan dari penjualan bersih",
+          "Hak cipta & kredit bersama diakui dalam SPK",
+        ],
+      },
+      {
+        title: "Katalog & E-Commerce Listing",
+        subtitle: "Sesi foto katalog bersih untuk peluncuran marketplace & website",
+        price: "Sesuai Brief",
+        unit: "per proyek",
+        popular: false,
+        features: [
+          "Foto produk packshot & on-model terstandar",
+          "Penyediaan garmen rapi & siap dipotret",
+          "Penggunaan hak tayang komersial digital",
+        ],
+      },
+    ],
+    defaultTerms: {
+      dpPercentage: 50,
+      maxRevisions: 2,
+      shiftHours: 8,
+      overtimeRate: "Rp 200.000 / jam",
+      gracePeriodMinutes: 30,
+      safeSetCompliant: true,
+      usageRightsScope: "ORGANIC_SOCIAL",
+      usageRightsDuration: "1_YEAR",
+      extraRevisionFee: "Rp 150.000 / revisi",
+      paymentMilestoneScheme: "50_50_WATERMARK",
+      roleSpecifics: {
+        brandCreditRequired: true,
+      },
+    },
+  },
+
+  DESIGNER: {
+    id: "DESIGNER",
+    name: "Fashion Designer",
+    roleBadge: "Fashion Designer",
+    defaultStartingRate: "Mulai Rp 2,5 Jt / koleksi",
+    quickRates: [
+      "Mulai Rp 1,5 Jt / desain",
+      "Mulai Rp 2,5 Jt / koleksi",
+      "Mulai Rp 4,0 Jt / proyek",
+      "Mulai Rp 500rb / sketsa",
+    ],
+    defaultTurnaround: "7 – 14 Hari Kerja",
+    quickTurnarounds: [
+      "3 – 5 Hari Kerja",
+      "7 – 14 Hari Kerja",
+      "14 – 21 Hari Kerja",
+      "Sesuai Timeline Batch",
+    ],
+    commonUnits: ["per proyek", "per koleksi", "per desain", "per sesi", "per batch"],
+    quickDeliverableSuggestions: [
+      "Moodboard & Tren Visual Riset",
+      "5-8 Sketsa Desain 2D Digital",
+      "Lembar Spesifikasi Teknis (Tech-Pack)",
+      "Pembuatan Pola (Pattern Making)",
+      "Prototipe Sampel Fisik (Toille)",
+      "Desain Packaging & Hangtag",
+      "Panduan Identitas Brand Kit",
+      "Gratis 2x Revisi Desain",
+    ],
+    packages: [
+      {
+        title: "Identitas Visual & Brand Kit",
+        subtitle: "Panduan visual brand busana lengkap untuk rilis koleksi baru",
+        price: "Rp 2.000.000",
+        unit: "per proyek",
+        popular: false,
+        features: [
+          "Panduan logo, tipografi, dan palet warna busana",
+          "Template visual lookbook & feed media sosial",
+          "Aset vektor master file (AI, EPS, PDF, SVG)",
+          "Gratis 2x revisi desain visual",
+        ],
+      },
+      {
+        title: "Desain Koleksi Busana & Tech-Pack",
+        subtitle: "Pengembangan konsep busana siap jahit dan spesifikasi garmen pabrik",
+        price: "Rp 3.500.000",
+        unit: "per koleksi",
+        popular: true,
+        features: [
+          "Riset tren & moodboard konsep koleksi (5-8 outfit)",
+          "Sketsa desain digital 2D (tampak depan & belakang)",
+          "Lembar spesifikasi teknis (tech-pack) lengkap ukuran & bahan",
+          "Rekomendasi jenis kain, gramasi, & aksesoris kancing/zipper",
+          "Gratis 2x putaran revisi teknis",
+        ],
+      },
+      {
+        title: "Pembuatan Pola & Sampel Fisik (Toille)",
+        subtitle: "Pengerjaan prototipe fisik busana pertama siap fitting bersama model",
+        price: "Rp 5.500.000",
+        unit: "per koleksi",
+        popular: false,
+        features: [
+          "Pembuatan pola presisi (pattern making) ukuran standar",
+          "Pengerjaan sampel fisik busana (toille mock-up)",
+          "1x Sesi fitting langsung bersama model & revisi ukuran",
+          "Standar jahitan rapi kualitas butik/atelier",
+          "Hak kekayaan intelektual desain diserahkan penuh ke klien",
+        ],
+      },
+    ],
+    defaultTerms: {
+      dpPercentage: 50,
+      maxRevisions: 2,
+      shiftHours: 8,
+      overtimeRate: "Rp 200.000 / jam",
+      gracePeriodMinutes: 30,
+      safeSetCompliant: true,
+      usageRightsScope: "ORGANIC_SOCIAL",
+      usageRightsDuration: "PERPETUAL",
+      extraRevisionFee: "Rp 250.000 / putaran revisi ekstra",
+      paymentMilestoneScheme: "50_50_WATERMARK",
+      roleSpecifics: {
+        fittingPolicy: "Fitting busana dilakukan H-1 atau di lokasi sebelum sesi dimulai",
+        dryCleaningResponsibility: "Biaya laundry / dry cleaning busana pasca-sesi ditanggung oleh klien/peminjam",
+        noAlteringPolicy: "Dilarang memotong, mengubah jahitan, atau merusak siluet busana tanpa izin tertulis desainer",
+        brandCreditRequired: true,
+      },
+    },
+  },
+
   PHOTOGRAPHER: {
     id: "PHOTOGRAPHER",
-    name: "Fotografer (Fashion & Komersial)",
+    name: "Photographer",
     roleBadge: "Fotografi",
     defaultStartingRate: "Mulai Rp 1,5 Jt / sesi",
     quickRates: [
@@ -124,101 +325,9 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
     },
   },
 
-  VIDEOGRAPHER: {
-    id: "VIDEOGRAPHER",
-    name: "Videografer & Cinema Fashion",
-    roleBadge: "Videografi",
-    defaultStartingRate: "Mulai Rp 1,8 Jt / video",
-    quickRates: [
-      "Mulai Rp 1,5 Jt / video",
-      "Mulai Rp 1,8 Jt / video",
-      "Mulai Rp 3,5 Jt / hari",
-      "Mulai Rp 5,0 Jt / proyek",
-    ],
-    defaultTurnaround: "4 – 6 Hari Kerja",
-    quickTurnarounds: [
-      "2 – 3 Hari (Kilat)",
-      "4 – 6 Hari Kerja",
-      "7 – 10 Hari Kerja",
-      "Selesai On-Set",
-    ],
-    commonUnits: ["per video", "per 4 jam", "per 8 jam", "per proyek"],
-    quickDeliverableSuggestions: [
-      "1 Master Video 4K (16:9)",
-      "2 Cutdown Reels/TikTok (9:16)",
-      "Kamera Sinema 4K + Gimbal",
-      "Lighting Continuous & Mic Wireless",
-      "Color Grading DaVinci Resolve",
-      "Lisensi Musik Komersial Bebas Klaim",
-      "Gratis 2x Revisi Offline/Warna",
-    ],
-    packages: [
-      {
-        title: "Reels & TikTok Cinematic",
-        subtitle: "Video fashion vertikal 9:16 untuk media sosial dan promosi rilis",
-        price: "Rp 1.800.000",
-        unit: "per 4 jam",
-        popular: false,
-        features: [
-          "1-2 Video reels sinematik durasi 30-45 detik",
-          "Kamera sinema 4K + Gimbal stabilization",
-          "Color grading khas seluloid / warm tone",
-          "Lisensi musik komersial legal tanpa copyright strike",
-          "Gratis 1x revisi minor",
-        ],
-      },
-      {
-        title: "Fashion Film & Campaign Video",
-        subtitle: "Video kampanye sinematik lookbook untuk peluncuran koleksi busana",
-        price: "Rp 3.500.000",
-        unit: "per 8 jam",
-        popular: true,
-        features: [
-          "1 Master film 4K (16:9) + 2 Cutdowns Reels (9:16)",
-          "Lighting kit continuous bawaan + wireless lavalier mic",
-          "Storyboarding & arahan visual on-set",
-          "Color grading profesional di DaVinci Resolve",
-          "Gratis 2x revisi color grading & offline edit",
-          "Delivery cepat 4-5 hari kerja",
-        ],
-      },
-      {
-        title: "Iklan TVC / Commercial Brand Video",
-        subtitle: "Produksi video iklan komersial skala penuh dengan aset multi-format",
-        price: "Rp 6.000.000",
-        unit: "per proyek",
-        popular: false,
-        features: [
-          "Setup multi-kamera 4K 10-bit ProRes + Drone aerial",
-          "Full audio field recording 32-bit float",
-          "Color grading ACES standar bioskop di DaVinci Resolve",
-          "Full commercial broadcast & advertising license",
-          "Penyusunan naskah visual & storyboard komprehensif",
-        ],
-      },
-    ],
-    defaultTerms: {
-      dpPercentage: 50,
-      maxRevisions: 2,
-      shiftHours: 8,
-      overtimeRate: "Rp 300.000 / jam",
-      gracePeriodMinutes: 30,
-      safeSetCompliant: true,
-      usageRightsScope: "PAID_ADS_DIGITAL",
-      usageRightsDuration: "1_YEAR",
-      extraRevisionFee: "Rp 350.000 / putaran revisi ekstra",
-      paymentMilestoneScheme: "50_50_WATERMARK",
-      roleSpecifics: {
-        aspectRatiosIncluded: "1x Vertikal Reels 9:16 (30-45 dtk) & 1x Master 16:9",
-        musicLicenseIncluded: true,
-        majorRevisionFeeNote: "Ganti musik latar setelah final cut dikenakan biaya re-editing",
-      },
-    },
-  },
-
   MODEL: {
     id: "MODEL",
-    name: "Model / Talent Fashion",
+    name: "Model",
     roleBadge: "Model & Talent",
     defaultStartingRate: "Mulai Rp 1,0 Jt / sesi",
     quickRates: [
@@ -248,53 +357,40 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
         title: "Katalog & E-Commerce",
         subtitle: "Foto produk katalog marketplace & webstore brand",
         price: "Rp 1.000.000",
-        unit: "per 3-4 jam",
+        unit: "per 4 jam",
         popular: false,
         features: [
-          "Maksimal 15 look / pergantian busana",
-          "Pose katalog bersih, simetris & profesional",
-          "Pilihan eksposur tag akun Instagram",
-          "Termasuk fitting sebelum sesi dimulai",
+          "Maksimal 12-15 look busana siap pakai",
+          "Pose katalog rapi, proporsional & konsisten",
+          "Termasuk fitting 30 menit sebelum sesi dimulai",
+          "Hak tayang foto untuk marketplace & webstore 1 tahun",
         ],
       },
       {
-        title: "Kampanye Lookbook (Full Day)",
-        subtitle: "Kampanye musiman koleksi baru label busana utama",
+        title: "Editorial Lookbook & Campaign",
+        subtitle: "Pemodelan kampanye rilis busana dengan eksplorasi gaya dinamis",
         price: "Rp 1.800.000",
         unit: "per 8 jam",
         popular: true,
         features: [
-          "Unlimited looks dalam durasi kerja 8 jam",
-          "Photoshoot indoor atau outdoor",
-          "Hak tayang digital & media sosial 1 tahun",
-          "Fleksibel untuk konsep editorial & ekspresi bebas",
-          "Didampingi 1 pendamping terdaftar",
-        ],
-      },
-      {
-        title: "Video TVC & Brand Ambassador",
-        subtitle: "Iklan komersial video, billboard, atau kampanye promosi berbayar",
-        price: "Rp 3.500.000",
-        unit: "per proyek",
-        popular: false,
-        features: [
-          "Video acting & dialog / voiceover kampanye",
-          "Hak guna komersial multi-channel (Ads & Billboard)",
-          "1x Post feed & 2x Story endorsement di medsos pribadi",
-          "Kontrak eksklusivitas kategori busana selama masa tayang",
+          "Eksplorasi pose editorial & ekspresi dramatis sesuai moodboard",
+          "Termasuk 1x fitting pra-produksi terpisah",
+          "Standby on-set penuh hingga 8 jam",
+          "Hak guna media sosial, website, & press release 1 tahun",
+          "Dukungan posting kolaborasi Instagram/TikTok feeds",
         ],
       },
     ],
     defaultTerms: {
       dpPercentage: 50,
       maxRevisions: 1,
-      shiftHours: 8,
+      shiftHours: 4,
       overtimeRate: "Rp 200.000 / jam",
       gracePeriodMinutes: 30,
       safeSetCompliant: true,
       usageRightsScope: "ORGANIC_SOCIAL",
       usageRightsDuration: "1_YEAR",
-      extraRevisionFee: "Rp 150.000 / jam tambahan",
+      extraRevisionFee: "Rp 100.000 / look tambahan",
       paymentMilestoneScheme: "50_50_WATERMARK",
       roleSpecifics: {
         wardrobeRestrictions: "Casual, Formal, Modest / Hijab (Sesuai Moodboard Awal)",
@@ -304,11 +400,11 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
     },
   },
 
-  MUA: {
-    id: "MUA",
-    name: "Makeup Artist & Hair Stylist (MUA)",
-    roleBadge: "MUA & Hair",
-    defaultStartingRate: "Mulai Rp 650rb / look",
+  MUA_STYLIST: {
+    id: "MUA_STYLIST",
+    name: "MUA/Stylist",
+    roleBadge: "MUA / Stylist",
+    defaultStartingRate: "Mulai Rp 800rb / sesi",
     quickRates: [
       "Mulai Rp 650rb / look",
       "Mulai Rp 800rb / sesi",
@@ -319,59 +415,59 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
     quickTurnarounds: [
       "Selesai On-Set Hari-H",
       "Standby Sesuai Durasi Jadwal",
-      "Standby + Ganti 3 Look",
+      "Pra-Produksi + Hari-H",
     ],
-    commonUnits: ["per look", "per 4 jam (half-day)", "per 8 jam (standby)", "per model"],
+    commonUnits: ["per look", "per 4 jam (half-day)", "per 8 jam (standby)", "per model", "per proyek"],
     quickDeliverableSuggestions: [
       "Complexion HD Tahan 12 Jam",
-      "Hair Styling / Hijab Do Rapi",
+      "Hair Styling & Hijab Do Rapi",
+      "Kurasi 8-15 Look Wardrobe Lengkap",
       "Standby Touch-Up On-Set",
-      "Gratis Pasang Eyelash & Lensa",
+      "Peminjaman Aksesoris & Fitting Kit",
+      "Garment Steamer & Penjagaan Siluet Busana",
       "Kosmetik High-End & Hypoallergenic",
-      "Pergantian 2-3 Look Makeup",
-      "Eksplorasi Editorial Avant-Garde",
     ],
     packages: [
       {
-        title: "1 Look Fashion Editorial",
-        subtitle: "Riasan flawless high-definition untuk pemotretan katalog ringkas",
-        price: "Rp 650.000",
-        unit: "per look",
-        popular: false,
-        features: [
-          "1 Model katalog atau lookbook",
-          "Makeup HD tahan lampu studio & keringat",
-          "Termasuk basic hair styling / hijab do",
-          "Standby touch-up 30 menit awal pemotretan",
-          "Gratis pasang bulu mata premium",
-        ],
-      },
-      {
-        title: "Half-Day Standby (2-3 Look)",
-        subtitle: "Pilihan favorit untuk photoshoot lookbook dengan pergantian look busana",
+        title: "Lookbook Styling & Makeup Starter",
+        subtitle: "Padu padan outfit dan riasan HD untuk katalog & lookbook",
         price: "Rp 1.400.000",
         unit: "per 4 jam",
         popular: true,
         features: [
-          "Standby on-set penuh selama 4 jam kerja",
-          "Pergantian 2-3 variasi makeup & hair restyling",
-          "Touch-up aktif di sela-sela jepretan kamera",
-          "Kosmetik high-end internasional aman untuk kulit sensitif",
-          "Free touch-up minyak wajah & bibir",
+          "Kurasi hingga 8 look busana siap pakai",
+          "Makeup HD tahan lampu studio & keringat",
+          "Hair styling atau hijab do rapi",
+          "Disediakan garment steamer & perlengkapan fitting on-set",
+          "Standby touch-up aktif selama 4 jam kerja",
         ],
       },
       {
-        title: "Full-Day Campaign Standby",
-        subtitle: "Pendampingan tata rias penuh untuk produksi kampanye besar atau TVC",
-        price: "Rp 2.200.000",
+        title: "Campaign Full-Day Direction",
+        subtitle: "Pengarahan gaya komprehensif dan tata rias penuh kampanye peluncuran busana",
+        price: "Rp 2.800.000",
         unit: "per 8 jam",
         popular: false,
         features: [
+          "Moodboard konsep styling & palet makeup selaras DNA brand",
+          "Kurasi 15-20 look head-to-toe lengkap",
+          "Pergantian 2-3 variasi makeup & hairdo sesuai konsep",
+          "Peminjaman aksesoris pendukung esensial",
           "Standby penuh 8 jam di set indoor maupun outdoor",
-          "Unlimited retouch & switch gaya rambut/makeup",
-          "Teknik makeup HD 4K khusus kamera sinema",
-          "Termasuk konsultasi moodboard sebelum hari H",
-          "Pembersihan makeup setelah sesi selesai",
+          "Pembersihan makeup & pengembalian wardrobe rapi",
+        ],
+      },
+      {
+        title: "Single Look Express",
+        subtitle: "Riasan dan penataan busana untuk sesi foto ringkas 1 model",
+        price: "Rp 750.000",
+        unit: "per look",
+        popular: false,
+        features: [
+          "1 Model katalog atau lookbook",
+          "Makeup HD + basic hair styling",
+          "Pemasangan bulu mata premium gratis",
+          "Standby touch-up 30 menit awal",
         ],
       },
     ],
@@ -394,192 +490,10 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
     },
   },
 
-  STYLIST: {
-    id: "STYLIST",
-    name: "Fashion Stylist & Wardrobe",
-    roleBadge: "Fashion Stylist",
-    defaultStartingRate: "Mulai Rp 1,2 Jt / sesi",
-    quickRates: [
-      "Mulai Rp 1,2 Jt / sesi",
-      "Mulai Rp 1,5 Jt / proyek",
-      "Mulai Rp 2,2 Jt / hari",
-      "Mulai Rp 3,0 Jt / kampanye",
-    ],
-    defaultTurnaround: "Selesai On-Set Hari-H",
-    quickTurnarounds: [
-      "Selesai On-Set Hari-H",
-      "Pra-Produksi H-3 + Hari-H",
-      "1 – 2 Minggu Kampanye",
-    ],
-    commonUnits: ["per proyek", "per 4 jam", "per 8 jam", "per look", "per hari"],
-    quickDeliverableSuggestions: [
-      "Moodboard & Deck Konsep Busana",
-      "Styling 8-10 Look Lengkap",
-      "Styling 15-20 Look Kampanye",
-      "Pulling & Return Baju Desainer",
-      "Penyediaan Aksesoris & Sepatu",
-      "Garment Steamer & Fitting Kit On-Set",
-      "Standby Kerapian On-Camera",
-    ],
-    packages: [
-      {
-        title: "Lookbook Styling Starter",
-        subtitle: "Kurasi padu padan outfit untuk pemotretan katalog & lookbook",
-        price: "Rp 1.500.000",
-        unit: "per proyek",
-        popular: false,
-        features: [
-          "Kurasi gaya hingga 8 look busana siap pakai",
-          "Disediakan garment steamer & perlengkapan fitting on-set",
-          "Peminjaman aksesoris & sepatu pendukung esensial",
-          "Penjagaan kerapian lipatan & siluet busana di depan kamera",
-          "Standby styling selama 4 jam sesi foto",
-        ],
-      },
-      {
-        title: "Campaign Full Wardrobe Direction",
-        subtitle: "Pengarahan gaya komprehensif kampanye peluncuran koleksi busana baru",
-        price: "Rp 3.000.000",
-        unit: "per 8 jam",
-        popular: true,
-        features: [
-          "Moodboard konsep styling & palet warna selaras DNA brand",
-          "Kurasi 15-20 look head-to-toe lengkap",
-          "Akses pulling wardrobe & perhiasan desainer lokal",
-          "Fitting pra-produksi H-1 bersama model",
-          "Manajemen wardrobe on-set tanpa noda & rapi",
-          "Pengembalian (return) seluruh baju pinjaman pasca-sesi",
-        ],
-      },
-      {
-        title: "Creative Direction & Sourcing",
-        subtitle: "Konseptualisasi tema rilis brand dan kurasi editorial skala besar",
-        price: "Rp 4.500.000",
-        unit: "per proyek",
-        popular: false,
-        features: [
-          "Perancangan visual identity kampanye dari nol",
-          "Sourcing koleksi vintage archive & kain wastra langka",
-          "Supervisi langsung wardrobe di set pemotretan",
-          "Arahan lookbook digital & panduan gaya katalog",
-          "Prioritas konsultasi kreatif via tatap muka/online",
-        ],
-      },
-    ],
-    defaultTerms: {
-      dpPercentage: 50,
-      maxRevisions: 2,
-      shiftHours: 8,
-      overtimeRate: "Rp 250.000 / jam",
-      gracePeriodMinutes: 30,
-      safeSetCompliant: true,
-      usageRightsScope: "ORGANIC_SOCIAL",
-      usageRightsDuration: "1_YEAR",
-      extraRevisionFee: "Rp 250.000 / jam tambahan",
-      paymentMilestoneScheme: "50_50_WATERMARK",
-      roleSpecifics: {
-        pullingDepositResponsibility: "Biaya sewa/deposit baju desainer dibayarkan langsung oleh klien",
-        wardrobeDamageResponsibility: "Ganti rugi noda/robekan busana di set ditanggung klien",
-      },
-    },
-  },
-
-  DESIGNER: {
-    id: "DESIGNER",
-    name: "Desainer Busana & Grafis Kreatif",
-    roleBadge: "Desainer Kreatif",
-    defaultStartingRate: "Mulai Rp 1,8 Jt / proyek",
-    quickRates: [
-      "Mulai Rp 1,5 Jt / proyek",
-      "Mulai Rp 2,5 Jt / koleksi",
-      "Mulai Rp 3,5 Jt / batch",
-      "Mulai Rp 500rb / desain",
-    ],
-    defaultTurnaround: "7 – 14 Hari Kerja",
-    quickTurnarounds: [
-      "3 – 5 Hari Kerja",
-      "7 – 14 Hari Kerja",
-      "14 – 21 Hari Kerja",
-      "Sesuai Timeline Batch",
-    ],
-    commonUnits: ["per proyek", "per koleksi", "per desain", "per sesi", "per batch"],
-    quickDeliverableSuggestions: [
-      "Moodboard & Tren Visual Riset",
-      "5-8 Sketsa Desain 2D Digital",
-      "Lembar Spesifikasi Teknis (Tech-Pack)",
-      "Pembuatan Pola (Pattern Making)",
-      "Prototipe Sampel Fisik (Toille)",
-      "Desain Packaging & Hangtag",
-      "Panduan Identitas Brand Kit",
-      "Gratis 2x Revisi Desain",
-    ],
-    packages: [
-      {
-        title: "Identitas Visual & Brand Kit",
-        subtitle: "Panduan visual brand busana lengkap untuk rilis koleksi baru",
-        price: "Rp 2.000.000",
-        unit: "per proyek",
-        popular: false,
-        features: [
-          "Panduan logo, tipografi, dan palet warna busana",
-          "Template visual lookbook & feed media sosial",
-          "Aset vektor master file (AI, EPS, PDF, SVG)",
-          "Gratis 2x revisi desain visual",
-        ],
-      },
-      {
-        title: "Desain Koleksi Busana & Tech-Pack",
-        subtitle: "Pengembangan konsep busana siap jahit dan spesifikasi garmen pabrik",
-        price: "Rp 3.500.000",
-        unit: "per koleksi",
-        popular: true,
-        features: [
-          "Riset tren & moodboard konsep koleksi (5-8 outfit)",
-          "Sketsa desain digital 2D (tampak depan & belakang)",
-          "Lembar spesifikasi teknis (tech-pack) lengkap ukuran & bahan",
-          "Rekomendasi jenis kain, gramasi, & aksesoris kancing/zipper",
-          "Gratis 2x putaran revisi teknis",
-        ],
-      },
-      {
-        title: "Pembuatan Pola & Sampel Fisik (Toille)",
-        subtitle: "Pengerjaan prototipe fisik busana pertama siap fitting bersama model",
-        price: "Rp 5.500.000",
-        unit: "per koleksi",
-        popular: false,
-        features: [
-          "Pembuatan pola presisi (pattern making) ukuran standar",
-          "Pengerjaan sampel fisik busana (toille mock-up)",
-          "1x Sesi fitting langsung bersama model & revisi ukuran",
-          "Standar jahitan rapi kualitas butik/atelier",
-          "Hak kekayaan intelektual desain diserahkan penuh ke klien",
-        ],
-      },
-    ],
-    defaultTerms: {
-      dpPercentage: 50,
-      maxRevisions: 2,
-      shiftHours: 8,
-      overtimeRate: "Rp 200.000 / jam",
-      gracePeriodMinutes: 30,
-      safeSetCompliant: true,
-      usageRightsScope: "ORGANIC_SOCIAL",
-      usageRightsDuration: "PERPETUAL",
-      extraRevisionFee: "Rp 250.000 / putaran revisi ekstra",
-      paymentMilestoneScheme: "50_50_WATERMARK",
-      roleSpecifics: {
-        fittingPolicy: "Fitting busana dilakukan H-1 atau di lokasi sebelum sesi dimulai",
-        dryCleaningResponsibility: "Biaya laundry / dry cleaning busana pasca-sesi ditanggung oleh klien/peminjam",
-        noAlteringPolicy: "Dilarang memotong, mengubah jahitan, atau merusak siluet busana tanpa izin tertulis desainer",
-        brandCreditRequired: true,
-      },
-    },
-  },
-
   STUDIO: {
     id: "STUDIO",
-    name: "Studio Foto & Ruang Kreatif",
-    roleBadge: "Studio Space",
+    name: "Studio",
+    roleBadge: "Studio",
     defaultStartingRate: "Mulai Rp 200rb / jam (Shift Rp 750rb)",
     quickRates: [
       "Mulai Rp 150rb / jam",
@@ -633,13 +547,13 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
       },
       {
         title: "Produksi Besar / 12 Jam",
-        subtitle: "Untuk syuting iklan TVC, webseries, atau multi-brand",
+        subtitle: "Untuk syuting kampanye lookbook besar atau multi-brand",
         price: "Rp 2.200.000",
         unit: "per 12 jam",
         popular: false,
         features: [
           "Prioritas jadwal & booking slot",
-          "Izin pemakaian generator / heavy-duty lighting",
+          "Izin pemakaian heavy-duty lighting",
           "Overtime grace period 30 menit",
           "Akses pantry & ruang tunggu VIP",
         ],
@@ -663,34 +577,60 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
       },
     },
   },
+
+  // Backward compatibility aliases
+  get MUA() {
+    return this.MUA_STYLIST;
+  },
+  get STYLIST() {
+    return this.MUA_STYLIST;
+  },
+  get VIDEOGRAPHER() {
+    return this.PHOTOGRAPHER;
+  },
 };
 
 /**
  * Mendeteksi kategori role berdasarkan sektor atau tipe actor.
+ * Selalu mengembalikan salah satu dari 6 kategori resmi.
  */
 export function detectRoleCategory(sector?: string | null, type?: string | null): RoleCategory {
   const s = (sector || "").toLowerCase();
   const t = (type || "").toUpperCase();
 
+  if (t === "BRAND" || s.includes("brand") || s.includes("label") || s.includes("umkm")) {
+    return "BRAND";
+  }
+  if (
+    s.includes("designer") ||
+    s.includes("desain") ||
+    s.includes("perancang") ||
+    s.includes("couture") ||
+    s.includes("pola") ||
+    s.includes("pattern")
+  ) {
+    return "DESIGNER";
+  }
   if (t === "STUDIO" || s.includes("studio") || s.includes("ruang") || s.includes("venue")) {
     return "STUDIO";
   }
-  if (s.includes("model") || s.includes("talent") || s.includes("peraga")) {
+  if (s.includes("model") || s.includes("talent") || s.includes("peraga") || s.includes("muse")) {
     return "MODEL";
   }
-  if (s.includes("mua") || s.includes("makeup") || s.includes("make up") || s.includes("hair") || s.includes("rias")) {
-    return "MUA";
-  }
-  if (s.includes("stylist") || s.includes("wardrobe") || s.includes("tata busana") || s.includes("penata gaya")) {
-    return "STYLIST";
-  }
-  if (s.includes("video") || s.includes("film") || s.includes("cinema") || s.includes("sinema") || s.includes("motion")) {
-    return "VIDEOGRAPHER";
-  }
-  if (s.includes("designer") || s.includes("desain") || s.includes("perancang") || s.includes("grafis") || s.includes("fashion design") || s.includes("pola")) {
-    return "DESIGNER";
+  if (
+    s.includes("mua") ||
+    s.includes("makeup") ||
+    s.includes("make up") ||
+    s.includes("hair") ||
+    s.includes("rias") ||
+    s.includes("stylist") ||
+    s.includes("wardrobe") ||
+    s.includes("tata busana") ||
+    s.includes("penata gaya")
+  ) {
+    return "MUA_STYLIST";
   }
 
-  // Default fotografer
+  // Default Photographer
   return "PHOTOGRAPHER";
 }

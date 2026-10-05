@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { acceptCollaboratorAction, declineCollaboratorAction } from "@/app/projects/actions";
 import { MapPin, AlertCircle, Check, ArrowUpRight, Handshake, ArrowRight, Sparkles } from "lucide-react";
+import { ActorAvatar } from "@/components/ui/ActorAvatar";
 
 const CATEGORY_LABELS: Record<string, string> = {
   PORTFOLIO_WORK: "Karya / Portofolio",
@@ -33,6 +34,7 @@ interface InterestCardProps {
     name: string;
     sector: string;
     location?: string | null;
+    avatarUrl?: string | null;
     description?: string | null;
     assets: { id: string; name: string; category: string; subtype: string }[];
   };
@@ -107,64 +109,62 @@ export function InterestCard({
 
   return (
     <div
-      className={`p-5 rounded-2xl border space-y-4 transition-all ${
+      className={`p-4 rounded-xl border space-y-3.5 transition-all ${
         localStatus === "ACCEPTED"
           ? "bg-emerald-50/40 border-emerald-200"
           : localStatus === "DECLINED"
           ? "bg-stone-50 border-stone-200 opacity-60"
           : isInvited && localStatus === "PENDING"
-          ? "bg-gradient-to-r from-purple-50/30 via-white to-white border-purple-200/80 shadow-2xs"
-          : "bg-white/95 border-stone-200/80 shadow-2xs"
+          ? "bg-white border-stone-300 shadow-2xs"
+          : "bg-white border-stone-200/80 shadow-2xs"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center font-bold text-lg text-amber-800 shrink-0">
-            {actor.name.charAt(0)}
-          </div>
+          <ActorAvatar name={actor.name} avatarUrl={actor.avatarUrl} className="w-9 h-9 rounded-lg" />
           <div>
             <div className="flex items-center gap-1.5">
               <Link
                 href={`/directory/${actor.id}`}
                 target="_blank"
-                className="font-bold text-[#27213D] hover:text-amber-800 hover:underline text-sm inline-flex items-center gap-1 group"
+                className="font-semibold text-stone-900 hover:text-stone-700 hover:underline text-xs sm:text-sm inline-flex items-center gap-1 group"
                 title="Tinjau profil & portofolio"
               >
                 <span>{actor.name}</span>
-                <ArrowUpRight className="w-3.5 h-3.5 text-stone-400 group-hover:text-amber-800 transition-colors" />
+                <ArrowUpRight className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-700 transition-colors" />
               </Link>
             </div>
-            <div className="text-[11px] text-[#716B7E]">{actor.sector}</div>
+            <div className="text-[11px] text-stone-500 font-normal">{actor.sector}</div>
             {actor.location && (
-              <div className="text-[10px] text-[#716B7E] flex items-center gap-1">
+              <div className="text-[10px] text-stone-400 flex items-center gap-1">
                 <MapPin className="w-3 h-3 text-stone-400 shrink-0" />
                 <span>{actor.location}</span>
               </div>
             )}
           </div>
         </div>
-        <div className="flex flex-col items-end gap-1.5">
+        <div className="flex flex-col items-end gap-1">
           <span
-            className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${cfg.color}`}
+            className={`px-2 py-0.5 rounded text-[10px] font-medium border ${cfg.color}`}
           >
             {cfg.label}
           </span>
-          <span className="text-[10px] text-[#716B7E] font-medium">{roleLabel}</span>
+          <span className="text-[10px] text-stone-500 font-medium">{roleLabel}</span>
         </div>
       </div>
 
       {actor.description && (
-        <p className="text-xs text-[#716B7E] leading-relaxed line-clamp-2">
+        <p className="text-xs text-stone-500 leading-relaxed line-clamp-2 font-normal">
           {actor.description}
         </p>
       )}
 
       {message && (
-        <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200/70">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-[#716B7E] mb-1">
-            Pesan
+        <div className="p-3 rounded-lg bg-stone-50 border border-stone-200/70">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-stone-400 mb-1">
+            Pesan Lamaran
           </div>
-          <p className="text-xs text-[#27213D] leading-relaxed italic">
+          <p className="text-xs text-stone-800 leading-relaxed italic">
             &ldquo;{message}&rdquo;
           </p>
         </div>
@@ -172,16 +172,16 @@ export function InterestCard({
 
       {proposedActorAssets.length > 0 && (
         <div className="space-y-1.5">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-[#716B7E]">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
             Aset yang Ditawarkan ({proposedActorAssets.length})
           </div>
           <div className="flex flex-wrap gap-1.5">
             {proposedActorAssets.map((asset) => (
               <span
                 key={asset.id}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] bg-white text-[#27213D] border border-stone-200 font-medium shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] bg-stone-50 text-stone-800 border border-stone-200 font-medium"
               >
-                <span className="text-amber-600 font-bold">
+                <span className="text-stone-500 font-semibold">
                   {CATEGORY_LABELS[asset.category] || asset.category}
                 </span>
                 <span>·</span>
@@ -201,17 +201,17 @@ export function InterestCard({
 
       {isInitiator && localStatus === "PENDING" && (
         isInvited ? (
-          <div className="p-3 rounded-xl bg-purple-50/70 border border-purple-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="p-3 rounded-lg bg-stone-50 border border-stone-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-              <span className="text-[11px] text-purple-900 font-medium">
+              <Sparkles className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+              <span className="text-[11px] text-stone-700 font-medium">
                 Undangan telah dikirim ke kreator ini. Menunggu tanggapan dari mereka.
               </span>
             </div>
             <button
               onClick={handleDecline}
               disabled={isPending}
-              className="px-3 py-1.5 rounded-lg bg-white hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 disabled:opacity-50 text-stone-600 font-bold text-[11px] border border-stone-200 transition-colors cursor-pointer shrink-0 shadow-2xs"
+              className="px-3 py-1.5 rounded-lg bg-white hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 disabled:opacity-50 text-stone-600 font-semibold text-[11px] border border-stone-200 transition-colors cursor-pointer shrink-0 shadow-2xs"
               title="Batalkan undangan ini"
             >
               {isPending ? "..." : "Batalkan Undangan"}
@@ -222,7 +222,7 @@ export function InterestCard({
             <button
               onClick={handleAccept}
               disabled={isPending}
-              className="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+              className="flex-1 py-2 px-3 rounded-lg bg-stone-900 hover:bg-black disabled:opacity-50 text-white font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
             >
               {isPending ? "..." : (
                 <>
@@ -234,7 +234,7 @@ export function InterestCard({
             <button
               onClick={handleDecline}
               disabled={isPending}
-              className="px-4 py-2 rounded-xl bg-stone-100 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 disabled:opacity-50 text-[#716B7E] font-bold text-xs border border-stone-200 transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-lg bg-white hover:bg-stone-50 hover:text-rose-700 hover:border-rose-200 disabled:opacity-50 text-stone-600 font-semibold text-xs border border-stone-200 transition-colors cursor-pointer shadow-2xs"
             >
               Tolak
             </button>
@@ -243,14 +243,14 @@ export function InterestCard({
       )}
 
       {createdCollabId && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between gap-3 text-xs animate-fade-in">
-          <div className="flex items-center gap-2 text-emerald-800 font-bold">
+        <div className="p-3 bg-emerald-50 border border-emerald-200/80 rounded-lg flex items-center justify-between gap-3 text-xs animate-fade-in">
+          <div className="flex items-center gap-2 text-emerald-800 font-semibold">
             <Handshake className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>Seluruh peran terisi! Ruang kolaborasi telah aktif.</span>
           </div>
           <Link
             href={`/collaborations/${createdCollabId}`}
-            className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-bold text-[11px] inline-flex items-center gap-1 shrink-0 shadow-xs transition-colors"
+            className="px-3 py-1.5 bg-stone-900 hover:bg-black text-white rounded-lg font-semibold text-[11px] inline-flex items-center gap-1 shrink-0 shadow-2xs transition-colors"
           >
             <span>Buka Workspace</span>
             <ArrowRight className="w-3.5 h-3.5" />

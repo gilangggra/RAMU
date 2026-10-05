@@ -6,7 +6,17 @@ import { getDirectoryActors } from "@/application/directoryService";
 import { AppShell } from "@/components/layout/AppShell";
 import { DirectoryFilterBar } from "@/components/directory/DirectoryFilterBar";
 import { ActorCard } from "@/components/directory/ActorCard";
-import { Inbox, Zap } from "lucide-react";
+import {
+  Users,
+  Sparkles,
+  Building2,
+  ShoppingBag,
+  Plus,
+  Compass,
+  Zap,
+  Inbox,
+  ArrowRight,
+} from "lucide-react";
 
 export const metadata = {
   title: "Direktori Talenta & Studio Fashion | RAMU",
@@ -33,7 +43,11 @@ export default async function DirectoryPage({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect(`/login?redirectTo=/directory&message=${encodeURIComponent("Silakan masuk atau daftar akun untuk mengakses direktori lengkap pelaku kreatif dan studio.")}`);
+    redirect(
+      `/login?redirectTo=/directory&message=${encodeURIComponent(
+        "Silakan masuk atau daftar akun untuk mengakses direktori lengkap pelaku kreatif dan studio."
+      )}`
+    );
   }
 
   const actor = await prisma.actor.findFirst({
@@ -80,9 +94,7 @@ export default async function DirectoryPage({
   const actorBriefs = actor!.createdProjectBriefs ?? [];
   const wantedCategories = new Set<string>([
     ...actorNeeds.map((n) => n.category as string),
-    ...actorBriefs.flatMap((b) =>
-      b.neededRoles.map((r) => r.assetCategory as string)
-    ),
+    ...actorBriefs.flatMap((b) => b.neededRoles.map((r) => r.assetCategory as string)),
   ]);
 
   const scoreMap = new Map<string, number>();
@@ -125,66 +137,148 @@ export default async function DirectoryPage({
   const totalActors = allActors.length;
   const totalStudios = allActors.filter((a) => a.actorType === "STUDIO").length;
   const totalIndividuals = allActors.filter((a) => a.actorType === "INDIVIDUAL").length;
-  const totalBrands = allActors.filter((a) => a.actorType === "BRAND" || (a.actorType as string) === "MSME").length;
+  const totalBrands = allActors.filter(
+    (a) => a.actorType === "BRAND" || (a.actorType as string) === "MSME"
+  ).length;
 
   return (
     <AppShell actor={actor} activeRoute="/directory">
-      <div className="space-y-12 pb-24">
-
-        <section className="pt-12 pb-8 border-b border-stone-200">
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-3 mb-6">
-                 <span className="w-8 h-px bg-stone-300"></span>
-                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
-                   Direktori Talenta & Studio Profesional
-                 </span>
-              </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light text-[#1E1B2E] tracking-tight leading-[1.1] mb-6">
-                Temukan talenta kreatif & <br className="hidden sm:block" />
-                <span className="font-serif italic text-stone-500">studio foto</span> untuk proyek Anda.
-              </h1>
-              <p className="text-base text-stone-500 font-light leading-relaxed max-w-lg">
-                Katalog kurasi fotografer, videografer, model, desainer, dan studio visual terverifikasi di Indonesia.
-                Siap disewa langsung untuk kampanye komersial, lookbook, dan produksi kreatif Anda.
-              </p>
-              <div className="mt-5 p-3.5 bg-stone-50 border border-stone-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-stone-600 max-w-xl">
-                <span>
-                  <strong className="text-[#1E1B2E]">Butuh Kru Lengkap?</strong> Lebih efisien buat 1 brief proyek untuk mengumpulkan Model, MUA, dan Studio sekaligus.
-                </span>
-                <Link
-                  href="/projects/new"
-                  className="shrink-0 font-bold text-[#E66A48] hover:text-[#d85c3b] hover:underline"
-                >
-                  Buka Brief Proyek &rarr;
-                </Link>
-              </div>
+      <div className="space-y-6 w-full">
+        {/* 1. ATTIO HEADER BANNER */}
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-stone-200/70">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
+                RAMU Ecosystem • Direktori Talenta &amp; Studio Kreatif
+              </span>
             </div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-stone-900">
+              Direktori Talenta &amp; Ekosistem Kreatif
+            </h1>
+            <p className="text-xs text-stone-500 max-w-2xl leading-relaxed">
+              Katalog kurasi fotografer, videografer, model, desainer, dan studio terverifikasi
+              se-Indonesia. Siap kolaborasi langsung berdasarkan komplementaritas resource.
+            </p>
+          </div>
 
-            <div className="flex flex-wrap items-center gap-6 lg:gap-10 pb-2">
-              <div className="space-y-1">
-                <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{totalActors}</div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Entitas Terdaftar</div>
-              </div>
-              <div className="w-px h-10 bg-stone-200 hidden sm:block"></div>
-              <div className="space-y-1">
-                <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{totalStudios}</div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Studio Foto</div>
-              </div>
-              <div className="w-px h-10 bg-stone-200 hidden sm:block"></div>
-              <div className="space-y-1">
-                <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{totalIndividuals}</div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Talenta Kreatif</div>
-              </div>
-              <div className="w-px h-10 bg-stone-200 hidden sm:block"></div>
-              <div className="space-y-1">
-                <div className="text-3xl sm:text-4xl font-light text-[#1E1B2E]">{totalBrands}</div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Brand &amp; Label</div>
-              </div>
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href="/showcase"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-700 border border-stone-200/80 text-xs font-semibold shadow-2xs transition-colors"
+            >
+              <Compass className="w-3.5 h-3.5 text-stone-500" />
+              <span>Karya &amp; Inspirasi</span>
+            </Link>
+            <Link
+              href="/projects/new"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-semibold shadow-2xs transition-colors shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5 text-stone-300" />
+              <span>Inisiasi Brief Baru</span>
+            </Link>
+          </div>
+        </header>
+
+        {/* 2. ATTIO 4-TILE ANALYTIC METRIC RIBBON */}
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {/* Tile 1: Total Entitas */}
+          <div className="p-4 rounded-xl bg-white border border-stone-200/80 shadow-2xs space-y-2 group hover:border-stone-300 transition-colors">
+            <div className="flex items-center justify-between text-xs font-medium text-stone-500">
+              <span className="truncate">Total Entitas Terdaftar</span>
+              <Users className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-700 transition-colors shrink-0" />
             </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold tracking-tight text-stone-900 font-mono">
+                {totalActors}
+              </span>
+              <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60">
+                Terverifikasi
+              </span>
+            </div>
+            <p className="text-[11px] text-stone-400 truncate">
+              Kreator, studio &amp; brand aktif
+            </p>
+          </div>
+
+          {/* Tile 2: Talenta Kreatif */}
+          <div className="p-4 rounded-xl bg-white border border-stone-200/80 shadow-2xs space-y-2 group hover:border-stone-300 transition-colors">
+            <div className="flex items-center justify-between text-xs font-medium text-stone-500">
+              <span className="truncate">Talenta Kreatif</span>
+              <Sparkles className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-700 transition-colors shrink-0" />
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold tracking-tight text-stone-900 font-mono">
+                {totalIndividuals}
+              </span>
+              <span className="text-[10px] font-semibold text-stone-600 bg-stone-100 px-1.5 py-0.5 rounded border border-stone-200/70">
+                Siap Kolaborasi
+              </span>
+            </div>
+            <p className="text-[11px] text-stone-400 truncate">
+              Fotografer, desainer, model, MUA
+            </p>
+          </div>
+
+          {/* Tile 3: Studio & Ruang */}
+          <div className="p-4 rounded-xl bg-white border border-stone-200/80 shadow-2xs space-y-2 group hover:border-stone-300 transition-colors">
+            <div className="flex items-center justify-between text-xs font-medium text-stone-500">
+              <span className="truncate">Studio &amp; Ruang Visual</span>
+              <Building2 className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-700 transition-colors shrink-0" />
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold tracking-tight text-stone-900 font-mono">
+                {totalStudios}
+              </span>
+              <span className="text-[10px] font-semibold text-stone-700 bg-stone-100 px-1.5 py-0.5 rounded border border-stone-200/70">
+                Resource Aktif
+              </span>
+            </div>
+            <p className="text-[11px] text-stone-400 truncate">
+              Studio foto &amp; peralatan aktif
+            </p>
+          </div>
+
+          {/* Tile 4: Brand & UMKM Mode */}
+          <div className="p-4 rounded-xl bg-white border border-stone-200/80 shadow-2xs space-y-2 group hover:border-stone-300 transition-colors">
+            <div className="flex items-center justify-between text-xs font-medium text-stone-500">
+              <span className="truncate">Brand &amp; UMKM Mode</span>
+              <ShoppingBag className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-700 transition-colors shrink-0" />
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold tracking-tight text-stone-900 font-mono">
+                {totalBrands}
+              </span>
+              <span className="text-[10px] font-semibold text-stone-600 bg-stone-100 px-1.5 py-0.5 rounded border border-stone-200/70">
+                Mencari Mitra
+              </span>
+            </div>
+            <p className="text-[11px] text-stone-400 truncate">
+              Inisiasi produksi &amp; kampanye
+            </p>
           </div>
         </section>
 
+        {/* Quick Notice Callout */}
+        <div className="p-3 bg-stone-50 border border-stone-200/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-stone-600">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-stone-500" />
+            <span>
+              <strong className="text-stone-900 font-semibold">Butuh Kru Lengkap?</strong> Lebih
+              efisien buat 1 brief proyek untuk mengumpulkan Model, MUA, dan Studio sekaligus.
+            </span>
+          </div>
+          <Link
+            href="/projects/new"
+            className="shrink-0 font-semibold text-stone-900 hover:text-black flex items-center gap-1 group transition-colors"
+          >
+            <span>Buka Brief Proyek</span>
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+        </div>
+
+        {/* 3. ATTIO CONTROLS: SEGMENTED TABS, SEARCH & FILTER SELECTS */}
         <DirectoryFilterBar
           currentSearch={search}
           currentType={actorType}
@@ -195,25 +289,34 @@ export default async function DirectoryPage({
           currentSort={sortBy}
         />
 
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-2">
-            <div className="text-[11px] uppercase tracking-widest text-stone-400 font-semibold">
-              Menampilkan <span className="text-[#1E1B2E] font-bold">{sortedActors.length}</span> Portofolio
-              {search && <span className="lowercase"> untuk <span className="text-[#1E1B2E] font-bold">&ldquo;{search}&rdquo;</span></span>}
+        {/* 4. RESULTS RIBBON */}
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="text-xs text-stone-500 font-medium">
+              Menampilkan <span className="text-stone-900 font-bold">{sortedActors.length}</span>{" "}
+              portofolio talenta
+              {search && (
+                <span>
+                  {" "}
+                  untuk pencarian <strong className="text-stone-900">&ldquo;{search}&rdquo;</strong>
+                </span>
+              )}
             </div>
 
             {matchedCount > 0 && sortBy === "recommended" && (
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-900 text-xs font-semibold self-start sm:self-auto">
-                <Zap className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-200/70 text-emerald-800 rounded-lg text-xs font-semibold self-start sm:self-auto shadow-2xs">
+                <Zap className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                 <span>
-                  <strong className="font-bold">{matchedCount} entitas</strong> cocok dengan brief &amp; kebutuhan aktif Anda
+                  <strong className="font-bold">{matchedCount} entitas</strong> memiliki sinergi
+                  komplementer dengan kebutuhan Anda
                 </span>
               </div>
             )}
           </div>
 
+          {/* 5. CARDS GRID */}
           {sortedActors.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {sortedActors.map((item) => (
                 <ActorCard
                   key={item.id}
@@ -223,17 +326,24 @@ export default async function DirectoryPage({
               ))}
             </div>
           ) : (
-            <div className="text-center py-24 px-6 border-y border-stone-200 space-y-4">
-              <div className="w-16 h-16 bg-stone-50 flex items-center justify-center mx-auto rounded-full text-stone-300">
+            <div className="flex flex-col items-center justify-center py-16 px-6 rounded-2xl bg-white border border-stone-200/80 shadow-2xs space-y-4 text-center">
+              <div className="w-12 h-12 rounded-xl bg-stone-100 border border-stone-200/80 flex items-center justify-center text-stone-400">
                 <Inbox className="w-6 h-6" />
               </div>
-              <div className="space-y-2 max-w-md mx-auto">
-                <h3 className="text-lg font-medium text-[#1E1B2E]">
-                  Tidak Ada Hasil Ditemukan
-                </h3>
-                <p className="text-sm text-stone-500 font-light">
-                  Coba sesuaikan kata kunci pencarian atau ubah kriteria filter untuk melihat portofolio lainnya.
+              <div className="space-y-1.5 max-w-sm">
+                <h3 className="text-sm font-bold text-stone-900">Tidak Ada Hasil Ditemukan</h3>
+                <p className="text-xs text-stone-500 leading-relaxed">
+                  Coba sesuaikan kata kunci pencarian atau ubah kriteria filter untuk melihat
+                  portofolio pelaku kreatif lainnya.
                 </p>
+              </div>
+              <div className="pt-2">
+                <Link
+                  href="/directory"
+                  className="px-3.5 py-1.5 rounded-lg bg-stone-900 text-white text-xs font-semibold hover:bg-black shadow-2xs transition-colors inline-block"
+                >
+                  Tampilkan Semua Talenta
+                </Link>
               </div>
             </div>
           )}

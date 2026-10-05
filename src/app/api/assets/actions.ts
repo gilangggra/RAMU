@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { AssetCategory, SourceType, ConfidenceLevel, AssetStatus } from "@prisma/client";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+import { createNotification } from "@/application/notificationService";
 
 export async function createShowcaseAsset(formData: FormData) {
   try {
@@ -135,6 +136,21 @@ export async function createShowcaseAsset(formData: FormData) {
         status: AssetStatus.ACTIVE,
       },
     });
+
+    if (tearSheetData?.credits && Array.isArray(tearSheetData.credits)) {
+      for (const c of tearSheetData.credits) {
+        if (c.actorId && c.actorId !== actor.id) {
+          await createNotification({
+            actorId: c.actorId,
+            title: "Penyematan Kredit Kru Baru",
+            message: `${actor.name} menyematkan Anda sebagai ${c.role || "Kru"} pada karya "${name}". Tinjau dan konfirmasi keterlibatan Anda.`,
+            type: "INFO",
+            link: "/dashboard",
+            metadata: { assetId: newAsset.id, role: c.role },
+          }).catch((err) => console.error("Error creating tag notification:", err));
+        }
+      }
+    }
 
     revalidatePath("/dashboard/showcase");
     revalidatePath("/showcase");
@@ -269,6 +285,15 @@ export async function claimCoCreditAction(params: {
       },
     });
 
+    await createNotification({
+      actorId: asset.actorId,
+      title: "Pengajuan Klaim Co-Credit",
+      message: `${actor.name} mengajukan klaim kontribusi peran sebagai ${params.role} pada karya "${asset.name}".`,
+      type: "INFO",
+      link: "/dashboard",
+      metadata: { assetId: asset.id, claimantId: actor.id, role: params.role },
+    }).catch((err) => console.error("Error sending claim notification:", err));
+
     revalidatePath("/dashboard");
     revalidatePath("/showcase");
     revalidatePath(`/directory/${actor.id}`);
@@ -375,6 +400,17 @@ export async function confirmCoCredit(assetId: string, targetActorId?: string) {
       },
     });
 
+    if (effectiveTargetId && effectiveTargetId !== actor.id) {
+      await createNotification({
+        actorId: effectiveTargetId,
+        title: "Kredit Kru Disetujui",
+        message: `Klaim kredit Anda pada karya "${asset.name}" telah disetujui dan kini aktif di portofolio Anda.`,
+        type: "INFO",
+        link: "/showcase?scope=mine",
+        metadata: { assetId: asset.id },
+      }).catch((err) => console.error("Error sending approval notification:", err));
+    }
+
     revalidatePath("/dashboard");
     revalidatePath("/showcase");
     revalidatePath(`/directory/${actor.id}`);
@@ -447,6 +483,17 @@ export async function rejectCoCredit(assetId: string, targetActorId?: string, re
         },
       },
     });
+
+    if (effectiveTargetId && effectiveTargetId !== actor.id) {
+      await createNotification({
+        actorId: effectiveTargetId,
+        title: "Penyematan Kredit Ditolak",
+        message: `Penyematan kredit pada karya "${asset.name}" tidak dapat disetujui.`,
+        type: "INFO",
+        link: "/showcase",
+        metadata: { assetId: asset.id },
+      }).catch((err) => console.error("Error sending rejection notification:", err));
+    }
 
     revalidatePath("/dashboard");
     revalidatePath("/showcase");

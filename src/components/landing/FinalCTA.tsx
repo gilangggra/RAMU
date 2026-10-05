@@ -25,7 +25,7 @@ export function FinalCTA() {
           </h2>
 
           <p className="text-base sm:text-lg text-stone-400 font-light leading-relaxed max-w-2xl mx-auto">
-            Kurasi aset Anda hari ini dan temukan talenta visioner yang siap meramu konsep Anda menjadi kampanye visual kelas dunia.
+            Daftarkan resource Anda hari ini dan temukan mitra komplementer yang siap mengaktivasi kapasitas menganggur menjadi karya kolaborasi bernilai ekonomi nyata.
           </p>
 
           <div className="pt-6 flex flex-wrap items-center justify-center gap-5">

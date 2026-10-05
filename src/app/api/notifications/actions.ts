@@ -8,6 +8,7 @@ import {
   getUnreadNotificationCount,
   markNotificationAsRead,
   markAllNotificationsAsRead,
+  createNotification,
   NotificationItem,
 } from "@/application/notificationService";
 
@@ -55,6 +56,34 @@ export async function markAllNotificationsReadAction(): Promise<{ success: boole
     const actor = await getPrimaryActor();
     return await markAllNotificationsAsRead(actor.id);
   } catch {
+    return { success: false };
+  }
+}
+
+export async function simulateNewInterestNotificationAction(customCandidateName?: string): Promise<{
+  success: boolean;
+  notification?: NotificationItem;
+}> {
+  try {
+    const actor = await getPrimaryActor();
+    const candidate = customCandidateName || "Glow & Form Artistry";
+    const roleLabel = "Fashion Stylist & Wardrobe";
+
+    const res = await createNotification({
+      actorId: actor.id,
+      title: "Peminat Kolaborasi Baru",
+      message: `${candidate} baru saja mengajukan minat untuk peran "${roleLabel}" pada brief proyek Anda. Klik untuk meninjau lamaran & portofolio.`,
+      type: "INTEREST_RECEIVED",
+      link: "/projects",
+      metadata: { candidateName: candidate, roleLabel, simulated: true },
+    });
+
+    if (res.success && res.id) {
+      const items = await getNotificationsForActor(actor.id, 1);
+      return { success: true, notification: items[0] };
+    }
+    return { success: false };
+  } catch (err) {
     return { success: false };
   }
 }

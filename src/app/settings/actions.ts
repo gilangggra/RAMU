@@ -1,11 +1,27 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir, unlink } from "fs/promises";
 import path from "path";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { clearRecommendationsCache } from "@/application/projectBriefService";
+
+const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+const AVATAR_ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const AVATAR_EXTENSIONS: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
+async function deleteLocalAvatarFile(avatarUrl: string) {
+  if (!avatarUrl.startsWith("/uploads/avatars/")) return;
+  const filename = path.basename(avatarUrl);
+  const filepath = path.join(process.cwd(), "public", "uploads", "avatars", filename);
+  await unlink(filepath).catch(() => {});
+}
 
 export async function updateProfileBasicInfo(formData: FormData) {
   try {
@@ -33,20 +49,27 @@ export async function updateProfileBasicInfo(formData: FormData) {
     const removeAvatar = formData.get("removeAvatar") === "true";
     let newAvatarUrl: string | null | undefined = undefined;
 
+    const existingProfile = await prisma.profile.findUnique({
+      where: { id: user.id },
+      select: { avatarUrl: true },
+    });
+    const previousAvatarUrl = existingProfile?.avatarUrl || null;
+
     if (avatarFile && avatarFile.size > 0 && typeof avatarFile.arrayBuffer === "function") {
-      try {
-        const bytes = await avatarFile.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-        const safeName = avatarFile.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-        const filename = `${Date.now()}-${safeName}`;
-        const uploadDir = path.join(process.cwd(), "public", "uploads", "avatars");
-        await mkdir(uploadDir, { recursive: true });
-        const filepath = path.join(uploadDir, filename);
-        await writeFile(filepath, buffer);
-        newAvatarUrl = `/uploads/avatars/${filename}`;
-      } catch (uploadErr) {
-        console.error("Gagal menyimpan file avatar di settings:", uploadErr);
+      if (!AVATAR_ALLOWED_TYPES.includes(avatarFile.type)) {
+        throw new Error("Format foto profil harus JPG, PNG, atau WebP.");
       }
+      if (avatarFile.size > AVATAR_MAX_BYTES) {
+        throw new Error("Ukuran foto profil maksimal 5 MB.");
+      }
+      const bytes = await avatarFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const ext = AVATAR_EXTENSIONS[avatarFile.type] || "jpg";
+      const filename = `${user.id}-${Date.now()}.${ext}`;
+      const uploadDir = path.join(process.cwd(), "public", "uploads", "avatars");
+      await mkdir(uploadDir, { recursive: true });
+      await writeFile(path.join(uploadDir, filename), buffer);
+      newAvatarUrl = `/uploads/avatars/${filename}`;
     } else if (removeAvatar) {
       newAvatarUrl = null;
     }
@@ -69,13 +92,20 @@ export async function updateProfileBasicInfo(formData: FormData) {
         bio: description || null,
         avatarUrl: newAvatarUrl !== undefined ? newAvatarUrl : (user.user_metadata?.avatar_url || null),
       },
-    }).catch((err) => console.error("Gagal update profile basic info:", err));
+    });
 
-    const authUpdateMetadata: { display_name: string; avatar_url?: string | null } = {
+    // Bersihkan file avatar lama (hanya file lokal milik RAMU) setelah DB berhasil diperbarui
+    if (newAvatarUrl !== undefined && previousAvatarUrl && previousAvatarUrl !== newAvatarUrl) {
+      await deleteLocalAvatarFile(previousAvatarUrl);
+    }
+
+    const authUpdateMetadata: { display_name: string; avatar_url?: string | null; picture?: string | null } = {
       display_name: name,
     };
     if (newAvatarUrl !== undefined) {
       authUpdateMetadata.avatar_url = newAvatarUrl || null;
+      // Timpa foto OAuth (Google) agar tidak muncul kembali setelah avatar dihapus/diganti
+      authUpdateMetadata.picture = newAvatarUrl || null;
     }
 
     await supabase.auth.updateUser({
@@ -121,7 +151,7 @@ export async function updateProfileBasicInfo(formData: FormData) {
     revalidatePath("/dashboard");
     revalidatePath("/", "layout");
 
-    return { success: true, message: "Profil dasar berhasil diperbarui." };
+    return { success: true, message: "Profil dasar berhasil diperbarui.", avatarUrl: newAvatarUrl };
   } catch (error: any) {
     console.error("Error updating profile:", error);
     return { success: false, error: error.message || "Terjadi kesalahan saat menyimpan profil." };
@@ -282,7 +312,9 @@ export async function getCurrentUserAvatar(): Promise<string | null> {
       where: { id: user.id },
       select: { avatarUrl: true },
     });
-    return profile?.avatarUrl || (user.user_metadata?.avatar_url as string) || (user.user_metadata?.picture as string) || null;
+    // Profile.avatarUrl adalah sumber kebenaran tunggal. Metadata auth hanya fallback jika profil belum ada.
+    if (profile) return profile.avatarUrl || null;
+    return (user.user_metadata?.avatar_url as string) || (user.user_metadata?.picture as string) || null;
   } catch {
     return null;
   }

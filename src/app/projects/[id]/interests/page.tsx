@@ -52,69 +52,69 @@ export default async function ProjectInterestsPage({
     <AppShell actor={actor} activeRoute="/projects">
       <div className="space-y-8 max-w-6xl mx-auto">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-[#716B7E]">
-            <Link href="/projects" className="hover:text-[#27213D] font-bold transition-colors">
-              Proyek
+          <div className="flex items-center gap-2 text-xs text-stone-500">
+            <Link href="/projects" className="hover:text-stone-900 font-semibold transition-colors">
+              Papan Proyek
             </Link>
             <span>/</span>
-            <Link href={`/projects/${brief.id}`} className="hover:text-[#27213D] font-bold transition-colors truncate max-w-xs">
+            <Link href={`/projects/${brief.id}`} className="hover:text-stone-900 font-semibold transition-colors truncate max-w-xs">
               {brief.title}
             </Link>
             <span>/</span>
-            <span className="text-[#27213D] font-bold">Kelola Peminat</span>
+            <span className="text-stone-900 font-bold">Kelola Peminat</span>
           </div>
 
           <Link
             href={`/projects/${brief.id}`}
-            className="text-xs font-bold text-[#E66A48] hover:underline transition-colors inline-flex items-center gap-1"
+            className="text-xs font-semibold text-stone-600 hover:text-stone-900 transition-colors inline-flex items-center gap-1.5"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Kembali ke Detail Brief</span>
           </Link>
         </div>
 
-        <div className="p-8 rounded-[32px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] space-y-6">
+        <div className="p-8 rounded-[32px] bg-white border border-stone-200/90 shadow-2xs space-y-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2.5">
-              <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4]">
+              <span className="px-3 py-1 rounded-md text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200">
                 Kurasi Kolaborator
               </span>
-              <span className="text-xs text-[#716B7E]">
-                Proyek: <strong className="text-[#27213D]">{brief.title}</strong>
+              <span className="text-xs text-stone-500">
+                Proyek: <strong className="text-stone-900">{brief.title}</strong>
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-[#27213D] tracking-tight">
-              Tinjau & Pilih Rekan Kolaborasi
+            <h1 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
+              Tinjau &amp; Pilih Rekan Kolaborasi
             </h1>
-            <p className="text-xs sm:text-sm text-[#716B7E] leading-relaxed max-w-2xl">
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed max-w-2xl">
               Tinjau aset dan pesan yang ditawarkan oleh para calon kolaborator. Saat Anda menerima seorang kolaborator untuk suatu peran, slot tersebut otomatis terisi dan siap dieksekusi.
             </p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-stone-100">
-            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
-              <p className="text-[11px] font-bold uppercase text-[#716B7E]">Peran Dibutuhkan</p>
-              <p className="text-2xl font-black text-[#27213D] mt-1">{totalRoles}</p>
+            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/70">
+              <p className="text-[11px] font-bold uppercase text-stone-400">Peran Dibutuhkan</p>
+              <p className="text-2xl font-black text-stone-900 mt-1">{totalRoles}</p>
             </div>
-            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
-              <p className="text-[11px] font-bold uppercase text-[#716B7E]">Slot Terisi</p>
-              <p className="text-2xl font-black text-[#E66A48] mt-1">
-                {filledRoles} <span className="text-xs font-normal text-[#716B7E]">/ {totalRoles}</span>
+            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/70">
+              <p className="text-[11px] font-bold uppercase text-stone-400">Slot Terisi</p>
+              <p className="text-2xl font-black text-amber-800 mt-1">
+                {filledRoles} <span className="text-xs font-normal text-stone-400">/ {totalRoles}</span>
               </p>
             </div>
-            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
-              <p className="text-[11px] font-bold uppercase text-[#716B7E]">Menunggu Review</p>
-              <p className="text-2xl font-black text-amber-800 mt-1">{pendingCount}</p>
+            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/70">
+              <p className="text-[11px] font-bold uppercase text-stone-400">Menunggu Review</p>
+              <p className="text-2xl font-black text-amber-900 mt-1">{pendingCount}</p>
             </div>
-            <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
-              <p className="text-[11px] font-bold uppercase text-[#716B7E]">Kolaborator Terpilih</p>
+            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/70">
+              <p className="text-[11px] font-bold uppercase text-stone-400">Kolaborator Terpilih</p>
               <p className="text-2xl font-black text-emerald-800 mt-1">{acceptedCount}</p>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-amber-50/50 border border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="p-5 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-sm font-bold text-[#27213D] flex items-center gap-2">
+              <div className="text-sm font-bold text-stone-900 flex items-center gap-2">
                 {allFilled ? (
                   <>
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -124,7 +124,7 @@ export default async function ProjectInterestsPage({
                   <span>Progres Tim: {filledRoles} dari {totalRoles} peran terisi</span>
                 )}
               </div>
-              <p className="text-xs text-[#716B7E] mt-0.5">
+              <p className="text-xs text-stone-600 mt-0.5">
                 {allFilled
                   ? "Bentuk ruang kolaborasi sekarang untuk mengaktifkan workspace tugas dan milestone bersama."
                   : acceptedCount > 0
@@ -150,22 +150,22 @@ export default async function ProjectInterestsPage({
             return (
               <section
                 key={role.id}
-                className="p-6 sm:p-8 rounded-[28px] bg-white/95 border border-stone-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.03)] space-y-5"
+                className="p-6 sm:p-8 rounded-[28px] bg-white border border-stone-200/90 shadow-2xs space-y-5"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-stone-100">
                   <div className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 font-black text-xs flex items-center justify-center">
+                    <span className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 font-black text-xs flex items-center justify-center">
                       0{idx + 1}
                     </span>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h2 className="text-base font-bold text-[#27213D]">{role.roleLabel}</h2>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-stone-100 text-[#716B7E] border border-stone-200">
+                        <h2 className="text-base font-bold text-stone-900">{role.roleLabel}</h2>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-stone-100 text-stone-600 border border-stone-200">
                           {role.assetCategory}
                         </span>
                       </div>
                       {role.description && (
-                        <p className="text-xs text-[#716B7E] mt-0.5">{role.description}</p>
+                        <p className="text-xs text-stone-500 mt-0.5">{role.description}</p>
                       )}
                     </div>
                   </div>
@@ -186,14 +186,14 @@ export default async function ProjectInterestsPage({
                 </div>
 
                 {roleInterests.length === 0 ? (
-                  <div className="py-8 text-center rounded-2xl bg-stone-50 border border-dashed border-stone-200/80">
+                  <div className="py-8 text-center rounded-2xl bg-stone-50 border border-dashed border-stone-200">
                     <div className="flex justify-center mb-2">
                       <Search className="w-7 h-7 text-stone-400" />
                     </div>
-                    <p className="text-xs font-bold text-[#27213D]">
+                    <p className="text-xs font-bold text-stone-900">
                       Belum ada peminat untuk peran {role.roleLabel}
                     </p>
-                    <p className="text-[11px] text-[#716B7E] mt-1 max-w-sm mx-auto">
+                    <p className="text-[11px] text-stone-500 mt-1 max-w-sm mx-auto">
                       Brief Anda sedang aktif di galeri publik. Kolaborator dengan profil yang cocok akan segera mengajukan asetnya.
                     </p>
                   </div>
@@ -213,6 +213,7 @@ export default async function ProjectInterestsPage({
                           name: interest.actor.name,
                           sector: interest.actor.sector,
                           location: interest.actor.location,
+                          avatarUrl: interest.actor.owner?.avatarUrl || null,
                           description: interest.actor.description,
                           assets: interest.actor.assets || [],
                         }}

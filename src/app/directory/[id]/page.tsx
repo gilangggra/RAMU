@@ -15,11 +15,13 @@ import {
   Search,
   MessageSquare,
   ShieldCheck,
+  Camera,
 } from "lucide-react";
 import { parseSocialLinks, InstagramIcon } from "@/lib/socialUtils";
 import { ActorDetailTabs } from "@/components/directory/ActorDetailTabs";
 import { BookingButton } from "@/components/directory/BookingButton";
 import { OpenEditModalButton } from "@/components/directory/OpenEditModalButton";
+import { ActorAvatar } from "@/components/ui/ActorAvatar";
 
 export async function generateMetadata({
   params,
@@ -121,89 +123,255 @@ export default async function DirectoryDetailPage({
     },
   });
 
-  let previewImage = null;
-  for (const asset of actorWithCoCredits.assets) {
-    if (asset.category === "EQUIPMENT") continue;
-    if (actor.actorType !== "STUDIO" && asset.category === "STUDIO_SPACE") continue;
 
-    if (asset.attributes) {
-      const attrs = asset.attributes as any;
-      if (asset.category === "PORTFOLIO_WORK" && attrs.image_url) {
-        previewImage = attrs.image_url;
-        break;
+
+  const sectorLower = actor.sector.toLowerCase();
+  const actorTypeUpper = (actor.actorType || "").toUpperCase();
+  const hasStudioSpaceAsset = actor.assets.some(
+    (a) => a.category === "STUDIO_SPACE" || a.subtype?.toLowerCase().includes("studio")
+  );
+
+  const isBrand =
+    actorTypeUpper === "BRAND" ||
+    actorTypeUpper === "MSME" ||
+    actorTypeUpper === "COLLECTIVE" ||
+    sectorLower.includes("brand") ||
+    sectorLower.includes("label") ||
+    sectorLower.includes("umkm");
+
+  // Studio: explicitly studio type, or named Studio Imaji, or sector contains studio and not photographer
+  const isStudio =
+    !isBrand &&
+    (actorTypeUpper === "STUDIO" ||
+      actor.name.toLowerCase().includes("studio imaji") ||
+      (sectorLower.includes("studio") && !sectorLower.includes("photographer") && !sectorLower.includes("fotografi")));
+
+  const isModel = !isBrand && !isStudio && (sectorLower.includes("model") || sectorLower.includes("talent"));
+  const isMua = !isBrand && !isStudio && (sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair"));
+  const isStylist = !isBrand && !isStudio && !isMua && (sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));
+  const isDesigner = !isBrand && !isStudio && (sectorLower.includes("designer") || sectorLower.includes("desain") || sectorLower.includes("atelier"));
+  const isVideo = !isBrand && !isStudio && (sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema"));
+  const isPhotog = !isBrand && !isStudio && !isVideo && !isModel && !isMua && !isStylist && !isDesigner;
+
+  // Role-Aware Primary Preview Image Resolution
+  let previewImage: string | null = null;
+
+  if (isStudio) {
+    // 1. Studio Space asset
+    for (const asset of actorWithCoCredits.assets) {
+      if (asset.category === "EQUIPMENT") continue;
+      if (asset.attributes) {
+        const attrs = asset.attributes as any;
+        if (asset.category === "STUDIO_SPACE" && attrs.image_url) {
+          previewImage = attrs.image_url;
+          break;
+        }
       }
-      if (attrs.comp_card && attrs.comp_card.images && attrs.comp_card.images.length > 0) {
-        previewImage = attrs.comp_card.images[0];
-        break;
+    }
+    // 2. Studio uploaded avatar / space photo
+    if (!previewImage && actor.owner?.avatarUrl) {
+      previewImage = actor.owner.avatarUrl;
+    }
+    // 3. Any portfolio image
+    if (!previewImage) {
+      for (const asset of actorWithCoCredits.assets) {
+        if (asset.attributes) {
+          const attrs = asset.attributes as any;
+          if (attrs.image_url) {
+            previewImage = attrs.image_url;
+            break;
+          }
+        }
       }
-      if (attrs.brand_gallery && attrs.brand_gallery.length > 0) {
-        previewImage = attrs.brand_gallery[0];
-        break;
+    }
+  } else if (isBrand) {
+    // 1. Brand gallery or lookbook
+    for (const asset of actorWithCoCredits.assets) {
+      if (asset.category === "EQUIPMENT") continue;
+      if (asset.attributes) {
+        const attrs = asset.attributes as any;
+        if (attrs.brand_gallery && attrs.brand_gallery.length > 0) {
+          previewImage = attrs.brand_gallery[0];
+          break;
+        }
+        if (asset.category === "PORTFOLIO_WORK" && attrs.image_url) {
+          previewImage = attrs.image_url;
+          break;
+        }
       }
-      if (attrs.styling_gallery && attrs.styling_gallery.length > 0) {
-        previewImage = attrs.styling_gallery[0];
-        break;
+    }
+    // 2. Brand official logo / avatar
+    if (!previewImage && actor.owner?.avatarUrl) {
+      previewImage = actor.owner.avatarUrl;
+    }
+  } else {
+    // Individual Creators (Photographer, Model, MUA, Stylist, Videographer, Designer):
+    if (isModel) {
+      // 1. Comp card for models has highest priority
+      for (const asset of actorWithCoCredits.assets) {
+        if (asset.attributes) {
+          const attrs = asset.attributes as any;
+          if (attrs.comp_card && attrs.comp_card.images && attrs.comp_card.images.length > 0) {
+            previewImage = attrs.comp_card.images[0];
+            break;
+          }
+        }
       }
-      if (actor.actorType === "STUDIO" && attrs.image_url) {
-        previewImage = attrs.image_url;
-        break;
+      // 2. Official headshot / avatar
+      if (!previewImage && actor.owner?.avatarUrl) {
+        previewImage = actor.owner.avatarUrl;
+      }
+      // 3. Portfolio work
+      if (!previewImage) {
+        for (const asset of actorWithCoCredits.assets) {
+          if (asset.attributes) {
+            const attrs = asset.attributes as any;
+            if (attrs.image_url) {
+              previewImage = attrs.image_url;
+              break;
+            }
+          }
+        }
+      }
+    } else {
+      // Photographer, Videographer, Stylist, Designer, MUA:
+      // 1. Featured Cover or Masterpiece Portfolio has HIGHEST precedence for hero visual!
+      for (const asset of actorWithCoCredits.assets) {
+        if (asset.attributes) {
+          const attrs = asset.attributes as any;
+          if (attrs.is_featured_cover || attrs.is_cover) {
+            if (attrs.image_url || attrs.thumbnail_url || attrs.poster_url) {
+              previewImage = attrs.image_url || attrs.thumbnail_url || attrs.poster_url;
+              break;
+            }
+          }
+        }
+      }
+
+      // 2. Portfolio work / styling gallery
+      if (!previewImage) {
+        for (const asset of actorWithCoCredits.assets) {
+          if (asset.category === "EQUIPMENT") continue;
+          if (asset.category === "STUDIO_SPACE") continue;
+          if (asset.attributes) {
+            const attrs = asset.attributes as any;
+            if (asset.category === "PORTFOLIO_WORK" && attrs.image_url) {
+              previewImage = attrs.image_url;
+              break;
+            }
+            if (attrs.styling_gallery && attrs.styling_gallery.length > 0) {
+              previewImage = attrs.styling_gallery[0];
+              break;
+            }
+          }
+        }
+      }
+
+      // 3. Fallback to Official Avatar (if no portfolio uploaded yet)
+      if (!previewImage && actor.owner?.avatarUrl) {
+        previewImage = actor.owner.avatarUrl;
       }
     }
   }
 
-  if (!previewImage && actor.owner?.avatarUrl) {
-    previewImage = actor.owner.avatarUrl;
-  }
-
+  // Fallbacks if absolutely no image exists
   if (!previewImage) {
-    if (actor.actorType === "STUDIO") previewImage = "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd08?q=80&w=2000&auto=format&fit=crop";
-    else if (actor.actorType === "BRAND" || (actor.actorType as string) === "MSME") previewImage = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2000&auto=format&fit=crop";
+    if (isStudio) previewImage = "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd08?q=80&w=2000&auto=format&fit=crop";
+    else if (isBrand) previewImage = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2000&auto=format&fit=crop";
     else previewImage = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop";
   }
 
-  const sectorLower = actor.sector.toLowerCase();
-  const isBrand = actor.actorType === "BRAND" || (actor.actorType as string) === "MSME" || actor.actorType === "COLLECTIVE" || sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("umkm");
-  const isVideo = !isBrand && (sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema"));
-  const isModel = !isBrand && (sectorLower.includes("model") || sectorLower.includes("talent"));
-  const isMua = !isBrand && (sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair"));
-  const isStylist = !isBrand && (sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));
-  const isPhotog = !isBrand && (sectorLower.includes("fotografi") || sectorLower.includes("photographer"));
-  const isDesigner = !isBrand && (sectorLower.includes("designer") || sectorLower.includes("desain"));
-
-  const isIndividualSector = isVideo || isModel || isMua || isStylist || isPhotog || isDesigner;
-  const hasStudioSpaceAsset = actor.assets.some(
-    (a) => a.category === "STUDIO_SPACE" || a.subtype?.toLowerCase().includes("studio")
-  );
-  const isStudio = !isIndividualSector && !isBrand && (actor.actorType === "STUDIO" || sectorLower.includes("studio") || hasStudioSpaceAsset);
-  const isIndividual = !isStudio && !isBrand;
+  let roleBadgeLabel = "Kreator Ekosistem";
+  let cardOverlayBadge = "Kreator Terverifikasi";
+  let availabilityBadge = "Tersedia untuk Booking";
+  let metric3Label = "Area & Format";
+  let metric3Value = actor.location ? actor.location.split(",")[0] : "Indonesia";
+  let metric4Label = "Sistem Kontrak";
+  let metric4Value = "SPK Digital & Perikatan Sah";
 
   let startingRate = "Mulai Rp 1,5 Jt / sesi";
   let turnaroundTime = "3 – 5 Hari Kerja";
 
   if (isStudio) {
+    roleBadgeLabel = "Studio & Lokasi Produksi";
+    cardOverlayBadge = "Studio Foto Terverifikasi";
+    availabilityBadge = "Studio Siap Booking Slot";
     startingRate = "Mulai Rp 200rb / jam (Shift Rp 750rb)";
-    turnaroundTime = "Instan / Slot Booking";
+    turnaroundTime = "Instan / Slot Booking Shift";
+    metric3Label = "Luas & Fasilitas";
+    metric3Value = "120 m² Cyclorama L-Curve";
+    metric4Label = "Sistem Reservasi";
+    metric4Value = "DP Reservasi & Garansi Jadwal";
+  } else if (isBrand) {
+    roleBadgeLabel = "Brand & Label Mode";
+    cardOverlayBadge = "Partner Brand Resmi";
+    availabilityBadge = "Menerima Pitch & Brief";
+    startingRate = "Sesuai Brief & Volume Proyek";
+    turnaroundTime = "Sesuai Timeline Produksi";
+    metric3Label = "Fokus Kemitraan";
+    metric3Value = "Lookbook & Campaign";
+    metric4Label = "Kontrak Kerja";
+    metric4Value = "Invoice Resmi & PO Transparan";
   } else if (isModel) {
+    roleBadgeLabel = "Model & Fashion Talent";
+    cardOverlayBadge = "Comp Card Agensi";
+    availabilityBadge = "Tersedia untuk Booking";
     startingRate = "Mulai Rp 1,0 Jt / sesi";
-    turnaroundTime = "Selesai Sesi Pemotretan";
+    turnaroundTime = "Selesai On-Set Hari-H";
+    metric3Label = "Format Kerja";
+    metric3Value = "Katalog, Lookbook & TVC";
+    metric4Label = "Proteksi Kerja";
+    metric4Value = "SPK Digital & Safe Set Protocol";
   } else if (isMua) {
+    roleBadgeLabel = "MUA & Hair Artistry";
+    cardOverlayBadge = "Makeup Artist Standar Steril";
+    availabilityBadge = "Tersedia untuk Booking";
     startingRate = "Mulai Rp 800rb / sesi";
-    turnaroundTime = "Selesai On-Set Hari-H";
+    turnaroundTime = "Standby On-Set Hari-H";
+    metric3Label = "Standar Kit";
+    metric3Value = "Pro Luxury & Kuas Steril";
+    metric4Label = "Proteksi Kerja";
+    metric4Value = "SPK Digital Multi-Pihak";
   } else if (isStylist) {
+    roleBadgeLabel = "Fashion Stylist & Wardrobe";
+    cardOverlayBadge = "Fashion Stylist Terverifikasi";
+    availabilityBadge = "Tersedia untuk Booking";
     startingRate = "Mulai Rp 1,2 Jt / sesi";
-    turnaroundTime = "Selesai On-Set Hari-H";
+    turnaroundTime = "Fitting & On-Set Hari-H";
+    metric3Label = "Arsip Wardrobe";
+    metric3Value = "200+ Busana & Steamer On-Set";
+    metric4Label = "Proteksi Kerja";
+    metric4Value = "SPK Digital Multi-Pihak";
   } else if (isVideo) {
+    roleBadgeLabel = "Videografer & Cinema Director";
+    cardOverlayBadge = "Cinema Crew Terkurasi";
+    availabilityBadge = "Tersedia untuk Booking";
     startingRate = "Mulai Rp 1,8 Jt / video";
     turnaroundTime = "4 – 6 Hari Kerja";
-  } else if (isPhotog) {
-    startingRate = "Mulai Rp 1,5 Jt / sesi";
-    turnaroundTime = "3 – 5 Hari Kerja";
+    metric3Label = "Kamera & Grading";
+    metric3Value = "Cinema 4K & DaVinci 10-Bit";
+    metric4Label = "Proteksi Kerja";
+    metric4Value = "SPK Digital & Hak Lisensi";
   } else if (isDesigner) {
+    roleBadgeLabel = "Fashion Designer & Atelier";
+    cardOverlayBadge = "Atelier & Desainer Terverifikasi";
+    availabilityBadge = "Tersedia untuk Kolaborasi";
     startingRate = "Mulai Rp 2,5 Jt / koleksi";
     turnaroundTime = "7 – 14 Hari Kerja";
-  } else if (isBrand) {
-    startingRate = "Sesuai Brief & Volume";
-    turnaroundTime = "Sesuai Timeline Proyek";
+    metric3Label = "Keahlian Desain";
+    metric3Value = "Pattern Making & Sampling";
+    metric4Label = "Proteksi HKI";
+    metric4Value = "NDA & SPK Hak Cipta Desain";
+  } else if (isPhotog) {
+    roleBadgeLabel = "Fotografer Mode & Komersial";
+    cardOverlayBadge = "Fotografer Terkurasi";
+    availabilityBadge = "Tersedia untuk Booking";
+    startingRate = "Mulai Rp 1,5 Jt / sesi";
+    turnaroundTime = "3 – 5 Hari Kerja (Retouching)";
+    metric3Label = "Format & Lighting";
+    metric3Value = "Studio Cyclorama & Location";
+    metric4Label = "Proteksi Kerja";
+    metric4Value = "SPK Digital & Hak Lisensi";
   }
 
   const customServiceAsset = actor.assets.find(
@@ -229,13 +397,14 @@ export default async function DirectoryDetailPage({
   // Dynamic role-specific specs tags for profile header
   const specsAsset = actor.assets.find(
     (a) =>
-      (isModel && (a.subtype.toLowerCase().includes("model") || (a.attributes && typeof a.attributes === "object" && "comp_card" in (a.attributes as any)))) ||
-      (isStudio && (a.subtype.toLowerCase().includes("studio") || (a.attributes && typeof a.attributes === "object" && "cyclorama_type" in (a.attributes as any)))) ||
+      (isModel && (a.subtype.toLowerCase().includes("model") || (a.attributes && typeof a.attributes === "object" && ("comp_card" in (a.attributes as any) || "height_cm" in (a.attributes as any))))) ||
+      (isStudio && (a.subtype.toLowerCase().includes("studio") || (a.attributes && typeof a.attributes === "object" && ("cyclorama_type" in (a.attributes as any) || "area_sqm" in (a.attributes as any))))) ||
       (isPhotog && a.attributes && typeof a.attributes === "object" && "primary_camera" in (a.attributes as any)) ||
       (isVideo && a.attributes && typeof a.attributes === "object" && ("primary_cinema_camera" in (a.attributes as any) || "stabilizer_gimbal" in (a.attributes as any))) ||
       (isMua && a.attributes && typeof a.attributes === "object" && ("makeup_styles" in (a.attributes as any) || "primary_kit_brands" in (a.attributes as any))) ||
-      (isStylist && a.attributes && typeof a.attributes === "object" && ("styling_specialties" in (a.attributes as any) || "onset_equipment" in (a.attributes as any))) ||
-      (isDesigner && a.attributes && typeof a.attributes === "object" && ("design_disciplines" in (a.attributes as any) || "primary_software" in (a.attributes as any)))
+      (isStylist && a.attributes && typeof a.attributes === "object" && ("styling_specialties" in (a.attributes as any) || "onset_equipment" in (a.attributes as any) || "wardrobe_archive_count" in (a.attributes as any))) ||
+      (isDesigner && a.attributes && typeof a.attributes === "object" && ("design_disciplines" in (a.attributes as any) || "primary_software" in (a.attributes as any))) ||
+      (isBrand && a.attributes && typeof a.attributes === "object" && ("brand_gallery" in (a.attributes as any) || "sample_sizes_ready" in (a.attributes as any) || "design_dna" in (a.attributes as any)))
   );
   const specsAttrs = (specsAsset?.attributes && typeof specsAsset.attributes === "object")
     ? (specsAsset.attributes as Record<string, any>)
@@ -246,23 +415,33 @@ export default async function DirectoryDetailPage({
     if (specsAttrs.height_cm) headerTags.push(`Tinggi ${specsAttrs.height_cm} cm`);
     if (specsAttrs.bust_waist_hips) headerTags.push(`Vital ${specsAttrs.bust_waist_hips}`);
     if (specsAttrs.clothing_size) headerTags.push(`Size ${specsAttrs.clothing_size}`);
+    if (specsAttrs.shoe_size) headerTags.push(`Sepatu ${specsAttrs.shoe_size}`);
     if (Array.isArray(specsAttrs.specialties) && specsAttrs.specialties.length > 0) {
       headerTags.push(...specsAttrs.specialties.slice(0, 2));
     } else {
       headerTags.push("Editorial & Lookbook", "Comp Card Resmi");
     }
+  } else if (isStudio) {
+    if (specsAttrs.area_sqm) headerTags.push(`Luas ${specsAttrs.area_sqm} m²`);
+    if (specsAttrs.cyclorama_type) headerTags.push("Cyclorama L-Curve");
+    if (specsAttrs.electrical_capacity) headerTags.push("Daya 16.500W 3-Phase");
+    headerTags.push("Ruang Rias & Fitting AC", "Lighting Godox & Aputure");
+  } else if (isBrand) {
+    if (specsAttrs.sample_sizes_ready) headerTags.push(specsAttrs.sample_sizes_ready.length > 28 ? specsAttrs.sample_sizes_ready.slice(0, 28) + "..." : specsAttrs.sample_sizes_ready);
+    if (specsAttrs.design_dna) headerTags.push(specsAttrs.design_dna.length > 28 ? specsAttrs.design_dna.slice(0, 28) + "..." : specsAttrs.design_dna);
+    headerTags.push("Contemporary Ready-to-Wear", "Open Collaboration Brief", "PO & Invoice Resmi");
   } else if (isPhotog && !isVideo) {
     if (specsAttrs.primary_camera) headerTags.push(specsAttrs.primary_camera);
     if (Array.isArray(specsAttrs.lenses) && specsAttrs.lenses.length > 0) {
       headerTags.push(specsAttrs.lenses[0]);
     }
     if (specsAttrs.drone_aerial) headerTags.push("Drone Aerial Certified");
-    if (headerTags.length < 3) headerTags.push("Editorial & Lookbook", "Studio & On-Location");
+    headerTags.push("Editorial & Lookbook", "Studio & On-Location", "Retouching Presisi");
   } else if (isVideo && !isPhotog) {
     if (specsAttrs.primary_cinema_camera) headerTags.push(specsAttrs.primary_cinema_camera);
     if (specsAttrs.max_resolution) headerTags.push(specsAttrs.max_resolution);
     if (specsAttrs.drone_aerial) headerTags.push("Drone 4K Cinema");
-    if (headerTags.length < 3) headerTags.push("Fashion Film & TVC", "Color Grading 10-Bit");
+    headerTags.push("Fashion Film & TVC", "Color Grading 10-Bit");
   } else if (isPhotog && isVideo) {
     if (specsAttrs.primary_camera || specsAttrs.primary_cinema_camera) {
       headerTags.push(specsAttrs.primary_camera || specsAttrs.primary_cinema_camera);
@@ -335,485 +514,294 @@ export default async function DirectoryDetailPage({
           </Link>
         </div>
 
-        {isIndividual && (
-          <section className="mb-14 pt-2">
-            <div className="flex flex-col md:flex-row items-start gap-8 lg:gap-12 pb-10 border-b border-stone-200">
-              <div className="w-full sm:w-64 md:w-72 shrink-0">
-                <div className="aspect-[3/4] w-full bg-stone-100 border border-stone-200/90 relative overflow-hidden shadow-xs">
-                  {actor.owner?.avatarUrl ? (
-                    <img
-                      src={actor.owner.avatarUrl}
-                      alt={actor.name}
-                      className="w-full h-full object-cover grayscale-[10%] hover:grayscale-0 transition-all duration-700"
-                    />
-                  ) : previewImage ? (
-                    <img
-                      src={previewImage}
-                      alt={actor.name}
-                      className="w-full h-full object-cover grayscale-[10%] hover:grayscale-0 transition-all duration-700"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-[#1E1B2E] text-white flex items-center justify-center text-4xl font-light tracking-tight">
-                      {actor.name.slice(0, 2).toUpperCase()}
-                    </div>
-                  )}
-                  <div className="absolute top-3 left-3">
-                    <span className="px-2.5 py-1 bg-white/95 backdrop-blur-md text-[9px] font-bold uppercase tracking-widest text-[#1E1B2E] shadow-2xs border border-stone-200/50">
-                      Kreator Terverifikasi
-                    </span>
+        <section className="mb-12 pt-1">
+          <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-12 pb-10 border-b border-stone-200">
+            {/* Left Column: Media Card with Badge & Verified Trust Strip */}
+            <div className="w-full sm:w-72 md:w-80 shrink-0">
+              <div className="aspect-[3/4] w-full bg-stone-100 border border-stone-200/90 rounded-2xl relative overflow-hidden shadow-xs group">
+                {previewImage ? (
+                  <img
+                    src={previewImage}
+                    alt={actor.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                ) : actor.owner?.avatarUrl ? (
+                  <img
+                    src={actor.owner.avatarUrl}
+                    alt={actor.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-stone-900 text-white flex items-center justify-center text-4xl font-semibold tracking-tight">
+                    {actor.name.slice(0, 2).toUpperCase()}
                   </div>
+                )}
+
+                {/* Owner hover quick-action to edit photo */}
+                {isCurrentActor && (
+                  <div className="absolute inset-0 bg-stone-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-auto">
+                    <OpenEditModalButton
+                      initialTab="profile"
+                      label="Ubah Foto Profil"
+                      className="px-4 py-2 bg-white/95 hover:bg-white text-stone-900 text-xs font-semibold rounded-xl shadow-md flex items-center gap-2 cursor-pointer transition-all hover:scale-105"
+                      iconClassName="text-stone-700"
+                    />
+                  </div>
+                )}
+
+                {/* Role / Trust Micro Badge Overlay */}
+                <div className="absolute top-3 left-3">
+                  <span className="px-2.5 py-1 bg-white/95 backdrop-blur-md rounded-full text-[9px] font-bold uppercase tracking-wider text-stone-800 shadow-2xs border border-stone-200/60 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    <span>{cardOverlayBadge}</span>
+                  </span>
                 </div>
 
-                <div className="mt-2.5 flex items-center justify-between text-[10px] uppercase tracking-wider font-semibold px-0.5">
-                  <span className="text-stone-500 font-medium">Partner Terverifikasi</span>
-                  <span className="flex items-center gap-1 text-emerald-700 font-bold">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                    Proteksi Escrow RAMU
+                <div className="absolute bottom-3 left-3">
+                  <span className="px-2.5 py-1 bg-stone-950/80 backdrop-blur-md rounded-full text-[9px] font-semibold text-white shadow-2xs border border-white/10 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>RAMU Ecosystem Verified</span>
                   </span>
                 </div>
               </div>
 
-              <div className="flex-1 flex flex-col justify-between min-h-[360px] w-full">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2.5 text-[10px] font-bold uppercase tracking-[0.25em] text-stone-400 mb-2.5">
-                    <span>{actor.sector}</span>
-                    <span className="w-1 h-1 bg-stone-300" />
-                    <span className="text-emerald-700 flex items-center gap-1.5 font-bold">
-                      <span className="w-1.5 h-1.5 bg-emerald-600 animate-pulse" />
-                      Tersedia untuk Booking
-                    </span>
-                  </div>
-
-                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light text-[#1E1B2E] tracking-tighter leading-none mb-4">
-                    {actor.name}
-                  </h1>
-
-                  <div className="flex flex-wrap items-center gap-5 text-xs font-semibold uppercase tracking-wider text-stone-500 mb-5">
-                    {actor.location && (
-                      <div className="flex items-center gap-1.5 text-stone-600">
-                        <MapPin className="w-3.5 h-3.5 text-stone-400" />
-                        <span>{actor.location}</span>
-                      </div>
-                    )}
-                    {socialLinks.instagram && (
-                      <a
-                        href={socialLinks.instagram.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-1.5 hover:text-[#1E1B2E] transition-colors"
-                      >
-                        <InstagramIcon className="w-3.5 h-3.5 text-stone-400" />
-                        <span>Instagram</span>
-                      </a>
-                    )}
-                    {socialLinks.website && (
-                      <a
-                        href={socialLinks.website.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-1.5 hover:text-[#1E1B2E] transition-colors"
-                      >
-                        <Globe className="w-3.5 h-3.5 text-stone-400" />
-                        <span>Website</span>
-                      </a>
-                    )}
-                    {actor.contactEmail && (
-                      <a
-                        href={`mailto:${actor.contactEmail}`}
-                        className="flex items-center gap-1.5 hover:text-[#1E1B2E] transition-colors lowercase tracking-normal"
-                      >
-                        <Mail className="w-3.5 h-3.5 text-stone-400" />
-                        <span>{actor.contactEmail}</span>
-                      </a>
-                    )}
-                  </div>
-
-                  <p className="text-sm font-light text-stone-600 leading-relaxed max-w-2xl mb-6">
-                    {actor.description ||
-                      `${actor.name} adalah ${actor.sector} profesional berbasis di ${actor.location || "Indonesia"}, fokus pada penciptaan narasi visual komersial, editorial lookbook, dan kampanye berestetika tinggi yang terkurasi untuk brand busana dan media kreatif kontemporer.`}
-                  </p>
-
-                  <div className="flex flex-wrap items-center gap-2 mb-8">
-                    {displayHeaderTags.map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className="px-3 py-1 bg-white border border-stone-200 text-[10px] font-bold uppercase tracking-wider text-stone-600 shadow-2xs"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-6 pt-2">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-4 border-y border-stone-200">
-                    <div>
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400 block mb-0.5">
-                        Estimasi Tarif
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-[#1E1B2E]">
-                        {startingRate}
-                      </span>
-                    </div>
-                    <div className="sm:border-l border-stone-200 sm:pl-4">
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400 block mb-0.5">
-                        Turnaround
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-[#1E1B2E]">
-                        {turnaroundTime}
-                      </span>
-                    </div>
-                    <div className="border-t sm:border-t-0 sm:border-l border-stone-200 sm:pl-4 pt-2 sm:pt-0">
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400 block mb-0.5">
-                        Area Kerja
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-[#1E1B2E] truncate block">
-                        {actor.location ? actor.location.split(",")[0] : "Indonesia"}
-                      </span>
-                    </div>
-                    <div className="border-t sm:border-t-0 sm:border-l border-stone-200 sm:pl-4 pt-2 sm:pt-0">
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400 block mb-0.5">
-                        Model Kompensasi
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-[#1E1B2E] truncate block">
-                        {isBrand ? "Kemitraan & Brief" : "Project Fee / By Brief"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div>
-                    {!isCurrentActor ? (
-                      <div className="space-y-3">
-                        <div className="flex flex-wrap items-center gap-3">
-                          <Link
-                            href={`/messages?with=${actor.id}`}
-                            className="inline-flex items-center gap-2 px-5 py-3 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition-all shadow-xs"
-                            title="Kirim pesan langsung & diskusikan brief di dalam platform RAMU"
-                          >
-                            <MessageSquare className="w-4 h-4 text-amber-400" />
-                            <span>Chat &amp; Brief Proyek</span>
-                          </Link>
-
-                          <BookingButton
-                            targetId={actor.id}
-                            targetName={actor.name}
-                            targetSector={actor.sector}
-                            targetType={actor.actorType}
-                            label={
-                              isModel
-                                ? "Booking Model / Fitting"
-                                : isMua
-                                ? "Booking MUA / Hair Artist"
-                                : isStylist
-                                ? "Booking Fashion Stylist"
-                                : isVideo
-                                ? "Sewa Jasa Videografi"
-                                : isDesigner
-                                ? "Mulai Proyek Desain"
-                                : "Sewa Jasa / Rekrut Sekarang"
-                            }
-                            termsConfig={customTermsConfig}
-                          />
-
-                          {waLink && (
-                            <a
-                              href={waLink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-2 px-4 py-3 border border-emerald-600/30 hover:border-emerald-600 bg-emerald-50/70 hover:bg-emerald-100/70 text-emerald-800 text-xs font-bold uppercase tracking-widest transition-all shadow-xs"
-                              title="Gunakan WhatsApp hanya untuk bantuan darurat hari-H. Seluruh kesepakatan resmi wajib via RAMU Chat."
-                            >
-                              <MessageCircle className="w-4 h-4 text-emerald-600" />
-                              <span>WhatsApp (Darurat On-Set)</span>
-                            </a>
-                          )}
-
-                          {actor.contactEmail && !waLink && (
-                            <a
-                              href={`mailto:${actor.contactEmail}?subject=${encodeURIComponent(`Tawaran Proyek Kerja - ${actor.name}`)}`}
-                              className="inline-flex items-center gap-2 px-4 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
-                            >
-                              <Mail className="w-4 h-4 text-stone-500" />
-                              <span>Email</span>
-                            </a>
-                          )}
-                        </div>
-
-                        <div className="flex items-center gap-1.5 text-[11px] text-stone-500">
-                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                          <span>Negosiasi resmi, pengiriman brief, &amp; tawaran di RAMU Chat otomatis terlindungi garansi Escrow.</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-wrap items-center gap-3">
-                        <OpenEditModalButton
-                          initialTab="profile"
-                          label="Edit Halaman Profil"
-                        />
-                        <Link
-                          href="/dashboard/showcase"
-                          className="inline-flex items-center gap-2 px-6 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
-                        >
-                          <span>Kelola Portofolio</span>
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                </div>
+              {/* Trust Badge Strip */}
+              <div className="mt-3 px-3 py-2 bg-stone-50 border border-stone-200/80 rounded-xl flex items-center justify-between text-[11px]">
+                <span className="text-stone-500 font-medium flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>Peer-Verified Co-Credit</span>
+                </span>
+                <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md">
+                  100% Anti-Catfishing
+                </span>
               </div>
             </div>
-          </section>
-        )}
 
-        {isStudio && (
-          <section className="mb-16">
-            <div className="flex flex-col lg:flex-row justify-between items-end gap-6 mb-8">
+            {/* Right Column: Information, Badges, KPIs, Action Buttons */}
+            <div className="flex-1 flex flex-col justify-between min-h-[360px] w-full">
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 mb-2 flex items-center gap-2">
-                  <span>{actor.sector}</span>
-                  <span className="w-1 h-1 bg-stone-300" />
-                  <span className="text-emerald-700 font-bold flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-emerald-700 animate-pulse" />
-                    Studio Siap Booking
+                {/* Role Pill & Availability status */}
+                <div className="flex flex-wrap items-center gap-2.5 text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-3">
+                  <span className="px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-800 border border-stone-200">
+                    {roleBadgeLabel}
+                  </span>
+                  <span className="w-1 h-1 rounded-full bg-stone-300" />
+                  <span className="text-emerald-700 flex items-center gap-1.5 font-bold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                    {availabilityBadge}
                   </span>
                 </div>
-                <div className="flex items-center gap-3.5 mb-2">
-                  {actor.owner?.avatarUrl && (
-                    <div className="w-12 h-12 rounded-none overflow-hidden bg-stone-100 border border-stone-200 shadow-xs shrink-0">
-                      <img src={actor.owner.avatarUrl} alt={actor.name} className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium text-[#1E1B2E] tracking-tight">
-                    {actor.name}
+
+                {/* Actor Name + Official Avatar Badge */}
+                <div className="flex items-center gap-3.5 mb-3">
+                  <ActorAvatar
+                    name={actor.name}
+                    avatarUrl={actor.owner?.avatarUrl}
+                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border border-stone-200/90 bg-white shadow-2xs shrink-0"
+                    textClassName="text-base sm:text-lg font-bold"
+                  />
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-stone-900 tracking-tight leading-tight flex items-center gap-2.5">
+                    <span>{actor.name}</span>
                   </h1>
                 </div>
-                <div className="flex flex-wrap items-center gap-4 text-xs font-bold uppercase tracking-widest text-stone-400">
+
+                {/* Metadata Row (Location, Socials, Email) */}
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-stone-500 mb-4">
                   {actor.location && (
-                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{actor.location}</span>
+                    <div className="flex items-center gap-1.5 text-stone-700">
+                      <MapPin className="w-3.5 h-3.5 text-stone-400" />
+                      <span>{actor.location}</span>
+                    </div>
                   )}
                   {socialLinks.instagram && (
-                    <>
-                      <span>&mdash;</span>
-                      <a href={socialLinks.instagram.url} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-[#1E1B2E] transition-colors">
-                        <InstagramIcon className="w-3 h-3" />
-                        <span>Instagram</span>
-                      </a>
-                    </>
-                  )}
-                  {socialLinks.website && (
-                    <>
-                      <span>&mdash;</span>
-                      <a href={socialLinks.website.url} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-[#1E1B2E] transition-colors">
-                        <Globe className="w-3 h-3" />
-                        <span>Website</span>
-                      </a>
-                    </>
-                  )}
-                  {actor.contactEmail && (
-                    <>
-                      <span>&mdash;</span>
-                      <a href={`mailto:${actor.contactEmail}`} className="flex items-center gap-1 hover:text-[#1E1B2E] transition-colors">
-                        <Mail className="w-3 h-3" />
-                        <span>Email</span>
-                      </a>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {!isCurrentActor ? (
-                <div className="flex flex-wrap items-center gap-3">
-                  <BookingButton
-                    targetId={actor.id}
-                    targetName={actor.name}
-                    targetSector={actor.sector}
-                    targetType={actor.actorType}
-                    label="Sewa Studio Sekarang"
-                    termsConfig={customTermsConfig}
-                  />
-                  {waLink ? (
                     <a
-                      href={waLink}
+                      href={socialLinks.instagram.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 px-6 py-3 border border-emerald-600/40 hover:border-emerald-600 bg-emerald-50/60 hover:bg-emerald-100/60 text-emerald-800 text-xs font-bold uppercase tracking-widest transition-all shadow-xs"
-                      title="Chat WhatsApp Langsung"
+                      className="flex items-center gap-1.5 hover:text-stone-900 transition-colors"
                     >
-                      <MessageCircle className="w-4 h-4 text-emerald-600" />
-                      <span>Chat via WhatsApp</span>
+                      <InstagramIcon className="w-3.5 h-3.5 text-stone-400" />
+                      <span>Instagram</span>
                     </a>
-                  ) : actor.contactEmail ? (
+                  )}
+                  {socialLinks.website && (
                     <a
-                      href={`mailto:${actor.contactEmail}?subject=${encodeURIComponent(`Reservasi Sewa Studio - ${actor.name}`)}`}
-                      className="inline-flex items-center gap-2 px-6 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
+                      href={socialLinks.website.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1.5 hover:text-stone-900 transition-colors"
                     >
-                      <Mail className="w-4 h-4 text-stone-500" />
-                      <span>Kirim Email</span>
+                      <Globe className="w-3.5 h-3.5 text-stone-400" />
+                      <span>Website</span>
                     </a>
-                  ) : null}
+                  )}
+                  {actor.contactEmail && (
+                    <a
+                      href={`mailto:${actor.contactEmail}`}
+                      className="flex items-center gap-1.5 hover:text-stone-900 transition-colors lowercase font-normal"
+                    >
+                      <Mail className="w-3.5 h-3.5 text-stone-400" />
+                      <span>{actor.contactEmail}</span>
+                    </a>
+                  )}
                 </div>
-              ) : (
-                <div className="flex flex-wrap items-center gap-3">
-                  <OpenEditModalButton
-                    initialTab="profile"
-                    label="Edit Fasilitas & Profil"
-                    iconClassName="text-blue-300"
-                  />
-                  <Link
-                    href="/dashboard/showcase"
-                    className="inline-flex items-center gap-2 px-5 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
-                  >
-                    <span>Kelola Portofolio</span>
-                  </Link>
+
+                {/* Description / Bio */}
+                <p className="text-sm font-normal text-stone-600 leading-relaxed max-w-2xl mb-4">
+                  {actor.description ||
+                    `${actor.name} adalah entitas kreatif terverifikasi di ekosistem RAMU, berfokus pada kolaborasi komersial, produksi visual estetis, dan sinergi proyek industri busana kontemporer.`}
+                </p>
+
+                {/* Dynamic Role-Specific Specs & Capability Tags */}
+                <div className="flex flex-wrap items-center gap-1.5 mb-6">
+                  {displayHeaderTags.map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2.5 py-1 bg-white border border-stone-200/90 rounded-lg text-[11px] font-medium text-stone-700 shadow-2xs"
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
-              )}
+              </div>
+
+              {/* 4-Metric Attio KPI Grid */}
+              <div className="space-y-5 pt-1">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-stone-50/90 border border-stone-200/80 rounded-xl">
+                  <div className="space-y-0.5">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-stone-400 block">
+                      {isStudio ? "Tarif Sewa" : isBrand ? "Skema Biaya" : "Estimasi Tarif"}
+                    </span>
+                    <span className="text-xs sm:text-sm font-bold text-stone-900 truncate block">
+                      {startingRate}
+                    </span>
+                  </div>
+                  <div className="space-y-0.5 sm:border-l border-stone-200/80 sm:pl-3">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-stone-400 block">
+                      Waktu Kerja
+                    </span>
+                    <span className="text-xs sm:text-sm font-bold text-stone-900 truncate block">
+                      {turnaroundTime}
+                    </span>
+                  </div>
+                  <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/80 sm:pl-3 pt-2 sm:pt-0">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-stone-400 block">
+                      {metric3Label}
+                    </span>
+                    <span className="text-xs sm:text-sm font-bold text-stone-900 truncate block">
+                      {metric3Value}
+                    </span>
+                  </div>
+                  <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/80 sm:pl-3 pt-2 sm:pt-0">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-stone-400 block">
+                      {metric4Label}
+                    </span>
+                    <span className="text-xs sm:text-sm font-bold text-emerald-800 truncate block">
+                      {metric4Value}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action CTAs */}
+                <div>
+                  {!isCurrentActor ? (
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <BookingButton
+                          targetId={actor.id}
+                          targetName={actor.name}
+                          targetSector={actor.sector}
+                          targetType={actor.actorType}
+                          label={
+                            isBrand
+                              ? "Ajukan Pitch Kolaborasi"
+                              : isStudio
+                              ? "Sewa Studio Sekarang"
+                              : isModel
+                              ? "Booking Model / Fitting"
+                              : isMua
+                              ? "Booking MUA & Hair Artist"
+                              : isStylist
+                              ? "Booking Fashion Stylist"
+                              : isDesigner
+                              ? "Mulai Proyek Desain"
+                              : isVideo
+                              ? "Inisiasi Kerja Sama Video"
+                              : "Booking Fotografer"
+                          }
+                          termsConfig={customTermsConfig}
+                        />
+
+                        <Link
+                          href={`/messages?with=${actor.id}`}
+                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-xl transition-all shadow-xs"
+                          title="Kirim pesan langsung & diskusikan brief di dalam platform RAMU"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Chat &amp; Brief Proyek</span>
+                        </Link>
+
+                        {isBrand && (
+                          <Link
+                            href={`/projects?tab=browse&search=${encodeURIComponent(actor.name)}`}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 border border-stone-300 hover:border-stone-900 text-stone-700 hover:text-stone-900 text-xs font-semibold rounded-xl bg-white hover:bg-stone-50 transition-all shadow-xs"
+                          >
+                            <Search className="w-3.5 h-3.5 text-stone-400" />
+                            <span>Lihat Brief Proyek</span>
+                          </Link>
+                        )}
+
+                        {waLink && (
+                          <a
+                            href={waLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 border border-emerald-600/30 hover:border-emerald-600 bg-emerald-50/70 hover:bg-emerald-100/70 text-emerald-800 text-xs font-semibold rounded-xl transition-all shadow-xs"
+                            title={isStudio ? "Tanya ketersediaan jadwal studio via WhatsApp" : "Gunakan WhatsApp untuk konfirmasi darurat hari-H"}
+                          >
+                            <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>WhatsApp ({isStudio ? "Jadwal Studio" : "Darurat On-Set"})</span>
+                          </a>
+                        )}
+
+                        {actor.contactEmail && !waLink && (
+                          <a
+                            href={`mailto:${actor.contactEmail}?subject=${encodeURIComponent(`Penawaran Proyek Kolaborasi - ${actor.name}`)}`}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 border border-stone-300 hover:border-stone-900 text-stone-700 hover:text-stone-900 text-xs font-semibold rounded-xl bg-white hover:bg-stone-50 transition-all shadow-xs"
+                          >
+                            <Mail className="w-3.5 h-3.5 text-stone-500" />
+                            <span>Kirim Email</span>
+                          </a>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1.5 text-[11px] text-stone-500">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span>
+                          Seluruh negosiasi, brief, dan SPK Kontrak Multi-Pihak resmi terlindungi aman dalam ekosistem RAMU.
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-3">
+                      <OpenEditModalButton
+                        initialTab="profile"
+                        label="Edit Halaman Profil"
+                        iconClassName="text-blue-300"
+                      />
+                      <Link
+                        href="/dashboard/showcase"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 border border-stone-300 hover:border-stone-900 text-stone-700 hover:text-stone-900 text-xs font-semibold rounded-xl bg-white hover:bg-stone-50 transition-all shadow-xs"
+                      >
+                        <span>Kelola Portofolio</span>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-stone-50 border border-stone-200/80 mb-6">
-              <div className="space-y-0.5">
-                <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Tarif Sewa</div>
-                <div className="text-xs font-semibold text-[#1E1B2E]">{startingRate}</div>
-              </div>
-              <div className="space-y-0.5 sm:border-l border-stone-200/60 sm:pl-3">
-                <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Waktu Booking</div>
-                <div className="text-xs font-semibold text-[#1E1B2E]">Shift 4 Jam / 8 Jam</div>
-              </div>
-              <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/60 sm:pl-3 pt-2 sm:pt-0">
-                <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Lokasi Studio</div>
-                <div className="text-xs font-semibold text-[#1E1B2E] truncate">{actor.location || "Jakarta"}</div>
-              </div>
-              <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/60 sm:pl-3 pt-2 sm:pt-0">
-                <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Sistem Pembayaran</div>
-                <div className="text-xs font-semibold text-[#1E1B2E]">DP Reservasi Slot 50%</div>
-              </div>
-            </div>
-
-            <div className="w-full h-[40vh] sm:h-[60vh] bg-stone-100 overflow-hidden">
-               <img
-                  src={previewImage}
-                  alt={actor.name}
-                  className="w-full h-full object-cover"
-                />
-            </div>
-          </section>
-        )}
-
-        {isBrand && (
-          <section className="flex flex-col items-center text-center max-w-4xl mx-auto mb-20 pt-10">
-            <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-stone-400 mb-6">
-              {actor.actorType === "BRAND" || (actor.actorType as string) === "MSME" ? "Brand & Label Busana" : "Creative Collective"}
-            </div>
-
-            {actor.owner?.avatarUrl && (
-              <div className="w-20 h-20 rounded-none overflow-hidden bg-stone-100 border border-stone-200 mx-auto mb-4 shadow-xs">
-                <img src={actor.owner.avatarUrl} alt={actor.name} className="w-full h-full object-cover" />
-              </div>
-            )}
-            <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif italic text-[#1E1B2E] leading-tight mb-6">
-              {actor.name}
-            </h1>
-
-            <p className="text-base md:text-lg font-light text-stone-500 leading-relaxed max-w-2xl mb-8">
-              {actor.description || "Kami adalah entitas yang fokus pada penciptaan nilai visual tinggi melalui sinergi komersial."}
-            </p>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-stone-50 border border-stone-200/80 mb-8 w-full text-left">
-              <div className="space-y-0.5">
-                <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Fokus Kemitraan</div>
-                <div className="text-xs font-semibold text-[#1E1B2E]">Lookbook &amp; Campaign</div>
-              </div>
-              <div className="space-y-0.5 sm:border-l border-stone-200/60 sm:pl-3">
-                <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Status Kerjasama</div>
-                <div className="text-xs font-semibold text-emerald-700">Menerima Kolaborasi &amp; Brief</div>
-              </div>
-              <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/60 sm:pl-3 pt-2 sm:pt-0">
-                <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Domisili</div>
-                <div className="text-xs font-semibold text-[#1E1B2E] truncate">{actor.location || "Indonesia"}</div>
-              </div>
-              <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/60 sm:pl-3 pt-2 sm:pt-0">
-                <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Kontrak Kerja</div>
-                <div className="text-xs font-semibold text-[#1E1B2E]">Invoice Resmi &amp; PO</div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-8 text-[11px] font-bold uppercase tracking-widest text-[#1E1B2E] mb-8 border-y border-stone-200 py-4 w-full">
-               {actor.location && (
-                 <span className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5 text-stone-400" />{actor.location}</span>
-               )}
-               {socialLinks.instagram && (
-                 <a href={socialLinks.instagram.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-stone-500 transition-colors">
-                   <InstagramIcon className="w-3.5 h-3.5 text-stone-400" />
-                   <span>Instagram</span>
-                 </a>
-               )}
-               {socialLinks.website && (
-                 <a href={socialLinks.website.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-stone-500 transition-colors">
-                   <Globe className="w-3.5 h-3.5 text-stone-400" />
-                   <span>Website</span>
-                 </a>
-               )}
-               {actor.contactEmail && (
-                 <a href={`mailto:${actor.contactEmail}`} className="flex items-center gap-2 hover:text-stone-500 transition-colors">
-                   <Mail className="w-3.5 h-3.5 text-stone-400" /> Email
-                 </a>
-               )}
-            </div>
-
-            {!isCurrentActor ? (
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <BookingButton
-                  targetId={actor.id}
-                  targetName={actor.name}
-                  targetSector={actor.sector}
-                  targetType={actor.actorType}
-                  label="Ajukan Pitch Kolaborasi"
-                  termsConfig={customTermsConfig}
-                />
-                <Link
-                  href={`/projects?tab=browse&search=${encodeURIComponent(actor.name)}`}
-                  className="inline-flex items-center gap-2 px-6 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
-                >
-                  <Search className="w-4 h-4 text-stone-500" />
-                  <span>Lihat Brief Proyek</span>
-                </Link>
-                {waLink ? (
-                  <a
-                    href={waLink}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 border border-emerald-600/40 hover:border-emerald-600 bg-emerald-50/60 hover:bg-emerald-100/60 text-emerald-800 text-xs font-bold uppercase tracking-widest transition-all shadow-xs"
-                    title="Chat WhatsApp Langsung"
-                  >
-                    <MessageCircle className="w-4 h-4 text-emerald-600" />
-                    <span>Chat via WhatsApp</span>
-                  </a>
-                ) : actor.contactEmail ? (
-                  <a
-                    href={`mailto:${actor.contactEmail}?subject=${encodeURIComponent(`Penawaran Pengadaan / Kerjasama - ${actor.name}`)}`}
-                    className="inline-flex items-center gap-2 px-6 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
-                  >
-                    <Mail className="w-4 h-4 text-stone-500" />
-                    <span>Kirim Email</span>
-                  </a>
-                ) : null}
-              </div>
-            ) : (
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <OpenEditModalButton
-                  initialTab="profile"
-                  label="Edit Brand & Profil"
-                  iconClassName="text-emerald-300"
-                />
-                <Link
-                  href="/dashboard/showcase"
-                  className="inline-flex items-center gap-2 px-6 py-3 border border-stone-300 hover:border-[#1E1B2E] text-stone-700 hover:text-[#1E1B2E] text-xs font-bold uppercase tracking-widest bg-white hover:bg-stone-50 transition-all shadow-xs"
-                >
-                  <span>Kelola Portofolio</span>
-                </Link>
-              </div>
-            )}
-          </section>
-        )}
+          </div>
+        </section>
 
         <div className="border-t border-stone-200 pt-12">
           <ActorDetailTabs

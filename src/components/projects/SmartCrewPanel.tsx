@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import type { CrewRecommendation } from "@/application/projectBriefService";
 import { inviteActorToRoleAction, refreshCrewRecommendationsAction } from "@/app/projects/actions";
+import { ActorAvatar } from "@/components/ui/ActorAvatar";
 
 const CATEGORY_LABELS: Record<string, string> = {
   PORTFOLIO_WORK: "Karya & Portofolio",
@@ -238,9 +239,11 @@ export function SmartCrewPanel({ recommendations, briefId }: SmartCrewPanelProps
 
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-stone-100 to-stone-200 border border-stone-200 flex items-center justify-center font-black text-[#1E1B2E] text-sm shrink-0">
-                          {cand.actor.name.charAt(0).toUpperCase()}
-                        </div>
+                        <ActorAvatar
+                          name={cand.actor.name}
+                          avatarUrl={cand.actor.owner?.avatarUrl}
+                          className="w-10 h-10 rounded-xl"
+                        />
                         <div className="min-w-0">
                           <p className="font-bold text-[#1E1B2E] text-sm truncate">
                             {cand.actor.name}

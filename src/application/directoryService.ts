@@ -63,9 +63,57 @@ export async function getDirectoryActors(params: DirectoryFilterParams = {}) {
   }
 
   if (sector && sector !== "ALL") {
-    andConditions.push({
-      sector: { contains: sector, mode: "insensitive" },
-    });
+    if (sector === "MUA/Stylist") {
+      andConditions.push({
+        OR: [
+          { sector: { contains: "MUA", mode: "insensitive" } },
+          { sector: { contains: "Stylist", mode: "insensitive" } },
+          { sector: { contains: "Makeup", mode: "insensitive" } },
+        ],
+      });
+    } else if (sector === "Fashion Brand/UMKM") {
+      andConditions.push({
+        OR: [
+          { sector: { contains: "Brand", mode: "insensitive" } },
+          { sector: { contains: "UMKM", mode: "insensitive" } },
+          { sector: { contains: "Label", mode: "insensitive" } },
+          { actorType: ActorType.BRAND },
+        ],
+      });
+    } else if (sector === "Fashion Designer") {
+      andConditions.push({
+        OR: [
+          { sector: { contains: "Designer", mode: "insensitive" } },
+          { sector: { contains: "Desain", mode: "insensitive" } },
+        ],
+      });
+    } else if (sector === "Photographer") {
+      andConditions.push({
+        OR: [
+          { sector: { contains: "Photographer", mode: "insensitive" } },
+          { sector: { contains: "Fotografi", mode: "insensitive" } },
+          { sector: { contains: "Foto", mode: "insensitive" } },
+        ],
+      });
+    } else if (sector === "Model") {
+      andConditions.push({
+        OR: [
+          { sector: { contains: "Model", mode: "insensitive" } },
+          { sector: { contains: "Talent", mode: "insensitive" } },
+        ],
+      });
+    } else if (sector === "Studio") {
+      andConditions.push({
+        OR: [
+          { sector: { contains: "Studio", mode: "insensitive" } },
+          { actorType: ActorType.STUDIO },
+        ],
+      });
+    } else {
+      andConditions.push({
+        sector: { contains: sector, mode: "insensitive" },
+      });
+    }
   }
 
   if (location && location !== "ALL") {

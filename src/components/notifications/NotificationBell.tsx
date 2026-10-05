@@ -15,13 +15,22 @@ import {
   AlertCircle,
   X,
   Clock,
+  BellRing,
 } from "lucide-react";
 import {
   fetchMyNotificationsAction,
   markNotificationReadAction,
   markAllNotificationsReadAction,
+  simulateNewInterestNotificationAction,
 } from "@/app/api/notifications/actions";
 import { NotificationItem } from "@/application/notificationService";
+import {
+  isBrowserNotificationSupported,
+  getBrowserNotificationPermission,
+  requestBrowserNotificationPermission,
+  registerServiceWorker,
+  showBrowserPushNotification,
+} from "@/lib/notifications/pushNotificationManager";
 
 function formatRelativeTime(dateInput: Date | string): string {
   const date = new Date(dateInput);
@@ -53,94 +62,97 @@ function getNotificationIcon(type: string) {
   }
 }
 
-// Module-level shared store to prevent multiple mounted instances (desktop + mobile header) from firing duplicate requests
-interface NotificationStore {
-  notifications: NotificationItem[];
-  unreadCount: number;
-  lastFetched: number;
-}
-
-let sharedStore: NotificationStore = {
-  notifications: [],
-  unreadCount: 0,
-  lastFetched: 0,
-};
-
-let inFlightPromise: Promise<NotificationStore> | null = null;
-const storeListeners = new Set<(store: NotificationStore) => void>();
-let globalPollingInterval: NodeJS.Timeout | null = null;
-
-function notifyStoreListeners() {
-  for (const listener of storeListeners) {
-    listener({ ...sharedStore });
-  }
-}
-
-async function fetchNotificationsShared(force = false): Promise<NotificationStore> {
-  const now = Date.now();
-  // If fresh (within 45 seconds) and not forced, return cached data immediately
-  if (!force && sharedStore.lastFetched > 0 && now - sharedStore.lastFetched < 45000) {
-    return sharedStore;
-  }
-
-  // If a fetch is already in flight, reuse the same promise (eliminates thundering herd)
-  if (inFlightPromise) {
-    return inFlightPromise;
-  }
-
-  inFlightPromise = (async () => {
-    try {
-      const res = await fetchMyNotificationsAction();
-      sharedStore = {
-        notifications: res.notifications || [],
-        unreadCount: res.unreadCount ?? 0,
-        lastFetched: Date.now(),
-      };
-      notifyStoreListeners();
-      return sharedStore;
-    } catch {
-      return sharedStore;
-    } finally {
-      inFlightPromise = null;
-    }
-  })();
-
-  return inFlightPromise;
-}
-
-function ensureGlobalPolling() {
-  if (globalPollingInterval) return;
-  globalPollingInterval = setInterval(() => {
-    // Only poll when browser tab is active/visible
-    if (typeof document !== "undefined" && document.visibilityState === "visible") {
-      fetchNotificationsShared(true);
-    }
-  }, 90000); // 90 seconds
-}
-
 export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolean }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(() => sharedStore.notifications);
-  const [unreadCount, setUnreadCount] = useState<number>(() => sharedStore.unreadCount);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [pushPermission, setPushPermission] = useState<"granted" | "denied" | "default" | "unsupported">("unsupported");
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const seenIdsRef = useRef<Set<string>>(new Set());
+  const isInitialLoadRef = useRef<boolean>(true);
+
+  async function loadNotifications() {
+    try {
+      const res = await fetchMyNotificationsAction();
+      const items = res.notifications || [];
+
+      // Detect newly arrived unread notifications and trigger browser push
+      if (!isInitialLoadRef.current) {
+        for (const item of items) {
+          if (!seenIdsRef.current.has(item.id) && !item.is_read) {
+            showBrowserPushNotification({
+              title: item.title,
+              message: item.message,
+              link: item.link || "/projects",
+              tag: item.id,
+            });
+          }
+        }
+      } else {
+        isInitialLoadRef.current = false;
+      }
+
+      items.forEach((n) => seenIdsRef.current.add(n.id));
+      setNotifications(items);
+      setUnreadCount(res.unreadCount);
+    } catch {
+      // ignore
+    }
+  }
 
   useEffect(() => {
-    const listener = (store: NotificationStore) => {
-      setNotifications(store.notifications);
-      setUnreadCount(store.unreadCount);
-    };
-    storeListeners.add(listener);
-
-    // Initial load: uses cache if within TTL, else single deduplicated server action
-    fetchNotificationsShared();
-    ensureGlobalPolling();
-
-    return () => {
-      storeListeners.delete(listener);
-    };
+    if (isBrowserNotificationSupported()) {
+      setPushPermission(getBrowserNotificationPermission());
+      registerServiceWorker();
+    }
   }, []);
+
+  useEffect(() => {
+    loadNotifications();
+    // Poll every 12 seconds for responsive real-time notifications
+    const interval = setInterval(loadNotifications, 12000);
+    return () => clearInterval(interval);
+  }, []);
+
+  async function handleEnablePush() {
+    const granted = await requestBrowserNotificationPermission();
+    setPushPermission(granted ? "granted" : getBrowserNotificationPermission());
+    if (granted) {
+      await showBrowserPushNotification({
+        title: "Notifikasi Browser RAMU Aktif",
+        message: "Anda akan mendapatkan pemberitahuan desktop langsung saat ada peminat baru yang melamar brief proyek Anda.",
+        link: "/projects",
+      });
+    }
+  }
+
+  async function handleSimulateNewApplicant() {
+    setIsSimulating(true);
+    try {
+      if (pushPermission === "default") {
+        await requestBrowserNotificationPermission();
+        setPushPermission(getBrowserNotificationPermission());
+      }
+      const res = await simulateNewInterestNotificationAction("Elena Rostova (Fashion Stylist)");
+      if (res.success && res.notification) {
+        await showBrowserPushNotification({
+          title: res.notification.title,
+          message: res.notification.message,
+          link: res.notification.link || "/projects",
+          tag: res.notification.id,
+        });
+        await loadNotifications();
+      }
+    } catch (err) {
+      console.error("Gagal simulasi notifikasi:", err);
+    } finally {
+      setIsSimulating(false);
+    }
+  }
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -156,14 +168,10 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
 
   async function handleNotificationClick(item: NotificationItem) {
     if (!item.is_read) {
-      sharedStore = {
-        ...sharedStore,
-        notifications: sharedStore.notifications.map((n) =>
-          n.id === item.id ? { ...n, is_read: true } : n
-        ),
-        unreadCount: Math.max(0, sharedStore.unreadCount - 1),
-      };
-      notifyStoreListeners();
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === item.id ? { ...n, is_read: true } : n))
+      );
+      setUnreadCount((c) => Math.max(0, c - 1));
       markNotificationReadAction(item.id);
     }
     setIsOpen(false);
@@ -173,12 +181,8 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
   }
 
   async function handleMarkAllAsRead() {
-    sharedStore = {
-      ...sharedStore,
-      notifications: sharedStore.notifications.map((n) => ({ ...n, is_read: true })),
-      unreadCount: 0,
-    };
-    notifyStoreListeners();
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    setUnreadCount(0);
     await markAllNotificationsReadAction();
   }
 
@@ -193,12 +197,8 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
       <button
         type="button"
         onClick={() => {
-          const nextOpen = !isOpen;
-          setIsOpen(nextOpen);
-          // Only refresh when opening if data is older than 30s
-          if (nextOpen && Date.now() - sharedStore.lastFetched > 30000) {
-            fetchNotificationsShared(true);
-          }
+          setIsOpen(!isOpen);
+          if (!isOpen) loadNotifications();
         }}
         title="Notifikasi & Pembaruan"
         className={`relative p-2 rounded-xl text-stone-500 hover:text-[#1E1B2E] hover:bg-stone-100 transition-colors cursor-pointer flex items-center justify-center ${
@@ -255,6 +255,25 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
               </button>
             </div>
           </div>
+
+          {/* PERMISSION PROMPT BANNER */}
+          {pushPermission === "default" && (
+            <div className="px-4 py-2.5 bg-amber-500/10 border-b border-amber-200/50 flex items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-stone-800 min-w-0">
+                <BellRing className="w-4 h-4 text-amber-600 shrink-0" />
+                <span className="text-[11px] leading-snug">
+                  Aktifkan notifikasi desktop agar tahu saat ada pelamar baru.
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleEnablePush}
+                className="shrink-0 px-2.5 py-1 bg-stone-900 hover:bg-black text-white text-[11px] font-bold rounded-lg transition-colors cursor-pointer shadow-2xs"
+              >
+                Izinkan
+              </button>
+            </div>
+          )}
 
           {/* FILTER TABS */}
           <div className="flex items-center px-4 pt-2 border-b border-stone-100 gap-4 text-xs font-semibold">
@@ -339,6 +358,34 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
                 );
               })
             )}
+          </div>
+
+          {/* FOOTER ACTION BAR */}
+          <div className="p-3 bg-stone-50 border-t border-stone-100 flex items-center justify-between text-xs">
+            <button
+              type="button"
+              onClick={handleSimulateNewApplicant}
+              disabled={isSimulating}
+              className="inline-flex items-center gap-1.5 text-stone-600 hover:text-stone-950 font-medium transition-colors cursor-pointer disabled:opacity-50"
+              title="Kirim simulasi notifikasi pelamar baru untuk menguji notifikasi browser desktop"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+              <span>{isSimulating ? "Mengirim Notifikasi..." : "Uji Notifikasi Peminat Baru"}</span>
+            </button>
+            {pushPermission === "granted" ? (
+              <span className="inline-flex items-center gap-1.5 text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Push Aktif
+              </span>
+            ) : pushPermission === "default" ? (
+              <button
+                type="button"
+                onClick={handleEnablePush}
+                className="text-[10px] text-amber-700 font-semibold hover:underline cursor-pointer"
+              >
+                Aktifkan Push
+              </button>
+            ) : null}
           </div>
         </div>
       )}

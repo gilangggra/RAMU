@@ -19,7 +19,8 @@ export async function syncUserProfile(
     if (profileById.email !== email) {
       updateData.email = email;
     }
-    if (avatarUrl && avatarUrl !== profileById.avatarUrl) {
+    // Jangan timpa foto profil yang sudah diunggah user; metadata auth hanya dipakai sebagai seed awal.
+    if (avatarUrl && !profileById.avatarUrl) {
       updateData.avatarUrl = avatarUrl;
     }
     if (displayName && profileById.displayName !== displayName && !profileById.displayName) {

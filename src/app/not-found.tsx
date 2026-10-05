@@ -57,7 +57,7 @@ export default function NotFound() {
         </div>
 
         <p className="text-[11px] text-stone-600">
-          © {new Date().getFullYear()} RAMU — Creative Visual Opportunity Engine
+          © {new Date().getFullYear()} RAMU — Platform Kolaborasi Berbasis Komplementaritas Resource
         </p>
       </div>
     </div>
