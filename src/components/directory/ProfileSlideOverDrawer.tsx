@@ -571,6 +571,11 @@ export function ProfileSlideOverDrawer({
     const result = await updateProfileBasicInfo(formData);
 
     if (result.success) {
+      if (result.avatarUrl !== undefined) {
+        setAvatarPreview(result.avatarUrl);
+        setRemoveAvatar(false);
+        window.dispatchEvent(new CustomEvent("ramu:avatar-updated", { detail: { avatarUrl: result.avatarUrl } }));
+      }
       setMessage({ type: "success", text: result.message || "Profil berhasil diperbarui." });
       router.refresh();
     } else {
@@ -1185,19 +1190,19 @@ export function ProfileSlideOverDrawer({
               <input type="hidden" name="contactPhone" value={contactPhone} />
 
               {/* CARD 1: FOTO PROFIL */}
-              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-4">
+              <div className="p-6 bg-white border border-stone-200/80 rounded-2xl shadow-2xs space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-stone-100">
                   <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-blue-600" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                    <User className="w-4 h-4 text-stone-700" />
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-900">
                       Foto Profil Resmi
                     </h3>
                   </div>
-                  <span className="text-[10px] text-stone-400 font-semibold">Identitas &amp; Lencana Terverifikasi</span>
+                  <span className="text-[10px] text-stone-400 font-medium">Identitas &amp; Lencana Terverifikasi</span>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 bg-stone-100 border-2 border-stone-300 shrink-0 relative overflow-hidden flex items-center justify-center shadow-inner">
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 bg-stone-100 border border-stone-200 rounded-2xl shrink-0 relative overflow-hidden flex items-center justify-center shadow-xs">
                     {avatarPreview ? (
                       <img
                         src={avatarPreview}
@@ -1205,7 +1210,7 @@ export function ProfileSlideOverDrawer({
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <User className="w-12 h-12 text-stone-300" />
+                      <User className="w-10 h-10 text-stone-300" />
                     )}
                   </div>
 
@@ -1222,7 +1227,7 @@ export function ProfileSlideOverDrawer({
                       <button
                         type="button"
                         onClick={() => avatarInputRef.current?.click()}
-                        className="px-4 py-2 bg-[#1E1B2E] text-white hover:bg-black text-xs font-bold uppercase tracking-wider transition-all rounded-none cursor-pointer shadow-xs inline-flex items-center gap-1.5"
+                        className="px-4 py-2 bg-stone-900 text-white hover:bg-stone-800 text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-xs inline-flex items-center gap-1.5"
                       >
                         <Upload className="w-3.5 h-3.5" />
                         <span>Unggah Foto Baru</span>
@@ -1231,7 +1236,7 @@ export function ProfileSlideOverDrawer({
                         <button
                           type="button"
                           onClick={handleRemoveAvatar}
-                          className="px-4 py-2 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 text-xs font-bold uppercase tracking-wider transition-all rounded-none cursor-pointer"
+                          className="px-4 py-2 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 text-xs font-semibold rounded-xl transition-all cursor-pointer"
                         >
                           Hapus Foto
                         </button>
@@ -1241,11 +1246,11 @@ export function ProfileSlideOverDrawer({
                       Format berkas JPG, PNG, atau WebP resolusi tinggi dengan rasio 1:1 (persegi), ukuran berkas maksimal 5 MB.
                     </p>
 
-                    <div className="p-3 bg-stone-50 border border-stone-200/90 flex items-start gap-2.5 text-xs text-stone-600">
-                      <User className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                    <div className="p-3 bg-stone-50 border border-stone-200/90 rounded-xl flex items-start gap-2.5 text-xs text-stone-600">
+                      <User className="w-4 h-4 text-stone-600 shrink-0 mt-0.5" />
                       <div className="leading-relaxed text-[11px]">
-                        <strong className="text-stone-900 block font-bold mb-0.5">Tampilan Foto Profil di RAMU:</strong>
-                        Foto profil resmi ini menjadi wajah utama Anda di halaman profil publik Anda (serta otomatis menjadi foto sampul utama kartu direktori bagi talenta Model &amp; Muse).
+                        <strong className="text-stone-900 block font-semibold mb-0.5">Tampilan Foto Profil di RAMU:</strong>
+                        Foto profil resmi ini menjadi wajah utama Anda di kartu profil publik Anda (serta otomatis menjadi foto sampul kartu direktori bagi talenta Model &amp; Muse).
                       </div>
                     </div>
                   </div>
@@ -1325,14 +1330,14 @@ export function ProfileSlideOverDrawer({
                   <button
                     type="button"
                     onClick={handleModalClose}
-                    className="px-5 py-2.5 rounded-none border border-stone-300 text-stone-700 font-bold text-xs uppercase tracking-wider hover:bg-stone-100 transition-colors cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl border border-stone-300 text-stone-700 font-semibold text-xs hover:bg-stone-100 transition-colors cursor-pointer"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="flex items-center gap-2 px-6 py-2.5 rounded-none bg-[#1E1B2E] text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-stone-900 text-white font-semibold text-xs hover:bg-stone-800 transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-xs"
                   >
                     {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                     <span>{isPending ? "Menyimpan..." : "Simpan Profil"}</span>

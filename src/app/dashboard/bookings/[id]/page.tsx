@@ -18,7 +18,6 @@ import {
   Building2,
   Hash,
   ShieldCheck,
-  MessageCircle,
   ExternalLink,
 } from "lucide-react";
 import {
@@ -32,7 +31,7 @@ import {
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   return {
-    title: `Detail Booking SPK-RAMU-${id.slice(0, 8).toUpperCase()} | RAMU`,
+    title: `Detail Pesanan SPK-RAMU-${id.slice(0, 8).toUpperCase()} | RAMU`,
   };
 }
 
@@ -85,26 +84,26 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
   const statusConfig = {
     PENDING: {
       label: "Menunggu Respons",
-      badge: "bg-amber-50 text-amber-700 border-amber-200",
+      badge: "bg-amber-50 text-amber-700 border-amber-200/60",
       dot: "bg-amber-500 animate-pulse",
       icon: Clock,
     },
     ACCEPTED: hasCollaboration
       ? {
           label: "Workspace Kolaborasi Aktif",
-          badge: "bg-purple-50 text-purple-700 border-purple-200",
-          dot: "bg-purple-600 animate-pulse",
+          badge: "bg-stone-900 text-white border-stone-900 shadow-2xs",
+          dot: "bg-emerald-400 animate-pulse",
           icon: Handshake,
         }
       : {
-          label: "Diterima",
-          badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
+          label: "Disetujui",
+          badge: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
           dot: "bg-emerald-500",
           icon: CheckCircle2,
         },
     DECLINED: {
       label: "Ditolak",
-      badge: "bg-rose-50 text-rose-700 border-rose-200",
+      badge: "bg-rose-50 text-rose-700 border-rose-200/60",
       dot: "bg-rose-500",
       icon: XCircle,
     },
@@ -139,6 +138,9 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
     conceptSummary: "Ringkasan Konsep & Sinergi",
     deckUrl: "Tautan Pitch Deck / Moodboard",
     initiatorType: "Tipe Pemrakarsa",
+    projectTitle: "Judul Proyek",
+    outputDetails: "Rincian Luaran",
+    sessionDate: "Estimasi Tanggal",
   };
 
   const collabTypeLabels: Record<string, string> = {
@@ -154,6 +156,8 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
       key !== "collaborationId" &&
       key !== "agreedTerms" &&
       key !== "initiatorType" &&
+      key !== "offerMessageId" &&
+      key !== "source" &&
       val &&
       String(val).trim() !== ""
   );
@@ -165,39 +169,38 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
 
   return (
     <AppShell actor={{ ...primaryActor, avatarUrl: profile.avatarUrl }} activeRoute="/dashboard/bookings">
-      <div className="max-w-4xl mx-auto space-y-6 pb-12">
-
+      <div className="max-w-5xl mx-auto space-y-6 pb-12 w-full">
         {/* BREADCRUMB */}
         <div className="flex items-center gap-2 text-xs text-stone-500">
           <Link
             href="/dashboard/bookings"
-            className="inline-flex items-center gap-1.5 font-bold hover:text-[#1E1B2E] transition-colors"
+            className="inline-flex items-center gap-1.5 font-medium hover:text-stone-900 transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            Manajemen Booking
+            <span>Manajemen Pesanan</span>
           </Link>
-          <span>/</span>
-          <span className="font-mono text-[#1E1B2E] font-semibold">{refCode}</span>
+          <span className="text-stone-300">/</span>
+          <span className="font-mono text-stone-900 font-semibold">{refCode}</span>
         </div>
 
         {/* HEADER CARD */}
-        <div className="bg-white border border-stone-200 shadow-xs overflow-hidden">
-          <div className="p-6 sm:p-8 border-b border-stone-100">
+        <div className="bg-white border border-stone-200/80 rounded-2xl shadow-2xs overflow-hidden">
+          <div className="p-6 sm:p-7 border-b border-stone-100">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5">
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">
-                    {isBrandCollaboration ? "Proposal Kemitraan & Kolaborasi" : "Surat Perjanjian Kerja"}
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
+                    {isBrandCollaboration ? "Proposal Kemitraan & Kolaborasi" : "Surat Perjanjian Kerja (SPK)"}
                   </span>
-                  <span className="px-2 py-0.5 bg-stone-100 border border-stone-200 font-mono text-[11px] font-semibold text-stone-600">
+                  <span className="px-2 py-0.5 bg-stone-100 border border-stone-200/70 rounded-md font-mono text-[11px] font-medium text-stone-600">
                     {refCode}
                   </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${sc.badge}`}>
-                    <span className={`w-2 h-2 rounded-full ${sc.dot}`} />
-                    {sc.label}
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${sc.badge}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
+                    <span>{sc.label}</span>
                   </span>
                   <span className="text-xs text-stone-400">
                     Dibuat {new Date(booking.createdAt).toLocaleDateString("id-ID", { dateStyle: "long" })}
@@ -205,19 +208,19 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                   {hasCollaboration && (
                     <Link
                       href={`/collaborations/${collaborationId}`}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition-colors shadow-2xs"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-stone-900 hover:bg-black text-white transition-colors shadow-2xs"
                     >
-                      <Handshake className="w-3.5 h-3.5" />
+                      <Handshake className="w-3.5 h-3.5 text-stone-300" />
                       <span>Buka Workspace</span>
-                      <ArrowUpRight className="w-3 h-3" />
+                      <ArrowUpRight className="w-3 h-3 opacity-70" />
                     </Link>
                   )}
                 </div>
 
                 {isTarget && booking.status === "PENDING" && (
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200/60 rounded-lg text-xs font-medium text-amber-800">
                     <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                    <span className="text-xs font-semibold text-amber-800">
+                    <span>
                       {isBrandCollaboration
                         ? "Proposal kemitraan ini menunggu tinjauan Anda — mohon beri keputusan."
                         : "Pesanan ini menunggu respons Anda — mohon segera tinjau dan beri keputusan."}
@@ -234,61 +237,69 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
           </div>
 
           {/* PARTIES */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-stone-100">
+          <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-stone-100 bg-[#FAFAFA]/50">
+            {/* Requester */}
             <div className="p-5 sm:p-6 space-y-2">
-              <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-stone-400 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5" /> {isBrandCollaboration ? "Pemrakarsa / Inisiator" : "Pemesan / Requester"}
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-stone-400 flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-stone-400" />
+                <span>{isBrandCollaboration ? "Pemrakarsa / Inisiator" : "Pemesan / Klien"}</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-stone-100 border border-stone-200 flex items-center justify-center shrink-0 font-bold text-stone-700">
-                  {booking.requester.name.charAt(0)}
+                <div className="w-10 h-10 rounded-xl bg-stone-100 border border-stone-200/80 flex items-center justify-center shrink-0 font-bold text-stone-700 text-xs shadow-2xs">
+                  {booking.requester.name.slice(0, 2).toUpperCase()}
                 </div>
                 <div>
                   <Link
                     href={`/directory/${booking.requesterId}`}
-                    className="font-bold text-[#1E1B2E] text-sm hover:underline inline-flex items-center gap-1"
+                    className="font-semibold text-stone-900 text-sm hover:underline inline-flex items-center gap-1 group"
                   >
-                    {booking.requester.name}
-                    <ArrowUpRight className="w-3.5 h-3.5 text-stone-400" />
+                    <span>{booking.requester.name}</span>
+                    <ArrowUpRight className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-900 transition-colors" />
                   </Link>
                   <p className="text-xs text-stone-500">{booking.requester.sector}</p>
                   {booking.requester.location && (
-                    <p className="text-xs text-stone-400 flex items-center gap-1">
+                    <p className="text-xs text-stone-400 flex items-center gap-1 mt-0.5">
                       <MapPin className="w-3 h-3" /> {booking.requester.location}
                     </p>
                   )}
                 </div>
                 {isRequester && (
-                  <span className="ml-auto text-[10px] font-bold px-2 py-0.5 bg-stone-100 border border-stone-200 text-stone-600">ANDA</span>
+                  <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 border border-stone-200/60">
+                    Akun Anda
+                  </span>
                 )}
               </div>
             </div>
 
+            {/* Target */}
             <div className="p-5 sm:p-6 space-y-2">
-              <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-stone-400 flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5" /> {isBrandCollaboration ? "Mitra Kolaborasi / Brand" : "Penyedia Jasa / Target"}
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-stone-400 flex items-center gap-1.5">
+                <Building2 className="w-3.5 h-3.5 text-stone-400" />
+                <span>{isBrandCollaboration ? "Mitra Kolaborasi / Brand" : "Penyedia Jasa / Pelaksana"}</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#1E1B2E] flex items-center justify-center shrink-0 font-bold text-white">
-                  {booking.target.name.charAt(0)}
+                <div className="w-10 h-10 rounded-xl bg-stone-900 text-white flex items-center justify-center shrink-0 font-bold text-xs shadow-2xs">
+                  {booking.target.name.slice(0, 2).toUpperCase()}
                 </div>
                 <div>
                   <Link
                     href={`/directory/${booking.targetId}`}
-                    className="font-bold text-[#1E1B2E] text-sm hover:underline inline-flex items-center gap-1"
+                    className="font-semibold text-stone-900 text-sm hover:underline inline-flex items-center gap-1 group"
                   >
-                    {booking.target.name}
-                    <ArrowUpRight className="w-3.5 h-3.5 text-stone-400" />
+                    <span>{booking.target.name}</span>
+                    <ArrowUpRight className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-900 transition-colors" />
                   </Link>
                   <p className="text-xs text-stone-500">{booking.target.sector}</p>
                   {booking.target.location && (
-                    <p className="text-xs text-stone-400 flex items-center gap-1">
+                    <p className="text-xs text-stone-400 flex items-center gap-1 mt-0.5">
                       <MapPin className="w-3 h-3" /> {booking.target.location}
                     </p>
                   )}
                 </div>
                 {isTarget && (
-                  <span className="ml-auto text-[10px] font-bold px-2 py-0.5 bg-[#1E1B2E] text-white">ANDA</span>
+                  <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-stone-900 text-white shadow-2xs">
+                    Akun Anda
+                  </span>
                 )}
               </div>
             </div>
@@ -297,42 +308,41 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
 
         {/* MAIN GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
           {/* LEFT: DETAIL INFO */}
           <div className="lg:col-span-2 space-y-5">
-
             {/* TANGGAL & BUDGET */}
-            <div className="bg-white border border-stone-200 shadow-xs divide-y divide-stone-100">
-              <div className="px-5 py-4 bg-stone-50 border-b border-stone-200">
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
-                  Rincian Pesanan
+            <div className="bg-white border border-stone-200/80 rounded-2xl shadow-2xs overflow-hidden">
+              <div className="px-5 py-3.5 bg-stone-50/70 border-b border-stone-200/70">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-500">
+                  Rincian Jadwal &amp; Komitmen Finansial
                 </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-stone-100">
                 <div className="p-5 space-y-1">
-                  <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-stone-400">
-                    <Calendar className="w-3.5 h-3.5" />
-                    Tanggal Pelaksanaan
+                  <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-stone-400">
+                    <Calendar className="w-3.5 h-3.5 text-stone-400" />
+                    <span>Tanggal Pelaksanaan</span>
                   </div>
-                  <p className="text-sm font-bold text-[#1E1B2E]">
-                    {booking.startDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                  <p className="text-sm font-semibold text-stone-900">
+                    {new Date(booking.startDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
                   </p>
                   {booking.endDate && (
                     <p className="text-xs text-stone-500">
-                      s/d {booking.endDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                      s/d {new Date(booking.endDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
                     </p>
                   )}
                 </div>
+
                 <div className="p-5 space-y-1">
-                  <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-stone-400">
-                    <CircleDollarSign className="w-3.5 h-3.5" />
-                    Anggaran / Budget
+                  <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-stone-400">
+                    <CircleDollarSign className="w-3.5 h-3.5 text-stone-400" />
+                    <span>Nilai Kesepakatan (Anggaran)</span>
                   </div>
-                  <p className="text-sm font-bold text-[#1E1B2E]">
+                  <p className="text-sm font-bold text-stone-900">
                     {booking.budget || "Sesuai kesepakatan"}
                   </p>
                   <p className="text-[10px] text-stone-400">
-                    Skema DP {dpPercentage}% + Pelunasan {100 - dpPercentage}%
+                    Skema pembayaran DP {dpPercentage}% + Pelunasan {100 - dpPercentage}%
                   </p>
                 </div>
               </div>
@@ -340,31 +350,32 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
 
             {/* SPESIFIKASI / PROPOSAL DETAIL */}
             {detailEntries.length > 0 && (
-              <div className="bg-white border border-stone-200 shadow-xs divide-y divide-stone-100">
-                <div className="px-5 py-4 bg-stone-50 border-b border-stone-200 flex items-center justify-between">
+              <div className="bg-white border border-stone-200/80 rounded-2xl shadow-2xs overflow-hidden">
+                <div className="px-5 py-3.5 bg-stone-50/70 border-b border-stone-200/70 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <FileText className="w-3.5 h-3.5 text-stone-500" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
-                      {isBrandCollaboration ? "Rincian Proposal Kemitraan & Sinergi" : "Spesifikasi & Kebutuhan Proyek"}
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-500">
+                      {isBrandCollaboration ? "Rincian Proposal Kemitraan" : "Spesifikasi & Kebutuhan Proyek"}
                     </span>
                   </div>
                   {isBrandCollaboration && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-50 text-amber-800 border border-amber-200">
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-700 border border-stone-200/60">
                       Brand Pitch
                     </span>
                   )}
                 </div>
+
                 <div className="p-5 space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {detailEntries.map(([key, val]) => {
                       const valStr = String(val);
                       const isUrl = valStr.startsWith("http://") || valStr.startsWith("https://") || key === "deckUrl";
-                      const isFullWidth = key === "conceptSummary" || key === "concept" || key === "notes";
+                      const isFullWidth = key === "conceptSummary" || key === "concept" || key === "notes" || key === "outputDetails";
                       const displayVal = key === "collaborationType" ? (collabTypeLabels[valStr] || valStr) : valStr;
 
                       return (
                         <div key={key} className={`space-y-1.5 ${isFullWidth ? "sm:col-span-2" : ""}`}>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-400 block">
                             {labelMap[key] || key}
                           </span>
                           {isUrl ? (
@@ -372,13 +383,13 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                               href={valStr}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-xs font-bold text-amber-900 bg-amber-50/70 hover:bg-amber-100 border border-amber-200/80 px-3.5 py-2 inline-flex items-center gap-2 transition-colors"
+                              className="text-xs font-semibold text-stone-900 bg-stone-50 hover:bg-stone-100 border border-stone-200/80 rounded-lg px-3.5 py-2 inline-flex items-center gap-2 transition-colors shadow-2xs"
                             >
                               <span>{key === "deckUrl" ? "Buka Pitch Deck / Moodboard" : "Buka Tautan Referensi"}</span>
-                              <ExternalLink className="w-3.5 h-3.5 text-amber-700" />
+                              <ExternalLink className="w-3.5 h-3.5 text-stone-500" />
                             </a>
                           ) : (
-                            <p className="text-sm font-semibold text-[#1E1B2E] leading-relaxed whitespace-pre-line bg-stone-50/60 p-3 border border-stone-100">
+                            <p className="text-xs font-medium text-stone-800 leading-relaxed whitespace-pre-line bg-stone-50/70 p-3 rounded-lg border border-stone-200/60">
                               {displayVal}
                             </p>
                           )}
@@ -389,26 +400,26 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
 
                   {agreedTerms && (agreedTerms.ndaAgreed || agreedTerms.coCreditsAgreed || agreedTerms.sampleCareAgreed) && (
                     <div className="pt-4 border-t border-stone-100 space-y-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
-                        Komitmen &amp; Kepatuhan Hukum RAMU
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-400 block">
+                        Kepatuhan Legalitas &amp; Perlindungan RAMU
                       </span>
                       <div className="flex flex-wrap gap-2">
                         {agreedTerms.ndaAgreed && (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200/60">
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                            Persetujuan Kerahasiaan (NDA) Aktif
+                            <span>Persetujuan Kerahasiaan (NDA) Aktif</span>
                           </span>
                         )}
                         {agreedTerms.coCreditsAgreed && (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200/60">
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                            Hak Co-Credits &amp; Atribusi Karya
+                            <span>Hak Co-Credits &amp; Atribusi Karya</span>
                           </span>
                         )}
                         {agreedTerms.sampleCareAgreed && (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200/60">
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                            Garansi Keamanan Sampel Busana
+                            <span>Garansi Keamanan Sampel Busana</span>
                           </span>
                         )}
                       </div>
@@ -418,34 +429,32 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
               </div>
             )}
 
-            {/* MILESTONE TRACKER */}
-            <div className="bg-white border border-stone-200 shadow-xs divide-y divide-stone-100">
-              <div className="px-5 py-4 bg-stone-50 border-b border-stone-200 flex items-center gap-2">
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
-                  Alur Proteksi Pembayaran RAMU
+            {/* MILESTONE PIPELINE */}
+            <div className="bg-white border border-stone-200/80 rounded-2xl shadow-2xs overflow-hidden">
+              <div className="px-5 py-3.5 bg-stone-50/70 border-b border-stone-200/70 flex items-center gap-2">
+                <ShieldCheck className="w-3.5 h-3.5 text-stone-500" />
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-500">
+                  Tahapan Pengerjaan &amp; Penyerahan Luaran
                 </span>
               </div>
               <div className="p-5">
                 <BookingMilestoneTracker status={booking.status} dpPercentage={dpPercentage} collaborationId={collaborationId} />
               </div>
             </div>
-
           </div>
 
           {/* RIGHT: ACTION PANEL */}
           <div className="space-y-4">
-
             {/* STATUS ACTION */}
-            <div className="bg-white border border-stone-200 shadow-xs">
-              <div className="px-5 py-4 border-b border-stone-100 bg-stone-50">
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
+            <div className="bg-white border border-stone-200/80 rounded-2xl shadow-2xs overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-stone-100 bg-stone-50/70">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-500">
                   {isTarget ? "Tindakan Anda" : "Status Pesanan"}
                 </span>
               </div>
               <div className="p-5 space-y-4">
-                <div className={`flex items-center gap-2 p-3 rounded-xl border text-xs font-bold ${sc.badge}`}>
-                  <StatusIcon className="w-4 h-4" />
+                <div className={`flex items-center gap-2 p-3 rounded-xl border text-xs font-semibold ${sc.badge}`}>
+                  <StatusIcon className="w-4 h-4 shrink-0" />
                   <span>{sc.label}</span>
                 </div>
 
@@ -456,19 +465,21 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                 {booking.status === "ACCEPTED" && (
                   <div className="space-y-3">
                     {hasCollaboration && (
-                      <div className="p-3 bg-purple-50/70 border border-purple-200/80 rounded-xl space-y-1">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-purple-900">
-                          <Handshake className="w-4 h-4 text-purple-600" />
+                      <div className="p-3 bg-stone-50 border border-stone-200/80 rounded-xl space-y-1">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-stone-900">
+                          <Handshake className="w-3.5 h-3.5 text-stone-600" />
                           <span>Ruang Kerja Terhubung</span>
                         </div>
-                        <p className="text-[11px] text-purple-700 leading-relaxed">
-                          Pesanan ini telah dibuka menjadi ruang kolaborasi resmi. Task board, roadmap, dan catatan kerja dapat diakses bersama mitra.
+                        <p className="text-[11px] text-stone-500 leading-relaxed">
+                          Pesanan ini telah dibuka menjadi ruang kolaborasi resmi. Task board, milestone, dan catatan kerja dapat diakses bersama mitra.
                         </p>
                       </div>
                     )}
 
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Koordinasi Langsung</p>
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
+                        Koordinasi Langsung
+                      </p>
                       <BookingContactActions
                         phone={isTarget ? booking.requester.contactPhone : booking.target.contactPhone}
                         email={isTarget ? booking.requester.contactEmail : booking.target.contactEmail}
@@ -478,32 +489,33 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                       />
                     </div>
 
-                    <ConvertBookingButton
-                      bookingId={booking.id}
-                      collaborationId={collaborationId}
-                    />
+                    <div className="pt-2">
+                      <ConvertBookingButton
+                        bookingId={booking.id}
+                        collaborationId={collaborationId}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
             </div>
 
             {/* IP & CATATAN HUKUM */}
-            <div className="bg-stone-50 border border-stone-200 p-5 space-y-3">
+            <div className="bg-stone-50 border border-stone-200/80 rounded-2xl p-5 space-y-3 shadow-2xs">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-stone-600" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
-                  Catatan Hukum & Hak Cipta
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-500">
+                  Kepastian Hukum &amp; Hak Cipta
                 </span>
               </div>
               <p className="text-[11px] text-stone-500 leading-relaxed">
-                Pesanan ini dilindungi oleh SPK RAMU. Hak cipta aset orisinal tetap menjadi milik pencipta. Penggunaan komersial hanya berlaku sesuai lingkup yang disepakati.
+                Seluruh transaksi diikat oleh SPK digital resmi RAMU. Hak cipta master aset orisinal tetap terlindungi, dan izin komersial berlaku sah setelah seluruh luaran diterima.
               </p>
-              <div className="flex items-center gap-2 text-[11px] text-stone-400">
+              <div className="flex items-center gap-1.5 text-[11px] text-stone-400 pt-1 border-t border-stone-200/60">
                 <Hash className="w-3 h-3" />
                 <span className="font-mono">{booking.id}</span>
               </div>
             </div>
-
           </div>
         </div>
       </div>

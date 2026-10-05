@@ -182,7 +182,7 @@ export function BookingModal({
               type="text"
               placeholder="Misal: Lead Photographer & Creative Director / Fashion Stylist / Model"
               required
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.initiatorRole || ""}
               onChange={(e) => handleDetailChange("initiatorRole", e.target.value)}
             />
@@ -192,7 +192,7 @@ export function BookingModal({
               Bentuk Sinergi / Model Kerjasama *
             </label>
             <select
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-medium"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-medium"
               value={details.collaborationType || "CAMPAIGN_PRODUCTION"}
               onChange={(e) => handleDetailChange("collaborationType", e.target.value)}
             >
@@ -211,7 +211,7 @@ export function BookingModal({
               placeholder="Jelaskan secara singkat ide konsep visual, target audiens, dan keuntungan sinergi ini bagi brand..."
               required
               rows={3}
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.conceptSummary || ""}
               onChange={(e) => handleDetailChange("conceptSummary", e.target.value)}
             />
@@ -223,7 +223,7 @@ export function BookingModal({
             <input
               type="text"
               placeholder="Link Google Drive, Pinterest, atau Behance"
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.deckUrl || ""}
               onChange={(e) => handleDetailChange("deckUrl", e.target.value)}
             />
@@ -241,7 +241,7 @@ export function BookingModal({
               type="text"
               placeholder="Misal: Studio A (Cyclorama), Set Ruang Tamu, Podcast Room"
               required
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.roomType || ""}
               onChange={(e) => handleDetailChange("roomType", e.target.value)}
             />
@@ -252,7 +252,7 @@ export function BookingModal({
               type="text"
               placeholder="Misal: 8 Orang (Kapasitas maks studio: 10-15 orang)"
               required
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.crewCount || ""}
               onChange={(e) => handleDetailChange("crewCount", e.target.value)}
             />
@@ -262,7 +262,7 @@ export function BookingModal({
             <input
               type="text"
               placeholder="Misal: Tambahan Lampu Godox/Profoto, Seamless Paper warna beige"
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.addons || ""}
               onChange={(e) => handleDetailChange("addons", e.target.value)}
             />
@@ -280,7 +280,7 @@ export function BookingModal({
               type="text"
               placeholder="Misal: Editorial Avant-Garde, Casual Modest / Hijab"
               required
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.role || ""}
               onChange={(e) => handleDetailChange("role", e.target.value)}
             />
@@ -291,7 +291,7 @@ export function BookingModal({
               type="text"
               placeholder="Misal: Studio A Jakarta Selatan, Talenta didampingi 1 orang"
               required
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.location || ""}
               onChange={(e) => handleDetailChange("location", e.target.value)}
             />
@@ -309,7 +309,7 @@ export function BookingModal({
               type="text"
               placeholder="Misal: 5 Look Koleksi Raya 2026, 2 Gaun Utama"
               required
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.lookCount || ""}
               onChange={(e) => handleDetailChange("lookCount", e.target.value)}
             />
@@ -320,7 +320,7 @@ export function BookingModal({
               type="text"
               placeholder="Misal: Fitting H-1 di Studio Desainer, Pengambilan mandiri oleh tim"
               required
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.fittingSchedule || ""}
               onChange={(e) => handleDetailChange("fittingSchedule", e.target.value)}
             />
@@ -330,7 +330,7 @@ export function BookingModal({
             <input
               type="url"
               placeholder="Link Pinterest / Google Drive"
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.referenceUrl || ""}
               onChange={(e) => handleDetailChange("referenceUrl", e.target.value)}
             />
@@ -348,7 +348,7 @@ export function BookingModal({
               type="text"
               placeholder="Misal: 8 Look Katalog, Konsep Streetwear Luxury &amp; Aksesoris"
               required
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.stylingLooks || ""}
               onChange={(e) => handleDetailChange("stylingLooks", e.target.value)}
             />
@@ -359,7 +359,7 @@ export function BookingModal({
               type="text"
               placeholder="Misal: Peminjaman Desainer (Pulling) &amp; Wardrobe Klien"
               required
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.wardrobeSource || ""}
               onChange={(e) => handleDetailChange("wardrobeSource", e.target.value)}
             />
@@ -377,7 +377,7 @@ export function BookingModal({
               type="text"
               placeholder="Misal: 2 Model (Gaya: Natural Clean &amp; Editorial Bold Hair)"
               required
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.muaHeads || ""}
               onChange={(e) => handleDetailChange("muaHeads", e.target.value)}
             />
@@ -388,7 +388,7 @@ export function BookingModal({
               type="text"
               placeholder="Misal: 07:00 WIB (Sesi foto mulai 09:00 WIB)"
               required
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.prepTime || ""}
               onChange={(e) => handleDetailChange("prepTime", e.target.value)}
             />
@@ -406,7 +406,7 @@ export function BookingModal({
               type="text"
               placeholder="Misal: 2x Reels 9:16 Vertikal (30 detik) &amp; 1x Teaser 16:9"
               required
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.videoFormats || ""}
               onChange={(e) => handleDetailChange("videoFormats", e.target.value)}
             />
@@ -417,7 +417,7 @@ export function BookingModal({
               type="text"
               placeholder="Misal: Studio Indoor Jakarta, Butuh Mic Lavalier Wireless"
               required
-              className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.location || ""}
               onChange={(e) => handleDetailChange("location", e.target.value)}
             />
@@ -434,7 +434,7 @@ export function BookingModal({
             type="text"
             placeholder="Misal: Studio Indoor, Lokasi Outdoor Jakarta Selatan"
             required
-            className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+            className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
             value={details.location || ""}
             onChange={(e) => handleDetailChange("location", e.target.value)}
           />
@@ -445,7 +445,7 @@ export function BookingModal({
             placeholder="Misal: 25 Foto Edit High-Res, 5 Foto Retouch Beauty, Semua Foto Kurasi (JPG)"
             required
             rows={2}
-            className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 resize-none"
+            className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 resize-none"
             value={details.deliverables || ""}
             onChange={(e) => handleDetailChange("deliverables", e.target.value)}
           />
@@ -455,7 +455,7 @@ export function BookingModal({
           <input
             type="url"
             placeholder="Link Pinterest / Google Drive"
-            className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+            className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
             value={details.referenceUrl || ""}
             onChange={(e) => handleDetailChange("referenceUrl", e.target.value)}
           />
@@ -472,12 +472,12 @@ export function BookingModal({
       onClick={handleClose}
     >
       <div
-        className="w-full max-w-5xl xl:max-w-6xl bg-white rounded-none border border-stone-200 shadow-2xl overflow-hidden flex flex-col h-[90vh] max-h-[92vh] my-auto animate-in zoom-in-95 duration-150 relative"
+        className="w-full max-w-5xl xl:max-w-6xl bg-white rounded-xl border border-stone-200 shadow-2xl overflow-hidden flex flex-col h-[90vh] max-h-[92vh] my-auto animate-in zoom-in-95 duration-150 relative"
         onClick={(e) => e.stopPropagation()}
       >
 
         {/* MODAL HEADER */}
-        <div className="px-6 sm:px-8 py-4 bg-[#1E1B2E] border-b border-stone-800 flex items-center justify-between shrink-0">
+        <div className="px-6 sm:px-8 py-4 bg-stone-900 border-b border-stone-800 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3.5 min-w-0">
             <div className="w-10 h-10 bg-white/10 flex items-center justify-center border border-white/20 shrink-0">
               <ShieldCheck className="w-5 h-5 text-amber-400" />
@@ -507,7 +507,7 @@ export function BookingModal({
           </div>
           <button
             onClick={handleClose}
-            className="p-2 text-stone-400 hover:text-white hover:bg-white/10 transition-colors rounded-none cursor-pointer shrink-0 ml-4"
+            className="p-2 text-stone-400 hover:text-white hover:bg-white/10 transition-colors rounded-xl cursor-pointer shrink-0 ml-4"
           >
             <X className="w-5 h-5" />
           </button>
@@ -515,11 +515,11 @@ export function BookingModal({
 
         {isSuccess ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-8 space-y-4">
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-none flex items-center justify-center">
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
               <CheckCircle2 className="w-8 h-8" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-[#1E1B2E] mb-2">
+              <h3 className="text-xl font-bold text-stone-900 mb-2">
                 {isBrand ? "Proposal Kolaborasi Terkirim!" : "Permintaan Terkirim!"}
               </h3>
               <p className="text-sm text-stone-500 max-w-sm mx-auto leading-relaxed">
@@ -532,14 +532,14 @@ export function BookingModal({
               <Link
                 href="/dashboard/bookings"
                 onClick={handleClose}
-                className="w-full sm:w-auto px-6 py-3 bg-[#1E1B2E] text-white rounded-none text-xs uppercase tracking-wider font-bold hover:bg-black transition-colors inline-flex items-center justify-center gap-2 shadow-sm"
+                className="w-full sm:w-auto px-6 py-3 bg-stone-900 text-white rounded-xl text-xs uppercase tracking-wider font-bold hover:bg-black transition-colors inline-flex items-center justify-center gap-2 shadow-sm"
               >
                 <span>Pantau Status di Dashboard</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <button
                 onClick={handleClose}
-                className="w-full sm:w-auto px-6 py-3 bg-stone-100 text-stone-700 rounded-none text-xs uppercase tracking-wider font-bold hover:bg-stone-200 transition-colors cursor-pointer"
+                className="w-full sm:w-auto px-6 py-3 bg-stone-100 text-stone-700 rounded-xl text-xs uppercase tracking-wider font-bold hover:bg-stone-200 transition-colors cursor-pointer"
               >
                 Tutup
               </button>
@@ -560,7 +560,7 @@ export function BookingModal({
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#1E1B2E]">{targetName}</h3>
+                  <h3 className="text-base font-bold text-stone-900">{targetName}</h3>
                   <p className="text-xs text-stone-500 font-medium">{targetSector}</p>
                 </div>
 
@@ -568,11 +568,11 @@ export function BookingModal({
                   <div className="pt-3 border-t border-stone-100 grid grid-cols-2 gap-2 text-xs">
                     <div className="p-2.5 bg-stone-50 border border-stone-200/60 space-y-0.5">
                       <span className="text-[9px] font-bold text-stone-400 uppercase tracking-wider block">Durasi Shift</span>
-                      <span className="font-bold text-[#1E1B2E]">{effectiveTerms.shiftHours} Jam Kerja</span>
+                      <span className="font-bold text-stone-900">{effectiveTerms.shiftHours} Jam Kerja</span>
                     </div>
                     <div className="p-2.5 bg-stone-50 border border-stone-200/60 space-y-0.5">
                       <span className="text-[9px] font-bold text-stone-400 uppercase tracking-wider block">Batas Revisi</span>
-                      <span className="font-bold text-[#1E1B2E]">{effectiveTerms.maxRevisions}x Minor</span>
+                      <span className="font-bold text-stone-900">{effectiveTerms.maxRevisions}x Minor</span>
                     </div>
                   </div>
                 )}
@@ -582,7 +582,7 @@ export function BookingModal({
               <div className="p-5 bg-white border border-stone-200 space-y-3">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-amber-600" />
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-stone-900">
                     Jaminan Transaksi &amp; SPK Sah
                   </h4>
                 </div>
@@ -628,7 +628,7 @@ export function BookingModal({
             <div className="w-full lg:w-7/12 p-6 sm:p-8 overflow-y-auto bg-white flex flex-col justify-between">
               <div>
                 {errorMessage && (
-                  <div className="mb-6 p-3 rounded-none bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold animate-fade-in">
+                  <div className="mb-6 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold animate-fade-in">
                     {errorMessage}
                   </div>
                 )}
@@ -646,7 +646,7 @@ export function BookingModal({
                           type="date"
                           required
                           min={todayStr}
-                          className="w-full bg-stone-50 border border-stone-200 rounded-none pl-10 pr-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                          className="w-full bg-stone-50 border border-stone-200 rounded-xl pl-10 pr-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                           value={startDate}
                           onChange={(e) => setStartDate(e.target.value)}
                         />
@@ -661,7 +661,7 @@ export function BookingModal({
                         <input
                           type="date"
                           min={startDate || todayStr}
-                          className="w-full bg-stone-50 border border-stone-200 rounded-none pl-10 pr-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                          className="w-full bg-stone-50 border border-stone-200 rounded-xl pl-10 pr-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                           value={endDate}
                           onChange={(e) => setEndDate(e.target.value)}
                         />
@@ -676,7 +676,7 @@ export function BookingModal({
                     <input
                       type="text"
                       placeholder={isBrand ? "Misal: Barter Produk / Rp 5.000.000 / Terbuka Negosiasi" : "Misal: Rp 5.000.000 atau Rate Standar"}
-                      className="w-full bg-stone-50 border border-stone-200 rounded-none px-4 py-3 text-sm text-[#1E1B2E] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                       value={budget}
                       onChange={(e) => setBudget(e.target.value)}
                     />
@@ -687,15 +687,15 @@ export function BookingModal({
                   {renderDynamicFields()}
 
                   {isBrand ? (
-                    <div className="p-4 sm:p-5 rounded-none bg-stone-50 border border-stone-200 space-y-4">
+                    <div className="p-4 sm:p-5 rounded-xl bg-stone-50 border border-stone-200 space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <ShieldCheck className="w-4 h-4 text-amber-600" />
-                          <span className="text-xs font-bold text-[#1E1B2E] uppercase tracking-wider">
+                          <span className="text-xs font-bold text-stone-900 uppercase tracking-wider">
                             Persetujuan Kerjasama Brand
                           </span>
                         </div>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-none bg-stone-200 text-stone-800 uppercase">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-xl bg-stone-200 text-stone-800 uppercase">
                           Brand Partnership
                         </span>
                       </div>
@@ -707,29 +707,29 @@ export function BookingModal({
                           checked={agreedToTerms}
                           onChange={(e) => setAgreedToTerms(e.target.checked)}
                           required
-                          className="w-4 h-4 rounded-none text-[#1E1B2E] border-stone-300 focus:ring-[#1E1B2E] mt-0.5 cursor-pointer"
+                          className="w-4 h-4 rounded-xl text-stone-900 border-stone-300 focus:ring-[#1E1B2E] mt-0.5 cursor-pointer"
                         />
-                        <label htmlFor="agreedToTerms" className="text-xs font-bold text-[#1E1B2E] cursor-pointer leading-relaxed">
+                        <label htmlFor="agreedToTerms" className="text-xs font-bold text-stone-900 cursor-pointer leading-relaxed">
                           Saya menyetujui Kode Etik Kolaborasi RAMU: menjaga kerahasiaan produk belum rilis, menghormati hak cipta bersama, dan menjaga integritas sampel busana.
                         </label>
                       </div>
                     </div>
                   ) : (
-                    <div className="p-4 sm:p-5 rounded-none bg-stone-50 border border-stone-200 space-y-4">
+                    <div className="p-4 sm:p-5 rounded-xl bg-stone-50 border border-stone-200 space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <ShieldCheck className="w-4 h-4 text-amber-600" />
-                          <span className="text-xs font-bold text-[#1E1B2E] uppercase tracking-wider">
+                          <span className="text-xs font-bold text-stone-900 uppercase tracking-wider">
                             Ketentuan Hak Pakai &amp; Pembayaran
                           </span>
                         </div>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-none bg-stone-200 text-stone-800 uppercase">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-xl bg-stone-200 text-stone-800 uppercase">
                           Standar RAMU
                         </span>
                       </div>
 
                       <div className="space-y-3 pt-1">
-                        <div className="bg-white p-3 rounded-none border border-stone-200 space-y-2">
+                        <div className="bg-white p-3 rounded-xl border border-stone-200 space-y-2">
                           <label className="text-[10px] font-bold text-stone-600 uppercase tracking-wider block">
                             1. Ruang Lingkup Lisensi &amp; Durasi Hak Pakai (Usage Rights)
                           </label>
@@ -739,7 +739,7 @@ export function BookingModal({
                               <select
                                 value={selectedUsageScope}
                                 onChange={(e) => setSelectedUsageScope(e.target.value as any)}
-                                className="w-full bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] px-2.5 py-1.5 focus:border-[#1E1B2E]"
+                                className="w-full bg-stone-50 border border-stone-200 text-xs font-bold text-stone-900 px-2.5 py-1.5 focus:border-stone-900"
                               >
                                 <option value="ORGANIC_SOCIAL">Medsos Organik &amp; Web Portofolio</option>
                                 <option value="PAID_ADS_DIGITAL">Iklan Berbayar Digital (+Ads)</option>
@@ -752,7 +752,7 @@ export function BookingModal({
                               <select
                                 value={selectedUsageDuration}
                                 onChange={(e) => setSelectedUsageDuration(e.target.value as any)}
-                                className="w-full bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] px-2.5 py-1.5 focus:border-[#1E1B2E]"
+                                className="w-full bg-stone-50 border border-stone-200 text-xs font-bold text-stone-900 px-2.5 py-1.5 focus:border-stone-900"
                               >
                                 <option value="6_MONTHS">6 Bulan (Musiman / Seasonal)</option>
                                 <option value="1_YEAR">1 Tahun (Standar Industri)</option>
@@ -763,18 +763,18 @@ export function BookingModal({
                           </div>
                         </div>
 
-                        <div className="bg-white p-3 rounded-none border border-stone-200 space-y-2">
+                        <div className="bg-white p-3 rounded-xl border border-stone-200 space-y-2">
                           <label className="text-[10px] font-bold text-stone-600 uppercase tracking-wider block">
                             2. Skema &amp; Termin Pembayaran Bertahap
                           </label>
                           <select
                             value={selectedMilestoneScheme}
                             onChange={(e) => setSelectedMilestoneScheme(e.target.value as any)}
-                            className="w-full bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] px-2.5 py-1.5 focus:border-[#1E1B2E]"
+                            className="w-full bg-stone-50 border border-stone-200 text-xs font-bold text-stone-900 px-2.5 py-1.5 focus:border-stone-900"
                           >
                             <option value="50_50_WATERMARK">DP 50% Kunci Jadwal + Pelunasan 50% (Watermark Protected)</option>
                             <option value="30_40_30">Termin 30% Booking - 40% On-Set - 30% Final File</option>
-                            <option value="100_ESCROW">100% Ditampung Aman di Rekening Escrow RAMU</option>
+                            <option value="100_UPFRONT">100% Pembayaran di Awal (Full Upfront Settlement)</option>
                           </select>
                           <p className="text-[10px] text-stone-500 leading-tight">
                             {getMilestoneSchemeLabel(selectedMilestoneScheme, effectiveTerms.dpPercentage).desc}
@@ -783,17 +783,17 @@ export function BookingModal({
                       </div>
 
                       {effectiveTerms.roleSpecifics.wardrobeRestrictions && (
-                        <p className="text-[11px] text-stone-600 bg-white p-2.5 rounded-none border border-stone-200">
+                        <p className="text-[11px] text-stone-600 bg-white p-2.5 rounded-xl border border-stone-200">
                           <strong>Batasan Busana:</strong> {effectiveTerms.roleSpecifics.wardrobeRestrictions}
                         </p>
                       )}
                       {effectiveTerms.roleSpecifics.maxHeadsIncluded && (
-                        <p className="text-[11px] text-stone-600 bg-white p-2.5 rounded-none border border-stone-200">
+                        <p className="text-[11px] text-stone-600 bg-white p-2.5 rounded-xl border border-stone-200">
                           <strong>Lingkup Rias:</strong> Maksimal {effectiveTerms.roleSpecifics.maxHeadsIncluded} orang (orang tambahan: {effectiveTerms.roleSpecifics.extraHeadFee || "biaya terpisah"}).
                         </p>
                       )}
                       {effectiveTerms.roleSpecifics.maxCrewCapacity && (
-                        <p className="text-[11px] text-stone-600 bg-white p-2.5 rounded-none border border-stone-200">
+                        <p className="text-[11px] text-stone-600 bg-white p-2.5 rounded-xl border border-stone-200">
                           <strong>Kapasitas Studio:</strong> Maksimal {effectiveTerms.roleSpecifics.maxCrewCapacity} orang di dalam area studio.
                         </p>
                       )}
@@ -805,9 +805,9 @@ export function BookingModal({
                           checked={agreedToTerms}
                           onChange={(e) => setAgreedToTerms(e.target.checked)}
                           required
-                          className="w-4 h-4 rounded-none text-[#1E1B2E] border-stone-300 focus:ring-[#1E1B2E] mt-0.5 cursor-pointer"
+                          className="w-4 h-4 rounded-xl text-stone-900 border-stone-300 focus:ring-[#1E1B2E] mt-0.5 cursor-pointer"
                         />
-                        <label htmlFor="agreedToTerms" className="text-xs font-bold text-[#1E1B2E] cursor-pointer leading-relaxed">
+                        <label htmlFor="agreedToTerms" className="text-xs font-bold text-stone-900 cursor-pointer leading-relaxed">
                           Saya menyetujui Ketentuan Kerja Profesional RAMU di atas: batasan hak pakai ({getUsageScopeLabel(selectedUsageScope).split(" (")[0]}), termin pembayaran bertahap, batas revisi, serta Garansi Anti No-Show.
                         </label>
                       </div>
@@ -823,7 +823,7 @@ export function BookingModal({
                   type="button"
                   onClick={handleClose}
                   disabled={isLoading}
-                  className="px-6 py-3 rounded-none text-xs uppercase tracking-wider font-bold text-stone-600 hover:text-[#1E1B2E] hover:bg-stone-100 transition-colors cursor-pointer"
+                  className="px-6 py-3 rounded-xl text-xs uppercase tracking-wider font-bold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors cursor-pointer"
                 >
                   Batal
                 </button>
@@ -831,7 +831,7 @@ export function BookingModal({
                   type="submit"
                   form="booking-form"
                   disabled={isLoading || !agreedToTerms}
-                  className="px-8 py-3 bg-[#1E1B2E] hover:bg-black text-white rounded-none text-xs uppercase tracking-wider font-bold transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer shadow-sm"
+                  className="px-8 py-3 bg-stone-900 hover:bg-black text-white rounded-xl text-xs uppercase tracking-wider font-bold transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer shadow-sm"
                 >
                   {isLoading ? (
                     <>

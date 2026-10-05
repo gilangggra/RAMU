@@ -12,6 +12,7 @@ import {
   List,
   RotateCcw,
   Sparkles,
+  Check,
 } from "lucide-react";
 
 interface ProjectFilterBarProps {
@@ -37,11 +38,11 @@ export const PROJECT_ROLE_FILTERS = [
 ];
 
 export const PROJECT_COMPENSATION_FILTERS = [
-  { id: "ALL", label: "Semua Kompensasi", badge: "Semua" },
+  { id: "ALL", label: "Semua Kompensasi", badge: "Semua Kompensasi" },
   { id: "PAID", label: "Fee Komersial (Paid)", badge: "Paid (Berbayar)" },
-  { id: "BARTER", label: "Barter Produk / Jasa", badge: "Barter" },
-  { id: "TFP", label: "TFP (Trade for Portfolio)", badge: "TFP" },
-  { id: "REVENUE_SHARE", label: "Bagi Hasil (Revenue Share)", badge: "Rev-Share" },
+  { id: "BARTER", label: "Barter Produk / Jasa", badge: "Barter Portofolio" },
+  { id: "TFP", label: "TFP (Trade for Portfolio)", badge: "TFP Kolaborasi" },
+  { id: "REVENUE_SHARE", label: "Bagi Hasil (Revenue Share)", badge: "Bagi Hasil" },
 ];
 
 export const PROJECT_LOCATION_FILTERS = [
@@ -123,22 +124,22 @@ export function ProjectFilterBar({
   );
 
   return (
-    <div className="space-y-4 pb-6 border-b border-stone-200">
-      {/* 1. TOP ROW: SMART SEARCH & VIEW MODE SWITCHER */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+    <div className="space-y-3.5 pb-5 border-b border-stone-200/80">
+      {/* 1. TOP ROW: ATTIO MINIMAL SEARCH & VIEW MODE SWITCHER */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
         <form onSubmit={handleSearchSubmit} className="relative flex-1">
           <div className="relative flex items-center">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari brief proyek, tema editorial, kebutuhan kru, atau brand..."
-              className="w-full pl-11 pr-24 py-3 bg-stone-50 rounded-xl border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-1 focus:ring-[#1E1B2E] text-xs sm:text-sm font-medium text-stone-800 placeholder:text-stone-400 transition-all outline-hidden shadow-2xs"
+              placeholder="Cari lowongan brief, brand, peran yang dicari, atau target luaran..."
+              className="w-full pl-9 pr-24 py-2.5 bg-white rounded-lg border border-stone-200/90 focus:border-stone-900 focus:ring-1 focus:ring-stone-900 text-xs font-medium text-stone-900 placeholder:text-stone-400 transition-all outline-hidden shadow-2xs"
             />
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
-              <Search className="w-4 h-4" />
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
+              <Search className="w-3.5 h-3.5" />
             </div>
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
               {search && (
                 <button
                   type="button"
@@ -146,7 +147,7 @@ export function ProjectFilterBar({
                     setSearch("");
                     updateQuery({ search: null });
                   }}
-                  className="p-1.5 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer rounded-md"
+                  className="p-1 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer rounded"
                   title="Hapus kata kunci"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -155,7 +156,7 @@ export function ProjectFilterBar({
               <button
                 type="submit"
                 disabled={isPending}
-                className="px-3.5 py-1.5 bg-[#1E1B2E] hover:bg-black text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors cursor-pointer shadow-xs"
+                className="px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white text-[11px] font-semibold rounded-md transition-colors cursor-pointer shadow-2xs"
               >
                 {isPending ? "Mencari..." : "Cari"}
               </button>
@@ -163,48 +164,48 @@ export function ProjectFilterBar({
           </div>
         </form>
 
-        {/* VIEW MODE TOGGLE (GRID VS COMPACT LIST) */}
-        <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl border border-stone-200 self-end sm:self-auto shrink-0">
+        {/* VIEW MODE TOGGLE (ATTIO SEGMENTED ICON CONTROL) */}
+        <div className="flex items-center gap-0.5 bg-stone-100 p-0.5 rounded-lg border border-stone-200/70 self-end sm:self-auto shrink-0">
           <button
             type="button"
             onClick={() => updateQuery({ view: "grid" })}
-            className={`p-2 rounded-lg transition-all cursor-pointer ${
+            className={`p-1.5 rounded-md transition-all cursor-pointer ${
               currentView === "grid"
-                ? "bg-[#1E1B2E] text-white shadow-xs"
-                : "text-stone-500 hover:text-stone-900"
+                ? "bg-white text-stone-900 shadow-2xs font-semibold"
+                : "text-stone-400 hover:text-stone-700"
             }`}
             title="Tampilan Kartu Galeri (Grid)"
           >
-            <LayoutGrid className="w-4 h-4" />
+            <LayoutGrid className="w-3.5 h-3.5" />
           </button>
           <button
             type="button"
             onClick={() => updateQuery({ view: "list" })}
-            className={`p-2 rounded-lg transition-all cursor-pointer ${
+            className={`p-1.5 rounded-md transition-all cursor-pointer ${
               currentView === "list"
-                ? "bg-[#1E1B2E] text-white shadow-xs"
-                : "text-stone-500 hover:text-stone-900"
+                ? "bg-white text-stone-900 shadow-2xs font-semibold"
+                : "text-stone-400 hover:text-stone-700"
             }`}
             title="Tampilan Baris Ringkas (List)"
           >
-            <List className="w-4 h-4" />
+            <List className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* 2. SECOND ROW: COMPACT SELECTORS & QUICK FILTERS */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
+      {/* 2. SECOND ROW: ATTIO FILTER DROPDOWNS & QUICK CHIPS */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 text-xs">
         <div className="flex items-center gap-2 flex-wrap">
           {/* ROLE SELECTOR */}
           <div className="relative inline-flex items-center">
-            <Briefcase className="w-3.5 h-3.5 text-stone-400 absolute left-3 pointer-events-none" />
+            <Briefcase className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 pointer-events-none" />
             <select
               value={currentRole}
               onChange={(e) => updateQuery({ role: e.target.value })}
-              className={`pl-8 pr-7 py-2 rounded-xl text-xs font-semibold border cursor-pointer transition-colors outline-hidden appearance-none bg-stone-50 hover:bg-white ${
+              className={`pl-7 pr-6 py-1.5 rounded-lg text-xs font-medium border cursor-pointer transition-colors outline-hidden appearance-none ${
                 currentRole !== "ALL"
-                  ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
-                  : "border-stone-200 text-stone-700"
+                  ? "bg-stone-900 text-white border-stone-900 shadow-2xs"
+                  : "bg-white text-stone-700 border-stone-200/90 hover:bg-stone-50"
               }`}
             >
               {PROJECT_ROLE_FILTERS.map((r) => (
@@ -217,14 +218,14 @@ export function ProjectFilterBar({
 
           {/* COMPENSATION SELECTOR */}
           <div className="relative inline-flex items-center">
-            <CircleDollarSign className="w-3.5 h-3.5 text-stone-400 absolute left-3 pointer-events-none" />
+            <CircleDollarSign className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 pointer-events-none" />
             <select
               value={currentCompensation}
               onChange={(e) => updateQuery({ compensation: e.target.value })}
-              className={`pl-8 pr-7 py-2 rounded-xl text-xs font-semibold border cursor-pointer transition-colors outline-hidden appearance-none bg-stone-50 hover:bg-white ${
+              className={`pl-7 pr-6 py-1.5 rounded-lg text-xs font-medium border cursor-pointer transition-colors outline-hidden appearance-none ${
                 currentCompensation !== "ALL"
-                  ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
-                  : "border-stone-200 text-stone-700"
+                  ? "bg-stone-900 text-white border-stone-900 shadow-2xs"
+                  : "bg-white text-stone-700 border-stone-200/90 hover:bg-stone-50"
               }`}
             >
               {PROJECT_COMPENSATION_FILTERS.map((c) => (
@@ -237,14 +238,14 @@ export function ProjectFilterBar({
 
           {/* LOCATION SELECTOR */}
           <div className="relative inline-flex items-center">
-            <MapPin className="w-3.5 h-3.5 text-stone-400 absolute left-3 pointer-events-none" />
+            <MapPin className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 pointer-events-none" />
             <select
               value={currentLocation}
               onChange={(e) => updateQuery({ location: e.target.value })}
-              className={`pl-8 pr-7 py-2 rounded-xl text-xs font-semibold border cursor-pointer transition-colors outline-hidden appearance-none bg-stone-50 hover:bg-white ${
+              className={`pl-7 pr-6 py-1.5 rounded-lg text-xs font-medium border cursor-pointer transition-colors outline-hidden appearance-none ${
                 currentLocation !== "ALL"
-                  ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
-                  : "border-stone-200 text-stone-700"
+                  ? "bg-stone-900 text-white border-stone-900 shadow-2xs"
+                  : "bg-white text-stone-700 border-stone-200/90 hover:bg-stone-50"
               }`}
             >
               {PROJECT_LOCATION_FILTERS.map((l) => (
@@ -255,30 +256,49 @@ export function ProjectFilterBar({
             </select>
           </div>
 
-          {/* USER SECTOR QUICK MATCH BUTTON */}
+          {/* QUICK TOGGLE: BERBAYAR ONLY */}
+          <button
+            type="button"
+            onClick={() =>
+              updateQuery({
+                compensation: currentCompensation === "PAID" ? "ALL" : "PAID",
+              })
+            }
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer border ${
+              currentCompensation === "PAID"
+                ? "bg-stone-900 text-white border-stone-900 shadow-2xs"
+                : "bg-white hover:bg-stone-50 text-stone-700 border-stone-200/90"
+            }`}
+          >
+            {currentCompensation === "PAID" && <Check className="w-3 h-3 text-emerald-400" />}
+            <span>Hanya Berbayar (Paid)</span>
+          </button>
+
+          {/* USER SECTOR QUICK MATCH BUTTON (CLEAN ATTIO STYLE) */}
           {userSector && (
             <button
               type="button"
               onClick={() => {
-                const detectedRole = PROJECT_ROLE_FILTERS.find((r) =>
-                  r.label.toLowerCase().includes(userSector.toLowerCase()) ||
-                  userSector.toLowerCase().includes(r.id.toLowerCase())
+                const detectedRole = PROJECT_ROLE_FILTERS.find(
+                  (r) =>
+                    r.label.toLowerCase().includes(userSector.toLowerCase()) ||
+                    userSector.toLowerCase().includes(r.id.toLowerCase())
                 );
                 const targetRoleId = detectedRole ? detectedRole.id : userSector;
                 updateQuery({
                   role: currentRole === targetRoleId ? "ALL" : targetRoleId,
                 });
               }}
-              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer border ${
                 currentRole !== "ALL" &&
                 (userSector.toLowerCase().includes(currentRole.toLowerCase()) ||
                   currentRole.toLowerCase().includes(userSector.toLowerCase()))
-                  ? "bg-amber-400 text-stone-950 border-amber-400 shadow-xs"
-                  : "bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200/80"
+                  ? "bg-stone-900 text-white border-stone-900 shadow-2xs"
+                  : "bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200/80"
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Sesuai Peran Saya ({userSector})</span>
+              <Sparkles className="w-3 h-3 text-stone-500" />
+              <span>Sesuai Profil ({userSector})</span>
             </button>
           )}
         </div>
@@ -289,23 +309,23 @@ export function ProjectFilterBar({
             <button
               type="button"
               onClick={handleClearAll}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:text-rose-900 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-stone-500 hover:text-stone-900 transition-colors cursor-pointer"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-3 h-3" />
               <span>Reset Filter</span>
             </button>
           </div>
         )}
       </div>
 
-      {/* 3. ACTIVE FILTER CHIPS (IF ANY) */}
+      {/* 3. ACTIVE FILTER CHIPS */}
       {hasActiveFilters && (
-        <div className="flex items-center gap-2 flex-wrap pt-1 text-xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
-            Filter Aktif:
+        <div className="flex items-center gap-1.5 flex-wrap pt-0.5 text-xs">
+          <span className="text-[11px] font-medium text-stone-400">
+            Filter diterapkan:
           </span>
           {currentSearch && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-stone-100 text-stone-800 rounded-md text-xs font-medium">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-stone-100 text-stone-700 rounded-md text-[11px] font-medium border border-stone-200/60">
               Kata kunci: &ldquo;{currentSearch}&rdquo;
               <button
                 type="button"
@@ -313,43 +333,43 @@ export function ProjectFilterBar({
                   setSearch("");
                   updateQuery({ search: null });
                 }}
-                className="hover:text-rose-600 cursor-pointer"
+                className="hover:text-stone-900 cursor-pointer"
               >
                 <X className="w-3 h-3" />
               </button>
             </span>
           )}
           {activeRoleObj && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-stone-100 text-stone-800 rounded-md text-xs font-medium">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-stone-100 text-stone-700 rounded-md text-[11px] font-medium border border-stone-200/60">
               Peran: {activeRoleObj.label}
               <button
                 type="button"
                 onClick={() => updateQuery({ role: "ALL" })}
-                className="hover:text-rose-600 cursor-pointer"
+                className="hover:text-stone-900 cursor-pointer"
               >
                 <X className="w-3 h-3" />
               </button>
             </span>
           )}
           {activeCompObj && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-stone-100 text-stone-800 rounded-md text-xs font-medium">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-stone-100 text-stone-700 rounded-md text-[11px] font-medium border border-stone-200/60">
               Kompensasi: {activeCompObj.badge}
               <button
                 type="button"
                 onClick={() => updateQuery({ compensation: "ALL" })}
-                className="hover:text-rose-600 cursor-pointer"
+                className="hover:text-stone-900 cursor-pointer"
               >
                 <X className="w-3 h-3" />
               </button>
             </span>
           )}
           {activeLocObj && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-stone-100 text-stone-800 rounded-md text-xs font-medium">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-stone-100 text-stone-700 rounded-md text-[11px] font-medium border border-stone-200/60">
               Lokasi: {activeLocObj.label}
               <button
                 type="button"
                 onClick={() => updateQuery({ location: "ALL" })}
-                className="hover:text-rose-600 cursor-pointer"
+                className="hover:text-stone-900 cursor-pointer"
               >
                 <X className="w-3 h-3" />
               </button>

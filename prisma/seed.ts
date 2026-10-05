@@ -37,13 +37,16 @@ async function main() {
   // ─────────────────────────────────────
   const nala = await prisma.actor.upsert({
     where: { id: "00000000-0000-0000-0000-000000000001" },
-    update: {},
+    update: {
+      sector: "Fashion Brand/UMKM",
+      actorType: ActorType.BRAND,
+    },
     create: {
       id: "00000000-0000-0000-0000-000000000001",
       ownerUserId: demoProfile.id,
       name: "Nala The Label",
       actorType: ActorType.BRAND,
-      sector: "Fashion Designer / Label",
+      sector: "Fashion Brand/UMKM",
       location: "Jakarta Selatan",
       description:
         "Brand fashion lokal dengan gaya contemporary ready-to-wear, fokus pada siluet modern dan keberlanjutan.",
@@ -151,16 +154,19 @@ async function main() {
   // ─────────────────────────────────────
   const imaji = await prisma.actor.upsert({
     where: { id: "00000000-0000-0000-0000-000000000002" },
-    update: {},
+    update: {
+      sector: "Studio",
+      actorType: ActorType.STUDIO,
+    },
     create: {
       id: "00000000-0000-0000-0000-000000000002",
       ownerUserId: demoProfile.id,
       name: "Studio Imaji & Co.",
       actorType: ActorType.STUDIO,
-      sector: "Creative & Art Director",
+      sector: "Studio",
       location: "Bandung, Jawa Barat",
       description:
-        "Studio creative direction yang merancang konsep kampanye visual, set design, dan keseluruhan art direction untuk brand lifestyle.",
+        "Fasilitas studio foto daylight, ruang produksi kreatif, dan penyewaan properti set kampanye busana.",
       contactEmail: "hello@studioimaji.co",
       status: ActorStatus.ACTIVE,
     },
@@ -236,13 +242,16 @@ async function main() {
   // ─────────────────────────────────────
   const makeup = await prisma.actor.upsert({
     where: { id: "00000000-0000-0000-0000-000000000003" },
-    update: {},
+    update: {
+      sector: "MUA/Stylist",
+      actorType: ActorType.INDIVIDUAL,
+    },
     create: {
       id: "00000000-0000-0000-0000-000000000003",
       ownerUserId: demoProfile.id,
       name: "Glow & Form Artistry",
-      actorType: ActorType.STUDIO,
-      sector: "Makeup & Hair Artist (MUA)",
+      actorType: ActorType.INDIVIDUAL,
+      sector: "MUA/Stylist",
       location: "Jakarta Pusat",
       description:
         "Tim profesional MUA dan Hair Stylist spesialis pemotretan editorial, fashion show, dan kampanye komersial.",
@@ -295,13 +304,16 @@ async function main() {
   // ─────────────────────────────────────
   const lensa = await prisma.actor.upsert({
     where: { id: "00000000-0000-0000-0000-000000000004" },
-    update: {},
+    update: {
+      sector: "Photographer",
+      actorType: ActorType.INDIVIDUAL,
+    },
     create: {
       id: "00000000-0000-0000-0000-000000000004",
       ownerUserId: demoProfile.id,
       name: "Lensa Kreatif Studio",
-      actorType: ActorType.STUDIO,
-      sector: "Fotografi / Visual Production",
+      actorType: ActorType.INDIVIDUAL,
+      sector: "Photographer",
       location: "Surabaya, Jawa Timur",
       description:
         "Studio fotografi komersial dan visual production spesialis katalog produk fesyen, lookbook, dan kampanye digital.",
@@ -365,8 +377,92 @@ async function main() {
   });
   console.log(`✓ Aktor selesai: ${lensa.name}`);
 
-  console.log("\n[SEED] Seeding Phase 1 + 2 selesai!");
-  console.log("   4 Aktor | Assets, Goals, Needs, Constraints Golden Demo siap untuk Engine.");
+  // ─────────────────────────────────────
+  // 6. Actor: Go Young Jung (Model)
+  // ─────────────────────────────────────
+  const model = await prisma.actor.upsert({
+    where: { id: "00000000-0000-0000-0000-000000000005" },
+    update: {
+      sector: "Model",
+      actorType: ActorType.INDIVIDUAL,
+    },
+    create: {
+      id: "00000000-0000-0000-0000-000000000005",
+      ownerUserId: demoProfile.id,
+      name: "Go Young Jung",
+      actorType: ActorType.INDIVIDUAL,
+      sector: "Model",
+      location: "Jakarta Selatan",
+      description:
+        "Talenta dan model fesyen profesional spesialis katalog lookbook, kampanye editorial, dan video komersial rilis busana.",
+      contactEmail: "talent@goyoungjung.me",
+      status: ActorStatus.ACTIVE,
+    },
+  });
+
+  await prisma.asset.createMany({
+    skipDuplicates: true,
+    data: [
+      {
+        actorId: model.id,
+        category: AssetCategory.SKILL_TALENT,
+        subtype: "Fashion Modeling",
+        name: "Pemodelan Lookbook & Editorial Fashion",
+        description: "Talenta model editorial busana dengan pengalaman kampanye lookbook lokal dan internasional",
+        roles: [AssetRole.CAPABILITY, AssetRole.CREATIVE_ELEMENT],
+        attributes: { height_cm: 174, shoes_size: 39 },
+        sourceType: SourceType.SELF_REPORTED,
+        confidenceLevel: ConfidenceLevel.HIGH,
+        status: AssetStatus.ACTIVE,
+      },
+    ],
+  });
+  console.log(`✓ Aktor selesai: ${model.name}`);
+
+  // ─────────────────────────────────────
+  // 7. Actor: Atelier Nara (Fashion Designer)
+  // ─────────────────────────────────────
+  const designer = await prisma.actor.upsert({
+    where: { id: "00000000-0000-0000-0000-000000000006" },
+    update: {
+      sector: "Fashion Designer",
+      actorType: ActorType.INDIVIDUAL,
+    },
+    create: {
+      id: "00000000-0000-0000-0000-000000000006",
+      ownerUserId: demoProfile.id,
+      name: "Atelier Nara",
+      actorType: ActorType.INDIVIDUAL,
+      sector: "Fashion Designer",
+      location: "Bandung, Jawa Barat",
+      description:
+        "Perancang busana avant-garde dan pattern maker independen yang merancang siluet kontemporer dengan bahan silk organza dan tenun.",
+      contactEmail: "nara@ateliernara.design",
+      status: ActorStatus.ACTIVE,
+    },
+  });
+
+  await prisma.asset.createMany({
+    skipDuplicates: true,
+    data: [
+      {
+        actorId: designer.id,
+        category: AssetCategory.PORTFOLIO_WORK,
+        subtype: "Koleksi Busana Ready-to-Wear",
+        name: "Koleksi Kapsul Busana Deconstructed Silk Organza",
+        description: "Koleksi 12 busana siap pakai dengan eksplorasi draperi modern untuk editorial lookbook",
+        roles: [AssetRole.INPUT, AssetRole.COMPONENT],
+        attributes: { collection_year: "2026", looks_count: 12 },
+        sourceType: SourceType.SELF_REPORTED,
+        confidenceLevel: ConfidenceLevel.HIGH,
+        status: AssetStatus.ACTIVE,
+      },
+    ],
+  });
+  console.log(`✓ Aktor selesai: ${designer.name}`);
+
+  console.log("\n[SEED] Seeding 6 Aktor Resmi RAMU selesai!");
+  console.log("   6 Aktor: Fashion Brand/UMKM, Fashion Designer, Photographer, Model, MUA/Stylist, Studio.");
 }
 
 main()

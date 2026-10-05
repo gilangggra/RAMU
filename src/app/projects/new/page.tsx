@@ -4,40 +4,105 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createProjectBriefAction } from "@/app/projects/actions";
-import { Lightbulb, MapPin, Clock, CircleDollarSign, Send, Check, AlertCircle, CheckCircle2, ArrowRight, ArrowLeft, Camera, Palette, UserCircle, Building2, ChevronDown } from "lucide-react";
+import {
+  Lightbulb,
+  MapPin,
+  Clock,
+  CircleDollarSign,
+  Send,
+  Check,
+  AlertCircle,
+  CheckCircle2,
+  ArrowRight,
+  ArrowLeft,
+  Camera,
+  Scissors,
+  Brush,
+  Building,
+  Palette,
+  UserCircle,
+  Building2,
+  ChevronDown,
+} from "lucide-react";
 
 const ROLE_BLUEPRINTS = [
-  { 
-    id: "FOTO", 
-    label: "Fotografer & Videografer", 
-    icon: Camera, 
-    category: "SKILL_TALENT", 
-    desc: "Pencipta visual untuk kampanye dan katalog.",
-    specializations: ["Fotografer Produk", "Fotografer Fesyen", "Videografer Komersial", "Art Director"]
+  {
+    id: "DESIGNER",
+    label: "Fashion Designer",
+    icon: Scissors,
+    category: "SKILL_TALENT",
+    desc: "Perancang busana, pattern maker, dan desainer koleksi lookbook.",
+    specializations: [
+      "Fashion Designer Utama",
+      "Pattern Maker Presisi",
+      "Ready-to-Wear Specialist",
+      "Couture & Modest Designer",
+    ],
   },
-  { 
-    id: "DESAIN", 
-    label: "Desainer Kreatif", 
-    icon: Palette, 
-    category: "SKILL_TALENT", 
-    desc: "Perancang identitas visual dan aset grafis.",
-    specializations: ["Desainer Grafis (Branding)", "Desainer Kemasan", "UI/UX Designer", "Illustrator 2D/3D"]
+  {
+    id: "PHOTOGRAPHER",
+    label: "Photographer",
+    icon: Camera,
+    category: "SKILL_TALENT",
+    desc: "Fotografer fashion, editorial lookbook, dan kampanye komersial.",
+    specializations: [
+      "Fashion Photographer",
+      "Lookbook Specialist",
+      "E-Commerce Packshot",
+      "Editorial High-Fashion",
+    ],
   },
-  { 
-    id: "MODEL", 
-    label: "Model & Talent", 
-    icon: UserCircle, 
-    category: "SKILL_TALENT", 
-    desc: "Talenta profesional di depan layar atau mikrofon.",
-    specializations: ["Model Fesyen Utama", "Karakter Pendukung", "Aktor Iklan Komersial", "Voice Over Talent"]
+  {
+    id: "MODEL",
+    label: "Model",
+    icon: UserCircle,
+    category: "SKILL_TALENT",
+    desc: "Model peraga busana, editorial muse, dan talent runway.",
+    specializations: [
+      "Model Utama Lookbook",
+      "Editorial Fashion Muse",
+      "Commercial Fitting Model",
+      "Runway & Campaign Talent",
+    ],
   },
-  { 
-    id: "STUDIO", 
-    label: "Infrastruktur & Ruang", 
-    icon: Building2, 
-    category: "STUDIO_SPACE", 
-    desc: "Fasilitas, ruang kerja, atau peralatan teknis.",
-    specializations: ["Studio Foto (Cyclorama)", "Studio Rekaman (Audio)", "Penyewaan Alat/Lighting", "Set Lokasi Shooting"]
+  {
+    id: "MUA_STYLIST",
+    label: "MUA/Stylist",
+    icon: Brush,
+    category: "SKILL_TALENT",
+    desc: "Makeup & Hair artist serta penata gaya busana (wardrobe stylist).",
+    specializations: [
+      "Editorial Makeup Artist",
+      "Fashion Wardrobe Stylist",
+      "Hair Styling & Hijab Do",
+      "On-Set Grooming Specialist",
+    ],
+  },
+  {
+    id: "STUDIO",
+    label: "Studio",
+    icon: Building2,
+    category: "STUDIO_SPACE",
+    desc: "Fasilitas studio foto sewa, cyclorama wall, dan lighting kit.",
+    specializations: [
+      "Studio Foto Cyclorama",
+      "Daylight Loft Studio",
+      "Penyewaan Alat & Lighting",
+      "Studio + Ruang Fitting AC",
+    ],
+  },
+  {
+    id: "BRAND",
+    label: "Fashion Brand/UMKM",
+    icon: Building,
+    category: "WARDROBE_PROP",
+    desc: "Brand mode mitra co-branding atau penyedia busana.",
+    specializations: [
+      "Co-Branding Partner",
+      "Wardrobe Sponsor",
+      "Apparel Label",
+      "Accessories Brand",
+    ],
   },
 ];
 
@@ -266,19 +331,19 @@ export default function NewProjectBriefPage() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="misal: Campaign Video Minuman Lokal — Bali Vibes"
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors"
+                    className="w-full px-4 py-2.5 rounded-lg bg-white border border-stone-200 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900 transition-colors"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-stone-500">
                       Jenis Proyek *
                     </label>
                     <select
                       value={projectType}
                       onChange={(e) => setProjectType(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 rounded-lg bg-white border border-stone-200 text-xs text-stone-900 focus:outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900 transition-colors cursor-pointer"
                     >
                       {PROJECT_TYPES.map((t) => (
                         <option key={t} value={t}>{t}</option>
@@ -287,13 +352,13 @@ export default function NewProjectBriefPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-stone-500">
                       Tema / Gaya Visual
                     </label>
                     <select
                       value={aestheticStyle}
                       onChange={(e) => setAestheticStyle(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 rounded-lg bg-white border border-stone-200 text-xs text-stone-900 focus:outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900 transition-colors cursor-pointer"
                     >
                       {["Minimalist", "Streetwear", "Luxury", "Cinematic", "Y2K", "High-Fashion", "Edgy", "Vintage", "Editorial", "Lainnya"].map((t) => (
                         <option key={t} value={t}>{t}</option>
@@ -303,19 +368,19 @@ export default function NewProjectBriefPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-stone-500">
                     Target Output *
                   </label>
                   <input
                     value={targetOutput}
                     onChange={(e) => setTargetOutput(e.target.value)}
                     placeholder="misal: Video iklan 60 detik + 10 foto produk berkualitas tinggi"
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors"
+                    className="w-full px-4 py-2.5 rounded-lg bg-white border border-stone-200 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900 transition-colors"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-stone-500">
                     Deskripsi Proyek *
                   </label>
                   <textarea
@@ -323,7 +388,7 @@ export default function NewProjectBriefPage() {
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Jelaskan konteks, tujuan, dan apa yang ingin dicapai dari proyek ini..."
                     rows={4}
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors resize-none"
+                    className="w-full px-4 py-2.5 rounded-lg bg-white border border-stone-200 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900 transition-colors resize-none"
                   />
                 </div>
               </div>
@@ -462,7 +527,7 @@ export default function NewProjectBriefPage() {
                             onChange={(e) => updateRole(role.id, "description", e.target.value)}
                             placeholder={`Contoh: Harus membawa perlengkapan sendiri, atau memiliki pengalaman spesifik...`}
                             rows={2}
-                            className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] focus:ring-2 focus:ring-[#E66A48]/10 transition-colors resize-none"
+                            className="w-full px-4 py-2.5 rounded-lg bg-white border border-stone-200 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900 transition-colors resize-none"
                           />
                         </div>
                       </div>
@@ -472,66 +537,66 @@ export default function NewProjectBriefPage() {
 
                 <button
                   onClick={addRole}
-                  className="w-full py-4 rounded-2xl border border-dashed border-[#E66A48]/30 hover:border-[#E66A48] bg-white hover:bg-stone-50/40 text-[#1E1B2E] text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full py-3.5 rounded-xl border border-dashed border-stone-300 hover:border-stone-500 bg-white hover:bg-stone-50 text-stone-800 text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <div className="w-5 h-5 rounded-full bg-[#1E1B2E] text-white flex items-center justify-center text-lg leading-none pb-0.5">+</div>
+                  <div className="w-5 h-5 rounded-full bg-stone-900 text-white flex items-center justify-center text-sm leading-none">+</div>
                   <span>Tambah Slot Kebutuhan Lainnya</span>
                 </button>
               </div>
             )}
 
             {step === 3 && (
-              <div className="space-y-5">
-                <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200/70 text-xs text-stone-500">
-                  Semua field di langkah ini opsional. Anda bisa mengisi, menentukan detail, atau membahasnya nanti bersama kolaborator.
+              <div className="space-y-4">
+                <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200/70 text-xs text-stone-500 font-normal">
+                  Semua kolom di langkah ini bersifat opsional. Anda dapat mengisi, menentukan perkiraan, atau membahasnya kemudian bersama mitra kolaborator.
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-stone-500">
                     Lokasi Proyek
                   </label>
                   <input
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="misal: Bali, atau Remote"
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors"
+                    className="w-full px-4 py-2.5 rounded-lg bg-white border border-stone-200 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900 transition-colors"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-stone-500">
                       Estimasi Durasi
                     </label>
                     <input
                       value={estimatedDuration}
                       onChange={(e) => setEstimatedDuration(e.target.value)}
                       placeholder="misal: 3 Minggu"
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors"
+                      className="w-full px-4 py-2.5 rounded-lg bg-white border border-stone-200 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900 transition-colors"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-stone-500">
                       Target Peluncuran
                     </label>
                     <input
                       value={targetLaunch}
                       onChange={(e) => setTargetLaunch(e.target.value)}
                       placeholder="misal: Oktober 2026"
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors"
+                      className="w-full px-4 py-2.5 rounded-lg bg-white border border-stone-200 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900 transition-colors"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-stone-500">
                       Model Kompensasi
                     </label>
                     <select
                       value={compensationModel}
                       onChange={(e) => setCompensationModel(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] focus:outline-none focus:border-[#E66A48] transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 rounded-lg bg-white border border-stone-200 text-xs text-stone-900 focus:outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900 transition-colors cursor-pointer"
                     >
                       <option value="PAID">Paid (Berbayar)</option>
                       <option value="TFP">TFP / Barter Portofolio</option>
@@ -539,19 +604,20 @@ export default function NewProjectBriefPage() {
                     </select>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-stone-500">
                       Estimasi Anggaran Total
                     </label>
                     <input
                       value={estimatedTotal}
                       onChange={(e) => setEstimatedTotal(e.target.value)}
                       placeholder="misal: Rp 5.000.000 (jika paid)"
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors"
+                      className="w-full px-4 py-2.5 rounded-lg bg-white border border-stone-200 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900 transition-colors"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1.5">                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-stone-500">
                     Catatan Budget
                   </label>
                   <textarea
@@ -559,7 +625,7 @@ export default function NewProjectBriefPage() {
                     onChange={(e) => setBudgetNotes(e.target.value)}
                     placeholder="misal: Bagi hasil 50:50, biaya produksi ditanggung bersama..."
                     rows={2}
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200/80 text-sm text-[#1E1B2E] placeholder-[#9E98A8] focus:outline-none focus:border-[#E66A48] transition-colors resize-none"
+                    className="w-full px-4 py-2.5 rounded-lg bg-white border border-stone-200 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900 transition-colors resize-none"
                   />
                 </div>
               </div>
@@ -568,30 +634,30 @@ export default function NewProjectBriefPage() {
             {step === 4 && (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-5 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-3 flex flex-col justify-between">
+                  <div className="p-4 rounded-xl bg-white border border-stone-200/80 space-y-3 flex flex-col justify-between shadow-2xs">
                     <div>
-                      <div className="text-xs font-bold uppercase text-stone-500 mb-2">Informasi Proyek</div>
+                      <div className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 mb-2">Informasi Proyek</div>
                       <div className="space-y-1">
-                        <div className="text-base font-bold text-[#1E1B2E]">{title}</div>
-                        <div className="text-xs font-bold text-[#E66A48]">{projectType} {aestheticStyle ? `· ${aestheticStyle}` : ""}</div>
-                        <div className="text-xs text-stone-500 leading-relaxed mt-1 line-clamp-3">{description}</div>
+                        <div className="text-base font-semibold text-stone-900">{title}</div>
+                        <div className="text-xs font-medium text-stone-600">{projectType} {aestheticStyle ? `· ${aestheticStyle}` : ""}</div>
+                        <div className="text-xs text-stone-500 leading-relaxed mt-1 line-clamp-3 font-normal">{description}</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 pt-2 border-t border-stone-200/60">
-                      <span className="text-[10px] font-bold text-stone-500">TARGET:</span>
-                      <span className="text-xs font-bold text-[#1E1B2E]">{targetOutput}</span>
+                    <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
+                      <span className="text-[10px] font-semibold text-stone-400">TARGET:</span>
+                      <span className="text-xs font-semibold text-stone-800">{targetOutput}</span>
                     </div>
                   </div>
 
-                  <div className="p-5 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-2">
-                    <div className="text-xs font-bold uppercase text-stone-500 mb-2">Detail Operasional &amp; Budget</div>
-                    <div className="text-xs text-[#1E1B2E] space-y-2">
+                  <div className="p-4 rounded-xl bg-white border border-stone-200/80 space-y-2 shadow-2xs">
+                    <div className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 mb-2">Detail Operasional &amp; Budget</div>
+                    <div className="text-xs text-stone-700 space-y-2 font-normal">
                       <div className="flex items-center gap-2">
-                        <MapPin className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+                        <MapPin className="w-3.5 h-3.5 text-stone-400 shrink-0" />
                         <span>{location || "Lokasi belum ditentukan"}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Clock className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+                        <Clock className="w-3.5 h-3.5 text-stone-400 shrink-0" />
                         <span>{estimatedDuration || "Durasi fleksibel"} {targetLaunch ? `(Target: ${targetLaunch})` : ""}</span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -607,28 +673,30 @@ export default function NewProjectBriefPage() {
                   </div>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-stone-50/80 border border-stone-200/70 space-y-3">
-                  <div className="text-xs font-bold uppercase text-stone-500">Peran Dibutuhkan ({roles.filter(r => r.roleLabel).length})</div>
+                <div className="p-4 rounded-xl bg-white border border-stone-200/80 space-y-3 shadow-2xs">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-stone-400">
+                    Peran Dibutuhkan ({roles.filter(r => r.roleLabel).length})
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {roles
                       .filter((r) => r.roleLabel.trim())
                       .map((role, idx) => (
-                        <div key={role.id} className="p-3 bg-white border border-stone-200/60 rounded-xl flex items-center gap-2 text-xs">
-                          <span className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-[10px] font-bold text-amber-800 shrink-0">
+                        <div key={role.id} className="p-2.5 bg-stone-50 border border-stone-200/70 rounded-lg flex items-center gap-2 text-xs">
+                          <span className="w-5 h-5 rounded-full bg-stone-200 flex items-center justify-center text-[10px] font-semibold text-stone-700 shrink-0">
                             {idx + 1}
                           </span>
                           <div className="min-w-0">
-                            <span className="font-bold text-[#1E1B2E] block truncate">{role.roleLabel}</span>
-                            <span className="text-[10px] text-stone-400 block truncate">{role.assetCategory}</span>
+                            <span className="font-semibold text-stone-900 block truncate">{role.roleLabel}</span>
+                            <span className="text-[10px] text-stone-500 block truncate">{role.assetCategory}</span>
                           </div>
                         </div>
                       ))}
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2.5">
+                <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200/80 text-xs text-emerald-900 flex items-center gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Setelah dipublikasikan, proyek ini akan muncul di galeri publik dan dapat dilihat oleh semua kreator di RAMU.</span>
+                  <span>Setelah dipublikasikan, brief proyek ini akan muncul di galeri publik dan dapat dilihat oleh seluruh kreator di RAMU.</span>
                 </div>
               </div>
             )}
@@ -636,26 +704,26 @@ export default function NewProjectBriefPage() {
           </div>
 
           {/* CARD ACTION BAR FOOTER (shrink-0 pinned at bottom) */}
-          <div className="px-6 sm:px-8 py-3.5 sm:py-4 bg-white border-t border-stone-200 flex items-center justify-between gap-3 shrink-0">
+          <div className="px-6 sm:px-8 py-3.5 sm:py-4 bg-white border-t border-stone-200/80 flex items-center justify-between gap-3 shrink-0">
             <div>
               {step > 1 ? (
                 <button
                   type="button"
                   onClick={() => setStep((s) => s - 1)}
                   disabled={isPending}
-                  className="px-5 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-[#1E1B2E] font-bold text-xs sm:text-sm transition-colors cursor-pointer inline-flex items-center gap-2"
+                  className="px-4 py-2 rounded-lg bg-white hover:bg-stone-50 text-stone-700 font-semibold text-xs border border-stone-200 shadow-2xs transition-colors cursor-pointer inline-flex items-center gap-1.5"
                 >
-                  <ArrowLeft className="w-4 h-4" />
+                  <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Sebelumnya</span>
                 </button>
               ) : (
-                <span className="text-xs text-stone-400 font-medium hidden sm:inline">
+                <span className="text-[11px] text-stone-400 font-medium hidden sm:inline">
                   RAMU Anti-Catfishing System • Standar Produksi Terverifikasi
                 </span>
               )}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               {step < 4 ? (
                 <button
                   type="button"
@@ -664,20 +732,20 @@ export default function NewProjectBriefPage() {
                     (step === 1 && !canProceedStep1) ||
                     (step === 2 && !canProceedStep2)
                   }
-                  className="px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl bg-[#1E1B2E] hover:bg-black disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer inline-flex items-center gap-2"
+                  className="px-5 py-2 rounded-lg bg-stone-900 hover:bg-black disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-xs shadow-2xs transition-all cursor-pointer inline-flex items-center gap-1.5"
                 >
                   <span>Lanjutkan</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={handleSubmit}
                   disabled={isPending}
-                  className="px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl bg-[#1E1B2E] hover:bg-black disabled:opacity-50 text-white font-black text-xs sm:text-sm shadow-lg shadow-[#1E1B2E]/20 transition-all cursor-pointer inline-flex items-center gap-2"
+                  className="px-5 py-2 rounded-lg bg-stone-900 hover:bg-black disabled:opacity-50 text-white font-semibold text-xs shadow-2xs transition-all cursor-pointer inline-flex items-center gap-1.5"
                 >
                   <span>{isPending ? "Mempublikasikan..." : "Publikasikan Project Brief"}</span>
-                  <Send className="w-4 h-4" />
+                  <Send className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>

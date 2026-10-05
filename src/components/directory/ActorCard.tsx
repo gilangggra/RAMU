@@ -3,7 +3,18 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { ActorType } from "@prisma/client";
-import { ArrowUpRight, MapPin, Zap, Play, Camera, User, Sparkles, Building2 } from "lucide-react";
+import {
+  ArrowUpRight,
+  MapPin,
+  Zap,
+  Play,
+  Camera,
+  User,
+  Sparkles,
+  Building2,
+  CheckCircle2,
+} from "lucide-react";
+import { ActorAvatar } from "@/components/ui/ActorAvatar";
 
 export interface DirectoryActorItem {
   id: string;
@@ -46,7 +57,6 @@ export interface DirectoryActorItem {
 
 interface ActorCardProps {
   actor: DirectoryActorItem;
-
   complementarityScore?: number;
 }
 
@@ -74,14 +84,12 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
       sectorLower.includes("aktor") ||
       sectorLower.includes("aktris"));
 
-  const isIndividualSector = !isBrand && !isStudio;
-
   // Determine smart preview image and label
   let previewImage: string | null = null;
   let previewType: "PORTFOLIO" | "VIDEO" | "COMP_CARD" | "AVATAR" | "STUDIO" | "STOCK" = "STOCK";
   let previewBadgeLabel = "";
 
-  // 1. Explicit featured cover check (if marked by user)
+  // 1. Explicit featured cover check
   for (const asset of actor.assets) {
     if (asset.attributes && typeof asset.attributes === "object") {
       const attrs = asset.attributes as any;
@@ -105,7 +113,6 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
   // 2. Context-aware prioritization by profession
   if (!previewImage) {
     if (isModelOrTalent) {
-      // Models & Talents: Comp Card or Headshot is primary
       for (const asset of actor.assets) {
         if (asset.attributes) {
           const attrs = asset.attributes as any;
@@ -118,14 +125,12 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
         }
       }
 
-      // If no comp card, prioritize official profile headshot (avatar)
       if (!previewImage && actor.owner?.avatarUrl) {
         previewImage = actor.owner.avatarUrl;
         previewType = "AVATAR";
         previewBadgeLabel = "Headshot Resmi";
       }
 
-      // Fallback to portfolio work
       if (!previewImage) {
         for (const asset of actor.assets) {
           if (asset.attributes) {
@@ -140,7 +145,6 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
         }
       }
     } else if (isStudio) {
-      // Studio: Studio space image is primary
       for (const asset of actor.assets) {
         if (asset.category === "STUDIO_SPACE" && asset.attributes) {
           const attrs = asset.attributes as any;
@@ -173,8 +177,6 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
         previewBadgeLabel = "Profil Studio";
       }
     } else {
-      // Creative professionals (Photographers, Videographers, Stylists, HMUA, Designers, Brands):
-      // Portfolio work / video showcase is primary
       for (const asset of actor.assets) {
         if (asset.category === "EQUIPMENT") continue;
         if (asset.category === "STUDIO_SPACE") continue;
@@ -213,7 +215,6 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
         }
       }
 
-      // If no portfolio work uploaded yet, fallback to real profile avatar
       if (!previewImage && actor.owner?.avatarUrl) {
         previewImage = actor.owner.avatarUrl;
         previewType = "AVATAR";
@@ -222,20 +223,24 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
     }
   }
 
-  // 3. Fallback: Only if NEITHER portfolio NOR profile avatar exists
+  // 3. Fallback
   if (!previewImage) {
     previewType = "STOCK";
     if (isStudio) {
-      previewImage = "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd08?q=80&w=800&auto=format&fit=crop";
+      previewImage =
+        "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd08?q=80&w=800&auto=format&fit=crop";
       previewBadgeLabel = "Studio";
     } else if (actor.sector.includes("Fashion") || isModelOrTalent) {
-      previewImage = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&auto=format&fit=crop";
+      previewImage =
+        "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&auto=format&fit=crop";
       previewBadgeLabel = "Editorial";
     } else if (actor.sector.includes("Kopi") || actor.sector.includes("F&B")) {
-      previewImage = "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=800&auto=format&fit=crop";
+      previewImage =
+        "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=800&auto=format&fit=crop";
       previewBadgeLabel = "Komersial";
     } else {
-      previewImage = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop";
+      previewImage =
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop";
       previewBadgeLabel = "Kreator";
     }
   }
@@ -245,11 +250,19 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
     startingRate = "Mulai Rp 200rb / jam";
   } else if (sectorLower.includes("model") || sectorLower.includes("talent")) {
     startingRate = "Mulai Rp 1,0 Jt / sesi";
-  } else if (sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair")) {
+  } else if (
+    sectorLower.includes("mua") ||
+    sectorLower.includes("makeup") ||
+    sectorLower.includes("hair")
+  ) {
     startingRate = "Mulai Rp 800rb / sesi";
   } else if (sectorLower.includes("stylist") || sectorLower.includes("wardrobe")) {
     startingRate = "Mulai Rp 1,2 Jt / sesi";
-  } else if (sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema")) {
+  } else if (
+    sectorLower.includes("video") ||
+    sectorLower.includes("film") ||
+    sectorLower.includes("cinema")
+  ) {
     startingRate = "Mulai Rp 1,8 Jt / video";
   } else if (sectorLower.includes("designer") || sectorLower.includes("desain")) {
     startingRate = "Mulai Rp 2,5 Jt / koleksi";
@@ -262,7 +275,9 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
   const customServiceAsset = actor.assets.find(
     (a) =>
       a.subtype === "COMMERCIAL_SERVICE_PACKAGES" ||
-      (a.attributes && typeof a.attributes === "object" && ("service_packages" in (a.attributes as any) || "starting_rate" in (a.attributes as any)))
+      (a.attributes &&
+        typeof a.attributes === "object" &&
+        ("service_packages" in (a.attributes as any) || "starting_rate" in (a.attributes as any)))
   );
   if (customServiceAsset?.attributes && typeof customServiceAsset.attributes === "object") {
     const customRate = (customServiceAsset.attributes as any).starting_rate;
@@ -271,10 +286,13 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
 
   const brandCollabAsset = isBrand
     ? actor.assets.find(
-        (a) => a.attributes && typeof a.attributes === "object" && "collab_types" in (a.attributes as any)
+        (a) =>
+          a.attributes && typeof a.attributes === "object" && "collab_types" in (a.attributes as any)
       )
     : null;
-  const brandCollabTypes: string[] = Array.isArray((brandCollabAsset?.attributes as any)?.collab_types)
+  const brandCollabTypes: string[] = Array.isArray(
+    (brandCollabAsset?.attributes as any)?.collab_types
+  )
     ? (brandCollabAsset?.attributes as any).collab_types
     : [];
   const brandCollabLabel =
@@ -289,172 +307,172 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
     .join("");
 
   const hasScore = complementarityScore !== undefined && complementarityScore > 0;
-  const scoreLabel =
-    !hasScore ? null
-    : complementarityScore! >= 80 ? "Sangat Cocok"
-    : complementarityScore! >= 50 ? "Cocok"
-    : "Ada Kecocokan";
-  const scoreBg =
-    complementarityScore! >= 80
-      ? "bg-emerald-500/90"
-      : complementarityScore! >= 50
-      ? "bg-amber-400/95"
-      : "bg-sky-500/90";
-  const scoreText = complementarityScore! >= 80 ? "text-white" : "text-stone-950";
 
   return (
     <Link
       href={`/directory/${actor.id}`}
-      className="group flex flex-col gap-3 cursor-pointer bg-white p-3 border border-stone-200/80 hover:border-[#1E1B2E] transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.06)]"
+      className="group w-full rounded-2xl border border-stone-200/80 bg-white p-2.5 sm:p-3 shadow-2xs hover:shadow-md hover:border-stone-300 transition-all duration-200 flex flex-col justify-between cursor-pointer select-none"
     >
-      <div className="relative aspect-[4/5] w-full overflow-hidden bg-stone-100">
+      {/* 1. MEDIA PREVIEW CONTAINER */}
+      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-stone-100 mb-3">
         {!imageError && previewImage ? (
           <img
             src={previewImage}
             alt={actor.name}
             onError={() => setImageError(true)}
-            className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
+            className="w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.03]"
             loading="lazy"
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-stone-100 text-stone-400 p-6 text-center">
-            <span className="font-serif italic text-4xl text-stone-300 mb-2">{initials}</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">{actor.name}</span>
+            <span className="text-3xl font-bold text-stone-300 mb-1">{initials}</span>
+            <span className="text-[10px] font-semibold tracking-wider text-stone-400 uppercase truncate max-w-full">
+              {actor.name}
+            </span>
           </div>
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-        {/* TOP BADGES */}
-        <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-          <div className={`px-2.5 py-1 backdrop-blur-md text-[9px] font-bold uppercase tracking-wider shadow-xs ${
-            isBrand ? "bg-[#1E1B2E] text-amber-400" : "bg-white/95 text-[#1E1B2E]"
-          }`}>
+        {/* Floating Top Badges */}
+        <div className="absolute top-2 left-2 right-2 flex items-center justify-between gap-1.5 z-20 pointer-events-none">
+          {/* Entity Type Pill */}
+          <span className="px-2 py-0.5 rounded-md bg-stone-900/80 backdrop-blur-md text-[10px] font-semibold text-white tracking-wide border border-white/10 shadow-2xs">
             {isStudio ? "Studio Foto" : isBrand ? "Brand Fashion" : "Kreator"}
-          </div>
+          </span>
 
+          {/* Complementarity Score or Status Badge */}
           {hasScore ? (
-            <div
+            <span
               title={`Kecocokan AI ${complementarityScore}% dengan kebutuhan & brief aktif Anda`}
-              className={`px-2.5 py-1 ${scoreBg} backdrop-blur-md text-[9px] font-extrabold ${scoreText} flex items-center gap-1 shadow-xs`}
+              className="px-2 py-0.5 rounded-md bg-emerald-50/95 backdrop-blur-md text-emerald-800 border border-emerald-200/70 text-[10px] font-bold flex items-center gap-1 shadow-2xs"
             >
-              <Zap className="w-2.5 h-2.5" />
+              <Zap className="w-2.5 h-2.5 text-emerald-600" />
               <span>{complementarityScore}% Cocok</span>
-            </div>
+            </span>
           ) : isBrand ? (
-            <div className="px-2 py-0.5 bg-amber-500/95 backdrop-blur-md text-[9px] font-bold text-stone-950 flex items-center gap-1 shadow-xs rounded-none">
-              <span className="w-1.5 h-1.5 bg-stone-950 animate-pulse" />
+            <span className="px-2 py-0.5 rounded-md bg-white/90 backdrop-blur-md text-stone-800 border border-stone-200/70 text-[10px] font-semibold flex items-center gap-1 shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               <span>Buka Kolaborasi</span>
-            </div>
+            </span>
           ) : (
-            <div className="px-2 py-0.5 bg-emerald-500/90 backdrop-blur-md text-[9px] font-bold text-white flex items-center gap-1 shadow-xs rounded-none">
-              <span className="w-1.5 h-1.5 bg-white animate-pulse" />
+            <span className="px-2 py-0.5 rounded-md bg-white/90 backdrop-blur-md text-stone-800 border border-stone-200/70 text-[10px] font-semibold flex items-center gap-1 shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               <span>Siap Kerja</span>
-            </div>
+            </span>
           )}
         </div>
 
-        {/* BOTTOM LEFT: CONTEXTUAL PREVIEW BADGE */}
-        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-black/65 backdrop-blur-md text-white text-[9.5px] font-semibold tracking-wider border border-white/15 transition-opacity duration-200 group-hover:opacity-0 pointer-events-none">
-          {previewType === "VIDEO" ? (
-            <>
-              <Play className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
-              <span>{previewBadgeLabel || "Video Showreel"}</span>
-            </>
-          ) : previewType === "COMP_CARD" ? (
-            <>
-              <Sparkles className="w-2.5 h-2.5 text-amber-300" />
-              <span>{previewBadgeLabel || "Comp Card"}</span>
-            </>
-          ) : previewType === "AVATAR" ? (
-            <>
-              <User className="w-2.5 h-2.5 text-sky-300" />
-              <span>{previewBadgeLabel || "Foto Profil Resmi"}</span>
-            </>
-          ) : previewType === "STUDIO" ? (
-            <>
-              <Building2 className="w-2.5 h-2.5 text-stone-300" />
-              <span>{previewBadgeLabel || "Area Studio"}</span>
-            </>
-          ) : (
-            <>
-              <Camera className="w-2.5 h-2.5 text-stone-300" />
-              <span>{previewBadgeLabel || "Karya Portofolio"}</span>
-            </>
-          )}
+        {/* Floating Bottom Left: Preview Badge */}
+        <div className="absolute bottom-2 left-2 z-20 pointer-events-none transition-opacity duration-200 group-hover:opacity-0">
+          <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-[9.5px] font-medium tracking-wide border border-white/10 flex items-center gap-1">
+            {previewType === "VIDEO" ? (
+              <>
+                <Play className="w-2.5 h-2.5 fill-white text-white" />
+                <span>{previewBadgeLabel || "Video Showreel"}</span>
+              </>
+            ) : previewType === "COMP_CARD" ? (
+              <>
+                <Sparkles className="w-2.5 h-2.5 text-stone-300" />
+                <span>{previewBadgeLabel || "Comp Card"}</span>
+              </>
+            ) : previewType === "AVATAR" ? (
+              <>
+                <User className="w-2.5 h-2.5 text-stone-300" />
+                <span>{previewBadgeLabel || "Foto Profil"}</span>
+              </>
+            ) : previewType === "STUDIO" ? (
+              <>
+                <Building2 className="w-2.5 h-2.5 text-stone-300" />
+                <span>{previewBadgeLabel || "Area Studio"}</span>
+              </>
+            ) : (
+              <>
+                <Camera className="w-2.5 h-2.5 text-stone-300" />
+                <span>{previewBadgeLabel || "Karya Unggulan"}</span>
+              </>
+            )}
+          </span>
         </div>
 
-        {/* HOVER CALL TO ACTION */}
-        <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-          <div className="w-full py-2 bg-white text-[#1E1B2E] text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-md">
+        {/* Hover Action Pill */}
+        <div className="absolute inset-x-2 bottom-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none flex justify-center">
+          <span className="px-3 py-1.5 rounded-lg bg-stone-900/90 backdrop-blur-md text-white text-[11px] font-semibold shadow-md flex items-center gap-1.5 border border-white/10">
             <span>
               {isBrand
-                ? "Ajukan Usulan Kolaborasi"
+                ? "Ajukan Kolaborasi"
                 : isStudio
                 ? "Lihat Studio & Sewa"
-                : "Lihat Portofolio & Sewa"}
+                : "Lihat Profil & Sewa"}
             </span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
-          </div>
+            <ArrowUpRight className="w-3 h-3 text-stone-400" />
+          </span>
         </div>
       </div>
 
-      {/* CREATOR IDENTITY & META */}
-      <div className="flex flex-col gap-2 pt-1">
-        <div>
-          <div className="flex items-start justify-between gap-2">
-            <h2 className="text-sm font-bold text-[#1E1B2E] tracking-tight group-hover:text-stone-700 transition-colors truncate">
-              {actor.name}
-            </h2>
-            {actor.location && (
-              <span className="text-[10px] font-medium text-stone-400 shrink-0 flex items-center gap-0.5 mt-0.5">
-                <MapPin className="w-2.5 h-2.5" />
-                {actor.location.split(",")[0]}
-              </span>
-            )}
+      {/* 2. CREATOR METADATA BODY */}
+      <div className="space-y-2 pt-1 px-0.5">
+        <div className="flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <ActorAvatar
+              name={actor.name}
+              avatarUrl={actor.owner?.avatarUrl}
+              className="w-7 h-7 rounded-full border border-stone-200/80 shrink-0 shadow-2xs"
+              textClassName="text-[10px]"
+            />
+            <div className="min-w-0">
+              <h3 className="text-xs sm:text-[13px] font-bold text-stone-900 line-clamp-1 group-hover:text-stone-700 transition-colors">
+                {actor.name}
+              </h3>
+              <p className="text-[11px] font-medium text-stone-500 truncate">
+                {actor.sector}
+              </p>
+            </div>
           </div>
-          <p className="text-[11px] font-medium text-stone-500 truncate mt-0.5">
-            {actor.sector}
-          </p>
+          {actor.location && (
+            <span className="text-[10px] text-stone-400 font-medium shrink-0 flex items-center gap-0.5 self-start mt-0.5">
+              <MapPin className="w-2.5 h-2.5" />
+              {actor.location.split(",")[0]}
+            </span>
+          )}
         </div>
 
-        <div className="pt-2 mt-0.5 border-t border-stone-100 space-y-1.5">
+        {/* Bottom Specs & Rate Strip */}
+        <div className="pt-2 border-t border-stone-100 space-y-1.5">
           {isBrand ? (
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">Peluang Kolaborasi</span>
-              <span className="font-semibold text-stone-900 tracking-tight">{brandCollabLabel}</span>
+              <span className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider">
+                Peluang Kolaborasi
+              </span>
+              <span className="font-semibold text-stone-800 tracking-tight">
+                {brandCollabLabel}
+              </span>
             </div>
           ) : (
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Estimasi Tarif</span>
-              <span className="font-semibold text-[#1E1B2E] tracking-tight">{startingRate}</span>
+              <span className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider">
+                Estimasi Tarif
+              </span>
+              <span className="font-semibold text-stone-900 tracking-tight font-mono text-[11px]">
+                {startingRate}
+              </span>
             </div>
           )}
+
           {hasScore && (
-            <div className="flex items-center justify-between" title="Kecocokan aset talenta dengan brief atau kebutuhan proyek aktif Anda">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Kecocokan Brief</span>
+            <div
+              className="flex items-center justify-between pt-0.5"
+              title="Kecocokan aset talenta dengan brief atau kebutuhan proyek aktif Anda"
+            >
+              <span className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider">
+                Kecocokan Brief
+              </span>
               <div className="flex items-center gap-1.5">
                 <div className="w-16 h-1 bg-stone-100 rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all ${
-                      complementarityScore! >= 80
-                        ? "bg-emerald-500"
-                        : complementarityScore! >= 50
-                        ? "bg-amber-400"
-                        : "bg-sky-400"
-                    }`}
+                    className="h-full rounded-full bg-emerald-500 transition-all"
                     style={{ width: `${complementarityScore}%` }}
                   />
                 </div>
-                <span
-                  className={`text-[10px] font-extrabold ${
-                    complementarityScore! >= 80
-                      ? "text-emerald-600"
-                      : complementarityScore! >= 50
-                      ? "text-amber-600"
-                      : "text-sky-600"
-                  }`}
-                >
+                <span className="text-[10px] font-bold text-emerald-700 font-mono">
                   {complementarityScore}%
                 </span>
               </div>

@@ -71,10 +71,10 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
   return (
     <div className="space-y-8">
 
-      <section className="p-7 sm:p-8 rounded-none bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
+      <section className="p-7 sm:p-8 rounded-2xl bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold text-[#E66A48]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold text-[#E66A48]">
               <Building2 className="w-3.5 h-3.5 text-[#E66A48]" />
               <span>Spesifikasi Cyclorama & Parameter Ruangan Studio</span>
             </div>
@@ -84,7 +84,7 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-stone-100 text-stone-700 text-xs font-bold">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 text-stone-700 text-xs font-bold">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
               <span>Terverifikasi Siap Produksi</span>
             </div>
@@ -94,7 +94,7 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
                 }}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
               >
                 <Pencil className="w-3.5 h-3.5" />
                 <span>Edit Spesifikasi</span>
@@ -104,7 +104,7 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-4 rounded-none bg-stone-50/80 border border-stone-200/70 space-y-1">
+          <div className="p-4 rounded-xl bg-stone-50/80 border border-stone-200/70 space-y-1">
             <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
               Luas Area Indoor
             </div>
@@ -114,7 +114,7 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
             <div className="text-[10px] text-stone-500 font-medium">Kapasitas hingga 15 kru</div>
           </div>
 
-          <div className="p-4 rounded-none bg-stone-50/80 border border-stone-200/70 space-y-1">
+          <div className="p-4 rounded-xl bg-stone-50/80 border border-stone-200/70 space-y-1">
             <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
               Tinggi Plafon (Ceiling)
             </div>
@@ -124,7 +124,7 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
             <div className="text-[10px] text-stone-500 font-medium">Ideal untuk overhead boom</div>
           </div>
 
-          <div className="p-4 rounded-none bg-stone-50/80 border border-stone-200/70 space-y-1">
+          <div className="p-4 rounded-xl bg-stone-50/80 border border-stone-200/70 space-y-1">
             <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
               Daya Listrik
             </div>
@@ -137,7 +137,7 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
             </div>
           </div>
 
-          <div className="p-4 rounded-none bg-stone-50/80 border border-stone-200/70 space-y-1">
+          <div className="p-4 rounded-xl bg-stone-50/80 border border-stone-200/70 space-y-1">
             <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
               Bentuk Cyclorama
             </div>
@@ -160,12 +160,12 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
                 <div
                   key={idx}
                   onClick={() => setSelectedPhoto(photo)}
-                  className="break-inside-avoid mb-3 group cursor-pointer rounded-none bg-stone-100 border border-stone-200/80 overflow-hidden hover:shadow-xl transition-all relative block"
+                  className="break-inside-avoid mb-3 group cursor-pointer rounded-xl bg-stone-100 border border-stone-200/80 overflow-hidden hover:shadow-xl transition-all relative block"
                 >
                   <img
                     src={photo.url}
                     alt={photo.title}
-                    className="w-full h-auto object-cover rounded-none block transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                    className="w-full h-auto object-cover rounded-xl block transition-transform duration-700 ease-out group-hover:scale-[1.02]"
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
@@ -199,9 +199,9 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
               {gearList.map((gear, i) => (
                 <div
                   key={i}
-                  className="p-3 rounded-none bg-stone-50/90 border border-stone-200/70 text-xs text-[#27213D] flex items-start gap-2.5"
+                  className="p-3 rounded-xl bg-stone-50/90 border border-stone-200/70 text-xs text-[#27213D] flex items-start gap-2.5"
                 >
-                  <div className="w-5 h-5 rounded-none bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-5 h-5 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
                     <Check className="w-3 h-3 stroke-[2.5]" />
                   </div>
                   <span className="font-medium leading-snug">{gear}</span>
@@ -222,7 +222,7 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
               {facilities.map((fac, i) => (
                 <div
                   key={i}
-                  className="p-3 rounded-none bg-purple-50/50 border border-purple-200/60 text-xs text-[#27213D] flex items-center gap-2.5"
+                  className="p-3 rounded-xl bg-purple-50/50 border border-purple-200/60 text-xs text-[#27213D] flex items-center gap-2.5"
                 >
                   <CheckCircle2 className="w-4 h-4 text-purple-600 shrink-0" />
                   <span className="font-medium">{fac}</span>
@@ -240,12 +240,12 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative max-w-4xl w-full bg-[#1E1B2E] rounded-none overflow-hidden shadow-2xl border border-white/10"
+            className="relative max-w-4xl w-full bg-stone-900 rounded-xl overflow-hidden shadow-2xl border border-white/10"
           >
             <button
               type="button"
               onClick={() => setSelectedPhoto(null)}
-              className="absolute top-4 right-4 z-10 p-2.5 rounded-none bg-black/60 hover:bg-black text-white transition-colors cursor-pointer"
+              className="absolute top-4 right-4 z-10 p-2.5 rounded-xl bg-black/60 hover:bg-black text-white transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -267,7 +267,7 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
                 href={selectedPhoto.url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-none bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-colors shrink-0"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-colors shrink-0"
               >
                 <span>Buka Resolusi Penuh</span>
                 <ExternalLink className="w-3.5 h-3.5" />

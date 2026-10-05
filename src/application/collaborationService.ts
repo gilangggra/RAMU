@@ -508,8 +508,8 @@ export async function initiateCollaborationFromOpportunity(
     data: {
       collaborationId: collaboration.id,
       title: "Persetujuan Inisiasi Proyek Kolaboratif",
-      decision: `Membentuk ruang kerja kolaborasi berdasarkan rekomendasi Opportunity Engine pola "${opp.pattern?.name || opp.patternCode}".`,
-      reason: "Komplementaritas aset dan keselarasan sasaran usaha dinilai memenuhi kriteria kelayakan.",
+      decision: `Membentuk ruang kerja kolaborasi berdasarkan rekomendasi Deterministic Resource Compatibility Engine pola "${opp.pattern?.name || opp.patternCode}".`,
+      reason: "Komplementaritas resource dan keselarasan peran dinilai memenuhi kriteria kelayakan 4 pilar.",
       agreedByActors: opp.participants.map((p) => p.actorId) as unknown as Prisma.InputJsonValue,
     },
   });
@@ -547,13 +547,23 @@ export async function getCollaborationsForActor(actorId: string) {
         },
       },
       participants: {
-        include: { actor: true },
+        include: {
+          actor: {
+            include: {
+              owner: {
+                select: {
+                  avatarUrl: true,
+                },
+              },
+            },
+          },
+        },
       },
       tasks: {
-        select: { id: true, status: true },
+        select: { id: true, status: true, title: true, priority: true, dueDate: true },
       },
       milestones: {
-        select: { id: true, status: true },
+        select: { id: true, status: true, title: true, targetDate: true },
       },
     },
     orderBy: {
@@ -582,7 +592,17 @@ export async function getCollaborationWorkspace(collaborationId: string) {
             },
           },
           roles: {
-            include: { actor: true },
+            include: {
+              actor: {
+                include: {
+                  owner: {
+                    select: {
+                      avatarUrl: true,
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -591,12 +611,27 @@ export async function getCollaborationWorkspace(collaborationId: string) {
           actor: {
             include: {
               assets: { where: { status: "ACTIVE" } },
+              owner: {
+                select: {
+                  avatarUrl: true,
+                },
+              },
             },
           },
         },
       },
       tasks: {
-        include: { assignedActor: true },
+        include: {
+          assignedActor: {
+            include: {
+              owner: {
+                select: {
+                  avatarUrl: true,
+                },
+              },
+            },
+          },
+        },
         orderBy: [{ status: "asc" }, { createdAt: "asc" }],
       },
       milestones: {
@@ -609,7 +644,17 @@ export async function getCollaborationWorkspace(collaborationId: string) {
         orderBy: { createdAt: "desc" },
       },
       feedbacks: {
-        include: { actor: true },
+        include: {
+          actor: {
+            include: {
+              owner: {
+                select: {
+                  avatarUrl: true,
+                },
+              },
+            },
+          },
+        },
         orderBy: { createdAt: "desc" },
       },
     },

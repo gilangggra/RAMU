@@ -105,7 +105,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
 
       <footer className="relative z-10 border-t border-stone-200/60 py-6 text-center text-xs text-[#716B7E] bg-white/40 backdrop-blur-xs">
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>&copy; {new Date().getFullYear()} RAMU — Creative Opportunity Engine. Hak cipta dilindungi.</span>
+          <span>&copy; {new Date().getFullYear()} RAMU — Platform Kolaborasi Berbasis Komplementaritas Resource. Hak cipta dilindungi.</span>
           <div className="flex items-center gap-4 text-[11px]">
             <Link href="/" className="hover:text-[#27213D]">Beranda</Link>
             <span>•</span>

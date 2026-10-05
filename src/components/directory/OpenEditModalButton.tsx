@@ -15,7 +15,7 @@ export function OpenEditModalButton({
   initialTab = "profile",
   label = "Edit Halaman Profil",
   className,
-  iconClassName = "text-purple-300",
+  iconClassName = "text-stone-300",
 }: OpenEditModalButtonProps) {
   const handleClick = () => {
     window.dispatchEvent(
@@ -36,7 +36,7 @@ export function OpenEditModalButton({
       onClick={handleClick}
       className={
         className ||
-        "inline-flex items-center gap-2 px-6 py-3 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition-all rounded-none shadow-xs cursor-pointer"
+        "inline-flex items-center gap-2 px-5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-xl shadow-xs transition-all cursor-pointer"
       }
     >
       <Pencil className={`w-3.5 h-3.5 ${iconClassName}`} />

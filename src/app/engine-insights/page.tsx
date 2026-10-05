@@ -77,20 +77,20 @@ export default async function EngineInsightsPage() {
             </div>
 
             <h1 className="text-3xl sm:text-4xl font-black text-[#27213D] tracking-tight leading-tight">
-              Sinyal Pembelajaran Engine &amp; Validasi Luaran Ekosistem
+              Audit Kompatibilitas Engine &amp; Validasi Luaran Ekosistem
             </h1>
             <p className="text-sm text-[#716B7E] leading-relaxed">
-              Pusat pemantauan dampak nyata dan kalibrasi rekomendasi kolaborasi RAMU. Sistem memadukan analisis komplementaritas aset kreatif dengan pembuktian hasil karya riil di lapangan serta evaluasi langsung dari para praktisi kreatif.
+              Pusat pemantauan dampak ekonomi kolaboratif dan kalibrasi Deterministic Resource Compatibility Engine RAMU. Sistem memadukan analisis komplementaritas resource kreatif dengan pembuktian hasil karya riil di lapangan serta evaluasi langsung dari para praktisi kreatif.
             </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2 relative z-10">
             <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
-              <span className="text-[11px] text-[#716B7E] uppercase font-bold tracking-wider block">Peluang Diramu</span>
+              <span className="text-[11px] text-[#716B7E] uppercase font-bold tracking-wider block">Kecocokan Diramu</span>
               <div className="text-2xl font-black text-amber-600 mt-1">
                 {signals.conversionFunnel.opportunities}
               </div>
-              <span className="text-[10px] text-[#716B7E]">Kurasi sinergi cerdas</span>
+              <span className="text-[10px] text-[#716B7E]">Komplementaritas terhitung</span>
             </div>
 
             <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
@@ -280,10 +280,10 @@ export default async function EngineInsightsPage() {
           <div>
             <h2 className="text-lg font-bold text-[#27213D] tracking-tight flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-amber-600" />
-              <span>Matriks Efektivitas Pola Kolaborasi (Pattern Performance)</span>
+              <span>Matriks Efektivitas Templat Kolaborasi (Collaboration Templates)</span>
             </h2>
             <p className="text-xs text-[#716B7E]">
-              Evaluasi kinerja 6 pola kolaborasi utama berdasarkan jumlah luaran riil dan kepuasan aktor.
+              Evaluasi kinerja templat kolaborasi komplementer berdasarkan jumlah luaran riil dan kepuasan aktor.
             </p>
           </div>
 
@@ -291,7 +291,7 @@ export default async function EngineInsightsPage() {
             <table className="w-full text-left text-xs">
               <thead className="bg-stone-50/80 text-[#716B7E] uppercase text-[10px] tracking-wider border-b border-stone-200/70">
                 <tr>
-                  <th className="p-4 font-bold">Kode & Nama Pola</th>
+                  <th className="p-4 font-bold">Kode &amp; Nama Templat</th>
                   <th className="p-4 font-bold">Kategori Subsektor</th>
                   <th className="p-4 text-center font-bold">Luaran Riil</th>
                   <th className="p-4 text-center font-bold">Jumlah Ulasan</th>

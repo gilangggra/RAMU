@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ShieldCheck, Check, X, Sparkles, Loader2, ExternalLink } from "lucide-react";
 import { confirmCoCredit, rejectCoCredit } from "@/app/api/assets/actions";
 import Link from "next/link";
+import { ActorAvatar } from "@/components/ui/ActorAvatar";
 
 export interface PendingCoCredit {
   assetId: string;
@@ -12,6 +13,7 @@ export interface PendingCoCredit {
   assetImage: string;
   uploaderId: string;
   uploaderName: string;
+  uploaderAvatarUrl?: string | null;
   uploaderSector: string;
   roleTagged: string;
   taggedAt?: string;
@@ -69,18 +71,18 @@ export function CoCreditRequestsCard({ requests }: CoCreditRequestsCardProps) {
   };
 
   return (
-    <section className="p-6 md:p-7 rounded-[28px] bg-gradient-to-br from-amber-500/10 via-emerald-500/5 to-white border-2 border-amber-300/80 shadow-md space-y-5 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <section className="p-5 md:p-6 rounded-2xl bg-white border border-stone-200/80 shadow-2xs space-y-5 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200/70 pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md">
-            <ShieldCheck className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-2xl bg-stone-900 text-white flex items-center justify-center shrink-0 shadow-sm">
+            <ShieldCheck className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-extrabold text-base text-[#1E1B2E] tracking-tight">
+              <h3 className="font-extrabold text-base text-stone-900 tracking-tight">
                 Permintaan Konfirmasi Co-Credit Portofolio
               </h3>
-              <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-mono text-[10px] font-black border border-amber-300">
+              <span className="px-2 py-0.5 rounded-full bg-stone-100 text-stone-800 text-[10px] font-bold border border-stone-200">
                 {activeList.length} Menunggu
               </span>
             </div>
@@ -118,7 +120,7 @@ export function CoCreditRequestsCard({ requests }: CoCreditRequestsCardProps) {
           return (
             <div
               key={req.assetId}
-              className="p-4 rounded-2xl bg-white border border-stone-200/90 shadow-2xs hover:shadow-sm transition-all flex flex-col justify-between gap-4"
+              className="p-4 rounded-2xl bg-gradient-to-b from-white to-stone-50/70 border border-stone-200/90 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between gap-4"
             >
               <div className="flex items-start gap-3.5">
                 <img
@@ -128,19 +130,27 @@ export function CoCreditRequestsCard({ requests }: CoCreditRequestsCardProps) {
                 />
                 <div className="min-w-0 space-y-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 font-mono font-bold">
+                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 font-semibold border border-stone-200">
                       {req.roleTagged}
                     </span>
-                    <span className="text-[10px] text-stone-400 font-mono">
+                    <span className="text-[10px] text-stone-400">
                       &bull; Disematkan oleh
                     </span>
                   </div>
                   <h4 className="font-extrabold text-sm text-stone-900 truncate">
                     {req.assetName}
                   </h4>
-                  <p className="text-xs text-stone-600 truncate">
-                    Oleh: <strong>{req.uploaderName}</strong> ({req.uploaderSector})
-                  </p>
+                  <div className="flex items-center gap-1.5 text-xs text-stone-600 truncate">
+                    <ActorAvatar
+                      name={req.uploaderName}
+                      avatarUrl={req.uploaderAvatarUrl}
+                      className="w-4 h-4 rounded-full"
+                      textClassName="text-[8px]"
+                    />
+                    <span className="truncate">
+                      Oleh: <strong>{req.uploaderName}</strong> ({req.uploaderSector})
+                    </span>
+                  </div>
                   {req.details && (
                     <p className="text-[11px] text-stone-500 italic truncate">
                       &ldquo;{req.details}&rdquo;
@@ -154,12 +164,12 @@ export function CoCreditRequestsCard({ requests }: CoCreditRequestsCardProps) {
                   type="button"
                   disabled={isPending}
                   onClick={() => handleConfirm(req)}
-                  className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-2xs hover:scale-[1.01] active:scale-98 cursor-pointer disabled:opacity-50"
+                  className="flex-1 py-2 px-3 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-2xs hover:scale-[1.01] active:scale-98 cursor-pointer disabled:opacity-50"
                 >
                   {isPending ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   ) : (
-                    <Check className="w-3.5 h-3.5" />
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
                   )}
                   <span>Konfirmasi Keterlibatan</span>
                 </button>
@@ -168,7 +178,7 @@ export function CoCreditRequestsCard({ requests }: CoCreditRequestsCardProps) {
                   type="button"
                   disabled={isPending}
                   onClick={() => handleReject(req)}
-                  className="py-2 px-3 rounded-xl bg-stone-100 hover:bg-rose-50 hover:text-rose-700 border border-stone-200 text-stone-600 font-semibold text-xs transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
+                  className="py-2 px-3 rounded-xl bg-white hover:bg-rose-50 hover:text-rose-700 border border-stone-200 text-stone-600 font-semibold text-xs transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
                   title="Tolak penyematan jika Anda tidak terlibat"
                 >
                   <X className="w-3.5 h-3.5" />

@@ -24,10 +24,10 @@ export function ShowcaseUploadTrigger({
         onClick={() => setIsOpen(true)}
         className={
           className ||
-          "inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold transition-all shadow-sm hover:scale-[1.02] shrink-0 cursor-pointer active:scale-95"
+          "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-semibold shadow-2xs transition-colors shrink-0 cursor-pointer"
         }
       >
-        <Plus className="w-3.5 h-3.5 text-amber-400" />
+        <Plus className="w-3.5 h-3.5 text-stone-300" />
         <span>{label}</span>
       </button>
 

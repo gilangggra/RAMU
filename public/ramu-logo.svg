@@ -1,0 +1,20 @@
+<svg width="220" height="64" viewBox="0 0 220 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Mark -->
+  <g transform="translate(0, 0)">
+    <!-- Left Pillar Stem -->
+    <rect x="0" y="0" width="10" height="64" rx="0.5" fill="#18181B" />
+    <!-- Signature Crimson Red Accent Line -->
+    <rect x="10.8" y="10" width="1.8" height="44" rx="0.9" fill="#E11D48" />
+    <!-- Right Letterform (Loop & Diagonal Leg) -->
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M 13.5 0 L 21.5 0 A 12 16 0 0 1 33.5 16 A 12 16 0 0 1 21.5 32 L 33.5 64 L 23.5 64 L 14.5 32 L 13.5 32 L 13.5 0 Z M 17 9.5 L 21 9.5 A 6.5 6.5 0 0 1 27.5 16 A 6.5 6.5 0 0 1 21 22.5 L 17 22.5 L 17 9.5 Z"
+      fill="#18181B"
+    />
+  </g>
+  <!-- Wordmark -->
+  <text x="50" y="38" font-family="Inter, -apple-system, sans-serif" font-size="34" font-weight="900" letter-spacing="0.1em" fill="#18181B">RAMU</text>
+  <!-- Subtitle -->
+  <text x="51" y="56" font-family="Inter, -apple-system, sans-serif" font-size="8.5" font-weight="700" letter-spacing="0.22em" fill="#71717A">PLATFORM INDUSTRI KREATIF</text>
+</svg>

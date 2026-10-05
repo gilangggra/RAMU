@@ -18,7 +18,9 @@ import {
   Zap,
   PenTool,
   RotateCcw,
+  Download,
 } from "lucide-react";
+import { exportElementToPdf } from "@/lib/export/pdfExporter";
 
 export interface SpkParticipant {
   id: string;
@@ -91,6 +93,8 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
   const [copied, setCopied] = useState(false);
   const [isSigning, setIsSigning] = useState(false);
   const [signMsg, setSignMsg] = useState<string | null>(null);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const printableRef = useRef<HTMLDivElement | null>(null);
 
   if (!isOpen) return null;
 
@@ -178,6 +182,23 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
     }
   }
 
+  async function handleExportPdf() {
+    const el = printableRef.current || document.getElementById("spk-collab-printable");
+    if (!el) return;
+    setIsExportingPdf(true);
+    try {
+      const cleanTitle = (data.collaborationTitle || "Proyek").replace(/[^a-zA-Z0-9]/g, "-").slice(0, 30);
+      await exportElementToPdf(el, {
+        filename: `SPK-MultiPihak-${cleanTitle}-${shortId}.pdf`,
+      });
+    } catch (err) {
+      console.error("Gagal ekspor PDF otomatis, beralih ke print dialog:", err);
+      window.print();
+    } finally {
+      setIsExportingPdf(false);
+    }
+  }
+
   function handleCopy() {
     const t = [
       "*PKSK MULTI-PIHAK — RAMU*",
@@ -202,12 +223,12 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
   }
 
   const waText = encodeURIComponent(
-    `*PKSK MULTI-PIHAK — RAMU*\n` +
+    `*KESEPAKATAN KOLABORASI MULTI-PIHAK — RAMU*\n` +
     `No: ${spkNo}\n` +
     `Proyek: ${data.collaborationTitle}\n` +
-    `TTD: ${signedCount}/${total} pihak\n\n` +
+    `Persetujuan: ${signedCount}/${total} pihak\n\n` +
     allParties.map((p, i) => `${i + 1}. ${p.name} (${p.roleLabel})`).join("\n") +
-    `\n\nSah UU ITE — https://ramu.id/collaborations/${data.collaborationId}`
+    `\n\nKesepakatan Kolaborasi — https://ramu.id/collaborations/${data.collaborationId}`
   );
 
   return (
@@ -221,16 +242,27 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
             </span>
             <div className="min-w-0">
               <h2 className="text-xs sm:text-sm font-bold text-stone-900 truncate">
-                Perjanjian Kerja Sama Kolaborasi Kreatif Multi-Pihak
+                Collaboration Agreement Generator &bull; Draf Kesepakatan Multi-Pihak
               </h2>
               <p className="text-[11px] text-stone-500 font-mono">{spkNo}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0 ml-3">
+            {/* 1-CLICK PDF EXPORT BUTTON */}
+            <button
+              type="button"
+              onClick={handleExportPdf}
+              disabled={isExportingPdf}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer disabled:opacity-50 shadow-xs"
+              title="Unduh Lembar SPK Resmi dalam Format Dokumen PDF"
+            >
+              <Download className={`w-3.5 h-3.5 ${isExportingPdf ? "animate-bounce" : ""}`} />
+              <span>{isExportingPdf ? "Mengunduh PDF..." : "Unduh PDF"}</span>
+            </button>
             <button onClick={() => window.print()}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer">
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-stone-300 text-stone-700 text-xs font-semibold hover:bg-stone-50 transition-colors cursor-pointer shadow-xs">
               <Printer className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Cetak / PDF</span>
+              <span className="hidden sm:inline">Cetak</span>
             </button>
             <a href={`https://wa.me/?text=${waText}`} target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors">
@@ -460,10 +492,13 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
             </div>
           </div>
 
-          <div className="pt-6 border-t-2 border-stone-900 space-y-5">
+          <div className="pt-6 border-t-2 border-stone-900 space-y-4">
             <p className="text-[11px] text-stone-600 leading-relaxed">
-              Demikian Perjanjian Kerja Sama Kolaborasi Kreatif Multi-Pihak ini dibuat dan disetujui secara sadar, sukarela, dan tanpa paksaan melalui persetujuan digital di platform RAMU. Dokumen ini memiliki kekuatan hukum yang sah dan mengikat seluruh pihak sejak ditandatangani digital oleh semua pihak.
+              Demikian Draf Perjanjian Kerja Sama Kolaborasi Kreatif Multi-Pihak ini disusun dan disetujui secara sadar, sukarela, dan tanpa paksaan melalui platform RAMU sebagai acuan kesepakatan bersama para pihak dalam pelaksanaan proyek.
             </p>
+            <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-900 text-[10px] leading-relaxed">
+              <strong>Catatan Platform:</strong> Draf kesepakatan ini disusun secara terstruktur oleh <em>RAMU Collaboration Agreement Generator</em> berdasarkan parameter yang disetujui para pihak di ruang kerja. Dokumen ini disarankan untuk ditinjau dan disesuaikan oleh pihak yang berkompeten sebelum digunakan sebagai instrumen hukum formal.
+            </div>
 
             <div className={`grid gap-4 pt-2 ${
               total <= 2 ? "grid-cols-2" :
@@ -501,7 +536,7 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
             <div className="pt-4 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between text-[10px] text-stone-400 gap-2">
               <div className="flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-stone-400" />
-                <span>Dokumen sah digital &bull; Database RAMU &bull; {allSigned ? "SEPENUHNYA DITANDATANGANI" : `${signedCount}/${total} Pihak Menandatangani`}</span>
+                <span>Dokumen kesepakatan terverifikasi &bull; Rekam Jejak RAMU &bull; {allSigned ? "DISEPAKATI SEMUA PIHAK" : `${signedCount}/${total} Pihak Menyetujui`}</span>
               </div>
               <div className="font-mono">Hash: {shortId}-COLLAB-{d.getFullYear()}</div>
             </div>

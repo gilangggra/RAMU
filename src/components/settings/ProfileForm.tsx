@@ -56,6 +56,11 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
     const result = await updateProfileBasicInfo(formData);
 
     if (result.success) {
+      if (result.avatarUrl !== undefined) {
+        setAvatarPreview(result.avatarUrl);
+        setRemoveAvatar(false);
+        window.dispatchEvent(new CustomEvent("ramu:avatar-updated", { detail: { avatarUrl: result.avatarUrl } }));
+      }
       setMessage({ type: "success", text: result.message || "Berhasil disimpan." });
     } else {
       setMessage({ type: "error", text: result.error || "Gagal menyimpan." });
@@ -65,9 +70,9 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
   }
 
   return (
-    <div className="bg-white rounded-none border border-stone-200 shadow-xs overflow-hidden">
+    <div className="bg-white rounded-2xl border border-stone-200/80 shadow-xs overflow-hidden">
       <div className="p-6 sm:p-8 border-b border-stone-100 bg-stone-50/50">
-        <h2 className="text-xl font-bold text-[#1E1B2E]">Profil Dasar</h2>
+        <h2 className="text-xl font-bold text-stone-900">Profil Dasar</h2>
         <p className="text-sm text-stone-500 mt-1">
           Informasi ini akan ditampilkan secara publik di Direktori dan Showcase.
         </p>
@@ -75,7 +80,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
 
       <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
         {message && (
-          <div className={`p-4 rounded-none flex items-start gap-3 text-sm font-semibold ${
+          <div className={`p-4 rounded-xl flex items-start gap-3 text-sm font-semibold ${
             message.type === "success" ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-rose-50 text-rose-800 border border-rose-200"
           }`}>
             {message.type === "success" ? (
@@ -87,7 +92,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
           </div>
         )}
 
-        <div className="p-4 sm:p-5 rounded-none bg-stone-50/80 border border-stone-200/80 flex flex-col sm:flex-row items-center gap-5">
+        <div className="p-4 sm:p-5 rounded-2xl bg-stone-50/80 border border-stone-200/80 flex flex-col sm:flex-row items-center gap-5">
           <input
             type="file"
             name="avatarFile"
@@ -104,7 +109,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
 
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="w-20 h-20 rounded-none overflow-hidden border border-stone-200 bg-white hover:border-[#1E1B2E] transition-all flex items-center justify-center cursor-pointer shrink-0 group relative shadow-2xs"
+            className="w-20 h-20 rounded-2xl overflow-hidden border border-stone-200 bg-white hover:border-stone-900 transition-all flex items-center justify-center cursor-pointer shrink-0 group relative shadow-xs"
           >
             {avatarPreview ? (
               <img
@@ -113,7 +118,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-stone-100 flex items-center justify-center font-bold text-lg text-[#1E1B2E]">
+              <div className="w-full h-full bg-stone-100 flex items-center justify-center font-bold text-lg text-stone-700">
                 {initialData.name ? initialData.name.charAt(0).toUpperCase() : <User className="w-6 h-6 text-stone-400" />}
               </div>
             )}
@@ -123,7 +128,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
           </div>
 
           <div className="flex-1 text-center sm:text-left space-y-1">
-            <h3 className="text-xs font-bold text-[#1E1B2E] uppercase tracking-wider">Foto Profil</h3>
+            <h3 className="text-xs font-semibold text-stone-900 uppercase tracking-wider">Foto Profil</h3>
             <p className="text-xs text-stone-500 leading-relaxed">
               Format JPG, PNG, atau WebP. Maksimal ukuran 5 MB.
             </p>
@@ -131,7 +136,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-white border border-stone-200 text-xs font-bold text-stone-700 hover:text-stone-900 hover:bg-stone-50 shadow-2xs transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-stone-200 text-xs font-semibold text-stone-700 hover:text-stone-900 hover:bg-stone-50 shadow-xs transition-all cursor-pointer"
               >
                 <Camera className="w-3.5 h-3.5 text-stone-500" />
                 <span>{avatarPreview ? "Ganti Foto" : "Unggah Foto"}</span>
@@ -140,7 +145,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
                 <button
                   type="button"
                   onClick={handleRemovePhoto}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs font-bold text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Hapus</span>
@@ -247,13 +252,13 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               id="instagram"
               name="instagram"
               defaultValue={initialSocials.instagram?.handle || ""}
-              className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-medium text-stone-800"
+              className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 focus:bg-white focus:border-stone-900 focus:ring-2 focus:ring-stone-900/10 transition-all text-sm font-medium text-stone-800"
               placeholder="@username atau https://instagram.com/..."
             />
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="websiteUrl" className="text-xs font-bold text-[#1E1B2E] uppercase tracking-wider">
+            <label htmlFor="websiteUrl" className="text-xs font-semibold text-stone-900 uppercase tracking-wider">
               Website / Portofolio Eksternal (Opsional)
             </label>
             <input
@@ -261,7 +266,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               id="websiteUrl"
               name="websiteUrl"
               defaultValue={initialSocials.website?.url || ""}
-              className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-medium text-stone-800"
+              className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 focus:bg-white focus:border-stone-900 focus:ring-2 focus:ring-stone-900/10 transition-all text-sm font-medium text-stone-800"
               placeholder="https://portofolioanda.com"
             />
           </div>
@@ -271,7 +276,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
           <button
             type="submit"
             disabled={isPending}
-            className="flex items-center gap-2 px-6 py-3 rounded-none bg-[#1E1B2E] text-white font-bold text-sm hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-xs cursor-pointer"
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-stone-900 text-white font-semibold text-sm hover:bg-stone-800 transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-xs cursor-pointer"
           >
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             <span>{isPending ? "Menyimpan..." : "Simpan Perubahan"}</span>
