@@ -11,15 +11,15 @@ export default async function AdminRolesPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Settings2 className="w-4 h-4 text-indigo-500" />
-          <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest">
-            Engine Configuration
+      <div className="border-b border-stone-200/70 pb-4">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-purple-500" />
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200/70">
+            Engine Configuration • Crew Role Blueprints
           </span>
         </div>
-        <h1 className="text-2xl font-black text-[#27213D]">Blueprint Peran Kru</h1>
-        <p className="text-sm text-stone-500 mt-1">
+        <h1 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight mt-1">Blueprint Peran Kru</h1>
+        <p className="text-xs text-stone-500 leading-relaxed font-normal mt-0.5">
           Standarisasi keahlian, alat kerja, dan rekomendasi acuan tarif pasaran per peran profesi kreatif.
         </p>
       </div>

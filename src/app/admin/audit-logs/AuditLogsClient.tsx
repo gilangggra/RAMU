@@ -71,7 +71,7 @@ export default function AuditLogsClient({
   return (
     <div className="space-y-6">
       {/* Filter & Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm space-y-3">
+      <div className="bg-white p-4 rounded-2xl border border-stone-200/90 shadow-2xs space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* Search */}
           <div className="relative">
@@ -81,7 +81,7 @@ export default function AuditLogsClient({
               placeholder="Cari admin, ID target, atau detail..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-stone-200 text-xs font-medium text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full pl-9 pr-3.5 py-2 rounded-lg border border-stone-200 text-xs font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-400"
             />
           </div>
 
@@ -91,7 +91,7 @@ export default function AuditLogsClient({
             <select
               value={selectedEntity}
               onChange={(e) => setSelectedEntity(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs font-semibold text-stone-700 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full px-3 py-2 rounded-lg border border-stone-200 text-xs font-semibold text-stone-700 bg-white focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-400"
             >
               <option value="ALL">Semua Entitas ({initialLogs.length})</option>
               {entities.map((ent) => (
@@ -108,7 +108,7 @@ export default function AuditLogsClient({
             <select
               value={selectedAction}
               onChange={(e) => setSelectedAction(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs font-semibold text-stone-700 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full px-3 py-2 rounded-lg border border-stone-200 text-xs font-semibold text-stone-700 bg-white focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-400"
             >
               <option value="ALL">Semua Jenis Aksi</option>
               {actions.map((act) => (
@@ -120,9 +120,9 @@ export default function AuditLogsClient({
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-[11px] text-stone-400 pt-1 border-t border-stone-100">
+        <div className="flex items-center justify-between text-[11px] text-stone-500 pt-1 border-t border-stone-100">
           <span>
-            Menampilkan <strong className="text-stone-700">{filteredLogs.length}</strong> dari {initialLogs.length} log audit permanen
+            Menampilkan <strong className="text-stone-900">{filteredLogs.length}</strong> dari {initialLogs.length} log audit permanen
           </span>
           {(searchQuery || selectedEntity !== "ALL" || selectedAction !== "ALL") && (
             <button
@@ -131,7 +131,7 @@ export default function AuditLogsClient({
                 setSelectedEntity("ALL");
                 setSelectedAction("ALL");
               }}
-              className="text-amber-700 font-bold hover:underline"
+              className="text-purple-700 font-bold hover:underline"
             >
               Reset Filter
             </button>
@@ -140,13 +140,13 @@ export default function AuditLogsClient({
       </div>
 
       {/* Audit Log Table / List */}
-      <div className="rounded-2xl bg-white border border-stone-200 overflow-hidden shadow-sm">
-        <div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
+      <div className="rounded-2xl bg-white border border-stone-200/90 overflow-hidden shadow-2xs">
+        <div className="px-5 py-4 border-b border-stone-200/80 flex items-center justify-between bg-stone-50/70">
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-amber-600" />
-            <h2 className="text-sm font-bold text-[#27213D]">Log Aktivitas & Mutasi Admin</h2>
+            <Shield className="w-4 h-4 text-purple-600" />
+            <h2 className="text-sm font-bold text-stone-900">Log Aktivitas & Mutasi Admin</h2>
           </div>
-          <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+          <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
             Postgres Audit Trail
           </span>
         </div>
@@ -156,8 +156,8 @@ export default function AuditLogsClient({
             <div className="w-12 h-12 rounded-2xl bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
               <ScrollText className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-bold text-stone-700">Belum Ada Riwayat Aktivitas Audit</h3>
-            <p className="text-xs text-stone-400 max-w-sm mx-auto">
+            <h3 className="text-sm font-bold text-stone-900">Belum Ada Riwayat Aktivitas Audit</h3>
+            <p className="text-xs text-stone-500 max-w-sm mx-auto">
               Tidak ada catatan mutasi yang cocok dengan kriteria filter saat ini.
             </p>
           </div>
@@ -182,13 +182,13 @@ export default function AuditLogsClient({
                   <div className="space-y-1.5 min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${getActionBadgeColor(
+                        className={`text-[10px] font-semibold px-2 py-0.5 rounded ${getActionBadgeColor(
                           log.actionType
                         )}`}
                       >
                         {log.actionType}
                       </span>
-                      <span className="text-[10px] font-semibold text-stone-500 px-2 py-0.5 rounded-md bg-stone-100 border border-stone-200">
+                      <span className="text-[10px] font-semibold text-stone-600 px-2 py-0.5 rounded bg-stone-100 border border-stone-200">
                         {log.targetEntity}
                       </span>
                       {log.targetId && (
@@ -199,7 +199,7 @@ export default function AuditLogsClient({
                     </div>
 
                     <div className="flex items-center gap-4 text-xs text-stone-600">
-                      <span className="inline-flex items-center gap-1 font-medium text-[#27213D]">
+                      <span className="inline-flex items-center gap-1 font-semibold text-stone-900">
                         <User className="w-3 h-3 text-stone-400" />
                         {log.adminName || "Administrator"}
                       </span>
@@ -217,7 +217,7 @@ export default function AuditLogsClient({
                         {dateStr}
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-stone-300 group-hover:text-amber-600 group-hover:translate-x-0.5 transition-all" />
+                    <ChevronRight className="w-4 h-4 text-stone-300 group-hover:text-purple-600 group-hover:translate-x-0.5 transition-all" />
                   </div>
                 </div>
               );
@@ -228,16 +228,16 @@ export default function AuditLogsClient({
 
       {/* Details Modal */}
       {activeLog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-stone-200 space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-stone-200 space-y-5">
             <div className="flex items-center justify-between pb-4 border-b border-stone-100">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-700 border border-purple-200/70">
                   <Eye className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#27213D]">Rincian Log Audit</h3>
-                  <p className="text-xs text-stone-400">ID: {activeLog.id}</p>
+                  <h3 className="text-base font-bold text-stone-900">Rincian Log Audit</h3>
+                  <p className="text-xs text-stone-500 font-normal">ID: {activeLog.id}</p>
                 </div>
               </div>
               <button
@@ -249,10 +249,10 @@ export default function AuditLogsClient({
             </div>
 
             <div className="space-y-3.5 text-xs">
-              <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-stone-50 border border-stone-100">
+              <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-stone-50 border border-stone-200/80">
                 <div>
                   <span className="block text-[10px] font-bold text-stone-400 uppercase">Pelaksana</span>
-                  <span className="font-bold text-[#27213D]">{activeLog.adminName || "Administrator"}</span>
+                  <span className="font-bold text-stone-900">{activeLog.adminName || "Administrator"}</span>
                   <span className="block text-[10px] text-stone-400 font-mono mt-0.5 truncate">
                     {activeLog.adminId}
                   </span>
@@ -265,11 +265,11 @@ export default function AuditLogsClient({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-stone-50 border border-stone-100">
+              <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-stone-50 border border-stone-200/80">
                 <div>
                   <span className="block text-[10px] font-bold text-stone-400 uppercase">Jenis Aksi</span>
                   <span
-                    className={`inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded border ${getActionBadgeColor(
+                    className={`inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded border ${getActionBadgeColor(
                       activeLog.actionType
                     )}`}
                   >
@@ -288,10 +288,10 @@ export default function AuditLogsClient({
               </div>
 
               <div>
-                <span className="block text-[10px] font-bold text-stone-400 uppercase mb-1.5">
+                <span className="block text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5">
                   Payload & Data Mutasi (JSON)
                 </span>
-                <pre className="p-3.5 rounded-xl bg-stone-900 text-amber-300 font-mono text-[11px] overflow-x-auto max-h-52">
+                <pre className="p-3.5 rounded-xl bg-stone-900 text-purple-300 font-mono text-[11px] overflow-x-auto max-h-52">
                   {JSON.stringify(activeLog.detailsJson, null, 2)}
                 </pre>
               </div>
@@ -300,7 +300,7 @@ export default function AuditLogsClient({
             <div className="pt-2 border-t border-stone-100 text-right">
               <button
                 onClick={() => setActiveLog(null)}
-                className="px-4 py-2 rounded-xl bg-stone-100 text-stone-700 text-xs font-bold hover:bg-stone-200 transition-colors"
+                className="px-4 py-2 rounded-lg bg-stone-100 text-stone-700 text-xs font-semibold hover:bg-stone-200 transition-colors"
               >
                 Tutup
               </button>

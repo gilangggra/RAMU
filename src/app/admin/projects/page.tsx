@@ -18,38 +18,38 @@ export default async function AdminProjectsPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <FolderKanban className="w-4 h-4 text-purple-600" />
-          <span className="text-xs font-bold text-purple-600 uppercase tracking-widest">
-            Moderasi Platform
+      <div className="border-b border-stone-200/70 pb-4">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-purple-500" />
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200/70">
+            Moderasi Platform • Project Briefs
           </span>
         </div>
-        <h1 className="text-2xl font-black text-[#27213D]">
-          Pengawasan & Moderasi Project Brief
+        <h1 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight mt-1">
+          Pengawasan &amp; Moderasi Project Brief
         </h1>
-        <p className="text-sm text-stone-500 mt-1">
+        <p className="text-xs text-stone-500 leading-relaxed font-normal mt-0.5">
           Audit kualitas brief komersial, setujui publikasi, intervensi timeout inaktivitas, dan turunkan proyek yang melanggar pedoman.
         </p>
       </div>
 
       {/* Summary KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-4 rounded-xl bg-white border border-stone-200">
-          <div className="text-2xl font-black text-[#27213D]">{briefs.length}</div>
-          <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider mt-1">Total Brief</div>
+        <div className="p-3.5 rounded-xl bg-gradient-to-b from-white to-stone-50/80 border border-stone-200/80 shadow-2xs">
+          <div className="text-xl font-bold text-stone-900">{briefs.length}</div>
+          <div className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider mt-0.5">Total Brief</div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-stone-200">
-          <div className="text-2xl font-black text-purple-600">{inReviewCount}</div>
-          <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider mt-1">Menunggu Review</div>
+        <div className="p-3.5 rounded-xl bg-gradient-to-b from-white to-stone-50/80 border border-stone-200/80 shadow-2xs">
+          <div className="text-xl font-bold text-purple-700">{inReviewCount}</div>
+          <div className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider mt-0.5">Menunggu Review</div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-stone-200">
-          <div className="text-2xl font-black text-emerald-600">{openCount}</div>
-          <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider mt-1">Brief Terbuka</div>
+        <div className="p-3.5 rounded-xl bg-gradient-to-b from-white to-stone-50/80 border border-stone-200/80 shadow-2xs">
+          <div className="text-xl font-bold text-emerald-700">{openCount}</div>
+          <div className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider mt-0.5">Brief Terbuka</div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-stone-200">
-          <div className="text-2xl font-black text-rose-600">{takenDownCount}</div>
-          <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider mt-1">Diturunkan</div>
+        <div className="p-3.5 rounded-xl bg-gradient-to-b from-white to-stone-50/80 border border-stone-200/80 shadow-2xs">
+          <div className="text-xl font-bold text-rose-700">{takenDownCount}</div>
+          <div className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider mt-0.5">Diturunkan</div>
         </div>
       </div>
 

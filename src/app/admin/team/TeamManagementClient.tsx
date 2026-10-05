@@ -118,45 +118,45 @@ export default function TeamManagementClient({
 
       {/* Summary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+        <div className="p-4 rounded-2xl bg-white border border-stone-200/90 shadow-2xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-700 border border-purple-200/70">
             <Users className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
               Total Pengguna
             </p>
-            <p className="text-xl font-black text-[#27213D]">{users.length}</p>
+            <p className="text-xl font-bold text-stone-900">{users.length}</p>
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+        <div className="p-4 rounded-2xl bg-white border border-stone-200/90 shadow-2xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700 border border-emerald-200/70">
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
               Administrator Aktif
             </p>
-            <p className="text-xl font-black text-emerald-700">{adminCount}</p>
+            <p className="text-xl font-bold text-emerald-700">{adminCount}</p>
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+        <div className="p-4 rounded-2xl bg-white border border-stone-200/90 shadow-2xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-700 border border-purple-200/70">
             <Shield className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
               Level Keamanan
             </p>
-            <p className="text-xs font-bold text-[#27213D] mt-1">Multi-Admin RBAC</p>
+            <p className="text-xs font-bold text-stone-900 mt-1">Multi-Admin RBAC</p>
           </div>
         </div>
       </div>
 
       {/* Filter and Search */}
-      <div className="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-white p-4 rounded-2xl border border-stone-200/90 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
           <input
@@ -164,37 +164,37 @@ export default function TeamManagementClient({
             placeholder="Cari nama atau email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-stone-200 text-xs font-medium text-stone-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+            className="w-full pl-9 pr-3.5 py-2 rounded-lg border border-stone-200 text-xs font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-400"
           />
         </div>
 
         <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto">
           <button
             onClick={() => setRoleFilter("ALL")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
               roleFilter === "ALL"
-                ? "bg-[#27213D] text-white"
-                : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                ? "bg-stone-900 text-white font-semibold shadow-2xs"
+                : "bg-white border border-stone-200/90 text-stone-600 font-medium hover:text-stone-900"
             }`}
           >
             Semua ({users.length})
           </button>
           <button
             onClick={() => setRoleFilter("ADMIN")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
               roleFilter === "ADMIN"
-                ? "bg-emerald-600 text-white"
-                : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                ? "bg-stone-900 text-white font-semibold shadow-2xs"
+                : "bg-white border border-stone-200/90 text-stone-600 font-medium hover:text-stone-900"
             }`}
           >
             Admin Saja ({adminCount})
           </button>
           <button
             onClick={() => setRoleFilter("USER")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
               roleFilter === "USER"
-                ? "bg-stone-700 text-white"
-                : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                ? "bg-stone-900 text-white font-semibold shadow-2xs"
+                : "bg-white border border-stone-200/90 text-stone-600 font-medium hover:text-stone-900"
             }`}
           >
             Pengguna Biasa ({users.length - adminCount})
@@ -203,10 +203,10 @@ export default function TeamManagementClient({
       </div>
 
       {/* Users / Admins Table */}
-      <div className="rounded-2xl bg-white border border-stone-200 overflow-hidden shadow-sm">
-        <div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
-          <h2 className="text-sm font-bold text-[#27213D]">Daftar Pengguna & Hak Akses</h2>
-          <span className="text-[11px] text-stone-400">
+      <div className="rounded-2xl bg-white border border-stone-200/90 overflow-hidden shadow-2xs">
+        <div className="px-5 py-4 border-b border-stone-200/80 flex items-center justify-between bg-stone-50/70">
+          <h2 className="text-sm font-bold text-stone-900">Daftar Pengguna & Hak Akses</h2>
+          <span className="text-[11px] text-stone-500 font-normal">
             Menampilkan {filteredUsers.length} pengguna
           </span>
         </div>
@@ -216,8 +216,8 @@ export default function TeamManagementClient({
             <div className="w-12 h-12 rounded-2xl bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
               <Users className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-bold text-stone-700">Tidak Ada Pengguna Ditemukan</h3>
-            <p className="text-xs text-stone-400">
+            <h3 className="text-sm font-bold text-stone-900">Tidak Ada Pengguna Ditemukan</h3>
+            <p className="text-xs text-stone-500">
               Coba sesuaikan kata kunci pencarian atau filter peranan.
             </p>
           </div>
@@ -232,7 +232,7 @@ export default function TeamManagementClient({
                   className="p-4 sm:px-5 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-stone-50/50 transition-colors"
                 >
                   <div className="flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center text-xs font-bold text-[#27213D] shrink-0 overflow-hidden">
+                    <div className="w-10 h-10 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center text-xs font-bold text-stone-900 shrink-0 overflow-hidden">
                       {u.avatarUrl ? (
                         <img
                           src={u.avatarUrl}
@@ -246,26 +246,26 @@ export default function TeamManagementClient({
 
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-[#27213D]">
+                        <span className="text-sm font-bold text-stone-900">
                           {u.displayName || "Tanpa Nama"}
                         </span>
                         {isSelf && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200/70">
                             Akun Anda
                           </span>
                         )}
                         {u.isAdmin ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/70">
                             <ShieldCheck className="w-3 h-3" />
                             Administrator
                           </span>
                         ) : (
-                          <span className="text-[10px] font-semibold text-stone-500 px-2 py-0.5 rounded-full bg-stone-100 border border-stone-200">
+                          <span className="text-[10px] font-semibold text-stone-600 px-2 py-0.5 rounded bg-stone-100 border border-stone-200">
                             Pengguna ({u.role})
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-stone-400 mt-0.5">
+                      <div className="flex items-center gap-3 text-xs text-stone-500 mt-0.5 font-normal">
                         <span>{u.email}</span>
                         <span>•</span>
                         <span>{u.actorsCount} entitas profil kreator</span>
@@ -285,10 +285,10 @@ export default function TeamManagementClient({
                             user: u,
                           })
                         }
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                           isSelf
                             ? "bg-stone-100 text-stone-400 cursor-not-allowed"
-                            : "bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100"
+                            : "bg-rose-50 text-rose-700 border border-rose-200/80 hover:bg-rose-100"
                         }`}
                         title={isSelf ? "Anda tidak dapat mencabut hak akses Anda sendiri" : "Cabut Wewenang Admin"}
                       >
@@ -305,7 +305,7 @@ export default function TeamManagementClient({
                             user: u,
                           })
                         }
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 hover:bg-emerald-100 transition-colors"
                       >
                         <UserCheck className="w-3.5 h-3.5" />
                         Angkat Jadi Admin
@@ -321,14 +321,14 @@ export default function TeamManagementClient({
 
       {/* Confirmation Modal */}
       {confirmModal.open && confirmModal.user && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-stone-200 space-y-4">
             <div className="flex items-center gap-3">
               <div
-                className={`w-10 h-10 rounded-2xl flex items-center justify-center ${
+                className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                   confirmModal.type === "GRANT"
-                    ? "bg-emerald-50 text-emerald-600"
-                    : "bg-rose-50 text-rose-600"
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200/70"
+                    : "bg-rose-50 text-rose-700 border border-rose-200/70"
                 }`}
               >
                 {confirmModal.type === "GRANT" ? (
@@ -338,25 +338,25 @@ export default function TeamManagementClient({
                 )}
               </div>
               <div>
-                <h3 className="text-base font-bold text-[#27213D]">
+                <h3 className="text-base font-bold text-stone-900">
                   {confirmModal.type === "GRANT"
                     ? "Angkat Sebagai Administrator?"
                     : "Cabut Hak Akses Administrator?"}
                 </h3>
-                <p className="text-xs text-stone-400">Konfirmasi perubahan wewenang sistem</p>
+                <p className="text-xs text-stone-500 font-normal">Konfirmasi perubahan wewenang sistem</p>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200 text-xs space-y-2">
+            <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200/80 text-xs space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-stone-400 font-semibold">Nama:</span>
-                <span className="font-bold text-[#27213D]">{confirmModal.user.displayName || "—"}</span>
+                <span className="text-stone-500 font-semibold">Nama:</span>
+                <span className="font-bold text-stone-900">{confirmModal.user.displayName || "—"}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-stone-400 font-semibold">Email:</span>
+                <span className="text-stone-500 font-semibold">Email:</span>
                 <span className="font-mono text-stone-700">{confirmModal.user.email}</span>
               </div>
-              <div className="pt-2 border-t border-stone-200 text-stone-600 text-[11px] leading-relaxed">
+              <div className="pt-2 border-t border-stone-200/80 text-stone-600 text-[11px] leading-relaxed">
                 {confirmModal.type === "GRANT" ? (
                   <p>
                     Pengguna ini akan memiliki akses penuh ke <strong>Panel Admin RAMU (/admin)</strong>, termasuk
@@ -375,14 +375,14 @@ export default function TeamManagementClient({
               <button
                 disabled={isPending}
                 onClick={() => setConfirmModal({ open: false, type: "GRANT", user: null })}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 hover:bg-stone-100 transition-colors"
+                className="px-4 py-2 rounded-lg text-xs font-semibold text-stone-600 hover:bg-stone-100 transition-colors"
               >
                 Batal
               </button>
               <button
                 disabled={isPending}
                 onClick={handleConfirmAction}
-                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition-colors ${
+                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors shadow-2xs ${
                   confirmModal.type === "GRANT"
                     ? "bg-emerald-600 hover:bg-emerald-700"
                     : "bg-rose-600 hover:bg-rose-700"

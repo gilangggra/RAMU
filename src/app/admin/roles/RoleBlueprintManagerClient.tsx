@@ -123,16 +123,16 @@ export default function RoleBlueprintManagerClient({
       )}
 
       {/* Action Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-stone-200/90 shadow-2xs">
         <div>
-          <h2 className="text-base font-bold text-[#27213D]">Katalog Standar Profesi</h2>
-          <p className="text-xs text-stone-500 mt-0.5">
+          <h2 className="text-base font-bold text-stone-900">Katalog Standar Profesi</h2>
+          <p className="text-xs text-stone-500 mt-0.5 font-normal">
             Total {initialBlueprints.length} blueprint standar kompetensi dan acuan kompensasi terdaftar.
           </p>
         </div>
         <button
           onClick={openCreateModal}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#27213D] text-white text-xs font-bold hover:bg-[#3b325c] transition-colors shadow-sm"
+          className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg bg-stone-900 text-white text-xs font-semibold hover:bg-black transition-colors shadow-2xs"
         >
           <Plus className="w-4 h-4" />
           Tambah Blueprint Peran
@@ -145,13 +145,13 @@ export default function RoleBlueprintManagerClient({
           <div className="w-12 h-12 rounded-2xl bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
             <Settings2 className="w-6 h-6" />
           </div>
-          <h3 className="text-sm font-bold text-stone-700">Belum Ada Blueprint Peran</h3>
-          <p className="text-xs text-stone-400 max-w-sm mx-auto">
+          <h3 className="text-sm font-bold text-stone-900">Belum Ada Blueprint Peran</h3>
+          <p className="text-xs text-stone-500 max-w-sm mx-auto">
             Standarisasi profesi kru dan acuan tarif pasar belum dikonfigurasi. Klik tombol di atas untuk menambahkan.
           </p>
           <button
             onClick={openCreateModal}
-            className="mt-2 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-100 text-stone-700 text-xs font-bold hover:bg-stone-200 transition-colors"
+            className="mt-2 inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-stone-100 text-stone-700 text-xs font-semibold hover:bg-stone-200 transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             Buat Blueprint Pertama
@@ -162,18 +162,18 @@ export default function RoleBlueprintManagerClient({
           {initialBlueprints.map((bp) => (
             <div
               key={bp.id}
-              className="rounded-2xl bg-white border border-stone-200 overflow-hidden hover:border-indigo-500/25 transition-all shadow-sm flex flex-col justify-between"
+              className="rounded-2xl bg-white border border-stone-200/90 overflow-hidden hover:border-stone-300 transition-all shadow-2xs flex flex-col justify-between"
             >
               <div>
-                <div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
+                <div className="px-5 py-4 border-b border-stone-200/80 flex items-center justify-between bg-stone-50/60">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
-                    <h3 className="text-sm font-bold text-[#27213D]">{bp.roleName}</h3>
+                    <span className="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
+                    <h3 className="text-sm font-bold text-stone-900">{bp.roleName}</h3>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => openEditModal(bp)}
-                      className="p-1.5 rounded-lg text-stone-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                      className="p-1.5 rounded-lg text-stone-500 hover:text-purple-600 hover:bg-purple-50 transition-colors"
                       title="Edit Blueprint"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
@@ -191,8 +191,8 @@ export default function RoleBlueprintManagerClient({
                 <div className="p-5 space-y-4">
                   {/* Skills */}
                   <div>
-                    <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                      <Sparkles className="w-3 h-3 text-indigo-500" />
+                    <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <Sparkles className="w-3 h-3 text-purple-600" />
                       Keahlian Utama
                     </p>
                     <div className="flex flex-wrap gap-1.5">
@@ -200,7 +200,7 @@ export default function RoleBlueprintManagerClient({
                         bp.skillsArray.map((s, idx) => (
                           <span
                             key={idx}
-                            className="text-[10px] px-2.5 py-1 rounded-full bg-stone-50 text-[#27213D] font-medium border border-stone-200"
+                            className="text-[10px] px-2.5 py-1 rounded-md bg-stone-100/80 text-stone-800 font-medium border border-stone-200/80"
                           >
                             {s}
                           </span>
@@ -213,8 +213,8 @@ export default function RoleBlueprintManagerClient({
 
                   {/* Gear / Tools */}
                   <div>
-                    <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                      <Wrench className="w-3 h-3 text-indigo-500" />
+                    <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <Wrench className="w-3 h-3 text-purple-600" />
                       Alat Kerja Rekomendasi
                     </p>
                     <div className="flex flex-wrap gap-1.5">
@@ -222,7 +222,7 @@ export default function RoleBlueprintManagerClient({
                         bp.recommendedTools.map((g, idx) => (
                           <span
                             key={idx}
-                            className="text-[10px] px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 font-medium border border-indigo-100"
+                            className="text-[10px] px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 font-medium border border-purple-200/70"
                           >
                             {g}
                           </span>
@@ -235,23 +235,23 @@ export default function RoleBlueprintManagerClient({
 
                   {/* Rates */}
                   <div>
-                    <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">
+                    <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-2">
                       Panduan Acuan Tarif Pasar
                     </p>
                     <div className="grid grid-cols-3 gap-2">
-                      <div className="p-2.5 rounded-xl bg-stone-50 border border-stone-100 text-center">
+                      <div className="p-2.5 rounded-xl bg-stone-50/70 border border-stone-200/80 text-center">
                         <p className="text-[9px] font-bold text-stone-400 uppercase">Junior</p>
                         <p className="text-[10px] font-bold text-emerald-700 mt-0.5 truncate">
                           {bp.rateJunior || "—"}
                         </p>
                       </div>
-                      <div className="p-2.5 rounded-xl bg-stone-50 border border-stone-100 text-center">
+                      <div className="p-2.5 rounded-xl bg-stone-50/70 border border-stone-200/80 text-center">
                         <p className="text-[9px] font-bold text-stone-400 uppercase">Mid</p>
                         <p className="text-[10px] font-bold text-amber-700 mt-0.5 truncate">
                           {bp.rateMid || "—"}
                         </p>
                       </div>
-                      <div className="p-2.5 rounded-xl bg-stone-50 border border-stone-100 text-center">
+                      <div className="p-2.5 rounded-xl bg-stone-50/70 border border-stone-200/80 text-center">
                         <p className="text-[9px] font-bold text-stone-400 uppercase">Senior</p>
                         <p className="text-[10px] font-bold text-rose-700 mt-0.5 truncate">
                           {bp.rateSenior || "—"}
@@ -273,14 +273,14 @@ export default function RoleBlueprintManagerClient({
                     <button
                       disabled={isPending}
                       onClick={() => setDeleteConfirmId(null)}
-                      className="px-2.5 py-1 text-xs font-bold text-stone-600 hover:bg-stone-200/50 rounded-lg transition-colors"
+                      className="px-2.5 py-1 text-xs font-semibold text-stone-600 hover:bg-stone-200/50 rounded-lg transition-colors"
                     >
                       Batal
                     </button>
                     <button
                       disabled={isPending}
                       onClick={() => handleDelete(bp.id, bp.roleName)}
-                      className="px-3 py-1 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors flex items-center gap-1.5"
+                      className="px-3 py-1 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors flex items-center gap-1.5"
                     >
                       {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
                       Hapus
@@ -295,18 +295,18 @@ export default function RoleBlueprintManagerClient({
 
       {/* Create / Edit Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-stone-200 space-y-5 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-stone-200 space-y-5 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-stone-100">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-700 border border-purple-200/70">
                   <Settings2 className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#27213D]">
+                  <h3 className="text-base font-bold text-stone-900">
                     {editingBlueprint ? "Sunting Blueprint Peran" : "Tambah Blueprint Baru"}
                   </h3>
-                  <p className="text-xs text-stone-400">
+                  <p className="text-xs text-stone-500 font-normal">
                     Konfigurasi standar skill dan panduan tarif industri kreatif.
                   </p>
                 </div>
@@ -321,7 +321,7 @@ export default function RoleBlueprintManagerClient({
 
             <form onSubmit={handleSave} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#27213D] uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
                   Nama Peran Profesi *
                 </label>
                 <input
@@ -330,12 +330,12 @@ export default function RoleBlueprintManagerClient({
                   placeholder="Contoh: Colorist / Sound Designer / Lead Animator"
                   value={roleName}
                   onChange={(e) => setRoleName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-xs font-medium text-stone-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3.5 py-2 rounded-lg border border-stone-200 text-xs font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-400"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#27213D] uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
                   Keahlian Utama (Pisahkan dengan tanda koma)
                 </label>
                 <textarea
@@ -343,12 +343,12 @@ export default function RoleBlueprintManagerClient({
                   placeholder="Contoh: DaVinci Resolve, Color matching, ACES color pipeline, HDR grading"
                   value={skills}
                   onChange={(e) => setSkills(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-xs font-medium text-stone-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3.5 py-2 rounded-lg border border-stone-200 text-xs font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-400"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#27213D] uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
                   Alat Kerja / Perangkat Rekomendasi (Pisahkan dengan koma)
                 </label>
                 <textarea
@@ -356,12 +356,12 @@ export default function RoleBlueprintManagerClient({
                   placeholder="Contoh: Tangent Element panel, calibrated OLED monitor, DaVinci Mini"
                   value={tools}
                   onChange={(e) => setTools(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-xs font-medium text-stone-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3.5 py-2 rounded-lg border border-stone-200 text-xs font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-400"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#27213D] uppercase tracking-wider mb-2">
+                <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
                   Panduan Tarif Pasar
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -372,7 +372,7 @@ export default function RoleBlueprintManagerClient({
                       placeholder="Rp 1–2 jt/hari"
                       value={rateJunior}
                       onChange={(e) => setRateJunior(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs font-medium text-stone-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                      className="w-full px-3 py-2 rounded-lg border border-stone-200 text-xs font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-400"
                     />
                   </div>
                   <div>
@@ -382,7 +382,7 @@ export default function RoleBlueprintManagerClient({
                       placeholder="Rp 2,5–5 jt/hari"
                       value={rateMid}
                       onChange={(e) => setRateMid(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs font-medium text-stone-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                      className="w-full px-3 py-2 rounded-lg border border-stone-200 text-xs font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-400"
                     />
                   </div>
                   <div>
@@ -392,7 +392,7 @@ export default function RoleBlueprintManagerClient({
                       placeholder="Rp 6–12 jt/hari"
                       value={rateSenior}
                       onChange={(e) => setRateSenior(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs font-medium text-stone-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                      className="w-full px-3 py-2 rounded-lg border border-stone-200 text-xs font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-400"
                     />
                   </div>
                 </div>
@@ -402,14 +402,14 @@ export default function RoleBlueprintManagerClient({
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-stone-600 hover:bg-stone-100 transition-colors"
+                  className="px-4 py-2 rounded-lg text-xs font-semibold text-stone-600 hover:bg-stone-100 transition-colors"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#27213D] text-white text-xs font-bold hover:bg-[#3b325c] transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-stone-900 text-white text-xs font-semibold hover:bg-black transition-colors disabled:opacity-50 shadow-2xs"
                 >
                   {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                   {editingBlueprint ? "Simpan Perubahan" : "Simpan Blueprint"}

@@ -23,46 +23,46 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Users className="w-4 h-4 text-amber-600" />
-          <span className="text-xs font-bold text-amber-600 uppercase tracking-widest">
-            Trust & Safety
+      <div className="border-b border-stone-200/70 pb-4">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-purple-500" />
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200/70">
+            Trust &amp; Safety • User Moderation
           </span>
         </div>
-        <h1 className="text-2xl font-black text-[#27213D]">
-          Manajemen Talenta & Studio
+        <h1 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight mt-1">
+          Manajemen Talenta &amp; Studio
         </h1>
-        <p className="text-sm text-stone-500 mt-1">
+        <p className="text-xs text-stone-500 leading-relaxed font-normal mt-0.5">
           Kelola status kepatuhan akun, kurasi spotlight hero section, dan sanksi pelanggaran pedoman.
         </p>
       </div>
 
       {/* Status Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="p-4 rounded-xl bg-white border border-stone-200">
-          <div className="text-2xl font-black text-emerald-600">{statusCounts.ACTIVE}</div>
-          <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider mt-1">Aktif</div>
+        <div className="p-3.5 rounded-xl bg-gradient-to-b from-white to-stone-50/80 border border-stone-200/80 shadow-2xs">
+          <div className="text-xl font-bold text-emerald-700">{statusCounts.ACTIVE}</div>
+          <div className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider mt-0.5">Aktif</div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-stone-200">
-          <div className="text-2xl font-black text-amber-600">{statusCounts.CURATED}</div>
-          <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider mt-1">★ Spotlight</div>
+        <div className="p-3.5 rounded-xl bg-gradient-to-b from-white to-stone-50/80 border border-stone-200/80 shadow-2xs">
+          <div className="text-xl font-bold text-amber-700">{statusCounts.CURATED}</div>
+          <div className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider mt-0.5">★ Spotlight</div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-stone-200">
-          <div className="text-2xl font-black text-sky-600">{statusCounts.VERIFIED}</div>
-          <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider mt-1">✓ Verified</div>
+        <div className="p-3.5 rounded-xl bg-gradient-to-b from-white to-stone-50/80 border border-stone-200/80 shadow-2xs">
+          <div className="text-xl font-bold text-sky-700">{statusCounts.VERIFIED}</div>
+          <div className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider mt-0.5">✓ Verified</div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-stone-200">
-          <div className="text-2xl font-black text-stone-600">{statusCounts.DRAFT}</div>
-          <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider mt-1">Draf</div>
+        <div className="p-3.5 rounded-xl bg-gradient-to-b from-white to-stone-50/80 border border-stone-200/80 shadow-2xs">
+          <div className="text-xl font-bold text-stone-700">{statusCounts.DRAFT}</div>
+          <div className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider mt-0.5">Draf</div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-stone-200">
-          <div className="text-2xl font-black text-amber-700">{statusCounts.SUSPENDED}</div>
-          <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider mt-1">Suspended</div>
+        <div className="p-3.5 rounded-xl bg-gradient-to-b from-white to-stone-50/80 border border-stone-200/80 shadow-2xs">
+          <div className="text-xl font-bold text-amber-800">{statusCounts.SUSPENDED}</div>
+          <div className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider mt-0.5">Suspended</div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-stone-200">
-          <div className="text-2xl font-black text-rose-600">{statusCounts.BANNED}</div>
-          <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider mt-1">Banned</div>
+        <div className="p-3.5 rounded-xl bg-gradient-to-b from-white to-stone-50/80 border border-stone-200/80 shadow-2xs">
+          <div className="text-xl font-bold text-rose-700">{statusCounts.BANNED}</div>
+          <div className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider mt-0.5">Banned</div>
         </div>
       </div>
 

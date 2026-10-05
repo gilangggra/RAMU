@@ -54,14 +54,14 @@ export default async function AdminTeamPage() {
   return (
     <div className="space-y-6 pb-12">
       <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Users className="w-4 h-4 text-emerald-600" />
-          <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
+        <div className="flex items-center gap-2 mb-1.5">
+          <Users className="w-4 h-4 text-purple-600" />
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200/70">
             Akses & Otoritas Sistem
           </span>
         </div>
-        <h1 className="text-2xl font-black text-[#27213D]">Manajemen Akses Administrator</h1>
-        <p className="text-sm text-stone-500 mt-1">
+        <h1 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">Manajemen Akses Administrator</h1>
+        <p className="text-xs text-stone-500 mt-1 font-normal">
           Beri atau cabut wewenang administrator platform untuk akun terdaftar tanpa perlu akses langsung ke database console.
         </p>
       </div>
