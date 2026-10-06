@@ -22,6 +22,8 @@ import { ActorDetailTabs } from "@/components/directory/ActorDetailTabs";
 import { BookingButton } from "@/components/directory/BookingButton";
 import { OpenEditModalButton } from "@/components/directory/OpenEditModalButton";
 import { ActorAvatar } from "@/components/ui/ActorAvatar";
+import { ProfileCompatibilityBanner } from "@/components/directory/ProfileCompatibilityBanner";
+import { ActorMobileActionBar } from "@/components/directory/ActorMobileActionBar";
 
 export async function generateMetadata({
   params,
@@ -39,8 +41,10 @@ export async function generateMetadata({
 
 export default async function DirectoryDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ tab?: string; edit?: string }>;
 }) {
   const supabase = await createClient();
   const {
@@ -57,6 +61,21 @@ export default async function DirectoryDetailPage({
   if (!currentActor) redirect("/onboarding");
 
   const { id } = await params;
+  const sParams = searchParams ? await searchParams : {};
+  const rawTab = (sParams?.tab || "").toLowerCase();
+  const initialTab: "portfolio" | "rates" | "specs" | "collaborations" | "about" | "reviews" =
+    rawTab === "rates" || rawTab === "tarif" || rawTab === "paket"
+      ? "rates"
+      : rawTab === "specs" || rawTab === "spesifikasi"
+      ? "specs"
+      : rawTab === "collaborations" || rawTab === "proyek"
+      ? "collaborations"
+      : rawTab === "about" || rawTab === "tentang"
+      ? "about"
+      : rawTab === "reviews" || rawTab === "ulasan"
+      ? "reviews"
+      : "portfolio";
+
   const actor = await getDirectoryActorById(id);
 
   if (!actor) {
@@ -803,14 +822,32 @@ export default async function DirectoryDetailPage({
           </div>
         </section>
 
-        <div className="border-t border-stone-200 pt-12">
+        {!isCurrentActor && (
+          <div className="mb-10">
+            <ProfileCompatibilityBanner
+              targetActor={actor}
+              currentActor={currentActor}
+              termsConfig={customTermsConfig}
+            />
+          </div>
+        )}
+
+        <div className="border-t border-stone-200 pt-10">
           <ActorDetailTabs
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             actor={actorWithCoCredits as any}
             isCurrentActor={isCurrentActor}
             registeredActors={registeredActors}
+            initialTab={initialTab}
           />
         </div>
+
+        {!isCurrentActor && (
+          <ActorMobileActionBar
+            actor={actor}
+            termsConfig={customTermsConfig}
+          />
+        )}
       </div>
     </AppShell>
   );

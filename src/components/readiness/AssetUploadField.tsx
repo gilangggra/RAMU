@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { UploadCloud, Image as ImageIcon, X, CheckCircle2 } from "lucide-react";
+import { toast } from "@/components/ui/Toast";
 
 export function AssetUploadField() {
   const [preview, setPreview] = useState<string | null>(null);
@@ -14,12 +15,12 @@ export function AssetUploadField() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert("Mohon pilih file gambar (JPG, PNG, atau WebP).");
+      toast.error("Mohon pilih file gambar (JPG, PNG, atau WebP).");
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      alert("Ukuran foto maksimal adalah 10 MB.");
+      toast.error("Ukuran foto maksimal adalah 10 MB.");
       return;
     }
 

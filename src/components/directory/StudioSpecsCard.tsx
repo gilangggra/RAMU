@@ -28,8 +28,16 @@ export interface StudioAttributes {
   cyclorama_type?: string;
   electrical_capacity?: string;
   floor_type?: string;
+  space_type?: string[];
+  max_people_capacity?: number;
+  max_crew_capacity?: number;
+  available_setups?: string[];
+  lighting_gear?: string[];
+  props_available?: boolean;
   facilities?: string[];
   gear_included?: string[];
+  operating_hours?: string;
+  overtime_policy?: string;
   studio_gallery?: StudioGalleryPhoto[];
 }
 
@@ -66,7 +74,8 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
     : portfolioWorks;
 
   const facilities = attributes.facilities || [];
-  const gearList = attributes.gear_included || [];
+  const gearList = attributes.lighting_gear || attributes.gear_included || [];
+  const setups = attributes.available_setups || [];
 
   return (
     <div className="space-y-8">
@@ -145,6 +154,46 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
               {attributes.cyclorama_type || "Seamless White L-Curve"}
             </div>
             <div className="text-[10px] text-stone-500 font-medium">Tanpa sudut bayangan</div>
+          </div>
+        </div>
+
+        {/* SETUPS & OPERATIONAL LIMITS */}
+        <div className="pt-2 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          {setups.length > 0 && (
+            <div className="p-4 rounded-xl bg-stone-50/70 border border-stone-200/70 space-y-2">
+              <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">
+                Setups &amp; Backdrop Pilihan
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {setups.map((setp) => (
+                  <span key={setp} className="px-2.5 py-1 rounded-md bg-white border border-stone-200 text-stone-800 text-[11px] font-bold">
+                    ✓ {setp}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="p-4 rounded-xl bg-stone-50/70 border border-stone-200/70 space-y-2">
+            <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">
+              Jam Operasional &amp; Kapasitas Kru
+            </span>
+            <div className="space-y-1 text-[11px] text-stone-700">
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500">Jam Operasional:</span>
+                <span className="font-bold">{attributes.operating_hours || "08:00 – 22:00 WIB"}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500">Kapasitas Maksimal:</span>
+                <span className="font-bold">{attributes.max_people_capacity || 15} Orang Kru</span>
+              </div>
+              {attributes.overtime_policy && (
+                <div className="flex items-center justify-between">
+                  <span className="text-stone-500">Overtime:</span>
+                  <span className="font-semibold text-amber-800 truncate max-w-[200px]">{attributes.overtime_policy}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

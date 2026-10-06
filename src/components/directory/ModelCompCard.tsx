@@ -37,6 +37,10 @@ export interface ModelAttributes {
   skin_undertone?: string;
   experience_years?: number;
   specialties?: string[];
+  capabilities?: string[];
+  wardrobe_restrictions?: string;
+  chaperone_allowed?: boolean;
+  travel_radius?: string;
   comp_card?: CompCardPhoto[];
   portfolio_gallery?: PortfolioGalleryItem[];
   video_reel_title?: string;
@@ -260,6 +264,50 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
             </div>
           </div>
         )}
+
+        {/* CAPABILITIES & WARDROBE RESTRICTIONS STRIP */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-stone-100 text-xs">
+          {(attributes.capabilities && attributes.capabilities.length > 0) && (
+            <div className="p-3.5 rounded-xl bg-purple-50/50 border border-purple-200/60 space-y-2">
+              <span className="text-[10px] font-bold text-purple-900 uppercase tracking-wider block">
+                Kapabilitas &amp; Ekspresi On-Set:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {attributes.capabilities.map((cap) => (
+                  <span key={cap} className="px-2.5 py-0.5 rounded-md bg-white border border-purple-200 text-purple-800 text-[11px] font-semibold">
+                    ✓ {cap}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="p-3.5 rounded-xl bg-stone-50/80 border border-stone-200/70 space-y-2">
+            <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">
+              Kebijakan Wardrobe &amp; Akomodasi:
+            </span>
+            <div className="space-y-1 text-[11px] text-stone-700">
+              {attributes.wardrobe_restrictions && (
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-stone-500 shrink-0">Batasan Wardrobe:</span>
+                  <span className="font-bold text-right">{attributes.wardrobe_restrictions}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500">Pendamping On-Set:</span>
+                <span className="font-bold text-emerald-700">
+                  {attributes.chaperone_allowed ? "✓ Manajer / Chaperone Diizinkan" : "Independen"}
+                </span>
+              </div>
+              {attributes.travel_radius && (
+                <div className="flex items-center justify-between">
+                  <span className="text-stone-500">Jangkauan Kerja:</span>
+                  <span className="font-semibold text-stone-800">{attributes.travel_radius}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </section>
 
       {portfolioGallery.length > 0 && (

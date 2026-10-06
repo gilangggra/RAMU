@@ -350,3 +350,210 @@ export async function convertBookingToCollaboration(bookingId: string) {
     return { success: false, error: "Gagal mengonversi pesanan ke ruang kolaborasi." };
   }
 }
+
+export async function cancelBookingRequestAction(bookingId: string, reason?: string) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Unauthorized" };
+
+    const profile = await prisma.profile.findUnique({
+      where: { id: user.id },
+      include: { actors: { where: { status: { not: "ARCHIVED" } } } }
+    });
+    const userActorIds = profile?.actors?.map((a) => a.id) || [];
+    const primaryActor = profile?.actors?.[0];
+    if (!primaryActor) return { success: false, error: "Profil aktor tidak ditemukan." };
+
+    const booking = await prisma.bookingRequest.findUnique({
+      where: { id: bookingId },
+      include: { requester: true, target: true }
+    });
+    if (!booking) return { success: false, error: "Pesanan tidak ditemukan." };
+
+    const isRequester = userActorIds.includes(booking.requesterId);
+    const isTarget = userActorIds.includes(booking.targetId);
+    if (!isRequester && !isTarget) {
+      return { success: false, error: "Anda tidak memiliki akses untuk membatalkan pesanan ini." };
+    }
+
+    if (booking.status === "CANCELLED") {
+      return { success: false, error: "Pesanan ini sudah berstatus dibatalkan." };
+    }
+
+    const details = (typeof booking.details === "object" && booking.details !== null)
+      ? (booking.details as Record<string, any>)
+      : {};
+
+    if (details.collaborationId) {
+      return { success: false, error: "Pesanan yang sudah memiliki ruang kolaborasi aktif tidak dapat dibatalkan secara sepihak." };
+    }
+
+    const cancelledBy = isRequester ? booking.requester : booking.target;
+    const notifiedPartyId = isRequester ? booking.targetId : booking.requesterId;
+
+    const updatedDetails = {
+      ...details,
+      cancellation: {
+        cancelledByActorId: cancelledBy.id,
+        cancelledByName: cancelledBy.name,
+        cancelledAt: new Date().toISOString(),
+        reason: reason?.trim() || "Dibatalkan oleh pihak pemesan.",
+      }
+    };
+
+    await prisma.bookingRequest.update({
+      where: { id: bookingId },
+      data: {
+        status: "CANCELLED",
+        details: updatedDetails,
+      }
+    });
+
+    try {
+      await createNotification({
+        actorId: notifiedPartyId,
+        title: "Pesanan Dibatalkan",
+        message: `${cancelledBy.name} telah membatalkan pesanan SPK-RAMU-${bookingId.slice(0, 8).toUpperCase()}.${reason?.trim() ? ` Alasan: "${reason.trim()}"` : ""}`,
+        type: "BOOKING_UPDATE",
+        link: `/dashboard/bookings/${bookingId}`,
+        metadata: { bookingId, status: "CANCELLED", reason: reason?.trim() },
+      });
+    } catch (e) {
+      console.error("Failed to send cancellation notification:", e);
+    }
+
+    revalidatePath("/dashboard/bookings");
+    revalidatePath(`/dashboard/bookings/${bookingId}`);
+    revalidatePath("/dashboard");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error cancelling booking request:", error);
+    return { success: false, error: "Gagal membatalkan pesanan." };
+  }
+}
+
+export interface RescheduleBookingData {
+  bookingId: string;
+  startDate: string;
+  endDate?: string;
+  budget?: string;
+  notes?: string;
+}
+
+export async function rescheduleBookingRequestAction(data: RescheduleBookingData) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Unauthorized" };
+
+    const profile = await prisma.profile.findUnique({
+      where: { id: user.id },
+      include: { actors: { where: { status: { not: "ARCHIVED" } } } }
+    });
+    const userActorIds = profile?.actors?.map((a) => a.id) || [];
+    const primaryActor = profile?.actors?.[0];
+    if (!primaryActor) return { success: false, error: "Profil aktor tidak ditemukan." };
+
+    const booking = await prisma.bookingRequest.findUnique({
+      where: { id: data.bookingId },
+      include: { requester: true, target: true }
+    });
+    if (!booking) return { success: false, error: "Pesanan tidak ditemukan." };
+
+    const isRequester = userActorIds.includes(booking.requesterId);
+    const isTarget = userActorIds.includes(booking.targetId);
+    if (!isRequester && !isTarget) {
+      return { success: false, error: "Anda tidak memiliki akses untuk mengubah pesanan ini." };
+    }
+
+    if (booking.status === "CANCELLED" || booking.status === "DECLINED") {
+      return { success: false, error: "Pesanan yang telah dibatalkan atau ditolak tidak dapat di-reschedule." };
+    }
+
+    if (!data.startDate || typeof data.startDate !== "string" || !data.startDate.trim()) {
+      return { success: false, error: "Tanggal mulai pelaksanaan baru wajib diisi." };
+    }
+
+    const parsedStartDate = new Date(data.startDate);
+    if (isNaN(parsedStartDate.getTime())) {
+      return { success: false, error: "Format tanggal mulai pelaksanaan tidak valid." };
+    }
+
+    let parsedEndDate: Date | null = null;
+    if (data.endDate && typeof data.endDate === "string" && data.endDate.trim()) {
+      parsedEndDate = new Date(data.endDate);
+      if (isNaN(parsedEndDate.getTime())) {
+        return { success: false, error: "Format tanggal selesai tidak valid." };
+      }
+      if (parsedEndDate.getTime() < parsedStartDate.getTime()) {
+        return { success: false, error: "Tanggal selesai tidak boleh lebih awal dari tanggal mulai." };
+      }
+    }
+
+    const actor = isRequester ? booking.requester : booking.target;
+    const notifiedPartyId = isRequester ? booking.targetId : booking.requesterId;
+
+    const details = (typeof booking.details === "object" && booking.details !== null)
+      ? (booking.details as Record<string, any>)
+      : {};
+
+    const historyEntry = {
+      proposedByActorId: actor.id,
+      proposedByName: actor.name,
+      proposedAt: new Date().toISOString(),
+      oldStartDate: booking.startDate.toISOString(),
+      oldEndDate: booking.endDate?.toISOString() || null,
+      newStartDate: parsedStartDate.toISOString(),
+      newEndDate: parsedEndDate?.toISOString() || null,
+      oldBudget: booking.budget,
+      newBudget: data.budget?.trim() || booking.budget,
+      notes: data.notes?.trim() || "",
+    };
+
+    const rescheduleHistory = Array.isArray(details.rescheduleHistory)
+      ? [...details.rescheduleHistory, historyEntry]
+      : [historyEntry];
+
+    const updatedDetails = {
+      ...details,
+      rescheduleHistory,
+      latestRescheduleNote: data.notes?.trim() || details.latestRescheduleNote,
+    };
+
+    await prisma.bookingRequest.update({
+      where: { id: data.bookingId },
+      data: {
+        startDate: parsedStartDate,
+        endDate: parsedEndDate,
+        budget: data.budget?.trim() || booking.budget,
+        status: "PENDING", // Kembali ke status PENDING agar pihak mitra meninjau & mengonfirmasi jadwal baru
+        details: updatedDetails,
+      }
+    });
+
+    try {
+      const scheduleLabel = parsedStartDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+      await createNotification({
+        actorId: notifiedPartyId,
+        title: "Pengajuan Reschedule Jadwal SPK",
+        message: `${actor.name} mengajukan perubahan jadwal ke ${scheduleLabel} untuk pesanan SPK-RAMU-${data.bookingId.slice(0, 8).toUpperCase()}.${data.notes?.trim() ? ` Catatan: "${data.notes.trim()}"` : ""}`,
+        type: "BOOKING_UPDATE",
+        link: `/dashboard/bookings/${data.bookingId}`,
+        metadata: { bookingId: data.bookingId, status: "PENDING", newDate: parsedStartDate.toISOString() },
+      });
+    } catch (e) {
+      console.error("Failed to send reschedule notification:", e);
+    }
+
+    revalidatePath("/dashboard/bookings");
+    revalidatePath(`/dashboard/bookings/${data.bookingId}`);
+    revalidatePath("/dashboard");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error rescheduling booking request:", error);
+    return { success: false, error: "Gagal mengajukan perubahan jadwal." };
+  }
+}

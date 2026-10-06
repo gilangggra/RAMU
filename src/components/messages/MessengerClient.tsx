@@ -42,6 +42,7 @@ import {
   reportMediationIssueAction,
 } from "@/app/messages/actions";
 import { ActorAvatar } from "@/components/ui/ActorAvatar";
+import { toast } from "@/components/ui/Toast";
 
 interface MessengerClientProps {
   currentActor: {
@@ -174,7 +175,7 @@ export function MessengerClient({
     startTransition(async () => {
       const res = await sendDirectMessageAction(activePartner.id, textToSend);
       if (!res.success) {
-        alert(res.error || "Gagal mengirim pesan.");
+        toast.error(res.error || "Gagal mengirim pesan.");
       }
     });
   }
@@ -202,10 +203,11 @@ export function MessengerClient({
         setOfferOutput("");
         setOfferNotes("");
 
+        toast.success("Tawaran proyek berhasil dikirim!");
         const refetch = await fetchMessagesAction(activePartner.id);
         if (refetch.success) setMessages(refetch.messages);
       } else {
-        alert(res.error || "Gagal mengirim tawaran proyek.");
+        toast.error(res.error || "Gagal mengirim tawaran proyek.");
       }
     });
   }
@@ -216,10 +218,11 @@ export function MessengerClient({
     startTransition(async () => {
       const res = await respondToOfferAction(messageId, status);
       if (res.success) {
+        toast.success(status === "ACCEPTED" ? "Tawaran proyek diterima!" : "Tawaran proyek ditolak.");
         const refetch = await fetchMessagesAction(activePartner.id);
         if (refetch.success) setMessages(refetch.messages);
       } else {
-        alert(res.error || "Gagal merespons tawaran.");
+        toast.error(res.error || "Gagal merespons tawaran.");
       }
     });
   }
@@ -243,10 +246,11 @@ export function MessengerClient({
         setDeliveryUrl("");
         setDeliveryNotes("");
 
+        toast.success("Berkas hasil proyek berhasil dikirim!");
         const refetch = await fetchMessagesAction(activePartner.id);
         if (refetch.success) setMessages(refetch.messages);
       } else {
-        alert(res.error || "Gagal mengirimkan berkas hasil proyek.");
+        toast.error(res.error || "Gagal mengirimkan berkas hasil proyek.");
       }
     });
   }
@@ -261,10 +265,11 @@ export function MessengerClient({
     startTransition(async () => {
       const res = await respondToDeliveryAction(messageId, status, notes);
       if (res.success) {
+        toast.success(status === "ACCEPTED" ? "Hasil proyek disetujui!" : "Permintaan revisi telah dikirim.");
         const refetch = await fetchMessagesAction(activePartner.id);
         if (refetch.success) setMessages(refetch.messages);
       } else {
-        alert(res.error || "Gagal merespons serah terima hasil proyek.");
+        toast.error(res.error || "Gagal merespons serah terima hasil proyek.");
       }
     });
   }
@@ -284,10 +289,11 @@ export function MessengerClient({
 
       if (res.success) {
         setMediationChronology("");
+        toast.success("Laporan mediasi berhasil diajukan.");
         const refetch = await fetchMessagesAction(activePartner.id);
         if (refetch.success) setMessages(refetch.messages);
       } else {
-        alert(res.error || "Gagal mengajukan mediasi.");
+        toast.error(res.error || "Gagal mengajukan mediasi.");
       }
     });
   }

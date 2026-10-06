@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import {
   BookingStatusManager,
+  BookingRequesterActions,
   ConvertBookingButton,
   BookingContactActions,
   ViewSpkButton,
@@ -87,6 +88,18 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
       badge: "bg-amber-50 text-amber-700 border-amber-200/60",
       dot: "bg-amber-500 animate-pulse",
       icon: Clock,
+    },
+    NEGOTIATING: {
+      label: "Reschedule Diajukan",
+      badge: "bg-blue-50 text-blue-700 border-blue-200/60",
+      dot: "bg-blue-500 animate-pulse",
+      icon: Calendar,
+    },
+    CANCELLED: {
+      label: "Dibatalkan",
+      badge: "bg-stone-100 text-stone-600 border-stone-200/70",
+      dot: "bg-stone-400",
+      icon: XCircle,
     },
     ACCEPTED: hasCollaboration
       ? {
@@ -449,7 +462,7 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
             <div className="bg-white border border-stone-200/80 rounded-2xl shadow-2xs overflow-hidden">
               <div className="px-5 py-3.5 border-b border-stone-100 bg-stone-50/70">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-500">
-                  {isTarget ? "Tindakan Anda" : "Status Pesanan"}
+                  {isTarget ? "Tindakan Penyedia Jasa" : isRequester ? "Tindakan Pemesan" : "Status Pesanan"}
                 </span>
               </div>
               <div className="p-5 space-y-4">
@@ -458,8 +471,52 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                   <span>{sc.label}</span>
                 </div>
 
-                {isTarget && booking.status === "PENDING" && (
-                  <BookingStatusManager bookingId={booking.id} />
+                {/* Cancelled Notice */}
+                {booking.status === "CANCELLED" && details.cancellation && (
+                  <div className="p-3.5 bg-stone-50 rounded-xl border border-stone-200/80 space-y-1.5 text-xs">
+                    <div className="flex items-center gap-1.5 font-semibold text-stone-800">
+                      <XCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                      <span>Pesanan Telah Dibatalkan</span>
+                    </div>
+                    <p className="text-[11px] text-stone-500 leading-relaxed">
+                      Dibatalkan oleh <strong className="text-stone-800">{details.cancellation.cancelledByName || "pihak pemesan"}</strong> pada{" "}
+                      {new Date(details.cancellation.cancelledAt).toLocaleDateString("id-ID", { dateStyle: "long" })}.
+                    </p>
+                    {details.cancellation.reason && (
+                      <p className="text-[11px] text-stone-600 bg-white p-2.5 rounded-lg border border-stone-200/70 italic">
+                        &ldquo;{details.cancellation.reason}&rdquo;
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Actions for Target (Penyedia Jasa) */}
+                {isTarget && (booking.status === "PENDING" || booking.status === "NEGOTIATING") && (
+                  <BookingStatusManager
+                    bookingId={booking.id}
+                    partnerName={booking.requester.name}
+                    refCode={refCode}
+                    currentStartDate={booking.startDate}
+                    currentEndDate={booking.endDate}
+                    currentBudget={booking.budget}
+                  />
+                )}
+
+                {/* Actions for Requester (Pemesan) */}
+                {isRequester && (booking.status === "PENDING" || booking.status === "NEGOTIATING") && (
+                  <div className="space-y-3">
+                    <p className="text-[11px] text-stone-500 leading-relaxed">
+                      Pesanan Anda sedang menunggu tinjauan dari <strong className="text-stone-800">{booking.target.name}</strong>. Anda dapat mengusulkan perubahan jadwal atau membatalkan pesanan.
+                    </p>
+                    <BookingRequesterActions
+                      bookingId={booking.id}
+                      partnerName={booking.target.name}
+                      refCode={refCode}
+                      currentStartDate={booking.startDate}
+                      currentEndDate={booking.endDate}
+                      currentBudget={booking.budget}
+                    />
+                  </div>
                 )}
 
                 {booking.status === "ACCEPTED" && (

@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import {
   BookingStatusManager,
+  BookingRequesterActions,
   ConvertBookingButton,
   BookingContactActions,
   ViewSpkButton,
@@ -296,8 +297,10 @@ export function BookingsClientView({
             >
               <option value="ALL">Semua Status</option>
               <option value="PENDING">Menunggu Respons</option>
+              <option value="NEGOTIATING">Reschedule Diajukan</option>
               <option value="ACCEPTED">Disetujui (Aktif)</option>
               <option value="WORKSPACE">Workspace Aktif</option>
+              <option value="CANCELLED">Dibatalkan</option>
               <option value="DECLINED">Ditolak</option>
             </select>
           </div>
@@ -460,8 +463,26 @@ export function BookingsClientView({
 
                   {/* Contextual Action */}
                   <div className="flex items-center gap-2 shrink-0">
-                    {booking.status === "PENDING" && isIncoming && (
-                      <BookingStatusManager bookingId={booking.id} />
+                    {(booking.status === "PENDING" || booking.status === "NEGOTIATING") && isIncoming && (
+                      <BookingStatusManager
+                        bookingId={booking.id}
+                        partnerName={partner.name}
+                        refCode={refCode}
+                        currentStartDate={booking.startDate}
+                        currentEndDate={booking.endDate}
+                        currentBudget={booking.budget}
+                      />
+                    )}
+
+                    {(booking.status === "PENDING" || booking.status === "NEGOTIATING") && !isIncoming && (
+                      <BookingRequesterActions
+                        bookingId={booking.id}
+                        partnerName={partner.name}
+                        refCode={refCode}
+                        currentStartDate={booking.startDate}
+                        currentEndDate={booking.endDate}
+                        currentBudget={booking.budget}
+                      />
                     )}
 
                     {booking.status === "ACCEPTED" && (
@@ -575,6 +596,22 @@ function StatusBadge({
       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-200/60">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
         <span>Disetujui</span>
+      </span>
+    );
+  }
+  if (status === "NEGOTIATING") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-semibold border border-blue-200/60">
+        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+        <span>Reschedule Diajukan</span>
+      </span>
+    );
+  }
+  if (status === "CANCELLED") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-600 text-[10px] font-semibold border border-stone-200/70">
+        <span className="w-1.5 h-1.5 rounded-full bg-stone-400" />
+        <span>Dibatalkan</span>
       </span>
     );
   }

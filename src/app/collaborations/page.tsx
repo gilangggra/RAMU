@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-  title: "Ruang Proyek & Kolaborasi Aktif | RAMU",
+  title: "Workspace & Kolaborasi Aktif | RAMU",
   description:
     "Ruang kerja kolaboratif terintegrasi untuk mengelola pembagian peran, negosiasi SPK multi-pihak, milestone kerja, dan penugasan operasional proyek kreatif.",
 };
@@ -196,7 +196,7 @@ export default async function CollaborationsPage({ searchParams }: Collaboration
                 <span>Ruang Kerja &amp; Eksekusi Kolaborasi</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-stone-900">
-                Ruang Proyek &amp; Kolaborasi Aktif
+                Workspace &amp; Kolaborasi Aktif
               </h1>
               <p className="text-xs sm:text-sm text-stone-500 leading-relaxed font-normal">
                 Kelola pembagian peran kerja, pantau progres milestone &amp; tugas operasional harian, serta akses kesepakatan SPK multi-pihak resmi bersama mitra kolaborator Anda.
@@ -210,14 +210,14 @@ export default async function CollaborationsPage({ searchParams }: Collaboration
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-stone-700 bg-white hover:bg-stone-50 border border-stone-200 rounded-lg shadow-2xs transition-colors"
               >
                 <Briefcase className="w-3.5 h-3.5 text-stone-500" />
-                <span>Papan Proyek</span>
+                <span>Eksplorasi Proyek</span>
               </Link>
               <Link
                 href="/collaborate"
                 className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-stone-900 hover:bg-black border border-stone-900 rounded-lg shadow-2xs transition-colors"
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>Kompatibilitas 4 Pilar</span>
+                <span>Rekomendasi Mitra</span>
               </Link>
             </div>
           </div>

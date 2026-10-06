@@ -24,9 +24,9 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-  title: "Temukan Kolaborasi Kompatibel (Resource Matching) | RAMU",
+  title: "Rekomendasi Mitra Kolaborasi | RAMU",
   description:
-    "Pencocokan resource deterministik antara kebutuhan proyek dan aset kreatif terverifikasi tanpa halusinasi AI.",
+    "Temukan rekan kolaborasi kreatif yang selaras dengan kapasitas dan kebutuhan proyek Anda.",
 };
 
 export default async function CollaboratePage() {
@@ -92,13 +92,13 @@ export default async function CollaboratePage() {
             <div className="space-y-3 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-amber-300 border border-white/15 text-xs font-bold">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>Deterministic Resource Compatibility Engine</span>
+                <span>Rekomendasi Kecocokan Cerdas</span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-                Pencocokan Kolaborasi Berbasis Resource
+                Rekomendasi Mitra Kolaborasi
               </h1>
               <p className="text-xs sm:text-sm text-stone-300 leading-relaxed font-light">
-                RAMU memadukan apa yang Anda butuhkan dengan apa yang dimiliki oleh pelaku kreatif lain di ekosistem 6 peran tertutup. Seluruh kecocokan dihitung deterministik berdasarkan 4 pilar tanpa halusinasi AI.
+                Temukan mitra kreatif yang paling sesuai dengan kebutuhan proyek, jadwal kerja, dan kapasitas peralatan Anda.
               </p>
             </div>
 
@@ -175,12 +175,24 @@ export default async function CollaboratePage() {
                   <span>Model Kompensasi:</span>
                   <span className="font-bold text-stone-800">{activeBrief?.compensationModel || "PAID / REVENUE SHARE"}</span>
                 </div>
-                {activeBrief?.budget && (
-                  <div className="flex items-center justify-between">
-                    <span>Estimasi Anggaran:</span>
-                    <span className="font-bold text-emerald-700">Rp {activeBrief.budget.toLocaleString("id-ID")}</span>
-                  </div>
-                )}
+                {(() => {
+                  const raw = (activeBrief?.budget as { estimatedTotal?: string | number } | null)?.estimatedTotal;
+                  if (raw === undefined || raw === null || String(raw).trim() === "") return null;
+                  const label =
+                    typeof raw === "number"
+                      ? `Rp ${raw.toLocaleString("id-ID")}`
+                      : /^\s*rp/i.test(raw)
+                        ? raw
+                        : /^\d+$/.test(raw.trim())
+                          ? `Rp ${Number(raw).toLocaleString("id-ID")}`
+                          : raw;
+                  return (
+                    <div className="flex items-center justify-between gap-3">
+                      <span>Estimasi Anggaran:</span>
+                      <span className="font-bold text-emerald-700 text-right">{label}</span>
+                    </div>
+                  );
+                })()}
               </div>
 
               <Link
@@ -192,14 +204,14 @@ export default async function CollaboratePage() {
               </Link>
             </div>
 
-            {/* RESOURCE IDLE NOTICE */}
+            {/* COLLABORATIVE VALUE NOTICE */}
             <div className="p-5 rounded-2xl bg-amber-50/80 border border-amber-200 text-amber-950 space-y-2">
               <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-amber-900">
                 <Lightbulb className="w-4 h-4 text-amber-700" />
-                <span>Prinsip Collaborative Economy</span>
+                <span>Prinsip Kolaborasi Ekosistem</span>
               </div>
               <p className="text-[11px] text-amber-900 leading-relaxed font-light">
-                RAMU tidak menuntut Anda memiliki seluruh inventaris. Anda cukup menggabungkan aset yang Anda miliki dengan kapasitas menganggur (idle resources) milik mitra di samping.
+                RAMU memudahkan Anda berkolaborasi tanpa harus memiliki semua peralatan dan studio sendiri. Padukan keahlian dan fasilitas Anda dengan mitra kreatif yang saling melengkapi.
               </p>
             </div>
           </div>
@@ -209,14 +221,14 @@ export default async function CollaboratePage() {
             <div className="flex items-center justify-between px-1">
               <div>
                 <h2 className="text-lg font-black text-[#1E1B2E] tracking-tight">
-                  Resource Mitra yang Kompatibel ({opportunities.length})
+                  Rekomendasi Mitra yang Kompatibel ({opportunities.length})
                 </h2>
                 <p className="text-xs text-stone-500">
-                  Dihitung dari 4 pilar: Resource Fit (40%), Need Coverage (25%), Feasibility (20%), Readiness (15%).
+                  Dianalisis berdasarkan keselarasan peralatan, kebutuhan peran, jadwal, dan preferensi kerja.
                 </p>
               </div>
               <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                100% Deterministik
+                Kecocokan Terverifikasi
               </span>
             </div>
 
@@ -226,9 +238,9 @@ export default async function CollaboratePage() {
                   <Sparkles className="w-6 h-6" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold text-stone-900">Belum Ada Kecocokan Dihitung</h3>
+                  <h3 className="text-base font-bold text-stone-900">Belum Ada Rekomendasi Terdaftar</h3>
                   <p className="text-xs text-stone-500 max-w-sm mx-auto">
-                    Klik tombol &ldquo;Hitung Kompatibilitas Resource&rdquo; di atas untuk mencocokkan profil dan resource Anda dengan ekosistem.
+                    Klik tombol &ldquo;Segarkan Rekomendasi Mitra&rdquo; di atas untuk menemukan mitra yang paling sesuai dengan kebutuhan Anda.
                   </p>
                 </div>
               </div>
@@ -320,7 +332,7 @@ export default async function CollaboratePage() {
                       <div className="space-y-1.5 pt-1">
                         <div className="text-[11px] font-bold text-stone-700 flex items-center gap-1">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>Mengapa Cocok? (Why This Match?)</span>
+                          <span>Alasan Keselarasan Kolaborasi:</span>
                         </div>
                         <ul className="space-y-1 text-xs text-stone-600 pl-1">
                           {whyList.slice(0, 3).map((item, i) => (
@@ -335,19 +347,19 @@ export default async function CollaboratePage() {
                       {/* 4 PILLARS MINI BREAKDOWN & ACTION */}
                       <div className="pt-3 border-t border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex flex-wrap gap-2 text-[10px] text-stone-600 font-medium">
-                          <span className="bg-stone-100 px-2 py-0.5 rounded font-mono">Fit: {fit}/40</span>
-                          <span className="bg-stone-100 px-2 py-0.5 rounded font-mono">Coverage: {coverage}/25</span>
-                          <span className="bg-stone-100 px-2 py-0.5 rounded font-mono">Feasibility: {feasibility}/20</span>
-                          <span className="bg-stone-100 px-2 py-0.5 rounded font-mono">Readiness: {readiness}/15</span>
+                          <span className="bg-stone-100 px-2 py-0.5 rounded">Aset: {fit}/40</span>
+                          <span className="bg-stone-100 px-2 py-0.5 rounded">Peran: {coverage}/25</span>
+                          <span className="bg-stone-100 px-2 py-0.5 rounded">Jadwal: {feasibility}/20</span>
+                          <span className="bg-stone-100 px-2 py-0.5 rounded">Kesiapan: {readiness}/15</span>
                         </div>
 
                         <div className="flex items-center gap-2">
                           <Link
                             href={`/opportunities/${opp.id}`}
                             className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white hover:bg-stone-50 text-stone-700 hover:text-stone-900 text-xs font-semibold border border-stone-200 shadow-2xs transition-colors"
-                            title="Audit 4 pilar, checklist batasan & roadmap proyek"
+                            title="Lihat detail keselarasan peran & rencana proyek"
                           >
-                            <span>Audit &amp; Detail</span>
+                            <span>Detail Peluang</span>
                             <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
                           </Link>
 

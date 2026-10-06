@@ -25,7 +25,7 @@ export function FinalCTA() {
           </h2>
 
           <p className="text-base sm:text-lg text-stone-400 font-light leading-relaxed max-w-2xl mx-auto">
-            Daftarkan resource Anda hari ini dan temukan mitra komplementer yang siap mengaktivasi kapasitas menganggur menjadi karya kolaborasi bernilai ekonomi nyata.
+            Daftarkan keahlian &amp; studio Anda hari ini dan temukan mitra kolaborasi komplementer untuk menciptakan karya bernilai komersial nyata.
           </p>
 
           <div className="pt-6 flex flex-wrap items-center justify-center gap-5">

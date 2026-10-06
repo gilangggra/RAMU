@@ -24,6 +24,15 @@ interface PortfolioGalleryItem {
 export interface DesignerAttributes {
   primary_software?: string[];
   design_disciplines?: string[];
+  specialties?: string[];
+  capabilities?: string[];
+  sample_collection_ready?: boolean;
+  materials_swatches?: string[];
+  sewing_equipment?: string[];
+  sample_portfolio_count?: number;
+  sample_turnaround_days?: string;
+  batch_production_capacity?: string;
+  collab_types?: string[];
   deliverables?: string[];
   style_dna?: string;
   rate_starting_at?: string;
@@ -157,6 +166,58 @@ export function DesignerSpecsCard({ attributes, actorName, isCurrentActor, actor
             </p>
           </div>
         )}
+
+        {/* ATELIER & PRODUCTION CAPACITY STRIP */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-stone-100 text-xs">
+          <div className="p-4 rounded-xl bg-pink-50/50 border border-pink-200/60 space-y-2">
+            <span className="text-[10px] font-bold text-pink-800 uppercase tracking-wider block">
+              Koleksi Sampel &amp; Pulling
+            </span>
+            <div className="space-y-1 text-[11px] text-stone-700">
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500">Peminjaman Sampel:</span>
+                <span className="font-bold text-emerald-700">
+                  {attributes.sample_collection_ready ? "✓ Siap Dipinjamkan" : "Atas Permintaan"}
+                </span>
+              </div>
+              {attributes.sample_portfolio_count && (
+                <div className="flex items-center justify-between">
+                  <span className="text-stone-500">Arsip Koleksi:</span>
+                  <span className="font-bold">{attributes.sample_portfolio_count} Look Busana</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl bg-stone-50/80 border border-stone-200/70 space-y-2">
+            <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">
+              Material &amp; Swatch Unggulan
+            </span>
+            <div className="flex flex-wrap gap-1">
+              {(attributes.materials_swatches || ["Kain Tenun Lurik & Sutra", "Linen Premium"]).map((mat) => (
+                <span key={mat} className="px-2 py-0.5 rounded-md bg-white border border-stone-200 text-stone-700 text-[11px] font-semibold">
+                  {mat}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl bg-stone-50/80 border border-stone-200/70 space-y-2">
+            <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">
+              Turnaround &amp; Kapasitas Batch
+            </span>
+            <div className="space-y-1 text-[11px] text-stone-700">
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500">Sampel Prototipe:</span>
+                <span className="font-bold">{attributes.sample_turnaround_days || "7 – 14 Hari"}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500">Kapasitas Batch:</span>
+                <span className="font-bold">{attributes.batch_production_capacity || "100 – 300 Pcs"}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {portfolioGallery.length > 0 && (

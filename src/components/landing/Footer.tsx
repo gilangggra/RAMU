@@ -25,9 +25,9 @@ export function Footer() {
             </p>
 
             <p className="text-xs text-[#716B7E] leading-relaxed max-w-sm">
-              Platform kolaborasi berbasis komplementaritas resource industri fashion dan visual kreatif.
-              Mengaktivasi kapasitas menganggur dan meramu sinergi komplementer antar brand, desainer, fotografer, model, MUA, dan studio
-              melalui analisis deterministik 4 pilar.
+              Platform kolaborasi terpadu industri fashion dan visual kreatif.
+              Memadukan keahlian, peralatan, dan ruang studio antar brand, desainer, fotografer, model, MUA, dan pemilik studio
+              secara aman dan transparan.
             </p>
           </div>
 
@@ -43,7 +43,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/collaborate" className="hover:text-[#27213D] transition-colors font-semibold text-amber-700">
-                  Hub Kompatibilitas Resource
+                  Rekomendasi Mitra Kolaborasi
                 </Link>
               </li>
               <li>
@@ -58,7 +58,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/projects" className="hover:text-[#27213D] transition-colors">
-                  Papan Proyek (Briefs)
+                  Eksplorasi Proyek
                 </Link>
               </li>
               <li>

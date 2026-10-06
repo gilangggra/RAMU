@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { expressInterestAction, withdrawInterestAction } from "@/app/projects/actions";
 import { Clock, Send, Check, Circle, Sparkles, Undo2, Loader2 } from "lucide-react";
 import { InvitationResponseButtons } from "@/components/projects/InvitationResponseButtons";
+import { toast } from "@/components/ui/Toast";
 
 const CATEGORY_LABELS: Record<string, string> = {
   PORTFOLIO_WORK: "Karya / Portofolio",
@@ -83,8 +84,9 @@ export function RoleSlot({
         setLocalStatus(null);
         setActiveInterestId(null);
         setIsOpen(false);
+        toast.success("Lamaran berhasil ditarik.");
       } else {
-        alert(res.error || "Gagal menarik lamaran.");
+        toast.error(res.error || "Gagal menarik lamaran.");
       }
     });
   }

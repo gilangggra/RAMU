@@ -134,20 +134,20 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
       title: "Kolaborasi Utama",
       items: [
         { href: "/dashboard", label: "Dashboard", icon: <LayoutGrid className="w-4 h-4" /> },
-        { href: "/collaborate", label: "Kompatibilitas", icon: <Sparkles className="w-4 h-4" />, badge: "4 Pilar" },
-        { href: "/projects", label: "Papan Proyek (Briefs)", icon: <Megaphone className="w-4 h-4" /> },
-        { href: "/collaborations", label: "Ruang Proyek", icon: <Handshake className="w-4 h-4" /> },
-        { href: "/readiness", label: "Resource & Kapasitas Idle", icon: <Target className="w-4 h-4" /> },
+        { href: "/collaborate", label: "Rekomendasi Mitra", icon: <Sparkles className="w-4 h-4" /> },
+        { href: "/projects", label: "Eksplorasi Proyek", icon: <Megaphone className="w-4 h-4" /> },
+        { href: "/collaborations", label: "Workspace Aktif", icon: <Handshake className="w-4 h-4" /> },
+        { href: "/readiness", label: "Inventaris & Kesiapan", icon: <Target className="w-4 h-4" /> },
         { href: "/messages", label: "Pesan & Diskusi", icon: <MessageSquare className="w-4 h-4" /> },
       ],
     },
     {
-      title: "Ekosistem & Pendukung",
+      title: "Ekosistem & Profil",
       items: [
         { href: "/directory", label: "Direktori Talenta", icon: <Users className="w-4 h-4" /> },
         { href: "/showcase", label: "Karya & Portofolio", icon: <Compass className="w-4 h-4" /> },
         { href: "/dashboard/bookings", label: "Pesanan Masuk", icon: <Inbox className="w-4 h-4" /> },
-        { href: `/directory/${actor.id}`, label: "Profil Saya", icon: <User className="w-4 h-4" /> },
+        { href: `/directory/${actor.id}`, label: "Profil Publik Saya", icon: <User className="w-4 h-4" /> },
       ],
     },
     ...(isAdmin
@@ -544,7 +544,15 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
               {navSections.map(renderNavSection)}
             </div>
 
-            <div className="pt-3 border-t border-stone-200">
+            <div className="pt-3 border-t border-stone-200 space-y-2">
+              <Link
+                href="/settings"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-2 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold border border-stone-200/80 flex items-center justify-center gap-2 transition-colors"
+              >
+                <Settings className="w-3.5 h-3.5 text-stone-600" />
+                <span>Pengaturan Akun &amp; Rekening</span>
+              </Link>
               <form action={logout}>
                 <button
                   type="submit"

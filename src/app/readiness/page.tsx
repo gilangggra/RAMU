@@ -186,7 +186,7 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
                 Kelola Modal, Target &amp; Ketentuan Kolaborasi
               </h1>
               <p className="text-xs sm:text-sm text-stone-500 max-w-2xl leading-relaxed">
-                Empat pilar data ini digunakan oleh Resource Matching Engine untuk merekomendasikan rekan kolaborator yang memiliki aset komplementer, visi yang selaras, dan jadwal operasional yang realistis bagi <strong className="text-[#1E1B2E]">{actor.name}</strong>.
+                Data kesiapan ini membantu RAMU merekomendasikan rekan kolaborator yang memiliki peralatan komplementer, visi karya yang selaras, dan jadwal kerja yang cocok bagi <strong className="text-[#1E1B2E]">{actor.name}</strong>.
               </p>
             </div>
 
@@ -793,7 +793,7 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
                               href={`/projects/new?title=${encodeURIComponent(need.title)}`}
                               className="inline-flex items-center gap-1 font-bold text-[#E66A48] hover:underline"
                             >
-                              <span>Buka Open Brief di Papan Proyek</span>
+                              <span>Buka Open Brief di Eksplorasi Proyek</span>
                               <ArrowRight className="w-3 h-3" />
                             </Link>
                           </div>

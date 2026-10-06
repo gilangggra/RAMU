@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formCollaborationAction } from "@/app/projects/actions";
 import { Handshake, Rocket, ArrowRight } from "lucide-react";
+import { toast } from "@/components/ui/Toast";
 
 interface FormCollaborationButtonProps {
   briefId: string;
@@ -47,12 +48,13 @@ export function FormCollaborationButton({
     try {
       const res = await formCollaborationAction(briefId);
       if (res.success && res.collaborationId) {
+        toast.success("Ruang kolaborasi berhasil dibentuk!");
         router.push(`/collaborations/${res.collaborationId}`);
       } else {
-        alert(res.error || "Gagal membentuk kolaborasi.");
+        toast.error(res.error || "Gagal membentuk kolaborasi.");
       }
     } catch {
-      alert("Terjadi kesalahan teknis.");
+      toast.error("Terjadi kesalahan teknis.");
     } finally {
       setLoading(false);
     }

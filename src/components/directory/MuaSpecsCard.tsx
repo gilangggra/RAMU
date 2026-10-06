@@ -17,7 +17,12 @@ export interface MuaAttributes {
   primary_kit_brands?: string[];
   makeup_styles?: string[];
   hair_specialties?: string[];
+  services?: string[];
+  hair_tools?: string[];
+  onset_equipment?: string[];
   sanitation_standards?: string[];
+  max_heads_per_session?: number;
+  prep_time_minutes?: number;
   touchup_standby_hours?: number;
   experience_years?: number;
   skin_types_handled?: string[];
@@ -232,6 +237,44 @@ export function MuaSpecsCard({ attributes, actorName, isCurrentActor, actorAsset
                 <span className="leading-snug">{std}</span>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* ON-SET GEAR & CAPACITY LIMITS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-stone-100 text-xs">
+          {(attributes.onset_equipment && attributes.onset_equipment.length > 0) && (
+            <div className="p-3.5 rounded-xl bg-rose-50/50 border border-rose-200/60 space-y-2">
+              <span className="text-[10px] font-bold text-rose-900 uppercase tracking-wider block">
+                Peralatan On-Set &amp; Wardrobe Tools:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {attributes.onset_equipment.map((eq) => (
+                  <span key={eq} className="px-2.5 py-0.5 rounded-md bg-white border border-rose-200 text-rose-800 text-[11px] font-semibold">
+                    ✓ {eq}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="p-3.5 rounded-xl bg-stone-50/80 border border-stone-200/70 space-y-2">
+            <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">
+              Batas Kapasitas Operasional Shift:
+            </span>
+            <div className="space-y-1 text-[11px] text-stone-700">
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500">Maks Talent per Shift:</span>
+                <span className="font-bold">{attributes.max_heads_per_session || 3} Orang Model</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500">Waktu Rias per Look:</span>
+                <span className="font-bold">{attributes.prep_time_minutes || 90} Menit</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500">Standby Touch-Up:</span>
+                <span className="font-bold text-emerald-700">Hingga {attributes.touchup_standby_hours || 8} Jam Sesi</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>

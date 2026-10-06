@@ -6,6 +6,7 @@ import Link from "next/link";
 import { X, Calendar, Loader2, CheckCircle2, ArrowRight, ShieldCheck, Clock, Sparkles, Building2 } from "lucide-react";
 import { createBookingRequest } from "@/app/api/bookings/actions";
 import {
+  ServicePackage,
   TermsAndConditionsConfig,
   getDefaultTerms,
   UsageRightsScope,
@@ -24,6 +25,7 @@ interface BookingModalProps {
   targetSector: string;
   targetType: string;
   termsConfig?: TermsAndConditionsConfig | null;
+  selectedPackage?: ServicePackage | null;
 }
 
 export function BookingModal({
@@ -34,6 +36,7 @@ export function BookingModal({
   targetSector,
   targetType,
   termsConfig,
+  selectedPackage,
 }: BookingModalProps) {
   const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -94,13 +97,25 @@ export function BookingModal({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      if (selectedPackage) {
+        if (selectedPackage.price) {
+          setBudget(selectedPackage.price);
+        }
+        setDetails((prev) => ({
+          ...prev,
+          selectedPackageTitle: selectedPackage.title,
+          selectedPackageTier: selectedPackage.tier || "CAMPAIGN",
+          selectedPackageUnit: selectedPackage.unit,
+          selectedPackageScope: selectedPackage.deliverablesSummary || selectedPackage.subtitle,
+        }));
+      }
     } else {
       document.body.style.overflow = "unset";
     }
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [isOpen]);
+  }, [isOpen, selectedPackage]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -487,10 +502,15 @@ export function BookingModal({
                 <h2 className="text-base sm:text-lg font-black text-white tracking-tight truncate">
                   {isBrand
                     ? `Ajukan Pitch Kolaborasi ke ${targetName}`
-                    : targetType === "STUDIO"
-                    ? `Sewa Ruang Studio — ${targetName}`
-                    : `Sewa Jasa Profesional — ${targetName}`}
+                    : selectedPackage
+                    ? `Alokasi Resource: ${selectedPackage.title}`
+                    : `Inisiasi Kolaborasi & Resource — ${targetName}`}
                 </h2>
+                {selectedPackage?.tier && (
+                  <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-amber-400 text-stone-950 rounded shrink-0">
+                    {selectedPackage.tier} SCOPE
+                  </span>
+                )}
                 <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-white/10 text-stone-200 border border-white/10 shrink-0">
                   {targetSector}
                 </span>
@@ -501,7 +521,9 @@ export function BookingModal({
               <p className="text-xs text-stone-300 mt-0.5 truncate">
                 {isBrand
                   ? `Pengajuan proposal kemitraan & sinergi kreatif resmi untuk ${targetName}`
-                  : `Penugasan komersial langsung & penerbitan SPK otomatis melalui ekosistem RAMU`}
+                  : selectedPackage
+                  ? `Sertakan kapasitas terstandarisasi milik ${targetName} ke dalam proyek kolaboratif`
+                  : `Padukan resource komplementer dan penerbitan SPK multi-pihak melalui ekosistem RAMU`}
               </p>
             </div>
           </div>
@@ -520,14 +542,51 @@ export function BookingModal({
             </div>
             <div>
               <h3 className="text-xl font-bold text-stone-900 mb-2">
-                {isBrand ? "Proposal Kolaborasi Terkirim!" : "Permintaan Terkirim!"}
+                {isBrand ? "Proposal Kolaborasi Terkirim!" : "Permintaan Alokasi Resource Terkirim!"}
               </h3>
               <p className="text-sm text-stone-500 max-w-sm mx-auto leading-relaxed">
                 {isBrand
                   ? `Tim ${targetName} akan meninjau proposal Anda. Anda dapat memantau status responnya di Dashboard.`
-                  : `${targetName} akan menerima notifikasi booking Anda. Anda dapat memantau statusnya di Dashboard.`}
+                  : `${targetName} akan menerima notifikasi alokasi resource Anda. Anda dapat memantau statusnya di Dashboard.`}
               </p>
             </div>
+
+            {/* 3-Step Workflow Guidance */}
+            <div className="w-full max-w-md bg-stone-50 rounded-2xl border border-stone-200/90 p-4 text-left space-y-3 mt-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+                Apa Langkah Selanjutnya? (Alur Terpadu RAMU)
+              </span>
+              <div className="space-y-2.5 text-xs">
+                <div className="flex items-start gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-emerald-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                    1
+                  </div>
+                  <div>
+                    <span className="font-bold text-stone-900 block">Konfirmasi Ketersediaan Jadwal</span>
+                    <p className="text-[11px] text-stone-500">Kreator merespon brief Anda dalam waktu maksimal 24 jam.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-stone-200 text-stone-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                    2
+                  </div>
+                  <div>
+                    <span className="font-bold text-stone-900 block">Penyelarasan SPK Bersama</span>
+                    <p className="text-[11px] text-stone-500">Detail brief teknis, call-time, dan lisensi difinalisasi di Workspace Proyek.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-stone-200 text-stone-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                    3
+                  </div>
+                  <div>
+                    <span className="font-bold text-stone-900 block">Produksi &amp; Escrow Aman</span>
+                    <p className="text-[11px] text-stone-500">Dana diamankan di akun bersama dan dicairkan bertahap sesuai milestone terverifikasi.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
               <Link
                 href="/dashboard/bookings"
@@ -553,7 +612,7 @@ export function BookingModal({
               <div className="p-5 bg-white border border-stone-200 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
-                    {isBrand ? "Entitas Sasaran" : "Talenta / Vendor"}
+                    {isBrand ? "Entitas Sasaran" : "Mitra Resource Kolaborasi"}
                   </span>
                   <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Terverifikasi
@@ -577,6 +636,69 @@ export function BookingModal({
                   </div>
                 )}
               </div>
+
+              {/* JIKA MEMILIH PAKET: KARTU SCOPE TERSTRUKTUR */}
+              {selectedPackage && (
+                <div className="p-5 bg-white border border-stone-900 ring-1 ring-stone-900/10 shadow-xs space-y-3.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-amber-500" />
+                      <span className="text-xs font-bold uppercase tracking-wider text-stone-900">
+                        Baseline Scope Terpilih
+                      </span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-stone-100 text-stone-800">
+                      {selectedPackage.tier || "Paket Acuan"}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-bold text-stone-900">{selectedPackage.title}</h4>
+                    <p className="text-xs text-stone-500 mt-0.5 leading-snug">{selectedPackage.subtitle}</p>
+                  </div>
+
+                  <div className="p-3 bg-stone-50 rounded-xl border border-stone-200/70 space-y-1">
+                    <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+                      Listed Anchor Rate
+                    </div>
+                    <div className="text-lg font-black text-emerald-800">
+                      {selectedPackage.price} <span className="text-xs font-normal text-stone-500">/ {selectedPackage.unit}</span>
+                    </div>
+                  </div>
+
+                  {/* 4 Pilar Scope Rinci */}
+                  <div className="space-y-2 text-xs pt-1 border-t border-stone-100">
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">⏱️ 1. Kapasitas Waktu:</span>
+                      <span className="font-semibold text-stone-800 block pl-3">
+                        {selectedPackage.capacityDuration || `${effectiveTerms.shiftHours} Jam Kerja Sesi`}
+                      </span>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">📦 2. Deliverables Utama:</span>
+                      <span className="font-semibold text-stone-800 block pl-3">
+                        {selectedPackage.deliverablesSummary || selectedPackage.features?.[0] || "Sesuai rincian paket terdaftar"}
+                      </span>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">⚖️ 3. Hak Siar / Lisensi IP:</span>
+                      <span className="font-semibold text-stone-800 block pl-3">
+                        {selectedPackage.usageRights || getUsageScopeLabel(selectedUsageScope)}
+                      </span>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">🛠️ 4. Alat &amp; Fasilitas:</span>
+                      <span className="font-semibold text-stone-800 block pl-3">
+                        {selectedPackage.equipmentIncluded || "Peralatan standar siap pakai on-set"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-amber-50/80 rounded-xl border border-amber-200 text-[11px] text-amber-900 leading-snug">
+                    <strong>Catatan Kolaborasi:</strong> Scope di atas adalah patokan awal (anchor). Anda dapat menyesuaikan penambahan foto, shift, atau lisensi pada kolom brief di sebelah kanan.
+                  </div>
+                </div>
+              )}
 
               {/* Jaminan Proteksi RAMU */}
               <div className="p-5 bg-white border border-stone-200 space-y-3">
@@ -815,6 +937,14 @@ export function BookingModal({
                   )}
 
                 </form>
+
+                {/* Reassurance Banner */}
+                <div className="mt-4 p-3 bg-stone-50 rounded-xl border border-stone-200/80 text-[11px] text-stone-600 flex items-center gap-2.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>
+                    <strong className="text-stone-900">Bebas Komitmen Awal:</strong> Pengajuan ini tidak memotong biaya apa pun. SPK resmi dan termin pembayaran baru disepakati bersama di Workspace Proyek.
+                  </span>
+                </div>
               </div>
 
               {/* FOOTER ACTIONS */}
@@ -840,8 +970,10 @@ export function BookingModal({
                     </>
                   ) : isBrand ? (
                     "Kirim Proposal Kolaborasi"
+                  ) : selectedPackage ? (
+                    "Sertakan Resource ke Kolaborasi"
                   ) : (
-                    "Kirim Permintaan"
+                    "Ajukan Alokasi Resource"
                   )}
                 </button>
               </div>

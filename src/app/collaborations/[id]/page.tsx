@@ -61,14 +61,14 @@ export default async function CollaborationDetailPage({
 
   return (
     <AppShell actor={actor} activeRoute="/collaborations">
-      <div className="space-y-6 max-w-6xl mx-auto">
+      <div className="space-y-6 max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <Link
             href="/collaborations"
             className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-500 hover:text-stone-900 transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Kembali ke Ruang Proyek</span>
+            <span>Kembali ke Workspace Aktif</span>
           </Link>
 
           <div className="flex items-center gap-2.5">
