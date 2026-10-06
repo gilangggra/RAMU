@@ -74,12 +74,14 @@ export async function respondToBookingRequest(
 
 export async function updateBookingRequest(
   id: string, 
-  requesterId: string, 
+  actorId: string, 
   input: UpdateBookingRequestInput
 ) {
   const booking = await prisma.bookingRequest.findUnique({ where: { id } });
   if (!booking) throw new Error("Booking request not found");
-  if (booking.requesterId !== requesterId) throw new Error("Unauthorized to update this booking");
+  if (booking.requesterId !== actorId && booking.targetId !== actorId) {
+    throw new Error("Unauthorized to update this booking");
+  }
 
   return prisma.bookingRequest.update({
     where: { id },
@@ -87,15 +89,35 @@ export async function updateBookingRequest(
       startDate: input.startDate,
       endDate: input.endDate,
       budget: input.budget,
+      status: "PENDING",
       details: input.details ? (input.details as unknown as Prisma.InputJsonValue) : undefined,
     }
   });
 }
 
-export async function cancelBookingRequest(id: string, requesterId: string) {
+export async function cancelBookingRequest(id: string, actorId: string, reason?: string) {
   const booking = await prisma.bookingRequest.findUnique({ where: { id } });
   if (!booking) throw new Error("Booking request not found");
-  if (booking.requesterId !== requesterId) throw new Error("Unauthorized to cancel this booking");
+  if (booking.requesterId !== actorId && booking.targetId !== actorId) {
+    throw new Error("Unauthorized to cancel this booking");
+  }
 
-  return prisma.bookingRequest.delete({ where: { id } });
+  const existingDetails = (typeof booking.details === "object" && booking.details !== null)
+    ? (booking.details as Record<string, any>)
+    : {};
+
+  return prisma.bookingRequest.update({
+    where: { id },
+    data: {
+      status: "CANCELLED",
+      details: {
+        ...existingDetails,
+        cancellation: {
+          cancelledByActorId: actorId,
+          cancelledAt: new Date().toISOString(),
+          reason: reason || "Dibatalkan.",
+        },
+      } as unknown as Prisma.InputJsonValue,
+    },
+  });
 }

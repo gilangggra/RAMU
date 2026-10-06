@@ -181,13 +181,13 @@ export default async function ProjectsPage({
   const tabs = [
     {
       key: "browse",
-      label: "Papan Proyek (Job Board)",
+      label: "Semua Brief Proyek",
       count: openBriefsCount,
       isAi: false,
     },
     {
       key: "ai-opportunities",
-      label: "Kompatibilitas Resource (Matches)",
+      label: "Peluang Kompatibel",
       count: aiOpportunitiesCount || opportunitiesData.length,
       isAi: false,
     },
@@ -199,7 +199,7 @@ export default async function ProjectsPage({
     },
     {
       key: "interests",
-      label: "Lamaran & Minat Saya",
+      label: "Pengajuan & Minat Saya",
       count: myInterestsCount,
       isAi: false,
     },
@@ -208,16 +208,16 @@ export default async function ProjectsPage({
   return (
     <AppShell actor={actor} activeRoute="/projects">
       <div className="space-y-6 w-full max-w-7xl mx-auto">
-        {/* 1. ATTIO HEADER BANNER */}
+        {/* 1. HEADER BANNER */}
         <section className="pb-6 border-b border-stone-200/80">
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 pb-6">
             <div className="space-y-2 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-stone-100 border border-stone-200/70 text-[11px] font-semibold text-stone-600">
                 <Briefcase className="w-3.5 h-3.5 text-stone-500" />
-                <span>Pusat Karir &amp; Lowongan Proyek Kreatif</span>
+                <span>Pusat Peluang &amp; Brief Proyek Kreatif</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-stone-900">
-                Papan Proyek &amp; Lowongan Kru
+                Eksplorasi Proyek &amp; Lowongan Kru
               </h1>
               <p className="text-xs sm:text-sm text-stone-500 leading-relaxed font-normal">
                 Eksplorasi brief produksi komersial, temukan lowongan peran kreatif yang sesuai keahlian Anda, atau inisiasi proyek baru untuk merekrut kru talenta terbaik.

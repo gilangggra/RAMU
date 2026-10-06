@@ -13,6 +13,7 @@ import {
 import { deleteShowcaseAsset } from "@/app/api/assets/actions";
 import { useRouter } from "next/navigation";
 import { ShowcaseUploadModal, RegisteredActor } from "@/components/showcase/ShowcaseUploadModal";
+import { toast } from "@/components/ui/Toast";
 
 interface Asset {
   id: string;
@@ -76,9 +77,10 @@ export function ShowcaseManager({
     startTransition(async () => {
       const res = await deleteShowcaseAsset(id);
       if (res.success) {
+        toast.success("Karya berhasil dihapus dari portofolio.");
         router.refresh();
       } else {
-        alert(res.error || "Gagal menghapus karya");
+        toast.error(res.error || "Gagal menghapus karya.");
       }
     });
   }

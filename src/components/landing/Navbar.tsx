@@ -98,7 +98,7 @@ export function Navbar() {
             href="/projects"
             className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
           >
-            Papan Proyek
+            Eksplorasi Proyek
           </Link>
         </nav>
 
@@ -197,7 +197,7 @@ export function Navbar() {
               onClick={() => setMobileOpen(false)}
               className="hover:text-[#27213D] py-1.5"
             >
-              Papan Proyek
+              Eksplorasi Proyek
             </Link>
           </nav>
           <div className="pt-4 border-t border-stone-100 flex flex-col gap-3">

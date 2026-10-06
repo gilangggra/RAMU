@@ -20,9 +20,10 @@ import {
   RoleCategory,
   detectRoleCategory,
   ServicePackage,
+  PackageTier,
 } from "@/lib/constants/rolePresets";
 
-export type { ServicePackage };
+export type { ServicePackage, PackageTier };
 
 export type UsageRightsScope = "ORGANIC_SOCIAL" | "PAID_ADS_DIGITAL" | "COMMERCIAL_OOH" | "FULL_BUYOUT";
 export type UsageRightsDuration = "6_MONTHS" | "1_YEAR" | "2_YEARS" | "PERPETUAL";
@@ -203,15 +204,21 @@ export function RatesForm({
   }
 
   function handleAddNewPackage() {
-    if (packages.length >= 4) return;
+    if (packages.length >= 3) return;
+    const tier = packages.length === 0 ? "STARTER" : packages.length === 1 ? "CAMPAIGN" : "COMMERCIAL";
+    const tierTitle = tier === "STARTER" ? "Paket Starter / Mini" : tier === "CAMPAIGN" ? "Paket Kampanye Standar" : "Paket Komersial Lengkap";
     setPackages([
       ...packages,
       {
-        title: `Paket Layanan ${packages.length + 1}`,
-        subtitle: "Deskripsi singkat cakupan layanan yang diberikan",
+        tier,
+        title: tierTitle,
+        subtitle: "Deskripsi singkat komitmen resource dan spesifikasi output",
         price: "Rp 1.500.000",
-        unit: currentPreset.commonUnits[0] || "per sesi",
-        popular: false,
+        unit: currentPreset.commonUnits[0] || "per 4 jam",
+        capacityDuration: "4 Jam (Setengah Shift)",
+        deliverablesSummary: "Output terstandar kualitas tinggi",
+        usageRights: "Komersial Digital (Sosmed & Web) 1 Tahun",
+        equipmentIncluded: "Peralatan utama siap pakai on-set",
         features: ["Deliverable output terstandar kualitas tinggi", "Gratis 1x revisi minor"],
       },
     ]);
@@ -427,176 +434,247 @@ export function RatesForm({
         </div>
 
         {/* PACKAGES SECTION */}
+        {/* PACKAGES SECTION — STANDARDIZED 3-TIER COLLABORATION RESOURCES */}
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-stone-100">
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
-                  Daftar Paket Layanan Siap Booking ({packages.length}/4)
+                  3 Tingkatan Paket Kapasitas Kolaborasi ({packages.length}/3)
                 </h3>
-                <span className="px-2 py-0.5 rounded-full bg-stone-100 text-[10px] font-bold text-stone-600">
-                  Direkomendasikan 2-3 Paket
+                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-[10px] font-bold text-emerald-800 border border-emerald-200/70">
+                  Terstandarisasi 3 Tingkat
                 </span>
               </div>
-              <p className="text-xs text-stone-400 mt-0.5">
-                Klien dapat memilih salah satu paket ini untuk langsung mengajukan reservasi atau rekrutmen.
+              <p className="text-xs text-stone-500 mt-0.5 max-w-2xl leading-relaxed">
+                Tentukan komitmen resource terstruktur (waktu, deliverables, hak siar, dan alat) sebagai patokan awal kolaborasi. RAMU membandingkan <em>lingkup kapasitas</em>, bukan sekadar harga nominal.
               </p>
             </div>
 
-            {packages.length < 4 && (
+            {packages.length < 3 && (
               <button
                 type="button"
                 onClick={handleAddNewPackage}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-xs font-bold text-[#1E1B2E] transition-colors cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>+ Tambah Paket Baru</span>
+                <span>+ Tambah Tingkatan Paket</span>
               </button>
             )}
+          </div>
+
+          {/* COLLABORATIVE ECONOMY NOTICE */}
+          <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-amber-950 text-xs space-y-1">
+            <div className="flex items-center gap-1.5 font-bold text-amber-900">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+              <span>Prinsip Paket di Ekosistem RAMU:</span>
+            </div>
+            <p className="text-[11px] leading-relaxed text-amber-900/90">
+              Paket bukanlah produk e-commerce siap beli, melainkan <strong>unit komersial dari resource Anda</strong> yang akan dipadukan dengan resource mitra lain dalam 1 proyek bersama. Angka tarif merupakan <strong>Listed Rate / Starting Anchor</strong> yang dapat dinegosiasikan saat perumusan SPK.
+            </p>
           </div>
 
           {packages.length === 0 ? (
             <div className="p-8 text-center rounded-2xl border-2 border-dashed border-stone-200 space-y-3">
               <p className="text-xs text-stone-500 font-medium">
-                Belum ada paket kustom yang dibuat. Sistem saat ini masih menggunakan rekomendasi standar industri.
+                Belum ada paket kustom yang dibuat. Muat 3 tingkatan paket rekomendasi standar industri untuk peran Anda.
               </p>
               <button
                 type="button"
                 onClick={() => handleApplyRolePreset(selectedPresetRole)}
                 className="px-4 py-2 rounded-xl bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider cursor-pointer shadow-xs"
               >
-                Muat Paket dari Template
+                Muat 3 Paket dari Template
               </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {packages.map((pkg, idx) => (
-                <div
-                  key={idx}
-                  className={`p-6 rounded-2xl border transition-all space-y-5 flex flex-col justify-between ${
-                    pkg.popular
-                      ? "bg-white border-[#1E1B2E] ring-2 ring-[#1E1B2E]/10 shadow-sm"
-                      : "bg-white border-stone-200 shadow-2xs"
-                  }`}
-                >
-                  <div className="space-y-4">
-                    {/* PACKAGE HEADER */}
-                    <div className="flex items-center justify-between pb-2 border-b border-stone-100">
-                      <span className="px-2.5 py-0.5 rounded-full bg-stone-100 text-[10px] font-bold text-stone-700 uppercase tracking-widest">
-                        Paket {idx + 1}
-                      </span>
+              {packages.map((pkg, idx) => {
+                const tier = pkg.tier || (idx === 0 ? "STARTER" : idx === 1 ? "CAMPAIGN" : "COMMERCIAL");
+                const isCampaign = tier === "CAMPAIGN";
 
-                      <div className="flex items-center gap-2">
-                        <label className="flex items-center gap-1.5 text-[11px] font-bold text-stone-700 cursor-pointer select-none">
-                          <input
-                            type="checkbox"
-                            checked={Boolean(pkg.popular)}
-                            onChange={(e) => handlePackageChange(idx, "popular", e.target.checked)}
-                            className="rounded border-stone-300 text-[#1E1B2E] focus:ring-[#1E1B2E]"
-                          />
-                          <span>Paling Populer</span>
-                        </label>
+                return (
+                  <div
+                    key={idx}
+                    className={`p-6 rounded-2xl border transition-all space-y-5 flex flex-col justify-between ${
+                      isCampaign
+                        ? "bg-white border-[#1E1B2E] ring-2 ring-[#1E1B2E]/10 shadow-sm"
+                        : "bg-white border-stone-200 shadow-2xs"
+                    }`}
+                  >
+                    <div className="space-y-4">
+                      {/* PACKAGE HEADER & TIER */}
+                      <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={tier}
+                            onChange={(e) => handlePackageChange(idx, "tier", e.target.value)}
+                            className="px-2 py-0.5 rounded-md bg-stone-100 border border-stone-200 text-[10px] font-bold text-stone-800 uppercase tracking-widest cursor-pointer"
+                          >
+                            <option value="STARTER">Tier 1: Starter / Mini</option>
+                            <option value="CAMPAIGN">Tier 2: Campaign (Standar)</option>
+                            <option value="COMMERCIAL">Tier 3: Commercial Full</option>
+                          </select>
+                        </div>
 
                         {packages.length > 1 && (
                           <button
                             type="button"
                             onClick={() => handleRemovePackage(idx)}
                             className="p-1 rounded-md text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                            title="Hapus paket ini"
+                            title="Hapus tingkatan paket ini"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         )}
                       </div>
-                    </div>
 
-                    {/* TITLE & DESCRIPTION */}
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
-                          Nama Paket <span className="text-rose-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={pkg.title}
-                          onChange={(e) => handlePackageChange(idx, "title", e.target.value)}
-                          required
-                          placeholder="Misal: Lookbook Half-Day"
-                          className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:bg-white focus:border-[#1E1B2E]"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
-                          Deskripsi Singkat
-                        </label>
-                        <textarea
-                          value={pkg.subtitle}
-                          onChange={(e) => handlePackageChange(idx, "subtitle", e.target.value)}
-                          rows={2}
-                          placeholder="Misal: Sesi foto katalog 15 look untuk rilis koleksi baru"
-                          className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-normal text-stone-600 focus:bg-white focus:border-[#1E1B2E] resize-none"
-                        />
-                      </div>
-                    </div>
-
-                    {/* PRICE & BILLING UNIT */}
-                    <div className="space-y-2 pt-2 border-t border-stone-100">
-                      <div className="grid grid-cols-2 gap-3">
+                      {/* TITLE & DESCRIPTION */}
+                      <div className="space-y-3">
                         <div>
                           <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
-                            Harga Tarif <span className="text-rose-500">*</span>
+                            Nama Paket <span className="text-rose-500">*</span>
                           </label>
                           <input
                             type="text"
-                            value={pkg.price}
-                            onChange={(e) => handlePackageChange(idx, "price", e.target.value)}
+                            value={pkg.title}
+                            onChange={(e) => handlePackageChange(idx, "title", e.target.value)}
                             required
-                            placeholder="Rp 1.500.000"
+                            placeholder="Misal: Lookbook Half-Day"
                             className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:bg-white focus:border-[#1E1B2E]"
                           />
                         </div>
 
                         <div>
                           <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
-                            Satuan Penagihan <span className="text-rose-500">*</span>
+                            Deskripsi Singkat
                           </label>
-                          <input
-                            type="text"
-                            value={pkg.unit}
-                            onChange={(e) => handlePackageChange(idx, "unit", e.target.value)}
-                            required
-                            placeholder="per 4 jam / per sesi"
-                            className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-700 focus:bg-white focus:border-[#1E1B2E]"
+                          <textarea
+                            value={pkg.subtitle}
+                            onChange={(e) => handlePackageChange(idx, "subtitle", e.target.value)}
+                            rows={2}
+                            placeholder="Misal: Sesi foto katalog 15 look untuk rilis koleksi baru"
+                            className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-normal text-stone-600 focus:bg-white focus:border-[#1E1B2E] resize-none"
                           />
                         </div>
                       </div>
 
-                      {/* QUICK UNIT PILLS */}
-                      <div className="flex flex-wrap gap-1 pt-1">
-                        {currentPreset.commonUnits.map((u, uIdx) => (
-                          <button
-                            key={uIdx}
-                            type="button"
-                            onClick={() => handlePackageChange(idx, "unit", u)}
-                            className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-colors cursor-pointer ${
-                              pkg.unit === u
-                                ? "bg-[#1E1B2E] text-white border-[#1E1B2E]"
-                                : "bg-stone-50 text-stone-500 border-stone-200 hover:bg-stone-100"
-                            }`}
-                          >
-                            {u}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                      {/* PRICE & BILLING UNIT */}
+                      <div className="space-y-2 pt-2 border-t border-stone-100">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                              Listed Rate (Acuan) <span className="text-rose-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={pkg.price}
+                              onChange={(e) => handlePackageChange(idx, "price", e.target.value)}
+                              required
+                              placeholder="Rp 1.500.000"
+                              className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:bg-white focus:border-[#1E1B2E]"
+                            />
+                          </div>
 
-                    {/* DELIVERABLES & FEATURES */}
-                    <div className="space-y-2 pt-2 border-t border-stone-100">
-                      <div className="flex items-center justify-between">
-                        <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
-                          Poin Output &amp; Deliverables ({pkg.features.length})
-                        </label>
+                          <div>
+                            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                              Satuan Penagihan <span className="text-rose-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={pkg.unit}
+                              onChange={(e) => handlePackageChange(idx, "unit", e.target.value)}
+                              required
+                              placeholder="per 4 jam / per sesi"
+                              className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-700 focus:bg-white focus:border-[#1E1B2E]"
+                            />
+                          </div>
+                        </div>
+
+                        {/* QUICK UNIT PILLS */}
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {currentPreset.commonUnits.map((u, uIdx) => (
+                            <button
+                              key={uIdx}
+                              type="button"
+                              onClick={() => handlePackageChange(idx, "unit", u)}
+                              className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-colors cursor-pointer ${
+                                pkg.unit === u
+                                  ? "bg-[#1E1B2E] text-white border-[#1E1B2E]"
+                                  : "bg-stone-50 text-stone-500 border-stone-200 hover:bg-stone-100"
+                              }`}
+                            >
+                              {u}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* 4 STRUCTURED SCOPE DIMENSIONS */}
+                      <div className="space-y-3 pt-3 border-t border-stone-100 bg-stone-50/60 p-3 rounded-xl border border-stone-200/60">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-stone-700 block">
+                          4 Pilar Lingkup Terstruktur (Scope):
+                        </span>
+
+                        <div>
+                          <label className="text-[9px] font-bold text-stone-500 uppercase tracking-wider block mb-0.5">
+                            ⏱️ 1. Kapasitas Waktu / Shift
+                          </label>
+                          <input
+                            type="text"
+                            value={pkg.capacityDuration || ""}
+                            onChange={(e) => handlePackageChange(idx, "capacityDuration", e.target.value)}
+                            placeholder="Contoh: 4 Jam (Setengah Shift)"
+                            className="w-full px-2.5 py-1.5 rounded-md bg-white border border-stone-200 text-[11px] font-medium text-[#1E1B2E] focus:border-[#1E1B2E]"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-[9px] font-bold text-stone-500 uppercase tracking-wider block mb-0.5">
+                            📦 2. Deliverables Nyata
+                          </label>
+                          <input
+                            type="text"
+                            value={pkg.deliverablesSummary || ""}
+                            onChange={(e) => handlePackageChange(idx, "deliverablesSummary", e.target.value)}
+                            placeholder="Contoh: 15 Foto Final Retouch + Semua File RAW"
+                            className="w-full px-2.5 py-1.5 rounded-md bg-white border border-stone-200 text-[11px] font-medium text-[#1E1B2E] focus:border-[#1E1B2E]"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-[9px] font-bold text-stone-500 uppercase tracking-wider block mb-0.5">
+                            ⚖️ 3. Hak Siar / Lisensi IP
+                          </label>
+                          <input
+                            type="text"
+                            value={pkg.usageRights || ""}
+                            onChange={(e) => handlePackageChange(idx, "usageRights", e.target.value)}
+                            placeholder="Contoh: Komersial Digital (Sosmed & Web) 1 Tahun"
+                            className="w-full px-2.5 py-1.5 rounded-md bg-white border border-stone-200 text-[11px] font-medium text-[#1E1B2E] focus:border-[#1E1B2E]"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-[9px] font-bold text-stone-500 uppercase tracking-wider block mb-0.5">
+                            🛠️ 4. Peralatan / Fasilitas Terbawa
+                          </label>
+                          <input
+                            type="text"
+                            value={pkg.equipmentIncluded || ""}
+                            onChange={(e) => handlePackageChange(idx, "equipmentIncluded", e.target.value)}
+                            placeholder="Contoh: Kamera Sony A7IV + 2 Lensa + 1 Strobo Kit"
+                            className="w-full px-2.5 py-1.5 rounded-md bg-white border border-stone-200 text-[11px] font-medium text-[#1E1B2E] focus:border-[#1E1B2E]"
+                          />
+                        </div>
+                      </div>
+
+                      {/* EXTRA BULLET POINTS */}
+                      <div className="space-y-2 pt-2 border-t border-stone-100">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+                            Poin Rincian Tambahan ({pkg.features.length})
+                          </label>
                         <button
                           type="button"
                           onClick={() => handleAddFeature(idx, "")}
@@ -657,9 +735,10 @@ export function RatesForm({
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              );
+            })}
+          </div>
+        )}
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════ */}

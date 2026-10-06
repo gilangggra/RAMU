@@ -3,6 +3,7 @@
 import React, { useTransition } from "react";
 import { withdrawInterestAction } from "@/app/projects/actions";
 import { Undo2, Loader2 } from "lucide-react";
+import { toast } from "@/components/ui/Toast";
 
 interface WithdrawInterestButtonProps {
   interestId: string;
@@ -31,7 +32,9 @@ export function WithdrawInterestButton({
     startTransition(async () => {
       const res = await withdrawInterestAction(interestId, briefId);
       if (!res.success) {
-        alert(res.error || "Gagal menarik lamaran.");
+        toast.error(res.error || "Gagal menarik lamaran.");
+      } else {
+        toast.success("Pengajuan minat berhasil ditarik.");
       }
     });
   };

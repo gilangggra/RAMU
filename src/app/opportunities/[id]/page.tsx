@@ -89,14 +89,14 @@ export default async function OpportunityDetailPage({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs text-stone-500">
             <Link href="/collaborate" className="hover:text-stone-900 font-semibold transition-colors">
-              Kompatibilitas
+              Rekomendasi Mitra
             </Link>
             <span>/</span>
             <Link
               href="/collaborate"
               className="hover:text-stone-900 font-semibold transition-colors"
             >
-              Kecocokan Resource
+              Peluang Kolaborasi
             </Link>
             <span>/</span>
             <span className="text-stone-900 font-bold truncate max-w-[200px] sm:max-w-md">
@@ -110,7 +110,7 @@ export default async function OpportunityDetailPage({
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-600 hover:text-stone-900 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Kembali ke Kompatibilitas</span>
+              <span>Kembali ke Rekomendasi Mitra</span>
             </Link>
 
             <span className="px-3.5 py-1 rounded-full text-xs font-semibold bg-stone-100 text-stone-700 border border-stone-200">

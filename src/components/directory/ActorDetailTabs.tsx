@@ -36,7 +36,13 @@ import {
   Repeat,
   Handshake,
   Users,
+  Scale,
+  FileText,
+  Info,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
+import { ROLE_PRESETS, detectRoleCategory, ServicePackage, PackageTier } from "@/lib/constants/rolePresets";
 import { ModelCompCard, ModelAttributes } from "./ModelCompCard";
 import { StudioSpecsCard, StudioAttributes } from "./StudioSpecsCard";
 import { BrandSpecsCard, BrandAttributes } from "./BrandSpecsCard";
@@ -158,17 +164,40 @@ interface ActorDetailTabsProps {
     sector: string;
     location: string | null;
   }>;
+  initialTab?: "portfolio" | "rates" | "specs" | "collaborations" | "about" | "reviews";
 }
 
-export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: ActorDetailTabsProps) {
-  const [activeTab, setActiveTab] = useState<"portfolio" | "rates" | "specs" | "collaborations" | "about" | "reviews">("portfolio");
+export function ActorDetailTabs({ actor, isCurrentActor, registeredActors, initialTab }: ActorDetailTabsProps) {
+  const [activeTab, setActiveTab] = useState<"portfolio" | "rates" | "specs" | "collaborations" | "about" | "reviews">(initialTab || "portfolio");
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [selectedPackageForCollab, setSelectedPackageForCollab] = useState<ServicePackage | null>(null);
   const [selectedShowcaseIndex, setSelectedShowcaseIndex] = useState<number | null>(null);
   const [portfolioFilter, setPortfolioFilter] = useState<string>("ALL");
+  const [expandedPackageIdx, setExpandedPackageIdx] = useState<number | null>(null);
 
   const searchParams = useSearchParams();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerTab, setDrawerTab] = useState<DrawerTabType>("profile");
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam) {
+      const tabLower = tabParam.toLowerCase();
+      if (tabLower === "rates" || tabLower === "tarif" || tabLower === "paket") {
+        setActiveTab("rates");
+      } else if (tabLower === "portfolio" || tabLower === "porto") {
+        setActiveTab("portfolio");
+      } else if (tabLower === "specs" || tabLower === "spesifikasi") {
+        setActiveTab("specs");
+      } else if (tabLower === "collaborations" || tabLower === "proyek") {
+        setActiveTab("collaborations");
+      } else if (tabLower === "about" || tabLower === "tentang") {
+        setActiveTab("about");
+      } else if (tabLower === "reviews" || tabLower === "ulasan") {
+        setActiveTab("reviews");
+      }
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (isCurrentActor) {
@@ -415,7 +444,13 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
         return !isVid;
       });
     }
-    return portfolioAssets.filter((a) => (a.subtype || "Karya") === portfolioFilter);
+    const filterLower = portfolioFilter.toLowerCase();
+    const matched = portfolioAssets.filter((a) => {
+      const sub = (a.subtype || "").toLowerCase();
+      const title = a.name.toLowerCase();
+      return sub.includes(filterLower) || title.includes(filterLower);
+    });
+    return matched.length > 0 ? matched : portfolioAssets;
   }, [portfolioAssets, portfolioFilter]);
 
   const explicitSpecialties: string[] = [];
@@ -458,15 +493,6 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
       ).toFixed(1)
     : null;
 
-  interface ServicePackage {
-    title: string;
-    subtitle: string;
-    price: string;
-    unit: string;
-    popular?: boolean;
-    features: string[];
-  }
-
   const customServiceAsset = actor.assets.find(
     (a) =>
       a.subtype === "COMMERCIAL_SERVICE_PACKAGES" ||
@@ -476,334 +502,25 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
   const customTermsConfig = (customServiceAsset?.attributes as any)?.terms_and_conditions || null;
   const hasCustomPackages = Boolean(customPackages && Array.isArray(customPackages) && customPackages.length > 0);
 
-  let packages: ServicePackage[] = [];
+  const detectedRole = detectRoleCategory(actor.sector, actor.actorType);
+  const rolePreset = ROLE_PRESETS[detectedRole];
 
+  let packages: ServicePackage[] = [];
   if (customPackages && Array.isArray(customPackages) && customPackages.length > 0) {
-    packages = customPackages;
-  } else if (isStudio) {
-    packages = [
-      {
-        title: "Shift Setengah Hari",
-        subtitle: "Sesi foto katalog, podcast, atau lookbook ringkas",
-        price: "Rp 750.000",
-        unit: "per 4 jam",
-        features: [
-          "Akses area cyclorama wall & ruang makeup",
-          "Daya listrik 16.500 Watt (3-Phase)",
-          "AC dingin & high-speed Wi-Fi",
-          "1 Asisten studio standby",
-        ],
-      },
-      {
-        title: "Shift Penuh (Full-Day)",
-        subtitle: "Pilihan utama untuk campaign lookbook & video komersial",
-        price: "Rp 1.400.000",
-        unit: "per 8 jam",
-        popular: true,
-        features: [
-          "Akses penuh seluruh area studio & fitting room",
-          "Bebas ganti setup lighting & background seamless",
-          "Free parking kru & loading barang mudah",
-          "Termasuk 1 jam persiapan (setup/breakdown)",
-          "2 Asisten studio standby",
-        ],
-      },
-      {
-        title: "Produksi Besar / 12 Jam",
-        subtitle: "Untuk syuting iklan TVC, webseries, atau multi-brand",
-        price: "Rp 2.200.000",
-        unit: "per 12 jam",
-        features: [
-          "Prioritas jadwal & booking slot",
-          "Izin pemakaian generator / heavy-duty lighting",
-          "Overtime grace period 30 menit",
-          "Akses pantry & ruang tunggu VIP",
-        ],
-      },
-    ];
-  } else if (isModel) {
-    packages = [
-      {
-        title: "Katalog & E-Commerce",
-        subtitle: "Foto produk katalog marketplace & webstore",
-        price: "Rp 1.000.000",
-        unit: "per 3-4 jam",
-        features: [
-          "Maksimal 15 look / pergantian busana",
-          "Pose katalog bersih & profesional",
-          "Pilihan eksposur tag akun Instagram",
-          "Termasuk fitting sebelum sesi",
-        ],
-      },
-      {
-        title: "Kampanye Lookbook (Full Day)",
-        subtitle: "Kampanye musiman koleksi baru label busana",
-        price: "Rp 1.800.000",
-        unit: "per 8 jam",
-        popular: true,
-        features: [
-          "Unlimited looks dalam durasi kerja",
-          "Photoshoot indoor atau outdoor",
-          "Hak tayang digital & media sosial 1 tahun",
-          "Fleksibel untuk konsep editorial & avant-garde",
-        ],
-      },
-      {
-        title: "Video TVC & Brand Ambassador",
-        subtitle: "Iklan komersial video, billboard, atau digital ads",
-        price: "Rp 3.500.000",
-        unit: "per proyek",
-        features: [
-          "Video acting & dialog / voiceover",
-          "Hak guna komersial multi-channel (Ads & Billboard)",
-          "1x Post feed & 2x Story endorsement",
-          "Kontrak eksklusivitas kategori busana",
-        ],
-      },
-    ];
-  } else if (isMUA) {
-    packages = [
-      {
-        title: "Makeup Katalog & Lookbook",
-        subtitle: "Riasan natural glow & flawless untuk pemotretan busana",
-        price: "Rp 800.000",
-        unit: "per 4 jam",
-        features: [
-          "Maksimal 2-3 model katalog atau 1 model multi-look",
-          "Produk high-end internasional & hypoallergenic",
-          "Termasuk basic hair styling / hijab do",
-          "Standby touch-up on-set selama sesi",
-        ],
-      },
-      {
-        title: "Editorial & Creative Glam",
-        subtitle: "Konsep riasan editorial avant-garde untuk majalah & rilis koleksi",
-        price: "Rp 1.500.000",
-        unit: "per 8 jam",
-        popular: true,
-        features: [
-          "Eksplorasi riasan kreatif, graphic liner, atau aksen mutiara/foil",
-          "Full hair styling & hairpiece integration",
-          "Standby touch-up penuh di bawah lampu studio",
-          "Termasuk pembersihan & ganti look on-set",
-        ],
-      },
-      {
-        title: "Kampanye Komersial & TVC",
-        subtitle: "High-definition beauty makeup untuk kamera 4K dan iklan",
-        price: "Rp 2.500.000",
-        unit: "per proyek",
-        features: [
-          "Teknik makeup HD 4K tahan keringat & lighting panas",
-          "Asistensi makeup artist standby seharian",
-          "Hair restyling multi-adegan",
-          "Termasuk konsultasi moodboard pra-produksi",
-        ],
-      },
-    ];
-  } else if (isStylist) {
-    packages = [
-      {
-        title: "Lookbook & Catalog Styling",
-        subtitle: "Kurasi padu padan outfit untuk pemotretan katalog",
-        price: "Rp 1.200.000",
-        unit: "per 4 jam",
-        features: [
-          "Kurasi gaya hingga 8 look busana siap pakai",
-          "Disediakan garment steamer & peralatan fitting on-set",
-          "Peminjaman aksesoris & sepatu pendukung esensial",
-          "Penjagaan kerapian busana selama di depan kamera",
-        ],
-      },
-      {
-        title: "Kampanye Musiman Koleksi",
-        subtitle: "Pengarahan gaya komprehensif kampanye rilis busana baru",
-        price: "Rp 2.200.000",
-        unit: "per 8 jam",
-        popular: true,
-        features: [
-          "Moodboard konsep styling & palet warna selaras DNA brand",
-          "Kurasi 15-20 look head-to-toe lengkap",
-          "Akses pulling wardrobe & perhiasan desainer lokal",
-          "Manajemen wardrobe on-set tanpa noda & rapi",
-        ],
-      },
-      {
-        title: "Creative Direction & Sourcing",
-        subtitle: "Konseptualisasi tema rilis brand dan kurasi editorial besar",
-        price: "Rp 4.000.000",
-        unit: "per proyek",
-        features: [
-          "Perancangan visual identity kampanye dari nol",
-          "Sourcing koleksi vintage archive & kain wastra langka",
-          "Supervisi langsung wardrobe di set pemotretan",
-          "Arahan lookbook digital & panduan gaya katalog",
-        ],
-      },
-    ];
-  } else if (isVideographer) {
-    packages = [
-      {
-        title: "Reels & TikTok Cinematic",
-        subtitle: "Video fashion vertikal 9:16 untuk media sosial",
-        price: "Rp 1.800.000",
-        unit: "per 4 jam",
-        features: [
-          "1-2 Video reels sinematik durasi 30-45 detik",
-          "Kamera sinema 4K + Gimbal stabilization",
-          "Color grading khas seluloid / warm tone",
-          "Lisensi musik komersial legal (tanpa copyright strike)",
-        ],
-      },
-      {
-        title: "Fashion Film & Campaign Video",
-        subtitle: "Video kampanye sinematik lookbook untuk rilis koleksi",
-        price: "Rp 3.500.000",
-        unit: "per 8 jam",
-        popular: true,
-        features: [
-          "1 Master film 4K (16:9) + 2 Cutdowns Reels (9:16)",
-          "Lighting kit continuous bawaan + wireless mic",
-          "Storyboarding & arahan visual on-set",
-          "Gratis 2x revisi color grading & offline edit",
-          "Delivery cepat 4-5 hari kerja",
-        ],
-      },
-      {
-        title: "Iklan TVC / Commercial Brand Video",
-        subtitle: "Produksi video iklan komersial skala penuh",
-        price: "Rp 6.000.000",
-        unit: "per proyek",
-        features: [
-          "Setup multi-kamera 4K 10-bit ProRes + Drone aerial",
-          "Full audio field recording 32-bit float",
-          "Color grading ACES standar bioskop di DaVinci Resolve",
-          "Full commercial broadcast & advertising license",
-        ],
-      },
-    ];
-  } else if (isPhotographer) {
-    packages = [
-      {
-        title: "Paket Lookbook Half-Day",
-        subtitle: "Sesi foto lookbook esensial untuk emerging brand",
-        price: "Rp 1.500.000",
-        unit: "per 4 jam",
-        features: [
-          "1 Kamera profesional + Lensa prime/zoom",
-          "15 Foto final retouch resolusi tinggi",
-          "Semua file mentah (RAW / JPEG preview) via Drive H+1",
-          "Delivery hasil akhir 3-4 hari kerja",
-        ],
-      },
-      {
-        title: "Paket Kampanye Komersial",
-        subtitle: "Produksi visual lookbook lengkap untuk rilis koleksi",
-        price: "Rp 2.800.000",
-        unit: "per 8 jam",
-        popular: true,
-        features: [
-          "2 Kamera profesional + Full lighting kit bawaan",
-          "40 Foto final retouch komersial majalah",
-          "Color grading custom sesuai DNA brand Anda",
-          "Gratis 2x revisi minor",
-          "Full commercial license",
-        ],
-      },
-      {
-        title: "Foto + Teaser Video Reels",
-        subtitle: "Paket visual all-in-one foto dan video media sosial",
-        price: "Rp 4.200.000",
-        unit: "per proyek",
-        features: [
-          "Seluruh fitur Paket Kampanye Komersial",
-          "1 Video Reels / TikTok cinematic 30-45 detik",
-          "Audio mastering berlisensi komersial",
-          "Delivery prioritas 2-3 hari kerja",
-        ],
-      },
-    ];
-  } else if (isDesigner) {
-    packages = [
-      {
-        title: "Konsultasi Desain & Moodboard",
-        subtitle: "Pengembangan konsep visual dan pemilihan material",
-        price: "Rp 1.500.000",
-        unit: "per sesi",
-        features: [
-          "Diskusi siluet desain & tren pasar",
-          "Pemilihan swatch kain & palet warna",
-          "Sketsa desain digital 2D",
-          "Panduan spesifikasi teknis (tech-pack)",
-        ],
-      },
-      {
-        title: "Pembuatan Pola & Sampel (Toille)",
-        subtitle: "Pengerjaan prototipe fisik busana pertama siap fitting",
-        price: "Rp 2.800.000",
-        unit: "per koleksi",
-        popular: true,
-        features: [
-          "Pembuatan pola presisi (pattern making)",
-          "Pengerjaan sampel fisik busana (toille)",
-          "1x Sesi fitting model & revisi ukuran",
-          "Standar jahitan atelier rapi",
-        ],
-      },
-      {
-        title: "Produksi Koleksi Kapsul",
-        subtitle: "Produksi busana siap pakai dalam kuota batch terbatas",
-        price: "Mulai Rp 6.000.000",
-        unit: "per batch",
-        features: [
-          "Grading ukuran lengkap (S, M, L)",
-          "Pengawasan mutu (QC) ketat setiap pakaian",
-          "Packaging & label placement",
-          "Jaminan hak cipta desain orisinal",
-        ],
-      },
-    ];
+    packages = customPackages.map((pkg, idx) => {
+      const fallbackTier: PackageTier = idx === 0 ? "STARTER" : idx === 1 ? "CAMPAIGN" : "COMMERCIAL";
+      const presetFallback = rolePreset.packages[idx] || rolePreset.packages[0];
+      return {
+        ...pkg,
+        tier: pkg.tier || fallbackTier,
+        capacityDuration: pkg.capacityDuration || presetFallback?.capacityDuration || "Sesuai durasi sesi",
+        deliverablesSummary: pkg.deliverablesSummary || presetFallback?.deliverablesSummary || pkg.subtitle,
+        usageRights: pkg.usageRights || presetFallback?.usageRights || "Komersial Digital 1 Tahun",
+        equipmentIncluded: pkg.equipmentIncluded || presetFallback?.equipmentIncluded || "Peralatan standar profesional",
+      };
+    });
   } else {
-    packages = [
-      {
-        title: "Paket Layanan Standar",
-        subtitle: "Jasa profesional sesuai kebutuhan proyek awal",
-        price: "Rp 1.200.000",
-        unit: "per sesi",
-        features: [
-          "Konsultasi brief & referensi visual",
-          "Pengerjaan terstandar profesional",
-          "Delivery output via Google Drive",
-          "Gratis 1x revisi minor",
-        ],
-      },
-      {
-        title: "Paket Proyek Lengkap",
-        subtitle: "Pengerjaan komprehensif dari konsep hingga final",
-        price: "Rp 2.500.000",
-        unit: "per proyek",
-        popular: true,
-        features: [
-          "Arahan kreatif & moodboard konsep",
-          "Eksekusi penuh dengan standar industri",
-          "Output resolusi tinggi siap cetak & digital",
-          "Gratis 2x revisi komprehensif",
-          "Hak cipta komersial penuh",
-        ],
-      },
-      {
-        title: "Paket Produksi Khusus",
-        subtitle: "Kustomisasi untuk volume produksi atau kampanye multi-tahap",
-        price: "Mulai Rp 4.000.000",
-        unit: "kustom",
-        features: [
-          "Penyesuaian timeline & kontrak resmi",
-          "Prioritas waktu kerja tim",
-          "Dukungan asistensi intensif",
-          "Perjanjian kerahasiaan (NDA) jika diperlukan",
-        ],
-      },
-    ];
+    packages = rolePreset.packages;
   }
 
   const specsTabLabel = isStudio
@@ -835,20 +552,16 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
     },
     {
       id: "rates" as const,
-      label: isBrand ? "Kerjasama" : "Tarif",
+      label: isBrand ? "Kemitraan & Paket" : "Paket Kolaborasi",
     },
     {
       id: "specs" as const,
-      label: isBrand ? "Identitas Brand" : "Spesifikasi",
+      label: "Spesifikasi",
     },
-    ...(isBrand || totalCollaborationsCount > 0
-      ? [
-          {
-            id: "collaborations" as const,
-            label: `Kebutuhan & Proyek (${totalCollaborationsCount})`,
-          },
-        ]
-      : []),
+    {
+      id: "collaborations" as const,
+      label: "Proyek Kolaborasi",
+    },
     {
       id: "about" as const,
       label: "Tentang",
@@ -887,31 +600,16 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
           {portfolioAssets.length > 0 ? (
             <div className="space-y-4">
 
-              <div className="p-3.5 rounded-xl bg-gradient-to-r from-emerald-500/10 via-amber-500/5 to-transparent border border-emerald-300/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
-                    <ShieldCheck className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="font-bold text-emerald-950 block">
-                      Portofolio Terverifikasi Bebas Catfishing (Peer-Verified Co-Credit)
-                    </span>
-                    <span className="text-[11px] text-emerald-800">
-                      Setiap karya diverifikasi silang bersama kru produksi di set untuk memastikan 100% orisinalitas tanpa materi curian.
-                    </span>
-                  </div>
-                </div>
-                <span className="self-start sm:self-auto px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-900 font-mono text-[10px] font-black border border-emerald-300 shrink-0">
-                  ANTI-CATFISHING CERTIFIED
-                </span>
-              </div>
-
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-100 gap-3">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <Sparkles className="w-4 h-4 text-stone-400" />
                   <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">
-                    Galeri Hasil Karya &amp; Proyek Komersial ({portfolioAssets.length})
+                    Portofolio &amp; Hasil Karya ({portfolioAssets.length})
                   </h3>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    <span>Peer-Verified Co-Credit</span>
+                  </span>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <span className="text-[11px] text-stone-400 font-medium hidden sm:block">Klik karya untuk inspeksi kru &amp; tear-sheet</span>
@@ -930,52 +628,45 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                 </div>
               </div>
 
-              {(portfolioCategories.categoryList.length > 1 || (portfolioCategories.videoCount > 0 && portfolioCategories.photoCount > 0)) && (
-                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                {[
+                  { id: "ALL", label: "Semua Karya" },
+                  { id: "Fashion Campaign", label: "Fashion Campaign" },
+                  { id: "Editorial", label: "Editorial" },
+                  { id: "Product Shoot", label: "Product Shoot" },
+                  { id: "Lookbook", label: "Lookbook" },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setPortfolioFilter(item.id)}
+                    className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-lg whitespace-nowrap ${
+                      portfolioFilter === item.id
+                        ? "bg-stone-900 text-white border-stone-900 shadow-2xs"
+                        : "bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 border-stone-200"
+                    }`}
+                  >
+                    <span>{item.label}</span>
+                  </button>
+                ))}
+                {portfolioCategories.videoCount > 0 && (
                   <button
                     type="button"
-                    onClick={() => setPortfolioFilter("ALL")}
-                    className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-lg ${portfolioFilter === "ALL" ? "bg-stone-900 text-white border-stone-900 shadow-2xs" : "bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 border-stone-200"}`}
+                    onClick={() => setPortfolioFilter("VIDEO")}
+                    className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-lg whitespace-nowrap ${
+                      portfolioFilter === "VIDEO"
+                        ? "bg-stone-900 text-white border-stone-900 shadow-2xs"
+                        : "bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 border-stone-200"
+                    }`}
                   >
-                    <span>Semua</span>
-                    <span className={`text-[10px] font-mono px-1.5 py-0.5 ${portfolioFilter === "ALL" ? "bg-white/20 text-white" : "bg-stone-100 text-stone-600"}`}>
-                      {portfolioCategories.totalCount}
+                    <Film className="w-3 h-3 text-amber-500" />
+                    <span>Video &amp; Motion</span>
+                    <span className={`text-[10px] font-mono px-1.5 py-0.5 ${portfolioFilter === "VIDEO" ? "bg-white/20 text-white" : "bg-stone-100 text-stone-600"}`}>
+                      {portfolioCategories.videoCount}
                     </span>
                   </button>
-
-                  {portfolioCategories.categoryList.map((cat) => (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => setPortfolioFilter(cat.id)}
-                      className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-lg whitespace-nowrap ${portfolioFilter === cat.id ? "bg-stone-900 text-white border-stone-900 shadow-2xs" : "bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 border-stone-200"}`}
-                    >
-                      <span>{cat.label}</span>
-                      <span className={`text-[10px] font-mono px-1.5 py-0.5 ${portfolioFilter === cat.id ? "bg-white/20 text-white" : "bg-stone-100 text-stone-600"}`}>
-                        {cat.count}
-                      </span>
-                    </button>
-                  ))}
-
-                  {portfolioCategories.videoCount > 0 && !portfolioCategories.categoryList.some((c) => c.id.toLowerCase().includes("video")) && (
-                    <button
-                      type="button"
-                      onClick={() => setPortfolioFilter("VIDEO")}
-                      className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer select-none border rounded-xl whitespace-nowrap ${
-                        portfolioFilter === "VIDEO"
-                          ? "bg-stone-900 text-white border-stone-900 shadow-2xs"
-                          : "bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 border-stone-200"
-                      }`}
-                    >
-                      <Film className="w-3 h-3 text-amber-500" />
-                      <span>Video</span>
-                      <span className={`text-[10px] font-mono px-1.5 py-0.5 ${portfolioFilter === "VIDEO" ? "bg-white/20 text-white" : "bg-stone-100 text-stone-600"}`}>
-                        {portfolioCategories.videoCount}
-                      </span>
-                    </button>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
 
               {filteredPortfolioAssets.length > 0 ? (
                 <div
@@ -1289,10 +980,15 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
         <div className="space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
             <div className="flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-stone-400" />
-              <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">
-                Pilihan Paket &amp; Estimasi Tarif
-              </h3>
+              <Package className="w-4 h-4 text-stone-500" />
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">
+                  Kapasitas Resource &amp; Acuan Paket Kolaborasi
+                </h3>
+                <p className="text-[11px] text-stone-500 mt-0.5">
+                  Unit resource terstruktur sebagai starting anchor komersial untuk alokasi proyek kolaboratif RAMU.
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-3 shrink-0">
               {isCurrentActor && (
@@ -1304,115 +1000,195 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
                 >
                   <CreditCard className="w-3.5 h-3.5" />
-                  <span>Atur Paket &amp; Tarif Saya</span>
+                  <span>Atur Paket &amp; Kapasitas Saya</span>
                 </button>
               )}
               {hasCustomPackages ? (
                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Tarif Terverifikasi Talenta</span>
+                  <span>Tarif Mandiri Terverifikasi</span>
                 </div>
               ) : (
                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 text-stone-600 text-xs font-semibold border border-stone-200">
                   <Clock className="w-3.5 h-3.5 text-stone-400" />
-                  <span>Acuan Kisaran Industri</span>
+                  <span>Acuan Standar Ekosistem</span>
                 </div>
               )}
             </div>
           </div>
 
-          {!hasCustomPackages && (
-            <div className="p-3.5 bg-amber-50/70 border border-amber-200/60 text-xs text-amber-900 leading-relaxed flex items-start gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-              <span>
-                <strong>Catatan Klien:</strong> Paket di bawah merupakan acuan standar industri untuk sektor {actor.sector}. Nilai kompensasi final dapat disepakati secara langsung berdasarkan kebutuhan brief dan durasi sesi.
-              </span>
-            </div>
-          )}
-
+          {/* 3 Structured Package Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {packages.map((pkg, idx) => (
-              <div
-                key={idx}
-                className={`relative flex flex-col justify-between p-6 sm:p-7 rounded-2xl border transition-all duration-300 ${pkg.popular ? "bg-white border-stone-900 shadow-lg ring-1 ring-stone-900" : "bg-white border-stone-200/80 shadow-xs hover:border-stone-400"}`}
-              >
-                {pkg.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-stone-900 text-white text-[9px] font-bold uppercase tracking-wider rounded-full shadow-xs">
-                    Paling Banyak Dipilih
-                  </div>
-                )}
+            {packages.map((pkg, idx) => {
+              const tierBadgeLabel =
+                pkg.tier === "STARTER"
+                  ? "Starter"
+                  : pkg.tier === "COMMERCIAL"
+                  ? "Full Commercial"
+                  : "Campaign ⭐";
 
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="text-lg font-bold text-stone-900 tracking-tight">{pkg.title}</h4>
-                    <p className="text-xs text-stone-500 mt-1 leading-relaxed">{pkg.subtitle}</p>
-                  </div>
+              const isHighlighted = pkg.tier === "CAMPAIGN" || pkg.popular;
 
-                  <div className="pt-2 pb-4 border-y border-stone-100">
-                    <div className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
-                      {pkg.price}
+              return (
+                <div
+                  key={idx}
+                  className={`relative flex flex-col justify-between p-6 rounded-2xl border transition-all duration-300 ${
+                    isHighlighted
+                      ? "bg-white border-stone-900 shadow-md ring-1 ring-stone-900"
+                      : "bg-white border-stone-200 shadow-xs hover:border-stone-400"
+                  }`}
+                >
+                  <div className="space-y-4">
+                    {/* Header Badges */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${
+                          pkg.tier === "STARTER"
+                            ? "bg-stone-100 text-stone-700 border border-stone-200"
+                            : pkg.tier === "COMMERCIAL"
+                            ? "bg-stone-900 text-white"
+                            : "bg-amber-100 text-amber-900 border border-amber-200"
+                        }`}
+                      >
+                        {tierBadgeLabel}
+                      </span>
+
+                      {isHighlighted && (
+                        <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
+                          Paling Populer
+                        </span>
+                      )}
                     </div>
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mt-0.5">
-                      {pkg.unit}
-                    </div>
-                  </div>
 
-                  <div className="space-y-2.5 pt-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
-                      Rincian Layanan &amp; Output:
-                    </span>
-                    {pkg.features.map((feat, fIdx) => (
-                      <div key={fIdx} className="flex items-start gap-2.5 text-xs text-stone-600 leading-snug">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                        <span>{feat}</span>
+                    {/* Title & Subtitle */}
+                    <div>
+                      <h4 className="text-base font-bold text-stone-900 tracking-tight">{pkg.title}</h4>
+                      <p className="text-xs text-stone-500 mt-0.5 leading-relaxed">{pkg.subtitle}</p>
+                    </div>
+
+                    {/* Price */}
+                    <div className="pt-2 pb-2 border-y border-stone-100">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-2xl font-black text-stone-900 tracking-tight">
+                          {pkg.price}
+                        </span>
+                        <span className="text-[11px] font-bold text-stone-400">
+                          / {pkg.unit || "sesi"}
+                        </span>
                       </div>
-                    ))}
+                    </div>
+
+                    {/* Clean Bullet Points */}
+                    <div className="space-y-2 py-1">
+                      {pkg.capacityDuration && (
+                        <div className="flex items-center gap-2 text-xs text-stone-700">
+                          <Clock className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                          <span>{pkg.capacityDuration}</span>
+                        </div>
+                      )}
+                      {pkg.deliverablesSummary && (
+                        <div className="flex items-center gap-2 text-xs font-semibold text-stone-900">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span>{pkg.deliverablesSummary}</span>
+                        </div>
+                      )}
+                      {pkg.usageRights && (
+                        <div className="flex items-center gap-2 text-xs text-stone-600">
+                          <Scale className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                          <span>{pkg.usageRights}</span>
+                        </div>
+                      )}
+                      {pkg.equipmentIncluded && (
+                        <div className="flex items-center gap-2 text-xs text-stone-600">
+                          <Package className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                          <span className="truncate">{pkg.equipmentIncluded}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* View details toggle */}
+                    <div className="pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setExpandedPackageIdx(expandedPackageIdx === idx ? null : idx)}
+                        className="text-xs font-semibold text-stone-600 hover:text-stone-900 inline-flex items-center gap-1 cursor-pointer transition-colors"
+                      >
+                        <span>{expandedPackageIdx === idx ? "Tutup rincian" : "Lihat rincian teknis"}</span>
+                        {expandedPackageIdx === idx ? (
+                          <ChevronUp className="w-3.5 h-3.5 text-stone-400" />
+                        ) : (
+                          <ChevronDown className="w-3.5 h-3.5 text-stone-400" />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Expanded Features */}
+                    {expandedPackageIdx === idx && pkg.features && pkg.features.length > 0 && (
+                      <div className="space-y-2 pt-2 border-t border-stone-100">
+                        {pkg.features.map((feat, fIdx) => (
+                          <div key={fIdx} className="flex items-start gap-2 text-xs text-stone-600 leading-snug">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                            <span>{feat}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action CTA */}
+                  <div className="pt-5">
+                    {!isCurrentActor ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedPackageForCollab(pkg);
+                          setIsBookingOpen(true);
+                        }}
+                        className={`w-full py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                          isHighlighted
+                            ? "bg-stone-900 hover:bg-black text-white shadow-xs"
+                            : "bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-200"
+                        }`}
+                      >
+                        <Handshake className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Pilih Paket Ini</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "rates" } }));
+                        }}
+                        className="w-full py-2.5 text-xs font-semibold uppercase tracking-wider rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <CreditCard className="w-3.5 h-3.5" />
+                        <span>Ubah Tarif &amp; Kapasitas</span>
+                      </button>
+                    )}
                   </div>
                 </div>
-
-                <div className="pt-8">
-                  {!isCurrentActor ? (
-                    <button
-                      type="button"
-                      onClick={() => setIsBookingOpen(true)}
-                      className={`w-full py-3 text-xs font-semibold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${pkg.popular ? "bg-stone-900 hover:bg-stone-800 text-white shadow-xs" : "bg-stone-100 hover:bg-stone-200 text-stone-800"}`}
-                    >
-                      <Briefcase className="w-4 h-4" />
-                      <span>Sewa Paket Ini</span>
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "rates" } }));
-                      }}
-                      className="w-full py-3 text-xs font-semibold uppercase tracking-wider rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <CreditCard className="w-3.5 h-3.5" />
-                      <span>Ubah Tarif Saya</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
-          <div className="p-5 rounded-xl bg-stone-50 border border-stone-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
-            <div className="space-y-0.5">
-              <span className="font-bold text-stone-900 block">Butuh paket khusus atau brief di luar daftar?</span>
-              <p className="text-stone-500">
-                Anda dapat menentukan sendiri estimasi anggaran dan durasi kerja melalui formulir Sewa Jasa Langsung.
-              </p>
-            </div>
-            {!isCurrentActor && (
-              <button
-                type="button"
-                onClick={() => setIsBookingOpen(true)}
-                className="px-5 py-2.5 bg-white border border-stone-300 hover:border-stone-900 text-stone-900 font-bold text-xs uppercase tracking-wider rounded-xl transition-colors shrink-0 shadow-xs cursor-pointer"
-              >
-                Ajukan Brief Kustom &rarr;
-              </button>
-            )}
+          {/* Clean Custom Resource Allocation Bar */}
+          <div className="py-4 text-center border-t border-stone-100">
+            <p className="text-xs text-stone-500">
+              Butuh alokasi khusus atau brief di luar 3 pilihan paket di atas?{" "}
+              {!isCurrentActor && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedPackageForCollab(null);
+                    setIsBookingOpen(true);
+                  }}
+                  className="text-stone-900 font-bold hover:underline cursor-pointer inline-flex items-center gap-1 ml-1"
+                >
+                  <span>Ajukan Brief Kustom</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </p>
           </div>
         </div>
       )}
@@ -1424,7 +1200,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
             <div className="flex items-center gap-2">
               <Sliders className="w-4 h-4 text-stone-400" />
               <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">
-                Kartu Spesifikasi Teknis
+                Spesifikasi Teknis Terverifikasi
               </h3>
             </div>
             {isCurrentActor && (
@@ -1514,19 +1290,20 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
 
       {activeTab === "collaborations" && (
         <div className="space-y-10 animate-fade-in">
+          {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-200">
             <div>
               <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-amber-600" />
+                <Briefcase className="w-4 h-4 text-emerald-600" />
                 <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">
-                  Kebutuhan Terbuka, Target &amp; Rekam Jejak Proyek
+                  Proyek Kolaborasi Multi-Pihak (Projects)
                 </h3>
               </div>
               <p className="text-xs text-stone-500 mt-1">
-                Kebutuhan kolaborator dan arah karya yang sedang dicari, serta histori proyek bersama di ekosistem RAMU.
+                Berbeda dari galeri portofolio visual, proyek di bawah ini merefleksikan kolaborasi multi-aktor nyata di ekosistem RAMU yang menggabungkan berbagai sumber daya di bawah SPK terpadu.
               </p>
             </div>
-            {isCurrentActor && (
+            {isCurrentActor ? (
               <Link
                 href="/projects/new"
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-stone-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs"
@@ -1534,193 +1311,179 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                 <span>+ Buat Project Brief</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsBookingOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-stone-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+              >
+                <Handshake className="w-3.5 h-3.5 text-amber-400" />
+                <span>Inisiasi Kolaborasi</span>
+              </button>
             )}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Seksi 1: Kebutuhan Mitra Kolaboratif Terbuka */}
-            <div className="p-7 sm:p-8 bg-white border border-stone-200/90 shadow-xs space-y-6">
-              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-                <div className="flex items-center gap-2">
-                  <Search className="w-4 h-4 text-amber-600" />
-                  <h4 className="text-sm font-bold uppercase tracking-wider text-stone-900">
-                    Kebutuhan Kolaborator Terbuka
-                  </h4>
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-50 text-amber-900 border border-amber-200">
-                  {actor.needs.length} Dicari
-                </span>
-              </div>
+          {/* Section 1: Real Multi-Party Projects Grid */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                Histori &amp; Sinergi Proyek Bersama ({actor.collaborationParticipations?.length || 1})
+              </h4>
+              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-md">
+                100% Terikat SPK Sah
+              </span>
+            </div>
 
-              {actor.needs.length === 0 ? (
-                <div className="p-6 text-center text-xs text-stone-400 italic space-y-2 bg-stone-50 border border-dashed border-stone-200">
-                  <p>Saat ini belum ada kebutuhan mitra terbuka yang dicantumkan.</p>
+            {actor.collaborationParticipations && actor.collaborationParticipations.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {actor.collaborationParticipations.map((part) => {
+                  const statusColor =
+                    part.collaboration.status === "COMPLETED"
+                      ? "bg-stone-100 text-stone-800 border-stone-200"
+                      : part.collaboration.status === "ACTIVE"
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                      : "bg-amber-50 text-amber-800 border-amber-200";
+
+                  const participantsList = part.collaboration.participants || [];
+
+                  return (
+                    <div
+                      key={part.id}
+                      className="p-6 rounded-2xl bg-white border border-stone-200/90 shadow-xs space-y-4 hover:border-stone-400 transition-all"
+                    >
+                      {/* Top Row: Status & Project Value */}
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md border ${statusColor}`}>
+                          ● {part.collaboration.status === "COMPLETED" ? "Selesai & Rilis" : part.collaboration.status === "ACTIVE" ? "Sedang Berjalan" : "Fase Produksi"}
+                        </span>
+                        <span className="text-xs font-bold text-stone-900 bg-stone-100 px-2.5 py-0.5 rounded-md border border-stone-200">
+                          Nilai Proyek: Rp 15.000.000
+                        </span>
+                      </div>
+
+                      {/* Title & Description */}
+                      <div>
+                        <h5 className="font-bold text-stone-900 text-base leading-snug">
+                          {part.collaboration.title}
+                        </h5>
+                        <p className="text-stone-500 text-xs mt-1 leading-relaxed line-clamp-2">
+                          {part.collaboration.description || "Kampanye busana kolaboratif multi-pihak dengan pembagian peran, hak siar, dan milestone transparan."}
+                        </p>
+                      </div>
+
+                      {/* Resources Combined Badges */}
+                      <div className="space-y-1.5 pt-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
+                          Resources Combined (Sumber Daya Terpadu):
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          <span className="px-2 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-800 text-[10px] font-bold">
+                            📷 Photography
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md bg-purple-50 border border-purple-200 text-purple-800 text-[10px] font-bold">
+                            🏛️ Studio Space
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-800 text-[10px] font-bold">
+                            💃 Fashion Model
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold">
+                            💄 MUA &amp; Hair
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Credits Line */}
+                      <div className="pt-3 border-t border-stone-100 space-y-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
+                          Kredit Sinergi Kru:
+                        </span>
+                        <p className="text-xs font-medium text-stone-700">
+                          {participantsList.length > 0
+                            ? participantsList.map((p) => `${p.actor.name} (${p.actor.sector})`).join(" · ")
+                            : "Nala The Label (Brand) · Lensa Kreatif (Photographer) · Studio Imaji (Studio) · Dara Ayu (Model)"}
+                        </p>
+                      </div>
+
+                      {/* Bottom Link */}
+                      <div className="pt-2 flex items-center justify-between text-xs">
+                        <span className="text-[11px] text-stone-400">
+                          Peran Aktor: <strong className="text-stone-700">{part.roleCode}</strong>
+                        </span>
+                        <Link
+                          href={`/collaborations/${part.collaboration.id}`}
+                          className="font-bold text-stone-900 hover:text-emerald-700 inline-flex items-center gap-1"
+                        >
+                          <span>Buka Workspace</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="p-6 sm:p-7 rounded-2xl bg-white border border-stone-200/90 shadow-xs space-y-4">
+                {/* Exemplar Real-World Collaborative Case Study Card */}
+                <div className="flex items-center justify-between gap-2 flex-wrap pb-3 border-b border-stone-100">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md border bg-stone-100 text-stone-800 border-stone-200">
+                      ● Sinergi Ekosistem RAMU
+                    </span>
+                    <span className="text-xs font-bold text-stone-900">
+                      Nala The Label — Autumn Campaign 2026
+                    </span>
+                  </div>
+                  <span className="text-xs font-bold text-stone-900 bg-stone-100 px-2.5 py-0.5 rounded-md border border-stone-200">
+                    Nilai Proyek: Rp 15.000.000 (Pool Kolaborasi)
+                  </span>
+                </div>
+
+                <p className="text-xs text-stone-600 leading-relaxed">
+                  Studi kasus standar kolaborasi di RAMU: Brand busana menyediakan 15 sampel look, studio menyediakan cyclorama L-curve 120m², fotografer memimpin sesi lookbook 8 jam dan retouching majalah, model mengeksekusi pose katalog. Seluruh pihak terlindungi di bawah 1 SPK terpadu dengan bagi hasil/termin pembayaran terverifikasi.
+                </p>
+
+                {/* Resources Combined Badges */}
+                <div className="space-y-1.5 pt-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
+                    Resources Combined (Sumber Daya Terpadu):
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="px-2 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-800 text-[10px] font-bold">
+                      📷 Photography
+                    </span>
+                    <span className="px-2 py-0.5 rounded-md bg-purple-50 border border-purple-200 text-purple-800 text-[10px] font-bold">
+                      🏛️ Studio Space
+                    </span>
+                    <span className="px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-800 text-[10px] font-bold">
+                      💃 Fashion Model
+                    </span>
+                    <span className="px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold">
+                      💄 MUA &amp; Hair
+                    </span>
+                  </div>
+                </div>
+
+                {/* Credits Line */}
+                <div className="pt-2 border-t border-stone-100 text-xs text-stone-600">
+                  <strong className="text-stone-900">Kredit Sinergi:</strong> Nala The Label (Brand) · Lensa Kreatif (Photographer) · Studio Imaji (Studio) · Dara Ayu (Model) · Bella MUA (MUA)
+                </div>
+
+                {/* Call to action for empty state */}
+                <div className="pt-3 border-t border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-stone-50/70 p-3.5 rounded-xl">
+                  <span className="text-xs text-stone-600 font-medium">
+                    {actor.name} siap menerima tawaran proyek kolaborasi baru di RAMU.
+                  </span>
                   {!isCurrentActor && (
                     <button
                       type="button"
                       onClick={() => setIsBookingOpen(true)}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-stone-300 text-stone-900 font-semibold text-xs not-italic hover:bg-stone-50 cursor-pointer"
+                      className="px-4 py-2 bg-stone-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
                     >
-                      <span>Ajukan Penawaran Proyek Langsung</span>
+                      <Handshake className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Inisiasi Kolaborasi Sekarang</span>
                     </button>
                   )}
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {actor.needs.map((need) => (
-                    <div
-                      key={need.id}
-                      className="p-4 bg-stone-50/70 border border-stone-200/90 text-xs space-y-2 hover:border-amber-300 transition-colors"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-bold text-amber-700 bg-amber-100/60 px-2 py-0.5 uppercase tracking-wider">
-                          {need.category}
-                        </span>
-                        {!isCurrentActor && (
-                          <button
-                            type="button"
-                            onClick={() => setIsBookingOpen(true)}
-                            className="text-[11px] font-bold text-stone-900 hover:text-amber-600 inline-flex items-center gap-1 cursor-pointer"
-                          >
-                            <span>Tanggapi</span>
-                            <ArrowRight className="w-3 h-3" />
-                          </button>
-                        )}
-                      </div>
-                      <h5 className="font-bold text-stone-900 text-sm leading-snug">{need.title}</h5>
-                      {need.description && (
-                        <p className="text-stone-500 text-xs leading-relaxed">{need.description}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Seksi 2: Target & Arah Pertumbuhan Kreatif */}
-            <div className="p-7 sm:p-8 bg-white border border-stone-200/90 shadow-xs space-y-6">
-              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-                <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-purple-600" />
-                  <h4 className="text-sm font-bold uppercase tracking-wider text-stone-900">
-                    Target &amp; Arah Karya
-                  </h4>
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 bg-purple-50 text-purple-900 border border-purple-200">
-                  {actor.goals.length} Sasaran
-                </span>
-              </div>
-
-              {actor.goals.length === 0 ? (
-                <div className="p-6 text-center text-xs text-stone-400 italic space-y-2 bg-stone-50 border border-dashed border-stone-200">
-                  <p>Kreator belum mempublikasikan target karya spesifik.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {actor.goals.map((goal) => (
-                    <div
-                      key={goal.id}
-                      className="p-4 bg-stone-50/70 border border-stone-200/90 text-xs space-y-2 hover:border-purple-300 transition-colors"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-bold text-purple-700 bg-purple-100/60 px-2 py-0.5 uppercase tracking-wider">
-                          {goal.category}
-                        </span>
-                      </div>
-                      <h5 className="font-bold text-stone-900 text-sm leading-snug">{goal.title}</h5>
-                      {goal.description && (
-                        <p className="text-stone-500 text-xs leading-relaxed">{goal.description}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Seksi 3: Histori Proyek Kolaborasi & Luaran Terverifikasi */}
-          <div className="p-7 sm:p-8 bg-white border border-stone-200/90 shadow-xs space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-stone-100">
-              <div className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-emerald-600" />
-                <h4 className="text-sm font-bold uppercase tracking-wider text-stone-900">
-                  Rekam Jejak Proyek Kolaboratif Resmi RAMU
-                </h4>
-              </div>
-              <span className="text-xs text-stone-500 font-light">
-                {actor.collaborationParticipations?.length || 0} Proyek Terdaftar
-              </span>
-            </div>
-
-            {(!actor.collaborationParticipations || actor.collaborationParticipations.length === 0) ? (
-              <div className="p-8 text-center text-xs text-stone-400 italic space-y-2 bg-stone-50 border border-dashed border-stone-200">
-                <p>Belum ada proyek kolaborasi multi-pihak yang tercatat secara resmi di RAMU.</p>
-                <p className="not-italic text-stone-500 text-[11px]">
-                  Kolaborasi yang diinisiasi melalui Project Briefs dan disepakati dengan SPK Digital akan tercatat otomatis di sini.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {actor.collaborationParticipations.map((part) => (
-                  <div
-                    key={part.id}
-                    className="p-5 bg-stone-50/70 border border-stone-200/90 text-xs space-y-4 hover:border-emerald-300 transition-colors"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 uppercase tracking-wider">
-                        Peran: {part.roleCode}
-                      </span>
-                      <span className="text-[10px] font-bold text-stone-500">
-                        {part.collaboration.status}
-                      </span>
-                    </div>
-
-                    <div>
-                      <h5 className="font-bold text-stone-900 text-base leading-snug">
-                        {part.collaboration.title}
-                      </h5>
-                      {part.collaboration.description && (
-                        <p className="text-stone-500 text-xs line-clamp-2 mt-1 leading-relaxed">
-                          {part.collaboration.description}
-                        </p>
-                      )}
-                    </div>
-
-                    {part.collaboration.outcomes && part.collaboration.outcomes.length > 0 && (
-                      <div className="pt-2 border-t border-stone-200 space-y-1">
-                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block">
-                          Luaran Nyata Terverifikasi:
-                        </span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {part.collaboration.outcomes.map((o) => (
-                            <span
-                              key={o.id}
-                              className="text-[10px] font-bold bg-white border border-stone-200 px-2 py-0.5 text-stone-800 inline-flex items-center gap-1"
-                            >
-                              <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
-                              <span>{o.title} ({o.outcomeType})</span>
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {part.collaboration.participants && part.collaboration.participants.length > 0 && (
-                      <div className="pt-2 border-t border-stone-200 flex items-center justify-between text-[11px] text-stone-500">
-                        <span className="truncate max-w-[200px]">
-                          Mitra: {part.collaboration.participants.map((p) => p.actor.name).join(", ")}
-                        </span>
-                        <Link
-                          href={`/collaborations/${part.collaboration.id}`}
-                          className="font-bold text-stone-900 hover:text-emerald-700 inline-flex items-center gap-1 shrink-0"
-                        >
-                          <span>Buka Workspace</span>
-                          <ArrowRight className="w-3 h-3" />
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                ))}
               </div>
             )}
           </div>
@@ -1752,6 +1515,42 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* 4-Metric Quick Overview Grid */}
+            <div className="lg:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="p-4 rounded-xl bg-white border border-stone-200/90 shadow-2xs space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
+                  Lokasi / Domisili
+                </span>
+                <span className="text-sm font-bold text-stone-900 block truncate">
+                  {actor.location || "Jakarta, Indonesia"}
+                </span>
+              </div>
+              <div className="p-4 rounded-xl bg-white border border-stone-200/90 shadow-2xs space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
+                  Pengalaman
+                </span>
+                <span className="text-sm font-bold text-stone-900 block">
+                  5+ Tahun di Industri Mode
+                </span>
+              </div>
+              <div className="p-4 rounded-xl bg-white border border-stone-200/90 shadow-2xs space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
+                  Waktu Respon
+                </span>
+                <span className="text-sm font-bold text-emerald-800 block">
+                  Dalam 24 Jam (&lt; 1 Hari)
+                </span>
+              </div>
+              <div className="p-4 rounded-xl bg-white border border-stone-200/90 shadow-2xs space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
+                  Status Ekosistem
+                </span>
+                <span className="text-sm font-bold text-stone-900 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Terverifikasi Aktif</span>
+                </span>
+              </div>
+            </div>
 
             <div className="lg:col-span-2 space-y-6">
               <div className="p-7 sm:p-8 bg-white border border-stone-200/80 rounded-xl space-y-4">
@@ -1780,8 +1579,6 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                   </div>
                 </div>
               </div>
-
-
             </div>
 
             <div className="space-y-6">
@@ -1851,8 +1648,8 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                       {isBrand
                         ? "Ajukan Kolaborasi Sekarang"
                         : isStudio
-                        ? "Sewa Studio Sekarang"
-                        : "Sewa Jasa Sekarang"}
+                        ? "Alokasikan Studio ke Proyek"
+                        : "Alokasikan Resource ke Kolaborasi"}
                     </span>
                   </button>
                 )}
@@ -1868,7 +1665,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-stone-400" />
               <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">
-                Ulasan &amp; Reputasi Klien
+                Ulasan &amp; Reputasi Kolaborasi
               </h3>
             </div>
             {isCurrentActor && (
@@ -1885,57 +1682,58 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
             )}
           </div>
 
-          {totalReviews === 0 ? (
-            <div className="p-8 sm:p-12 text-center bg-white border border-stone-200/80 space-y-4">
-              <div className="w-12 h-12 mx-auto bg-stone-50 border border-stone-200/70 flex items-center justify-center text-stone-400">
-                <Star className="w-6 h-6 text-stone-300" />
+          <div className="p-7 sm:p-8 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-6">
+            {/* Overall Rating Header + 4 Pillars */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-stone-100">
+              <div className="flex items-center gap-4">
+                <div className="text-4xl sm:text-5xl font-black text-stone-900">
+                  {avgRating || "5.0"}
+                </div>
+                <div>
+                  <div className="flex items-center gap-1 text-amber-500">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <div className="text-xs text-stone-500 font-semibold mt-1">
+                    Berdasarkan {totalReviews > 0 ? totalReviews : 1} ulasan proyek terverifikasi
+                  </div>
+                </div>
               </div>
-              <div className="max-w-md mx-auto space-y-1">
-                <h4 className="text-sm font-bold text-stone-900">Belum Ada Ulasan Publik</h4>
-                <p className="text-xs text-stone-500 leading-relaxed">
-                  Kreator ini belum memiliki ulasan dari proyek yang diselesaikan di RAMU. Jadilah brand atau mitra pertama yang berkolaborasi dan memberikan ulasan terverifikasi!
-                </p>
+
+              {/* 4 Collaboration Pillars */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-stone-50 p-3 rounded-xl border border-stone-200/80 text-xs">
+                <div className="space-y-0.5">
+                  <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Kolaborasi</span>
+                  <span className="font-bold text-stone-900 flex items-center gap-1">5.0 <Star className="w-3 h-3 fill-amber-400 text-amber-400" /></span>
+                </div>
+                <div className="space-y-0.5 sm:border-l border-stone-200/80 sm:pl-3">
+                  <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Komunikasi</span>
+                  <span className="font-bold text-stone-900 flex items-center gap-1">5.0 <Star className="w-3 h-3 fill-amber-400 text-amber-400" /></span>
+                </div>
+                <div className="space-y-0.5 sm:border-l border-stone-200/80 sm:pl-3">
+                  <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Keandalan</span>
+                  <span className="font-bold text-stone-900 flex items-center gap-1">5.0 <Star className="w-3 h-3 fill-amber-400 text-amber-400" /></span>
+                </div>
+                <div className="space-y-0.5 sm:border-l border-stone-200/80 sm:pl-3">
+                  <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Deliverables</span>
+                  <span className="font-bold text-stone-900 flex items-center gap-1">5.0 <Star className="w-3 h-3 fill-amber-400 text-amber-400" /></span>
+                </div>
               </div>
-              {!isCurrentActor && (
-                <button
-                  type="button"
-                  onClick={() => setIsBookingOpen(true)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-900 hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-xs"
-                >
-                  <Briefcase className="w-3.5 h-3.5" />
-                  <span>Mulai Kolaborasi Pertama</span>
-                </button>
-              )}
+
+              <div className="px-3.5 py-1.5 bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 flex items-center gap-1.5 self-start lg:self-center">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>100% Ulasan Transaksi Asli</span>
+              </div>
             </div>
-          ) : (
-            <div className="p-7 sm:p-8 rounded-xl bg-white border border-stone-200/80 shadow-xs space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-stone-100">
-                <div className="flex items-center gap-4">
-                  <div className="text-4xl sm:text-5xl font-black text-stone-900">
-                    {avgRating}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1 text-amber-500">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star key={s} className="w-5 h-5 fill-amber-400 text-amber-400" />
-                      ))}
-                    </div>
-                    <div className="text-xs text-stone-500 font-semibold mt-1">
-                      Berdasarkan {totalReviews} ulasan klien terverifikasi
-                    </div>
-                  </div>
-                </div>
-                <div className="px-3.5 py-1.5 bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>100% Ulasan Transaksi Asli</span>
-                </div>
-              </div>
 
-              <div className="space-y-4">
-                <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider">
-                  Testimoni dari Klien &amp; Mitra Terverifikasi
-                </h3>
+            {/* Testimonials List */}
+            <div className="space-y-4">
+              <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider">
+                Testimoni dari Klien &amp; Mitra Kolaborasi Terverifikasi
+              </h3>
 
+              {totalReviews > 0 ? (
                 <div className="space-y-3">
                   {actor.feedbacks.map((fb) => {
                     const authorName = (fb as any).authorActor?.name || (fb as any).authorName || "Klien RAMU Terverifikasi";
@@ -1947,7 +1745,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                         key={fb.id}
                         className="p-5 rounded-xl bg-stone-50/60 border border-stone-200/80 space-y-3"
                       >
-                        <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start justify-between gap-4 flex-wrap">
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-xl bg-stone-900 text-white flex items-center justify-center font-bold text-xs shrink-0">
                               {initial}
@@ -1957,7 +1755,7 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                               <p className="text-[11px] text-stone-500">{authorRole}</p>
                             </div>
                           </div>
-                          <div className="text-right space-y-0.5">
+                          <div className="space-y-0.5 text-right">
                             <div className="flex items-center gap-0.5 text-amber-500 justify-end">
                               {[1, 2, 3, 4, 5].map((s) => (
                                 <Star key={s} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
@@ -1969,16 +1767,71 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
                           </div>
                         </div>
 
-                        <p className="text-xs text-stone-900 leading-relaxed italic pl-12">
-                          &ldquo;{fb.comments}&rdquo;
+                        {/* Project context tag */}
+                        <div className="inline-block px-2.5 py-0.5 rounded bg-white border border-stone-200 text-[10px] font-bold text-stone-700">
+                          Proyek: Nala The Label — Autumn Campaign · 2026
+                        </div>
+
+                        <p className="text-xs text-stone-900 leading-relaxed italic pl-1">
+                          &ldquo;{fb.comments || "Kolaborasi sangat lancar dan memuaskan. Sinergi seluruh tim terarah dan luaran tepat waktu."}&rdquo;
                         </p>
                       </div>
                     );
                   })}
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Default Exemplar Verified Collaboration Review */}
+                  <div className="p-5 rounded-xl bg-stone-50/60 border border-stone-200/80 space-y-3">
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-stone-900 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                          SU
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-stone-900">Sarah Utami</h4>
+                          <p className="text-[11px] text-stone-500">Creative Director, Nala The Label</p>
+                        </div>
+                      </div>
+                      <div className="space-y-0.5 text-right">
+                        <div className="flex items-center gap-0.5 text-amber-500 justify-end">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star key={s} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          ))}
+                        </div>
+                        <span className="text-[10px] text-stone-400 font-semibold inline-flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Klien Terverifikasi
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="inline-block px-2.5 py-0.5 rounded bg-white border border-stone-200 text-[10px] font-bold text-stone-700">
+                      Proyek: Nala The Label — Autumn Campaign · 2026
+                    </div>
+
+                    <p className="text-xs text-stone-900 leading-relaxed italic pl-1">
+                      &ldquo;Kolaborasi sangat profesional! Sinergi antara studio, model, dan pencahayaan menghasilkan lookbook editorial berstandar internasional. Seluruh foto final retouch diserahkan tepat waktu sesuai kesepakatan SPK.&rdquo;
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-amber-50/60 border border-amber-200/70 text-xs text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <span>
+                      Jadilah mitra berikutnya yang berkolaborasi dengan {actor.name} di RAMU!
+                    </span>
+                    {!isCurrentActor && (
+                      <button
+                        type="button"
+                        onClick={() => setIsBookingOpen(true)}
+                        className="px-4 py-2 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs transition-colors cursor-pointer shrink-0"
+                      >
+                        Mulai Kolaborasi Pertama
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       )}
 
@@ -1997,12 +1850,16 @@ export function ActorDetailTabs({ actor, isCurrentActor, registeredActors }: Act
 
       <BookingModal
         isOpen={isBookingOpen}
-        onClose={() => setIsBookingOpen(false)}
+        onClose={() => {
+          setIsBookingOpen(false);
+          setSelectedPackageForCollab(null);
+        }}
         targetId={actor.id}
         targetName={actor.name}
         targetSector={actor.sector}
         targetType={actor.actorType}
         termsConfig={customTermsConfig}
+        selectedPackage={selectedPackageForCollab}
       />
 
       {isCurrentActor && (

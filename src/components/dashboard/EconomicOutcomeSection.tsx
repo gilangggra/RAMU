@@ -38,14 +38,14 @@ const DEFAULT_ACTIVATED_RESOURCES: ActivatedResourceItem[] = [
     resourceName: "Fasilitas Studio",
     detail: "1 Shift Cyclorama Daylight (8 Jam)",
     provider: "Studio Imaji & Co.",
-    badge: "Ruang Idle Terpakai",
+    badge: "Studio Siap Pakai",
   },
   {
     role: "Photographer",
     resourceName: "Kamera & Lighting",
     detail: "Sony A7IV + Profoto B10 Kit",
     provider: "Lensa Kreatif Studio",
-    badge: "Gear Komplementer",
+    badge: "Kamera & Lighting",
   },
   {
     role: "Model",
@@ -94,23 +94,23 @@ export function EconomicOutcomeSection({
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/70">
-              Core 6 • Collaboration Outcome &amp; Economic Impact
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/70">
+              Dampak Kolektif Ekosistem
             </span>
           </div>
-          <h2 className="text-lg font-bold text-stone-900 tracking-tight mt-1">
-            Dampak Ekonomi Kolaboratif (Economic Outcome)
+          <h2 className="text-lg font-bold text-stone-900 tracking-tight mt-1.5">
+            Dampak Kolaborasi &amp; Efisiensi Bersama
           </h2>
           <p className="text-xs text-stone-500 leading-relaxed max-w-xl font-normal mt-0.5">
-            Transparansi perputaran ekonomi kreatif, optimalisasi kapasitas menganggur (idle resources), dan efisiensi biaya nyata yang teraktivasi melalui ekosistem RAMU.
+            Transparansi nilai perputaran produksi, efisiensi pengadaan aset bersama, dan hasil karya nyata yang terwujud di ekosistem RAMU.
           </p>
         </div>
 
         <Link
           href="/collaborations"
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-semibold transition-colors shrink-0 shadow-2xs"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-semibold transition-colors shrink-0 shadow-2xs"
         >
-          <span>Buka Ruang Proyek</span>
+          <span>Buka Workspace Proyek</span>
           <ArrowRight className="w-3.5 h-3.5 text-stone-300" />
         </Link>
       </div>
@@ -179,10 +179,10 @@ export function EconomicOutcomeSection({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
           <div className="flex items-center gap-2 font-bold text-stone-800 uppercase tracking-wider text-[11px]">
             <Layers className="w-3.5 h-3.5 text-stone-700" />
-            <span>Aset Menganggur yang Berhasil Teraktivasi (Ekosistem 6 Peran):</span>
+            <span>Sinergi Sumber Daya yang Teraktivasi Bersama:</span>
           </div>
           <span className="text-stone-500 text-[11px]">
-            Terverifikasi Melalui SPK Multi-Pihak
+            Terverifikasi Melalui SPK Terpadu
           </span>
         </div>
 
@@ -214,7 +214,7 @@ export function EconomicOutcomeSection({
 
               <div className="pt-2 border-t border-stone-100 flex items-center justify-between text-[10px] text-stone-500">
                 <span className="truncate font-medium">{item.provider}</span>
-                <span className="text-emerald-700 font-bold shrink-0">✓ Aktif</span>
+                <span className="text-emerald-700 font-bold shrink-0">✓ Siap Kolaborasi</span>
               </div>
             </div>
           ))}
@@ -224,7 +224,7 @@ export function EconomicOutcomeSection({
         <div className="pt-3 border-t border-stone-200/60 flex items-center gap-2 text-stone-600 text-xs leading-relaxed">
           <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
           <span>
-            <strong>Prinsip Ekonomi Kolaboratif RAMU:</strong> Pelaku usaha kreatif tidak perlu memiliki seluruh inventaris modal secara individual. Menggabungkan kapasitas menganggur (idle capacity) dari mitra terverifikasi menghemat hingga 45% anggaran produksi dan membuka perputaran pendapatan bersama.
+            <strong>Prinsip Ekonomi Kolaboratif RAMU:</strong> Pelaku usaha kreatif tidak perlu memiliki seluruh alat &amp; studio sendiri. Berkolaborasi dengan mitra terverifikasi menghemat hingga 45% biaya produksi dan menghasilkan luaran komersial berkualitas tinggi.
           </span>
         </div>
       </div>

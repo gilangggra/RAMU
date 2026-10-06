@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   FileText,
   Printer,
@@ -90,15 +91,27 @@ function ArticleHead({ n, title }: { n: number | React.ReactNode; title: string 
 }
 
 export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSign }: Props) {
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [isSigning, setIsSigning] = useState(false);
   const [signMsg, setSignMsg] = useState<string | null>(null);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [isPadOpen, setIsPadOpen] = useState(false);
+  const [hasDrawn, setHasDrawn] = useState(false);
+  const [locallySignedAt, setLocallySignedAt] = useState<string | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const isDrawingRef = useRef(false);
   const printableRef = useRef<HTMLDivElement | null>(null);
 
   if (!isOpen) return null;
 
-  const allParties: SpkParticipant[] = [data.initiator, ...data.participants];
+  const rawParties: SpkParticipant[] = [data.initiator, ...data.participants];
+  const allParties: SpkParticipant[] = rawParties.map((p) => {
+    if (p.id === currentActorId && locallySignedAt && !p.signedAt) {
+      return { ...p, signedAt: locallySignedAt };
+    }
+    return p;
+  });
   const total = allParties.length;
 
   const d = new Date(data.createdAt);
@@ -114,11 +127,6 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
   const iSigned = Boolean(me?.signedAt);
   const allSigned = allParties.every((p) => Boolean(p.signedAt));
   const signedCount = allParties.filter((p) => Boolean(p.signedAt)).length;
-
-  const [isPadOpen, setIsPadOpen] = useState(false);
-  const [hasDrawn, setHasDrawn] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const isDrawingRef = useRef(false);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     isDrawingRef.current = true;
@@ -170,8 +178,11 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
     try {
       const r = await onSign(data.collaborationId);
       if (r.success) {
+        const nowIso = new Date().toISOString();
+        setLocallySignedAt(nowIso);
         setIsPadOpen(false);
         setSignMsg("Tanda tangan digital Anda berhasil dibubuhkan secara sah pada SPK.");
+        router.refresh();
       } else {
         setSignMsg(r.error ?? "Gagal menandatangani dokumen.");
       }

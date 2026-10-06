@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { initiateCollaboration } from "@/app/collaborations/actions";
 import { Sparkles } from "lucide-react";
+import { toast } from "@/components/ui/Toast";
 
 export function InitiateCollaborationButton({ opportunityId }: { opportunityId: string }) {
   const [loading, setLoading] = useState(false);
@@ -14,12 +15,13 @@ export function InitiateCollaborationButton({ opportunityId }: { opportunityId: 
     try {
       const res = await initiateCollaboration(opportunityId);
       if (res.success && res.collaborationId) {
+        toast.success("Kolaborasi berhasil diinisiasi!");
         router.push(`/collaborations/${res.collaborationId}`);
       } else {
-        alert(res.error || "Gagal menginisiasi kolaborasi.");
+        toast.error(res.error || "Gagal menginisiasi kolaborasi.");
       }
     } catch {
-      alert("Terjadi kesalahan teknis.");
+      toast.error("Terjadi kesalahan teknis saat menginisiasi kolaborasi.");
     } finally {
       setLoading(false);
     }
@@ -58,7 +60,7 @@ export function InitiateCollaborationButton({ opportunityId }: { opportunityId: 
       ) : (
         <>
           <Sparkles className="w-4 h-4 group-hover:scale-110 transition-transform text-stone-950" />
-          <span>Inisiasi Rencana Kolaborasi (Buka Workspace)</span>
+          <span>Mulai Workspace Kolaborasi</span>
         </>
       )}
     </button>

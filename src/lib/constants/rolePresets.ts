@@ -1,12 +1,22 @@
 import { TermsAndConditionsConfig } from "@/components/settings/RatesForm";
 
+export type PackageTier = "STARTER" | "CAMPAIGN" | "COMMERCIAL";
+
 export interface ServicePackage {
+  id?: string;
+  tier?: PackageTier;
   title: string;
   subtitle: string;
   price: string;
   unit: string;
-  popular?: boolean;
-  features: string[];
+  // 4 Structured Scope Dimensions:
+  capacityDuration?: string;    // Durasi/Kapasitas (e.g. "4 Jam (Setengah Hari)")
+  deliverablesSummary?: string; // Deliverables Nyata (e.g. "15 Foto Final Retouch + Semua RAW")
+  usageRights?: string;         // Lisensi Hak Siar (e.g. "Komersial Digital Sosmed & Web 6 Bulan")
+  equipmentIncluded?: string;   // Gear/Fasilitas Terbawa (e.g. "Kamera Full-frame + Lighting Strobo Kit")
+  collaborationCount?: number;  // Data-driven counter
+  popular?: boolean;            // Backward compatibility
+  features: string[];           // Rincian poin
 }
 
 /**
@@ -87,10 +97,31 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
     ],
     packages: [
       {
+        tier: "STARTER",
+        title: "Katalog & E-Commerce Listing",
+        subtitle: "Sesi foto katalog produk bersih untuk peluncuran marketplace & webstore",
+        price: "Sesuai Brief",
+        unit: "per katalog",
+        capacityDuration: "1 – 2 Hari Sesi",
+        deliverablesSummary: "Penyediaan 10 sampel busana bersih & terstandar",
+        usageRights: "Komersial Digital (Webstore & Marketplace)",
+        equipmentIncluded: "Garmen sampel siap pakai + Hanger khusus",
+        features: [
+          "Foto produk packshot & on-model terstandar",
+          "Penyediaan garmen rapi & siap dipotret",
+          "Penggunaan hak tayang komersial digital",
+        ],
+      },
+      {
+        tier: "CAMPAIGN",
         title: "Kolaborasi Kampanye Lookbook",
         subtitle: "Penyediaan sampel busana & pendanaan produksi lookbook koleksi baru",
         price: "Sesuai Brief",
         unit: "per kampanye",
+        capacityDuration: "2 – 4 Minggu Timeline",
+        deliverablesSummary: "10-15 Look Busana Sampel + Alokasi Dana Produksi",
+        usageRights: "Komersial Digital & Sosial Media 1 Tahun",
+        equipmentIncluded: "Wardrobe set lengkap + Akomodasi pengiriman",
         popular: true,
         features: [
           "Penyediaan 10-15 look busana sampel siap fitting",
@@ -100,28 +131,20 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
         ],
       },
       {
+        tier: "COMMERCIAL",
         title: "Co-Branding Koleksi Kapsul",
         subtitle: "Kemitraan pembuatan lini produk eksklusif edisi terbatas dengan sistem bagi hasil",
         price: "Bagi Hasil",
         unit: "per koleksi",
-        popular: false,
+        capacityDuration: "1 Musim Rilis (3 Bulan)",
+        deliverablesSummary: "Produksi Batch Lini Busana Bersama Mitra",
+        usageRights: "Hak Komersial Eksklusif Multi-Kanal",
+        equipmentIncluded: "Jaringan Distribusi Retail & E-Commerce Resmi",
         features: [
           "Pengembangan desain bersama desainer & kolaborator",
           "Distribusi retail & penjualan di platform resmi brand",
           "Bagi hasil transparan dari penjualan bersih",
           "Hak cipta & kredit bersama diakui dalam SPK",
-        ],
-      },
-      {
-        title: "Katalog & E-Commerce Listing",
-        subtitle: "Sesi foto katalog bersih untuk peluncuran marketplace & website",
-        price: "Sesuai Brief",
-        unit: "per proyek",
-        popular: false,
-        features: [
-          "Foto produk packshot & on-model terstandar",
-          "Penyediaan garmen rapi & siap dipotret",
-          "Penggunaan hak tayang komersial digital",
         ],
       },
     ],
@@ -173,11 +196,15 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
     ],
     packages: [
       {
-        title: "Identitas Visual & Brand Kit",
-        subtitle: "Panduan visual brand busana lengkap untuk rilis koleksi baru",
-        price: "Rp 2.000.000",
+        tier: "STARTER",
+        title: "Identitas Visual & Sketsa Konsep",
+        subtitle: "Panduan visual brand busana dan sketsa konsep untuk rilis baru",
+        price: "Rp 1.500.000",
         unit: "per proyek",
-        popular: false,
+        capacityDuration: "5 – 7 Hari Kerja",
+        deliverablesSummary: "Moodboard Konsep + 5 Sketsa Desain 2D",
+        usageRights: "Hak Pakai Konsep Digital & Internal Brand",
+        equipmentIncluded: "Aset vektor master file (AI, PDF) + Color Palette",
         features: [
           "Panduan logo, tipografi, dan palet warna busana",
           "Template visual lookbook & feed media sosial",
@@ -186,10 +213,15 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
         ],
       },
       {
+        tier: "CAMPAIGN",
         title: "Desain Koleksi Busana & Tech-Pack",
         subtitle: "Pengembangan konsep busana siap jahit dan spesifikasi garmen pabrik",
         price: "Rp 3.500.000",
         unit: "per koleksi",
+        capacityDuration: "10 – 14 Hari Kerja",
+        deliverablesSummary: "Tech-Pack Lengkap 6-8 Outfit + Rekomendasi Kain",
+        usageRights: "Lisensi Produksi Koleksi Musiman",
+        equipmentIncluded: "Spesifikasi Fabrikasi + Panduan Jahit Garmen",
         popular: true,
         features: [
           "Riset tren & moodboard konsep koleksi (5-8 outfit)",
@@ -200,11 +232,15 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
         ],
       },
       {
+        tier: "COMMERCIAL",
         title: "Pembuatan Pola & Sampel Fisik (Toille)",
         subtitle: "Pengerjaan prototipe fisik busana pertama siap fitting bersama model",
         price: "Rp 5.500.000",
         unit: "per koleksi",
-        popular: false,
+        capacityDuration: "14 – 21 Hari Kerja",
+        deliverablesSummary: "Pola Presisi Butik + Sampel Fisik Siap Fitting",
+        usageRights: "Hak Cipta Desain Penuh (Commercial Buyout)",
+        equipmentIncluded: "1x Sesi Fitting Langsung Model On-Set",
         features: [
           "Pembuatan pola presisi (pattern making) ukuran standar",
           "Pengerjaan sampel fisik busana (toille mock-up)",
@@ -265,11 +301,15 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
     ],
     packages: [
       {
-        title: "Lookbook Half-Day",
-        subtitle: "Sesi foto lookbook esensial untuk rilis katalog busana baru",
+        tier: "STARTER",
+        title: "Lookbook Half-Day (Starter)",
+        subtitle: "Sesi foto lookbook esensial untuk emerging brand & katalog awal",
         price: "Rp 1.500.000",
         unit: "per 4 jam",
-        popular: false,
+        capacityDuration: "4 Jam (Setengah Shift)",
+        deliverablesSummary: "15 Foto Final Retouch High-Res + Semua RAW H+1",
+        usageRights: "Komersial Digital (Sosmed & Web) 6 Bulan",
+        equipmentIncluded: "1 Kamera Sony A7IV + 2 Lensa Prime/Zoom + 1 Strobo Kit",
         features: [
           "1 Kamera profesional + Lensa prime/zoom",
           "15 Foto final retouch resolusi tinggi",
@@ -279,10 +319,15 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
         ],
       },
       {
-        title: "Kampanye Penuh (Full-Day)",
-        subtitle: "Produksi visual lookbook komprehensif untuk kampanye utama rilis busana",
+        tier: "CAMPAIGN",
+        title: "Kampanye Lookbook Penuh (Campaign)",
+        subtitle: "Produksi visual lookbook komprehensif untuk peluncuran utama koleksi busana",
         price: "Rp 2.800.000",
         unit: "per 8 jam",
+        capacityDuration: "8 Jam (Full-Day Shift)",
+        deliverablesSummary: "35 Foto Final Retouch Komersial Majalah + Tethering On-Set",
+        usageRights: "Komersial Digital & Cetak 1 Tahun",
+        equipmentIncluded: "2 Kamera Pro + Full Studio Strobe Kit (Profoto/Godox)",
         popular: true,
         features: [
           "2 Kamera profesional + Full lighting kit bawaan",
@@ -294,16 +339,21 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
         ],
       },
       {
-        title: "Katalog & E-Commerce Packshot",
-        subtitle: "Foto katalog produk bersih untuk marketplace & website resmi",
-        price: "Rp 1.200.000",
-        unit: "per 20 produk",
-        popular: false,
+        tier: "COMMERCIAL",
+        title: "Produksi Visual Komersial & Video Teaser",
+        subtitle: "Produksi visual komersial multi-channel foto dan video teaser media sosial",
+        price: "Rp 4.500.000",
+        unit: "per proyek",
+        capacityDuration: "10 – 12 Jam / 2 Sesi",
+        deliverablesSummary: "50 Foto Retouch Majalah + 2 Video Reels 4K Sinematik",
+        usageRights: "Komersial Multi-Kanal (OOH Billboard & Paid Ads) 2 Tahun",
+        equipmentIncluded: "Setup Multi-Cam + Continuous Lighting Kit + Gimbal",
         features: [
-          "Background putih / seamless bersih seragam",
-          "3 Sudut foto per pakaian (Depan, Belakang, Detail)",
+          "Background putih / seamless & creative set lighting",
+          "50 Foto final retouch kualitas billboard & lookbook",
+          "2 Video Reels / TikTok sinematik durasi 30-45 detik",
           "Batch color matching akurat dengan warna kain asli",
-          "Format siap upload Tokopedia, Shopee, & Website",
+          "Lisensi komersial penuh multi-channel",
         ],
       },
     ],
@@ -354,11 +404,15 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
     ],
     packages: [
       {
-        title: "Katalog & E-Commerce",
+        tier: "STARTER",
+        title: "Katalog & E-Commerce (Starter)",
         subtitle: "Foto produk katalog marketplace & webstore brand",
         price: "Rp 1.000.000",
         unit: "per 4 jam",
-        popular: false,
+        capacityDuration: "4 Jam (Setengah Hari)",
+        deliverablesSummary: "Maksimal 12-15 Look Busana Katalog Bersih",
+        usageRights: "Komersial Marketplace & Webstore 6 Bulan",
+        equipmentIncluded: "Standby fitting 30 menit pra-sesi pemotretan",
         features: [
           "Maksimal 12-15 look busana siap pakai",
           "Pose katalog rapi, proporsional & konsisten",
@@ -367,10 +421,15 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
         ],
       },
       {
+        tier: "CAMPAIGN",
         title: "Editorial Lookbook & Campaign",
         subtitle: "Pemodelan kampanye rilis busana dengan eksplorasi gaya dinamis",
         price: "Rp 1.800.000",
         unit: "per 8 jam",
+        capacityDuration: "8 Jam (Full-Day Shift)",
+        deliverablesSummary: "Unlimited Look dalam Shift + Pose Dramatis Editorial",
+        usageRights: "Komersial Media Sosial, Web & PR 1 Tahun",
+        equipmentIncluded: "1x Fitting Pra-Produksi Terpisah + Kolaborasi Feeds",
         popular: true,
         features: [
           "Eksplorasi pose editorial & ekspresi dramatis sesuai moodboard",
@@ -378,6 +437,23 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
           "Standby on-set penuh hingga 8 jam",
           "Hak guna media sosial, website, & press release 1 tahun",
           "Dukungan posting kolaborasi Instagram/TikTok feeds",
+        ],
+      },
+      {
+        tier: "COMMERCIAL",
+        title: "Video TVC & Brand Ambassador",
+        subtitle: "Iklan komersial video sinematik, billboard, atau digital ads",
+        price: "Rp 3.500.000",
+        unit: "per proyek",
+        capacityDuration: "12 Jam / Multi-Day Sesi",
+        deliverablesSummary: "Akting Video TVC + Sesi Foto Komersial Utama",
+        usageRights: "Hak Siar Komersial Multi-Channel (Ads & Billboard) 1 Tahun",
+        equipmentIncluded: "Eksklusivitas Kategori Busana Musiman + 1 Post Endorsement",
+        features: [
+          "Video acting & dialog / voiceover",
+          "Hak guna komersial multi-channel (Ads & Billboard)",
+          "1x Post feed & 2x Story endorsement di akun talent",
+          "Kontrak eksklusivitas kategori busana",
         ],
       },
     ],
@@ -429,45 +505,58 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
     ],
     packages: [
       {
-        title: "Lookbook Styling & Makeup Starter",
-        subtitle: "Padu padan outfit dan riasan HD untuk katalog & lookbook",
-        price: "Rp 1.400.000",
+        tier: "STARTER",
+        title: "Single Look & Makeup Express (Starter)",
+        subtitle: "Riasan natural HD dan penataan rambut untuk sesi katalog ringkas 1 model",
+        price: "Rp 800.000",
         unit: "per 4 jam",
-        popular: true,
+        capacityDuration: "4 Jam (Setengah Shift)",
+        deliverablesSummary: "1-2 Model Katalog + Touch-up Standby On-Set",
+        usageRights: "Komersial Digital (Webstore & Media Sosial) 1 Tahun",
+        equipmentIncluded: "Kosmetik High-End Hypoallergenic + Basic Hair Kit",
         features: [
-          "Kurasi hingga 8 look busana siap pakai",
-          "Makeup HD tahan lampu studio & keringat",
-          "Hair styling atau hijab do rapi",
-          "Disediakan garment steamer & perlengkapan fitting on-set",
-          "Standby touch-up aktif selama 4 jam kerja",
+          "1 Model katalog atau lookbook ringkas",
+          "Makeup HD natural glow tahan lampu studio",
+          "Basic hair styling atau hijab do rapi",
+          "Pemasangan bulu mata premium",
+          "Standby touch-up aktif selama sesi",
         ],
       },
       {
-        title: "Campaign Full-Day Direction",
-        subtitle: "Pengarahan gaya komprehensif dan tata rias penuh kampanye peluncuran busana",
-        price: "Rp 2.800.000",
+        tier: "CAMPAIGN",
+        title: "Lookbook Styling & Makeup Direction (Campaign)",
+        subtitle: "Padu padan outfit dan pengarahan tata rias penuh kampanye peluncuran busana",
+        price: "Rp 1.800.000",
         unit: "per 8 jam",
-        popular: false,
+        capacityDuration: "8 Jam (Full-Day Shift)",
+        deliverablesSummary: "Kurasi 10-15 Look Head-to-Toe + 2-3 Variasi Riasan",
+        usageRights: "Komersial Digital & Cetak Majalah 1 Tahun",
+        equipmentIncluded: "Garment Steamer + Fitting Kit + Aksesoris Tambahan",
+        popular: true,
+        features: [
+          "Kurasi hingga 15 look busana siap pakai",
+          "Makeup HD tahan lampu studio & keringat",
+          "Hair styling atau hijab do variatif sesuai tema",
+          "Disediakan garment steamer & perlengkapan fitting on-set",
+          "Standby touch-up aktif selama 8 jam kerja",
+        ],
+      },
+      {
+        tier: "COMMERCIAL",
+        title: "Editorial Avant-Garde & High Fashion (Commercial)",
+        subtitle: "Pengarahan gaya komprehensif editorial avant-garde untuk kampanye besar",
+        price: "Rp 3.200.000",
+        unit: "per proyek",
+        capacityDuration: "Sesi Penuh + Riset Konsep",
+        deliverablesSummary: "Konsep Riasan Eksperimental + Custom Wardrobe Styling",
+        usageRights: "Hak Cipta Publikasi Komersial Penuh (Multi-Channel)",
+        equipmentIncluded: "Custom Props Styling + Makeup SFX/Prostetik Halus",
         features: [
           "Moodboard konsep styling & palet makeup selaras DNA brand",
           "Kurasi 15-20 look head-to-toe lengkap",
-          "Pergantian 2-3 variasi makeup & hairdo sesuai konsep",
+          "Pergantian variasi makeup & hairdo dramatis",
           "Peminjaman aksesoris pendukung esensial",
-          "Standby penuh 8 jam di set indoor maupun outdoor",
-          "Pembersihan makeup & pengembalian wardrobe rapi",
-        ],
-      },
-      {
-        title: "Single Look Express",
-        subtitle: "Riasan dan penataan busana untuk sesi foto ringkas 1 model",
-        price: "Rp 750.000",
-        unit: "per look",
-        popular: false,
-        features: [
-          "1 Model katalog atau lookbook",
-          "Makeup HD + basic hair styling",
-          "Pemasangan bulu mata premium gratis",
-          "Standby touch-up 30 menit awal",
+          "Standby penuh di set indoor maupun outdoor",
         ],
       },
     ],
@@ -519,11 +608,15 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
     ],
     packages: [
       {
-        title: "Shift Setengah Hari (Half-Day)",
+        tier: "STARTER",
+        title: "Shift Setengah Hari (Starter)",
         subtitle: "Sesi foto katalog, podcast, atau lookbook ringkas",
         price: "Rp 750.000",
         unit: "per 4 jam",
-        popular: false,
+        capacityDuration: "4 Jam (Setengah Shift)",
+        deliverablesSummary: "Akses Area Cyclorama Wall + Ruang Rias Ber-AC",
+        usageRights: "Bebas Hak Tayang Komersial (Perpetual / Selamanya)",
+        equipmentIncluded: "Daya Listrik 16.500W (3-Phase) + 1 Asisten Studio Standby",
         features: [
           "Akses area cyclorama wall & ruang makeup ber-AC",
           "Daya listrik 16.500 Watt (3-Phase)",
@@ -532,10 +625,15 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
         ],
       },
       {
-        title: "Shift Penuh (Full-Day)",
-        subtitle: "Pilihan utama untuk campaign lookbook & video komersial",
+        tier: "CAMPAIGN",
+        title: "Shift Penuh Lookbook (Campaign)",
+        subtitle: "Pilihan utama untuk campaign lookbook & video komersial brand",
         price: "Rp 1.400.000",
         unit: "per 8 jam",
+        capacityDuration: "8 Jam (Full-Day Shift)",
+        deliverablesSummary: "Akses Seluruh Area Studio + Fitting Room VIP + Setup Lighting",
+        usageRights: "Bebas Hak Tayang Komersial (Perpetual / Selamanya)",
+        equipmentIncluded: "2 Asisten Standby + Bebas Ganti Seamless Background",
         popular: true,
         features: [
           "Akses penuh seluruh area studio & fitting room",
@@ -546,14 +644,18 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
         ],
       },
       {
-        title: "Produksi Besar / 12 Jam",
-        subtitle: "Untuk syuting kampanye lookbook besar atau multi-brand",
+        tier: "COMMERCIAL",
+        title: "Produksi Skala Penuh & Syuting Video (Commercial)",
+        subtitle: "Untuk syuting kampanye lookbook besar, TVC, atau multi-brand",
         price: "Rp 2.200.000",
         unit: "per 12 jam",
-        popular: false,
+        capacityDuration: "12 Jam Produksi Penuh",
+        deliverablesSummary: "Akses Eksklusif Seluruh Venue + Prioritas Jadwal",
+        usageRights: "Bebas Hak Tayang Komersial (Perpetual / Selamanya)",
+        equipmentIncluded: "Izin Heavy-Duty Gear + Ruang Tunggu VIP & Free Parking Kru",
         features: [
           "Prioritas jadwal & booking slot",
-          "Izin pemakaian heavy-duty lighting",
+          "Izin pemakaian heavy-duty lighting / generator",
           "Overtime grace period 30 menit",
           "Akses pantry & ruang tunggu VIP",
         ],

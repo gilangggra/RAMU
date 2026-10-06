@@ -37,15 +37,15 @@ export function CollaborationMatchesWidget({ matches }: CollaborationMatchesWidg
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-600 bg-stone-100 px-2 py-0.5 rounded border border-stone-200/70">
-              Core 2 • Collaboration Matching
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/70">
+              Rekomendasi Cerdas
             </span>
           </div>
-          <h2 className="text-lg font-bold text-stone-900 tracking-tight mt-1">
-            Rekomendasi Kolaborasi Komplementer (Matches)
+          <h2 className="text-lg font-bold text-stone-900 tracking-tight mt-1.5">
+            Rekomendasi Kolaborasi Komplementer
           </h2>
           <p className="text-xs text-stone-500 leading-relaxed max-w-xl">
-            Sistem mencocokkan aset &amp; kebutuhan antar pelaku kreatif secara objektif berdasarkan 4 pilar kecocokan: Peran Komplementer, DNA Estetika/Tag, Domisili Lokasi, dan Ketersediaan Jadwal.
+            Sistem mencocokkan aset &amp; keahlian antar pelaku kreatif berdasarkan keselarasan peran, gaya visual, domisili, dan jadwal kerja.
           </p>
         </div>
 
@@ -53,7 +53,7 @@ export function CollaborationMatchesWidget({ matches }: CollaborationMatchesWidg
           href="/collaborate"
           className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200/80 text-xs font-semibold transition-colors shrink-0 shadow-2xs"
         >
-          <span>Buka Matching Hub</span>
+          <span>Lihat Semua Rekomendasi</span>
           <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
         </Link>
       </div>
@@ -91,12 +91,12 @@ export function CollaborationMatchesWidget({ matches }: CollaborationMatchesWidg
                 <div className="p-3 rounded-xl bg-white border border-stone-200/80 space-y-1.5 text-[11px] shadow-2xs">
                   <div className="font-bold text-stone-800 flex items-center gap-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Why This Match?</span>
+                    <span>Alasan Keselarasan:</span>
                   </div>
                   <ul className="space-y-1 text-stone-600 pl-4 list-disc text-[10px] leading-tight">
-                    <li>3 dari 3 kebutuhan proyek terpenuhi oleh profil mitra.</li>
-                    <li>Mengaktifkan kapasitas studio &amp; gear menganggur.</li>
-                    <li>Domisili lokasi dan ketersediaan jadwal selaras.</li>
+                    <li>Kebutuhan peran dan peralatan proyek saling melengkapi.</li>
+                    <li>Studio &amp; perlengkapan produksi siap digunakan.</li>
+                    <li>Domisili lokasi dan ketersediaan jadwal kerja selaras.</li>
                   </ul>
                 </div>
 

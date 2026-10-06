@@ -47,6 +47,13 @@ export interface PhotographerAttributes {
   video_format?: string;
   editing_software?: string[];
   specialties?: string[];
+  capabilities?: string[];
+  backdrop_types?: string[];
+  tethering_available?: boolean;
+  shooting_duration_shift?: string;
+  max_people_onset?: number;
+  max_locations_per_day?: number;
+  deliverables?: string[];
   delivery_time_days?: number;
   rate_starting_at?: string;
   gear_showcase?: GearShowcaseItem[];
@@ -293,6 +300,66 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
             <div className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3 text-emerald-600" />
               <span>S-Log3 / S-Cinetone Ready</span>
+            </div>
+          </div>
+        </div>
+
+        {/* TRIAD SUMMARY: CAPABILITIES, OPERATIONAL LIMITS & DELIVERABLES */}
+        <div className="pt-4 border-t border-stone-100 grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
+          {/* 1. Capabilities */}
+          <div className="space-y-2 p-3.5 bg-stone-50/60 rounded-xl border border-stone-200/60">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+              Kapabilitas On-Set &amp; Genre
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {(attributes.specialties || ["Fashion", "Lookbook", "Editorial"]).map((sp) => (
+                <span key={sp} className="px-2 py-0.5 rounded-md bg-white border border-stone-200 text-stone-800 text-[11px] font-semibold">
+                  {sp}
+                </span>
+              ))}
+              {(attributes.capabilities || ["Studio Photography", "Model Shoot"]).slice(0, 3).map((cap) => (
+                <span key={cap} className="px-2 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-800 text-[11px] font-semibold">
+                  {cap}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* 2. Operational Limits */}
+          <div className="space-y-2 p-3.5 bg-stone-50/60 rounded-xl border border-stone-200/60">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+              Batas Kapasitas Operasional
+            </span>
+            <div className="space-y-1 text-[11px] text-stone-700">
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500">Durasi Shift:</span>
+                <span className="font-bold">{attributes.shooting_duration_shift || "4 Jam Half-Day / 8 Jam Full-Day"}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500">Kapasitas Kru On-Set:</span>
+                <span className="font-bold">Maks {attributes.max_people_onset || 8} Orang</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500">Tethering Monitor:</span>
+                <span className="font-bold text-emerald-700">{attributes.tethering_available ? "✓ Tersedia On-Set" : "Atas Permintaan"}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Deliverables */}
+          <div className="space-y-2 p-3.5 bg-stone-50/60 rounded-xl border border-stone-200/60">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+              Deliverables &amp; Output Nyata
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {(attributes.deliverables || ["Foto Final Retouch High-Res", "Semua RAW via Drive", "Social Media Crops 9:16"]).map((del) => (
+                <span key={del} className="px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold">
+                  ✓ {del}
+                </span>
+              ))}
+              <span className="px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold">
+                Turnaround: {attributes.delivery_time_days || 3} Hari
+              </span>
             </div>
           </div>
         </div>

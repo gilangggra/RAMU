@@ -26,15 +26,15 @@ export function YourResourcesCard({ actorName, sector, isBrand, assets }: YourRe
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/70">
-              Core 1 • Resource Profile
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/70">
+              Aset &amp; Inventaris Kreatif
             </span>
           </div>
-          <h2 className="text-lg font-bold text-stone-900 tracking-tight mt-1">
-            Resource &amp; Kapasitas Idle Milik Anda
+          <h2 className="text-lg font-bold text-stone-900 tracking-tight mt-1.5">
+            Aset &amp; Peralatan Milik Anda
           </h2>
           <p className="text-xs text-stone-500 leading-relaxed max-w-xl">
-            Aset, peralatan, ruang, dan ketersediaan waktu yang Anda daftarkan di RAMU untuk dipasangkan dengan kebutuhan mitra kolaborator.
+            Peralatan, ruang studio, busana, dan keahlian yang Anda daftarkan di RAMU untuk dipadukan dengan proyek kolaborasi.
           </p>
         </div>
 
@@ -44,14 +44,14 @@ export function YourResourcesCard({ actorName, sector, isBrand, assets }: YourRe
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200/80 text-xs font-semibold transition-colors shadow-2xs"
           >
             <Layers className="w-3.5 h-3.5 text-stone-500" />
-            <span>Kelola Resource</span>
+            <span>Kelola Inventaris</span>
           </Link>
           <Link
             href="/readiness?tab=assets"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-semibold transition-all shadow-2xs"
           >
             <Plus className="w-3.5 h-3.5 text-stone-300" />
-            <span>Daftar Resource Baru</span>
+            <span>Tambah Aset Baru</span>
           </Link>
         </div>
       </div>
@@ -135,11 +135,11 @@ export function YourResourcesCard({ actorName, sector, isBrand, assets }: YourRe
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-stone-700" />
             <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
-              Aktivasi Kapasitas Menganggur (Resource Idle)
+              Optimalisasi Studio &amp; Peralatan Siap Pakai
             </h4>
           </div>
           <p className="text-[11px] text-stone-600 leading-relaxed max-w-2xl">
-            Punya hari kosong studio, kamera yang sedang tidak disewa, atau kain deadstock? Cantumkan di profil Anda agar dicocokkan otomatis dalam proyek bersama tanpa membiarkan aset menganggur.
+            Punya jadwal kosong studio, kamera yang sedang siap dipakai, atau bahan koleksi? Cantumkan di profil Anda agar dicocokkan otomatis dalam proyek kolaborasi kreatif bersama mitra terverifikasi.
           </p>
         </div>
 
