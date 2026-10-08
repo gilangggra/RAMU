@@ -2,6 +2,7 @@ import { prisma } from '@/infrastructure/database/prisma';
 import {
   OutcomeType,
   CollaborationStatus,
+  ProjectBriefStatus,
   Prisma,
 } from '@prisma/client';
 
@@ -10,6 +11,7 @@ export interface OutcomeMetrics {
   revenueAmount?: string | null;
   audienceReached?: string | null;
   evidenceUrl?: string | null;
+  galleryUrls?: string[] | null;
   notes?: string | null;
 }
 
@@ -56,11 +58,21 @@ export async function recordOutcome(input: RecordOutcomeInput) {
     throw new Error('Hanya partisipan kolaborasi yang diizinkan mencatat luaran proyek.');
   }
 
+  const collab = await prisma.collaboration.findUnique({
+    where: { id: input.collaborationId },
+    select: { status: true },
+  });
+  if (!collab) throw new Error('Kolaborasi tidak ditemukan.');
+  if (collab.status === CollaborationStatus.CANCELLED) {
+    throw new Error('Kolaborasi yang telah dibatalkan tidak dapat mencatat luaran.');
+  }
+
   const sanitizedMetrics: OutcomeMetrics = {
     unitsProduced: input.metrics?.unitsProduced ? Number(input.metrics.unitsProduced) : null,
     revenueAmount: input.metrics?.revenueAmount?.trim() || null,
     audienceReached: input.metrics?.audienceReached?.trim() || null,
     evidenceUrl: input.metrics?.evidenceUrl?.trim() || null,
+    galleryUrls: Array.isArray(input.metrics?.galleryUrls) ? input.metrics.galleryUrls.filter(Boolean) : null,
     notes: input.metrics?.notes?.trim() || null,
   };
 
@@ -83,6 +95,15 @@ export async function completeCollaboration(collaborationId: string, actorId: st
     throw new Error('Hanya partisipan kolaborasi yang berhak menandai proyek selesai.');
   }
 
+  const collab = await prisma.collaboration.findUnique({
+    where: { id: collaborationId },
+    select: { status: true },
+  });
+  if (!collab) throw new Error('Kolaborasi tidak ditemukan.');
+  if (collab.status === CollaborationStatus.CANCELLED) {
+    throw new Error('Kolaborasi yang telah dibatalkan tidak dapat diselesaikan.');
+  }
+
   const updated = await prisma.collaboration.update({
     where: { id: collaborationId },
     data: {
@@ -90,6 +111,40 @@ export async function completeCollaboration(collaborationId: string, actorId: st
       completedAt: new Date(),
     },
   });
+
+  // 1. Sinkronisasi ProjectBrief: Tutup ProjectBrief yang menjadi asal kolaborasi ini
+  try {
+    await prisma.projectBrief.updateMany({
+      where: { collaborationId },
+      data: {
+        status: ProjectBriefStatus.CLOSED,
+        closedAt: new Date(),
+      },
+    });
+  } catch (err) {
+    console.error("Error closing associated project brief:", err);
+  }
+
+  // 2. Sinkronisasi BookingRequest: Perbarui pesanan yang terhubung menjadi COMPLETED
+  try {
+    const relatedBookings = await prisma.bookingRequest.findMany({
+      where: {
+        details: {
+          path: ["collaborationId"],
+          equals: collaborationId,
+        },
+      },
+    });
+
+    for (const b of relatedBookings) {
+      await prisma.bookingRequest.update({
+        where: { id: b.id },
+        data: { status: "COMPLETED" },
+      });
+    }
+  } catch (err) {
+    console.error("Error updating related bookings to COMPLETED:", err);
+  }
 
   return updated;
 }
@@ -106,6 +161,29 @@ export async function submitCollaborationFeedback(input: SubmitFeedbackInput) {
 
   if (!isParticipant) {
     throw new Error('Hanya partisipan kolaborasi yang dapat memberikan evaluasi.');
+  }
+
+  const existingFeedback = await prisma.feedback.findFirst({
+    where: {
+      collaborationId: input.collaborationId,
+      actorId: input.actorId,
+    },
+  });
+
+  if (existingFeedback) {
+    return prisma.feedback.update({
+      where: { id: existingFeedback.id },
+      data: {
+        relevanceScore: input.relevanceScore ? Math.min(5, Math.max(1, Math.round(input.relevanceScore))) : null,
+        feasibilityScore: input.feasibilityScore ? Math.min(5, Math.max(1, Math.round(input.feasibilityScore))) : null,
+        noveltyScore: input.noveltyScore ? Math.min(5, Math.max(1, Math.round(input.noveltyScore))) : null,
+        usefulnessScore: input.usefulnessScore ? Math.min(5, Math.max(1, Math.round(input.usefulnessScore))) : null,
+        comments: input.comments?.trim() || null,
+      },
+      include: {
+        actor: true,
+      },
+    });
   }
 
   const feedback = await prisma.feedback.create({
@@ -129,6 +207,45 @@ export async function submitCollaborationFeedback(input: SubmitFeedbackInput) {
 export async function submitOpportunityFeedback(input: SubmitFeedbackInput) {
   if (!input.opportunityId) {
     throw new Error('ID peluang wajib disertakan.');
+  }
+
+  const opp = await prisma.opportunity.findUnique({
+    where: { id: input.opportunityId },
+    include: { participants: true },
+  });
+  if (!opp) {
+    throw new Error('Peluang tidak ditemukan.');
+  }
+
+  const isParticipant =
+    opp.createdByActorId === input.actorId ||
+    opp.participants.some((p) => p.actorId === input.actorId);
+
+  if (!isParticipant) {
+    throw new Error('Hanya kreator yang terlibat dalam peluang ini yang dapat memberikan feedback.');
+  }
+
+  const existingFeedback = await prisma.feedback.findFirst({
+    where: {
+      opportunityId: input.opportunityId,
+      actorId: input.actorId,
+    },
+  });
+
+  if (existingFeedback) {
+    return prisma.feedback.update({
+      where: { id: existingFeedback.id },
+      data: {
+        relevanceScore: input.relevanceScore ? Math.min(5, Math.max(1, Math.round(input.relevanceScore))) : null,
+        feasibilityScore: input.feasibilityScore ? Math.min(5, Math.max(1, Math.round(input.feasibilityScore))) : null,
+        noveltyScore: input.noveltyScore ? Math.min(5, Math.max(1, Math.round(input.noveltyScore))) : null,
+        usefulnessScore: input.usefulnessScore ? Math.min(5, Math.max(1, Math.round(input.usefulnessScore))) : null,
+        comments: input.comments?.trim() || null,
+      },
+      include: {
+        actor: true,
+      },
+    });
   }
 
   const feedback = await prisma.feedback.create({
@@ -298,5 +415,48 @@ export async function getGlobalLearningSignals() {
     patternPerformance,
     recentOutcomes: allOutcomes.slice(0, 10),
     recentFeedbacks: allFeedbacks.slice(0, 10),
+  };
+}
+
+export interface BlindReviewStatus {
+  isRevealed: boolean;
+  daysRemaining: number;
+  bothSubmitted: boolean;
+  feedbackCount: number;
+  totalParticipants: number;
+}
+
+/**
+ * Protokol Ulasan Dua Arah Tertutup (Double-Blind Review Protocol)
+ * Ulasan dirahasiakan sampai kedua belah pihak mengisi ulasan, atau otomatis dibuka setelah 14 hari kerja.
+ */
+export async function checkCollaborationBlindReviewStatus(collaborationId: string): Promise<BlindReviewStatus> {
+  const participants = await prisma.collaborationParticipant.findMany({
+    where: { collaborationId, status: "ACTIVE" },
+  });
+  const feedbacks = await prisma.feedback.findMany({
+    where: { collaborationId },
+  });
+
+  const feedbackCount = feedbacks.length;
+  const totalParticipants = participants.length;
+  const bothSubmitted = totalParticipants > 0 && feedbackCount >= totalParticipants;
+
+  let oldestDate = new Date();
+  if (feedbacks.length > 0) {
+    oldestDate = feedbacks.reduce((min, f) => (f.createdAt < min ? f.createdAt : min), feedbacks[0].createdAt);
+  }
+  const ageInDays = Math.floor((Date.now() - oldestDate.getTime()) / (1000 * 60 * 60 * 24));
+  const isExpired = ageInDays >= 14;
+
+  const isRevealed = bothSubmitted || isExpired;
+  const daysRemaining = Math.max(0, 14 - ageInDays);
+
+  return {
+    isRevealed,
+    daysRemaining,
+    bothSubmitted,
+    feedbackCount,
+    totalParticipants,
   };
 }

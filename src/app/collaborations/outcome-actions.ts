@@ -9,6 +9,7 @@ import {
   completeCollaboration,
   submitCollaborationFeedback,
 } from "@/application/outcomeService";
+import { createNotification } from "@/application/notificationService";
 import { OutcomeType } from "@prisma/client";
 
 async function getPrimaryActor() {
@@ -40,6 +41,14 @@ export async function recordOutcomeAction(collaborationId: string, formData: For
   const evidenceUrl = (formData.get("evidenceUrl") as string)?.trim();
   const notes = (formData.get("notes") as string)?.trim();
 
+  const galleryUrlsRaw = (formData.get("galleryUrls") as string)?.trim();
+  const galleryUrls = galleryUrlsRaw
+    ? galleryUrlsRaw
+        .split(/[\n,]+/)
+        .map((u) => u.trim())
+        .filter((u) => u.startsWith("http://") || u.startsWith("https://"))
+    : null;
+
   if (!title || !description) {
     return { success: false, error: "Judul dan deskripsi luaran wajib diisi." };
   }
@@ -58,6 +67,7 @@ export async function recordOutcomeAction(collaborationId: string, formData: For
         revenueAmount: revenueAmount || null,
         audienceReached: audienceReached || null,
         evidenceUrl: evidenceUrl || null,
+        galleryUrls,
         notes: notes || null,
       },
     });
@@ -96,6 +106,21 @@ export async function recordOutcomeAction(collaborationId: string, formData: For
       }
     }
 
+    if (collab) {
+      for (const p of collab.participants) {
+        if (p.actorId !== actor.id) {
+          createNotification({
+            actorId: p.actorId,
+            title: "Luaran Kolaborasi Dicatat",
+            message: `${actor.name} mencatat luaran baru '${title}' pada kolaborasi '${collab.title}'.`,
+            type: "INFO",
+            link: `/collaborations/${collaborationId}`,
+            metadata: { collaborationId, outcomeId: outcome.id },
+          }).catch((e) => console.error("Failed to notify outcome:", e));
+        }
+      }
+    }
+
     revalidatePath(`/collaborations/${collaborationId}`);
     revalidatePath("/collaborations");
     revalidatePath("/dashboard");
@@ -119,9 +144,35 @@ export async function completeCollaborationAction(collaborationId: string) {
   try {
     await completeCollaboration(collaborationId, actor.id);
 
+    const collab = await prisma.collaboration.findUnique({
+      where: { id: collaborationId },
+      include: {
+        participants: {
+          where: { status: "ACTIVE" },
+        },
+      },
+    });
+
+    if (collab) {
+      for (const p of collab.participants) {
+        if (p.actorId !== actor.id) {
+          createNotification({
+            actorId: p.actorId,
+            title: "Proyek Kolaborasi Selesai!",
+            message: `${actor.name} telah menandai kolaborasi '${collab.title}' selesai (COMPLETED). Silakan lengkapi luaran dan evaluasi.`,
+            type: "COLLABORATION_STARTED",
+            link: `/collaborations/${collaborationId}`,
+            metadata: { collaborationId, status: "COMPLETED" },
+          }).catch((e) => console.error("Failed to notify collab completed:", e));
+        }
+      }
+    }
+
     revalidatePath(`/collaborations/${collaborationId}`);
     revalidatePath("/collaborations");
     revalidatePath("/dashboard");
+    revalidatePath("/dashboard/bookings");
+    revalidatePath("/projects");
     revalidatePath("/engine-insights");
     return { success: true };
   } catch (error) {

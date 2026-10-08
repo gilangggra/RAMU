@@ -45,9 +45,26 @@ export async function runOpportunityEngine() {
 }
 
 export async function updateOpportunityStatus(opportunityId: string, status: OpportunityStatus) {
-  await getPrimaryActor();
+  const actor = await getPrimaryActor();
 
   try {
+    const opp = await prisma.opportunity.findUnique({
+      where: { id: opportunityId },
+      include: { participants: true },
+    });
+
+    if (!opp) {
+      return { success: false, error: "Peluang tidak ditemukan." };
+    }
+
+    const isParticipant =
+      opp.createdByActorId === actor.id ||
+      opp.participants.some((p) => p.actorId === actor.id);
+
+    if (!isParticipant) {
+      return { success: false, error: "Anda tidak memiliki izin untuk memperbarui status peluang ini." };
+    }
+
     await prisma.opportunity.update({
       where: { id: opportunityId },
       data: { status },

@@ -80,20 +80,20 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
   return (
     <div className="space-y-8">
 
-      <section className="p-7 sm:p-8 rounded-2xl bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
+      <section className="p-7 sm:p-8 rounded-[22px] bg-white/95 border border-slate-200/80 shadow-md space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold text-[#E66A48]">
-              <Building2 className="w-3.5 h-3.5 text-[#E66A48]" />
-              <span>Spesifikasi Cyclorama & Parameter Ruangan Studio</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-100 text-xs font-bold text-sky-800">
+              <Building2 className="w-3.5 h-3.5 text-[#4CC9FE]" />
+              <span>Spesifikasi Cyclorama &amp; Parameter Ruangan Studio</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-[#27213D] tracking-tight">
-              Kapasitas Ruang & Fitur Teknis {studioName}
+            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+              Kapasitas Ruang &amp; Fitur Teknis {studioName}
             </h2>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 text-stone-700 text-xs font-bold">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
               <span>Terverifikasi Siap Produksi</span>
             </div>
@@ -103,7 +103,7 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
                 }}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+                className="btn-primary-pill !text-xs !py-1.5 !px-4 shadow-sm shadow-[#4CC9FE]/20 font-semibold cursor-pointer inline-flex items-center gap-1.5 text-white active:scale-95"
               >
                 <Pencil className="w-3.5 h-3.5" />
                 <span>Edit Spesifikasi</span>
@@ -113,60 +113,60 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-4 rounded-xl bg-stone-50/80 border border-stone-200/70 space-y-1">
-            <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-1">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               Luas Area Indoor
             </div>
-            <div className="text-2xl font-black text-[#27213D]">
-              {attributes.area_sqm || 120} <span className="text-sm font-bold text-stone-500">m²</span>
+            <div className="text-2xl font-extrabold text-slate-900">
+              {attributes.area_sqm || 120} <span className="text-sm font-bold text-slate-500">m²</span>
             </div>
-            <div className="text-[10px] text-stone-500 font-medium">Kapasitas hingga 15 kru</div>
+            <div className="text-[10px] text-slate-500 font-medium">Kapasitas hingga 15 kru</div>
           </div>
 
-          <div className="p-4 rounded-xl bg-stone-50/80 border border-stone-200/70 space-y-1">
-            <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-1">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               Tinggi Plafon (Ceiling)
             </div>
-            <div className="text-2xl font-black text-[#E66A48]">
-              {attributes.ceiling_height_m || 4.5} <span className="text-sm font-bold text-stone-500">meter</span>
+            <div className="text-2xl font-extrabold text-[#4CC9FE]">
+              {attributes.ceiling_height_m || 4.5} <span className="text-sm font-bold text-slate-500">meter</span>
             </div>
-            <div className="text-[10px] text-stone-500 font-medium">Ideal untuk overhead boom</div>
+            <div className="text-[10px] text-slate-500 font-medium">Ideal untuk overhead boom</div>
           </div>
 
-          <div className="p-4 rounded-xl bg-stone-50/80 border border-stone-200/70 space-y-1">
-            <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-1">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               Daya Listrik
             </div>
-            <div className="text-xl font-black text-[#27213D]">
+            <div className="text-xl font-extrabold text-slate-900">
               {attributes.electrical_capacity || "16.500 Watt"}
             </div>
-            <div className="text-[10px] text-stone-500 font-medium flex items-center gap-1">
+            <div className="text-[10px] text-slate-500 font-medium flex items-center gap-1">
               <Zap className="w-3 h-3 text-amber-500" />
               <span>3-Phase Dedicated</span>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-stone-50/80 border border-stone-200/70 space-y-1">
-            <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-1">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               Bentuk Cyclorama
             </div>
-            <div className="text-sm font-black text-purple-700 leading-snug">
+            <div className="text-sm font-extrabold text-sky-700 leading-snug">
               {attributes.cyclorama_type || "Seamless White L-Curve"}
             </div>
-            <div className="text-[10px] text-stone-500 font-medium">Tanpa sudut bayangan</div>
+            <div className="text-[10px] text-slate-500 font-medium">Tanpa sudut bayangan</div>
           </div>
         </div>
 
         {/* SETUPS & OPERATIONAL LIMITS */}
         <div className="pt-2 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
           {setups.length > 0 && (
-            <div className="p-4 rounded-xl bg-stone-50/70 border border-stone-200/70 space-y-2">
-              <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">
+            <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-200/70 space-y-2">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
                 Setups &amp; Backdrop Pilihan
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {setups.map((setp) => (
-                  <span key={setp} className="px-2.5 py-1 rounded-md bg-white border border-stone-200 text-stone-800 text-[11px] font-bold">
+                  <span key={setp} className="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-800 text-[11px] font-bold">
                     ✓ {setp}
                   </span>
                 ))}
@@ -174,22 +174,22 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
             </div>
           )}
 
-          <div className="p-4 rounded-xl bg-stone-50/70 border border-stone-200/70 space-y-2">
-            <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">
+          <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-200/70 space-y-2">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
               Jam Operasional &amp; Kapasitas Kru
             </span>
-            <div className="space-y-1 text-[11px] text-stone-700">
+            <div className="space-y-1 text-[11px] text-slate-700">
               <div className="flex items-center justify-between">
-                <span className="text-stone-500">Jam Operasional:</span>
-                <span className="font-bold">{attributes.operating_hours || "08:00 – 22:00 WIB"}</span>
+                <span className="text-slate-500">Jam Operasional:</span>
+                <span className="font-bold text-slate-900">{attributes.operating_hours || "08:00 – 22:00 WIB"}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-stone-500">Kapasitas Maksimal:</span>
-                <span className="font-bold">{attributes.max_people_capacity || 15} Orang Kru</span>
+                <span className="text-slate-500">Kapasitas Maksimal:</span>
+                <span className="font-bold text-slate-900">{attributes.max_people_capacity || 15} Orang Kru</span>
               </div>
               {attributes.overtime_policy && (
                 <div className="flex items-center justify-between">
-                  <span className="text-stone-500">Overtime:</span>
+                  <span className="text-slate-500">Overtime:</span>
                   <span className="font-semibold text-amber-800 truncate max-w-[200px]">{attributes.overtime_policy}</span>
                 </div>
               )}
@@ -199,9 +199,9 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
 
         {gallery.length > 0 && (
           <div className="space-y-3 pt-2">
-            <div className="flex items-center justify-between text-xs font-bold text-stone-400 uppercase tracking-wider">
-              <span>Galeri Visual Studio & Set Area</span>
-              <span className="text-[11px] font-semibold text-[#716B7E]">Klik foto untuk inspeksi detail</span>
+            <div className="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <span>Galeri Visual Studio &amp; Set Area</span>
+              <span className="text-[11px] font-semibold text-slate-500">Klik foto untuk inspeksi detail</span>
             </div>
 
             <div className="columns-1 sm:columns-2 gap-3">
@@ -209,12 +209,12 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
                 <div
                   key={idx}
                   onClick={() => setSelectedPhoto(photo)}
-                  className="break-inside-avoid mb-3 group cursor-pointer rounded-xl bg-stone-100 border border-stone-200/80 overflow-hidden hover:shadow-xl transition-all relative block"
+                  className="break-inside-avoid mb-3 group cursor-pointer rounded-2xl bg-slate-100 border border-slate-200/80 overflow-hidden hover:shadow-xl transition-all relative block"
                 >
                   <img
                     src={photo.url}
                     alt={photo.title}
-                    className="w-full h-auto object-cover rounded-xl block transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                    className="w-full h-auto object-cover rounded-2xl block transition-transform duration-700 ease-out group-hover:scale-[1.02]"
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
@@ -223,9 +223,9 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
                         {photo.title}
                       </h4>
                       {photo.caption && (
-                        <p className="text-xs text-stone-300 leading-relaxed font-medium">{photo.caption}</p>
+                        <p className="text-xs text-slate-300 leading-relaxed font-medium">{photo.caption}</p>
                       )}
-                      <div className="pt-1.5 flex items-center gap-1 text-[10px] font-bold text-amber-300">
+                      <div className="pt-1.5 flex items-center gap-1 text-[10px] font-bold text-sky-300">
                         <Maximize2 className="w-3 h-3" />
                         <span>Inspeksi Set Studio</span>
                       </div>
@@ -238,19 +238,19 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
         )}
 
         {gearList.length > 0 && (
-          <div className="space-y-3 pt-4 border-t border-stone-100">
-            <div className="flex items-center gap-2 text-xs font-bold text-stone-400 uppercase tracking-wider">
-              <Camera className="w-3.5 h-3.5 text-[#E66A48]" />
-              <span>Daftar Lighting & Peralatan On-Site (Sudah Termasuk)</span>
+          <div className="space-y-3 pt-4 border-t border-slate-100">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <Camera className="w-3.5 h-3.5 text-[#4CC9FE]" />
+              <span>Daftar Lighting &amp; Peralatan On-Site (Sudah Termasuk)</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {gearList.map((gear, i) => (
                 <div
                   key={i}
-                  className="p-3 rounded-xl bg-stone-50/90 border border-stone-200/70 text-xs text-[#27213D] flex items-start gap-2.5"
+                  className="p-3 rounded-2xl bg-slate-50/90 border border-slate-200/70 text-xs text-slate-900 flex items-start gap-2.5"
                 >
-                  <div className="w-5 h-5 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-5 h-5 rounded-full bg-sky-100 text-[#4CC9FE] flex items-center justify-center shrink-0 mt-0.5">
                     <Check className="w-3 h-3 stroke-[2.5]" />
                   </div>
                   <span className="font-medium leading-snug">{gear}</span>
@@ -261,19 +261,19 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
         )}
 
         {facilities.length > 0 && (
-          <div className="space-y-3 pt-4 border-t border-stone-100">
-            <div className="flex items-center gap-2 text-xs font-bold text-stone-400 uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-              <span>Fasilitas Ruangan & Kenyamanan Kru</span>
+          <div className="space-y-3 pt-4 border-t border-slate-100">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-sky-600" />
+              <span>Fasilitas Ruangan &amp; Kenyamanan Kru</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {facilities.map((fac, i) => (
                 <div
                   key={i}
-                  className="p-3 rounded-xl bg-purple-50/50 border border-purple-200/60 text-xs text-[#27213D] flex items-center gap-2.5"
+                  className="p-3 rounded-2xl bg-sky-50/50 border border-sky-200/60 text-xs text-slate-900 flex items-center gap-2.5"
                 >
-                  <CheckCircle2 className="w-4 h-4 text-purple-600 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0" />
                   <span className="font-medium">{fac}</span>
                 </div>
               ))}
@@ -289,12 +289,12 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative max-w-4xl w-full bg-stone-900 rounded-xl overflow-hidden shadow-2xl border border-white/10"
+            className="relative max-w-4xl w-full bg-slate-900 rounded-[22px] overflow-hidden shadow-2xl border border-white/10"
           >
             <button
               type="button"
               onClick={() => setSelectedPhoto(null)}
-              className="absolute top-4 right-4 z-10 p-2.5 rounded-xl bg-black/60 hover:bg-black text-white transition-colors cursor-pointer"
+              className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/60 hover:bg-black text-white transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -307,16 +307,16 @@ export function StudioSpecsCard({ attributes, studioName, isCurrentActor, actorA
               />
             </div>
 
-            <div className="p-6 bg-[#27213D] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-white/10">
+            <div className="p-6 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-white/10">
               <div>
                 <h3 className="text-base font-extrabold">{selectedPhoto.title}</h3>
-                <p className="text-xs text-stone-400 mt-0.5">{selectedPhoto.caption}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{selectedPhoto.caption}</p>
               </div>
               <a
                 href={selectedPhoto.url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-colors shrink-0"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-colors shrink-0"
               >
                 <span>Buka Resolusi Penuh</span>
                 <ExternalLink className="w-3.5 h-3.5" />

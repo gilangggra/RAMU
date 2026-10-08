@@ -227,6 +227,10 @@ export async function sendMessage({
   metadata?: Record<string, any>;
   skipNotification?: boolean;
 }): Promise<{ success: boolean; message?: DirectMessageItem; error?: string }> {
+  if (senderId === recipientId) {
+    return { success: false, error: "Anda tidak dapat mengirim pesan kepada diri Anda sendiri." };
+  }
+
   try {
     const metaJson = JSON.stringify(metadata);
 
@@ -435,27 +439,32 @@ export async function sendProjectDelivery({
   title,
   storageUrl,
   deliverableNotes,
+  deliveryStage = "WATERMARKED_PREVIEW",
 }: {
   senderId: string;
   recipientId: string;
   title: string;
   storageUrl: string;
   deliverableNotes?: string;
+  deliveryStage?: "WATERMARKED_PREVIEW" | "FINAL_MASTER";
 }): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     // Tautkan serah terima ke ruang kolaborasi aktif milik kedua pihak (jika ada)
     const activeCollaboration = await findActiveCollaborationBetween(senderId, recipientId);
 
+    const stageLabel = deliveryStage === "WATERMARKED_PREVIEW" ? "[PRATINJAU BERTANDA-AIR]" : "[MASTER FINAL]";
+
     const res = await sendMessage({
       senderId,
       recipientId,
-      content: `[SERAH TERIMA HASIL PROYEK] ${title}`,
+      content: `${stageLabel} ${title}`,
       messageType: "DELIVERY",
       metadata: {
         title,
         storageUrl,
         deliverableNotes: deliverableNotes || "Seluruh berkas hasil kerja telah diunggah untuk ditinjau.",
         deliveryStatus: "PENDING_APPROVAL",
+        deliveryStage,
         submittedAt: new Date().toISOString(),
         collaborationId: activeCollaboration?.id || null,
         collaborationTitle: activeCollaboration?.title || null,

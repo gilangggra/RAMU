@@ -16,6 +16,7 @@ import {
   Award,
   Download,
   Loader2,
+  Fingerprint,
 } from "lucide-react";
 import {
   TermsAndConditionsConfig,
@@ -25,6 +26,7 @@ import {
   getMilestoneSchemeLabel,
 } from "@/components/settings/RatesForm";
 import { exportElementToPdf } from "@/lib/export/pdfExporter";
+import { createSpkAuditTrail } from "@/lib/spkFingerprint";
 
 export interface BookingSpkData {
   id: string;
@@ -33,6 +35,8 @@ export interface BookingSpkData {
   budget?: string | null;
   status: string;
   createdAt: string | Date;
+  requesterId?: string;
+  targetId?: string;
   requester: {
     id: string;
     name: string;
@@ -96,6 +100,18 @@ export function SpkAgreementModal({ isOpen, onClose, booking }: SpkAgreementModa
   const shortId = booking.id.slice(0, 8).toUpperCase();
   const spkNomorResmi = `SPK/RAMU/${year}/${romanMonth}/${shortId}`;
 
+  const auditTrail = createSpkAuditTrail({
+    bookingId: booking.id,
+    requesterId: booking.requester.id,
+    requesterName: booking.requester.name,
+    targetId: booking.target.id,
+    targetName: booking.target.name,
+    startDate: booking.startDate,
+    budget: booking.budget,
+    createdAt: booking.createdAt,
+    spkNomorResmi,
+  });
+
   const formattedDate = new Date(booking.startDate).toLocaleDateString("id-ID", {
     weekday: "long",
     day: "numeric",
@@ -157,9 +173,11 @@ Platform: RAMU Creative Ecosystem (PSE Terdaftar)
 - Pasal 1 (Jadwal): ${formattedDate} (Shift: ${terms.shiftHours} Jam)
 - Pasal 2 (Biaya & Termin): ${booking.budget || "Sesuai kesepakatan"} | ${milestoneInfo.title}
 - Pasal 3 (Lembur): Rp ${terms.overtimeRate}/jam (Toleransi ${terms.gracePeriodMinutes} mnt)
-- Pasal 4 (Revisi): Maksimal ${terms.maxRevisions}x revisi minor (Biaya revisi ekstra: ${terms.extraRevisionFee || "Rp 100.000 / foto"})
+- Pasal 4 (Revisi & Serah Terima): Maksimal ${terms.maxRevisions}x revisi minor; Deemed Acceptance 7 hari kalender
 - Pasal 5 (Hak Cipta & Lisensi): ${getUsageScopeLabel(terms.usageRightsScope).split(" (")[0]} selama ${getUsageDurationLabel(terms.usageRightsDuration).split(" —")[0]}. Watermark protection berlaku sebelum pelunasan.
 - Pasal 6 (Proteksi): Garansi 100% refund jika Pihak II No-Show; DP hangus jika Pihak I batal <48 jam.
+- Pasal 7 (Kontingensi Cuaca): Rain-Check outdoor maksimal 14 hari tanpa penalti; Staging Fee 25% jika kru telah tiba di lokasi.
+- Pasal 9 (Safe Harbor): Platform RAMU berstatus intermediary (safe harbor & hold harmless).
 
 Dokumen sah digital: https://ramu.id/dashboard/bookings`;
 
@@ -364,6 +382,9 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
                     </strong>.
                   </li>
                 )}
+                <li>
+                  <strong>Akomodasi &amp; Transportasi Luar Kota</strong>: Apabila lokasi pemotretan/produksi berada di luar wilayah domisili asal PIHAK KEDUA, maka seluruh biaya transportasi perjalanan, akomodasi hotel/penginapan yang layak, dan konsumsi harian menjadi beban dan tanggung jawab penuh PIHAK PERTAMA di luar honorarium pokok.
+                </li>
               </ol>
             </div>
 
@@ -389,6 +410,12 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
                       <strong>Proteksi Pratinjau (Watermark Protection)</strong>: Sebelum pelunasan Tahap II diterima penuh oleh PIHAK KEDUA, seluruh aset hasil kerja yang diserahkan berstatus <em>&ldquo;Pratinjau Bertanda-Air&rdquo;</em> dan <strong>DILARANG KERAS</strong> untuk diunggah, dipublikasikan, atau dikomersialisasikan oleh PIHAK PERTAMA di media manapun.
                     </li>
                   </ul>
+                </li>
+                <li>
+                  <strong>Alur Pembayaran Langsung (Direct Settlement)</strong>: Seluruh pembayaran DP dan pelunasan ditransfer langsung antar rekening bank resmi PARA PIHAK sebagaimana tercatat dalam korespondensi profil/invoice penyedia jasa. Bukti transfer perbankan yang sah diakui sebagai tanda terima pembayaran yang mengikat secara hukum.
+                </li>
+                <li>
+                  <strong>Ketentuan Perpajakan &amp; Bukti Potong (PPh 21 / PPh 23)</strong>: Seluruh penawaran honorarium berstatus standar Nett (kecuali disepakati Gross secara tertulis). Apabila PIHAK PERTAMA bertindak sebagai Badan Hukum/Pemotong Pajak resmi yang memotong PPh 21 atau PPh 23 dari honorarium, maka PIHAK PERTAMA wajib menerbitkan dan menyerahkan Bukti Pemotongan Pajak Elektronik (e-Bupot) yang sah kepada PIHAK KEDUA paling lambat akhir bulan pajak berjalan.
                 </li>
               </ol>
             </div>
@@ -416,13 +443,23 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
               </h3>
               <ol className="list-decimal pl-5 space-y-1 text-stone-700 text-[11px]">
                 <li>
-                  Pekerjaan mencakup maksimal <strong>{terms.maxRevisions} (dua) kali putaran revisi minor</strong> yang mencakup penyesuaian wajar (*exposure*, *color tone balancing*, perapian noda minor, atau *trim cut*) yang relevan dengan brief awal.
+                  <strong>Batasan Revisi Minor (Termasuk dalam Jasa)</strong>: Pekerjaan mencakup maksimal <strong>{terms.maxRevisions} (dua) kali putaran revisi minor</strong> yang terbatas pada: penyesuaian pencahayaan/kontras (*exposure/color tone*), pemotongan/pembingkaian (*cropping/framing*), perapian noda debu latar atau cela kulit minor, dan seleksi draf dalam batas toleransi wajar brief.
                 </li>
                 <li>
-                  Permintaan revisi tambahan di luar kuota maksimal dikenakan biaya revisi ekstra sebesar <strong>{terms.extraRevisionFee || "Rp 100.000 / foto"}</strong>.
+                  <strong>Batasan Revisi Mayor (Dikenakan Biaya Tambahan)</strong>: Perubahan konsep visual di luar moodboard yang telah disetujui, penggantian talenta/busana/lokasi pasca-produksi, manipulasi komposit grafis berat (*heavy compositing/CGI*), atau permintaan pengambilan gambar ulang (*reshoot*) diklasifikasikan sebagai Pekerjaan Tambahan dan dikenakan adendum biaya terpisah atau biaya revisi ekstra ({terms.extraRevisionFee || "Rp 100.000 / foto"}).
                 </li>
                 <li>
-                  Perubahan konsep visual, penggantian talenta/lokasi pasca-produksi, atau permintaan pengambilan gambar ulang (*reshoot*) bukan merupakan bagian dari revisi dan wajib disepakati sebagai adendum/kontrak kerja baru.
+                  <strong>Protokol Pemeliharaan Busana Sampel &amp; Alat Produksi</strong>: PARA PIHAK wajib menjaga seluruh sampel busana desainer, properti panggung, dan peralatan teknis (kamera, lensa, tata cahaya) dengan prinsip kehati-hatian wajar (*duty of care*). Kerusakan permanen, noda busana, atau kerusakan alat akibat kelalaian berat (*gross negligence*) menjadi tanggung jawab pihak yang melakukan tindakan fisik langsung tersebut.
+                </li>
+
+                <li>
+                  <strong>Garansi Kesesuaian Ukuran Busana &amp; Sampel Desainer (Wardrobe Sizing Match Guarantee)</strong>: PARA PIHAK wajib memastikan kecocokan ukuran busana sampel sebelum sesi produksi. Khusus talenta model, PIHAK KEDUA menjamin data ukuran tubuh pada Comp Card (Tinggi Badan, Lingkar Dada, Lingkar Pinggang, Lingkar Pinggul, Ukuran Sepatu) akurat dan mutakhir dalam 30 (tiga puluh) hari terakhir. PIHAK PERTAMA (Brand/Stylist/Desainer) bertanggung jawab menyediakan busana sampel yang sesuai dengan batas toleransi ukuran tersebut dan dilarang memaksakan pemakaian busana yang berisiko merusak jahitan atau mengorbankan kenyamanan fisik talenta.
+                </li>
+                <li>
+                  <strong>Batas Garansi Retensi Arsip Berkas Master (90 Hari Kalender)</strong>: PIHAK KEDUA (Fotografer/Videografer/Kreator) berkewajiban menyimpan cadangan arsip berkas master hasil pekerjaan beresolusi penuh (<em>High-Res &amp; Clean Master File</em>) minimal selama <strong>90 (sembilan puluh) hari kalender</strong> terhitung sejak tanggal serah terima final disetujui. Setelah lewat batas 90 hari, PIHAK PERTAMA bertanggung jawab penuh atas penyimpanan berkas lokalnya dan PIHAK KEDUA dibebaskan dari tanggung jawab kehilangan data serta berhak mengenakan biaya pemulihan arsip (<em>archival retrieval fee</em>) jika diminta mengirimkan ulang.
+                </li>
+                <li>
+                  <strong>Persetujuan Otomatis Luaran (Deemed Acceptance 7 Hari Kalender)</strong>: Apabila setelah penyerahan draf hasil pekerjaan (pratinjau berkas / <em>watermarked preview</em>) oleh PIHAK KEDUA, PIHAK PERTAMA tidak memberikan tanggapan atau daftar evaluasi/revisi tertulis dalam batas waktu <strong>7 (tujuh) hari kalender</strong>, maka hasil pekerjaan tersebut secara hukum dianggap telah diterima dan disetujui penuh (<em>Deemed Accepted</em>). Kewajiban pelunasan honorarium Tahap II menjadi jatuh tempo seketika.
                 </li>
 
                 {isModel && (
@@ -484,6 +521,9 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
                 <li>
                   <strong>Sanksi Pelanggaran Lisensi Komersial</strong>: Apabila PIHAK PERTAMA menayangkan, mendistribusikan, atau mengalihkan karya melampaui ruang lingkup media atau masa berlaku tanpa persetujuan tertulis dari PIHAK KEDUA (seperti menayangkan di iklan berbayar/billboard luar ruang tanpa lisensi komersial), maka PIHAK PERTAMA wajib membayar biaya lisensi komersial tambahan (*Extended Commercial License Fee*) sebesar <strong>200% dari total nilai jasa</strong>.
                 </li>
+                <li>
+                  <strong>Kerahasiaan &amp; Tanggal Embargo Publikasi (Strict Embargo Protocol)</strong>: Seluruh materi foto, cuplikan video, siluet busana, dan dokumentasi di balik layar (*Behind The Scenes / BTS*) berstatus RAHASIA (*CONFIDENTIAL*). PARA PIHAK dilarang keras mengunggah atau mempublikasikan materi karya ke media sosial pribadi atau portofolio sebelum <strong>Tanggal Rilis Resmi (Embargo Date)</strong> kampanye yang ditetapkan oleh PIHAK PERTAMA/Brand. Pelanggaran embargo yang mengakibatkan kebocoran koleksi desain dikenakan sanksi ganti rugi pemulihan reputasi.
+                </li>
               </ol>
             </div>
 
@@ -503,16 +543,38 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
 
             <div className="space-y-1.5">
               <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
-                PASAL 7: KEADAAN MEMAKSA (FORCE MAJEURE)
+                PASAL 7: KEADAAN MEMAKSA (FORCE MAJEURE) &amp; KONTINGENSI CUACA BURUK
               </h3>
-              <p className="text-[11px] text-stone-700">
-                Dalam hal terjadi peristiwa di luar kendali PARA PIHAK seperti bencana alam, kebakaran, kerusuhan massal, kecelakaan fatal, atau sakit mendadak yang dibuktikan dengan surat keterangan resmi rumah sakit, PARA PIHAK sepakat untuk menjadwalkan ulang (*reschedule*) pelaksanaan pekerjaan tanpa dikenakan penalti.
-              </p>
+              <ol className="list-decimal pl-5 space-y-1.5 text-stone-700 text-[11px]">
+                <li>
+                  <strong>Keadaan Memaksa Umum</strong>: Dalam hal terjadi peristiwa di luar kendali PARA PIHAK seperti bencana alam, kebakaran, kerusuhan massal, kecelakaan fatal, atau sakit mendadak yang dibuktikan dengan surat keterangan resmi rumah sakit, PARA PIHAK sepakat untuk menjadwalkan ulang (*reschedule*) pelaksanaan pekerjaan tanpa dikenakan penalti.
+                </li>
+                <li>
+                  <strong>Protokol Kontingensi Cuaca Luar Ruang (Outdoor Rain-Check Protocol)</strong>: Apabila pelaksanaan produksi disepakati di lokasi luar ruang (*outdoor/pantai/rooftop*) dan terhalang oleh cuaca buruk ekstrem (hujan lebat terus-menerus, badai petir, atau banjir) yang membahayakan keselamatan atau merusak kualitas teknis karya, PARA PIHAK sepakat memberlakukan opsi Penjadwalan Ulang Cuaca (*Rain-Check*) maksimal dalam 14 (empat belas) hari kalender tanpa biaya denda pembatalan.
+                </li>
+                <li>
+                  <strong>Kompensasi Waktu Tunggu &amp; Kehadiran Kru (Staging Fee)</strong>: Apabila penundaan akibat cuaca buruk terjadi setelah seluruh talenta dan kru tiba di lokasi pemotretan (*on-set call time*) dan/atau penataan rias/busana telah dilakukan, maka PIHAK PERTAMA wajib membayarkan Biaya Kehadiran/Waktu Tunggu (*Staging Fee*) sebesar <strong>25% (dua puluh lima persen)</strong> dari tarif shift harian kepada PIHAK KEDUA sebagai kompensasi operasional logistik hari tersebut, dan sesi pengganti dijadwalkan ulang bersama.
+                </li>
+              </ol>
             </div>
 
             <div className="space-y-1.5">
               <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
-                PASAL 8: PENYELESAIAN PERSELISIHAN &amp; KETENTUAN HUKUM
+                PASAL 8: PERLINDUNGAN HUBUNGAN BISNIS AGENSI &amp; ANTI-CIRCUMVENTION (12 BULAN)
+              </h3>
+              <ol className="list-decimal pl-5 space-y-1 text-stone-700 text-[11px]">
+                <li>
+                  <strong>Larangan Pembajakan Klien Langsung (Non-Circumvention)</strong>: Dalam hal penugasan atau hubungan kerja ini diinisiasi oleh Agensi, Production House (PH), Kolektif, atau Perantara Resmi yang memperkenalkan talenta dengan Klien Brand Pihak Ketiga, maka selama masa perjanjian dan untuk jangka waktu <strong>12 (dua belas) bulan kalender</strong> setelah tanggal penyelesaian proyek, PIHAK KEDUA dilarang melakukan kontak bisnis mandiri secara langsung (<em>direct soliciting/circumvention</em>) dengan Klien pihak ketiga tersebut untuk jenis pekerjaan yang serupa tanpa persetujuan tertulis dari inisiator awal.
+                </li>
+                <li>
+                  <strong>Kompensasi Pelanggaran Hubungan Bisnis</strong>: Pelanggaran atas klausul non-circumvention ini memberikan hak kepada pihak inisiator/agensi yang dirugikan untuk menuntut kompensasi sebesar nilai komisi standar agensi (minimal 25% dari nilai kontrak langsung yang diperoleh) sebagai biaya pemulihan hubungan bisnis.
+                </li>
+              </ol>
+            </div>
+
+            <div className="space-y-1.5">
+              <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
+                PASAL 9: PENYELESAIAN PERSELISIHAN &amp; KETENTUAN HUKUM
               </h3>
               <ol className="list-decimal pl-5 space-y-1 text-stone-700 text-[11px]">
                 <li>
@@ -520,6 +582,9 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
                 </li>
                 <li>
                   Kesepakatan ini disusun atas persetujuan sadar dan sukarela PARA PIHAK sebagai acuan rujukan hak, kewajiban, dan ruang lingkup lisensi penggunaan karya dalam pelaksanaan kerja sama.
+                </li>
+                <li>
+                  <strong>Pelepasan Tanggung Jawab Platform (Platform Safe Harbor Shield &amp; Hold Harmless)</strong>: Platform RAMU beroperasi murni sebagai fasilitator teknologi dan sarana perantara temu kerja elektronik (*Intermediary Electronic Platform* sesuai regulasi PSE Indonesia) dan bukan merupakan pihak dalam perjanjian kerja sama ini. RAMU tidak bertanggung jawab secara hukum maupun finansial atas sengketa materi konten, kerugian komersial, pelanggaran hak cipta pihak ketiga, maupun risiko teknis di lokasi kerja. PARA PIHAK sepakat melepaskan dan membebaskan RAMU beserta seluruh pengelolanya dari segala tuntutan atau gugatan hukum (*Hold Harmless*).
                 </li>
               </ol>
             </div>
@@ -572,12 +637,37 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
               </div>
             </div>
 
-            <div className="pt-4 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between text-[10px] text-stone-400">
-              <div className="flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-stone-400" />
-                <span>Dokumen sah digital &bull; Dicetak secara otomatis dari sistem database RAMU</span>
+            {/* AUDIT TRAIL KRIPTOGRAFIS SHA-256 RESMI RAMU */}
+            <div className="pt-4 border-t border-stone-200 space-y-2.5">
+              <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200/90 text-stone-700 space-y-2">
+                <div className="flex items-center justify-between border-b border-stone-200/60 pb-2">
+                  <div className="flex items-center gap-2">
+                    <Fingerprint className="w-4 h-4 text-emerald-700" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-stone-900">
+                      Sertifikasi Kriptografis &amp; Jejak Audit Digital (Digital Audit Trail)
+                    </span>
+                  </div>
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    INTEGRITY VERIFIED &bull; IMMUTABLE
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[10px]">
+                  <div>
+                    <span className="text-stone-400 block font-semibold">Fingerprint Dokumen (SHA-256 Checksum):</span>
+                    <span className="font-mono text-stone-900 font-bold break-all select-all">{auditTrail.sha256Hash}</span>
+                  </div>
+                  <div>
+                    <span className="text-stone-400 block font-semibold">Rujukan Bukti Elektronik Sah:</span>
+                    <span className="text-stone-800 font-medium">{auditTrail.legalStandard}</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-[9px] text-stone-500 pt-1 border-t border-stone-200/60 gap-1">
+                  <span>Penyelenggara Sistem Elektronik (PSE): RAMU Creative Tech Ecosystem</span>
+                  <span className="font-mono">Timestamp Hash: {auditTrail.timestampIso}</span>
+                </div>
               </div>
-              <div className="font-mono mt-1 sm:mt-0">Kode Hash Validasi: {shortId}-VERIFIED-ID</div>
             </div>
           </div>
         </div>

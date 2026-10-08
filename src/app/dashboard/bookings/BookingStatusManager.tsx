@@ -22,14 +22,19 @@ import {
   AlertTriangle,
   X,
   RotateCcw,
+  CreditCard,
 } from "lucide-react";
 import {
   updateBookingStatus,
   convertBookingToCollaboration,
   cancelBookingRequestAction,
   rescheduleBookingRequestAction,
+  completeBookingRequestAction,
+  reportBookingDisputeAction,
 } from "@/app/api/bookings/actions";
 import { SpkAgreementModal, BookingSpkData } from "@/components/bookings/SpkAgreementModal";
+import { BookingInvoiceModal } from "@/components/bookings/BookingInvoiceModal";
+import { BookingCallSheetModal } from "@/components/bookings/BookingCallSheetModal";
 import { toast } from "@/components/ui/Toast";
 
 function toDateInputValue(dateInput?: string | Date | null): string {
@@ -673,6 +678,132 @@ export function ConvertBookingButton({ bookingId, collaborationId }: ConvertBook
 }
 
 // ==========================================
+// 5B. COMPLETE BOOKING BUTTON & MODAL
+// ==========================================
+export interface CompleteBookingButtonProps {
+  bookingId: string;
+  partnerName: string;
+  refCode: string;
+}
+
+export function CompleteBookingButton({
+  bookingId,
+  partnerName,
+  refCode,
+}: CompleteBookingButtonProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [notes, setNotes] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  async function handleConfirm() {
+    setIsLoading(true);
+    try {
+      const res = await completeBookingRequestAction(bookingId, notes);
+      if (res.success) {
+        toast.success("Pesanan berhasil ditandai selesai!");
+        setIsOpen(false);
+        router.refresh();
+      } else {
+        toast.error(res.error || "Gagal menyelesaikan pesanan.");
+      }
+    } catch {
+      toast.error("Terjadi kesalahan teknis.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <>
+      <button
+        onClick={() => setIsOpen(true)}
+        className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-2xs transition-colors cursor-pointer"
+        title="Tandai pekerjaan tuntas dan terbitkan konfirmasi pemenuhan SPK"
+      >
+        <CheckCircle2 className="w-3.5 h-3.5" />
+        <span>Selesaikan Pesanan &amp; Tuntaskan SPK</span>
+      </button>
+
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white border border-stone-200 rounded-2xl shadow-xl max-w-md w-full overflow-hidden space-y-0">
+            <div className="p-5 border-b border-stone-100 flex items-start justify-between bg-emerald-50/60">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 border border-emerald-200/80">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-700" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-stone-900 leading-tight">
+                    Konfirmasi Penyelesaian Pesanan?
+                  </h3>
+                  <p className="text-[11px] text-stone-500 mt-0.5 font-mono">{refCode}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-1 rounded-md text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4 text-xs">
+              <p className="text-stone-600 leading-relaxed">
+                Menandai pesanan bersama <strong className="text-stone-900">{partnerName}</strong> sebagai selesai mengonfirmasi bahwa deliverables (hasil foto/video/layanan) telah diterima dan kewajiban SPK telah terpenuhi.
+              </p>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+                  Catatan Penyelesaian (Opsional)
+                </label>
+                <textarea
+                  rows={2}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Contoh: Seluruh file master telah diterima dalam kondisi baik..."
+                  className="w-full px-3 py-2 rounded-lg bg-white border border-stone-200 text-stone-900 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-hidden resize-none"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-stone-100">
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  disabled={isLoading}
+                  className="px-3.5 py-1.5 rounded-lg bg-white border border-stone-200 text-stone-700 text-xs font-medium hover:bg-stone-50 transition-colors cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirm}
+                  disabled={isLoading}
+                  className="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Menyelesaikan...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Ya, Konfirmasi Selesai</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+
+// ==========================================
 // 6. CONTACT ACTIONS
 // ==========================================
 interface BookingContactActionsProps {
@@ -681,12 +812,25 @@ interface BookingContactActionsProps {
   contactName: string;
   myRole: "requester" | "target";
   partnerActorId?: string | null;
+  bookingRefCode?: string | null;
+  bookingId?: string | null;
 }
 
-export function BookingContactActions({ phone, email, contactName, myRole, partnerActorId }: BookingContactActionsProps) {
+export function BookingContactActions({
+  phone,
+  email,
+  contactName,
+  myRole,
+  partnerActorId,
+  bookingRefCode,
+  bookingId,
+}: BookingContactActionsProps) {
+  const refText = bookingRefCode ? ` [${bookingRefCode}]` : "";
+  const linkText = bookingId ? ` Tinjau draf SPK & jadwal resmi: https://ramu.id/dashboard/bookings/${bookingId}` : "";
+
   const defaultText = myRole === "target"
-    ? `Halo ${contactName}, saya menerima pesanan booking Anda melalui RAMU. Mari kita koordinasikan jadwal dan teknis produksinya.`
-    : `Halo ${contactName}, saya telah mengajukan booking layanan melalui RAMU. Mohon konfirmasi jadwal dan teknis pembayarannya.`;
+    ? `Halo ${contactName}, saya menerima pesanan kerja sama Anda melalui platform RAMU${refText}.${linkText} Mari kita koordinasikan teknis produksi dan jadwalnya.`
+    : `Halo ${contactName}, saya telah mengajukan pesanan kerja sama resmi melalui platform RAMU${refText}.${linkText} Mohon konfirmasi jadwal dan pelaksanaan teknisnya.`;
 
   let waUrl = null;
   if (phone) {
@@ -764,6 +908,66 @@ export function ViewSpkButton({ booking }: ViewSpkButtonProps) {
 }
 
 // ==========================================
+// 7B. VIEW INVOICE & KWITANSI BUTTON
+// ==========================================
+interface ViewInvoiceButtonProps {
+  booking: BookingSpkData;
+}
+
+export function ViewInvoiceButton({ booking }: ViewInvoiceButtonProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <button
+        onClick={() => setIsOpen(true)}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-700 hover:text-stone-900 text-xs font-semibold border border-stone-200/80 shadow-2xs transition-colors cursor-pointer"
+        title="Buka Faktur Invoice DP, Invoice Pelunasan, atau Kwitansi Tanda Terima Resmi"
+      >
+        <CreditCard className="w-3.5 h-3.5 text-emerald-600" />
+        <span>Invoice &amp; Kwitansi</span>
+      </button>
+
+      <BookingInvoiceModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        booking={booking}
+      />
+    </>
+  );
+}
+
+// ==========================================
+// 7C. VIEW CALL SHEET & RUNDOWN BUTTON
+// ==========================================
+interface ViewCallSheetButtonProps {
+  booking: BookingSpkData;
+}
+
+export function ViewCallSheetButton({ booking }: ViewCallSheetButtonProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <button
+        onClick={() => setIsOpen(true)}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-700 hover:text-stone-900 text-xs font-semibold border border-stone-200/80 shadow-2xs transition-colors cursor-pointer"
+        title="Buka Lembar Panggilan Kerja On-Set, Rundown Jam Divisi & Siaran WhatsApp"
+      >
+        <Clock className="w-3.5 h-3.5 text-amber-600" />
+        <span>Lembar Call Sheet</span>
+      </button>
+
+      <BookingCallSheetModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        booking={booking}
+      />
+    </>
+  );
+}
+
+// ==========================================
 // 8. MILESTONE PIPELINE TRACKER
 // ==========================================
 interface BookingMilestoneTrackerProps {
@@ -777,6 +981,7 @@ export function BookingMilestoneTracker({
   dpPercentage = 50,
   collaborationId,
 }: BookingMilestoneTrackerProps) {
+  const isCompleted = status === "COMPLETED";
   const isAccepted = status === "ACCEPTED";
   const isDeclined = status === "DECLINED";
   const isCancelled = status === "CANCELLED";
@@ -808,7 +1013,7 @@ export function BookingMilestoneTracker({
         {/* Step 2: DP / Jadwal */}
         <div
           className={`p-2 rounded-lg border transition-all ${
-            hasCollab || isAccepted
+            isCompleted || hasCollab || isAccepted
               ? "bg-white border-stone-200/80 shadow-2xs"
               : isDeclined || isCancelled
               ? "bg-stone-100 text-stone-400 border-stone-200/60"
@@ -818,7 +1023,7 @@ export function BookingMilestoneTracker({
           }`}
         >
           <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-stone-800">
-            {hasCollab || isAccepted ? (
+            {isCompleted || hasCollab || isAccepted ? (
               <CheckCircle2 className="w-3 h-3 text-emerald-600" />
             ) : isCancelled ? (
               <XCircle className="w-3 h-3 text-rose-500" />
@@ -828,7 +1033,9 @@ export function BookingMilestoneTracker({
             <span>2. Jadwal &amp; DP</span>
           </div>
           <div className="text-[10px] text-stone-500 mt-0.5 font-medium">
-            {hasCollab || isAccepted
+            {isCompleted
+              ? "Tuntas Terlaksana"
+              : hasCollab || isAccepted
               ? "Terkunci & Aktif"
               : isCancelled
               ? "Dibatalkan"
@@ -841,26 +1048,198 @@ export function BookingMilestoneTracker({
         </div>
 
         {/* Step 3: Workspace & Pelunasan */}
-        <div
-          className={`p-2 rounded-lg border transition-all ${
-            hasCollab
-              ? "bg-stone-900 text-white border-stone-900 shadow-2xs"
-              : "bg-white/60 border-stone-200/60 text-stone-400"
-          }`}
-        >
-          <div className={`flex items-center justify-center gap-1 text-[11px] font-semibold ${hasCollab ? "text-white" : "text-stone-700"}`}>
-            {hasCollab ? (
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            ) : (
+        {hasCollab ? (
+          <Link
+            href={`/collaborations/${collaborationId}`}
+            className={`p-2 rounded-lg border transition-all shadow-2xs hover:scale-[1.02] cursor-pointer block ${
+              isCompleted
+                ? "bg-emerald-50 text-emerald-900 border-emerald-300 hover:bg-emerald-100"
+                : "bg-stone-900 text-white border-stone-900 hover:bg-black"
+            }`}
+            title="Buka Ruang Kerja Kolaborasi Resmi"
+          >
+            <div className="flex items-center justify-center gap-1 text-[11px] font-semibold">
+              <CheckCircle2 className={`w-3 h-3 ${isCompleted ? "text-emerald-600" : "text-emerald-400"}`} />
+              <span>3. Workspace</span>
+              <ArrowUpRight className="w-2.5 h-2.5 opacity-70" />
+            </div>
+            <div className={`text-[10px] mt-0.5 font-medium text-center ${isCompleted ? "text-emerald-700" : "text-stone-300"}`}>
+              {isCompleted ? "Selesai & Diarsipkan" : "Tugas & Serah Terima"}
+            </div>
+          </Link>
+        ) : isCompleted ? (
+          <div className="p-2 rounded-lg border transition-all bg-emerald-50 border-emerald-200 text-emerald-900 shadow-2xs">
+            <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-emerald-900">
+              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+              <span>3. Tuntas</span>
+            </div>
+            <div className="text-[10px] mt-0.5 font-medium text-emerald-700 text-center">
+              Pelunasan &amp; Selesai
+            </div>
+          </div>
+        ) : (
+          <div className="p-2 rounded-lg border transition-all bg-white/60 border-stone-200/60 text-stone-400">
+            <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-stone-700">
               <span className="w-3 h-3 rounded-full bg-stone-200 text-stone-600 text-[8px] flex items-center justify-center font-bold">3</span>
-            )}
-            <span>3. Workspace</span>
+              <span>3. Workspace</span>
+            </div>
+            <div className="text-[10px] mt-0.5 font-medium text-stone-400 text-center">
+              {isCancelled ? "Tidak Dilanjutkan" : "Pelunasan & Luaran"}
+            </div>
           </div>
-          <div className={`text-[10px] mt-0.5 font-medium ${hasCollab ? "text-stone-300" : "text-stone-400"}`}>
-            {hasCollab ? "Tugas & Serah Terima" : isCancelled ? "Tidak Dilanjutkan" : "Pelunasan & Luaran"}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
+
+export interface ReportDisputeButtonProps {
+  bookingId: string;
+  partnerName: string;
+  refCode: string;
+}
+
+export function ReportDisputeButton({
+  bookingId,
+  partnerName,
+  refCode,
+}: ReportDisputeButtonProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [category, setCategory] = useState("PAYMENT_BREACH");
+  const [reason, setReason] = useState("");
+  const [resolution, setResolution] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  async function handleReport(e: React.FormEvent) {
+    e.preventDefault();
+    if (!reason.trim()) {
+      toast.error("Alasan kendala wajib dijelaskan.");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const res = await reportBookingDisputeAction({
+        bookingId,
+        category,
+        reason,
+        requestedResolution: resolution,
+      });
+      if (res.success) {
+        toast.success("Pengajuan mediasi berhasil dikirim. Tim kepatuhan RAMU akan meninjau.");
+        setIsOpen(false);
+        router.refresh();
+      } else {
+        toast.error(res.error || "Gagal mengajukan mediasi.");
+      }
+    } catch {
+      toast.error("Terjadi kesalahan teknis saat mengirim laporan.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <>
+      <button
+        onClick={() => setIsOpen(true)}
+        className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/90 font-semibold text-xs transition-colors cursor-pointer"
+        title="Laporkan kendala pembayaran, batas revisi, atau pelaksanaan untuk mediasi resmi RAMU"
+      >
+        <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+        <span>Laporkan Kendala &amp; Ajukan Mediasi</span>
+      </button>
+
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white border border-stone-200 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden">
+            <div className="p-5 border-b border-stone-100 flex items-start justify-between bg-amber-50/70">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 border border-amber-200">
+                  <AlertTriangle className="w-4 h-4 text-amber-700" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-stone-900 leading-tight">
+                    Pusat Mediasi Sengketa SPK RAMU
+                  </h3>
+                  <p className="text-[11px] text-stone-500 font-mono mt-0.5">{refCode}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-1 rounded-md text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleReport} className="p-5 space-y-4 text-xs">
+              <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 text-stone-600 leading-relaxed">
+                Pengajuan ini akan dicatat dalam audit trail RAMU dan diteruskan kepada mitra Anda (<strong className="text-stone-900">{partnerName}</strong>) serta tim kepatuhan untuk fasilitasi musyawarah mufakat sesuai Pasal 8 SPK.
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-semibold text-stone-700 block">Kategori Kendala *</label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg border border-stone-200 bg-white text-xs text-stone-900 focus:outline-none focus:border-stone-900 font-medium cursor-pointer"
+                >
+                  <option value="PAYMENT_BREACH">Kendala Finansial / Pelunasan Terlambat / DP Macet</option>
+                  <option value="NO_SHOW">Ketidakhadiran di Lokasi (No-Show)</option>
+                  <option value="QUALITY_MISMATCH">Perbedaan Pemahaman Hasil Kerja / Sengketa Batas Revisi</option>
+                  <option value="SAMPLE_DAMAGE">Kerusakan Busana Sampel / Alat Produksi</option>
+                  <option value="COMMUNICATION_DEADLOCK">Kebuntuan Komunikasi / Tidak Ada Respons</option>
+                  <option value="OTHER">Kendala Lainnya</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-semibold text-stone-700 block">Jelaskan Duduk Perkara &amp; Bukti *</label>
+                <textarea
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  required
+                  rows={3}
+                  placeholder="Ceritakan secara kronologis kendala yang dialami dan upaya komunikasi yang telah dilakukan..."
+                  className="w-full px-3 py-2 rounded-lg border border-stone-200 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 transition-colors"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-semibold text-stone-700 block">Solusi yang Anda Harapkan (Opsional)</label>
+                <input
+                  type="text"
+                  value={resolution}
+                  onChange={(e) => setResolution(e.target.value)}
+                  placeholder="Misal: Pengembalian DP 50%, jadwal ulang sesi, penyerahan revisi tuntas..."
+                  className="w-full px-3 py-2 rounded-lg border border-stone-200 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 transition-colors"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-stone-100">
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  disabled={isLoading}
+                  className="px-4 py-2 rounded-lg border border-stone-200 text-stone-600 hover:bg-stone-50 text-xs font-semibold cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+                >
+                  {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Kirim Pengajuan Mediasi</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+

@@ -18,7 +18,7 @@ const categories = [
     icon: Camera,
     count: "121 kreator",
     accent: "#FFD45A",
-    href: "/directory?sector=Fotografi",
+    href: "/directory?sector=Photographer",
     img: "https://images.unsplash.com/photo-1567721913486-6585f069b3e8?q=80&w=500&auto=format&fit=crop",
   },
   {
@@ -36,7 +36,7 @@ const categories = [
     icon: Video,
     count: "63 kreator",
     accent: "#F7C8D0",
-    href: "/directory?sector=Videografi",
+    href: "/directory?sector=Videographer",
     img: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=500&auto=format&fit=crop",
   },
   {

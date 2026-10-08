@@ -120,20 +120,20 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
   return (
     <div className="space-y-8">
 
-      <section className="p-7 sm:p-8 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
+      <section className="p-7 sm:p-8 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-violet-50 border border-violet-200 text-xs font-bold text-violet-800">
               <Shirt className="w-3.5 h-3.5 text-violet-600" />
               <span>Fashion Styling &amp; Wardrobe Direction</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
               Kapabilitas Pengarahan Gaya {actorName}
             </h2>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-stone-900">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-900">
               <Package className="w-3.5 h-3.5 text-violet-600" />
               <span>Arsip Wardrobe: {attributes.wardrobe_archive_count || 150}+ Potong Koleksi</span>
             </div>
@@ -143,7 +143,7 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
                 }}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+                className="btn-primary-pill !text-xs !py-1.5 !px-3.5 shadow-sm shadow-[#4CC9FE]/20 font-semibold cursor-pointer inline-flex items-center gap-1.5 text-white"
               >
                 <Pencil className="w-3.5 h-3.5" />
                 <span>Edit Spesifikasi</span>
@@ -154,14 +154,14 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
-          <div className="p-5 rounded-xl bg-stone-50/70 border border-stone-200/80 space-y-3">
-            <div className="flex items-center gap-2 text-stone-500">
+          <div className="p-5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-3">
+            <div className="flex items-center gap-2 text-slate-500">
               <Compass className="w-4 h-4 text-violet-600" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Arah Gaya &amp; Spesialisasi
               </span>
             </div>
-            <ul className="text-xs font-medium text-stone-900 space-y-1.5">
+            <ul className="text-xs font-medium text-slate-900 space-y-1.5">
               {specialties.map((item, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <span className="text-violet-500 font-bold">•</span>
@@ -171,14 +171,14 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
             </ul>
           </div>
 
-          <div className="p-5 rounded-xl bg-stone-50/70 border border-stone-200/80 space-y-3">
-            <div className="flex items-center gap-2 text-stone-500">
+          <div className="p-5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-3">
+            <div className="flex items-center gap-2 text-slate-500">
               <Scissors className="w-4 h-4 text-amber-600" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Peralatan Wardrobe On-Set
               </span>
             </div>
-            <ul className="text-xs font-medium text-stone-900 space-y-1.5">
+            <ul className="text-xs font-medium text-slate-900 space-y-1.5">
               {onsetEquipment.slice(0, 5).map((item, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
@@ -188,14 +188,14 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
             </ul>
           </div>
 
-          <div className="p-5 rounded-xl bg-stone-50/70 border border-stone-200/80 space-y-3">
-            <div className="flex items-center gap-2 text-stone-500">
+          <div className="p-5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-3">
+            <div className="flex items-center gap-2 text-slate-500">
               <Sparkles className="w-4 h-4 text-pink-600" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Jejaring Peminjaman (Pulling)
               </span>
             </div>
-            <ul className="text-xs font-medium text-stone-900 space-y-1.5">
+            <ul className="text-xs font-medium text-slate-900 space-y-1.5">
               {showroomPartners.map((item, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <span className="text-pink-500 font-bold">•</span>
@@ -210,7 +210,7 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
           <Sparkles className="w-4 h-4 text-violet-600 shrink-0 mt-0.5" />
           <div className="text-xs space-y-1">
             <span className="font-bold text-violet-900 block">Karakter Visual &amp; Filosofi Styling:</span>
-            <p className="text-stone-600 leading-relaxed">
+            <p className="text-slate-600 leading-relaxed">
               {attributes.aesthetic_dna ||
                 "Pendekatan estetika modern yang mengutamakan proporsi siluet tubuh model, pemilihan warna harmonis sesuai DNA merek klien, serta ketelitian detail fitting pakaian on-set tanpa kusut."}
             </p>
@@ -219,13 +219,13 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
       </section>
 
       {gallery.length > 0 && (
-        <section className="p-7 sm:p-8 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-5">
-          <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+        <section className="p-7 sm:p-8 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900">
                 Portofolio Moodboard &amp; Hasil Styling ({gallery.length})
               </h3>
-              <p className="text-xs text-stone-400 mt-0.5">
+              <p className="text-xs text-slate-400 mt-0.5">
                 Dokumentasi hasil kurasi busana, moodboard konsep, dan wardrobe styling pada sesi foto editorial.
               </p>
             </div>
@@ -236,7 +236,7 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
               <div
                 key={idx}
                 onClick={() => setSelectedImage(item)}
-                className="break-inside-avoid mb-3 group relative cursor-pointer overflow-hidden rounded-xl bg-stone-100 border border-stone-200/80 block hover:shadow-xl transition-all"
+                className="break-inside-avoid mb-3 group relative cursor-pointer overflow-hidden rounded-xl bg-slate-100 border border-slate-200/80 block hover:shadow-xl transition-all"
               >
                 <img
                   src={item.url}
@@ -269,7 +269,7 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
             className="relative max-w-2xl w-full bg-white rounded-xl overflow-hidden shadow-2xl border border-white/10"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative aspect-[4/5] bg-stone-900 w-full overflow-hidden">
+            <div className="relative aspect-[4/5] bg-slate-900 w-full overflow-hidden">
               <img
                 src={selectedImage.url}
                 alt={selectedImage.title}
@@ -284,9 +284,9 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
               </button>
             </div>
             <div className="p-5 space-y-1">
-              <h3 className="font-bold text-base text-stone-900">{selectedImage.title}</h3>
+              <h3 className="font-bold text-base text-slate-900">{selectedImage.title}</h3>
               {selectedImage.caption && (
-                <p className="text-xs text-stone-500 leading-relaxed">{selectedImage.caption}</p>
+                <p className="text-xs text-slate-500 leading-relaxed">{selectedImage.caption}</p>
               )}
             </div>
           </div>

@@ -798,6 +798,9 @@ export async function updatePayoutSettingsAction(formData: FormData) {
     const accountHolder = formData.get("accountHolder")?.toString().trim();
     const defaultDpPercentageRaw = formData.get("defaultDpPercentage")?.toString().trim();
     const paymentInstructions = formData.get("paymentInstructions")?.toString().trim();
+    const npwpOrNik = formData.get("npwpOrNik")?.toString().trim() || "";
+    const taxScheme = formData.get("taxScheme")?.toString().trim() || "NETT";
+    const taxClassification = formData.get("taxClassification")?.toString().trim() || "INDIVIDUAL_FREELANCE";
 
     if (!bankName || !accountNumber || !accountHolder) {
       throw new Error("Nama Bank, Nomor Rekening, dan Nama Pemilik Rekening wajib diisi.");
@@ -818,6 +821,9 @@ export async function updatePayoutSettingsAction(formData: FormData) {
         accountHolder,
         defaultDpPercentage,
         paymentInstructions: paymentInstructions || "",
+        npwpOrNik,
+        taxScheme,
+        taxClassification,
         updatedAt: new Date().toISOString(),
       },
     };

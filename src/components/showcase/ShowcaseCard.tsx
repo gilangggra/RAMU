@@ -178,16 +178,27 @@ export function ShowcaseCard({ item, onOpenTearSheet }: ShowcaseCardProps) {
           <h3 className="text-xs sm:text-[13px] font-bold text-stone-900 line-clamp-1 group-hover:text-stone-700 transition-colors">
             {item.title}
           </h3>
-          {item.isOwner && (
-            <span className="shrink-0 text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-1.5 py-0.2 rounded leading-tight">
-              Milik Anda
-            </span>
-          )}
-          {!item.isOwner && item.isCoCreditor && (
-            <span className="shrink-0 text-[9px] font-bold text-purple-700 bg-purple-50 border border-purple-200/70 px-1.5 py-0.2 rounded leading-tight">
-              Kredit Anda
-            </span>
-          )}
+          <div className="flex items-center gap-1 shrink-0">
+            {item.collaborationId && (
+              <span
+                className="text-[9px] font-bold text-amber-900 bg-amber-50 border border-amber-300/80 px-1.5 py-0.5 rounded leading-tight flex items-center gap-0.5"
+                title="Karya Hasil Kolaborasi Resmi Terverifikasi di RAMU"
+              >
+                <span>🏆</span>
+                <span>Kolaborasi</span>
+              </span>
+            )}
+            {item.isOwner && (
+              <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-1.5 py-0.5 rounded leading-tight">
+                Milik Anda
+              </span>
+            )}
+            {!item.isOwner && item.isCoCreditor && (
+              <span className="text-[9px] font-bold text-purple-700 bg-purple-50 border border-purple-200/70 px-1.5 py-0.5 rounded leading-tight">
+                Kredit Anda
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Creator Identity & Team Count */}

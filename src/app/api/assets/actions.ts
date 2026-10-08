@@ -49,35 +49,80 @@ export async function createShowcaseAsset(formData: FormData) {
       const videoBuffer = Buffer.from(videoBytes);
       const safeVideoName = videoFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
       const cleanVideoName = `${Date.now()}-${safeVideoName}`;
-      const videoUploadDir = path.join(process.cwd(), 'public', 'uploads', 'portfolios', 'videos');
+      let uploadedToCloud = false;
 
+      // Coba unggah langsung ke Supabase Storage bucket 'portfolios'
       try {
-        await mkdir(videoUploadDir, { recursive: true });
-      } catch (e) {
+        const { data: storageData, error: storageError } = await supabase.storage
+          .from("portfolios")
+          .upload(`videos/${cleanVideoName}`, videoBuffer, {
+            contentType: videoFile.type || "video/mp4",
+            upsert: true,
+          });
 
+        if (!storageError && storageData) {
+          const { data: publicUrlData } = supabase.storage
+            .from("portfolios")
+            .getPublicUrl(storageData.path);
+          if (publicUrlData?.publicUrl) {
+            videoUrl = publicUrlData.publicUrl;
+            videoSource = "DIRECT_UPLOAD";
+            uploadedToCloud = true;
+          }
+        }
+      } catch (cloudErr) {
+        console.warn("Supabase storage upload failed, falling back to local filesystem:", cloudErr);
       }
 
-      const videoFilePath = path.join(videoUploadDir, cleanVideoName);
-      await writeFile(videoFilePath, videoBuffer);
-      videoUrl = `/uploads/portfolios/videos/${cleanVideoName}`;
-      videoSource = "DIRECT_UPLOAD";
+      if (!uploadedToCloud) {
+        const videoUploadDir = path.join(process.cwd(), 'public', 'uploads', 'portfolios', 'videos');
+        try {
+          await mkdir(videoUploadDir, { recursive: true });
+        } catch (e) {}
+        const videoFilePath = path.join(videoUploadDir, cleanVideoName);
+        await writeFile(videoFilePath, videoBuffer);
+        videoUrl = `/uploads/portfolios/videos/${cleanVideoName}`;
+        videoSource = "DIRECT_UPLOAD";
+      }
     }
 
     if (imageFile && imageFile.size > 0) {
       const bytes = await imageFile.arrayBuffer();
       const buffer = Buffer.from(bytes);
       const filename = `${Date.now()}-${imageFile.name.replace(/\s+/g, '-')}`;
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'portfolios');
+      let uploadedToCloud = false;
 
+      // Coba unggah langsung ke Supabase Storage bucket 'portfolios'
       try {
-        await mkdir(uploadDir, { recursive: true });
-      } catch (e) {
+        const { data: imgStorageData, error: imgStorageError } = await supabase.storage
+          .from("portfolios")
+          .upload(`images/${filename}`, buffer, {
+            contentType: imageFile.type || "image/jpeg",
+            upsert: true,
+          });
 
+        if (!imgStorageError && imgStorageData) {
+          const { data: publicImgUrl } = supabase.storage
+            .from("portfolios")
+            .getPublicUrl(imgStorageData.path);
+          if (publicImgUrl?.publicUrl) {
+            imageUrl = publicImgUrl.publicUrl;
+            uploadedToCloud = true;
+          }
+        }
+      } catch (cloudErr) {
+        console.warn("Supabase storage image upload failed, falling back to local filesystem:", cloudErr);
       }
 
-      const filepath = path.join(uploadDir, filename);
-      await writeFile(filepath, buffer);
-      imageUrl = `/uploads/portfolios/${filename}`;
+      if (!uploadedToCloud) {
+        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'portfolios');
+        try {
+          await mkdir(uploadDir, { recursive: true });
+        } catch (e) {}
+        const filepath = path.join(uploadDir, filename);
+        await writeFile(filepath, buffer);
+        imageUrl = `/uploads/portfolios/${filename}`;
+      }
     }
 
     if (mediaType === "VIDEO" && !imageUrl && videoUrl) {
@@ -170,17 +215,19 @@ export async function deleteShowcaseAsset(assetId: string) {
 
     if (!user) throw new Error("Unauthorized");
 
-    const actor = await prisma.actor.findFirst({
+    const userActors = await prisma.actor.findMany({
       where: { ownerUserId: user.id },
+      select: { id: true },
     });
+    const userActorIds = userActors.map((a) => a.id);
 
-    if (!actor) throw new Error("Actor profile not found");
+    if (userActorIds.length === 0) throw new Error("Actor profile not found");
 
     const asset = await prisma.asset.findUnique({
       where: { id: assetId },
     });
 
-    if (!asset || asset.actorId !== actor.id) {
+    if (!asset || !userActorIds.includes(asset.actorId)) {
       throw new Error("Asset not found or unauthorized");
     }
 
@@ -190,7 +237,7 @@ export async function deleteShowcaseAsset(assetId: string) {
 
     revalidatePath("/dashboard/showcase");
     revalidatePath("/showcase");
-    revalidatePath(`/directory/${actor.id}`);
+    revalidatePath(`/directory/${asset.actorId}`);
 
     return { success: true };
   } catch (error: any) {
@@ -341,11 +388,9 @@ export async function confirmCoCredit(assetId: string, targetActorId?: string) {
     const existingCredits = Array.isArray(tearSheet.credits) ? [...tearSheet.credits] : [];
 
     const isOwner = asset.actorId === actor.id;
-    const effectiveTargetId =
-      targetActorId ||
-      (isOwner
-        ? existingCredits.find((c: any) => c.status === "PENDING")?.actorId
-        : actor.id);
+    const effectiveTargetId = isOwner
+      ? (targetActorId || existingCredits.find((c: any) => c.status === "PENDING")?.actorId)
+      : actor.id;
 
     let updated = false;
     const newCredits = existingCredits.map((c: any) => {
@@ -450,11 +495,9 @@ export async function rejectCoCredit(assetId: string, targetActorId?: string, re
     const existingCredits = Array.isArray(tearSheet.credits) ? [...tearSheet.credits] : [];
 
     const isOwner = asset.actorId === actor.id;
-    const effectiveTargetId =
-      targetActorId ||
-      (isOwner
-        ? existingCredits.find((c: any) => c.status === "PENDING")?.actorId
-        : actor.id);
+    const effectiveTargetId = isOwner
+      ? (targetActorId || existingCredits.find((c: any) => c.status === "PENDING")?.actorId)
+      : actor.id;
 
     const newCredits = existingCredits.map((c: any) => {
       if (c.actorId === effectiveTargetId) {

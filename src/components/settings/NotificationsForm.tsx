@@ -93,11 +93,11 @@ export function NotificationsForm({ initialData }: NotificationsFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
       {/* Header Info */}
       <div className="space-y-1">
-        <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2">
-          <Bell className="w-5 h-5 text-stone-700" />
+        <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <Bell className="w-5 h-5 text-slate-700" />
           <span>Notifikasi &amp; Komunikasi</span>
         </h2>
-        <p className="text-xs text-stone-500 leading-relaxed">
+        <p className="text-xs text-slate-500 leading-relaxed">
           Atur bagaimana dan kapan RAMU menghubungi Anda mengenai pesanan, jadwal reschedule, pesan, dan peluang proyek baru.
         </p>
       </div>
@@ -120,16 +120,16 @@ export function NotificationsForm({ initialData }: NotificationsFormProps) {
       )}
 
       {/* Browser Push Card */}
-      <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-2xs space-y-4">
+      <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <Smartphone className="w-4 h-4 text-stone-600" />
-              <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+              <Smartphone className="w-4 h-4 text-slate-600" />
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                 Push Notification Peramban (Desktop &amp; Ponsel)
               </h3>
             </div>
-            <p className="text-[11px] text-stone-500 leading-relaxed max-w-md">
+            <p className="text-[11px] text-slate-500 leading-relaxed max-w-md">
               Terima notifikasi instan langsung di layar perangkat Anda saat ada tawaran booking baru, reschedule jadwal, atau pesan darurat on-set.
             </p>
           </div>
@@ -149,7 +149,7 @@ export function NotificationsForm({ initialData }: NotificationsFormProps) {
               <button
                 type="button"
                 onClick={handleRequestBrowserPush}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
               >
                 <BellRing className="w-3.5 h-3.5 text-amber-400" />
                 <span>Aktifkan Notifikasi</span>
@@ -160,60 +160,60 @@ export function NotificationsForm({ initialData }: NotificationsFormProps) {
       </div>
 
       {/* Email Preferences Card */}
-      <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-2xs space-y-3">
-        <div className="flex items-center gap-2 pb-2 border-b border-stone-100">
-          <Mail className="w-4 h-4 text-stone-600" />
-          <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+      <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
+        <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+          <Mail className="w-4 h-4 text-slate-600" />
+          <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
             Notifikasi Surat Elektronik (Email Alerts)
           </h3>
         </div>
 
-        <label className="flex items-start gap-3 p-3 rounded-xl bg-stone-50/60 border border-stone-200/80 cursor-pointer hover:bg-stone-50 transition-colors">
+        <label className="flex items-start gap-3 p-3 rounded-xl bg-slate-50/60 border border-slate-200/80 cursor-pointer hover:bg-slate-50 transition-colors">
           <input
             type="checkbox"
             checked={notifyBooking}
             onChange={(e) => setNotifyBooking(e.target.checked)}
-            className="mt-0.5 rounded text-stone-900 focus:ring-stone-900"
+            className="mt-0.5 rounded text-slate-900 focus:ring-slate-900"
           />
           <div className="text-xs">
-            <span className="font-semibold text-stone-900 block">
+            <span className="font-semibold text-slate-900 block">
               Pembaruan Pesanan &amp; Surat Perjanjian Kerja (SPK)
             </span>
-            <span className="text-[11px] text-stone-500 leading-relaxed block mt-0.5">
+            <span className="text-[11px] text-slate-500 leading-relaxed block mt-0.5">
               Dapatkan email saat ada pesanan masuk, persetujuan kontrak kerja, atau permintaan reschedule dari mitra.
             </span>
           </div>
         </label>
 
-        <label className="flex items-start gap-3 p-3 rounded-xl bg-stone-50/60 border border-stone-200/80 cursor-pointer hover:bg-stone-50 transition-colors">
+        <label className="flex items-start gap-3 p-3 rounded-xl bg-slate-50/60 border border-slate-200/80 cursor-pointer hover:bg-slate-50 transition-colors">
           <input
             type="checkbox"
             checked={notifyMessage}
             onChange={(e) => setNotifyMessage(e.target.checked)}
-            className="mt-0.5 rounded text-stone-900 focus:ring-stone-900"
+            className="mt-0.5 rounded text-slate-900 focus:ring-slate-900"
           />
           <div className="text-xs">
-            <span className="font-semibold text-stone-900 block">
+            <span className="font-semibold text-slate-900 block">
               Pesan Baru di Messenger RAMU
             </span>
-            <span className="text-[11px] text-stone-500 leading-relaxed block mt-0.5">
+            <span className="text-[11px] text-slate-500 leading-relaxed block mt-0.5">
               Email pemberitahuan jika Anda memiliki pesan obrolan yang belum dibaca lebih dari 15 menit.
             </span>
           </div>
         </label>
 
-        <label className="flex items-start gap-3 p-3 rounded-xl bg-stone-50/60 border border-stone-200/80 cursor-pointer hover:bg-stone-50 transition-colors">
+        <label className="flex items-start gap-3 p-3 rounded-xl bg-slate-50/60 border border-slate-200/80 cursor-pointer hover:bg-slate-50 transition-colors">
           <input
             type="checkbox"
             checked={notifyBriefDigest}
             onChange={(e) => setNotifyBriefDigest(e.target.checked)}
-            className="mt-0.5 rounded text-stone-900 focus:ring-stone-900"
+            className="mt-0.5 rounded text-slate-900 focus:ring-slate-900"
           />
           <div className="text-xs">
-            <span className="font-semibold text-stone-900 block">
+            <span className="font-semibold text-slate-900 block">
               Ringkasan Peluang Proyek Baru yang Kompatibel
             </span>
-            <span className="text-[11px] text-stone-500 leading-relaxed block mt-0.5">
+            <span className="text-[11px] text-slate-500 leading-relaxed block mt-0.5">
               Rangkuman mingguan brief proyek dan kampanye baru yang cocok dengan portofolio &amp; sektor Anda.
             </span>
           </div>
@@ -224,7 +224,7 @@ export function NotificationsForm({ initialData }: NotificationsFormProps) {
         <button
           type="submit"
           disabled={isLoading}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
         >
           {isLoading ? (
             <>
@@ -233,7 +233,7 @@ export function NotificationsForm({ initialData }: NotificationsFormProps) {
             </>
           ) : (
             <>
-              <Save className="w-3.5 h-3.5 text-stone-300" />
+              <Save className="w-3.5 h-3.5 text-slate-300" />
               <span>Simpan Notifikasi</span>
             </>
           )}

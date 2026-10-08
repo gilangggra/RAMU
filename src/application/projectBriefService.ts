@@ -365,9 +365,26 @@ export async function expressInterest(
   message?: string,
   proposedAssetIds?: string[]
 ) {
+  const brief = await prisma.projectBrief.findUnique({
+    where: { id: briefId },
+    select: { id: true, title: true, creatorActorId: true, status: true },
+  });
+  if (!brief) {
+    throw new Error('Brief proyek tidak ditemukan.');
+  }
+  if (brief.creatorActorId === actorId) {
+    throw new Error('Anda tidak dapat mendaftar pada brief yang Anda buat sendiri.');
+  }
+  if (brief.status !== 'OPEN') {
+    throw new Error('Brief proyek ini sudah tidak menerima pendaftaran baru.');
+  }
+
   const role = await prisma.projectBriefRole.findUnique({ where: { id: roleId } });
   if (!role || role.isFilled) {
     throw new Error('Peran ini sudah terisi atau tidak ditemukan.');
+  }
+  if (role.briefId !== briefId) {
+    throw new Error('Peran yang dipilih tidak sesuai dengan brief proyek ini.');
   }
 
   const existing = await prisma.collaborationInterest.findUnique({
@@ -447,6 +464,15 @@ export async function acceptCollaborator(interestId: string, initiatorActorId: s
   if (!interest) throw new Error('Interest tidak ditemukan.');
   if (interest.brief.creatorActorId !== initiatorActorId) {
     throw new Error('Hanya pembuat brief yang dapat menerima kolaborator.');
+  }
+  if (interest.brief.status !== 'OPEN') {
+    throw new Error('Brief ini sudah ditutup atau tidak aktif.');
+  }
+  if (interest.status !== InterestStatus.PENDING) {
+    throw new Error('Lamaran ini sudah tidak dalam status menunggu konfirmasi.');
+  }
+  if (interest.role.isFilled) {
+    throw new Error('Peran ini sudah terisi.');
   }
 
   // Find other candidates for this role to notify them that the slot is filled
@@ -647,6 +673,9 @@ export async function declineCollaborator(interestId: string, initiatorActorId: 
   if (interest.brief.creatorActorId !== initiatorActorId) {
     throw new Error('Hanya pembuat brief yang dapat menolak kolaborator.');
   }
+  if (interest.status !== InterestStatus.PENDING) {
+    throw new Error('Lamaran ini sudah tidak dalam status menunggu respon.');
+  }
 
   await prisma.collaborationInterest.update({
     where: { id: interestId },
@@ -676,6 +705,9 @@ export async function withdrawInterest(interestId: string, actorId: string) {
 
   if (!interest) throw new Error('Interest tidak ditemukan.');
   if (interest.actorId !== actorId) throw new Error('Bukan milik Anda.');
+  if (interest.status !== InterestStatus.PENDING) {
+    throw new Error('Lamaran ini sudah tidak dalam status menunggu respon.');
+  }
 
   await prisma.collaborationInterest.update({
     where: { id: interestId },
@@ -693,6 +725,10 @@ export async function inviteActorToBriefRole(
   roleId: string,
   customMessage?: string
 ) {
+  if (targetActorId === initiatorActorId) {
+    throw new Error('Anda tidak dapat mengundang diri Anda sendiri ke peran ini.');
+  }
+
   const initiator = await prisma.actor.findUnique({
     where: { id: initiatorActorId },
     select: { id: true, name: true },
@@ -701,11 +737,14 @@ export async function inviteActorToBriefRole(
 
   const brief = await prisma.projectBrief.findUnique({
     where: { id: briefId },
-    select: { id: true, title: true, creatorActorId: true },
+    select: { id: true, title: true, creatorActorId: true, status: true },
   });
   if (!brief) throw new Error('Brief tidak ditemukan.');
   if (brief.creatorActorId !== initiatorActorId) {
     throw new Error('Hanya inisiator proyek yang dapat mengundang kolaborator.');
+  }
+  if (brief.status !== 'OPEN') {
+    throw new Error('Brief proyek ini tidak sedang dalam status aktif/terbuka.');
   }
 
   const role = await prisma.projectBriefRole.findUnique({
@@ -713,6 +752,9 @@ export async function inviteActorToBriefRole(
   });
   if (!role || role.isFilled) {
     throw new Error('Peran ini sudah terisi atau tidak ditemukan.');
+  }
+  if (role.briefId !== briefId) {
+    throw new Error('Peran yang dipilih tidak sesuai dengan brief proyek ini.');
   }
 
   const targetActor = await prisma.actor.findUnique({
@@ -812,6 +854,9 @@ export async function respondToProjectInvitation(
   }
   if (interest.status !== InterestStatus.PENDING) {
     throw new Error('Undangan ini sudah tidak dalam status menunggu respon.');
+  }
+  if (interest.brief.status !== 'OPEN') {
+    throw new Error('Brief proyek ini sudah ditutup atau tidak aktif.');
   }
 
   if (response === 'DECLINE') {
@@ -1306,11 +1351,19 @@ export async function getProjectBriefDashboardStats(actorId: string) {
   const recentOpenBriefs = await prisma.projectBrief.findMany({
     where: { status: ProjectBriefStatus.OPEN, creatorActorId: { not: actorId } },
     orderBy: { createdAt: 'desc' },
-    take: 3,
+    take: 5,
     include: {
-      creatorActor: { select: { name: true, sector: true } },
+      creatorActor: {
+        select: {
+          id: true,
+          name: true,
+          sector: true,
+          location: true,
+          owner: { select: { avatarUrl: true } },
+        },
+      },
       neededRoles: {
-        select: { id: true, roleLabel: true, isFilled: true },
+        select: { id: true, roleLabel: true, isFilled: true, assetCategory: true },
       },
     },
   });
@@ -1337,21 +1390,12 @@ export async function getCrewRecommendationsForBrief(
     where: {
       status: 'ACTIVE',
       id: { not: brief.creatorActorId },
-      ...(neededCategories.length > 0
-        ? {
-            assets: {
-              some: {
-                status: 'ACTIVE',
-                category: { in: neededCategories as any },
-              },
-            },
-          }
-        : {}),
     },
     select: {
       id: true,
       name: true,
       sector: true,
+      actorType: true,
       location: true,
       description: true,
       aestheticStyles: true,
@@ -1389,6 +1433,33 @@ export async function getCrewRecommendationsForBrief(
         if (actorCategories.includes(role.assetCategory)) {
           score += 50;
           matchReasons.push('Kategori Aset Cocok');
+        } else {
+          // Fallback matching: analisa keselarasan sektor dan profil ke peran brief
+          const roleLabelLower = (role.roleLabel || '').toLowerCase();
+          const categoryLower = (role.assetCategory || '').toLowerCase();
+          const sectorLower = (actor.sector || '').toLowerCase();
+          const descLower = (actor.description || '').toLowerCase();
+
+          const isDirectSectorMatch =
+            sectorLower.includes(roleLabelLower) ||
+            roleLabelLower.includes(sectorLower) ||
+            descLower.includes(roleLabelLower);
+
+          const isDomainSynonymMatch =
+            (roleLabelLower.includes('foto') && sectorLower.includes('foto')) ||
+            (roleLabelLower.includes('model') && sectorLower.includes('model')) ||
+            (roleLabelLower.includes('styl') && sectorLower.includes('styl')) ||
+            (roleLabelLower.includes('mua') && (sectorLower.includes('mua') || sectorLower.includes('make'))) ||
+            (roleLabelLower.includes('desain') && sectorLower.includes('desain')) ||
+            (roleLabelLower.includes('studio') && (sectorLower.includes('studio') || actor.actorType === 'STUDIO')) ||
+            (roleLabelLower.includes('brand') && (sectorLower.includes('brand') || actor.actorType === 'BRAND')) ||
+            (categoryLower.includes('talent') && (sectorLower.includes('model') || sectorLower.includes('kreator'))) ||
+            (categoryLower.includes('studio') && actor.actorType === 'STUDIO');
+
+          if (isDirectSectorMatch || isDomainSynonymMatch) {
+            score += 35;
+            matchReasons.push('Sektor Talenta Sesuai');
+          }
         }
 
         if (
@@ -1405,7 +1476,8 @@ export async function getCrewRecommendationsForBrief(
           if (
             actorLoc.includes(briefLoc) ||
             briefLoc.includes(actorLoc) ||
-            briefLoc.includes('remote')
+            briefLoc.includes('remote') ||
+            actorLoc.includes('remote')
           ) {
             score += 15;
             matchReasons.push('Lokasi Sesuai');
@@ -1422,8 +1494,7 @@ export async function getCrewRecommendationsForBrief(
 
         return { actor, matchScore: score, matchReasons };
       })
-
-      .filter((c) => c.matchScore >= 50)
+      .filter((c) => c.matchScore >= 35)
       .sort((a, b) => b.matchScore - a.matchScore)
       .slice(0, 4);
 

@@ -69,7 +69,7 @@ export default async function CollaborationsPage({ searchParams }: Collaboration
 
   // Check if any collaboration is tied to an accepted booking request with SPK
   const acceptedBookings = await prisma.bookingRequest.findMany({
-    where: { status: "ACCEPTED" },
+    where: { status: { in: ["ACCEPTED", "COMPLETED"] } },
     select: { id: true, details: true },
   });
   const bookingCollabIds = new Set(

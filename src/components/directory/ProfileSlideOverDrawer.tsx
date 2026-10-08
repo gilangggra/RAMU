@@ -1066,32 +1066,32 @@ export function ProfileSlideOverDrawer({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 overflow-y-auto bg-stone-950/80 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 overflow-y-auto bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-150"
       onClick={handleModalClose}
     >
       <div
-        className="w-full max-w-5xl lg:max-w-6xl xl:max-w-7xl bg-white border border-stone-200 shadow-2xl flex flex-col h-[90vh] max-h-[92vh] rounded-none animate-in zoom-in-95 duration-150 relative my-auto overflow-hidden"
+        className="w-full max-w-5xl lg:max-w-6xl xl:max-w-7xl bg-white/95 backdrop-blur-2xl border border-white/80 shadow-[0_24px_64px_rgba(0,0,0,0.12)] flex flex-col h-[90vh] max-h-[92vh] rounded-[24px] animate-in zoom-in-95 duration-150 relative my-auto overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* MODAL HEADER */}
-        <div className="px-6 sm:px-8 py-5 bg-[#1E1B2E] border-b border-stone-800 flex items-center justify-between shrink-0">
+        <div className="px-6 sm:px-8 py-5 bg-white/95 backdrop-blur-md border-b border-slate-200/80 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4 min-w-0">
-            <div className="w-11 h-11 bg-white/10 flex items-center justify-center border border-white/20 shrink-0">
-              <Building2 className="w-5 h-5 text-amber-400" />
+            <div className="w-11 h-11 bg-sky-50 rounded-2xl flex items-center justify-center border border-[#4CC9FE]/30 shrink-0 text-[#0284c7] shadow-xs">
+              <Building2 className="w-5 h-5" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <h2 className="text-base sm:text-lg font-black text-white tracking-tight truncate">
+                <h2 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight truncate">
                   Pusat Kelola Profil &amp; Studio ({profileName || actor.name})
                 </h2>
-                <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-white/10 text-stone-200 border border-white/10 shrink-0">
+                <span className="px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-sky-50 text-[#0284c7] border border-[#4CC9FE]/30 rounded-full shrink-0">
                   {actor.sector}
                 </span>
-                <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0 flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Terverifikasi
+                <span className="px-3 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full shrink-0 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Terverifikasi
                 </span>
               </div>
-              <p className="text-xs text-stone-300 mt-1 truncate">
+              <p className="text-xs text-slate-500 mt-1 truncate">
                 Kelola profil bio, portofolio karya studio, paket tarif, spesifikasi teknis, kontak, serta usulan proyek dalam satu kendali terpadu.
               </p>
             </div>
@@ -1099,7 +1099,7 @@ export function ProfileSlideOverDrawer({
           <button
             type="button"
             onClick={handleModalClose}
-            className="p-2.5 text-stone-400 hover:text-white hover:bg-white/10 transition-colors rounded-none cursor-pointer shrink-0 ml-4 border border-transparent hover:border-white/20"
+            className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center transition-colors cursor-pointer shrink-0 ml-4 border border-slate-200"
             aria-label="Tutup"
             title="Tutup (Esc)"
           >
@@ -1108,7 +1108,7 @@ export function ProfileSlideOverDrawer({
         </div>
 
         {/* TAB BAR NAVIGATION (Profil -> Porto -> Tarif -> Spesifikasi -> Tentang -> Usulan) */}
-        <div className="flex border-b border-stone-200 bg-stone-50 overflow-x-auto no-scrollbar shrink-0 px-4 sm:px-8 gap-1">
+        <div className="flex border-b border-slate-200/80 bg-slate-50/80 backdrop-blur-sm overflow-x-auto no-scrollbar shrink-0 px-4 sm:px-8 py-2 gap-1.5">
           {tabs.map((tab) => {
             const isActive = activeDrawerTab === tab.id;
             return (
@@ -1116,29 +1116,29 @@ export function ProfileSlideOverDrawer({
                 key={tab.id}
                 type="button"
                 onClick={() => handleTabChange(tab.id)}
-                className={`py-3.5 px-4 sm:px-5 text-left transition-all cursor-pointer border-b-2 rounded-none flex items-center gap-3 shrink-0 ${
+                className={`py-2 px-3.5 sm:px-4 text-left transition-all cursor-pointer rounded-xl flex items-center gap-2.5 shrink-0 active:scale-95 ${
                   isActive
-                    ? "border-[#1E1B2E] text-[#1E1B2E] bg-white shadow-2xs font-extrabold"
-                    : "border-transparent text-stone-500 hover:text-stone-900 hover:bg-stone-100/60 font-semibold"
+                    ? "bg-white text-slate-900 shadow-xs border border-slate-200/80 font-extrabold"
+                    : "text-slate-500 hover:text-slate-900 hover:bg-white/60 font-semibold"
                 }`}
               >
-                <div className={`p-1.5 rounded-none ${isActive ? "bg-[#1E1B2E]/5" : "bg-transparent"}`}>
+                <div className={`p-1 rounded-lg ${isActive ? "bg-slate-100" : "bg-transparent"}`}>
                   {tab.icon}
                 </div>
                 <div className="flex flex-col items-start leading-none">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-black uppercase tracking-wider">{tab.label}</span>
+                    <span className="text-xs font-bold uppercase tracking-wider">{tab.label}</span>
                     {tab.badge !== undefined && (
                       <span
-                        className={`text-[10px] px-1.5 py-0.5 rounded-none font-mono font-bold ${
-                          isActive ? "bg-[#1E1B2E] text-white" : "bg-stone-200 text-stone-700"
+                        className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                          isActive ? "btn-primary-pill text-white shadow-xs" : "bg-slate-200 text-slate-700"
                         }`}
                       >
                         {tab.badge}
                       </span>
                     )}
                   </div>
-                  <span className="text-[10px] text-stone-400 font-normal mt-0.5 hidden sm:inline-block">
+                  <span className="text-[10px] text-slate-400 font-normal mt-0.5 hidden sm:inline-block">
                     {tab.sublabel}
                   </span>
                 </div>
@@ -1148,11 +1148,11 @@ export function ProfileSlideOverDrawer({
         </div>
 
         {/* TAB CONTENT BODY */}
-        <div className="flex-1 overflow-y-auto p-6 sm:p-8 lg:p-10 space-y-6 bg-stone-50/40">
+        <div className="flex-1 overflow-y-auto p-6 sm:p-8 lg:p-10 space-y-6 bg-white/40 backdrop-blur-sm">
           {/* GENERAL NOTIFICATION MESSAGE */}
           {message && (
             <div
-              className={`p-4 rounded-none flex items-center justify-between gap-3 text-sm font-semibold animate-in fade-in duration-200 ${
+              className={`p-4 rounded-xl flex items-center justify-between gap-3 text-sm font-semibold animate-in fade-in duration-200 ${
                 message.type === "success"
                   ? "bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs"
                   : "bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs"
@@ -1191,19 +1191,19 @@ export function ProfileSlideOverDrawer({
               <input type="hidden" name="contactPhone" value={contactPhone} />
 
               {/* CARD 1: FOTO PROFIL */}
-              <div className="p-6 bg-white border border-stone-200/80 rounded-2xl shadow-2xs space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+              <div className="p-6 bg-white/80 backdrop-blur-xl border border-white/90 rounded-[22px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] space-y-4 text-[#111827]">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-stone-700" />
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-900">
+                    <User className="w-4 h-4 text-slate-700" />
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-900">
                       Foto Profil Resmi
                     </h3>
                   </div>
-                  <span className="text-[10px] text-stone-400 font-medium">Identitas &amp; Lencana Terverifikasi</span>
+                  <span className="text-[10px] text-slate-400 font-medium">Identitas &amp; Lencana Terverifikasi</span>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 bg-stone-100 border border-stone-200 rounded-2xl shrink-0 relative overflow-hidden flex items-center justify-center shadow-xs">
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 bg-slate-100 border border-slate-200 rounded-2xl shrink-0 relative overflow-hidden flex items-center justify-center shadow-xs">
                     {avatarPreview ? (
                       <img
                         src={avatarPreview}
@@ -1211,7 +1211,7 @@ export function ProfileSlideOverDrawer({
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <User className="w-10 h-10 text-stone-300" />
+                      <User className="w-10 h-10 text-slate-300" />
                     )}
                   </div>
 
@@ -1228,7 +1228,7 @@ export function ProfileSlideOverDrawer({
                       <button
                         type="button"
                         onClick={() => avatarInputRef.current?.click()}
-                        className="px-4 py-2 bg-stone-900 text-white hover:bg-stone-800 text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-xs inline-flex items-center gap-1.5"
+                        className="px-4 py-2 btn-primary-pill text-white text-xs font-bold rounded-full transition-all cursor-pointer shadow-xs inline-flex items-center gap-1.5"
                       >
                         <Upload className="w-3.5 h-3.5" />
                         <span>Unggah Foto Baru</span>
@@ -1237,20 +1237,20 @@ export function ProfileSlideOverDrawer({
                         <button
                           type="button"
                           onClick={handleRemoveAvatar}
-                          className="px-4 py-2 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 text-xs font-semibold rounded-xl transition-all cursor-pointer"
+                          className="px-4 py-2 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 text-xs font-semibold rounded-full transition-all cursor-pointer"
                         >
                           Hapus Foto
                         </button>
                       )}
                     </div>
-                    <p className="text-xs text-stone-400 leading-relaxed">
+                    <p className="text-xs text-slate-400 leading-relaxed">
                       Format berkas JPG, PNG, atau WebP resolusi tinggi dengan rasio 1:1 (persegi), ukuran berkas maksimal 5 MB.
                     </p>
 
-                    <div className="p-3 bg-stone-50 border border-stone-200/90 rounded-xl flex items-start gap-2.5 text-xs text-stone-600">
-                      <User className="w-4 h-4 text-stone-600 shrink-0 mt-0.5" />
+                    <div className="p-3 bg-slate-50 border border-slate-200/90 rounded-xl flex items-start gap-2.5 text-xs text-slate-600">
+                      <User className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
                       <div className="leading-relaxed text-[11px]">
-                        <strong className="text-stone-900 block font-semibold mb-0.5">Tampilan Foto Profil di RAMU:</strong>
+                        <strong className="text-slate-900 block font-semibold mb-0.5">Tampilan Foto Profil di RAMU:</strong>
                         Foto profil resmi ini menjadi wajah utama Anda di kartu profil publik Anda (serta otomatis menjadi foto sampul kartu direktori bagi talenta Model &amp; Muse).
                       </div>
                     </div>
@@ -1259,20 +1259,20 @@ export function ProfileSlideOverDrawer({
               </div>
 
               {/* CARD 2: INFORMASI DASAR IDENTITAS */}
-              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
-                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+              <div className="p-6 bg-white/80 backdrop-blur-xl border border-white/90 rounded-[22px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] space-y-6 text-[#111827]">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <div className="flex items-center gap-2">
                     <Building2 className="w-4 h-4 text-purple-600" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                       Identitas Publik &amp; Lokasi Kerja
                     </h3>
                   </div>
-                  <span className="text-[10px] text-stone-400 font-semibold">Wajib Diisi</span>
+                  <span className="text-[10px] text-slate-400 font-semibold">Wajib Diisi</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label htmlFor="popup_name_profile" className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center justify-between">
+                    <label htmlFor="popup_name_profile" className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between">
                       <span>Nama Lengkap / Brand / Talenta <span className="text-rose-500">*</span></span>
                     </label>
                     <input
@@ -1283,14 +1283,14 @@ export function ProfileSlideOverDrawer({
                       onChange={(e) => setProfileName(e.target.value)}
                       required
                       placeholder="Nama profesional Anda"
-                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800 transition-colors"
+                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-sm font-medium text-slate-800 transition-colors"
                     />
-                    <span className="text-[10px] text-stone-400 block">Nama resmi yang dikenal publik di industri</span>
+                    <span className="text-[10px] text-slate-400 block">Nama resmi yang dikenal publik di industri</span>
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="popup_location_profile" className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-stone-500" />
+                    <label htmlFor="popup_location_profile" className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-slate-500" />
                       <span>Kota Domisili / Lokasi Kerja Utama</span>
                     </label>
                     <input
@@ -1300,16 +1300,16 @@ export function ProfileSlideOverDrawer({
                       value={profileLocation}
                       onChange={(e) => setProfileLocation(e.target.value)}
                       placeholder="mis. Jakarta Selatan, Indonesia"
-                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800 transition-colors"
+                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-sm font-medium text-slate-800 transition-colors"
                     />
-                    <span className="text-[10px] text-stone-400 block">Basis area operasional untuk penentuan ongkos produksi</span>
+                    <span className="text-[10px] text-slate-400 block">Basis area operasional untuk penentuan ongkos produksi</span>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="popup_description_profile" className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center justify-between">
+                  <label htmlFor="popup_description_profile" className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between">
                     <span>Bio Profil &amp; Ringkasan Keahlian Profesional</span>
-                    <span className="text-[10px] text-stone-400 font-normal">Disarankan 2 – 4 kalimat padat</span>
+                    <span className="text-[10px] text-slate-400 font-normal">Disarankan 2 – 4 kalimat padat</span>
                   </label>
                   <textarea
                     id="popup_description_profile"
@@ -1318,27 +1318,27 @@ export function ProfileSlideOverDrawer({
                     value={profileDescription}
                     onChange={(e) => setProfileDescription(e.target.value)}
                     placeholder="Deskripsikan pendekatan visual, jam terbang, spesialisasi kreasi, dan portfolio DNA Anda yang relevan bagi calon klien brand..."
-                    className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800 resize-none transition-colors leading-relaxed"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-sm font-medium text-slate-800 resize-none transition-colors leading-relaxed"
                   />
-                  <span className="text-[10px] text-stone-400 block">Narasi bio ini akan ditampilkan di kartu sorotan halaman profil Anda.</span>
+                  <span className="text-[10px] text-slate-400 block">Narasi bio ini akan ditampilkan di kartu sorotan halaman profil Anda.</span>
                 </div>
               </div>
 
               {/* ACTION FOOTER */}
-              <div className="pt-4 border-t border-stone-200 flex items-center justify-between gap-4 shrink-0">
-                <span className="text-xs text-stone-500">Perubahan akan langsung disimpan ke profil publik Anda.</span>
+              <div className="pt-4 border-t border-slate-200 flex items-center justify-between gap-4 shrink-0">
+                <span className="text-xs text-slate-500">Perubahan akan langsung disimpan ke profil publik Anda.</span>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={handleModalClose}
-                    className="px-4 py-2.5 rounded-xl border border-stone-300 text-stone-700 font-semibold text-xs hover:bg-stone-100 transition-colors cursor-pointer"
+                    className="px-5 py-2.5 rounded-full bg-white/80 hover:bg-white border border-slate-200 text-slate-700 font-semibold text-xs transition-colors cursor-pointer shadow-2xs"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-stone-900 text-white font-semibold text-xs hover:bg-stone-800 transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-full btn-primary-pill text-white font-bold text-xs transition-all disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-xs active:scale-95"
                   >
                     {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                     <span>{isPending ? "Menyimpan..." : "Simpan Profil"}</span>
@@ -1354,21 +1354,21 @@ export function ProfileSlideOverDrawer({
           {activeDrawerTab === "portfolio" && (
             <div className="space-y-6">
               {/* HERO CARD: PUSAT PORTOFOLIO & SHOWREEL */}
-              <div className="p-6 sm:p-7 bg-gradient-to-br from-[#1E1B2E] via-[#2A243F] to-[#1E1B2E] text-white rounded-2xl border border-stone-800 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="p-6 sm:p-7 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-[24px] border border-slate-800 shadow-md relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="space-y-2.5 max-w-2xl">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-400 text-stone-950 text-[10px] font-black uppercase tracking-wider rounded-full shadow-xs">
-                      <Sparkles className="w-3 h-3 text-stone-950" />
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/15 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider rounded-full border border-white/20 shadow-xs">
+                      <Sparkles className="w-3 h-3 text-[#4CC9FE]" />
                       Portofolio &amp; Showreel Kreatif
                     </span>
-                    <span className="text-stone-300 text-xs font-semibold">
+                    <span className="text-slate-300 text-xs font-semibold">
                       Karya Visual, Video &amp; Kredit Kolaborator
                     </span>
                   </div>
                   <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white">
                     Pusat Portofolio &amp; Showreel
                   </h3>
-                  <p className="text-xs sm:text-sm text-stone-300 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
                     Unggah karya editorial resolusi tinggi, streaming video sinematik, serta tautkan kredit rekan tim. Foto di urutan pertama secara otomatis menjadi foto sampul profil Anda di direktori pencarian publik RAMU.
                   </p>
                 </div>
@@ -1377,7 +1377,7 @@ export function ProfileSlideOverDrawer({
                   <button
                     type="button"
                     onClick={() => setShowQuickUpload(!showQuickUpload)}
-                    className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-[#1E1B2E] text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-md hover:shadow-lg cursor-pointer"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#4CC9FE] hover:bg-[#38bbf5] active:scale-[0.98] text-slate-900 text-xs font-bold rounded-full transition-all shadow-md cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>{showQuickUpload ? "Tutup Form Unggah" : "+ Unggah Karya Baru"}</span>
@@ -1385,10 +1385,10 @@ export function ProfileSlideOverDrawer({
                   <button
                     type="button"
                     onClick={() => setIsStudioUploadOpen(true)}
-                    className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-colors border border-white/20 cursor-pointer"
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-full transition-colors border border-white/20 cursor-pointer"
                     title="Buka studio tear-sheet untuk menandai titik hotspot produk dan busana"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <Sparkles className="w-3.5 h-3.5 text-[#4CC9FE]" />
                     <span>Mode Pin Hotspot</span>
                   </button>
                 </div>
@@ -1414,7 +1414,7 @@ export function ProfileSlideOverDrawer({
                   <button
                     type="button"
                     onClick={() => setPortfolioMessage(null)}
-                    className="text-stone-400 hover:text-stone-700 p-1 cursor-pointer rounded-md"
+                    className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer rounded-md"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -1423,8 +1423,8 @@ export function ProfileSlideOverDrawer({
 
               {/* STREAMLINED UPLOAD FORM */}
               {showQuickUpload && (
-                <div className="p-6 sm:p-7 bg-white rounded-2xl border border-stone-200 space-y-6 shadow-sm animate-in fade-in duration-200">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-stone-200 gap-4">
+                <div className="p-6 sm:p-7 bg-white/80 backdrop-blur-xl rounded-[22px] border border-white/90 space-y-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] animate-in fade-in duration-200 text-[#111827]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 text-purple-900 flex items-center justify-center shrink-0">
                         {portfolioMediaType === "VIDEO" ? (
@@ -1434,10 +1434,10 @@ export function ProfileSlideOverDrawer({
                         )}
                       </div>
                       <div>
-                        <h4 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                        <h4 className="text-sm font-bold uppercase tracking-wider text-[#111827]">
                           Unggah Karya Portofolio Baru
                         </h4>
-                        <p className="text-xs text-stone-500">
+                        <p className="text-xs text-slate-500">
                           {portfolioMediaType === "VIDEO"
                             ? "Unggah berkas video MP4/WebM atau tautkan video YouTube/Vimeo"
                             : "Unggah foto karya editorial atau komersial resolusi tinggi"}
@@ -1447,7 +1447,7 @@ export function ProfileSlideOverDrawer({
 
                     <div className="flex items-center gap-3">
                       {/* MEDIA TYPE TOGGLE */}
-                      <div className="flex items-center rounded-xl border border-stone-200 p-1 bg-stone-100">
+                      <div className="flex items-center rounded-xl border border-slate-200 p-1 bg-slate-100">
                         <button
                           type="button"
                           onClick={() => {
@@ -1456,8 +1456,8 @@ export function ProfileSlideOverDrawer({
                           }}
                           className={`px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
                             portfolioMediaType === "IMAGE"
-                              ? "bg-[#1E1B2E] text-white shadow-xs"
-                              : "text-stone-600 hover:text-stone-900"
+                              ? "btn-primary-pill text-white shadow-xs"
+                              : "text-slate-600 hover:text-slate-900"
                           }`}
                         >
                           <ImageIcon className="w-3.5 h-3.5" />
@@ -1471,11 +1471,11 @@ export function ProfileSlideOverDrawer({
                           }}
                           className={`px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
                             portfolioMediaType === "VIDEO"
-                              ? "bg-[#1E1B2E] text-white shadow-xs"
-                              : "text-stone-600 hover:text-stone-900"
+                              ? "btn-primary-pill text-white shadow-xs"
+                              : "text-slate-600 hover:text-slate-900"
                           }`}
                         >
-                          <Film className="w-3.5 h-3.5 text-amber-400" />
+                          <Film className="w-3.5 h-3.5 text-white" />
                           <span>Video</span>
                         </button>
                       </div>
@@ -1483,7 +1483,7 @@ export function ProfileSlideOverDrawer({
                       <button
                         type="button"
                         onClick={() => setShowQuickUpload(false)}
-                        className="text-stone-400 hover:text-stone-700 p-2 rounded-lg hover:bg-stone-100 cursor-pointer transition-colors"
+                        className="text-slate-400 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100 cursor-pointer transition-colors"
                         title="Tutup formulir unggah"
                       >
                         <X className="w-5 h-5" />
@@ -1496,7 +1496,7 @@ export function ProfileSlideOverDrawer({
                       {/* LEFT COLUMN: METADATA & DESKRIPSI */}
                       <div className="space-y-4">
                         <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                          <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                             Judul Karya / Proyek <span className="text-rose-500">*</span>
                           </label>
                           <input
@@ -1505,19 +1505,19 @@ export function ProfileSlideOverDrawer({
                             onChange={(e) => setPortfolioName(e.target.value)}
                             required
                             placeholder={portfolioMediaType === "VIDEO" ? "mis. Fashion Film: Eternal Horizon 4K" : "mis. Spring/Summer 2026 Editorial"}
-                            className="w-full px-4 py-3 bg-stone-50 rounded-xl border border-stone-200 focus:bg-white focus:border-[#1E1B2E] focus:ring-1 focus:ring-[#1E1B2E] text-xs font-medium text-stone-800 transition-all outline-hidden"
+                            className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-1 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                           />
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                               Kategori / Subtipe
                             </label>
                             <select
                               value={portfolioSubtype}
                               onChange={(e) => setPortfolioSubtype(e.target.value)}
-                              className="w-full px-4 py-3 bg-stone-50 rounded-xl border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-xs font-medium text-stone-800 cursor-pointer outline-hidden"
+                              className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-xs font-medium text-slate-800 cursor-pointer outline-hidden"
                             >
                               <option value="Editorial / Lookbook">Editorial / Lookbook</option>
                               <option value="Video Fashion / Campaign">Video Fashion / Campaign</option>
@@ -1530,7 +1530,7 @@ export function ProfileSlideOverDrawer({
                           </div>
 
                           <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                               Tautan Proyek (Opsional)
                             </label>
                             <input
@@ -1538,15 +1538,15 @@ export function ProfileSlideOverDrawer({
                               value={portfolioProjectUrl}
                               onChange={(e) => setPortfolioProjectUrl(e.target.value)}
                               placeholder="https://..."
-                              className="w-full px-4 py-3 bg-stone-50 rounded-xl border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-xs font-medium text-stone-800 outline-hidden"
+                              className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-xs font-medium text-slate-800 outline-hidden"
                             />
                           </div>
                         </div>
 
                         {/* ASPECT RATIO SELECTOR (FOR VIDEO) */}
                         {portfolioMediaType === "VIDEO" && (
-                          <div className="space-y-2 p-3.5 bg-stone-50 rounded-xl border border-stone-200">
-                            <label className="text-[11px] font-bold text-stone-700 uppercase tracking-wider block">
+                          <div className="space-y-2 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                            <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
                               Rasio Layar Video
                             </label>
                             <div className="grid grid-cols-3 gap-2">
@@ -1561,12 +1561,12 @@ export function ProfileSlideOverDrawer({
                                   onClick={() => setPortfolioAspectRatio(ratio.id as any)}
                                   className={`p-2.5 rounded-lg text-center border text-xs font-bold transition-all cursor-pointer ${
                                     portfolioAspectRatio === ratio.id
-                                      ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-xs"
-                                      : "bg-white text-stone-700 border-stone-200 hover:bg-stone-100"
+                                      ? "btn-primary-pill text-white border-[#4CC9FE] shadow-sm shadow-[#4CC9FE]/25"
+                                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
                                   }`}
                                 >
                                   <div>{ratio.label}</div>
-                                  <div className={`text-[10px] ${portfolioAspectRatio === ratio.id ? "text-stone-300" : "text-stone-400"}`}>
+                                  <div className={`text-[10px] ${portfolioAspectRatio === ratio.id ? "text-white/80" : "text-slate-400"}`}>
                                     {ratio.desc}
                                   </div>
                                 </button>
@@ -1576,7 +1576,7 @@ export function ProfileSlideOverDrawer({
                         )}
 
                         <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                          <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                             Deskripsi Karya / Konsep Visual
                           </label>
                           <textarea
@@ -1584,7 +1584,7 @@ export function ProfileSlideOverDrawer({
                             value={portfolioDesc}
                             onChange={(e) => setPortfolioDesc(e.target.value)}
                             placeholder="Ceritakan konsep pemotretan, brand, atau gaya visual yang dieksplorasi..."
-                            className="w-full px-4 py-3 bg-stone-50 rounded-xl border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-xs font-medium text-stone-800 resize-none outline-hidden"
+                            className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-xs font-medium text-slate-800 resize-none outline-hidden"
                           />
                         </div>
                       </div>
@@ -1594,21 +1594,21 @@ export function ProfileSlideOverDrawer({
                         {portfolioMediaType === "IMAGE" ? (
                           <>
                             <div className="flex items-center justify-between">
-                              <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                                 Berkas Foto Karya <span className="text-rose-500">*</span>
                               </label>
-                              <div className="flex items-center gap-1.5 bg-stone-100 p-1 rounded-lg border border-stone-200">
+                              <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg border border-slate-200">
                                 <button
                                   type="button"
                                   onClick={() => setPortfolioMode("file")}
-                                  className={`px-3 py-1 rounded-md text-xs font-bold transition-colors ${portfolioMode === "file" ? "bg-[#1E1B2E] text-white shadow-xs" : "text-stone-600 hover:text-stone-900"}`}
+                                  className={`px-3 py-1 rounded-md text-xs font-bold transition-colors ${portfolioMode === "file" ? "bg-[#4CC9FE] text-white shadow-sm font-bold" : "text-slate-600 hover:text-slate-900"}`}
                                 >
                                   Unggah Berkas
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setPortfolioMode("url")}
-                                  className={`px-3 py-1 rounded-md text-xs font-bold transition-colors ${portfolioMode === "url" ? "bg-[#1E1B2E] text-white shadow-xs" : "text-stone-600 hover:text-stone-900"}`}
+                                  className={`px-3 py-1 rounded-md text-xs font-bold transition-colors ${portfolioMode === "url" ? "bg-[#4CC9FE] text-white shadow-sm font-bold" : "text-slate-600 hover:text-slate-900"}`}
                                 >
                                   Tautan URL
                                 </button>
@@ -1627,7 +1627,7 @@ export function ProfileSlideOverDrawer({
                                 />
                                 <div
                                   onClick={() => portfolioFileRef.current?.click()}
-                                  className="border-2 border-dashed border-stone-300 hover:border-[#1E1B2E] rounded-xl p-6 text-center cursor-pointer transition-all bg-stone-50 hover:bg-white aspect-[16/10] flex flex-col items-center justify-center relative overflow-hidden group"
+                                  className="border-2 border-dashed border-slate-300 hover:border-[#4CC9FE] rounded-xl p-6 text-center cursor-pointer transition-all bg-slate-50 hover:bg-white aspect-[16/10] flex flex-col items-center justify-center relative overflow-hidden group"
                                 >
                                   {portfolioImagePreview ? (
                                     <>
@@ -1637,18 +1637,18 @@ export function ProfileSlideOverDrawer({
                                         className="w-full h-full object-cover absolute inset-0"
                                       />
                                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <span className="px-3 py-1.5 bg-white text-[#1E1B2E] text-xs font-bold rounded-lg shadow-sm">
+                                        <span className="px-3 py-1.5 bg-white text-[#111827] text-xs font-bold rounded-lg shadow-sm">
                                           Ganti Foto Terpilih
                                         </span>
                                       </div>
                                     </>
                                   ) : (
                                     <div className="space-y-2">
-                                      <div className="w-12 h-12 rounded-full bg-amber-400/20 text-[#1E1B2E] mx-auto flex items-center justify-center group-hover:scale-105 transition-transform">
-                                        <Upload className="w-6 h-6 text-[#1E1B2E]" />
+                                      <div className="w-12 h-12 rounded-full bg-amber-400/20 text-[#111827] mx-auto flex items-center justify-center group-hover:scale-105 transition-transform">
+                                        <Upload className="w-6 h-6 text-[#111827]" />
                                       </div>
-                                      <p className="text-xs font-bold text-stone-700">Klik untuk memilih berkas foto</p>
-                                      <p className="text-[11px] text-stone-400">JPG, PNG, atau WebP hingga 15 MB</p>
+                                      <p className="text-xs font-bold text-slate-700">Klik untuk memilih berkas foto</p>
+                                      <p className="text-[11px] text-slate-400">JPG, PNG, atau WebP hingga 15 MB</p>
                                     </div>
                                   )}
                                 </div>
@@ -1663,10 +1663,10 @@ export function ProfileSlideOverDrawer({
                                     setPortfolioImagePreview(e.target.value);
                                   }}
                                   placeholder="https://images.unsplash.com/..."
-                                  className="w-full px-4 py-3 bg-stone-50 rounded-xl border border-stone-200 text-xs font-medium text-stone-800 outline-hidden"
+                                  className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 outline-hidden"
                                 />
                                 {portfolioImageUrl && (
-                                  <div className="aspect-[16/10] bg-stone-100 rounded-xl border border-stone-200 overflow-hidden">
+                                  <div className="aspect-[16/10] bg-slate-100 rounded-xl border border-slate-200 overflow-hidden">
                                     <img
                                       src={portfolioImageUrl}
                                       alt="Preview Karya URL"
@@ -1681,15 +1681,15 @@ export function ProfileSlideOverDrawer({
                           /* VIDEO UPLOAD & STREAMING UI */
                           <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                              <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                                 Sumber Video Karya <span className="text-rose-500">*</span>
                               </label>
-                              <div className="flex items-center gap-1.5 bg-stone-100 p-1 rounded-lg border border-stone-200">
+                              <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg border border-slate-200">
                                 <button
                                   type="button"
                                   onClick={() => setPortfolioVideoSource("FILE")}
                                   className={`px-3 py-1 rounded-md text-xs font-bold transition-colors ${
-                                    portfolioVideoSource === "FILE" ? "bg-[#1E1B2E] text-white shadow-xs" : "text-stone-600 hover:text-stone-900"
+                                    portfolioVideoSource === "FILE" ? "bg-[#4CC9FE] text-white shadow-sm font-bold" : "text-slate-600 hover:text-slate-900"
                                   }`}
                                 >
                                   Berkas Video
@@ -1698,7 +1698,7 @@ export function ProfileSlideOverDrawer({
                                   type="button"
                                   onClick={() => setPortfolioVideoSource("URL")}
                                   className={`px-3 py-1 rounded-md text-xs font-bold transition-colors ${
-                                    portfolioVideoSource === "URL" ? "bg-[#1E1B2E] text-white shadow-xs" : "text-stone-600 hover:text-stone-900"
+                                    portfolioVideoSource === "URL" ? "bg-[#4CC9FE] text-white shadow-sm font-bold" : "text-slate-600 hover:text-slate-900"
                                   }`}
                                 >
                                   Tautan URL
@@ -1718,7 +1718,7 @@ export function ProfileSlideOverDrawer({
 
                                 {portfolioVideoPreviewUrl ? (
                                   <div className="space-y-2">
-                                    <div className="aspect-video bg-black rounded-xl overflow-hidden relative border border-stone-800">
+                                    <div className="aspect-video bg-black rounded-xl overflow-hidden relative border border-slate-800">
                                       <video
                                         src={portfolioVideoPreviewUrl}
                                         controls
@@ -1726,19 +1726,19 @@ export function ProfileSlideOverDrawer({
                                         className="w-full h-full object-contain"
                                       />
                                     </div>
-                                    <div className="flex items-center justify-between p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs">
+                                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
                                       <div className="truncate max-w-[220px]">
-                                        <span className="font-bold text-stone-800 block truncate">
+                                        <span className="font-bold text-slate-800 block truncate">
                                           {portfolioVideoFile?.name || "Video Terpilih"}
                                         </span>
-                                        <span className="text-[11px] text-stone-400">
+                                        <span className="text-[11px] text-slate-400">
                                           {portfolioVideoFile ? `${(portfolioVideoFile.size / (1024 * 1024)).toFixed(1)} MB` : ""}
                                         </span>
                                       </div>
                                       <button
                                         type="button"
                                         onClick={() => portfolioVideoFileRef.current?.click()}
-                                        className="px-3 py-1.5 bg-white hover:bg-stone-100 border border-stone-300 text-stone-700 text-xs font-bold rounded-lg cursor-pointer transition-colors"
+                                        className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold rounded-lg cursor-pointer transition-colors"
                                       >
                                         Ganti Video
                                       </button>
@@ -1747,16 +1747,16 @@ export function ProfileSlideOverDrawer({
                                 ) : (
                                   <div
                                     onClick={() => portfolioVideoFileRef.current?.click()}
-                                    className="border-2 border-dashed border-stone-300 hover:border-[#1E1B2E] rounded-xl p-6 text-center cursor-pointer transition-all bg-stone-50 hover:bg-white aspect-video flex flex-col items-center justify-center relative overflow-hidden group"
+                                    className="border-2 border-dashed border-slate-300 hover:border-[#4CC9FE] rounded-xl p-6 text-center cursor-pointer transition-all bg-slate-50 hover:bg-white aspect-video flex flex-col items-center justify-center relative overflow-hidden group"
                                   >
                                     <div className="space-y-2">
-                                      <div className="w-12 h-12 rounded-full bg-amber-400/20 text-[#1E1B2E] mx-auto flex items-center justify-center group-hover:scale-105 transition-transform">
+                                      <div className="w-12 h-12 rounded-full bg-amber-400/20 text-[#111827] mx-auto flex items-center justify-center group-hover:scale-105 transition-transform">
                                         <Film className="w-6 h-6 text-purple-700" />
                                       </div>
-                                      <p className="text-xs font-bold text-stone-800">
+                                      <p className="text-xs font-bold text-slate-800">
                                         Klik untuk memilih berkas video portofolio
                                       </p>
-                                      <p className="text-[11px] text-stone-400">
+                                      <p className="text-[11px] text-slate-400">
                                         Format MP4, WebM, atau MOV hingga 200 MB
                                       </p>
                                     </div>
@@ -1771,15 +1771,15 @@ export function ProfileSlideOverDrawer({
                                     value={portfolioVideoUrl}
                                     onChange={(e) => handlePortfolioVideoUrlChange(e.target.value)}
                                     placeholder="https://www.youtube.com/watch?v=... atau Vimeo"
-                                    className="w-full px-4 py-3 bg-stone-50 rounded-xl border border-stone-200 text-xs font-medium text-stone-800 outline-hidden"
+                                    className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 outline-hidden"
                                   />
-                                  <span className="text-[11px] text-stone-400 block">
+                                  <span className="text-[11px] text-slate-400 block">
                                     Mendukung YouTube, Vimeo, atau tautan streaming MP4 langsung
                                   </span>
                                 </div>
 
                                 {portfolioVideoUrl && (
-                                  <div className="aspect-video bg-black rounded-xl border border-stone-200 overflow-hidden relative flex items-center justify-center">
+                                  <div className="aspect-video bg-black rounded-xl border border-slate-200 overflow-hidden relative flex items-center justify-center">
                                     {portfolioPosterPreview ? (
                                       <img
                                         src={portfolioPosterPreview}
@@ -1798,13 +1798,13 @@ export function ProfileSlideOverDrawer({
                             )}
 
                             {/* COVER POSTER THUMBNAIL (AUTO-CAPTURED OR CUSTOM) */}
-                            <div className="pt-2 border-t border-stone-200 space-y-2">
+                            <div className="pt-2 border-t border-slate-200 space-y-2">
                               <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
-                                  <label className="text-[11px] font-bold text-stone-700 uppercase tracking-wider block">
+                                  <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
                                     Sampul Poster Video
                                   </label>
-                                  <span className="text-[10px] text-stone-400 block">
+                                  <span className="text-[10px] text-slate-400 block">
                                     {isCapturingPoster
                                       ? "Sedang mengekstrak frame otomatis..."
                                       : portfolioPosterPreview
@@ -1815,7 +1815,7 @@ export function ProfileSlideOverDrawer({
                                 <button
                                   type="button"
                                   onClick={() => portfolioPosterFileRef.current?.click()}
-                                  className="px-3 py-1 text-xs font-bold border border-stone-300 rounded-lg bg-white hover:bg-stone-50 text-stone-700 cursor-pointer"
+                                  className="px-3 py-1 text-xs font-bold border border-slate-300 rounded-lg bg-white hover:bg-slate-50 text-slate-700 cursor-pointer"
                                 >
                                   Ganti Sampul
                                 </button>
@@ -1837,17 +1837,17 @@ export function ProfileSlideOverDrawer({
                               )}
 
                               {portfolioPosterPreview && !isCapturingPoster && (
-                                <div className="flex items-center gap-3 p-2.5 bg-stone-50 rounded-xl border border-stone-200">
+                                <div className="flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
                                   <img
                                     src={portfolioPosterPreview}
                                     alt="Cover Sampul"
-                                    className="w-16 h-12 rounded-lg object-cover border border-stone-300"
+                                    className="w-16 h-12 rounded-lg object-cover border border-slate-300"
                                   />
                                   <div className="text-xs">
                                     <span className="font-bold text-emerald-700 flex items-center gap-1">
                                       <CheckCircle2 className="w-3.5 h-3.5" /> Sampul Siap
                                     </span>
-                                    <span className="text-[11px] text-stone-400">
+                                    <span className="text-[11px] text-slate-400">
                                       Ditampilkan di kartu galeri dan sebelum video diputar
                                     </span>
                                   </div>
@@ -1860,19 +1860,19 @@ export function ProfileSlideOverDrawer({
                     </div>
 
                     {/* COLLABORATOR CREDITS ENGINE */}
-                    <div className="pt-5 border-t border-stone-200 space-y-4">
+                    <div className="pt-5 border-t border-slate-200 space-y-4">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
                           <div className="flex items-center gap-2">
                             <Users className="w-4 h-4 text-purple-700" />
-                            <h4 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                               Kredit Kru &amp; Kolaborator Tim ({portfolioCredits.length})
                             </h4>
                             <span className="text-[10px] px-2 py-0.5 bg-purple-50 text-purple-700 font-bold rounded-full border border-purple-200">
                               Peer-Verified
                             </span>
                           </div>
-                          <p className="text-xs text-stone-500 mt-0.5">
+                          <p className="text-xs text-slate-500 mt-0.5">
                             Tandai kru, model, stylist, fotografer, atau studio yang berkolaborasi. Karya otomatis terhubung ke portofolio mereka.
                           </p>
                         </div>
@@ -1880,7 +1880,7 @@ export function ProfileSlideOverDrawer({
                         <button
                           type="button"
                           onClick={() => setShowAddCredit(!showAddCredit)}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold uppercase tracking-wider bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl border border-stone-300 transition-colors cursor-pointer self-start sm:self-auto"
+                          className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-full bg-white/90 hover:bg-white text-[#0284c7] border border-[#4CC9FE]/30 hover:border-[#4CC9FE] transition-colors cursor-pointer shadow-2xs self-start sm:self-auto"
                         >
                           <Plus className="w-3.5 h-3.5" />
                           <span>{showAddCredit ? "Tutup Form Kru" : "+ Tambah Rekan Kru"}</span>
@@ -1895,7 +1895,7 @@ export function ProfileSlideOverDrawer({
                           return (
                             <div
                               key={c.id}
-                              className="p-3.5 bg-stone-50 rounded-xl border border-stone-200 flex items-start justify-between gap-2.5 text-xs relative group hover:border-stone-400 transition-colors"
+                              className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-start justify-between gap-2.5 text-xs relative group hover:border-slate-400 transition-colors"
                             >
                               <div className="min-w-0 flex-1 space-y-1">
                                 <div className="flex items-center gap-1.5 flex-wrap">
@@ -1903,7 +1903,7 @@ export function ProfileSlideOverDrawer({
                                     {CREDIT_CATEGORIES.find((cat) => cat.category === c.category)?.label || c.category}
                                   </span>
                                   {isUploader && (
-                                    <span className="text-[9px] font-bold px-2 py-0.5 bg-[#1E1B2E] text-white rounded-full">
+                                    <span className="text-[9px] font-bold px-2 py-0.5 bg-slate-900 text-white rounded-full">
                                       Uploader
                                     </span>
                                   )}
@@ -1915,14 +1915,14 @@ export function ProfileSlideOverDrawer({
                                   )}
                                 </div>
 
-                                <div className="font-bold text-stone-900 truncate text-xs">
+                                <div className="font-bold text-slate-900 truncate text-xs">
                                   {c.name}
                                 </div>
 
-                                <div className="text-[11px] text-stone-500 truncate flex items-center gap-1.5">
-                                  <span className="font-medium text-stone-700">{c.role}</span>
+                                <div className="text-[11px] text-slate-500 truncate flex items-center gap-1.5">
+                                  <span className="font-medium text-slate-700">{c.role}</span>
                                   <span>&bull;</span>
-                                  <span className="font-mono text-stone-400">{c.handle}</span>
+                                  <span className="font-mono text-slate-400">{c.handle}</span>
                                 </div>
                               </div>
 
@@ -1930,7 +1930,7 @@ export function ProfileSlideOverDrawer({
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveCredit(c.id)}
-                                  className="p-1.5 text-stone-400 hover:text-rose-600 rounded-lg hover:bg-white cursor-pointer transition-colors shrink-0"
+                                  className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white cursor-pointer transition-colors shrink-0"
                                   title="Hapus kredit kru ini"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -1952,7 +1952,7 @@ export function ProfileSlideOverDrawer({
                             <button
                               type="button"
                               onClick={() => setShowAddCredit(false)}
-                              className="text-xs text-amber-800 hover:text-stone-900 cursor-pointer"
+                              className="text-xs text-amber-800 hover:text-slate-900 cursor-pointer"
                             >
                               Batal
                             </button>
@@ -1961,7 +1961,7 @@ export function ProfileSlideOverDrawer({
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             {/* DEPT SELECTOR */}
                             <div className="space-y-1">
-                              <label className="text-[10px] font-bold text-stone-600 uppercase tracking-wider block">
+                              <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider block">
                                 Departemen
                               </label>
                               <select
@@ -1972,7 +1972,7 @@ export function ProfileSlideOverDrawer({
                                   const def = CREDIT_CATEGORIES.find((c) => c.category === cat)?.defaultRole;
                                   if (def) setCreditRole(def);
                                 }}
-                                className="w-full px-3 py-2 bg-white rounded-lg border border-stone-200 text-xs font-medium text-stone-800 cursor-pointer outline-hidden"
+                                className="w-full px-3 py-2 bg-white rounded-lg border border-slate-200 text-xs font-medium text-slate-800 cursor-pointer outline-hidden"
                               >
                                 {CREDIT_CATEGORIES.map((cat) => (
                                   <option key={cat.category} value={cat.category}>
@@ -1984,7 +1984,7 @@ export function ProfileSlideOverDrawer({
 
                             {/* NAME INPUT WITH AUTOCOMPLETE */}
                             <div className="space-y-1 relative">
-                              <label className="text-[10px] font-bold text-stone-600 uppercase tracking-wider block">
+                              <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider block">
                                 Nama Kru / Cari di RAMU
                               </label>
                               <input
@@ -1997,11 +1997,11 @@ export function ProfileSlideOverDrawer({
                                 }}
                                 onFocus={() => setShowActorSuggestions(true)}
                                 placeholder="Ketik nama untuk mencari..."
-                                className="w-full px-3 py-2 bg-white rounded-lg border border-stone-200 text-xs font-medium text-stone-800 outline-hidden"
+                                className="w-full px-3 py-2 bg-white rounded-lg border border-slate-200 text-xs font-medium text-slate-800 outline-hidden"
                               />
 
                               {showActorSuggestions && filteredActorSuggestions.length > 0 && (
-                                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-stone-200 shadow-xl z-50 divide-y divide-stone-100 max-h-48 overflow-y-auto">
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-slate-200 shadow-xl z-50 divide-y divide-slate-100 max-h-48 overflow-y-auto">
                                   {filteredActorSuggestions.map((ra) => (
                                     <button
                                       key={ra.id}
@@ -2010,13 +2010,13 @@ export function ProfileSlideOverDrawer({
                                       className="w-full text-left px-3.5 py-2 hover:bg-purple-50 flex items-center justify-between text-xs transition-colors cursor-pointer"
                                     >
                                       <div>
-                                        <div className="font-bold text-stone-900 flex items-center gap-1.5">
+                                        <div className="font-bold text-slate-900 flex items-center gap-1.5">
                                           <span>{ra.name}</span>
                                           <span className="text-[9px] px-1.5 py-0.2 bg-emerald-50 text-emerald-800 font-bold rounded border border-emerald-200">
                                             Terdaftar
                                           </span>
                                         </div>
-                                        <div className="text-[10px] text-stone-400">
+                                        <div className="text-[10px] text-slate-400">
                                           {ra.sector} &bull; {ra.location || "Indonesia"}
                                         </div>
                                       </div>
@@ -2029,7 +2029,7 @@ export function ProfileSlideOverDrawer({
 
                             {/* INSTAGRAM HANDLE */}
                             <div className="space-y-1">
-                              <label className="text-[10px] font-bold text-stone-600 uppercase tracking-wider block">
+                              <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider block">
                                 Instagram Tag / Handle
                               </label>
                               <input
@@ -2037,13 +2037,13 @@ export function ProfileSlideOverDrawer({
                                 value={creditHandle}
                                 onChange={(e) => setCreditHandle(e.target.value)}
                                 placeholder="@username"
-                                className="w-full px-3 py-2 bg-white rounded-lg border border-stone-200 text-xs font-medium text-stone-800 outline-hidden"
+                                className="w-full px-3 py-2 bg-white rounded-lg border border-slate-200 text-xs font-medium text-slate-800 outline-hidden"
                               />
                             </div>
 
                             {/* SPECIFIC ROLE */}
                             <div className="space-y-1">
-                              <label className="text-[10px] font-bold text-stone-600 uppercase tracking-wider block">
+                              <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider block">
                                 Peran Spesifik
                               </label>
                               <input
@@ -2051,7 +2051,7 @@ export function ProfileSlideOverDrawer({
                                 value={creditRole}
                                 onChange={(e) => setCreditRole(e.target.value)}
                                 placeholder="mis. Lead Stylist"
-                                className="w-full px-3 py-2 bg-white rounded-lg border border-stone-200 text-xs font-medium text-stone-800 outline-hidden"
+                                className="w-full px-3 py-2 bg-white rounded-lg border border-slate-200 text-xs font-medium text-slate-800 outline-hidden"
                               />
                             </div>
                           </div>
@@ -2061,7 +2061,7 @@ export function ProfileSlideOverDrawer({
                               type="button"
                               onClick={handleAddCredit}
                               disabled={!creditName.trim()}
-                              className="px-4 py-2 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors disabled:opacity-50 cursor-pointer flex items-center gap-1.5 shadow-xs"
+                              className="btn-primary-pill !text-xs !py-2 !px-4 text-white font-semibold rounded-full shadow-md shadow-[#4CC9FE]/25 transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5 active:scale-95"
                             >
                               <Plus className="w-3.5 h-3.5" />
                               <span>Tambahkan Kru ke Daftar</span>
@@ -2071,18 +2071,18 @@ export function ProfileSlideOverDrawer({
                       )}
                     </div>
 
-                    <div className="pt-4 border-t border-stone-200 flex items-center justify-end gap-3">
+                    <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-3">
                       <button
                         type="button"
                         onClick={() => setShowQuickUpload(false)}
-                        className="px-5 py-2.5 rounded-xl border border-stone-300 text-stone-700 text-xs font-bold uppercase tracking-wider hover:bg-stone-100 transition-colors"
+                        className="px-5 py-2.5 rounded-full bg-white/80 hover:bg-white border border-slate-200 text-slate-700 text-xs font-semibold transition-colors shadow-2xs"
                       >
                         Batal
                       </button>
                       <button
                         type="submit"
                         disabled={portfolioIsPending}
-                        className="px-6 py-2.5 rounded-xl bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer flex items-center gap-2 shadow-xs"
+                        className="px-6 py-2.5 rounded-full btn-primary-pill text-white text-xs font-bold transition-all disabled:opacity-50 cursor-pointer flex items-center gap-2 shadow-xs active:scale-95"
                       >
                         {portfolioIsPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                         <span>{portfolioIsPending ? "Mengunggah..." : portfolioMediaType === "VIDEO" ? "Terbitkan Video Portofolio" : "Terbitkan Karya"}</span>
@@ -2093,11 +2093,11 @@ export function ProfileSlideOverDrawer({
               )}
 
               {/* FILTER TABS & ASSET GALLERY GRID */}
-              <div className="p-6 sm:p-7 bg-white rounded-2xl border border-stone-200/90 shadow-sm space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-stone-200 gap-4">
+              <div className="p-6 sm:p-7 bg-white/80 backdrop-blur-xl rounded-[22px] border border-white/90 shadow-[0_4px_24px_rgba(0,0,0,0.02)] space-y-6 text-[#111827]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-4">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-purple-700" />
-                    <h4 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
+                    <h4 className="text-sm font-bold uppercase tracking-wider text-[#111827]">
                       Koleksi Portofolio &amp; Karya ({filteredPortfolioAssets.length})
                     </h4>
                   </div>
@@ -2106,10 +2106,10 @@ export function ProfileSlideOverDrawer({
                     <button
                       type="button"
                       onClick={() => setSelectedFilterCategory("ALL")}
-                      className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full transition-all cursor-pointer ${
+                      className={`px-3.5 py-1.5 text-xs font-bold rounded-full transition-all cursor-pointer ${
                         selectedFilterCategory === "ALL"
-                          ? "bg-[#1E1B2E] text-white shadow-xs"
-                          : "bg-stone-100 hover:bg-stone-200 text-stone-700"
+                          ? "bg-[#4CC9FE]/15 text-[#0284c7] border border-[#4CC9FE]/30 shadow-xs"
+                          : "bg-white/80 hover:bg-white text-slate-600 border border-slate-200/80"
                       }`}
                     >
                       Semua ({portfolioCategories.totalCount})
@@ -2118,13 +2118,13 @@ export function ProfileSlideOverDrawer({
                       <button
                         type="button"
                         onClick={() => setSelectedFilterCategory("VIDEO")}
-                        className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full transition-all cursor-pointer flex items-center gap-1.5 ${
+                        className={`px-3.5 py-1.5 text-xs font-bold rounded-full transition-all cursor-pointer flex items-center gap-1.5 ${
                           selectedFilterCategory === "VIDEO"
-                            ? "bg-[#1E1B2E] text-white shadow-xs"
-                            : "bg-stone-100 hover:bg-stone-200 text-stone-700"
+                            ? "bg-[#4CC9FE]/15 text-[#0284c7] border border-[#4CC9FE]/30 shadow-xs"
+                            : "bg-white/80 hover:bg-white text-slate-600 border border-slate-200/80"
                         }`}
                       >
-                        <Film className="w-3.5 h-3.5 text-amber-400" />
+                        <Film className="w-3.5 h-3.5 text-[#0284c7]" />
                         <span>Video ({portfolioCategories.videoCount})</span>
                       </button>
                     )}
@@ -2133,10 +2133,10 @@ export function ProfileSlideOverDrawer({
                         key={cat.id}
                         type="button"
                         onClick={() => setSelectedFilterCategory(cat.id)}
-                        className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full transition-all cursor-pointer ${
+                        className={`px-3.5 py-1.5 text-xs font-bold rounded-full transition-all cursor-pointer ${
                           selectedFilterCategory === cat.id
-                            ? "bg-[#1E1B2E] text-white shadow-xs"
-                            : "bg-stone-100 hover:bg-stone-200 text-stone-700"
+                            ? "bg-[#4CC9FE]/15 text-[#0284c7] border border-[#4CC9FE]/30 shadow-xs"
+                            : "bg-white/80 hover:bg-white text-slate-600 border border-slate-200/80"
                         }`}
                       >
                         {cat.label} ({cat.count})
@@ -2146,8 +2146,8 @@ export function ProfileSlideOverDrawer({
                 </div>
 
                 {filteredPortfolioAssets.length > 0 && (
-                  <div className="p-3.5 bg-amber-50/70 rounded-xl border border-amber-200/80 flex items-start gap-3 text-xs text-amber-950">
-                    <Star className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 fill-amber-400" />
+                  <div className="p-3.5 bg-sky-50/70 rounded-2xl border border-sky-200/80 flex items-start gap-3 text-xs text-sky-950">
+                    <Star className="w-4 h-4 text-[#0284c7] shrink-0 mt-0.5 fill-[#4CC9FE]" />
                     <div className="leading-relaxed text-xs">
                       <strong className="font-bold text-amber-900">Foto Sampul Direktori:</strong> Karya paling pertama (kiri atas) secara otomatis diprioritaskan sebagai gambar sampul profil Anda pada kartu direktori publik RAMU.
                     </div>
@@ -2155,22 +2155,22 @@ export function ProfileSlideOverDrawer({
                 )}
 
                 {filteredPortfolioAssets.length === 0 ? (
-                  <div className="py-16 px-4 text-center rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50/50 space-y-4">
-                    <div className="w-14 h-14 rounded-2xl bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
+                  <div className="py-16 px-4 text-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 space-y-4">
+                    <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
                       <ImageIcon className="w-7 h-7" />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-base font-bold text-stone-800">Belum ada karya dalam kategori ini</p>
-                      <p className="text-xs text-stone-500 max-w-md mx-auto">
+                      <p className="text-base font-bold text-slate-800">Belum ada karya dalam kategori ini</p>
+                      <p className="text-xs text-slate-500 max-w-md mx-auto">
                         Tampilkan keahlian terbaik Anda dengan mengunggah foto editorial, komersial, maupun video kampanye showreel.
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setShowQuickUpload(true)}
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-xs"
+                      className="btn-primary-pill !text-xs !py-2.5 !px-6 text-white font-semibold rounded-full transition-all cursor-pointer shadow-md shadow-[#4CC9FE]/25 inline-flex items-center gap-2 active:scale-95"
                     >
-                      <Plus className="w-4 h-4 text-amber-400" />
+                      <Plus className="w-4 h-4 text-white" />
                       <span>+ Unggah Karya Portofolio Pertama</span>
                     </button>
                   </div>
@@ -2197,7 +2197,7 @@ export function ProfileSlideOverDrawer({
                       return (
                         <div
                           key={item.id}
-                          className="aspect-[4/5] bg-stone-900 rounded-xl border border-stone-200 overflow-hidden relative group shadow-2xs hover:shadow-md transition-all duration-300"
+                          className="aspect-[4/5] bg-slate-900 rounded-xl border border-slate-200 overflow-hidden relative group shadow-2xs hover:shadow-md transition-all duration-300"
                         >
                           {isDirectVideo && (
                             <video
@@ -2224,8 +2224,8 @@ export function ProfileSlideOverDrawer({
                           {/* TOP BADGES */}
                           <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 items-start z-10 pointer-events-none">
                             {idx === 0 && selectedFilterCategory === "ALL" && (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider px-2.5 py-1 bg-amber-400 text-stone-950 rounded-full shadow-xs">
-                                <Star className="w-2.5 h-2.5 fill-current text-stone-950" />
+                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider px-2.5 py-1 bg-amber-400 text-slate-950 rounded-full shadow-xs">
+                                <Star className="w-2.5 h-2.5 fill-current text-slate-950" />
                                 Sampul Profil
                               </span>
                             )}
@@ -2236,7 +2236,7 @@ export function ProfileSlideOverDrawer({
                               </span>
                             )}
                             {hasTearSheet && (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider px-2.5 py-1 bg-[#1E1B2E]/90 text-white rounded-full border border-white/20 backdrop-blur-xs shadow-xs">
+                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider px-2.5 py-1 bg-slate-900/90 text-white rounded-full border border-white/20 backdrop-blur-xs shadow-xs">
                                 <Users className="w-2.5 h-2.5 text-amber-400" />
                                 Kru ({itemAttrs.tear_sheet.credits.length})
                               </span>
@@ -2267,7 +2267,7 @@ export function ProfileSlideOverDrawer({
                               {item.name}
                             </p>
                             {item.description && (
-                              <p className="text-[10px] text-stone-300 truncate mt-0.5">
+                              <p className="text-[10px] text-slate-300 truncate mt-0.5">
                                 {item.description}
                               </p>
                             )}
@@ -2296,38 +2296,38 @@ export function ProfileSlideOverDrawer({
               </div>
 
               {/* JENIS KERJASAMA */}
-              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+              <div className="p-6 bg-white/80 backdrop-blur-xl border border-white/90 rounded-[22px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] space-y-4 text-[#111827]">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <div className="flex items-center gap-2">
                     <Briefcase className="w-4 h-4 text-emerald-700" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">Jenis Kerjasama yang Dibuka</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">Jenis Kerjasama yang Dibuka</h3>
                   </div>
-                  <span className="text-[10px] text-stone-400 font-semibold">Pilih semua yang relevan</span>
+                  <span className="text-[10px] text-slate-400 font-semibold">Pilih semua yang relevan</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {COLLAB_TYPE_OPTIONS.map((type) => (
-                    <label key={type} className="flex items-center gap-3 p-3 bg-stone-50 border border-stone-200 hover:border-[#1E1B2E] cursor-pointer transition-colors group">
+                    <label key={type} className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 hover:border-[#4CC9FE] cursor-pointer transition-colors group">
                       <input
                         type="checkbox"
                         checked={brandCollabTypes.includes(type)}
                         onChange={() => toggleBrandCollabType(type)}
-                        className="w-4 h-4 rounded-none accent-[#1E1B2E] cursor-pointer"
+                        className="w-4 h-4 rounded-xl accent-[#0284c7] cursor-pointer"
                       />
-                      <span className="text-xs font-bold text-stone-700 group-hover:text-[#1E1B2E] transition-colors">{type}</span>
+                      <span className="text-xs font-bold text-slate-700 group-hover:text-[#111827] transition-colors">{type}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
               {/* BUDGET & TIMELINE */}
-              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-4">
-                <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
+              <div className="p-6 bg-white/80 backdrop-blur-xl border border-white/90 rounded-[22px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] space-y-4 text-[#111827]">
+                <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
                   <CreditCard className="w-4 h-4 text-blue-600" />
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">Budget & Timeline Kampanye</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">Budget & Timeline Kampanye</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                       Budget / Kompensasi Kreator
                     </label>
                     <input
@@ -2335,12 +2335,12 @@ export function ProfileSlideOverDrawer({
                       value={brandBudgetRange}
                       onChange={(e) => setBrandBudgetRange(e.target.value)}
                       placeholder="mis. Rp 1-5 Jt per campaign, atau Sesuai brief"
-                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800 transition-colors"
+                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-sm font-medium text-slate-800 transition-colors"
                     />
-                    <span className="text-[10px] text-stone-400">Estimasi, bukan harga pasti. Bisa berupa range atau deskripsi.</span>
+                    <span className="text-[10px] text-slate-400">Estimasi, bukan harga pasti. Bisa berupa range atau deskripsi.</span>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                       Timeline per Kampanye
                     </label>
                     <input
@@ -2348,21 +2348,21 @@ export function ProfileSlideOverDrawer({
                       value={brandCollabTimeline}
                       onChange={(e) => setBrandCollabTimeline(e.target.value)}
                       placeholder="mis. 2 – 4 Minggu per Kampanye"
-                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800 transition-colors"
+                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-sm font-medium text-slate-800 transition-colors"
                     />
-                    <span className="text-[10px] text-stone-400">Dari pengiriman brief hingga konten dipublikasikan.</span>
+                    <span className="text-[10px] text-slate-400">Dari pengiriman brief hingga konten dipublikasikan.</span>
                   </div>
                 </div>
               </div>
 
               {/* PROFIL KREATOR YANG DICARI */}
-              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-4">
-                <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
+              <div className="p-6 bg-white/80 backdrop-blur-xl border border-white/90 rounded-[22px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] space-y-4 text-[#111827]">
+                <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
                   <Users className="w-4 h-4 text-amber-600" />
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">Profil & Persyaratan Kreator Ideal</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">Profil & Persyaratan Kreator Ideal</h3>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                     Deskripsi Kreator yang Dicari
                   </label>
                   <textarea
@@ -2370,12 +2370,12 @@ export function ProfileSlideOverDrawer({
                     value={brandCreatorRequirements}
                     onChange={(e) => setBrandCreatorRequirements(e.target.value)}
                     placeholder="mis. Fotografer fashion dengan estetika minimalis & lookbook editorial, pengalaman min. 1 tahun dengan fashion brand lokal"
-                    className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-none focus:bg-white focus:border-[#1E1B2E] text-xs font-medium text-stone-800 resize-none leading-relaxed"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4CC9FE] text-xs font-medium text-slate-800 resize-none leading-relaxed"
                   />
-                  <span className="text-[10px] text-stone-400">Niche, gaya, level pengalaman, atau follower minimum yang Anda harapkan.</span>
+                  <span className="text-[10px] text-slate-400">Niche, gaya, level pengalaman, atau follower minimum yang Anda harapkan.</span>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                     Catatan Tambahan (Opsional)
                   </label>
                   <textarea
@@ -2383,26 +2383,26 @@ export function ProfileSlideOverDrawer({
                     value={brandCollabNotes}
                     onChange={(e) => setBrandCollabNotes(e.target.value)}
                     placeholder="mis. Prioritas kreator berbasis Bandung & Jakarta. Tidak menerima konten yang mempromosikan brand kompetitor."
-                    className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-none focus:bg-white focus:border-[#1E1B2E] text-xs font-medium text-stone-800 resize-none leading-relaxed"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4CC9FE] text-xs font-medium text-slate-800 resize-none leading-relaxed"
                   />
                 </div>
               </div>
 
               {/* ACTION FOOTER */}
-              <div className="pt-4 border-t border-stone-200 flex items-center justify-between gap-4 shrink-0">
-                <span className="text-xs text-stone-500">Preferensi kerjasama ditampilkan di tab "Kerjasama" profil direktori brand Anda.</span>
+              <div className="pt-4 border-t border-slate-200 flex items-center justify-between gap-4 shrink-0">
+                <span className="text-xs text-slate-500">Preferensi kerjasama ditampilkan di tab "Kerjasama" profil direktori brand Anda.</span>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={handleModalClose}
-                    className="px-5 py-2.5 rounded-none border border-stone-300 text-stone-700 font-bold text-xs uppercase tracking-wider hover:bg-stone-100 transition-colors cursor-pointer"
+                    className="px-5 py-2.5 rounded-full bg-white/80 hover:bg-white border border-slate-200 text-slate-700 font-semibold text-xs transition-colors cursor-pointer shadow-2xs"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="flex items-center gap-2 px-6 py-2.5 rounded-none bg-[#1E1B2E] text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-full btn-primary-pill text-white font-bold text-xs transition-all disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-xs active:scale-95"
                   >
                     {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                     <span>{isPending ? "Menyimpan..." : "Simpan Preferensi Kerjasama"}</span>
@@ -2464,21 +2464,21 @@ export function ProfileSlideOverDrawer({
               <input type="hidden" name="removeAvatar" value="false" />
 
               {/* CONTACT & SOCIAL CARDS */}
-              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
-                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+              <div className="p-6 bg-white/80 backdrop-blur-xl border border-white/90 rounded-[22px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] space-y-6 text-[#111827]">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <div className="flex items-center gap-2">
                     <Phone className="w-4 h-4 text-amber-600" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                       Saluran Komunikasi &amp; Media Sosial Resmi
                     </h3>
                   </div>
-                  <span className="text-[10px] text-stone-400 font-semibold">Tautan Langsung</span>
+                  <span className="text-[10px] text-slate-400 font-semibold">Tautan Langsung</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1.5">
-                    <label htmlFor="popup_instagram_contact" className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
-                      <InstagramIcon className="w-3.5 h-3.5 text-stone-600" />
+                    <label htmlFor="popup_instagram_contact" className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <InstagramIcon className="w-3.5 h-3.5 text-slate-600" />
                       <span>Akun Instagram</span>
                     </label>
                     <input
@@ -2488,16 +2488,16 @@ export function ProfileSlideOverDrawer({
                       value={contactInstagram}
                       onChange={(e) => setContactInstagram(e.target.value)}
                       placeholder="@namaakun atau link instagram"
-                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-sm font-medium text-slate-800"
                     />
-                    <span className="text-[10px] text-stone-400 block">
+                    <span className="text-[10px] text-slate-400 block">
                       Kosongkan bila tidak ingin menampilkan tombol Instagram di profil.
                     </span>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label htmlFor="popup_websiteUrl_contact" className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
-                      <ExternalLink className="w-3.5 h-3.5 text-stone-600" />
+                    <label htmlFor="popup_websiteUrl_contact" className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-600" />
                       <span>Website / Portfolio Eksternal URL</span>
                     </label>
                     <input
@@ -2507,15 +2507,15 @@ export function ProfileSlideOverDrawer({
                       value={contactWebsite}
                       onChange={(e) => setContactWebsite(e.target.value)}
                       placeholder="https://portofolioanda.com"
-                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-sm font-medium text-slate-800"
                     />
-                    <span className="text-[10px] text-stone-400 block">
+                    <span className="text-[10px] text-slate-400 block">
                       Tautan website pribadi, Behance, atau showcase agensi Anda.
                     </span>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label htmlFor="popup_contactPhone_contact" className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <label htmlFor="popup_contactPhone_contact" className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                       <Phone className="w-3.5 h-3.5 text-emerald-600" />
                       <span>Nomor WhatsApp / HP Komersial</span>
                     </label>
@@ -2526,13 +2526,13 @@ export function ProfileSlideOverDrawer({
                       value={contactPhone}
                       onChange={(e) => setContactPhone(e.target.value)}
                       placeholder="08123456789"
-                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-sm font-medium text-slate-800"
                     />
-                    <span className="text-[10px] text-stone-400 block">Untuk tombol Chat WhatsApp langsung bagi klien</span>
+                    <span className="text-[10px] text-slate-400 block">Untuk tombol Chat WhatsApp langsung bagi klien</span>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label htmlFor="popup_contactEmail_contact" className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <label htmlFor="popup_contactEmail_contact" className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                       <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
                       <span>Email Kerjasama Proyek</span>
                     </label>
@@ -2543,52 +2543,52 @@ export function ProfileSlideOverDrawer({
                       value={contactEmail}
                       onChange={(e) => setContactEmail(e.target.value)}
                       placeholder="kontak@domain.com"
-                      className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm font-medium text-stone-800"
+                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-sm font-medium text-slate-800"
                     />
-                    <span className="text-[10px] text-stone-400 block">Alamat email pengiriman kontrak &amp; brief resmi</span>
+                    <span className="text-[10px] text-slate-400 block">Alamat email pengiriman kontrak &amp; brief resmi</span>
                   </div>
                 </div>
               </div>
 
               {/* SOP WORKING TERMS OVERVIEW */}
-              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+              <div className="p-6 bg-white/80 backdrop-blur-xl border border-white/90 rounded-[22px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] space-y-4 text-[#111827]">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-purple-600" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                       Standar Ketentuan Kerja (SOP) RAMU Indonesia
                     </h3>
                   </div>
-                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-none border border-emerald-200">
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-xl border border-emerald-200">
                     SOP Terverifikasi
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-4 bg-stone-50 border border-stone-200 space-y-1">
-                    <span className="text-xs font-bold text-[#1E1B2E] block">Jam Kerja &amp; Overtime</span>
-                    <p className="text-[11px] text-stone-500 leading-relaxed">
+                  <div className="p-4 bg-slate-50 border border-slate-200 space-y-1">
+                    <span className="text-xs font-bold text-[#111827] block">Jam Kerja &amp; Overtime</span>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
                       Sesi standar 8 jam kerja termasuk 1 jam istirahat. Overtime dihitung proporsional per jam sesuai kesepakatan awal.
                     </p>
                   </div>
 
-                  <div className="p-4 bg-stone-50 border border-stone-200 space-y-1">
-                    <span className="text-xs font-bold text-[#1E1B2E] block">DP &amp; Pelunasan</span>
-                    <p className="text-[11px] text-stone-500 leading-relaxed">
+                  <div className="p-4 bg-slate-50 border border-slate-200 space-y-1">
+                    <span className="text-xs font-bold text-[#111827] block">DP &amp; Pelunasan</span>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
                       DP 50% untuk penguncian tanggal di kalender. Pelunasan 50% dituntaskan saat preview berkas final disetujui.
                     </p>
                   </div>
 
-                  <div className="p-4 bg-stone-50 border border-stone-200 space-y-1">
-                    <span className="text-xs font-bold text-[#1E1B2E] block">Revisi &amp; Serah Terima</span>
-                    <p className="text-[11px] text-stone-500 leading-relaxed">
+                  <div className="p-4 bg-slate-50 border border-slate-200 space-y-1">
+                    <span className="text-xs font-bold text-[#111827] block">Revisi &amp; Serah Terima</span>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
                       Termasuk 2x revisi minor. Seluruh file master resolusi tinggi diserahkan melalui tautan cloud resmi.
                     </p>
                   </div>
 
-                  <div className="p-4 bg-stone-50 border border-stone-200 space-y-1">
-                    <span className="text-xs font-bold text-[#1E1B2E] block">Hak Cipta Komersial</span>
-                    <p className="text-[11px] text-stone-500 leading-relaxed">
+                  <div className="p-4 bg-slate-50 border border-slate-200 space-y-1">
+                    <span className="text-xs font-bold text-[#111827] block">Hak Cipta Komersial</span>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
                       Klien memperoleh lisensi komersial penuh untuk kebutuhan media sosial, website e-commerce, dan katalog promosi.
                     </p>
                   </div>
@@ -2596,20 +2596,20 @@ export function ProfileSlideOverDrawer({
               </div>
 
               {/* ACTION FOOTER */}
-              <div className="pt-4 border-t border-stone-200 flex items-center justify-between gap-4 shrink-0">
-                <span className="text-xs text-stone-500">Saluran kontak akan langsung terlihat oleh klien yang ingin menyewa jasa.</span>
+              <div className="pt-4 border-t border-slate-200 flex items-center justify-between gap-4 shrink-0">
+                <span className="text-xs text-slate-500">Saluran kontak akan langsung terlihat oleh klien yang ingin menyewa jasa.</span>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={handleModalClose}
-                    className="px-5 py-2.5 rounded-none border border-stone-300 text-stone-700 font-bold text-xs uppercase tracking-wider hover:bg-stone-100 transition-colors cursor-pointer"
+                    className="px-5 py-2.5 rounded-full bg-white/80 hover:bg-white border border-slate-200 text-slate-700 font-semibold text-xs transition-colors cursor-pointer shadow-2xs"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="flex items-center gap-2 px-6 py-2.5 rounded-none bg-[#1E1B2E] text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-full btn-primary-pill text-white font-bold text-xs transition-all disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-xs active:scale-95"
                   >
                     {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                     <span>{isPending ? "Menyimpan..." : "Simpan Kontak"}</span>
@@ -2625,20 +2625,20 @@ export function ProfileSlideOverDrawer({
           {activeDrawerTab === "reviews" && (
             <div className="space-y-6">
               {/* CARD 1: STATUS & PREFERENSI USULAN PROYEK */}
-              <form onSubmit={handlePreferencesSubmit} className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
-                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+              <form onSubmit={handlePreferencesSubmit} className="p-6 bg-white/80 backdrop-blur-xl border border-white/90 rounded-[22px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] space-y-6 text-[#111827]">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <div className="flex items-center gap-2">
                     <Sliders className="w-4 h-4 text-purple-600" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                       Kesiapan &amp; Preferensi Penerimaan Usulan Proyek
                     </h3>
                   </div>
-                  <span className="text-[10px] text-stone-400 font-semibold">Pengaturan Kolaborasi</span>
+                  <span className="text-[10px] text-slate-400 font-semibold">Pengaturan Kolaborasi</span>
                 </div>
 
                 {/* STATUS TOGGLE */}
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                     Status Ketersediaan Menerima Usulan / Proyek Baru
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -2666,17 +2666,17 @@ export function ProfileSlideOverDrawer({
                         key={opt.value}
                         type="button"
                         onClick={() => setExperienceLevel(opt.value)}
-                        className={`p-4 border text-left rounded-none transition-all cursor-pointer ${
+                        className={`p-4 border text-left rounded-xl transition-all cursor-pointer ${
                           experienceLevel === opt.value
-                            ? "border-[#1E1B2E] bg-stone-50 shadow-xs"
-                            : "border-stone-200 bg-white hover:bg-stone-50/50"
+                            ? "border-[#4CC9FE] bg-slate-50 shadow-xs"
+                            : "border-slate-200 bg-white hover:bg-slate-50/50"
                         }`}
                       >
-                        <span className="text-xs font-bold flex items-center gap-1.5 text-[#1E1B2E]">
+                        <span className="text-xs font-bold flex items-center gap-1.5 text-[#111827]">
                           <span className={`w-2 h-2 rounded-full ${opt.dotColor} shrink-0`} />
                           {opt.label}
                         </span>
-                        <span className="text-[10px] text-stone-500 mt-1 block">{opt.desc}</span>
+                        <span className="text-[10px] text-slate-500 mt-1 block">{opt.desc}</span>
                       </button>
                     ))}
                   </div>
@@ -2684,7 +2684,7 @@ export function ProfileSlideOverDrawer({
 
                 {/* FORMAT USULAN YANG DIMINATI */}
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                     Format Usulan yang Diutamakan (Pilih yang sesuai)
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -2703,13 +2703,13 @@ export function ProfileSlideOverDrawer({
                           key={tag}
                           type="button"
                           onClick={() => toggleStyleTag(tag)}
-                          className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border rounded-none flex items-center gap-1.5 ${
+                          className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border rounded-xl flex items-center gap-1.5 ${
                             isSelected
-                              ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
-                              : "bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100"
+                              ? "btn-primary-pill !text-xs !py-1.5 !px-3.5 text-white border-[#4CC9FE] shadow-xs"
+                              : "bg-white/80 text-slate-700 border-slate-200 hover:bg-white hover:text-slate-900"
                           }`}
                         >
-                          {isSelected && <Check className="w-3 h-3 text-amber-400" />}
+                          {isSelected && <Check className="w-3 h-3 text-white" />}
                           <span>{tag}</span>
                         </button>
                       );
@@ -2719,7 +2719,7 @@ export function ProfileSlideOverDrawer({
 
                 {/* MODEL KOMPENSASI */}
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                     Model Kompensasi / Skema Usulan Kerjasama
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -2736,13 +2736,13 @@ export function ProfileSlideOverDrawer({
                           key={model}
                           type="button"
                           onClick={() => toggleCompModel(model)}
-                          className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border rounded-none flex items-center gap-1.5 ${
+                          className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border rounded-xl flex items-center gap-1.5 ${
                             isSelected
-                              ? "bg-[#1E1B2E] text-white border-[#1E1B2E] shadow-2xs"
-                              : "bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100"
+                              ? "btn-primary-pill !text-xs !py-1.5 !px-3.5 text-white border-[#4CC9FE] shadow-xs"
+                              : "bg-white/80 text-slate-700 border-slate-200 hover:bg-white hover:text-slate-900"
                           }`}
                         >
-                          {isSelected && <Check className="w-3 h-3 text-amber-400" />}
+                          {isSelected && <Check className="w-3 h-3 text-white" />}
                           <span>{model}</span>
                         </button>
                       );
@@ -2751,10 +2751,10 @@ export function ProfileSlideOverDrawer({
                 </div>
 
                 {/* SUBMIT BUTTON */}
-                <div className="pt-4 border-t border-stone-200 flex items-center justify-between gap-4">
+                <div className="pt-4 border-t border-slate-200 flex items-center justify-between gap-4">
                   <Link
                     href="/dashboard"
-                    className="inline-flex items-center gap-2 text-xs font-bold text-[#1E1B2E] hover:underline"
+                    className="inline-flex items-center gap-2 text-xs font-bold text-[#111827] hover:underline"
                   >
                     <span>Buka Dashboard Brief &amp; Peluang Proyek</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -2763,7 +2763,7 @@ export function ProfileSlideOverDrawer({
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="flex items-center gap-2 px-6 py-2.5 rounded-none bg-[#1E1B2E] text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-full btn-primary-pill text-white font-bold text-xs transition-all disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-xs active:scale-95"
                   >
                     {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                     <span>{isPending ? "Menyimpan..." : "Simpan Preferensi Usulan"}</span>
@@ -2772,27 +2772,27 @@ export function ProfileSlideOverDrawer({
               </form>
 
               {/* CARD 2: RINGKASAN REPUTASI & ULASAN KLIEN */}
-              <div className="p-6 bg-white border border-stone-200/80 shadow-2xs space-y-6">
-                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+              <div className="p-6 bg-white/80 backdrop-blur-xl border border-white/90 rounded-[22px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] space-y-6 text-[#111827]">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <div className="flex items-center gap-2">
                     <Star className="w-4 h-4 text-amber-500" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                       Ringkasan Reputasi &amp; Ulasan Klien Terverifikasi
                     </h3>
                   </div>
-                  <span className="text-[10px] text-stone-400 font-semibold">Transparansi Kinerja</span>
+                  <span className="text-[10px] text-slate-400 font-semibold">Transparansi Kinerja</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-                  <div className="flex items-center gap-4 p-4 bg-stone-50 border border-stone-200">
-                    <div className="text-4xl font-black text-[#1E1B2E]">5.0</div>
+                  <div className="flex items-center gap-4 p-4 bg-slate-50 border border-slate-200">
+                    <div className="text-4xl font-black text-[#111827]">5.0</div>
                     <div>
                       <div className="flex items-center gap-0.5 text-amber-500">
                         {[1, 2, 3, 4, 5].map((s) => (
                           <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />
                         ))}
                       </div>
-                      <span className="text-[11px] text-stone-500 font-bold block mt-1">
+                      <span className="text-[11px] text-slate-500 font-bold block mt-1">
                         {actor.feedbacks && actor.feedbacks.length > 0
                           ? `${actor.feedbacks.length} Ulasan Klien Terverifikasi`
                           : "Penilaian Standar Profesional RAMU"}
@@ -2801,41 +2801,41 @@ export function ProfileSlideOverDrawer({
                   </div>
 
                   <div className="md:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                    <div className="p-3 bg-stone-50 border border-stone-200 text-center">
-                      <span className="text-[10px] text-stone-400 font-bold uppercase">Kualitas Output</span>
-                      <div className="font-bold text-[#1E1B2E] text-sm mt-0.5">98%</div>
+                    <div className="p-3 bg-slate-50 border border-slate-200 text-center">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">Kualitas Output</span>
+                      <div className="font-bold text-[#111827] text-sm mt-0.5">98%</div>
                     </div>
-                    <div className="p-3 bg-stone-50 border border-stone-200 text-center">
-                      <span className="text-[10px] text-stone-400 font-bold uppercase">Ketepatan Waktu</span>
+                    <div className="p-3 bg-slate-50 border border-slate-200 text-center">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">Ketepatan Waktu</span>
                       <div className="font-bold text-emerald-700 text-sm mt-0.5">97%</div>
                     </div>
-                    <div className="p-3 bg-stone-50 border border-stone-200 text-center">
-                      <span className="text-[10px] text-stone-400 font-bold uppercase">Komunikasi</span>
+                    <div className="p-3 bg-slate-50 border border-slate-200 text-center">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">Komunikasi</span>
                       <div className="font-bold text-purple-700 text-sm mt-0.5">99%</div>
                     </div>
-                    <div className="p-3 bg-stone-50 border border-stone-200 text-center">
-                      <span className="text-[10px] text-stone-400 font-bold uppercase">Kepuasan Klien</span>
-                      <div className="font-bold text-[#1E1B2E] text-sm mt-0.5">99%</div>
+                    <div className="p-3 bg-slate-50 border border-slate-200 text-center">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">Kepuasan Klien</span>
+                      <div className="font-bold text-[#111827] text-sm mt-0.5">99%</div>
                     </div>
                   </div>
                 </div>
 
                 {/* TESTIMONIAL FEEDBACK LIST */}
                 <div className="space-y-3 pt-2">
-                  <h4 className="text-xs font-bold text-stone-600 uppercase tracking-wider">
+                  <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wider">
                     Ulasan &amp; Testimoni Publik Terkini
                   </h4>
 
                   {actor.feedbacks && actor.feedbacks.length > 0 ? (
                     <div className="space-y-3">
                       {actor.feedbacks.map((fb, idx) => (
-                        <div key={fb.id} className="p-4 bg-stone-50 border border-stone-200 space-y-2">
+                        <div key={fb.id} className="p-4 bg-slate-50 border border-slate-200 space-y-2">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <span className="w-7 h-7 bg-[#1E1B2E] text-white text-[10px] font-bold flex items-center justify-center">
+                              <span className="w-7 h-7 bg-slate-900 text-white text-[10px] font-bold flex items-center justify-center">
                                 #{idx + 1}
                               </span>
-                              <span className="text-xs font-bold text-[#1E1B2E]">Klien Mitra Terverifikasi</span>
+                              <span className="text-xs font-bold text-[#111827]">Klien Mitra Terverifikasi</span>
                             </div>
                             <div className="flex items-center gap-0.5 text-amber-500">
                               {[1, 2, 3, 4, 5].map((s) => (
@@ -2844,7 +2844,7 @@ export function ProfileSlideOverDrawer({
                             </div>
                           </div>
                           {fb.comments && (
-                            <p className="text-xs text-stone-600 italic leading-relaxed">
+                            <p className="text-xs text-slate-600 italic leading-relaxed">
                               &ldquo;{fb.comments}&rdquo;
                             </p>
                           )}
@@ -2852,7 +2852,7 @@ export function ProfileSlideOverDrawer({
                       ))}
                     </div>
                   ) : (
-                    <div className="p-6 text-center text-xs text-stone-400 bg-stone-50 border border-dashed border-stone-200">
+                    <div className="p-6 text-center text-xs text-slate-400 bg-slate-50 border border-dashed border-slate-200">
                       Ulasan klien akan otomatis terkumpul setelah proyek brief diselesaikan di sistem RAMU.
                     </div>
                   )}

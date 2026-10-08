@@ -69,7 +69,7 @@ export default async function EngineInsightsPage() {
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4] flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#E66A48] animate-pulse" />
-                RAMU Engine Intelligence • Closed-Loop Learning
+                RAMU Intelligence • Evaluasi Rekomendasi Nyata
               </span>
               <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
                 Data Nyata &amp; Transparan
@@ -77,20 +77,20 @@ export default async function EngineInsightsPage() {
             </div>
 
             <h1 className="text-3xl sm:text-4xl font-black text-[#27213D] tracking-tight leading-tight">
-              Audit Kompatibilitas Engine &amp; Validasi Luaran Ekosistem
+              Audit Kecocokan Rekomendasi &amp; Hasil Nyata Ekosistem
             </h1>
             <p className="text-sm text-[#716B7E] leading-relaxed">
-              Pusat pemantauan dampak ekonomi kolaboratif dan kalibrasi Deterministic Resource Compatibility Engine RAMU. Sistem memadukan analisis komplementaritas resource kreatif dengan pembuktian hasil karya riil di lapangan serta evaluasi langsung dari para praktisi kreatif.
+              Pusat pemantauan dampak kolaborasi dan akurasi rekomendasi mitra kerja RAMU. Sistem memadukan analisis keselarasan gaya visual, keahlian, dan ketersediaan jadwal dengan pembuktian hasil karya nyata di lapangan serta evaluasi langsung dari para praktisi kreatif.
             </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2 relative z-10">
             <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
-              <span className="text-[11px] text-[#716B7E] uppercase font-bold tracking-wider block">Kecocokan Diramu</span>
+              <span className="text-[11px] text-[#716B7E] uppercase font-bold tracking-wider block">Peluang Kecocokan</span>
               <div className="text-2xl font-black text-amber-600 mt-1">
                 {signals.conversionFunnel.opportunities}
               </div>
-              <span className="text-[10px] text-[#716B7E]">Komplementaritas terhitung</span>
+              <span className="text-[10px] text-[#716B7E]">Kecocokan gaya &amp; jadwal</span>
             </div>
 
             <div className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/70">
@@ -162,10 +162,10 @@ export default async function EngineInsightsPage() {
                 <CircleDollarSign className="w-5 h-5" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-sm font-bold text-[#27213D]">Optimalisasi Anggaran via Barter</h3>
-                <div className="text-2xl font-black text-emerald-600">Hingga 60% Efisiensi</div>
+                <h3 className="text-sm font-bold text-[#27213D]">Kompensasi Komersial Transparan</h3>
+                <div className="text-2xl font-black text-emerald-600">100% Paid &amp; Terlindungi</div>
                 <p className="text-xs text-[#716B7E] leading-relaxed">
-                  Memanfaatkan studio idle, wardrobe arsip, dan peralatan kamera lewat skema pertukaran nilai karya (TFP) yang setara dan adil.
+                  Menjamin seluruh kompensasi dan fee profesional disepakati secara berbayar dan transparan di awal, bebas dari risiko kerja cuma-cuma tanpa kepastian.
                 </p>
               </div>
             </div>

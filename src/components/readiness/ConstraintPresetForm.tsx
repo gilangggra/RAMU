@@ -158,9 +158,22 @@ export function ConstraintPresetForm({ action, constraintLabels = DEFAULT_CONSTR
             }}
             className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-sm text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E] focus:bg-white cursor-pointer"
           >
-            {Object.entries(constraintLabels).map(([val, { label }]) => (
-              <option key={val} value={val}>{label}</option>
-            ))}
+            <optgroup label="Preferensi Kerja Kreatif (Umum)">
+              <option value="BUDGET">{constraintLabels.BUDGET?.label || "Batas Anggaran / Rate Minimum (Budget)"}</option>
+              <option value="AVAILABILITY">{constraintLabels.AVAILABILITY?.label || "Ketersediaan Jadwal (Availability)"}</option>
+              <option value="LOCATION">{constraintLabels.LOCATION?.label || "Jangkauan Wilayah / Domisili (Location)"}</option>
+              <option value="TIME">{constraintLabels.TIME?.label || "Batas Waktu / Target Selesai (Deadline)"}</option>
+              <option value="IP">{constraintLabels.IP?.label || "Hak Cipta & Portofolio (IP Rights)"}</option>
+              <option value="LEGAL">{constraintLabels.LEGAL?.label || "Izin & Kontrak Tertulis (Legal)"}</option>
+            </optgroup>
+            <optgroup label="Ketentuan Produksi / Industri (Lanjutan)">
+              <option value="EQUIPMENT">{constraintLabels.EQUIPMENT?.label || "Peralatan / Spesifikasi Gear Khusus"}</option>
+              <option value="CAPABILITY">{constraintLabels.CAPABILITY?.label || "Batasan Cakupan Keahlian"}</option>
+              <option value="LEAD_TIME">{constraintLabels.LEAD_TIME?.label || "Lead Time Persiapan"}</option>
+              <option value="CAPACITY">{constraintLabels.CAPACITY?.label || "Kapasitas Produksi"}</option>
+              <option value="MINIMUM_ORDER">{constraintLabels.MINIMUM_ORDER?.label || "Minimum Pemesanan / Order"}</option>
+              <option value="MARKET">{constraintLabels.MARKET?.label || "Wilayah Pasar / Distribusi"}</option>
+            </optgroup>
           </select>
         </div>
 

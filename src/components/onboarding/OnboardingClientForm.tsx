@@ -405,9 +405,8 @@ export function OnboardingClientForm({
             </label>
             <div className="space-y-2 pt-1">
               {[
-                { id: "PAID", label: "Paid (Tarif Profesional Berbayar)" },
-                { id: "TFP", label: "TFP / Barter Portofolio Non-Komersial" },
-                { id: "REVENUE_SHARE", label: "Bagi Hasil (Revenue Share / Royalty)" },
+                { id: "PAID", label: "Paid (Fee Komersial Berbayar Penuh)" },
+                { id: "REVENUE_SHARE", label: "Bagi Hasil (Revenue Share / Royalti Komersial)" },
               ].map((model) => (
                 <label key={model.id} className="flex items-center gap-2.5 cursor-pointer group">
                   <div className="relative flex items-center justify-center shrink-0">

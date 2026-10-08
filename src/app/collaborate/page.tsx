@@ -59,16 +59,17 @@ export default async function CollaboratePage() {
   if (!actor) redirect("/onboarding");
 
   // 1. Ambil brief kebutuhan aktif milik user atau brief terbuka di ekosistem
-  const activeBrief =
-    actor.createdProjectBriefs[0] ||
-    (await prisma.projectBrief.findFirst({
-      where: { status: "OPEN" },
-      include: {
-        creatorActor: { select: { id: true, name: true, sector: true, location: true } },
-        neededRoles: true,
-      },
-      orderBy: { createdAt: "desc" },
-    }));
+  const myActiveBrief = actor.createdProjectBriefs[0] || null;
+  const ecosystemBrief = !myActiveBrief
+    ? await prisma.projectBrief.findFirst({
+        where: { status: "OPEN" },
+        include: {
+          creatorActor: { select: { id: true, name: true, sector: true, location: true } },
+          neededRoles: true,
+        },
+        orderBy: { createdAt: "desc" },
+      })
+    : null;
 
   // 2. Ambil peluang kolaborasi deterministik dari engine
   let opportunities = await getOpportunities({ actorId: actor.id });
@@ -113,96 +114,149 @@ export default async function CollaboratePage() {
 
           {/* LEFT COLUMN: YOUR ACTIVE NEEDS (4 COLS) */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="p-6 rounded-[28px] bg-white border border-stone-200/90 shadow-xs space-y-5">
-              <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
-                  Kebutuhan Proyek Aktif
+            {myActiveBrief ? (
+              <div className="p-6 rounded-[28px] bg-white border border-stone-200/90 shadow-xs space-y-5">
+                <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                    Kebutuhan Proyek Anda
+                  </div>
+                  <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold">
+                    Brief Aktif Anda
+                  </span>
                 </div>
-                <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200 text-[10px] font-bold">
-                  Active Need
-                </span>
-              </div>
 
-              <div>
-                <h3 className="text-base font-extrabold text-[#1E1B2E]">
-                  {activeBrief?.title || "Kampanye Lookbook Koleksi Musim Gugur"}
-                </h3>
-                <p className="text-xs text-stone-500 mt-1 leading-relaxed line-clamp-3">
-                  {activeBrief?.description ||
-                    "Produksi visual editorial 15 look untuk peluncuran busana ready-to-wear kontemporer."}
-                </p>
-              </div>
-
-              <div className="space-y-2 pt-2 border-t border-stone-100 text-xs">
-                <div className="font-bold text-stone-700">Daftar Kebutuhan Spesifik:</div>
-                <ul className="space-y-2 text-stone-600">
-                  {activeBrief && activeBrief.neededRoles && activeBrief.neededRoles.length > 0 ? (
-                    activeBrief.neededRoles.map((r, i) => (
-                      <li key={i} className="flex items-center gap-2 p-2 rounded-xl bg-stone-50 border border-stone-200/60">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span className="font-medium">{r.roleLabel}</span>
-                      </li>
-                    ))
-                  ) : (
-                    <>
-                      <li className="flex items-center gap-2 p-2 rounded-xl bg-stone-50 border border-stone-200/60">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>Studio Foto Daylight (Cyclorama Wall)</span>
-                      </li>
-                      <li className="flex items-center gap-2 p-2 rounded-xl bg-stone-50 border border-stone-200/60">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>Fotografer Komersial (Kamera + Lighting Kit)</span>
-                      </li>
-                      <li className="flex items-center gap-2 p-2 rounded-xl bg-stone-50 border border-stone-200/60">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>Model Editorial Muse (Tinggi 170cm+)</span>
-                      </li>
-                      <li className="flex items-center gap-2 p-2 rounded-xl bg-stone-50 border border-stone-200/60">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>MUA &amp; Wardrobe Stylist On-Set</span>
-                      </li>
-                    </>
-                  )}
-                </ul>
-              </div>
-
-              <div className="pt-2 border-t border-stone-100 space-y-1.5 text-[11px] text-stone-500">
-                <div className="flex items-center justify-between">
-                  <span>Lokasi Produksi:</span>
-                  <span className="font-bold text-stone-800">{activeBrief?.location || actor.location || "Jabodetabek / Bandung"}</span>
+                <div>
+                  <h3 className="text-base font-extrabold text-[#1E1B2E]">
+                    {myActiveBrief.title}
+                  </h3>
+                  <p className="text-xs text-stone-500 mt-1 leading-relaxed line-clamp-3">
+                    {myActiveBrief.description}
+                  </p>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span>Model Kompensasi:</span>
-                  <span className="font-bold text-stone-800">{activeBrief?.compensationModel || "PAID / REVENUE SHARE"}</span>
+
+                <div className="space-y-2 pt-2 border-t border-stone-100 text-xs">
+                  <div className="font-bold text-stone-700">Daftar Peran yang Dibutuhkan:</div>
+                  <ul className="space-y-2 text-stone-600">
+                    {myActiveBrief.neededRoles && myActiveBrief.neededRoles.length > 0 ? (
+                      myActiveBrief.neededRoles.map((r, i) => (
+                        <li key={i} className="flex items-center gap-2 p-2 rounded-xl bg-stone-50 border border-stone-200/60">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span className="font-medium">{r.roleLabel}</span>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="text-stone-400 italic text-[11px]">Belum ada peran spesifik yang ditambahkan.</li>
+                    )}
+                  </ul>
                 </div>
-                {(() => {
-                  const raw = (activeBrief?.budget as { estimatedTotal?: string | number } | null)?.estimatedTotal;
-                  if (raw === undefined || raw === null || String(raw).trim() === "") return null;
-                  const label =
-                    typeof raw === "number"
-                      ? `Rp ${raw.toLocaleString("id-ID")}`
-                      : /^\s*rp/i.test(raw)
-                        ? raw
-                        : /^\d+$/.test(raw.trim())
-                          ? `Rp ${Number(raw).toLocaleString("id-ID")}`
-                          : raw;
-                  return (
-                    <div className="flex items-center justify-between gap-3">
-                      <span>Estimasi Anggaran:</span>
-                      <span className="font-bold text-emerald-700 text-right">{label}</span>
+
+                <div className="pt-2 border-t border-stone-100 space-y-1.5 text-[11px] text-stone-500">
+                  <div className="flex items-center justify-between">
+                    <span>Lokasi Produksi:</span>
+                    <span className="font-bold text-stone-800">{myActiveBrief.location || actor.location || "Indonesia"}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Model Kompensasi:</span>
+                    <span className="font-bold text-stone-800">{myActiveBrief.compensationModel || "PAID"}</span>
+                  </div>
+                  {(() => {
+                    const raw = (myActiveBrief.budget as { estimatedTotal?: string | number } | null)?.estimatedTotal;
+                    if (raw === undefined || raw === null || String(raw).trim() === "") return null;
+                    const label =
+                      typeof raw === "number"
+                        ? `Rp ${raw.toLocaleString("id-ID")}`
+                        : /^\s*rp/i.test(raw)
+                          ? raw
+                          : /^\d+$/.test(raw.trim())
+                            ? `Rp ${Number(raw).toLocaleString("id-ID")}`
+                            : raw;
+                    return (
+                      <div className="flex items-center justify-between gap-3">
+                        <span>Estimasi Anggaran:</span>
+                        <span className="font-bold text-emerald-700 text-right">{label}</span>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                <div className="flex flex-col gap-2 pt-1">
+                  <Link
+                    href={`/projects/${myActiveBrief.id}`}
+                    className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-semibold transition-colors shadow-2xs"
+                  >
+                    <span>Kelola &amp; Tinjau Brief Ini</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                  <Link
+                    href="/projects/new"
+                    className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>+ Buat Brief Baru Lainnya</span>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="p-6 rounded-[28px] bg-white border border-stone-200/90 shadow-xs space-y-5">
+                <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                    Kebutuhan Proyek Anda
+                  </div>
+                  <span className="px-2 py-0.5 rounded-md bg-stone-100 text-stone-600 border border-stone-200 text-[10px] font-semibold">
+                    Belum Ada Brief
+                  </span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <h3 className="text-base font-bold text-stone-900">
+                    Mulai dengan Kebutuhan Proyek
+                  </h3>
+                  <p className="text-xs text-stone-500 leading-relaxed font-normal">
+                    Anda belum mempublikasikan brief kebutuhan proyek. Publikasikan brief untuk mendapatkan rekomendasi mitra yang 100% presisi untuk jadwal dan anggaran Anda.
+                  </p>
+                </div>
+
+                <div className="space-y-2 pt-2">
+                  <Link
+                    href="/projects/new"
+                    className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-semibold transition-colors shadow-2xs"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Buat Brief Kebutuhan Proyek</span>
+                  </Link>
+                  <Link
+                    href="/projects"
+                    className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium transition-colors"
+                  >
+                    <span>Eksplorasi Proyek Komunitas</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+
+                {ecosystemBrief && (
+                  <div className="pt-3 border-t border-stone-100 space-y-2">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                      Contoh Kebutuhan Terbuka di Ekosistem:
                     </div>
-                  );
-                })()}
+                    <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/60 space-y-1">
+                      <div className="text-xs font-bold text-stone-800 line-clamp-1">
+                        {ecosystemBrief.title}
+                      </div>
+                      <div className="text-[11px] text-stone-500">
+                        Oleh <span className="font-medium text-stone-700">{ecosystemBrief.creatorActor?.name}</span> ({ecosystemBrief.creatorActor?.sector})
+                      </div>
+                      <Link
+                        href={`/projects/${ecosystemBrief.id}`}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 pt-1"
+                      >
+                        <span>Lihat &amp; Ajukan Minat</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  </div>
+                )}
               </div>
-
-              <Link
-                href="/projects/new"
-                className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-[#1E1B2E] text-xs font-bold transition-colors"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Buat Brief Kebutuhan Baru</span>
-              </Link>
-            </div>
+            )}
 
             {/* COLLABORATIVE VALUE NOTICE */}
             <div className="p-5 rounded-2xl bg-amber-50/80 border border-amber-200 text-amber-950 space-y-2">
