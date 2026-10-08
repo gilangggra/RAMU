@@ -158,11 +158,13 @@ export async function sendProjectDeliveryAction({
   title,
   storageUrl,
   deliverableNotes,
+  deliveryStage = "WATERMARKED_PREVIEW",
 }: {
   recipientId: string;
   title: string;
   storageUrl: string;
   deliverableNotes?: string;
+  deliveryStage?: "WATERMARKED_PREVIEW" | "FINAL_MASTER";
 }) {
   try {
     const currentActor = await getAuthenticatedActor();
@@ -173,6 +175,7 @@ export async function sendProjectDeliveryAction({
       title,
       storageUrl,
       deliverableNotes,
+      deliveryStage,
     });
 
     if (res.success) {

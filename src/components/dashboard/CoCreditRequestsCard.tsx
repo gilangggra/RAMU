@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Check, X, Sparkles, Loader2, ExternalLink } from "lucide-react";
+import { ShieldCheck, Check, X, Loader2, ExternalLink } from "lucide-react";
 import { confirmCoCredit, rejectCoCredit } from "@/app/api/assets/actions";
 import Link from "next/link";
 import { ActorAvatar } from "@/components/ui/ActorAvatar";
@@ -18,6 +18,7 @@ export interface PendingCoCredit {
   roleTagged: string;
   taggedAt?: string;
   details?: string;
+  isOwnerApproval?: boolean;
 }
 
 interface CoCreditRequestsCardProps {
@@ -34,7 +35,8 @@ export function CoCreditRequestsCard({ requests }: CoCreditRequestsCardProps) {
 
   const handleConfirm = (req: PendingCoCredit) => {
     startTransition(async () => {
-      const res = await confirmCoCredit(req.assetId, req.uploaderId);
+      const targetId = req.isOwnerApproval ? req.uploaderId : undefined;
+      const res = await confirmCoCredit(req.assetId, targetId);
       if (res.success) {
         setFeedback({
           id: req.assetId,
@@ -54,7 +56,8 @@ export function CoCreditRequestsCard({ requests }: CoCreditRequestsCardProps) {
     if (!confirm(`Apakah Anda yakin ingin menolak penyematan/klaim co-credit pada "${req.assetName}"? Tag kredit akan dibatalkan.`)) return;
 
     startTransition(async () => {
-      const res = await rejectCoCredit(req.assetId, req.uploaderId);
+      const targetId = req.isOwnerApproval ? req.uploaderId : undefined;
+      const res = await rejectCoCredit(req.assetId, targetId);
       if (res.success) {
         setFeedback({
           id: req.assetId,
@@ -71,29 +74,29 @@ export function CoCreditRequestsCard({ requests }: CoCreditRequestsCardProps) {
   };
 
   return (
-    <section className="p-5 md:p-6 rounded-2xl bg-white border border-stone-200/80 shadow-2xs space-y-5 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200/70 pb-4">
+    <section className="p-5 md:p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-stone-900 text-white flex items-center justify-center shrink-0 shadow-sm">
-            <ShieldCheck className="w-5 h-5 text-emerald-400" />
+          <div className="w-9 h-9 rounded-xl bg-[#4CC9FE]/15 text-[#0284c7] border border-[#4CC9FE]/30 flex items-center justify-center shrink-0">
+            <ShieldCheck className="w-5 h-5 text-[#0284c7]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-extrabold text-base text-stone-900 tracking-tight">
-                Permintaan Konfirmasi Co-Credit Portofolio
+              <h3 className="font-bold text-sm text-slate-900 tracking-tight">
+                Konfirmasi Keterlibatan Portofolio (Co-Credit)
               </h3>
-              <span className="px-2 py-0.5 rounded-full bg-stone-100 text-stone-800 text-[10px] font-bold border border-stone-200">
+              <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200/70">
                 {activeList.length} Menunggu
               </span>
             </div>
-            <p className="text-xs text-stone-600">
-              Kreator lain menyematkan Anda sebagai bagian dari tim produksi. Konfirmasi untuk mengaktifkan sertifikat anti-catfishing dan menampilkan karya ini di profil Anda.
+            <p className="text-xs text-slate-500 font-normal">
+              Kreator lain menandai Anda sebagai bagian tim produksi proyek ini. Konfirmasi untuk menyinkronkan karya ke profil Anda.
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
         {activeList.map((req) => {
           const isCurrentFeedback = feedback?.id === req.assetId;
 
@@ -101,18 +104,18 @@ export function CoCreditRequestsCard({ requests }: CoCreditRequestsCardProps) {
             return (
               <div
                 key={req.assetId}
-                className={`p-5 rounded-2xl border flex items-center gap-3 animate-fade-in ${
+                className={`p-4 rounded-2xl border flex items-center gap-3 ${
                   feedback.type === "success"
                     ? "bg-emerald-50 border-emerald-300 text-emerald-950"
                     : "bg-rose-50 border-rose-300 text-rose-950"
                 }`}
               >
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-white ${
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-white ${
                   feedback.type === "success" ? "bg-emerald-600" : "bg-rose-600"
                 }`}>
                   {feedback.type === "success" ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
                 </div>
-                <p className="text-xs font-bold leading-relaxed">{feedback.msg}</p>
+                <p className="text-xs font-semibold leading-relaxed">{feedback.msg}</p>
               </div>
             );
           }
@@ -120,69 +123,69 @@ export function CoCreditRequestsCard({ requests }: CoCreditRequestsCardProps) {
           return (
             <div
               key={req.assetId}
-              className="p-4 rounded-2xl bg-gradient-to-b from-white to-stone-50/70 border border-stone-200/90 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between gap-4"
+              className="p-4 rounded-2xl bg-white hover:bg-slate-50/50 border border-slate-200/80 hover:border-slate-300 transition-all flex flex-col justify-between gap-3 shadow-2xs"
             >
-              <div className="flex items-start gap-3.5">
+              <div className="flex items-start gap-3">
                 <img
                   src={req.assetImage}
                   alt={req.assetName}
-                  className="w-20 h-20 rounded-xl object-cover border border-stone-200 shrink-0"
+                  className="w-16 h-16 rounded-xl object-cover border border-slate-200 shrink-0"
                 />
                 <div className="min-w-0 space-y-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 font-semibold border border-stone-200">
+                    <span className="text-xs px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium border border-slate-200">
                       {req.roleTagged}
                     </span>
-                    <span className="text-[10px] text-stone-400">
-                      &bull; Disematkan oleh
+                    <span className="text-xs text-slate-400">
+                      {req.isOwnerApproval ? "• Mengajukan klaim" : "• Disematkan oleh"}
                     </span>
                   </div>
-                  <h4 className="font-extrabold text-sm text-stone-900 truncate">
+                  <h4 className="font-bold text-xs text-slate-900 truncate">
                     {req.assetName}
                   </h4>
-                  <div className="flex items-center gap-1.5 text-xs text-stone-600 truncate">
+                  <div className="flex items-center gap-1.5 text-xs text-slate-600 truncate">
                     <ActorAvatar
                       name={req.uploaderName}
                       avatarUrl={req.uploaderAvatarUrl}
                       className="w-4 h-4 rounded-full"
                       textClassName="text-[8px]"
                     />
-                    <span className="truncate">
-                      Oleh: <strong>{req.uploaderName}</strong> ({req.uploaderSector})
+                    <span className="truncate text-xs font-medium">
+                      {req.uploaderName} ({req.uploaderSector})
                     </span>
                   </div>
                   {req.details && (
-                    <p className="text-[11px] text-stone-500 italic truncate">
+                    <p className="text-xs text-slate-500 italic truncate font-normal">
                       &ldquo;{req.details}&rdquo;
                     </p>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
+              <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   disabled={isPending}
                   onClick={() => handleConfirm(req)}
-                  className="flex-1 py-2 px-3 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-2xs hover:scale-[1.01] active:scale-98 cursor-pointer disabled:opacity-50"
+                  className="flex-1 py-1.5 px-3 rounded-xl bg-[#4CC9FE] hover:bg-[#38bbf5] text-white font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-50"
                 >
                   {isPending ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   ) : (
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <Check className="w-3.5 h-3.5 text-white" />
                   )}
-                  <span>Konfirmasi Keterlibatan</span>
+                  <span>{req.isOwnerApproval ? "Setujui Kredit" : "Konfirmasi"}</span>
                 </button>
 
                 <button
                   type="button"
                   disabled={isPending}
                   onClick={() => handleReject(req)}
-                  className="py-2 px-3 rounded-xl bg-white hover:bg-rose-50 hover:text-rose-700 border border-stone-200 text-stone-600 font-semibold text-xs transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
-                  title="Tolak penyematan jika Anda tidak terlibat"
+                  className="py-1.5 px-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 font-semibold text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
+                  title={req.isOwnerApproval ? "Tolak pengajuan klaim ini" : "Tolak jika bukan Anda"}
                 >
-                  <X className="w-3.5 h-3.5" />
-                  <span>Bukan Saya</span>
+                  <X className="w-3.5 h-3.5 text-slate-400" />
+                  <span>{req.isOwnerApproval ? "Tolak Klaim" : "Bukan Saya"}</span>
                 </button>
               </div>
             </div>

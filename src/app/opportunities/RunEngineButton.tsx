@@ -35,7 +35,7 @@ export function RunEngineButton({ actorName }: { actorName?: string }) {
       <button
         onClick={handleRunEngine}
         disabled={isRunning}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-900 hover:bg-black text-white font-semibold text-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+        className="btn-primary-pill inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-[#4CC9FE]/20"
       >
         {isRunning ? (
           <>
@@ -44,14 +44,14 @@ export function RunEngineButton({ actorName }: { actorName?: string }) {
           </>
         ) : (
           <>
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <Sparkles className="w-3.5 h-3.5 text-white" />
             <span>Segarkan Rekomendasi Mitra</span>
           </>
         )}
       </button>
 
       {statusMessage && (
-        <span className="text-xs text-emerald-800 font-bold px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 animate-fade-in shadow-2xs flex items-center gap-1.5">
+        <span className="text-xs text-emerald-800 font-semibold px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 animate-fade-in shadow-2xs flex items-center gap-1.5">
           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
           <span>{statusMessage}</span>
         </span>

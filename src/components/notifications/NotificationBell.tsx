@@ -58,7 +58,7 @@ function getNotificationIcon(type: string) {
     case "INTEREST_DECLINED":
       return <AlertCircle className="w-4 h-4 text-rose-500" />;
     default:
-      return <Bell className="w-4 h-4 text-stone-500" />;
+      return <Bell className="w-4 h-4 text-slate-400" />;
   }
 }
 
@@ -96,9 +96,9 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
         isInitialLoadRef.current = false;
       }
 
-      items.forEach((n) => seenIdsRef.current.add(n.id));
+      items.forEach((n: NotificationItem) => seenIdsRef.current.add(n.id));
       setNotifications(items);
-      setUnreadCount(res.unreadCount);
+      setUnreadCount(res.unreadCount || 0);
     } catch {
       // ignore
     }
@@ -201,14 +201,14 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
           if (!isOpen) loadNotifications();
         }}
         title="Notifikasi & Pembaruan"
-        className={`relative p-2 rounded-xl text-stone-500 hover:text-[#1E1B2E] hover:bg-stone-100 transition-colors cursor-pointer flex items-center justify-center ${
-          isOpen ? "bg-stone-100 text-[#1E1B2E]" : ""
+        className={`relative p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 transition-colors cursor-pointer flex items-center justify-center ${
+          isOpen ? "bg-slate-100 text-slate-900" : ""
         }`}
         aria-label="Buka notifikasi"
       >
         <Bell className="w-4 h-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-amber-500 px-1 text-[9px] font-black text-white shadow-xs animate-pulse">
+          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#4CC9FE] px-1 text-[9px] font-black text-white shadow-xs animate-pulse">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -217,7 +217,7 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
       {/* DROPDOWN PANEL */}
       {isOpen && (
         <div
-          className={`absolute z-50 mt-2 bg-white border border-stone-200/90 rounded-2xl shadow-2xl overflow-hidden animate-fade-in ${
+          className={`absolute z-50 mt-2 bg-white/95 backdrop-blur-xl border border-white/80 rounded-[22px] shadow-2xl overflow-hidden animate-fade-in ${
             isCollapsed
               ? "left-0 sm:left-12 top-0 w-[320px] sm:w-[380px]"
               : "right-0 sm:left-auto w-[320px] sm:w-[380px]"
@@ -225,11 +225,11 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
           style={{ maxWidth: "calc(100vw - 2rem)" }}
         >
           {/* HEADER */}
-          <div className="p-4 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
+          <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-[#1E1B2E]">Notifikasi</span>
+              <span className="text-sm font-bold text-slate-900">Notifikasi</span>
               {unreadCount > 0 && (
-                <span className="px-2 py-0.5 text-[10px] font-extrabold bg-amber-100 text-amber-800 rounded-full">
+                <span className="px-2 py-0.5 text-[10px] font-bold bg-[#4CC9FE]/15 text-[#0284c7] rounded-full">
                   {unreadCount} baru
                 </span>
               )}
@@ -240,7 +240,7 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
                 <button
                   type="button"
                   onClick={handleMarkAllAsRead}
-                  className="text-[11px] font-semibold text-stone-500 hover:text-amber-800 transition-colors px-2 py-1 rounded-lg hover:bg-white"
+                  className="text-[11px] font-semibold text-slate-500 hover:text-[#0284c7] transition-colors px-2 py-1 rounded-full hover:bg-white"
                   title="Tandai semua sudah dibaca"
                 >
                   Tandai Dibaca
@@ -249,7 +249,7 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-1 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-white"
+                className="p-1 text-slate-400 hover:text-slate-700 rounded-full hover:bg-white cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -258,9 +258,9 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
 
           {/* PERMISSION PROMPT BANNER */}
           {pushPermission === "default" && (
-            <div className="px-4 py-2.5 bg-amber-500/10 border-b border-amber-200/50 flex items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2 text-stone-800 min-w-0">
-                <BellRing className="w-4 h-4 text-amber-600 shrink-0" />
+            <div className="px-4 py-2.5 bg-sky-500/10 border-b border-sky-200/50 flex items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-slate-800 min-w-0">
+                <BellRing className="w-4 h-4 text-[#0284c7] shrink-0" />
                 <span className="text-[11px] leading-snug">
                   Aktifkan notifikasi desktop agar tahu saat ada pelamar baru.
                 </span>
@@ -268,7 +268,7 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
               <button
                 type="button"
                 onClick={handleEnablePush}
-                className="shrink-0 px-2.5 py-1 bg-stone-900 hover:bg-black text-white text-[11px] font-bold rounded-lg transition-colors cursor-pointer shadow-2xs"
+                className="shrink-0 px-3 py-1 bg-slate-900 hover:bg-black text-white text-[11px] font-bold rounded-full transition-colors cursor-pointer shadow-2xs"
               >
                 Izinkan
               </button>
@@ -276,40 +276,40 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
           )}
 
           {/* FILTER TABS */}
-          <div className="flex items-center px-4 pt-2 border-b border-stone-100 gap-4 text-xs font-semibold">
+          <div className="flex items-center px-4 pt-2 border-b border-slate-100 gap-4 text-xs font-semibold">
             <button
               type="button"
               onClick={() => setFilter("all")}
-              className={`pb-2 transition-all relative ${
-                filter === "all" ? "text-[#1E1B2E] font-bold" : "text-stone-400 hover:text-stone-600"
+              className={`pb-2 transition-all relative cursor-pointer ${
+                filter === "all" ? "text-slate-900 font-bold" : "text-slate-400 hover:text-slate-600"
               }`}
             >
               <span>Semua</span>
-              {filter === "all" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#1E1B2E]" />}
+              {filter === "all" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#4CC9FE] rounded-full" />}
             </button>
             <button
               type="button"
               onClick={() => setFilter("unread")}
-              className={`pb-2 transition-all relative ${
-                filter === "unread" ? "text-[#1E1B2E] font-bold" : "text-stone-400 hover:text-stone-600"
+              className={`pb-2 transition-all relative cursor-pointer ${
+                filter === "unread" ? "text-slate-900 font-bold" : "text-slate-400 hover:text-slate-600"
               }`}
             >
               <span>Belum Dibaca ({unreadCount})</span>
-              {filter === "unread" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#1E1B2E]" />}
+              {filter === "unread" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#4CC9FE] rounded-full" />}
             </button>
           </div>
 
           {/* NOTIFICATION LIST */}
-          <div className="max-h-[380px] overflow-y-auto divide-y divide-stone-100 no-scrollbar">
+          <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-100 no-scrollbar">
             {displayedNotifications.length === 0 ? (
               <div className="p-8 text-center space-y-2">
-                <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
+                <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
                   <Bell className="w-5 h-5" />
                 </div>
-                <p className="text-xs font-semibold text-stone-600">
+                <p className="text-xs font-semibold text-slate-700">
                   {filter === "unread" ? "Tidak ada notifikasi baru" : "Belum ada notifikasi"}
                 </p>
-                <p className="text-[11px] text-stone-400 max-w-[200px] mx-auto">
+                <p className="text-[11px] text-slate-400 max-w-[200px] mx-auto">
                   Aktivitas lamaran proyek, undangan kolaborasi, dan pesanan booking akan muncul di sini.
                 </p>
               </div>
@@ -321,30 +321,30 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
                     onClick={() => handleNotificationClick(notif)}
                     className={`p-3.5 flex items-start gap-3 transition-colors cursor-pointer group ${
                       !notif.is_read
-                        ? "bg-amber-50/40 hover:bg-amber-50/70"
-                        : "hover:bg-stone-50"
+                        ? "bg-[#4CC9FE]/8 hover:bg-[#4CC9FE]/14"
+                        : "hover:bg-slate-50/80"
                     }`}
                   >
-                    <div className="w-8 h-8 rounded-xl bg-white border border-stone-200 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform mt-0.5">
+                    <div className="w-8 h-8 rounded-xl bg-white border border-slate-200/80 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform mt-0.5">
                       {getNotificationIcon(notif.type)}
                     </div>
 
                     <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-bold text-[#1E1B2E] truncate">
+                        <span className="text-xs font-bold text-slate-900 truncate">
                           {notif.title}
                         </span>
-                        <span className="text-[10px] text-stone-400 shrink-0 font-medium">
+                        <span className="text-[10px] text-slate-400 shrink-0 font-medium">
                           {formatRelativeTime(notif.created_at)}
                         </span>
                       </div>
 
-                      <p className="text-[11px] text-stone-600 line-clamp-2 leading-relaxed">
+                      <p className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">
                         {notif.message}
                       </p>
 
                       {notif.link && (
-                        <div className="pt-1 flex items-center gap-1 text-[10px] font-bold text-amber-800 group-hover:underline">
+                        <div className="pt-1 flex items-center gap-1 text-[10px] font-bold text-[#0284c7] group-hover:underline">
                           <span>Buka Detail</span>
                           <ExternalLink className="w-2.5 h-2.5" />
                         </div>
@@ -352,7 +352,7 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
                     </div>
 
                     {!notif.is_read && (
-                      <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0 mt-2" />
+                      <span className="w-2 h-2 rounded-full bg-[#4CC9FE] shrink-0 mt-2" />
                     )}
                   </div>
                 );
@@ -361,19 +361,19 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
           </div>
 
           {/* FOOTER ACTION BAR */}
-          <div className="p-3 bg-stone-50 border-t border-stone-100 flex items-center justify-between text-xs">
+          <div className="p-3 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between text-xs">
             <button
               type="button"
               onClick={handleSimulateNewApplicant}
               disabled={isSimulating}
-              className="inline-flex items-center gap-1.5 text-stone-600 hover:text-stone-950 font-medium transition-colors cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 text-slate-600 hover:text-slate-950 font-medium transition-colors cursor-pointer disabled:opacity-50"
               title="Kirim simulasi notifikasi pelamar baru untuk menguji notifikasi browser desktop"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+              <Sparkles className="w-3.5 h-3.5 text-[#0284c7]" />
               <span>{isSimulating ? "Mengirim Notifikasi..." : "Uji Notifikasi Peminat Baru"}</span>
             </button>
             {pushPermission === "granted" ? (
-              <span className="inline-flex items-center gap-1.5 text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
+              <span className="inline-flex items-center gap-1.5 text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 Push Aktif
               </span>
@@ -381,7 +381,7 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
               <button
                 type="button"
                 onClick={handleEnablePush}
-                className="text-[10px] text-amber-700 font-semibold hover:underline cursor-pointer"
+                className="text-[10px] text-[#0284c7] font-semibold hover:underline cursor-pointer"
               >
                 Aktifkan Push
               </button>

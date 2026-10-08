@@ -113,15 +113,15 @@ export function BrandCollabForm({
     <form onSubmit={handleSubmit} className="space-y-8">
       <div className="space-y-1">
         <div className="flex items-center gap-2">
-          <Briefcase className="w-5 h-5 text-[#1E1B2E]" />
-          <h2 className="text-xl font-black text-[#1E1B2E] tracking-tight">
+          <Briefcase className="w-5 h-5 text-[#111827]" />
+          <h2 className="text-xl font-black text-[#111827] tracking-tight">
             Preferensi Kerjasama Brand
           </h2>
         </div>
-        <p className="text-sm text-stone-500 leading-relaxed">
+        <p className="text-sm text-slate-500 leading-relaxed">
           Atur jenis kolaborasi yang terbuka, kompensasi, dan profil kreator ideal yang Anda cari.
           Informasi ini akan tampil publik di tab{" "}
-          <strong className="text-[#1E1B2E]">&ldquo;Kerjasama&rdquo;</strong> pada profil direktori brand Anda.
+          <strong className="text-[#111827]">&ldquo;Kerjasama&rdquo;</strong> pada profil direktori brand Anda.
         </p>
       </div>
 
@@ -133,15 +133,15 @@ export function BrandCollabForm({
         </p>
       </div>
 
-      <div className="p-6 bg-white border border-stone-200/80 shadow-xs space-y-5">
-        <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+      <div className="p-6 bg-white border border-slate-200/80 shadow-xs space-y-5">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2">
             <Briefcase className="w-4 h-4 text-emerald-600" />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
               Jenis Kerjasama yang Dibuka
             </h3>
           </div>
-          <span className="text-[10px] text-stone-400 font-semibold">
+          <span className="text-[10px] text-slate-400 font-semibold">
             {collabTypes.length} dipilih
           </span>
         </div>
@@ -156,19 +156,19 @@ export function BrandCollabForm({
                 onClick={() => toggleType(option.id)}
                 className={`text-left p-4 border transition-all duration-200 space-y-2 ${
                   isSelected
-                    ? "bg-[#1E1B2E] border-[#1E1B2E] shadow-md"
-                    : "bg-stone-50 border-stone-200 hover:border-stone-400 hover:bg-white"
+                    ? "bg-[#4CC9FE] border-[#4CC9FE] shadow-md"
+                    : "bg-slate-50 border-slate-200 hover:border-slate-400 hover:bg-white"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <option.icon className={`w-5 h-5 ${isSelected ? "text-amber-400" : "text-stone-400"}`} />
+                  <option.icon className={`w-5 h-5 ${isSelected ? "text-amber-400" : "text-slate-400"}`} />
                   {isSelected && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
                 </div>
                 <div>
-                  <p className={`text-xs font-black uppercase tracking-wider ${isSelected ? "text-white" : "text-[#1E1B2E]"}`}>
+                  <p className={`text-xs font-black uppercase tracking-wider ${isSelected ? "text-white" : "text-[#111827]"}`}>
                     {option.title}
                   </p>
-                  <p className={`text-[11px] mt-1 leading-relaxed ${isSelected ? "text-stone-300" : "text-stone-500"}`}>
+                  <p className={`text-[11px] mt-1 leading-relaxed ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
                     {option.desc}
                   </p>
                 </div>
@@ -184,16 +184,16 @@ export function BrandCollabForm({
         )}
       </div>
 
-      <div className="p-6 bg-white border border-stone-200/80 shadow-xs space-y-5">
-        <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
+      <div className="p-6 bg-white border border-slate-200/80 shadow-xs space-y-5">
+        <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
           <CreditCard className="w-4 h-4 text-blue-600" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
             Budget & Timeline Kampanye
           </h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-2">
-            <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
               Budget / Kompensasi Kreator
             </label>
             <input
@@ -201,12 +201,12 @@ export function BrandCollabForm({
               value={budgetRange}
               onChange={(e) => setBudgetRange(e.target.value)}
               placeholder="mis. Rp 1-5 Jt per campaign, atau Sesuai scope brief"
-              className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm text-stone-800 font-medium transition-colors outline-none"
+              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-sm text-slate-800 font-medium transition-colors outline-none"
             />
-            <p className="text-[10px] text-stone-400">Estimasi, bukan harga pasti. Bisa berupa range angka atau deskripsi.</p>
+            <p className="text-[10px] text-slate-400">Estimasi, bukan harga pasti. Bisa berupa range angka atau deskripsi.</p>
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
               Timeline per Kampanye
             </label>
             <input
@@ -214,22 +214,22 @@ export function BrandCollabForm({
               value={timeline}
               onChange={(e) => setTimeline(e.target.value)}
               placeholder="mis. 2-4 Minggu per Kampanye"
-              className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm text-stone-800 font-medium transition-colors outline-none"
+              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-sm text-slate-800 font-medium transition-colors outline-none"
             />
-            <p className="text-[10px] text-stone-400">Estimasi dari pengiriman brief hingga konten dipublikasikan.</p>
+            <p className="text-[10px] text-slate-400">Estimasi dari pengiriman brief hingga konten dipublikasikan.</p>
           </div>
         </div>
       </div>
 
-      <div className="p-6 bg-white border border-stone-200/80 shadow-xs space-y-5">
-        <div className="flex items-center gap-2 pb-3 border-b border-stone-100">
+      <div className="p-6 bg-white border border-slate-200/80 shadow-xs space-y-5">
+        <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
           <Users className="w-4 h-4 text-amber-600" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
             Profil & Persyaratan Kreator Ideal
           </h3>
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+          <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
             Deskripsi Kreator yang Dicari <span className="text-rose-500">*</span>
           </label>
           <textarea
@@ -237,12 +237,12 @@ export function BrandCollabForm({
             value={creatorRequirements}
             onChange={(e) => setCreatorRequirements(e.target.value)}
             placeholder="mis. Fotografer fashion dengan estetika minimalis, berpengalaman min. 1 tahun dengan brand lokal, domisili Bandung atau Jakarta..."
-            className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm text-stone-800 font-medium resize-none leading-relaxed transition-colors outline-none"
+            className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-sm text-slate-800 font-medium resize-none leading-relaxed transition-colors outline-none"
           />
-          <p className="text-[10px] text-stone-400">Niche, gaya visual, level pengalaman, atau follower minimum yang Anda harapkan.</p>
+          <p className="text-[10px] text-slate-400">Niche, gaya visual, level pengalaman, atau follower minimum yang Anda harapkan.</p>
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+          <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
             Catatan Tambahan (Opsional)
           </label>
           <textarea
@@ -250,16 +250,16 @@ export function BrandCollabForm({
             value={collabNotes}
             onChange={(e) => setCollabNotes(e.target.value)}
             placeholder="mis. Prioritas kreator berbasis Bandung & Jakarta. Tidak menerima konten promosi brand kompetitor."
-            className="w-full px-4 py-3 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-sm text-stone-800 font-medium resize-none leading-relaxed transition-colors outline-none"
+            className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-sm text-slate-800 font-medium resize-none leading-relaxed transition-colors outline-none"
           />
         </div>
       </div>
 
       {collabTypes.length > 0 && (
-        <div className="p-5 bg-stone-50 border border-stone-200 space-y-3">
+        <div className="p-5 bg-slate-50 border border-slate-200 space-y-3">
           <div className="flex items-center gap-2">
             <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-stone-500">Pratinjau Tampilan Publik</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Pratinjau Tampilan Publik</span>
           </div>
           <div className="space-y-2">
             <div className="flex flex-wrap gap-2">
@@ -267,15 +267,15 @@ export function BrandCollabForm({
                 const opt = COLLAB_TYPE_OPTIONS.find((o) => o.id === t);
                 const Icon = opt?.icon;
                 return (
-                  <span key={t} className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-stone-300 text-xs font-bold text-[#1E1B2E]">
-                    {Icon && <Icon className="w-3.5 h-3.5 text-stone-600 shrink-0" />}
+                  <span key={t} className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-slate-300 text-xs font-bold text-[#111827]">
+                    {Icon && <Icon className="w-3.5 h-3.5 text-slate-600 shrink-0" />}
                     <span>{t}</span>
                   </span>
                 );
               })}
             </div>
-            {budgetRange && <p className="text-xs text-stone-600"><strong>Budget:</strong> {budgetRange}</p>}
-            {timeline && <p className="text-xs text-stone-600"><strong>Timeline:</strong> {timeline}</p>}
+            {budgetRange && <p className="text-xs text-slate-600"><strong>Budget:</strong> {budgetRange}</p>}
+            {timeline && <p className="text-xs text-slate-600"><strong>Timeline:</strong> {timeline}</p>}
           </div>
         </div>
       )}
@@ -287,14 +287,14 @@ export function BrandCollabForm({
         </div>
       )}
 
-      <div className="pt-2 flex items-center justify-between gap-4 border-t border-stone-200">
-        <p className="text-xs text-stone-400 leading-relaxed">
+      <div className="pt-2 flex items-center justify-between gap-4 border-t border-slate-200">
+        <p className="text-xs text-slate-400 leading-relaxed">
           Preferensi ini ditampilkan secara publik di profil direktori brand Anda.
         </p>
         <button
           type="submit"
           disabled={isPending || collabTypes.length === 0}
-          className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-none bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+          className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#4CC9FE] text-slate-900 font-bold text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-xs"
         >
           {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
           <span>{isPending ? "Menyimpan..." : "Simpan Preferensi Kerjasama"}</span>

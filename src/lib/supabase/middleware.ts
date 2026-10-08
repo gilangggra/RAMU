@@ -42,6 +42,8 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
+  const isProjectDetail = /^\/projects\/[a-zA-Z0-9_-]+$/.test(pathname);
+
   const isProtectedRoute =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/onboarding") ||
@@ -52,7 +54,10 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/constraints") ||
     pathname.startsWith("/opportunities") ||
     pathname.startsWith("/collaborations") ||
-    pathname.startsWith("/projects");
+    (pathname.startsWith("/projects") && !isProjectDetail) ||
+    pathname.startsWith("/messages") ||
+    pathname.startsWith("/settings") ||
+    pathname.startsWith("/collaborate");
 
   const isAuthRoute = pathname === "/login" || pathname === "/register";
 

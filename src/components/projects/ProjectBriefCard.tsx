@@ -62,18 +62,18 @@ const STATUS_CONFIG: Record<
   },
   IN_REVIEW: {
     label: "Tahap Review",
-    badge: "bg-stone-100 text-stone-700 border-stone-200",
-    dot: "bg-stone-500",
+    badge: "bg-amber-50 text-amber-800 border-amber-200/80",
+    dot: "bg-amber-500",
   },
   FILLED: {
     label: "Peran Terisi",
-    badge: "bg-blue-50 text-blue-800 border-blue-200/80",
-    dot: "bg-blue-500",
+    badge: "bg-[#4CC9FE]/15 text-[#0284c7] border-[#4CC9FE]/30",
+    dot: "bg-[#4CC9FE]",
   },
   CLOSED: {
     label: "Selesai",
-    badge: "bg-stone-100 text-stone-500 border-stone-200",
-    dot: "bg-stone-400",
+    badge: "bg-slate-100 text-slate-600 border-slate-200/80",
+    dot: "bg-slate-400",
   },
 };
 
@@ -138,56 +138,36 @@ export function ProjectBriefCard({
   const renderCompensationBadge = () => {
     if (estimatedTotal) {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80">
-          <CircleDollarSign className="w-3 h-3 text-emerald-600" />
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs">
+          <CircleDollarSign className="w-3.5 h-3.5 text-emerald-600" />
           <span>{estimatedTotal}</span>
-        </span>
-      );
-    }
-    if (compKey === "PAID" || compKey.includes("BERBAYAR")) {
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80">
-          <CircleDollarSign className="w-3 h-3 text-emerald-600" />
-          <span>Fee Komersial (Paid)</span>
-        </span>
-      );
-    }
-    if (compKey === "BARTER") {
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-stone-100 text-stone-700 border border-stone-200">
-          <span>Barter Produk / Jasa</span>
-        </span>
-      );
-    }
-    if (compKey === "TFP") {
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-purple-50 text-purple-800 border border-purple-200/80">
-          <span>TFP (Portofolio)</span>
         </span>
       );
     }
     if (compKey === "REVENUE_SHARE") {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-800 border border-blue-200/80">
-          <span>Bagi Hasil (Rev-Share)</span>
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-sky-50 text-sky-800 border border-sky-200/80 shadow-2xs">
+          <CircleDollarSign className="w-3.5 h-3.5 text-sky-600" />
+          <span>Bagi Hasil Komersial</span>
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-stone-100 text-stone-700 border border-stone-200">
-        <span>Komersial</span>
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs">
+        <CircleDollarSign className="w-3.5 h-3.5 text-emerald-600" />
+        <span>Fee Komersial (Paid)</span>
       </span>
     );
   };
 
   // ══════════════════════════════════════════════════════════════════════════
-  // 1. LIST VIEW MODE (Attio Dense Job Table / Row)
+  // 1. LIST VIEW MODE (Glassmorphic Dense Job Row)
   // ══════════════════════════════════════════════════════════════════════════
   if (viewMode === "list") {
     return (
       <Link
         href={`/projects/${id}`}
-        className="group block p-4 bg-white rounded-xl border border-stone-200/90 hover:border-stone-800 transition-all duration-200 shadow-2xs hover:shadow-xs"
+        className="glass-card group block p-4 sm:p-5 rounded-[22px] border-white/80 hover:border-[#4CC9FE]/40 transition-all duration-300"
       >
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           {/* Main Info */}
@@ -196,52 +176,52 @@ export function ProjectBriefCard({
             <ActorAvatar
               name={creatorActor.name}
               avatarUrl={creatorActor.owner?.avatarUrl}
-              className="w-10 h-10 rounded-full"
+              className="w-10 h-10 rounded-full shrink-0 ring-2 ring-white/80 shadow-xs"
             />
 
-            <div className="min-w-0 space-y-1">
+            <div className="min-w-0 space-y-1.5 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-semibold text-stone-700 flex items-center gap-1">
+                <span className="text-xs font-semibold text-slate-800 flex items-center gap-1">
                   <span>{creatorActor.name}</span>
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                 </span>
-                <span className="text-stone-300 text-xs">&bull;</span>
-                <span className="text-[11px] text-stone-500">
+                <span className="text-slate-300 text-xs">&bull;</span>
+                <span className="text-[11px] text-slate-500">
                   {location || creatorActor.location || "Indonesia"}
                 </span>
-                <span className="text-stone-300 text-xs">&bull;</span>
-                <span className="text-[11px] text-stone-400">
+                <span className="text-slate-300 text-xs">&bull;</span>
+                <span className="text-[11px] text-slate-400">
                   {daysAgo === 0 ? "Hari ini" : `${daysAgo}h lalu`}
                 </span>
 
                 {isSectorMatch && !isOwnBrief && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-stone-900 text-white">
-                    <Sparkles className="w-2.5 h-2.5" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#4CC9FE]/15 text-[#0284c7] border border-[#4CC9FE]/30">
+                    <Sparkles className="w-2.5 h-2.5 text-[#0284c7]" />
                     Sesuai Profil Anda
                   </span>
                 )}
                 {isOwnBrief && (
-                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-stone-100 text-stone-700 border border-stone-200">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200/80">
                     Brief Anda
                   </span>
                 )}
               </div>
 
-              <h3 className="text-sm sm:text-base font-semibold text-stone-900 group-hover:text-stone-950 transition-colors truncate">
+              <h3 className="text-sm sm:text-base font-semibold text-slate-900 group-hover:text-[#0284c7] transition-colors leading-snug">
                 {title}
               </h3>
 
-              <div className="flex items-center gap-2 text-xs text-stone-500 flex-wrap">
-                <span className="px-2 py-0.5 bg-stone-100 text-stone-700 text-[10px] font-medium rounded">
+              <div className="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
+                <span className="px-2.5 py-0.5 bg-slate-100/80 text-slate-700 text-[10px] font-semibold rounded-full border border-slate-200/60">
                   {projectType}
                 </span>
                 {aestheticStyle && (
-                  <span className="text-[11px] text-stone-500 font-medium">
+                  <span className="text-[11px] text-slate-500 font-medium">
                     Tema: {aestheticStyle}
                   </span>
                 )}
                 {targetOutput && (
-                  <span className="text-[11px] text-stone-500 truncate max-w-xs">
+                  <span className="text-[11px] text-slate-600 font-medium">
                     Luaran: {targetOutput}
                   </span>
                 )}
@@ -250,8 +230,8 @@ export function ProjectBriefCard({
           </div>
 
           {/* Roles Chips */}
-          <div className="lg:w-80 shrink-0 space-y-1">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
+          <div className="lg:w-80 shrink-0 space-y-1.5">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
               Lowongan Kru: {openRoles.length} Terbuka dari {neededRoles.length} Peran
             </div>
             <div className="flex flex-wrap gap-1.5">
@@ -260,12 +240,12 @@ export function ProjectBriefCard({
                 return (
                   <span
                     key={role.id}
-                    className={`text-[11px] px-2 py-0.5 rounded border transition-all ${
+                    className={`text-[11px] px-2.5 py-0.5 rounded-full border transition-all ${
                       role.isFilled
-                        ? "bg-stone-50 text-stone-400 border-stone-200 line-through"
+                        ? "bg-slate-100/60 text-slate-400 border-slate-200 line-through"
                         : matchesUser
-                        ? "bg-stone-900 text-white border-stone-900 font-semibold"
-                        : "bg-white text-stone-800 border-stone-200 font-medium"
+                        ? "bg-[#4CC9FE] text-white border-[#4CC9FE] font-semibold shadow-xs"
+                        : "bg-white/80 text-slate-700 border-white/80 font-medium"
                     }`}
                   >
                     {role.roleLabel}
@@ -273,7 +253,7 @@ export function ProjectBriefCard({
                 );
               })}
               {neededRoles.length > 3 && (
-                <span className="text-[11px] text-stone-400 px-1 py-0.5">
+                <span className="text-[11px] text-slate-500 px-1 py-0.5 font-medium">
                   +{neededRoles.length - 3} lainnya
                 </span>
               )}
@@ -281,16 +261,16 @@ export function ProjectBriefCard({
           </div>
 
           {/* Compensation & CTA */}
-          <div className="flex items-center justify-between lg:justify-end gap-4 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-stone-100">
+          <div className="flex items-center justify-between lg:justify-end gap-4 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
             <div className="text-left lg:text-right">
               {renderCompensationBadge()}
-              <div className="text-[10px] text-stone-400 mt-1 flex items-center lg:justify-end gap-1">
-                <Users className="w-3 h-3 text-stone-400" />
+              <div className="text-[10px] text-slate-400 mt-1 flex items-center lg:justify-end gap-1">
+                <Users className="w-3 h-3 text-slate-400" />
                 <span>{totalInterests} pelamar terdaftar</span>
               </div>
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold group-hover:bg-stone-800 transition-colors shrink-0 shadow-2xs">
+            <div className="btn-primary-pill inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold shrink-0">
               <span>{isOwnBrief ? "Kelola Brief" : "Lamar Peran"}</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </div>
@@ -301,35 +281,35 @@ export function ProjectBriefCard({
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // 2. GRID VIEW MODE (Attio Editorial Card with Crystal Clear Job Info)
+  // 2. GRID VIEW MODE (Glassmorphic Editorial Card)
   // ══════════════════════════════════════════════════════════════════════════
   return (
     <Link
       href={`/projects/${id}`}
-      className="group flex flex-col justify-between bg-white rounded-xl border border-stone-200/90 hover:border-stone-800 transition-all duration-200 shadow-2xs hover:shadow-xs overflow-hidden relative"
+      className="glass-card group flex flex-col justify-between rounded-[22px] border-white/80 hover:border-[#4CC9FE]/40 transition-all duration-300 overflow-hidden relative shadow-2xs hover:shadow-md"
     >
       {/* CARD TOP: INITIATOR INFO + COMPENSATION BADGE */}
-      <div className="p-5 pb-3 border-b border-stone-100 flex items-start justify-between gap-3">
+      <div className="p-4 pb-2.5 border-b border-slate-100/80 flex items-start justify-between gap-3 bg-white/40">
         {/* Initiator Info */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
           <ActorAvatar
             name={creatorActor.name}
             avatarUrl={creatorActor.owner?.avatarUrl}
-            className="w-9 h-9 rounded-full"
+            className="w-9 h-9 rounded-full shrink-0 ring-2 ring-white/80 shadow-xs"
           />
 
           <div className="min-w-0">
-            <div className="font-semibold text-stone-900 text-xs truncate flex items-center gap-1">
+            <div className="font-semibold text-slate-900 text-xs flex items-center gap-1">
               <span>{creatorActor.name}</span>
               <span title="Inisiator Terverifikasi">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               </span>
             </div>
-            <div className="text-[11px] text-stone-500 truncate flex items-center gap-1">
+            <div className="text-[10px] text-slate-500 flex items-center gap-1.5 flex-wrap">
               <span>{creatorActor.sector}</span>
               <span>&bull;</span>
-              <span className="flex items-center gap-0.5">
-                <MapPin className="w-2.5 h-2.5 text-stone-400" />
+              <span className="flex items-center gap-0.5 text-slate-400">
+                <MapPin className="w-2.5 h-2.5 text-slate-400 shrink-0" />
                 <span>{location || creatorActor.location || "Indonesia"}</span>
               </span>
             </div>
@@ -337,10 +317,10 @@ export function ProjectBriefCard({
         </div>
 
         {/* Right Header Status / Compensation */}
-        <div className="flex flex-col items-end gap-1.5 shrink-0">
+        <div className="flex flex-col items-end gap-1 shrink-0">
           {renderCompensationBadge()}
           <span
-            className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full border ${statusCfg.badge}`}
+            className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-medium rounded-full border ${statusCfg.badge}`}
           >
             <span
               className={`w-1.5 h-1.5 rounded-full ${statusCfg.dot} ${
@@ -353,59 +333,59 @@ export function ProjectBriefCard({
       </div>
 
       {/* CARD BODY */}
-      <div className="p-5 space-y-3.5 flex-1">
+      <div className="p-4 space-y-3 flex-1">
         {/* Project Title & Category tags */}
         <div className="space-y-1.5">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="px-2 py-0.5 bg-stone-100 text-stone-700 text-[10px] font-semibold rounded uppercase tracking-wider">
+            <span className="px-2 py-0.5 bg-slate-100/90 text-slate-700 text-[10px] font-semibold rounded-full uppercase tracking-wider border border-slate-200/60">
               {projectType}
             </span>
             {aestheticStyle && (
-              <span className="px-2 py-0.5 bg-stone-50 text-stone-600 text-[10px] font-medium rounded border border-stone-200/70">
+              <span className="px-2 py-0.5 bg-white/80 text-slate-600 text-[10px] font-medium rounded-full border border-white/80">
                 {aestheticStyle}
               </span>
             )}
             {isSectorMatch && !isOwnBrief && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-stone-900 text-white shadow-2xs">
-                <Sparkles className="w-2.5 h-2.5" />
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#4CC9FE]/15 text-[#0284c7] border border-[#4CC9FE]/30 shadow-2xs">
+                <Sparkles className="w-2.5 h-2.5 text-[#0284c7]" />
                 Sesuai Profil Anda
               </span>
             )}
             {isOwnBrief && (
-              <span className="px-2 py-0.5 text-[10px] font-semibold bg-stone-100 text-stone-700 rounded border border-stone-200">
+              <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-700 rounded-full border border-slate-200/80">
                 Brief Anda
               </span>
             )}
           </div>
 
-          <h3 className="text-base font-semibold text-stone-900 group-hover:text-stone-950 transition-colors line-clamp-2 leading-snug">
+          <h3 className="text-sm sm:text-[15px] font-bold text-slate-900 group-hover:text-[#0284c7] transition-colors leading-snug">
             {title}
           </h3>
 
-          <p className="text-xs text-stone-500 font-normal leading-relaxed line-clamp-2">
+          <p className="text-xs text-slate-600 font-normal leading-relaxed">
             {description}
           </p>
         </div>
 
         {/* DELIVERABLE & TIMELINE METADATA */}
-        <div className="p-2.5 bg-stone-50/70 rounded-lg border border-stone-200/70 space-y-1.5 text-xs">
+        <div className="p-2.5 bg-white/70 backdrop-blur-xs rounded-xl border border-white/80 space-y-1.5 text-xs shadow-2xs">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[11px] font-medium text-stone-500 flex items-center gap-1 shrink-0">
-              <Layers className="w-3 h-3 text-stone-400" />
+            <span className="text-[10px] font-medium text-slate-500 flex items-center gap-1.5 shrink-0">
+              <Layers className="w-3 h-3 text-slate-400" />
               Target Luaran:
             </span>
-            <span className="text-[11px] font-semibold text-stone-800 truncate text-right">
+            <span className="text-[11px] font-semibold text-slate-800 text-right">
               {targetOutput || "Produksi Kreatif"}
             </span>
           </div>
 
           {(targetLaunch || estimatedDuration) && (
-            <div className="flex items-center justify-between gap-2 pt-1 border-t border-stone-200/60">
-              <span className="text-[11px] font-medium text-stone-500 flex items-center gap-1 shrink-0">
-                <Calendar className="w-3 h-3 text-stone-400" />
+            <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-200/60">
+              <span className="text-[10px] font-medium text-slate-500 flex items-center gap-1.5 shrink-0">
+                <Calendar className="w-3 h-3 text-slate-400" />
                 Jadwal Produksi:
               </span>
-              <span className="text-[11px] font-semibold text-stone-800 text-right">
+              <span className="text-[11px] font-semibold text-slate-800 text-right">
                 {targetLaunch || estimatedDuration}
               </span>
             </div>
@@ -413,19 +393,19 @@ export function ProjectBriefCard({
         </div>
 
         {/* NEEDED ROLES BREAKDOWN WITH SLOTS */}
-        <div className="space-y-2 pt-1">
+        <div className="space-y-1.5 pt-0.5">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1">
-              <Briefcase className="w-3 h-3 text-stone-400" />
+            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+              <Briefcase className="w-3 h-3 text-slate-400" />
               Lowongan Kru ({neededRoles.length} Peran)
             </span>
             {openRoles.length > 0 ? (
-              <span className="text-[11px] font-semibold text-emerald-700">
+              <span className="text-[10px] font-semibold text-emerald-700">
                 {openRoles.length} slot terbuka
               </span>
             ) : (
-              <span className="text-[11px] font-semibold text-stone-400 flex items-center gap-1">
-                <Check className="w-3 h-3 text-stone-400" />
+              <span className="text-[10px] font-semibold text-slate-400 flex items-center gap-1">
+                <Check className="w-2.5 h-2.5 text-slate-400" />
                 Semua Terisi
               </span>
             )}
@@ -437,26 +417,26 @@ export function ProjectBriefCard({
               return (
                 <span
                   key={role.id}
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] transition-all ${
+                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] transition-all ${
                     role.isFilled
-                      ? "bg-stone-50 text-stone-400 border border-stone-200/70 line-through"
+                      ? "bg-slate-100/60 text-slate-400 border border-slate-200/70 line-through"
                       : matchesUser
-                      ? "bg-stone-900 text-white font-semibold shadow-2xs"
-                      : "bg-white text-stone-800 border border-stone-200/90 font-medium hover:border-stone-400"
+                      ? "bg-[#4CC9FE] text-white font-semibold shadow-xs"
+                      : "bg-white/80 text-slate-700 border border-white/80 font-medium hover:border-slate-300"
                   }`}
                 >
                   {role.isFilled ? (
-                    <Check className="w-2.5 h-2.5 text-stone-400" />
+                    <Check className="w-2.5 h-2.5 text-slate-400" />
                   ) : (
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${
-                        matchesUser ? "bg-emerald-400" : "bg-emerald-500"
+                        matchesUser ? "bg-white" : "bg-emerald-500"
                       }`}
                     />
                   )}
                   <span>{role.roleLabel}</span>
                   {matchesUser && !role.isFilled && (
-                    <span className="text-[9px] font-bold text-stone-300 ml-0.5">
+                    <span className="text-[9px] font-bold text-white/90 ml-0.5">
                       (Anda)
                     </span>
                   )}
@@ -468,22 +448,22 @@ export function ProjectBriefCard({
       </div>
 
       {/* CARD FOOTER: APPLICANTS & CTA */}
-      <div className="px-5 py-3 bg-stone-50/50 border-t border-stone-100 flex items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-3 text-stone-500 text-[11px]">
-          <span className="flex items-center gap-1 font-medium text-stone-700">
-            <Users className="w-3 h-3 text-stone-400" />
+      <div className="px-4 py-2.5 bg-white/50 backdrop-blur-xs border-t border-slate-100 flex items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2.5 text-slate-500 text-[10px]">
+          <span className="flex items-center gap-1 font-medium text-slate-700">
+            <Users className="w-3 h-3 text-slate-400" />
             {totalInterests} pelamar
           </span>
           <span>&bull;</span>
-          <span className="flex items-center gap-1 text-stone-400">
-            <Clock className="w-2.5 h-2.5 text-stone-300" />
+          <span className="flex items-center gap-1 text-slate-400">
+            <Clock className="w-3 h-3 text-slate-300" />
             {daysAgo === 0 ? "Hari ini" : `${daysAgo}h lalu`}
           </span>
         </div>
 
-        <div className="inline-flex items-center gap-1 px-3 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold group-hover:bg-stone-800 transition-colors shadow-2xs">
+        <div className="btn-primary-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[11px] font-semibold">
           <span>{isOwnBrief ? "Kelola Brief" : "Lamar Peran"}</span>
-          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
         </div>
       </div>
     </Link>

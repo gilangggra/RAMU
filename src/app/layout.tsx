@@ -33,7 +33,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className={`${plusJakarta.variable} ${inter.variable}`}>
-      <body className="font-sans antialiased selection:bg-stone-900 selection:text-white min-h-screen">
+      <body className="font-sans antialiased selection:bg-[#4CC9FE]/25 selection:text-slate-900 min-h-screen">
         <Toaster />
         {children}
       </body>

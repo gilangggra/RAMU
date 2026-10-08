@@ -69,7 +69,7 @@ export function ApplyModal({ briefId, roles, actorAssets, actorId, matchRoleId }
 
   if (availableRoles.length === 0 && !hasApplied) {
     return (
-      <button disabled className="w-full py-4 rounded-2xl bg-stone-100 text-stone-400 font-bold text-sm cursor-not-allowed">
+      <button disabled className="w-full py-3.5 rounded-full bg-slate-100 text-slate-400 font-semibold text-sm cursor-not-allowed">
         Semua Peran Telah Terisi
       </button>
     );
@@ -77,7 +77,7 @@ export function ApplyModal({ briefId, roles, actorAssets, actorId, matchRoleId }
 
   if (hasApplied) {
     return (
-      <div className="w-full p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
+      <div className="w-full p-4 rounded-[22px] bg-emerald-50/80 border border-emerald-200/80 text-center">
         <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto mb-2" />
         <p className="text-sm font-bold text-emerald-800">Lamaran Anda Terkirim</p>
         <p className="text-xs text-emerald-600 mt-1">
@@ -123,9 +123,9 @@ export function ApplyModal({ briefId, roles, actorAssets, actorId, matchRoleId }
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="w-full py-4 rounded-2xl bg-[#1E1B2E] hover:bg-black text-white font-bold text-sm transition-all shadow-lg flex items-center justify-center gap-2"
+        className="w-full py-3.5 rounded-full bg-[#4CC9FE] hover:bg-[#38b6eb] text-white font-semibold text-sm transition-all shadow-md shadow-[#4CC9FE]/20 flex items-center justify-center gap-2 cursor-pointer"
       >
-        <Sparkles className="w-4 h-4" />
+        <Sparkles className="w-4 h-4 text-white" />
         <span>Ajukan Kolaborasi</span>
       </button>
 
@@ -134,38 +134,38 @@ export function ApplyModal({ briefId, roles, actorAssets, actorId, matchRoleId }
           <div
             role="dialog"
             aria-modal="true"
-            className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-stone-950/80 backdrop-blur-xs animate-in fade-in duration-200 overflow-hidden"
+            className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-hidden"
             onClick={() => setIsOpen(false)}
           >
             <div
-              className="bg-white rounded-[32px] w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl relative my-auto animate-in zoom-in-95 duration-150"
+              className="bg-white/95 backdrop-blur-xl rounded-[22px] border border-white/80 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl relative my-auto animate-in zoom-in-95 duration-150"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-6 sm:p-8 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
+              <div className="p-6 sm:p-7 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
                 <div>
-                  <h2 className="text-xl font-bold text-[#1E1B2E]">Ajukan Kolaborasi</h2>
-                  <p className="text-sm text-stone-500 font-light mt-1">Pilih peran dan aset yang akan Anda kontribusikan.</p>
+                  <h2 className="text-xl font-bold text-slate-900">Ajukan Kolaborasi</h2>
+                  <p className="text-xs text-slate-500 font-normal mt-0.5">Pilih peran dan aset yang akan Anda kontribusikan.</p>
                 </div>
-                <button onClick={() => setIsOpen(false)} className="p-2 bg-stone-100 hover:bg-stone-200 rounded-full transition-colors cursor-pointer">
-                  <X className="w-5 h-5 text-stone-600" />
+                <button onClick={() => setIsOpen(false)} className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors cursor-pointer">
+                  <X className="w-5 h-5 text-slate-600" />
                 </button>
               </div>
 
-              <div className="p-6 sm:p-8 overflow-y-auto custom-scrollbar space-y-8">
+              <div className="p-6 sm:p-7 overflow-y-auto custom-scrollbar space-y-6">
                 {success ? (
                   <div className="py-12 text-center space-y-4">
-                    <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
-                      <CheckCircle2 className="w-10 h-10 text-emerald-600" />
+                    <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
+                      <CheckCircle2 className="w-9 h-9 text-emerald-600" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-stone-900">Lamaran Berhasil Terkirim!</h3>
-                      <p className="text-stone-500 mt-2">Inisiator proyek akan segera meninjau profil dan aset Anda.</p>
+                      <h3 className="text-xl font-bold text-slate-900">Lamaran Berhasil Terkirim!</h3>
+                      <p className="text-xs text-slate-500 mt-1">Inisiator proyek akan segera meninjau profil dan aset Anda.</p>
                     </div>
                   </div>
                 ) : (
                   <>
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-bold uppercase tracking-wider text-stone-500">1. Pilih Peran</h3>
+                    <div className="space-y-3">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">1. Pilih Peran</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {availableRoles.map(role => (
                           <div 
@@ -173,17 +173,17 @@ export function ApplyModal({ briefId, roles, actorAssets, actorId, matchRoleId }
                             onClick={() => setSelectedRoleId(role.id)}
                             className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
                               selectedRoleId === role.id 
-                                ? "border-[#1E1B2E] bg-stone-50" 
-                                : "border-stone-100 hover:border-stone-200 bg-white"
+                                ? "border-[#4CC9FE] bg-[#4CC9FE]/10" 
+                                : "border-slate-100 hover:border-slate-200 bg-white"
                             }`}
                           >
                             <div className="flex items-start justify-between gap-2">
                               <div>
-                                <p className="font-bold text-stone-900">{role.roleLabel}</p>
-                                <p className="text-[10px] uppercase tracking-wider text-stone-500 mt-1">{CATEGORY_LABELS[role.assetCategory] || role.assetCategory}</p>
+                                <p className="font-bold text-slate-900 text-xs sm:text-sm">{role.roleLabel}</p>
+                                <p className="text-[10px] uppercase tracking-wider text-slate-500 mt-1">{CATEGORY_LABELS[role.assetCategory] || role.assetCategory}</p>
                               </div>
                               {matchRoleId === role.id && (
-                                <Sparkles className="w-4 h-4 text-emerald-500 shrink-0" />
+                                <Sparkles className="w-4 h-4 text-[#4CC9FE] shrink-0" />
                               )}
                             </div>
                           </div>
@@ -191,36 +191,36 @@ export function ApplyModal({ briefId, roles, actorAssets, actorId, matchRoleId }
                       </div>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       <div className="flex justify-between items-end">
-                        <h3 className="text-sm font-bold uppercase tracking-wider text-stone-500">2. Aset yang Dikontribusikan</h3>
-                        <span className="text-xs text-stone-400 font-light">Pilih dari profil Anda</span>
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">2. Aset yang Dikontribusikan</h3>
+                        <span className="text-[11px] text-slate-400">Pilih dari profil Anda</span>
                       </div>
 
                       {actorAssets.length === 0 ? (
-                        <div className="p-4 rounded-xl bg-stone-50 border border-stone-200 text-sm text-stone-500 italic">
+                        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-500 italic">
                           Anda belum memiliki aset di profil Anda. Anda tetap bisa melamar dengan mengisi catatan pendekatan kreatif di bawah.
                         </div>
                       ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                           {actorAssets.map((asset) => {
                             const isChecked = selectedAssets.includes(asset.id);
                             return (
                               <div
                                 key={asset.id}
                                 onClick={() => toggleAsset(asset.id)}
-                                className={`p-3 rounded-xl border-2 text-xs cursor-pointer transition-all flex items-start gap-3 ${
+                                className={`p-3.5 rounded-2xl border text-xs cursor-pointer transition-all flex items-start gap-2.5 ${
                                   isChecked
-                                    ? "bg-amber-50 border-amber-400 shadow-sm"
-                                    : "bg-white border-stone-100 hover:border-stone-200"
+                                    ? "bg-sky-50/80 border-[#4CC9FE] shadow-2xs"
+                                    : "bg-white border-slate-200/80 hover:border-slate-300"
                                 }`}
                               >
-                                <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isChecked ? "border-amber-500 bg-amber-500" : "border-stone-300"}`}>
+                                <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isChecked ? "border-[#4CC9FE] bg-[#4CC9FE]" : "border-slate-300"}`}>
                                   {isChecked && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                                 </div>
                                 <div className="min-w-0">
-                                  <p className={`font-bold truncate ${isChecked ? "text-amber-900" : "text-stone-700"}`}>{asset.name}</p>
-                                  <p className={`text-[10px] mt-0.5 ${isChecked ? "text-amber-700/70" : "text-stone-400"}`}>{asset.subtype || asset.category}</p>
+                                  <p className={`font-semibold ${isChecked ? "text-slate-900" : "text-slate-700"}`}>{asset.name}</p>
+                                  <p className={`text-[10px] mt-0.5 ${isChecked ? "text-[#0284c7]" : "text-slate-400"}`}>{asset.subtype || asset.category}</p>
                                 </div>
                               </div>
                             );
@@ -229,19 +229,19 @@ export function ApplyModal({ briefId, roles, actorAssets, actorId, matchRoleId }
                       )}
                     </div>
 
-                    <div className="space-y-3">
-                      <h3 className="text-sm font-bold uppercase tracking-wider text-stone-500">3. Pendekatan Kreatif (Opsional)</h3>
+                    <div className="space-y-2">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">3. Pendekatan Kreatif (Opsional)</h3>
                       <textarea
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder="Ceritakan mengapa Anda cocok untuk peran ini dan pendekatan apa yang akan Anda berikan..."
-                        rows={4}
-                        className="w-full p-4 rounded-2xl bg-stone-50 border border-stone-200 text-sm text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E] focus:ring-1 focus:ring-[#1E1B2E] placeholder-stone-400 resize-none"
+                        rows={3}
+                        className="w-full p-3.5 rounded-2xl bg-white border border-slate-200 text-xs text-slate-800 focus:outline-none focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 placeholder-slate-400 resize-none shadow-2xs"
                       />
                     </div>
 
                     {error && (
-                      <div className="p-4 rounded-xl bg-rose-50 text-rose-600 text-xs font-bold border border-rose-200">
+                      <div className="p-3.5 rounded-2xl bg-rose-50 text-rose-600 text-xs font-semibold border border-rose-200">
                         {error}
                       </div>
                     )}
@@ -250,20 +250,20 @@ export function ApplyModal({ briefId, roles, actorAssets, actorId, matchRoleId }
               </div>
 
               {!success && (
-                <div className="p-6 border-t border-stone-100 bg-white flex justify-end gap-3">
+                <div className="p-5 border-t border-slate-100 bg-white/80 backdrop-blur-sm flex justify-end items-center gap-3">
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="px-6 py-3 rounded-xl text-stone-500 hover:bg-stone-50 text-sm font-bold transition-colors cursor-pointer"
+                    className="px-5 py-2.5 rounded-full text-slate-600 hover:bg-slate-100 text-xs font-semibold transition-colors cursor-pointer"
                   >
                     Batal
                   </button>
                   <button
                     onClick={handleSubmit}
                     disabled={isPending || !selectedRoleId}
-                    className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-[#1E1B2E] hover:bg-black disabled:opacity-50 text-white font-bold text-sm transition-all shadow-md cursor-pointer"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#4CC9FE] hover:bg-[#38b6eb] disabled:opacity-50 text-white font-semibold text-xs transition-all shadow-md shadow-[#4CC9FE]/20 cursor-pointer"
                   >
                     <span>{isPending ? "Mengirim..." : "Kirim Lamaran"}</span>
-                    {!isPending && <Send className="w-4 h-4" />}
+                    {!isPending && <Send className="w-3.5 h-3.5" />}
                   </button>
                 </div>
               )}

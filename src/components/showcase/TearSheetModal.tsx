@@ -395,8 +395,8 @@ export function TearSheetModal({
           <div className="flex items-center gap-2.5">
             <span className="w-2 h-2 rounded-full bg-stone-900" />
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[11px] font-extrabold tracking-[0.22em] uppercase text-stone-900">
-                RAMU DOSSIER
+              <span className="font-mono text-[11px] font-extrabold tracking-[0.18em] uppercase text-stone-900">
+                RAMU DOSSIER &bull; LOOKBOOK EDITORIAL
               </span>
               <span className="text-stone-300 hidden sm:inline">•</span>
               <span className="text-[11px] font-mono text-stone-500 hidden sm:inline">
@@ -570,6 +570,16 @@ export function TearSheetModal({
                           <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-emerald-100 text-emerald-900 font-mono font-black border border-emerald-300">
                             KOLABORASI ANDA
                           </span>
+                        )}
+                        {item.collaborationId && (
+                          <Link
+                            href={`/collaborations/${item.collaborationId}`}
+                            className="text-[9px] px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 font-bold border border-amber-300 hover:bg-amber-100 transition-colors flex items-center gap-1 shrink-0"
+                            title="Buka Ruang Kerja & SPK Kolaborasi Resmi"
+                          >
+                            <span>🏆</span>
+                            <span>Karya Kolaborasi RAMU</span>
+                          </Link>
                         )}
                       </div>
                       <span className="text-[10px] text-stone-500 font-mono block truncate">

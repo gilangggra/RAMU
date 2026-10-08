@@ -50,14 +50,17 @@ export default async function CollaborationDetailPage({
     );
   }
 
-  const allAcceptedBookings = await prisma.bookingRequest.findMany({
-    where: { status: "ACCEPTED" },
+  const linkedBooking = await prisma.bookingRequest.findFirst({
+    where: {
+      status: { in: ["ACCEPTED", "COMPLETED"] },
+      OR: [{ requesterId: actor.id }, { targetId: actor.id }],
+      details: {
+        path: ["collaborationId"],
+        equals: id,
+      },
+    },
     include: { requester: true, target: true },
-    orderBy: { createdAt: "desc" },
   });
-  const linkedBooking = allAcceptedBookings.find(
-    (b) => (b.details as any)?.collaborationId === id
-  );
 
   return (
     <AppShell actor={actor} activeRoute="/collaborations">

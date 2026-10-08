@@ -102,7 +102,14 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
   const hasCurrentActorSigned = Boolean(currentActorParticipant?.signedAt);
   const isSpkFullySigned = totalParties > 0 && signedParties === totalParties;
 
+  const otherParticipant = participants.find(
+    (p: any) => (p.actorId ?? p.id) !== currentActorId
+  );
+  const partnerActorId = otherParticipant?.actorId ?? otherParticipant?.id;
+  const chatTimUrl = partnerActorId ? `/messages?with=${partnerActorId}` : "/messages";
+
   const [taskFilter, setTaskFilter] = useState<string>("ALL");
+  const [taskViewMode, setTaskViewMode] = useState<"kanban" | "list">("kanban");
   const filteredTasks = tasks.filter((t: any) => {
     if (taskFilter === "ALL") return true;
     return t.status === taskFilter;
@@ -402,7 +409,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
             </button>
 
             <Link
-              href="/messages"
+              href={chatTimUrl}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold transition-colors"
             >
               <MessageSquare className="w-3.5 h-3.5 text-stone-500" />
@@ -839,7 +846,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   </h3>
                 </div>
                 <Link
-                  href="/messages"
+                  href={chatTimUrl}
                   className="text-xs font-semibold text-stone-600 hover:text-stone-900 flex items-center gap-1"
                 >
                   <span>Chat Tim</span>
@@ -892,6 +899,16 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                           <User className="w-3 h-3" />
                           <span>Profil</span>
                         </Link>
+
+                        {!isYou && (
+                          <Link
+                            href={`/messages?with=${p.actorId ?? p.id}`}
+                            className="inline-flex items-center gap-1 text-[11px] font-medium text-stone-600 hover:text-stone-900"
+                          >
+                            <MessageSquare className="w-3 h-3 text-stone-400" />
+                            <span>Chat</span>
+                          </Link>
+                        )}
 
                         {!isYou && p.actor?.contactPhone && (
                           <a
@@ -955,67 +972,208 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                const text = generateCallsheetWhatsAppText();
-                navigator.clipboard.writeText(text);
-                setCallsheetCopied(true);
-                setTimeout(() => setCallsheetCopied(false), 3000);
-              }}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs shrink-0 ${
-                callsheetCopied
-                  ? "bg-emerald-600 text-white"
-                  : "bg-stone-900 hover:bg-black text-white"
-              }`}
-            >
-              {callsheetCopied ? (
-                <>
-                  <Check className="w-3.5 h-3.5" />
-                  <span>Tersalin! Paste di WhatsApp Kru</span>
-                </>
-              ) : (
-                <>
-                  <Phone className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Salin ke WhatsApp Kru</span>
-                  <Copy className="w-3 h-3 text-stone-400" />
-                </>
-              )}
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  const text = generateCallsheetWhatsAppText();
+                  navigator.clipboard.writeText(text);
+                  setCallsheetCopied(true);
+                  setTimeout(() => setCallsheetCopied(false), 3000);
+                }}
+                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs ${
+                  callsheetCopied
+                    ? "bg-emerald-600 text-white"
+                    : "bg-stone-900 hover:bg-black text-white"
+                }`}
+              >
+                {callsheetCopied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Tersalin! Siap Paste</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 text-stone-400" />
+                    <span>Salin Rundown</span>
+                  </>
+                )}
+              </button>
+
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(generateCallsheetWhatsAppText())}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-all shadow-xs"
+                title="Buka WhatsApp Langsung dengan Teks Rundown"
+              >
+                <Phone className="w-3.5 h-3.5 text-white" />
+                <span>Kirim via WA</span>
+              </a>
+            </div>
           </div>
 
           {/* Filter Bar & Tasks List */}
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-stone-700 uppercase tracking-wider">
-                <Clock className="w-3.5 h-3.5 text-stone-500" />
-                <span>Daftar Sesi ({filteredTasks.length})</span>
-              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <Clock className="w-3.5 h-3.5 text-stone-500" />
+                  <span>Daftar Sesi ({filteredTasks.length})</span>
+                </div>
 
-              <div className="flex items-center gap-1 p-1 rounded-xl bg-stone-100 border border-stone-200 text-xs">
-                {[
-                  { key: "ALL", label: "Semua Sesi" },
-                  { key: "TODO", label: "Antrean" },
-                  { key: "IN_PROGRESS", label: "Berjalan" },
-                  { key: "DONE", label: "Selesai" },
-                ].map((f) => (
+                {/* View Switcher: List vs Kanban */}
+                <div className="inline-flex rounded-lg bg-stone-100 p-0.5 border border-stone-200 text-xs">
                   <button
-                    key={f.key}
                     type="button"
-                    onClick={() => setTaskFilter(f.key)}
-                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                      taskFilter === f.key
+                    onClick={() => setTaskViewMode("kanban")}
+                    className={`px-2.5 py-1 rounded-md transition-all font-medium ${
+                      taskViewMode === "kanban"
                         ? "bg-white text-stone-900 shadow-2xs font-semibold"
                         : "text-stone-500 hover:text-stone-800"
                     }`}
                   >
-                    {f.label}
+                    Papan Kanban
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() => setTaskViewMode("list")}
+                    className={`px-2.5 py-1 rounded-md transition-all font-medium ${
+                      taskViewMode === "list"
+                        ? "bg-white text-stone-900 shadow-2xs font-semibold"
+                        : "text-stone-500 hover:text-stone-800"
+                    }`}
+                  >
+                    Daftar List
+                  </button>
+                </div>
               </div>
+
+              {taskViewMode === "list" && (
+                <div className="flex items-center gap-1 p-1 rounded-xl bg-stone-100 border border-stone-200 text-xs">
+                  {[
+                    { key: "ALL", label: "Semua Sesi" },
+                    { key: "TODO", label: "Antrean" },
+                    { key: "IN_PROGRESS", label: "Berjalan" },
+                    { key: "DONE", label: "Selesai" },
+                  ].map((f) => (
+                    <button
+                      key={f.key}
+                      type="button"
+                      onClick={() => setTaskFilter(f.key)}
+                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                        taskFilter === f.key
+                          ? "bg-white text-stone-900 shadow-2xs font-semibold"
+                          : "text-stone-500 hover:text-stone-800"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {filteredTasks.length === 0 ? (
+            {/* KANBAN BOARD VIEW */}
+            {taskViewMode === "kanban" ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  {
+                    status: "TODO",
+                    title: "Antrean Sesi (TODO)",
+                    badgeColor: "bg-stone-100 text-stone-700 border-stone-200",
+                    items: tasks.filter((t: any) => t.status === "TODO"),
+                  },
+                  {
+                    status: "IN_PROGRESS",
+                    title: "Sedang Berjalan On-Set",
+                    badgeColor: "bg-amber-50 text-amber-800 border-amber-200",
+                    items: tasks.filter((t: any) => t.status === "IN_PROGRESS"),
+                  },
+                  {
+                    status: "DONE",
+                    title: "Selesai / Terverifikasi",
+                    badgeColor: "bg-emerald-50 text-emerald-800 border-emerald-200",
+                    items: tasks.filter((t: any) => t.status === "DONE"),
+                  },
+                ].map((col) => (
+                  <div key={col.status} className="p-4 rounded-2xl bg-stone-50/80 border border-stone-200/80 flex flex-col space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-stone-200/60">
+                      <span className="text-xs font-bold text-stone-800">{col.title}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${col.badgeColor}`}>
+                        {col.items.length}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2.5 flex-1 min-h-[140px]">
+                      {col.items.length === 0 ? (
+                        <div className="h-full flex items-center justify-center p-4 text-center rounded-xl border border-dashed border-stone-200 text-[11px] text-stone-400">
+                          Tidak ada sesi di tahap ini
+                        </div>
+                      ) : (
+                        col.items.map((t: any, idx: number) => {
+                          const assignedParticipant = participants.find((p: any) => p.actorId === t.assignedActorId);
+                          return (
+                            <div
+                              key={t.id}
+                              className="p-3 rounded-xl bg-white border border-stone-200 shadow-2xs space-y-2 hover:border-stone-300 transition-all"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <span
+                                  className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
+                                    t.priority === "HIGH"
+                                      ? "bg-rose-50 text-rose-700 border-rose-200"
+                                      : t.priority === "MEDIUM"
+                                      ? "bg-amber-50 text-amber-800 border-amber-200"
+                                      : "bg-stone-50 text-stone-600 border-stone-200"
+                                  }`}
+                                >
+                                  {t.priority === "HIGH" ? "Krusial" : t.priority === "MEDIUM" ? "Standar" : "Fleksibel"}
+                                </span>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteTask(t.id)}
+                                  className="text-stone-300 hover:text-rose-500 transition-colors p-0.5"
+                                  title="Hapus sesi"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+
+                              <h4 className="text-xs font-bold text-stone-900 leading-snug">{t.title}</h4>
+                              {t.description && (
+                                <p className="text-[11px] text-stone-500 leading-relaxed font-normal line-clamp-2">
+                                  {t.description}
+                                </p>
+                              )}
+
+                              <div className="pt-2 border-t border-stone-100 flex items-center justify-between gap-1 text-[10px]">
+                                {assignedParticipant ? (
+                                  <span className="text-stone-600 font-medium truncate">
+                                    PJ: {assignedParticipant.actor?.name}
+                                  </span>
+                                ) : (
+                                  <span className="text-stone-400">Semua Kru</span>
+                                )}
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleTask(t.id, t.status)}
+                                  className="px-2 py-0.5 rounded-md bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold transition-colors cursor-pointer shrink-0"
+                                >
+                                  {col.status === "TODO" ? "Mulai ⚡" : col.status === "IN_PROGRESS" ? "Selesai ✅" : "Reset ↩"}
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredTasks.length === 0 ? (
               <div className="p-8 text-center rounded-2xl bg-white border border-dashed border-stone-300 space-y-2">
                 <ListTodo className="w-8 h-8 text-stone-400 mx-auto" />
                 <h4 className="text-sm font-bold text-stone-800">
@@ -1685,9 +1843,27 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-xs font-semibold text-stone-900 hover:underline"
                           >
-                            <span>Lihat Karya</span>
+                            <span>Lihat Karya Utama</span>
                             <ArrowUpRight className="w-3.5 h-3.5 text-stone-600" />
                           </a>
+                        </div>
+                      )}
+
+                      {metrics.galleryUrls && Array.isArray(metrics.galleryUrls) && metrics.galleryUrls.length > 0 && (
+                        <div className="pt-1.5 flex flex-wrap items-center gap-1.5">
+                          <span className="text-[10px] text-stone-400">Bukti Pendukung:</span>
+                          {metrics.galleryUrls.map((gUrl: string, gIdx: number) => (
+                            <a
+                              key={gIdx}
+                              href={gUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-stone-50 hover:bg-stone-100 text-[10px] font-medium text-stone-700 border border-stone-200 transition-colors"
+                            >
+                              <span>Tautan #{gIdx + 2}</span>
+                              <ExternalLink className="w-2.5 h-2.5 text-stone-500" />
+                            </a>
+                          ))}
                         </div>
                       )}
                     </div>
@@ -1734,7 +1910,7 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
               <div className="space-y-1 sm:col-span-2">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
-                  Tautan Bukti Publikasi / Portofolio *
+                  Tautan Bukti Publikasi Utama *
                 </label>
                 <input
                   type="url"
@@ -1742,6 +1918,18 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
                   required
                   placeholder="https://instagram.com/p/... atau link Google Drive"
                   className="w-full px-3 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-900 focus:outline-none focus:border-stone-900 focus:bg-white"
+                />
+              </div>
+
+              <div className="space-y-1 sm:col-span-2">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                  Tautan Bukti Tambahan / Multi-Link Galeri (Opsional)
+                </label>
+                <textarea
+                  name="galleryUrls"
+                  rows={2}
+                  placeholder="https://drive.google.com/..., https://tiktok.com/@... (pisahkan dengan baris baru atau koma)"
+                  className="w-full px-3 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-900 focus:outline-none focus:border-stone-900 focus:bg-white resize-none"
                 />
               </div>
 
@@ -1822,13 +2010,16 @@ export function CollaborationWorkspaceClient({ collaboration, currentActorId }: 
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  { key: "relevanceScore", label: "Relevansi Visi" },
-                  { key: "feasibilityScore", label: "Kelancaran Kerja" },
-                  { key: "noveltyScore", label: "Kreativitas Hasil" },
-                  { key: "usefulnessScore", label: "Manfaat Nyata" },
+                  { key: "relevanceScore", label: "Kualitas Karya", sub: "Estetika & kerapian visual" },
+                  { key: "feasibilityScore", label: "Ketepatan Waktu", sub: "Disiplin rundown & deadline" },
+                  { key: "noveltyScore", label: "Komunikasi Tim", sub: "Sikap kerja & koordinasi" },
+                  { key: "usefulnessScore", label: "Kepuasan Kerja Sama", sub: "Kesesuaian ekspektasi brief" },
                 ].map((item) => (
-                  <div key={item.key} className="p-3 rounded-xl bg-stone-50 border border-stone-200/60 space-y-1.5">
-                    <span className="text-[11px] font-semibold text-stone-700 block truncate">{item.label}</span>
+                  <div key={item.key} className="p-3 rounded-xl bg-stone-50 border border-stone-200/60 space-y-2">
+                    <div>
+                      <span className="text-[11px] font-bold text-stone-900 block truncate">{item.label}</span>
+                      <span className="text-[9px] text-stone-500 block truncate">{item.sub}</span>
+                    </div>
                     <div className="flex items-center gap-1">
                       {[1, 2, 3, 4, 5].map((star) => {
                         const currentVal = (selectedRatings as any)[item.key];

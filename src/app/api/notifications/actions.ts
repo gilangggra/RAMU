@@ -1,91 +1,116 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import {
-  getNotificationsForActor,
-  getUnreadNotificationCount,
   markNotificationAsRead,
   markAllNotificationsAsRead,
+  getNotificationsForActor,
+  getUnreadNotificationCount,
   createNotification,
-  NotificationItem,
+  type NotificationItem,
 } from "@/application/notificationService";
 
-async function getPrimaryActor() {
+async function getAuthenticatedActorId(): Promise<string | null> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) throw new Error("Unauthorized");
+  if (!user) return null;
 
   const actor = await prisma.actor.findFirst({
     where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
-    orderBy: { createdAt: "asc" },
+    select: { id: true },
   });
 
-  if (!actor) throw new Error("Actor not found");
-  return actor;
+  return actor?.id || null;
+}
+
+export async function markNotificationReadAction(notificationId: string) {
+  try {
+    const actorId = await getAuthenticatedActorId();
+    if (!actorId) return { success: false, error: "Unauthorized" };
+
+    const res = await markNotificationAsRead(notificationId, actorId);
+    revalidatePath("/dashboard");
+    return res;
+  } catch (error: any) {
+    console.error("Error marking notification read:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function markAllNotificationsReadAction() {
+  try {
+    const actorId = await getAuthenticatedActorId();
+    if (!actorId) return { success: false, error: "Unauthorized" };
+
+    const res = await markAllNotificationsAsRead(actorId);
+    revalidatePath("/dashboard");
+    return res;
+  } catch (error: any) {
+    console.error("Error marking all notifications read:", error);
+    return { success: false, error: error.message };
+  }
 }
 
 export async function fetchMyNotificationsAction(): Promise<{
+  success: boolean;
   notifications: NotificationItem[];
   unreadCount: number;
+  error?: string;
 }> {
   try {
-    const actor = await getPrimaryActor();
+    const actorId = await getAuthenticatedActorId();
+    if (!actorId) {
+      return { success: false, notifications: [], unreadCount: 0, error: "Unauthorized" };
+    }
+
     const [notifications, unreadCount] = await Promise.all([
-      getNotificationsForActor(actor.id, 20),
-      getUnreadNotificationCount(actor.id),
+      getNotificationsForActor(actorId, 30),
+      getUnreadNotificationCount(actorId),
     ]);
-    return { notifications, unreadCount };
-  } catch (error) {
-    return { notifications: [], unreadCount: 0 };
+
+    return { success: true, notifications, unreadCount };
+  } catch (error: any) {
+    console.error("Error fetching notifications:", error);
+    return { success: false, notifications: [], unreadCount: 0, error: error.message };
   }
 }
 
-export async function markNotificationReadAction(notificationId: string): Promise<{ success: boolean }> {
+export async function simulateNewInterestNotificationAction(
+  applicantName: string = "Elena Rostova (Fashion Stylist)"
+) {
   try {
-    const actor = await getPrimaryActor();
-    return await markNotificationAsRead(notificationId, actor.id);
-  } catch {
-    return { success: false };
-  }
-}
+    const actorId = await getAuthenticatedActorId();
+    if (!actorId) return { success: false, error: "Unauthorized" };
 
-export async function markAllNotificationsReadAction(): Promise<{ success: boolean }> {
-  try {
-    const actor = await getPrimaryActor();
-    return await markAllNotificationsAsRead(actor.id);
-  } catch {
-    return { success: false };
-  }
-}
-
-export async function simulateNewInterestNotificationAction(customCandidateName?: string): Promise<{
-  success: boolean;
-  notification?: NotificationItem;
-}> {
-  try {
-    const actor = await getPrimaryActor();
-    const candidate = customCandidateName || "Glow & Form Artistry";
-    const roleLabel = "Fashion Stylist & Wardrobe";
+    const title = "Minat Kolaborasi Baru (Simulasi)";
+    const message = `${applicantName} baru saja mengajukan ketertarikan untuk bergabung dalam proyek kolaborasi Anda.`;
 
     const res = await createNotification({
-      actorId: actor.id,
-      title: "Peminat Kolaborasi Baru",
-      message: `${candidate} baru saja mengajukan minat untuk peran "${roleLabel}" pada brief proyek Anda. Klik untuk meninjau lamaran & portofolio.`,
+      actorId,
+      title,
+      message,
       type: "INTEREST_RECEIVED",
-      link: "/projects",
-      metadata: { candidateName: candidate, roleLabel, simulated: true },
+      link: "/collaborations",
     });
 
-    if (res.success && res.id) {
-      const items = await getNotificationsForActor(actor.id, 1);
-      return { success: true, notification: items[0] };
-    }
-    return { success: false };
-  } catch (err) {
-    return { success: false };
+    revalidatePath("/dashboard");
+    return {
+      success: true,
+      notification: {
+        id: res.id || "simulated-id",
+        title,
+        message,
+        link: "/collaborations",
+      },
+    };
+  } catch (error: any) {
+    console.error("Error creating simulated notification:", error);
+    return { success: false, error: error.message };
   }
 }
+

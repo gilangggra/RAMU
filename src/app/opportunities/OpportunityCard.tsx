@@ -98,8 +98,8 @@ export function OpportunityCard({
     },
     PARTIAL: {
       label: "Perlu Pelengkap",
-      color: "bg-[#E2F4FD] text-[#2563EB] border-[#BFDBFE]",
-      dot: "bg-[#2563EB]",
+      color: "bg-[#4CC9FE]/15 text-[#0284c7] border-[#4CC9FE]/30",
+      dot: "bg-[#4CC9FE]",
     },
     BLOCKED: {
       label: "Terkendala",
@@ -108,13 +108,13 @@ export function OpportunityCard({
     },
     UNKNOWN: {
       label: "Belum Terverifikasi",
-      color: "bg-stone-100 text-stone-600 border-stone-200",
-      dot: "bg-stone-400",
+      color: "bg-slate-100 text-slate-600 border-slate-200",
+      dot: "bg-slate-400",
     },
   }[feasibilityStatus] || {
     label: feasibilityStatus,
-    color: "bg-stone-100 text-stone-600 border-stone-200",
-    dot: "bg-stone-400",
+    color: "bg-slate-100 text-slate-600 border-slate-200",
+    dot: "bg-slate-400",
   };
 
   async function handleToggleSave() {
@@ -131,61 +131,61 @@ export function OpportunityCard({
   }
 
   return (
-    <div className="p-6 sm:p-7 rounded-[28px] bg-white/95 border border-stone-200/80 hover:border-amber-400/60 shadow-xs hover:shadow-md transition-all duration-300 space-y-6 group flex flex-col justify-between">
-      <div className="space-y-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#1E1B2E] text-white">
+    <div className="glass-card p-4.5 sm:p-5 rounded-[22px] border-white/80 hover:border-[#4CC9FE]/50 shadow-2xs hover:shadow-md transition-all duration-300 space-y-4 group flex flex-col justify-between">
+      <div className="space-y-3.5">
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/80 text-slate-800 border border-white/80 shadow-2xs">
               {patternName || patternCode}
             </span>
             <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${feasibilityBadge.color}`}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${feasibilityBadge.color}`}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${feasibilityBadge.dot}`} />
               {feasibilityBadge.label}
             </span>
             {isCurrentUserParticipant && (
-              <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#4CC9FE]/15 text-[#0284c7] border border-[#4CC9FE]/30 shadow-2xs">
                 Aset Anda Terlibat
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-amber-50/80 border border-amber-200/80 shadow-2xs">
-            <div className="text-[10px] uppercase tracking-wider text-amber-900 font-bold">Kesesuaian Resource</div>
-            <div className="text-base font-black text-amber-700">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4CC9FE]/15 border border-[#4CC9FE]/30 shadow-2xs shrink-0">
+            <span className="text-[10px] uppercase tracking-wider text-[#0284c7] font-bold">Kesesuaian:</span>
+            <span className="text-xs font-black text-[#0284c7]">
               {displayScore}%
-            </div>
+            </span>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <h3 className="text-lg sm:text-xl font-bold text-[#1E1B2E] tracking-tight group-hover:text-amber-700 transition-colors">
+        <div className="space-y-1.5">
+          <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight group-hover:text-[#0284c7] transition-colors leading-snug">
             {title}
           </h3>
-          <p className="text-xs sm:text-sm text-stone-500 leading-relaxed">{description}</p>
+          <p className="text-xs text-slate-600 leading-relaxed font-normal">{description}</p>
         </div>
 
-        <div className="space-y-2.5 pt-2 border-t border-stone-100">
-          <div className="text-xs font-bold uppercase tracking-wider text-stone-400">
-            Anggota Kolaborasi Terhubung ({participants.length})
+        <div className="space-y-2 pt-2 border-t border-slate-100/80">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Mitra Terhubung ({participants.length})
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {participants.map((p, idx) => (
               <div
                 key={idx}
-                className="p-3 rounded-2xl bg-stone-50/80 border border-stone-200/80 flex items-start gap-3"
+                className="p-2.5 rounded-xl bg-white/70 backdrop-blur-xs border border-white/80 flex items-start gap-2.5 shadow-2xs"
               >
-                <div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center font-bold text-xs text-[#1E1B2E] shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-[#4CC9FE]/15 border border-[#4CC9FE]/30 flex items-center justify-center font-bold text-[11px] text-[#0284c7] shrink-0">
                   {p.actor.name.charAt(0)}
                 </div>
-                <div className="min-w-0 flex-1 space-y-0.5">
-                  <div className="text-xs font-bold text-[#1E1B2E] truncate">{p.actor.name}</div>
-                  <div className="text-[11px] text-amber-700 font-bold">
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-bold text-slate-900 break-words leading-tight">{p.actor.name}</div>
+                  <div className="text-[10px] text-[#0284c7] font-semibold leading-tight mt-0.5">
                     {p.roleLabel || p.roleCode}
                   </div>
                   {p.contribution && (
-                    <div className="text-[11px] text-stone-500 line-clamp-1">{p.contribution}</div>
+                    <div className="text-[10px] text-slate-500 break-words font-normal leading-snug mt-0.5">{p.contribution}</div>
                   )}
                 </div>
               </div>
@@ -194,14 +194,14 @@ export function OpportunityCard({
         </div>
 
         {expectedOutputs && expectedOutputs.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5 pt-1">
-            <span className="text-[11px] font-bold text-[#9E98A8] uppercase tracking-wider mr-1">
-              Target Output Bersama:
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-0.5">
+              Target Luaran:
             </span>
             {expectedOutputs.map((out, i) => (
               <span
                 key={i}
-                className="px-2.5 py-1 rounded-lg text-xs bg-stone-50 text-[#27213D] border border-stone-200"
+                className="px-2.5 py-0.5 rounded-full text-[11px] bg-white/80 text-slate-700 border border-white/80 font-medium shadow-2xs"
               >
                 • {out}
               </span>
@@ -210,28 +210,28 @@ export function OpportunityCard({
         )}
 
         {/* WHY THIS MATCH? (EXPLAINABLE COLLABORATION) */}
-        <div className="border border-amber-200/80 rounded-2xl overflow-hidden bg-amber-50/30">
+        <div className="border border-[#4CC9FE]/30 rounded-xl overflow-hidden bg-white/60 backdrop-blur-xs">
           <button
             type="button"
             onClick={() => setShowExplanation(!showExplanation)}
-            className="w-full px-4 py-3 flex items-center justify-between text-xs font-bold text-[#1E1B2E] hover:bg-amber-100/50 transition-colors cursor-pointer"
+            className="w-full px-3.5 py-2 flex items-center justify-between text-[11px] font-bold text-slate-800 hover:bg-[#4CC9FE]/10 transition-colors cursor-pointer"
           >
-            <span className="flex items-center gap-2">
-              <Lightbulb className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>Why This Match? (Transparansi Kecocokan Resource)</span>
+            <span className="flex items-center gap-1.5">
+              <Lightbulb className="w-3.5 h-3.5 text-[#0284c7] shrink-0" />
+              <span>Why This Match? (Transparansi Analisis)</span>
             </span>
-            <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-white border border-amber-200 text-amber-800">
-              {showExplanation ? "Sembunyikan" : "Buka Analisis"}
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white border border-slate-200/80 text-slate-700 shadow-2xs">
+              {showExplanation ? "Tutup" : "Lihat Analisis"}
             </span>
           </button>
 
           {showExplanation && (
-            <div className="p-4 pt-3 border-t border-amber-200/60 space-y-4 text-xs text-[#27213D] bg-white animate-fade-in">
-              <div className="space-y-2 pt-1 pb-3 border-b border-stone-100">
-                <div className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
+            <div className="p-3.5 pt-2.5 border-t border-slate-100 space-y-3 text-xs text-slate-800 bg-white/90 backdrop-blur-sm animate-fade-in">
+              <div className="space-y-2 pb-2.5 border-b border-slate-100">
+                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                   Kolaborasi Kompatibel (4 Pilar Determinatif)
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                   <ScoreBar label="Resource Fit" score={score ? score.complementarityScore : 3.6} max={4} weight="40%" />
                   <ScoreBar label="Need Coverage" score={score ? score.needCoverageScore : 3.4} max={4} weight="25%" />
                   <ScoreBar label="Feasibility" score={score ? score.feasibilityScore : 3.8} max={4} weight="20%" />
@@ -239,12 +239,12 @@ export function OpportunityCard({
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <div className="font-bold text-[#1E1B2E] flex items-center gap-1.5">
+              <div className="space-y-1">
+                <div className="font-bold text-slate-900 flex items-center gap-1.5 text-[11px]">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                   Kombinasi Resource Saling Melengkapi:
                 </div>
-                <ul className="space-y-1.5 text-stone-600 pl-1 text-[11px]">
+                <ul className="space-y-1 text-slate-600 pl-1 text-[11px] font-normal">
                   {explanation?.why && explanation.why.length > 0 ? (
                     explanation.why.map((r, i) => (
                       <li key={i} className="flex items-start gap-1.5">
@@ -256,7 +256,7 @@ export function OpportunityCard({
                     <>
                       <li className="flex items-start gap-1.5">
                         <span className="text-emerald-600 font-bold">✓</span>
-                        <span>Seluruh kebutuhan peralatan & talenta terpenuhi oleh profil mitra.</span>
+                        <span>Seluruh kebutuhan peralatan &amp; talenta terpenuhi oleh profil mitra.</span>
                       </li>
                       <li className="flex items-start gap-1.5">
                         <span className="text-emerald-600 font-bold">✓</span>
@@ -272,9 +272,9 @@ export function OpportunityCard({
               </div>
 
               {explanation?.can?.notes && explanation.can.notes.length > 0 && (
-                <div className="space-y-1.5 pt-2 border-t border-stone-100">
-                  <div className="font-bold text-[#1E1B2E]">Catatan Jadwal & Kelayakan:</div>
-                  <ul className="space-y-1 text-stone-600 pl-1 text-[11px]">
+                <div className="space-y-1 pt-1.5 border-t border-slate-100">
+                  <div className="font-bold text-slate-900 text-[11px]">Catatan Jadwal &amp; Kelayakan:</div>
+                  <ul className="space-y-1 text-slate-600 pl-1 text-[11px] font-normal">
                     {explanation.can.notes.map((n, i) => (
                       <li key={i} className="flex items-start gap-1.5">
                         <span className="text-amber-600 font-bold">•</span>
@@ -289,35 +289,35 @@ export function OpportunityCard({
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-stone-100">
+      <div className="flex items-center justify-between pt-2.5 border-t border-slate-100">
         <button
           onClick={handleToggleSave}
           disabled={isUpdating}
-          className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
+          className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-colors cursor-pointer ${
             currentStatus === OpportunityStatus.SAVED
-              ? "bg-amber-50 text-amber-800 border-amber-200 font-bold"
-              : "bg-white hover:bg-stone-50 text-stone-500 hover:text-stone-900 border-stone-200"
+              ? "bg-[#4CC9FE]/15 text-[#0284c7] border-[#4CC9FE]/30 font-bold shadow-2xs"
+              : "bg-white/80 hover:bg-white text-slate-600 hover:text-slate-900 border-white/80 shadow-2xs"
           }`}
         >
           {currentStatus === OpportunityStatus.SAVED ? (
             <span className="inline-flex items-center gap-1.5">
-              <BookmarkCheck className="w-3.5 h-3.5 text-amber-600" />
-              <span>Match Tersimpan</span>
+              <BookmarkCheck className="w-3.5 h-3.5 text-[#0284c7]" />
+              <span>Tersimpan</span>
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5">
-              <Bookmark className="w-3.5 h-3.5 text-stone-400" />
-              <span>Simpan Match</span>
+              <Bookmark className="w-3.5 h-3.5 text-slate-400" />
+              <span>Simpan</span>
             </span>
           )}
         </button>
 
         <Link
           href={`/opportunities/${id}`}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1E1B2E] hover:bg-stone-800 text-white font-bold text-xs shadow-xs hover:shadow-md transition-all cursor-pointer"
+          className="btn-primary-pill inline-flex items-center gap-1.5 px-4 py-1.5 text-[11px] font-semibold shadow-md shadow-[#4CC9FE]/20 cursor-pointer"
         >
           <span>Mulai Kolaborasi</span>
-          <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
+          <ArrowRight className="w-3.5 h-3.5 text-white" />
         </Link>
       </div>
     </div>
@@ -337,18 +337,18 @@ function ScoreBar({
 }) {
   const percentage = Math.min(100, Math.round((score / max) * 100));
   return (
-    <div className="p-2.5 rounded-xl bg-stone-50 border border-stone-200 space-y-1">
-      <div className="flex items-center justify-between text-[10px] text-stone-600">
-        <span className="truncate">{label}</span>
-        <span className="text-amber-700 font-bold">{percentage}%</span>
+    <div className="p-2 rounded-lg bg-white/80 border border-slate-200/80 space-y-1 shadow-2xs">
+      <div className="flex items-center justify-between text-[9px] text-slate-600 font-medium">
+        <span className="break-words">{label}</span>
+        <span className="text-[#0284c7] font-bold">{percentage}%</span>
       </div>
-      <div className="w-full h-1.5 rounded-full bg-stone-200 overflow-hidden">
+      <div className="w-full h-1 rounded-full bg-slate-100 overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-500"
+          className="h-full bg-[#4CC9FE] rounded-full transition-all duration-500"
           style={{ width: `${percentage}%` }}
         />
       </div>
-      <div className="text-[9px] text-stone-400 text-right">Bobot: {weight}</div>
+      <div className="text-[8px] text-slate-400 text-right">Bobot: {weight}</div>
     </div>
   );
 }

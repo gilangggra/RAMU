@@ -45,10 +45,10 @@ export function WithdrawInterestButton({
       onClick={handleWithdraw}
       disabled={isPending}
       title="Tarik / Batalkan pengajuan minat pada proyek ini"
-      className={`inline-flex items-center gap-1.5 font-bold transition-all cursor-pointer disabled:opacity-50 ${
+      className={`inline-flex items-center gap-1.5 font-semibold transition-all cursor-pointer rounded-full disabled:opacity-50 ${
         compact
-          ? "px-2.5 py-1 text-[11px] text-rose-700 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200"
-          : "px-3.5 py-1.5 text-xs text-rose-700 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 shadow-2xs"
+          ? "px-3 py-1 text-[11px] text-rose-700 hover:text-rose-800 bg-rose-50/80 hover:bg-rose-100 border border-rose-200"
+          : "px-4 py-1.5 text-xs text-rose-700 hover:text-rose-800 bg-rose-50/80 hover:bg-rose-100 border border-rose-200 shadow-2xs"
       }`}
     >
       {isPending ? (

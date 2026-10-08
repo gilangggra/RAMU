@@ -149,7 +149,7 @@ export async function generateAndSaveOpportunities(options?: {
       description: opp.description,
       targetMarket: opp.targetMarket as unknown as Prisma.InputJsonValue,
       expectedOutputs: opp.expectedOutputs as unknown as Prisma.InputJsonValue,
-      status: OpportunityStatus.GENERATED,
+      status: existing ? existing.status : OpportunityStatus.GENERATED,
       feasibilityStatus,
       freshnessStatus: FreshnessStatus.CURRENT,
       explanation: opp.explanation as unknown as Prisma.InputJsonValue,
@@ -327,6 +327,44 @@ export async function getOpportunities(filter?: {
       createdAt: 'desc',
     },
   });
+
+  if (list.length === 0 && filter?.actorId) {
+    try {
+      await generateAndSaveOpportunities({ focusActorId: filter.actorId });
+      return prisma.opportunity.findMany({
+        where,
+        include: {
+          pattern: true,
+          participants: {
+            include: {
+              actor: true,
+            },
+          },
+          assets: {
+            include: {
+              asset: true,
+            },
+          },
+          scores: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
+          constraintEvaluations: true,
+          goals: {
+            include: { goal: true },
+          },
+          needs: {
+            include: { need: true },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    } catch (err) {
+      console.error("Auto-trigger opportunity engine failed:", err);
+    }
+  }
 
   return list;
 }

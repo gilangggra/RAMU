@@ -19,15 +19,21 @@ import {
   Hash,
   ShieldCheck,
   ExternalLink,
+  AlertTriangle,
 } from "lucide-react";
 import {
   BookingStatusManager,
   BookingRequesterActions,
   ConvertBookingButton,
+  CompleteBookingButton,
+  ReportDisputeButton,
   BookingContactActions,
   ViewSpkButton,
+  ViewInvoiceButton,
+  ViewCallSheetButton,
   BookingMilestoneTracker,
 } from "@/app/dashboard/bookings/BookingStatusManager";
+import { PaymentSlipManager } from "@/components/bookings/PaymentSlipManager";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -114,6 +120,12 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
           dot: "bg-emerald-500",
           icon: CheckCircle2,
         },
+    COMPLETED: {
+      label: "Selesai (Tuntas)",
+      badge: "bg-emerald-50 text-emerald-800 border-emerald-200/80 shadow-2xs",
+      dot: "bg-emerald-600",
+      icon: CheckCircle2,
+    },
     DECLINED: {
       label: "Ditolak",
       badge: "bg-rose-50 text-rose-700 border-rose-200/60",
@@ -158,7 +170,7 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
 
   const collabTypeLabels: Record<string, string> = {
     CAMPAIGN_PRODUCTION: "Produksi Kampanye Lookbook Koleksi Baru",
-    BARTER_SEEDING: "Barter / Product Seeding & Endorsement",
+    BARTER_SEEDING: "Produksi Kampanye & Product Endorsement (Paid Fee)",
     CO_BRANDING: "Kolaborasi Koleksi Kapsul (Co-Branding)",
     SPONSORSHIP: "Sponsorship Event / Fashion Show / Editorial",
     CUSTOM_BRIEF: "Brief Kemitraan Khusus",
@@ -195,6 +207,31 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
           <span className="text-stone-300">/</span>
           <span className="font-mono text-stone-900 font-semibold">{refCode}</span>
         </div>
+
+        {/* BANNER MEDIASI SENGKETA TERBUKA */}
+        {details.dispute && (
+          <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-950 space-y-2.5 shadow-2xs">
+            <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wide text-amber-900">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>Mediasi Musyawarah SPK Terbuka (Dalam Peninjauan Sistem)</span>
+            </div>
+            <p className="text-xs leading-relaxed text-stone-800">
+              Pengajuan mediasi diajukan oleh <strong>{(details.dispute as any).reportedByName}</strong> pada{" "}
+              {new Date((details.dispute as any).reportedAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}:
+            </p>
+            <div className="p-3 rounded-xl bg-white border border-amber-200 text-xs text-stone-900 italic leading-relaxed">
+              &ldquo;{(details.dispute as any).reason}&rdquo;
+            </div>
+            {(details.dispute as any).requestedResolution && (
+              <p className="text-[11px] text-stone-600">
+                <strong>Solusi yang Diajukan:</strong> {(details.dispute as any).requestedResolution}
+              </p>
+            )}
+            <p className="text-[11px] text-amber-800 border-t border-amber-200/60 pt-2">
+              Sesuai Pasal 8 SPK RAMU, Para Pihak mengutamakan musyawarah mufakat yang difasilitasi oleh catatan jejak digital sistem.
+            </p>
+          </div>
+        )}
 
         {/* HEADER CARD */}
         <div className="bg-white border border-stone-200/80 rounded-2xl shadow-2xs overflow-hidden">
@@ -242,9 +279,11 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                 )}
               </div>
 
-              {/* View SPK */}
-              <div className="shrink-0">
+              {/* Official Documents Group */}
+              <div className="shrink-0 flex flex-wrap items-center gap-2">
                 <ViewSpkButton booking={booking as any} />
+                <ViewInvoiceButton booking={booking as any} />
+                <ViewCallSheetButton booking={booking as any} />
               </div>
             </div>
           </div>
@@ -359,6 +398,17 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                   </p>
                 </div>
               </div>
+
+              {/* Callout Transparansi Pembayaran Direct Settlement */}
+              <div className="px-5 py-3.5 bg-emerald-50/60 border-t border-emerald-100/80 flex items-start gap-3">
+                <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+                <div className="text-[11px] text-emerald-950 leading-relaxed">
+                  <span className="font-bold text-emerald-900 block mb-0.5">
+                    Alur Finansial Langsung (Direct Settlement Terlindungi SPK)
+                  </span>
+                  Pembayaran uang muka DP ({dpPercentage}%) dan pelunasan ({100 - dpPercentage}%) ditransfer langsung antar rekening resmi Para Pihak (tertera pada dokumen SPK). RAMU melindungi hak cipta dan kepastian hukum tanpa memotong komisi honorarium Anda.
+                </div>
+              </div>
             </div>
 
             {/* SPESIFIKASI / PROPOSAL DETAIL */}
@@ -454,6 +504,19 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                 <BookingMilestoneTracker status={booking.status} dpPercentage={dpPercentage} collaborationId={collaborationId} />
               </div>
             </div>
+
+            {/* PAYMENT SLIP MANAGER (MUTASI PERBANKAN RESMI) */}
+            <PaymentSlipManager
+              bookingId={booking.id}
+              refCode={refCode}
+              isRequester={isRequester}
+              isTarget={isTarget}
+              currentActorId={primaryActor.id}
+              slips={details?.paymentSlips || []}
+              agreedBudget={booking.budget}
+              dpPercentage={dpPercentage}
+              targetBankDetails={details?.payoutAccount || details?.agreedTerms?.payoutAccount || null}
+            />
           </div>
 
           {/* RIGHT: ACTION PANEL */}
@@ -519,9 +582,21 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                   </div>
                 )}
 
-                {booking.status === "ACCEPTED" && (
+                {(booking.status === "ACCEPTED" || booking.status === "COMPLETED") && (
                   <div className="space-y-3">
-                    {hasCollaboration && (
+                    {booking.status === "COMPLETED" && (
+                      <div className="p-3 bg-emerald-50 border border-emerald-200/80 rounded-xl space-y-1">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-900">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Pesanan &amp; Transaksi Tuntas</span>
+                        </div>
+                        <p className="text-[11px] text-emerald-700 leading-relaxed">
+                          Seluruh kewajiban kerja telah diselesaikan. Bukti karya dan hasil luaran tercatat resmi dalam ekosistem RAMU.
+                        </p>
+                      </div>
+                    )}
+
+                    {hasCollaboration && booking.status !== "COMPLETED" && (
                       <div className="p-3 bg-stone-50 border border-stone-200/80 rounded-xl space-y-1">
                         <div className="flex items-center gap-1.5 text-xs font-semibold text-stone-900">
                           <Handshake className="w-3.5 h-3.5 text-stone-600" />
@@ -543,14 +618,32 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                         contactName={isTarget ? booking.requester.name : booking.target.name}
                         myRole={isTarget ? "target" : "requester"}
                         partnerActorId={isTarget ? booking.requesterId : booking.targetId}
+                        bookingRefCode={refCode}
+                        bookingId={booking.id}
                       />
                     </div>
 
-                    <div className="pt-2">
+                    <div className="pt-2 space-y-2">
                       <ConvertBookingButton
                         bookingId={booking.id}
                         collaborationId={collaborationId}
                       />
+                      {booking.status === "ACCEPTED" && (
+                        <>
+                          <CompleteBookingButton
+                            bookingId={booking.id}
+                            partnerName={isTarget ? booking.requester.name : booking.target.name}
+                            refCode={refCode}
+                          />
+                          {!details.dispute && (
+                            <ReportDisputeButton
+                              bookingId={booking.id}
+                              partnerName={isTarget ? booking.requester.name : booking.target.name}
+                              refCode={refCode}
+                            />
+                          )}
+                        </>
+                      )}
                     </div>
                   </div>
                 )}

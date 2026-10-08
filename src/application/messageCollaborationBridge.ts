@@ -490,6 +490,9 @@ async function syncLinkedBookingDetails(
 
   await tx.bookingRequest.update({
     where: { id: booking.id },
-    data: { details: { ...current, ...patch } as Prisma.InputJsonValue },
+    data: {
+      status: patch.projectStatus === "COMPLETED" ? "COMPLETED" : undefined,
+      details: { ...current, ...patch } as Prisma.InputJsonValue,
+    },
   });
 }

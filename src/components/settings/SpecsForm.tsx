@@ -92,11 +92,11 @@ function TagInputWithSuggestions({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
           {label} {required && <span className="text-rose-500">*</span>}
         </label>
         {tags.length > 0 && (
-          <span className="text-[10px] text-stone-400 font-medium">
+          <span className="text-[10px] text-slate-400 font-medium">
             {tags.length} item aktif
           </span>
         )}
@@ -106,11 +106,11 @@ function TagInputWithSuggestions({
 
       {/* Selected tags */}
       {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 p-2 bg-stone-50 border border-stone-200">
+        <div className="flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-200">
           {tags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold bg-[#1E1B2E] text-white"
+              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold bg-[#4CC9FE] text-white font-bold"
             >
               <span>{tag}</span>
               <button
@@ -134,12 +134,12 @@ function TagInputWithSuggestions({
           onChange={(e) => setCustomInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder || "Ketik kustom lalu tekan Tambah..."}
-          className="flex-1 px-3.5 py-2 rounded-none bg-stone-50 border border-stone-200 focus:bg-white focus:border-[#1E1B2E] text-xs font-medium text-stone-800"
+          className="flex-1 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-xs font-medium text-slate-800"
         />
         <button
           type="button"
           onClick={addCustomTag}
-          className="px-3.5 py-2 bg-stone-200 text-stone-800 text-xs font-bold hover:bg-stone-300 transition-colors cursor-pointer"
+          className="px-3.5 py-2 bg-slate-200 text-slate-800 text-xs font-bold hover:bg-slate-300 transition-colors cursor-pointer"
         >
           + Tambah
         </button>
@@ -148,7 +148,7 @@ function TagInputWithSuggestions({
       {/* Suggestions / Chips */}
       {suggestions && suggestions.length > 0 && (
         <div className="space-y-1 pt-1">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
             Pilihan Cepat (Klik untuk memilih):
           </span>
           <div className="flex flex-wrap gap-1.5">
@@ -161,8 +161,8 @@ function TagInputWithSuggestions({
                   onClick={() => toggleTag(sug)}
                   className={`text-[11px] font-semibold px-2.5 py-1 border transition-all cursor-pointer ${
                     isSelected
-                      ? "bg-[#1E1B2E] text-white border-[#1E1B2E]"
-                      : "bg-white text-stone-600 border-stone-200 hover:border-stone-400 hover:text-stone-900"
+                      ? "bg-[#4CC9FE] text-white font-bold border-[#4CC9FE]"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:text-slate-900"
                   }`}
                 >
                   {isSelected ? "✓ " : "+ "}
@@ -175,7 +175,7 @@ function TagInputWithSuggestions({
       )}
 
       {helperText && (
-        <span className="text-[10px] text-stone-400 block">{helperText}</span>
+        <span className="text-[10px] text-slate-400 block">{helperText}</span>
       )}
     </div>
   );
@@ -287,10 +287,10 @@ export function SpecsForm({
   }
 
   return (
-    <div className={`bg-white rounded-none ${embedded ? "border-0" : "border border-stone-200 shadow-xs"} overflow-hidden`}>
+    <div className={`bg-white rounded-xl ${embedded ? "border-0" : "border border-slate-200 shadow-xs"} overflow-hidden`}>
       {/* HEADER SECTION */}
-      <div className="p-6 sm:p-8 border-b border-stone-100 bg-stone-50/50">
-        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">
+      <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/50">
+        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
           {isPhotographer && (
             <span className="text-emerald-700 bg-emerald-50 px-2.5 py-0.5 border border-emerald-200">
               Fotografi &amp; Tata Cahaya
@@ -334,7 +334,7 @@ export function SpecsForm({
           <span>{actorSector}</span>
         </div>
 
-        <h2 className="text-xl font-bold text-[#1E1B2E]">
+        <h2 className="text-xl font-bold text-[#111827]">
           {isPhotographer
             ? `Spesifikasi Teknis & Inventaris Kamera ${actorName}`
             : isStudio
@@ -354,7 +354,7 @@ export function SpecsForm({
             : `Spesifikasi Kolaborasi ${actorName}`}
         </h2>
 
-        <p className="text-xs text-stone-500 mt-1 max-w-2xl leading-relaxed">
+        <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
           RAMU menggunakan triad spesifikasi (Kapabilitas, Sumber Daya Fisik, dan Batasan Operasional) agar sistem pencocokan kolaborasi dapat menghitung kompatibilitas proyek secara akurat dan transparan.
         </p>
       </div>
@@ -362,7 +362,7 @@ export function SpecsForm({
       <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-8">
         {message && (
           <div
-            className={`p-4 rounded-none flex items-start gap-3 text-sm font-semibold ${
+            className={`p-4 rounded-xl flex items-start gap-3 text-sm font-semibold ${
               message.type === "success"
                 ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
                 : "bg-rose-50 text-rose-800 border border-rose-200"
@@ -383,10 +383,10 @@ export function SpecsForm({
         {isPhotographer && (
           <div className="space-y-8">
             {/* SEKSI 1: CAPABILITIES */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Sparkles className="w-4 h-4 text-emerald-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   1. Kapabilitas &amp; Spesialisasi Fotografi
                 </h3>
               </div>
@@ -409,17 +409,17 @@ export function SpecsForm({
             </div>
 
             {/* SEKSI 2: RESOURCES & EQUIPMENT */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Camera className="w-4 h-4 text-emerald-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   2. Inventaris Kamera &amp; Peralatan Fisik (Hardware)
                 </h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="primary_camera" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="primary_camera" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Kamera Utama (Primary Body) <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -429,7 +429,7 @@ export function SpecsForm({
                     defaultValue={attrs.primary_camera || "Sony A7 IV"}
                     placeholder="Sony A7 IV / Canon EOS R5 / Hasselblad"
                     required
-                    className="w-full px-4 py-2.5 bg-white border border-stone-200 focus:border-[#1E1B2E] text-xs font-medium text-stone-800"
+                    className="w-full px-4 py-2.5 bg-white border border-slate-200 focus:border-[#4CC9FE] text-xs font-medium text-slate-800"
                   />
                   <div className="flex flex-wrap gap-1 pt-1">
                     {ROLE_SPECS_PRESETS.PHOTOGRAPHER.quickCameras.slice(0, 4).map((cam) => (
@@ -440,7 +440,7 @@ export function SpecsForm({
                           const el = document.getElementById("primary_camera") as HTMLInputElement;
                           if (el) el.value = cam;
                         }}
-                        className="text-[10px] px-2 py-0.5 bg-white border border-stone-200 hover:border-stone-400 text-stone-600"
+                        className="text-[10px] px-2 py-0.5 bg-white border border-slate-200 hover:border-slate-400 text-slate-600"
                       >
                         + {cam}
                       </button>
@@ -449,7 +449,7 @@ export function SpecsForm({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="secondary_camera" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="secondary_camera" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Kamera Cadangan (Backup Body)
                   </label>
                   <input
@@ -458,9 +458,9 @@ export function SpecsForm({
                     name="secondary_camera"
                     defaultValue={attrs.secondary_camera || ""}
                     placeholder="Sony A7 III / Canon EOS R6"
-                    className="w-full px-4 py-2.5 bg-white border border-stone-200 focus:border-[#1E1B2E] text-xs font-medium text-stone-800"
+                    className="w-full px-4 py-2.5 bg-white border border-slate-200 focus:border-[#4CC9FE] text-xs font-medium text-slate-800"
                   />
-                  <span className="text-[10px] text-stone-400">Jaminan kelancaran saat kamera utama kendala</span>
+                  <span className="text-[10px] text-slate-400">Jaminan kelancaran saat kamera utama kendala</span>
                 </div>
               </div>
 
@@ -481,48 +481,48 @@ export function SpecsForm({
               />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <label className="flex items-center gap-2 p-3 bg-white border border-stone-200 cursor-pointer hover:bg-stone-50">
+                <label className="flex items-center gap-2 p-3 bg-white border border-slate-200 cursor-pointer hover:bg-slate-50">
                   <input
                     type="checkbox"
                     name="tethering_available"
                     value="true"
                     defaultChecked={Boolean(attrs.tethering_available)}
-                    className="w-4 h-4 rounded-none accent-[#1E1B2E]"
+                    className="w-4 h-4 rounded-md accent-[#0284c7]"
                   />
-                  <div className="text-xs font-bold text-[#1E1B2E]">
+                  <div className="text-xs font-bold text-[#111827]">
                     Tethering Monitor On-Set
-                    <span className="block text-[10px] font-normal text-stone-400">Klien bisa langsung mereview foto real-time</span>
+                    <span className="block text-[10px] font-normal text-slate-400">Klien bisa langsung mereview foto real-time</span>
                   </div>
                 </label>
 
-                <label className="flex items-center gap-2 p-3 bg-white border border-stone-200 cursor-pointer hover:bg-stone-50">
+                <label className="flex items-center gap-2 p-3 bg-white border border-slate-200 cursor-pointer hover:bg-slate-50">
                   <input
                     type="checkbox"
                     name="drone_aerial"
                     value="true"
                     defaultChecked={Boolean(attrs.drone_aerial)}
-                    className="w-4 h-4 rounded-none accent-[#1E1B2E]"
+                    className="w-4 h-4 rounded-md accent-[#0284c7]"
                   />
-                  <div className="text-xs font-bold text-[#1E1B2E]">
+                  <div className="text-xs font-bold text-[#111827]">
                     Drone &amp; Aerial Photography
-                    <span className="block text-[10px] font-normal text-stone-400">Layanan foto udara bersertifikat</span>
+                    <span className="block text-[10px] font-normal text-slate-400">Layanan foto udara bersertifikat</span>
                   </div>
                 </label>
               </div>
             </div>
 
             {/* SEKSI 3: OPERATIONAL LIMITS & DELIVERABLES */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Clock className="w-4 h-4 text-emerald-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   3. Batasan Kapasitas, Deliverables &amp; Operasional
                 </h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="shooting_duration_shift" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="shooting_duration_shift" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Durasi Shift Foto
                   </label>
                   <input
@@ -531,12 +531,12 @@ export function SpecsForm({
                     name="shooting_duration_shift"
                     defaultValue={attrs.shooting_duration_shift || "4 Jam (Half-Day) / 8 Jam (Full-Day)"}
                     placeholder="Contoh: 4 Jam Half-Day"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="max_people_onset" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="max_people_onset" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Kapasitas Kru On-Set (Maks Orang)
                   </label>
                   <input
@@ -545,12 +545,12 @@ export function SpecsForm({
                     name="max_people_onset"
                     defaultValue={attrs.max_people_onset || 8}
                     placeholder="8"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="delivery_time_days" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="delivery_time_days" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Turnaround Output (Hari)
                   </label>
                   <input
@@ -559,7 +559,7 @@ export function SpecsForm({
                     name="delivery_time_days"
                     defaultValue={attrs.delivery_time_days || 3}
                     placeholder="3"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
               </div>
@@ -581,17 +581,17 @@ export function SpecsForm({
         {isStudio && (
           <div className="space-y-8">
             {/* SEKSI 1: DIMENSI & RUANG */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Building2 className="w-4 h-4 text-blue-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   1. Dimensi Ruang &amp; Fitur Cyclorama
                 </h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="area_sqm" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="area_sqm" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Luas Area (m²) <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -601,12 +601,12 @@ export function SpecsForm({
                     defaultValue={attrs.area_sqm || 120}
                     placeholder="120"
                     required
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="ceiling_height_m" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="ceiling_height_m" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Tinggi Plafon (meter) <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -617,12 +617,12 @@ export function SpecsForm({
                     defaultValue={attrs.ceiling_height_m || 4.5}
                     placeholder="4.5"
                     required
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5 sm:col-span-2">
-                  <label htmlFor="cyclorama_type" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="cyclorama_type" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Tipe Cyclorama Wall
                   </label>
                   <input
@@ -631,7 +631,7 @@ export function SpecsForm({
                     name="cyclorama_type"
                     defaultValue={attrs.cyclorama_type || "3-Wall Seamless Curve (White)"}
                     placeholder="3-Wall Seamless Curve (White)"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
               </div>
@@ -646,17 +646,17 @@ export function SpecsForm({
             </div>
 
             {/* SEKSI 2: KELISTRIKAN, LIGHTING & FASILITAS */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Zap className="w-4 h-4 text-blue-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   2. Kelistrikan, Lighting On-Site &amp; Fasilitas
                 </h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="electrical_capacity" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="electrical_capacity" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Daya Listrik Studio
                   </label>
                   <input
@@ -665,7 +665,7 @@ export function SpecsForm({
                     name="electrical_capacity"
                     defaultValue={attrs.electrical_capacity || "16.500 Watt (3-Phase)"}
                     placeholder="16.500 Watt (3-Phase)"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
@@ -676,9 +676,9 @@ export function SpecsForm({
                       name="props_available"
                       value="true"
                       defaultChecked={Boolean(attrs.props_available !== false)}
-                      className="w-4 h-4 rounded-none accent-[#1E1B2E]"
+                      className="w-4 h-4 rounded-md accent-[#0284c7]"
                     />
-                    <span className="text-xs font-bold text-[#1E1B2E]">
+                    <span className="text-xs font-bold text-[#111827]">
                       Menyediakan Properti &amp; Furniture On-Site (Stool, Podium, Cermin)
                     </span>
                   </label>
@@ -703,17 +703,17 @@ export function SpecsForm({
             </div>
 
             {/* SEKSI 3: KAPASITAS & OPERASIONAL */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Clock className="w-4 h-4 text-blue-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   3. Kapasitas Orang &amp; Jam Operasional
                 </h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="max_people_capacity" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="max_people_capacity" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Kapasitas Maks Kru (Orang)
                   </label>
                   <input
@@ -722,12 +722,12 @@ export function SpecsForm({
                     name="max_people_capacity"
                     defaultValue={attrs.max_people_capacity || 15}
                     placeholder="15"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="operating_hours" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="operating_hours" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Jam Operasional
                   </label>
                   <input
@@ -736,12 +736,12 @@ export function SpecsForm({
                     name="operating_hours"
                     defaultValue={attrs.operating_hours || "08:00 – 22:00 WIB (Setiap Hari)"}
                     placeholder="08:00 – 22:00 WIB"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5 sm:col-span-2 lg:col-span-1">
-                  <label htmlFor="overtime_policy" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="overtime_policy" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Ketentuan Overtime
                   </label>
                   <input
@@ -750,7 +750,7 @@ export function SpecsForm({
                     name="overtime_policy"
                     defaultValue={attrs.overtime_policy || "Toleransi 15 Menit, Overtime Rp 150.000 / 30 Menit"}
                     placeholder="Toleransi 15 menit..."
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
               </div>
@@ -764,10 +764,10 @@ export function SpecsForm({
         {isBrand && (
           <div className="space-y-8">
             {/* SEKSI 1: BRAND IDENTITY & DNA */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <ShoppingBag className="w-4 h-4 text-amber-800" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   1. Identitas Brand &amp; DNA Desain
                 </h3>
               </div>
@@ -797,7 +797,7 @@ export function SpecsForm({
               />
 
               <div className="space-y-1.5">
-                <label htmlFor="design_dna" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                <label htmlFor="design_dna" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                   DNA &amp; Karakter Desain Brand
                 </label>
                 <textarea
@@ -806,23 +806,23 @@ export function SpecsForm({
                   rows={2}
                   defaultValue={attrs.design_dna || "Minimalist Modern Silhouettes dengan Sentuhan Wastra Tenun Kontemporer"}
                   placeholder="Ceritakan estetika utama, siluet, dan filosofi rancangan brand Anda..."
-                  className="w-full px-4 py-2.5 bg-white border border-stone-200 text-xs font-medium text-stone-800 leading-relaxed"
+                  className="w-full px-4 py-2.5 bg-white border border-slate-200 text-xs font-medium text-slate-800 leading-relaxed"
                 />
               </div>
             </div>
 
             {/* SEKSI 2: RESOURCES & PHYSICAL SAMPLES */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Scissors className="w-4 h-4 text-amber-800" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   2. Sumber Daya Fisik, Sampel Busana &amp; Material
                 </h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="sample_sizes_ready" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="sample_sizes_ready" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Ukuran Sampel Siap Foto
                   </label>
                   <input
@@ -831,12 +831,12 @@ export function SpecsForm({
                     name="sample_sizes_ready"
                     defaultValue={attrs.sample_sizes_ready || "S, M (Siap Fitting On-Set)"}
                     placeholder="S, M / All-size"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="sample_skus_count" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="sample_skus_count" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Jumlah Look/SKU Siap Foto
                   </label>
                   <input
@@ -845,12 +845,12 @@ export function SpecsForm({
                     name="sample_skus_count"
                     defaultValue={attrs.sample_skus_count || 15}
                     placeholder="15"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="capacity_monthly" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="capacity_monthly" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Kapasitas Produksi Bulanan
                   </label>
                   <input
@@ -859,7 +859,7 @@ export function SpecsForm({
                     name="capacity_monthly"
                     defaultValue={attrs.capacity_monthly || "500 - 1.000 Pcs / Bulan"}
                     placeholder="500 - 1.000 Pcs"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
               </div>
@@ -874,10 +874,10 @@ export function SpecsForm({
             </div>
 
             {/* SEKSI 3: COLLABORATION PREFERENCES */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Sparkles className="w-4 h-4 text-amber-800" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   3. Kebutuhan Kolaborasi Proyek &amp; Format Kerjasama
                 </h3>
               </div>
@@ -900,7 +900,7 @@ export function SpecsForm({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="budget_range" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="budget_range" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Rentang Anggaran Kolaborasi (Rp)
                   </label>
                   <input
@@ -909,12 +909,12 @@ export function SpecsForm({
                     name="budget_range"
                     defaultValue={attrs.budget_range || "Rp 5.000.000 – Rp 15.000.000 per Kampanye"}
                     placeholder="Rp 5.000.000 – Rp 15.000.000"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="collab_timeline" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="collab_timeline" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Target Timeline Pengerjaan
                   </label>
                   <input
@@ -923,7 +923,7 @@ export function SpecsForm({
                     name="collab_timeline"
                     defaultValue={attrs.collab_timeline || "2 – 4 Minggu dari Brief hingga Peluncuran"}
                     placeholder="2 – 4 Minggu"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
               </div>
@@ -937,17 +937,17 @@ export function SpecsForm({
         {isModel && (
           <div className="space-y-8">
             {/* SEKSI 1: VITAL MEASUREMENTS */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Ruler className="w-4 h-4 text-purple-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   1. Ukuran Tubuh Vital (Fitting &amp; Sample Specs)
                 </h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="height_cm" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="height_cm" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Tinggi Badan (cm) <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -957,12 +957,12 @@ export function SpecsForm({
                     defaultValue={attrs.height_cm || 175}
                     placeholder="175"
                     required
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="weight_kg" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="weight_kg" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Berat Badan (kg)
                   </label>
                   <input
@@ -971,12 +971,12 @@ export function SpecsForm({
                     name="weight_kg"
                     defaultValue={attrs.weight_kg || 52}
                     placeholder="52"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="bust_waist_hips" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="bust_waist_hips" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Dada - Pinggang - Pinggul <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -986,12 +986,12 @@ export function SpecsForm({
                     defaultValue={attrs.bust_waist_hips || "84-60-89 cm"}
                     placeholder="84-60-89 cm"
                     required
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="clothing_size" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="clothing_size" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Ukuran Baju Sampel <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -1001,12 +1001,12 @@ export function SpecsForm({
                     defaultValue={attrs.clothing_size || "S / 36 EU"}
                     placeholder="S / 36 EU"
                     required
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="shoe_size" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="shoe_size" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Ukuran Sepatu <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -1016,12 +1016,12 @@ export function SpecsForm({
                     defaultValue={attrs.shoe_size || "39 EU"}
                     placeholder="39 EU"
                     required
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="experience_years" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="experience_years" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Pengalaman (Tahun)
                   </label>
                   <input
@@ -1030,26 +1030,26 @@ export function SpecsForm({
                     name="experience_years"
                     defaultValue={attrs.experience_years || 4}
                     placeholder="4"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
               </div>
             </div>
 
             {/* SEKSI 2: CAPABILITIES & POLAROID COMP CARDS */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Camera className="w-4 h-4 text-purple-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   2. Foto Polaroid Comp Card (3 Sudut Pandang Casting)
                 </h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {polaroidPreviews.map((slot, idx) => (
-                  <div key={idx} className="p-3 bg-white border border-stone-200 space-y-2">
+                  <div key={idx} className="p-3 bg-white border border-slate-200 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#1E1B2E]">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#111827]">
                         Slot {idx + 1}: {slot.type}
                       </span>
                       {slot.url && (
@@ -1076,7 +1076,7 @@ export function SpecsForm({
 
                     <div
                       onClick={() => fileInputRefs[idx].current?.click()}
-                      className="aspect-[3/4] w-full bg-stone-50 border border-dashed border-stone-300 hover:border-[#1E1B2E] transition-all flex flex-col items-center justify-center cursor-pointer relative overflow-hidden group select-none"
+                      className="aspect-[3/4] w-full bg-slate-50 border border-dashed border-slate-300 hover:border-[#4CC9FE] transition-all flex flex-col items-center justify-center cursor-pointer relative overflow-hidden group select-none"
                     >
                       {slot.url ? (
                         <>
@@ -1087,10 +1087,10 @@ export function SpecsForm({
                           </div>
                         </>
                       ) : (
-                        <div className="text-center p-3 space-y-1 text-stone-400">
-                          <Upload className="w-5 h-5 mx-auto text-stone-400" />
-                          <span className="text-[10px] font-bold block text-stone-600">Unggah Polaroid</span>
-                          <span className="text-[9px] text-stone-400 block">Maks 10 MB</span>
+                        <div className="text-center p-3 space-y-1 text-slate-400">
+                          <Upload className="w-5 h-5 mx-auto text-slate-400" />
+                          <span className="text-[10px] font-bold block text-slate-600">Unggah Polaroid</span>
+                          <span className="text-[9px] text-slate-400 block">Maks 10 MB</span>
                         </div>
                       )}
                     </div>
@@ -1100,7 +1100,7 @@ export function SpecsForm({
                       name={`polaroid_caption_${idx}`}
                       defaultValue={slot.caption}
                       placeholder={`Keterangan ${slot.type}`}
-                      className="w-full px-2.5 py-1.5 bg-stone-50 border border-stone-200 text-[11px] font-medium text-stone-800"
+                      className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 text-[11px] font-medium text-slate-800"
                     />
                   </div>
                 ))}
@@ -1124,16 +1124,16 @@ export function SpecsForm({
             </div>
 
             {/* SEKSI 3: OPERATIONAL POLICIES & LIMITS */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <ShieldCheck className="w-4 h-4 text-purple-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   3. Batasan Operasional &amp; Kebijakan Wardrobe
                 </h3>
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="wardrobe_restrictions" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                <label htmlFor="wardrobe_restrictions" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                   Batasan &amp; Preferensi Wardrobe
                 </label>
                 <input
@@ -1142,7 +1142,7 @@ export function SpecsForm({
                   name="wardrobe_restrictions"
                   defaultValue={attrs.wardrobe_restrictions || "Casual, Formal, Modest (No Swimwear / No Sheer)"}
                   placeholder="Casual, Formal, Modest / Hijab..."
-                  className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                  className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                 />
                 <div className="flex flex-wrap gap-1 pt-1">
                   {ROLE_SPECS_PRESETS.MODEL.quickWardrobePolicies.map((pol) => (
@@ -1153,7 +1153,7 @@ export function SpecsForm({
                         const el = document.getElementById("wardrobe_restrictions") as HTMLInputElement;
                         if (el) el.value = pol;
                       }}
-                      className="text-[10px] px-2 py-0.5 bg-white border border-stone-200 hover:border-stone-400 text-stone-600"
+                      className="text-[10px] px-2 py-0.5 bg-white border border-slate-200 hover:border-slate-400 text-slate-600"
                     >
                       + {pol}
                     </button>
@@ -1163,7 +1163,7 @@ export function SpecsForm({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                 <div className="space-y-1.5">
-                  <label htmlFor="travel_radius" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="travel_radius" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Jangkauan Lokasi Kerja
                   </label>
                   <input
@@ -1172,7 +1172,7 @@ export function SpecsForm({
                     name="travel_radius"
                     defaultValue={attrs.travel_radius || "Jabodetabek & Luar Kota dengan Akomodasi"}
                     placeholder="Jabodetabek / Seluruh Indonesia"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
@@ -1183,9 +1183,9 @@ export function SpecsForm({
                       name="chaperone_allowed"
                       value="true"
                       defaultChecked={Boolean(attrs.chaperone_allowed !== false)}
-                      className="w-4 h-4 rounded-none accent-[#1E1B2E]"
+                      className="w-4 h-4 rounded-md accent-[#0284c7]"
                     />
-                    <span className="text-xs font-bold text-[#1E1B2E]">
+                    <span className="text-xs font-bold text-[#111827]">
                       Didampingi Manajer / Chaperone di Lokasi Shoot
                     </span>
                   </label>
@@ -1201,10 +1201,10 @@ export function SpecsForm({
         {(isMUA || isStylist) && (
           <div className="space-y-8">
             {/* SEKSI 1: CAPABILITIES */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Palette className="w-4 h-4 text-rose-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   1. Keahlian &amp; Cakupan Layanan
                 </h3>
               </div>
@@ -1227,10 +1227,10 @@ export function SpecsForm({
             </div>
 
             {/* SEKSI 2: KIT & EQUIPMENT */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Sparkles className="w-4 h-4 text-rose-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   2. Peralatan Rias, Wardrobe Gear &amp; Standar Sanitasi
                 </h3>
               </div>
@@ -1252,7 +1252,7 @@ export function SpecsForm({
               />
 
               <div className="space-y-1.5">
-                <label htmlFor="sanitation_standards" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                <label htmlFor="sanitation_standards" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                   Standar Higienitas &amp; Sanitasi Kuas
                 </label>
                 <input
@@ -1265,23 +1265,23 @@ export function SpecsForm({
                       : "Disinfektan Kuas 70% Alkohol, Palet Stainless Steel, Aplikator Sekali Pakai (Disposable)"
                   }
                   placeholder="Disinfektan Kuas 70% Alkohol..."
-                  className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                  className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                 />
               </div>
             </div>
 
             {/* SEKSI 3: CAPACITY LIMITS */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Clock className="w-4 h-4 text-rose-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   3. Batasan Kapasitas &amp; Durasi Operasional
                 </h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="max_heads_per_session" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="max_heads_per_session" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Maks Model per Shift (Kepala)
                   </label>
                   <input
@@ -1290,12 +1290,12 @@ export function SpecsForm({
                     name="max_heads_per_session"
                     defaultValue={attrs.max_heads_per_session || 3}
                     placeholder="3"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="prep_time_minutes" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="prep_time_minutes" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Waktu Rias per Look (Menit)
                   </label>
                   <input
@@ -1304,12 +1304,12 @@ export function SpecsForm({
                     name="prep_time_minutes"
                     defaultValue={attrs.prep_time_minutes || 90}
                     placeholder="90"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="touchup_standby_hours" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="touchup_standby_hours" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Durasi Standby On-Set (Jam)
                   </label>
                   <input
@@ -1318,7 +1318,7 @@ export function SpecsForm({
                     name="touchup_standby_hours"
                     defaultValue={attrs.touchup_standby_hours || 8}
                     placeholder="8"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
               </div>
@@ -1332,10 +1332,10 @@ export function SpecsForm({
         {isDesigner && (
           <div className="space-y-8">
             {/* SEKSI 1: DESIGN DISCIPLINES */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Scissors className="w-4 h-4 text-pink-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   1. Disiplin Desain Busana &amp; DNA Atelier
                 </h3>
               </div>
@@ -1357,7 +1357,7 @@ export function SpecsForm({
               />
 
               <div className="space-y-1.5">
-                <label htmlFor="style_dna" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                <label htmlFor="style_dna" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                   DNA Desain &amp; Karakter Siluet
                 </label>
                 <textarea
@@ -1366,37 +1366,37 @@ export function SpecsForm({
                   rows={2}
                   defaultValue={attrs.style_dna || "Siluet Deconstructed dengan Sentuhan Draping Wastra & Palet Earth-Tone"}
                   placeholder="Deskripsikan karakter siluet, estetika, dan DNA desain Anda..."
-                  className="w-full px-4 py-2.5 bg-white border border-stone-200 text-xs font-medium text-stone-800 leading-relaxed"
+                  className="w-full px-4 py-2.5 bg-white border border-slate-200 text-xs font-medium text-slate-800 leading-relaxed"
                 />
               </div>
             </div>
 
             {/* SEKSI 2: WORKSHOP & SAMPLE ARCHIVE */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Layers className="w-4 h-4 text-pink-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   2. Sumber Daya Workshop, Material &amp; Koleksi Sampel
                 </h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <label className="flex items-center gap-2 p-3 bg-white border border-stone-200 cursor-pointer hover:bg-stone-50">
+                <label className="flex items-center gap-2 p-3 bg-white border border-slate-200 cursor-pointer hover:bg-slate-50">
                   <input
                     type="checkbox"
                     name="sample_collection_ready"
                     value="true"
                     defaultChecked={Boolean(attrs.sample_collection_ready !== false)}
-                    className="w-4 h-4 rounded-none accent-[#1E1B2E]"
+                    className="w-4 h-4 rounded-md accent-[#0284c7]"
                   />
-                  <div className="text-xs font-bold text-[#1E1B2E]">
+                  <div className="text-xs font-bold text-[#111827]">
                     Menyediakan Sampel Siap Dipinjamkan (Wardrobe Pulling)
-                    <span className="block text-[10px] font-normal text-stone-400">Untuk pemotretan lookbook brand partner &amp; editorial</span>
+                    <span className="block text-[10px] font-normal text-slate-400">Untuk pemotretan lookbook brand partner &amp; editorial</span>
                   </div>
                 </label>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="sample_portfolio_count" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="sample_portfolio_count" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Jumlah Arsip Busana Siap Pakai (Look)
                   </label>
                   <input
@@ -1405,7 +1405,7 @@ export function SpecsForm({
                     name="sample_portfolio_count"
                     defaultValue={attrs.sample_portfolio_count || 25}
                     placeholder="25"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
               </div>
@@ -1420,17 +1420,17 @@ export function SpecsForm({
             </div>
 
             {/* SEKSI 3: PRODUCTION CAPACITY & COLLAB */}
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Clock className="w-4 h-4 text-pink-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   3. Kapasitas Produksi &amp; Format Kolaborasi
                 </h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="sample_turnaround_days" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="sample_turnaround_days" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Turnaround Sampel Prototipe (Hari)
                   </label>
                   <input
@@ -1439,12 +1439,12 @@ export function SpecsForm({
                     name="sample_turnaround_days"
                     defaultValue={attrs.sample_turnaround_days || "7 – 14 Hari Kerja per Prototipe"}
                     placeholder="7 – 14 Hari Kerja"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="batch_production_capacity" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="batch_production_capacity" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Kapasitas Batch Produksi Busana
                   </label>
                   <input
@@ -1453,7 +1453,7 @@ export function SpecsForm({
                     name="batch_production_capacity"
                     defaultValue={attrs.batch_production_capacity || "100 – 300 Pcs per Batch Koleksi Kapsul"}
                     placeholder="100 – 300 Pcs per Batch"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
               </div>
@@ -1474,17 +1474,17 @@ export function SpecsForm({
         {/* ─────────────────────────────────────────────────────────────────── */}
         {isVideographer && (
           <div className="space-y-8">
-            <div className="p-5 bg-stone-50/70 border border-stone-200 space-y-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
+            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                 <Video className="w-4 h-4 text-cyan-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1E1B2E]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
                   Peralatan Sinematografi &amp; Cinema Rig
                 </h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="primary_cinema_camera" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="primary_cinema_camera" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Kamera Sinema Utama
                   </label>
                   <input
@@ -1493,12 +1493,12 @@ export function SpecsForm({
                     name="primary_cinema_camera"
                     defaultValue={attrs.primary_cinema_camera || attrs.primary_camera || "Sony FX3 / FX6"}
                     placeholder="Sony FX3 / RED Komodo / BMPCC 6K"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="stabilizer_gimbal" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="stabilizer_gimbal" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Stabilizer / Gimbal Rig
                   </label>
                   <input
@@ -1507,7 +1507,7 @@ export function SpecsForm({
                     name="stabilizer_gimbal"
                     defaultValue={attrs.stabilizer_gimbal || "DJI RS 3 Pro Gimbal"}
                     placeholder="DJI RS 3 Pro Gimbal"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
               </div>
@@ -1521,7 +1521,7 @@ export function SpecsForm({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div className="space-y-1.5">
-                  <label htmlFor="audio_rig" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="audio_rig" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Perangkat Audio On-Set
                   </label>
                   <input
@@ -1530,12 +1530,12 @@ export function SpecsForm({
                     name="audio_rig"
                     defaultValue={attrs.audio_rig || "DJI Mic 2 Wireless + Rode NTG3 Shotgun"}
                     placeholder="DJI Mic 2, Rode VideoMic Pro..."
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="max_resolution" className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                  <label htmlFor="max_resolution" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Resolusi Video Maksimal
                   </label>
                   <input
@@ -1544,7 +1544,7 @@ export function SpecsForm({
                     name="max_resolution"
                     defaultValue={attrs.max_resolution || "4K 60fps / 10-Bit 4:2:2 (S-Log3)"}
                     placeholder="4K 60fps 10-bit 4:2:2"
-                    className="w-full px-3 py-2 bg-white border border-stone-200 text-xs font-medium text-stone-800"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
                   />
                 </div>
               </div>
@@ -1553,15 +1553,15 @@ export function SpecsForm({
         )}
 
         {/* SUBMIT BUTTON BAR */}
-        <div className="pt-4 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-stone-500 text-xs">
+        <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-slate-500 text-xs">
             <Check className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>Tersinkronisasi otomatis dengan profil direktori publik &amp; algoritma matching.</span>
           </div>
           <button
             type="submit"
             disabled={isPending}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-3 rounded-none bg-[#1E1B2E] text-white font-bold text-sm hover:bg-black transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-xs cursor-pointer"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#4CC9FE] hover:bg-[#38bbf5] text-white font-bold text-xs transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-xs cursor-pointer active:scale-95"
           >
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             <span>{isPending ? "Menyimpan Spesifikasi..." : "Simpan Spesifikasi Terstruktur"}</span>

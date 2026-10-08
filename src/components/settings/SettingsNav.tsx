@@ -23,6 +23,7 @@ export function SettingsNav({ isBrand, actorId }: SettingsNavProps = {}) {
   const pathname = usePathname();
 
   const accountLinks = [
+    { href: "/settings/profile", label: "Profil & Identitas", icon: UserCircle },
     { href: "/settings/payout", label: "Rekening & Pencairan", icon: CreditCard },
     { href: "/settings/availability", label: "Ketersediaan & Jam Kerja", icon: Clock },
     { href: "/settings/legal", label: "Template SPK & Hak Cipta", icon: ShieldCheck },
@@ -36,10 +37,10 @@ export function SettingsNav({ isBrand, actorId }: SettingsNavProps = {}) {
   ];
 
   return (
-    <nav className="w-full lg:w-64 flex flex-col gap-6 shrink-0 border-b lg:border-b-0 lg:border-r border-stone-200 lg:pr-6 pb-6 lg:pb-0">
+    <nav className="w-full lg:w-64 flex flex-col gap-6 shrink-0 border-b lg:border-b-0 lg:border-r border-slate-200 lg:pr-6 pb-6 lg:pb-0">
       {/* Group 1: Private Account Settings */}
       <div className="space-y-1.5">
-        <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-stone-400 select-none">
+        <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 select-none">
           Akun &amp; Operasional
         </div>
         <div className="flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible pb-1 lg:pb-0 scrollbar-none">
@@ -53,11 +54,11 @@ export function SettingsNav({ isBrand, actorId }: SettingsNavProps = {}) {
                 href={item.href}
                 className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs transition-all whitespace-nowrap lg:whitespace-normal font-medium ${
                   isActive
-                    ? "bg-stone-900 text-white font-semibold shadow-2xs"
-                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-100/80"
+                    ? "bg-slate-900 text-white font-semibold shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
                 }`}
               >
-                <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-stone-400"}`} />
+                <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-slate-400"}`} />
                 <span>{item.label}</span>
               </Link>
             );
@@ -66,8 +67,8 @@ export function SettingsNav({ isBrand, actorId }: SettingsNavProps = {}) {
       </div>
 
       {/* Group 2: Public Creative Showcase (Distinct) */}
-      <div className="space-y-1.5 pt-2 border-t border-stone-100">
-        <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-stone-400 select-none">
+      <div className="space-y-1.5 pt-2 border-t border-slate-100">
+        <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 select-none">
           Tampilan Publik
         </div>
         <div className="flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible pb-1 lg:pb-0 scrollbar-none">
@@ -77,13 +78,13 @@ export function SettingsNav({ isBrand, actorId }: SettingsNavProps = {}) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-xl text-xs text-stone-600 hover:text-stone-900 hover:bg-stone-100/80 transition-all font-medium group"
+                className="flex items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-xl text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all font-medium group"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <Icon className="w-4 h-4 shrink-0 text-stone-400 group-hover:text-stone-600" />
+                  <Icon className="w-4 h-4 shrink-0 text-slate-400 group-hover:text-slate-600" />
                   <span className="truncate">{item.label}</span>
                 </div>
-                <ArrowUpRight className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-800 shrink-0" />
+                <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-800 shrink-0" />
               </Link>
             );
           })}

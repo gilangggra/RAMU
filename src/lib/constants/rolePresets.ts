@@ -76,7 +76,7 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
       "Sesuai Anggaran Brief",
       "Sistem Bagi Hasil Produk",
       "Kompensasi Flat Fee",
-      "Barter / TFP Kolaborasi",
+      "Fee Komersial Berbayar Sesuai SPK",
     ],
     defaultTurnaround: "Sesuai Timeline Kampanye",
     quickTurnarounds: [

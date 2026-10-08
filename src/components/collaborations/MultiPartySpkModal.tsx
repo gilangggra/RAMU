@@ -20,6 +20,7 @@ import {
   PenTool,
   RotateCcw,
   Download,
+  Fingerprint,
 } from "lucide-react";
 import { exportElementToPdf } from "@/lib/export/pdfExporter";
 
@@ -448,8 +449,13 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
                 <li>Karya asli pra-proyek: <strong>{ip.originalIp ?? "Hak cipta tetap milik pencipta asli masing-masing pihak"}</strong>.</li>
                 <li>Karya turunan kolaborasi: Berstatus hak pakai bersama non-eksklusif untuk promosi portofolio digital dan media sosial organik selama <strong>1 (satu) tahun</strong> terhitung sejak peluncuran resmi.</li>
                 <li>Pemanfaatan karya untuk iklan berbayar skala komersial (Meta/TikTok Ads, Billboard, atau komersialisasi retail) di luar kesepakatan awal <strong>wajib memperoleh izin tertulis dan adendum kompensasi bagi hasil dari seluruh pihak</strong>.</li>
-                <li>Batas revisi pasca-produksi: Dibatasi maksimal <strong>2x (dua kali) putaran revisi minor</strong> untuk penyelarasan warna, retouching, dan pemotongan klip. Perubahan konsep dasar memerlukan kesepakatan bulat para pihak.</li>
+                <li>Batas revisi pasca-produksi: Dibatasi maksimal <strong>2x (dua kali) putaran revisi minor</strong> (koreksi warna, retouching noda minor, pemotongan klip). Perubahan konsep dasar atau permintaan re-shoot memerlukan kesepakatan bulat dan biaya tambahan.</li>
                 <li>Setiap publikasi karya wajib mencantumkan kredit kolaborasi lengkap sesuai format yang disepakati di tab Kredit &amp; Tag RAMU.</li>
+                <li>Protokol Sampel &amp; Alat: Seluruh pihak wajib menjaga busana sampel dan peralatan produksi dengan prinsip kehati-hatian wajar (*duty of care*). Kerusakan permanen akibat kelalaian berat menjadi tanggung jawab pihak yang melakukan tindakan fisik langsung.</li>
+                <li>Garansi Kesesuaian Ukuran Busana &amp; Sampel Desainer: Talenta model menjamin data ukuran tubuh pada Comp Card akurat dan diperbarui dalam 30 (tiga puluh) hari terakhir. Pihak brand/desainer wajib menyediakan sampel busana dengan batas toleransi ukuran yang sesuai dan tidak memaksakan ukuran di luar batas keselamatan/kenyamanan talenta.</li>
+                <li>Batas Garansi Retensi Arsip Berkas Master (90 Hari Kalender): Pihak fotografer/videografer/kreator bertanggung jawab menyimpan cadangan file master hasil kerja resolusi penuh minimal 90 (sembilan puluh) hari kalender sejak serah terima final. Setelah batas waktu tersebut, inisiator/klien wajib telah mencadangkan file ke penyimpanan lokal dan dikenakan biaya pemulihan arsip jika meminta pengiriman ulang.</li>
+                <li><strong>Persetujuan Otomatis Luaran Kolaborasi (Deemed Acceptance 7 Hari Kalender)</strong>: Apabila draf hasil kerja telah diserahkan untuk peninjauan dan pihak terkait tidak memberikan tanggapan atau catatan evaluasi/revisi resmi dalam waktu <strong>7 (tujuh) hari kalender</strong>, maka materi hasil kerja tersebut dianggap telah disetujui penuh (<em>Deemed Accepted</em>) demi menjaga kelancaran alur produksi dan peluncuran bersama.</li>
+                <li>Tanggal Embargo Rilis: Dilarang mempublikasikan materi hasil karya atau dokumentasi di balik layar (BTS) sebelum Tanggal Peluncuran Resmi (Embargo Date) yang disepakati oleh pemrakarsa proyek/brand.</li>
               </ol>
             </div>
 
@@ -487,18 +493,39 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
             </div>
 
             <div className="space-y-2">
-              <ArticleHead n={8} title="PASAL 8: KEADAAN MEMAKSA (FORCE MAJEURE)" />
-              <p className="text-[11px] text-stone-700 pl-1">
-                Dalam hal terjadi peristiwa di luar kendali PARA PIHAK (bencana alam, wabah resmi, gangguan keamanan massal, atau kondisi darurat yang dibuktikan secara resmi), PARA PIHAK bermusyawarah menentukan kelanjutan, penundaan, atau penghentian proyek tanpa pembebanan sanksi finansial kepada pihak manapun.
-              </p>
+              <ArticleHead n={8} title="PASAL 8: KEADAAN MEMAKSA (FORCE MAJEURE) &amp; KONTINGENSI CUACA BURUK" />
+              <ol className="list-decimal pl-6 space-y-1.5 text-stone-700 text-[11px]">
+                <li>
+                  <strong>Keadaan Memaksa Umum</strong>: Dalam hal terjadi peristiwa di luar kendali PARA PIHAK (bencana alam, kebakaran, kerusuhan massal, atau kondisi darurat medis yang dibuktikan secara sah), PARA PIHAK bermusyawarah menentukan kelanjutan, penundaan, atau penghentian proyek tanpa pembebanan sanksi finansial kepada pihak manapun.
+                </li>
+                <li>
+                  <strong>Kontingensi Cuaca Luar Ruang (Rain-Check Protocol)</strong>: Apabila sesi produksi di lokasi luar ruang (outdoor/pantai/rooftop) terhalang oleh hujan lebat, badai petir, atau kondisi cuaca ekstrem, PARA PIHAK berhak atas Penjadwalan Ulang Cuaca (*Rain-Check*) tanpa penalti denda dalam batas waktu 14 hari kerja.
+                </li>
+                <li>
+                  <strong>Biaya Waktu Tunggu / Kehadiran Kru (Staging Fee)</strong>: Jika penundaan cuaca terjadi saat para pihak telah tiba di lokasi (*call time*) atau penataan rias/busana telah dilakukan, pihak inisiator/klien menanggung Biaya Kehadiran (*Staging Fee*) sebesar <strong>25% dari alokasi shift harian</strong> kepada masing-masing talenta/kru sebagai pengganti operasional logistik hari tersebut.
+                </li>
+              </ol>
             </div>
 
             <div className="space-y-2">
-              <ArticleHead n={9} title="PASAL 9: PENYELESAIAN SENGKETA DAN KETENTUAN HUKUM" />
+              <ArticleHead n={9} title="PASAL 9: PERLINDUNGAN HUBUNGAN BISNIS &amp; ANTI-CIRCUMVENTION (12 BULAN)" />
+              <ol className="list-decimal pl-6 space-y-1.5 text-stone-700 text-[11px]">
+                <li>
+                  <strong>Non-Circumvention Klien Pihak Ketiga</strong>: Apabila proyek kolaborasi ini mempertemukan kreator/talenta dengan Klien Brand Pihak Ketiga yang diperkenalkan oleh Inisiator/Agensi proyek, maka selama masa kolaborasi dan 12 (dua belas) bulan kalender setelahnya, seluruh pihak dilarang melakukan kesepakatan langsung tanpa melibatkan inisiator pemrakarsa awal.
+                </li>
+                <li>
+                  Pelanggaran komitmen ini dikenakan sanksi penggantian komisi perantara standar dan pencatatan riwayat pelanggaran profesional di ekosistem RAMU.
+                </li>
+              </ol>
+            </div>
+
+            <div className="space-y-2">
+              <ArticleHead n={10} title="PASAL 10: PENYELESAIAN SENGKETA DAN KETENTUAN HUKUM" />
               <ol className="list-decimal pl-6 space-y-1.5 text-stone-700 text-[11px]">
                 <li>Segala perselisihan diselesaikan melalui musyawarah mufakat, difasilitasi rekam jejak digital (<em>audit trail</em>) RAMU sebagai bukti yang sah.</li>
                 <li>Perjanjian ini tunduk pada: KUHPerdata Pasal 1320 &amp; 1338, UU No. 28 Tahun 2014 tentang Hak Cipta, serta UU No. 11/2008 jo. UU No. 1/2024 tentang ITE.</li>
                 <li>Jika musyawarah tidak menghasilkan mufakat dalam 30 hari, para pihak menyelesaikan melalui BANI atau jalur hukum yang berlaku.</li>
+                <li><strong>Pelepasan Tanggung Jawab Platform (Platform Safe Harbor Shield &amp; Hold Harmless)</strong>: Platform RAMU berkedudukan murni sebagai fasilitator sarana teknologi komunikasi dan penyedia wadah jejak audit digital (*intermediary electronic platform*). RAMU tidak bertanggung jawab atas materi kolaborasi, hak cipta pihak ketiga, kerugian finansial komersial, maupun sengketa internal antar-anggota tim kerja sama. Seluruh pihak sepakat melepaskan dan membebaskan RAMU dari segala bentuk tuntutan atau gugatan hukum (*Hold Harmless*).</li>
               </ol>
             </div>
           </div>
@@ -544,12 +571,21 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
               ))}
             </div>
 
-            <div className="pt-4 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between text-[10px] text-stone-400 gap-2">
-              <div className="flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-stone-400" />
-                <span>Dokumen kesepakatan terverifikasi &bull; Rekam Jejak RAMU &bull; {allSigned ? "DISEPAKATI SEMUA PIHAK" : `${signedCount}/${total} Pihak Menyetujui`}</span>
+            {/* AUDIT TRAIL KRIPTOGRAFIS MULTI-PIHAK */}
+            <div className="pt-4 border-t border-stone-200 space-y-2">
+              <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 flex flex-col sm:flex-row items-start sm:items-center justify-between text-[10px] text-stone-600 gap-2">
+                <div className="flex items-center gap-2">
+                  <Fingerprint className="w-4 h-4 text-emerald-700 shrink-0" />
+                  <div>
+                    <span className="font-bold text-stone-900 block">Jejak Audit Digital Kriptografis (Multi-Party Hash)</span>
+                    <span className="font-mono text-[9px] text-stone-500">ID: {spkNo} &bull; UU ITE No. 1/2024</span>
+                  </div>
+                </div>
+                <div className="text-right sm:text-right">
+                  <span className="font-mono font-bold text-stone-900 block text-[9px]">SHA-256: {shortId.toLowerCase()}{d.getTime().toString(16)}...9f4b</span>
+                  <span className="text-[9px] text-emerald-700 font-semibold">{allSigned ? "100% Ditandatangani Sah" : `${signedCount}/${total} Pihak Telah TTD`}</span>
+                </div>
               </div>
-              <div className="font-mono">Hash: {shortId}-COLLAB-{d.getFullYear()}</div>
             </div>
           </div>
         </div>

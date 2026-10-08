@@ -18,6 +18,7 @@ export interface ShowcaseItem {
   aspectRatio?: string | null;
   isOwner?: boolean;
   isCoCreditor?: boolean;
+  collaborationId?: string | null;
   tearSheet?: any;
   availableActors?: { id: string; name: string; sector: string; location: string | null; owner?: { avatarUrl: string | null } | null }[];
   actor: {
@@ -183,6 +184,11 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
       .join("")
       .toUpperCase();
 
+    const collabId =
+      (attrs.collaborationId as string) ||
+      (attrs.tear_sheet as any)?.collaborationId ||
+      null;
+
     showcaseItems.push({
       id: asset.id,
       title: asset.name,
@@ -194,6 +200,7 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
       aspectRatio,
       isOwner,
       isCoCreditor,
+      collaborationId: collabId,
       tearSheet,
       availableActors: allActors,
       actor: {

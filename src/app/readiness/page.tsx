@@ -76,7 +76,7 @@ const READINESS_ASSET_CATEGORY_LABELS: Partial<Record<AssetCategory, string>> = 
 const GOAL_LABELS: Record<GoalCategory, { label: string; desc: string; icon: React.ReactNode }> = {
   EDITORIAL_PUBLICATION: { label: "Publikasi Editorial", desc: "Tampil di majalah/media fesyen ternama", icon: <Globe className="w-4 h-4 text-[#1E1B2E]" /> },
   COMMERCIAL_CAMPAIGN: { label: "Kampanye Komersial", desc: "Kampanye promosi produk/brand baru", icon: <Wrench className="w-4 h-4 text-[#1E1B2E]" /> },
-  PORTFOLIO_BUILDING: { label: "Kolaborasi Portofolio (TFP)", desc: "Membangun karya editorial bersama secara setara", icon: <Palette className="w-4 h-4 text-[#1E1B2E]" /> },
+  PORTFOLIO_BUILDING: { label: "Kolaborasi Portofolio Bersama", desc: "Membangun karya editorial bersama berstandar tinggi", icon: <Palette className="w-4 h-4 text-[#1E1B2E]" /> },
   BRAND_AWARENESS: { label: "Eksposur & Brand Awareness", desc: "Meningkatkan jangkauan dan rekognisi publik", icon: <Sparkles className="w-4 h-4 text-[#1E1B2E]" /> },
   REVENUE_GENERATION: { label: "Proyek Komersial Berbayar", desc: "Monetisasi dan profitabilitas bisnis", icon: <TrendingUp className="w-4 h-4 text-[#1E1B2E]" /> },
   SKILL_DEVELOPMENT: { label: "Eksplorasi Kreatif & Skill", desc: "Eksperimen teknik visual dan estetika baru", icon: <Zap className="w-4 h-4 text-[#1E1B2E]" /> },
@@ -91,7 +91,7 @@ const NEED_LABELS: Record<
   LOCATION_NEED: { label: "Studio Foto / Lokasi Khusus", desc: "Ruang cyclorama, studio indoor, atau outdoor", icon: Home },
   EQUIPMENT_NEED: { label: "Peralatan Produksi & Lighting", desc: "Sewa lighting 3-phase, lensa, atau gear khusus", icon: Zap },
   WARDROBE_NEED: { label: "Busana & Properti Pendukung", desc: "Koleksi pakaian desainer atau properti artistik", icon: Layers },
-  FUNDING_NEED: { label: "Dukungan Sponsor / Anggaran", desc: "Sponsor dana atau barter promosi", icon: CircleDollarSign },
+  FUNDING_NEED: { label: "Dukungan Sponsor / Anggaran", desc: "Sponsor dana atau alokasi komersial produksi", icon: CircleDollarSign },
   PUBLICATION_NEED: { label: "Kanal Media & Publikasi", desc: "Akses liputan ke majalah fesyen atau portal berita", icon: Truck },
 };
 
@@ -166,9 +166,9 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
 
   const tabs = [
     { id: "assets", label: "Aset & Modal Kreatif", count: assets.length, icon: Package },
-    { id: "goals", label: "Target Capaian", count: goals.length, icon: Target },
-    { id: "needs", label: "Kebutuhan Mitra", count: needs.length, icon: Search },
-    { id: "constraints", label: "Ketentuan & Batasan", count: constraints.length, icon: ShieldAlert },
+    { id: "goals", label: "Target & Visi Karya", count: goals.length, icon: Target },
+    { id: "needs", label: "Kebutuhan Rekan Tim", count: needs.length, icon: Search },
+    { id: "constraints", label: "Ketentuan & Preferensi Kerja", count: constraints.length, icon: ShieldAlert },
   ];
 
   return (
@@ -180,13 +180,13 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-stone-100 border border-stone-200 text-xs font-bold text-[#1E1B2E] shadow-2xs">
                 <Sliders className="w-3.5 h-3.5 text-[#1E1B2E]" />
-                Pusat Kesiapan Kolaborasi & Profil
+                Pusat Kesiapan &amp; Modal Kerja Kreatif
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1E1B2E] tracking-tight">
-                Kelola Modal, Target &amp; Ketentuan Kolaborasi
+                Kelola Portofolio, Target &amp; Preferensi Kerja
               </h1>
               <p className="text-xs sm:text-sm text-stone-500 max-w-2xl leading-relaxed">
-                Data kesiapan ini membantu RAMU merekomendasikan rekan kolaborator yang memiliki peralatan komplementer, visi karya yang selaras, dan jadwal kerja yang cocok bagi <strong className="text-[#1E1B2E]">{actor.name}</strong>.
+                Kelola portofolio visual, alat kerja utama, dan preferensi jadwal Anda agar rekan kolaborator dan klien dapat menemukan serta bekerja sama secara cocok dengan <strong className="text-[#1E1B2E]">{actor.name}</strong>.
               </p>
             </div>
 
@@ -808,7 +808,18 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
         )}
 
         {activeTab === "constraints" && (
-          <div className="grid grid-cols-1 xl:grid-cols-5 gap-8 animate-fade-in">
+          <div className="space-y-6 animate-fade-in">
+            <div className="p-4 sm:p-5 rounded-2xl bg-stone-50 border border-stone-200 text-xs text-stone-600 flex items-start gap-3">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <span className="font-bold text-stone-900 block">Panduan Praktis Pengisian Ketentuan Kerja:</span>
+                <p className="text-stone-500 leading-relaxed">
+                  Bagi talenta perorangan (Model, Fotografer, MUA, Stylist), Anda cukup memasang preferensi umum seperti <strong>Ketersediaan Jadwal</strong>, <strong>Domisili Wilayah</strong>, dan <strong>Batas Rate Dasar</strong>. Isian teknis seperti kapasitas produksi dan minimum order dirancang khusus untuk studio sewa atau brand fesyen/konveksi.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
 
             <div className="xl:col-span-2 space-y-4">
               <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest">+ Pasang Preferensi &amp; Ketentuan Kerja</h2>
@@ -892,7 +903,8 @@ export default async function ReadinessHubPage({ searchParams }: ReadinessPagePr
               )}
             </div>
           </div>
-        )}
+        </div>
+      )}
 
       </div>
     </AppShell>

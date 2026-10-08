@@ -17,7 +17,7 @@ import {
   ArrowUpRight,
   ExternalLink,
   MessageSquare,
-  Sparkles,
+  Users,
   Layers,
   SlidersHorizontal,
 } from "lucide-react";
@@ -153,7 +153,7 @@ export function BookingsClientView({
             href="/directory"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-semibold shadow-2xs transition-colors"
           >
-            <Sparkles className="w-3.5 h-3.5 text-stone-300" />
+            <Users className="w-3.5 h-3.5 text-stone-300" />
             <span>Cari Mitra Baru</span>
           </Link>
         </div>
@@ -300,6 +300,7 @@ export function BookingsClientView({
               <option value="NEGOTIATING">Reschedule Diajukan</option>
               <option value="ACCEPTED">Disetujui (Aktif)</option>
               <option value="WORKSPACE">Workspace Aktif</option>
+              <option value="COMPLETED">Selesai (Tuntas)</option>
               <option value="CANCELLED">Dibatalkan</option>
               <option value="DECLINED">Ditolak</option>
             </select>
@@ -458,6 +459,8 @@ export function BookingsClientView({
                       contactName={partner.name}
                       myRole={isIncoming ? "target" : "requester"}
                       partnerActorId={partner.id}
+                      bookingRefCode={`SPK-RAMU-${booking.id.slice(0, 8).toUpperCase()}`}
+                      bookingId={booking.id}
                     />
                   </div>
 
@@ -485,7 +488,7 @@ export function BookingsClientView({
                       />
                     )}
 
-                    {booking.status === "ACCEPTED" && (
+                    {(booking.status === "ACCEPTED" || booking.status === "COMPLETED") && (
                       <ConvertBookingButton
                         bookingId={booking.id}
                         collaborationId={collabId}
@@ -548,7 +551,7 @@ function BookingDetailsBadgeList({ details }: { details: any }) {
         return (
           <span
             key={k}
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-stone-200/80 text-[10px] text-stone-700 shadow-2xs max-w-[200px] truncate"
+            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white border border-stone-200/80 text-[10px] text-stone-700 shadow-2xs max-w-[200px] truncate"
           >
             <span className="font-semibold text-stone-900">{labelMap[k] || k}:</span>
             {isUrl ? (
@@ -583,6 +586,14 @@ function StatusBadge({
   status: string;
   collaborationId?: string | null;
 }) {
+  if (status === "COMPLETED") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-semibold border border-emerald-200/80 shadow-2xs">
+        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+        <span>Selesai (Tuntas)</span>
+      </span>
+    );
+  }
   if (collaborationId) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-stone-900 text-white text-[10px] font-semibold tracking-wider shadow-2xs">

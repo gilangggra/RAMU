@@ -52,12 +52,18 @@ export function LegalDefaultsForm({ initialData }: LegalDefaultsFormProps) {
     setIsLoading(true);
     setMessage(null);
 
+    if (customClauses.length > 1500) {
+      setMessage({ type: "error", text: "Klausul tambahan melebihi batas maksimal 1.500 karakter." });
+      setIsLoading(false);
+      return;
+    }
+
     const formData = new FormData();
-    formData.append("customClauses", customClauses);
+    formData.append("customClauses", customClauses.trim());
     formData.append("defaultLicensing", defaultLicensing);
     formData.append("autoNda", String(autoNda));
     formData.append("requireSampleCare", String(requireSampleCare));
-    formData.append("coCreditRule", coCreditRule);
+    formData.append("coCreditRule", coCreditRule.trim());
 
     const res = await updateLegalDefaultsAction(formData);
     setIsLoading(false);
@@ -73,11 +79,11 @@ export function LegalDefaultsForm({ initialData }: LegalDefaultsFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
       {/* Header Info */}
       <div className="space-y-1">
-        <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-stone-700" />
+        <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <ShieldCheck className="w-5 h-5 text-slate-700" />
           <span>Template SPK &amp; Ketentuan Hak Cipta</span>
         </h2>
-        <p className="text-xs text-stone-500 leading-relaxed">
+        <p className="text-xs text-slate-500 leading-relaxed">
           Atur klausul standar, lisensi karya cipta, dan perlindungan hukum yang otomatis disematkan ke dalam Surat Perjanjian Kerja (SPK) digital Anda.
         </p>
       </div>
@@ -100,16 +106,16 @@ export function LegalDefaultsForm({ initialData }: LegalDefaultsFormProps) {
       )}
 
       {/* Licensing Card */}
-      <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-2xs space-y-4">
+      <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4">
         <div>
-          <label className="block text-xs font-semibold text-stone-800 mb-1.5 flex items-center gap-1.5">
-            <Award className="w-3.5 h-3.5 text-stone-400" />
+          <label className="block text-xs font-semibold text-slate-800 mb-1.5 flex items-center gap-1.5">
+            <Award className="w-3.5 h-3.5 text-slate-400" />
             <span>Model Lisensi Penggunaan Aset Visual (Default)</span>
           </label>
           <select
             value={defaultLicensing}
             onChange={(e) => setDefaultLicensing(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl bg-stone-50/60 border border-stone-200 text-stone-900 text-xs font-medium focus:bg-white focus:ring-2 focus:ring-stone-900 focus:outline-hidden transition-all"
+            className="w-full px-3 py-2 rounded-xl bg-slate-50/60 border border-slate-200 text-slate-900 text-xs font-medium focus:bg-white focus:ring-2 focus:ring-slate-900 focus:outline-hidden transition-all"
           >
             <option value="COMMERCIAL_LIMITED">
               Komersial Terbatas (Hak tayang 1 tahun media digital &amp; lookbook)
@@ -127,7 +133,7 @@ export function LegalDefaultsForm({ initialData }: LegalDefaultsFormProps) {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-stone-800 mb-1.5">
+          <label className="block text-xs font-semibold text-slate-800 mb-1.5">
             Klausul Atribusi &amp; Hak Co-Credits
           </label>
           <input
@@ -135,46 +141,46 @@ export function LegalDefaultsForm({ initialData }: LegalDefaultsFormProps) {
             value={coCreditRule}
             onChange={(e) => setCoCreditRule(e.target.value)}
             placeholder="Contoh: Wajib mencantumkan kredit resmi (@handle) pada media sosial..."
-            className="w-full px-3 py-2 rounded-xl bg-stone-50/60 border border-stone-200 text-stone-900 text-xs focus:bg-white focus:ring-2 focus:ring-stone-900 focus:outline-hidden transition-all"
+            className="w-full px-3 py-2 rounded-xl bg-slate-50/60 border border-slate-200 text-slate-900 text-xs focus:bg-white focus:ring-2 focus:ring-slate-900 focus:outline-hidden transition-all"
           />
         </div>
       </div>
 
       {/* Protective Agreements */}
-      <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-2xs space-y-3">
-        <span className="text-xs font-semibold text-stone-800 block">
+      <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
+        <span className="text-xs font-semibold text-slate-800 block">
           Proteksi Otomatis pada Setiap SPK
         </span>
 
-        <label className="flex items-start gap-3 p-3 rounded-xl bg-stone-50/60 border border-stone-200/80 cursor-pointer hover:bg-stone-50 transition-colors">
+        <label className="flex items-start gap-3 p-3 rounded-xl bg-slate-50/60 border border-slate-200/80 cursor-pointer hover:bg-slate-50 transition-colors">
           <input
             type="checkbox"
             checked={autoNda}
             onChange={(e) => setAutoNda(e.target.checked)}
-            className="mt-0.5 rounded text-stone-900 focus:ring-stone-900"
+            className="mt-0.5 rounded text-slate-900 focus:ring-slate-900"
           />
           <div className="text-xs">
-            <span className="font-semibold text-stone-900 block">
+            <span className="font-semibold text-slate-900 block">
               Sertakan Klausul Kerahasiaan (Non-Disclosure Agreement / NDA)
             </span>
-            <span className="text-[11px] text-stone-500 leading-relaxed block mt-0.5">
+            <span className="text-[11px] text-slate-500 leading-relaxed block mt-0.5">
               Mewajibkan kedua pihak menjaga kerahasiaan konsep, sampel koleksi, dan aset pra-rilis sebelum peluncuran resmi.
             </span>
           </div>
         </label>
 
-        <label className="flex items-start gap-3 p-3 rounded-xl bg-stone-50/60 border border-stone-200/80 cursor-pointer hover:bg-stone-50 transition-colors">
+        <label className="flex items-start gap-3 p-3 rounded-xl bg-slate-50/60 border border-slate-200/80 cursor-pointer hover:bg-slate-50 transition-colors">
           <input
             type="checkbox"
             checked={requireSampleCare}
             onChange={(e) => setRequireSampleCare(e.target.checked)}
-            className="mt-0.5 rounded text-stone-900 focus:ring-stone-900"
+            className="mt-0.5 rounded text-slate-900 focus:ring-slate-900"
           />
           <div className="text-xs">
-            <span className="font-semibold text-stone-900 block">
+            <span className="font-semibold text-slate-900 block">
               Klausul Garansi Keamanan Sampel Busana &amp; Alat
             </span>
-            <span className="text-[11px] text-stone-500 leading-relaxed block mt-0.5">
+            <span className="text-[11px] text-slate-500 leading-relaxed block mt-0.5">
               Menegaskan ganti rugi atau pertanggungjawaban jika terjadi kerusakan sampel busana atau peralatan studio di lokasi on-set.
             </span>
           </div>
@@ -182,28 +188,53 @@ export function LegalDefaultsForm({ initialData }: LegalDefaultsFormProps) {
       </div>
 
       {/* Custom Clauses Textarea */}
-      <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-2xs space-y-2">
-        <label className="block text-xs font-semibold text-stone-800 flex items-center justify-between">
+      <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-2">
+        <label className="block text-xs font-semibold text-slate-800 flex items-center justify-between">
           <span className="flex items-center gap-1.5">
-            <FileText className="w-3.5 h-3.5 text-stone-400" />
+            <FileText className="w-3.5 h-3.5 text-slate-400" />
             <span>Klausul Tambahan Khusus (Custom Terms)</span>
           </span>
-          <span className="text-[10px] text-stone-400 font-normal">Otomatis dicetak di lampiran SPK</span>
+          <span className={`text-[10px] font-mono ${customClauses.length > 1500 ? "text-rose-600 font-bold" : "text-slate-400"}`}>
+            {customClauses.length} / 1500 karakter
+          </span>
         </label>
         <textarea
           rows={5}
           value={customClauses}
           onChange={(e) => setCustomClauses(e.target.value)}
           placeholder="Tuliskan butir-butir syarat kerja khusus Anda..."
-          className="w-full px-3 py-2.5 rounded-xl bg-stone-50/60 border border-stone-200 text-stone-900 text-xs focus:bg-white focus:ring-2 focus:ring-stone-900 focus:outline-hidden transition-all leading-relaxed font-mono resize-none"
+          className="w-full px-3 py-2.5 rounded-xl bg-slate-50/60 border border-slate-200 text-slate-900 text-xs focus:bg-white focus:ring-2 focus:ring-slate-900 focus:outline-hidden transition-all leading-relaxed font-mono resize-none"
         />
+      </div>
+
+      {/* Live Preview Card */}
+      <div className="p-5 rounded-2xl bg-slate-900 text-white shadow-md space-y-3">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-bold tracking-wide">Pratinjau Klausul Dokumen SPK</span>
+          </div>
+          <span className="text-[10px] text-slate-400 font-mono">DOKUMEN RESMI RAMU</span>
+        </div>
+        <div className="text-[11px] text-slate-300 space-y-2 font-mono leading-relaxed bg-slate-950/60 p-3.5 rounded-xl border border-slate-800/80">
+          <div><strong className="text-white">Model Lisensi:</strong> {defaultLicensing}</div>
+          <div><strong className="text-white">Atribusi &amp; Kredit:</strong> {coCreditRule || "-"}</div>
+          <div><strong className="text-white">NDA Kerahasiaan:</strong> {autoNda ? "Aktif &amp; Mengikat" : "Tidak disertakan"}</div>
+          <div><strong className="text-white">Jaminan Sampel &amp; Alat:</strong> {requireSampleCare ? "Wajib Ganti Rugi Kerusakan" : "Standar"}</div>
+          {customClauses && (
+            <div className="pt-2 border-t border-slate-800/90">
+              <strong className="text-white block mb-1">Ketentuan Khusus:</strong>
+              <p className="whitespace-pre-line text-slate-400 text-[10px]">{customClauses}</p>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="pt-2 flex justify-end">
         <button
           type="submit"
           disabled={isLoading}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
         >
           {isLoading ? (
             <>
@@ -212,7 +243,7 @@ export function LegalDefaultsForm({ initialData }: LegalDefaultsFormProps) {
             </>
           ) : (
             <>
-              <Save className="w-3.5 h-3.5 text-stone-300" />
+              <Save className="w-3.5 h-3.5 text-slate-300" />
               <span>Simpan Template SPK</span>
             </>
           )}
