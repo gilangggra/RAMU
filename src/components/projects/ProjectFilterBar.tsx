@@ -28,19 +28,14 @@ export const PROJECT_ROLE_FILTERS = [
   { id: "ALL", label: "Semua Peran" },
   { id: "Foto", label: "Fotografer" },
   { id: "Model", label: "Model / Muse" },
-  { id: "Stylist", label: "Fashion Stylist" },
+  { id: "Stylist", label: "Fashion Stylist & Wardrobe" },
   { id: "MUA", label: "Makeup & Hair (MUA)" },
-  { id: "Video", label: "Videografer / DoP" },
-  { id: "Desain", label: "Fashion Designer" },
   { id: "Studio", label: "Studio & Ruang" },
-  { id: "Director", label: "Art Director" },
-  { id: "Props", label: "Set & Props" },
 ];
 
 export const PROJECT_COMPENSATION_FILTERS = [
   { id: "ALL", label: "Semua Kompensasi", badge: "Semua Kompensasi" },
-  { id: "PAID", label: "Fee Komersial (Paid)", badge: "Paid (Berbayar)" },
-  { id: "REVENUE_SHARE", label: "Bagi Hasil (Revenue Share)", badge: "Bagi Hasil Komersial" },
+  { id: "PAID", label: "Honorarium Flat per Peran", badge: "Fee Flat per Peran" },
 ];
 
 export const PROJECT_LOCATION_FILTERS = [

@@ -129,11 +129,44 @@ export async function updateProfileBasicInfo(formData: FormData) {
       finalWebsiteUrl = websiteUrl;
     }
 
+    let canonicalSector = sector;
+    let newActorType = actor.actorType;
+    const sLower = (sector || "").toLowerCase();
+    const isAdmin = sLower.includes("admin") || sLower.includes("administrator");
+
+    if (!isAdmin) {
+      if (
+        sLower.includes("brand") ||
+        sLower.includes("label") ||
+        sLower.includes("umkm") ||
+        sLower.includes("designer") ||
+        sLower.includes("desain") ||
+        sLower.includes("perancang") ||
+        sLower.includes("pola")
+      ) {
+        canonicalSector = "Fashion Brand/UMKM";
+        newActorType = "BRAND";
+      } else if (sLower.includes("studio") || sLower.includes("ruang") || sLower.includes("cyclorama")) {
+        canonicalSector = "Studio";
+        newActorType = "STUDIO";
+      } else if (sLower.includes("model") || sLower.includes("talent") || sLower.includes("peraga") || sLower.includes("muse")) {
+        canonicalSector = "Model";
+        newActorType = "INDIVIDUAL";
+      } else if (sLower.includes("mua") || sLower.includes("makeup") || sLower.includes("hair") || sLower.includes("stylist") || sLower.includes("wardrobe")) {
+        canonicalSector = "MUA/Stylist";
+        newActorType = "INDIVIDUAL";
+      } else if (sLower.includes("foto") || sLower.includes("photo") || sLower.includes("kamera")) {
+        canonicalSector = "Photographer";
+        newActorType = "INDIVIDUAL";
+      }
+    }
+
     await prisma.actor.update({
       where: { id: actor.id },
       data: {
         name,
-        sector,
+        sector: canonicalSector,
+        actorType: newActorType,
         description: description || null,
         location: location || null,
         websiteUrl: finalWebsiteUrl,

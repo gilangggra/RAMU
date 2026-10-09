@@ -20,18 +20,16 @@ export interface ServicePackage {
 }
 
 /**
- * 6 PERAN RESMI AKTOR DI PLATFORM RAMU:
+ * 5 PERAN RESMI AKTOR DI PLATFORM RAMU:
  * 1. Fashion Brand/UMKM
- * 2. Fashion Designer
- * 3. Photographer
- * 4. Model
- * 5. MUA/Stylist
- * 6. Studio
+ * 2. Photographer
+ * 3. Model
+ * 4. MUA/Stylist
+ * 5. Studio
  * Tidak boleh ada yang lain.
  */
 export const ALLOWED_ACTOR_ROLES = [
   "Fashion Brand/UMKM",
-  "Fashion Designer",
   "Photographer",
   "Model",
   "MUA/Stylist",
@@ -141,7 +139,7 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
         usageRights: "Hak Komersial Eksklusif Multi-Kanal",
         equipmentIncluded: "Jaringan Distribusi Retail & E-Commerce Resmi",
         features: [
-          "Pengembangan desain bersama desainer & kolaborator",
+          "Pengembangan konsep koleksi bersama mitra & kolaborator",
           "Distribusi retail & penjualan di platform resmi brand",
           "Bagi hasil transparan dari penjualan bersih",
           "Hak cipta & kredit bersama diakui dalam SPK",
@@ -264,7 +262,7 @@ export const ROLE_PRESETS: Record<RoleCategory, RolePresetData> = {
       roleSpecifics: {
         fittingPolicy: "Fitting busana dilakukan H-1 atau di lokasi sebelum sesi dimulai",
         dryCleaningResponsibility: "Biaya laundry / dry cleaning busana pasca-sesi ditanggung oleh klien/peminjam",
-        noAlteringPolicy: "Dilarang memotong, mengubah jahitan, atau merusak siluet busana tanpa izin tertulis desainer",
+        noAlteringPolicy: "Dilarang memotong, mengubah jahitan, atau merusak siluet busana tanpa izin tertulis pemilik brand/wardrobe",
         brandCreditRequired: true,
       },
     },
@@ -700,10 +698,11 @@ export function detectRoleCategory(sector?: string | null, type?: string | null)
   const s = (sector || "").toLowerCase();
   const t = (type || "").toUpperCase();
 
-  if (t === "BRAND" || s.includes("brand") || s.includes("label") || s.includes("umkm")) {
-    return "BRAND";
-  }
   if (
+    t === "BRAND" ||
+    s.includes("brand") ||
+    s.includes("label") ||
+    s.includes("umkm") ||
     s.includes("designer") ||
     s.includes("desain") ||
     s.includes("perancang") ||
@@ -711,7 +710,7 @@ export function detectRoleCategory(sector?: string | null, type?: string | null)
     s.includes("pola") ||
     s.includes("pattern")
   ) {
-    return "DESIGNER";
+    return "BRAND";
   }
   if (t === "STUDIO" || s.includes("studio") || s.includes("ruang") || s.includes("venue")) {
     return "STUDIO";

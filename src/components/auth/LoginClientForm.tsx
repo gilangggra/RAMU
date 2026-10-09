@@ -14,7 +14,6 @@ interface LoginClientFormProps {
 
 const DEMO_ACCOUNTS = [
   { email: "brand@ramu.id", pass: "password123", role: "Fashion Brand/UMKM", name: "Nala The Label" },
-  { email: "designer@ramu.id", pass: "password123", role: "Fashion Designer", name: "Atelier Nara" },
   { email: "photographer@ramu.id", pass: "password123", role: "Photographer", name: "Lensa Kreatif" },
   { email: "model@ramu.id", pass: "password123", role: "Model", name: "Go Young Jung" },
   { email: "mua@ramu.id", pass: "password123", role: "MUA/Stylist", name: "Glow & Form" },

@@ -173,17 +173,24 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
 
           <div className="space-y-2">
             <label htmlFor="sector" className="text-xs font-bold text-[#111827] uppercase tracking-wider">
-              Sektor / Peran Utama <span className="text-rose-500">*</span>
+              Sektor / Peran Ekosistem <span className="text-rose-500">*</span>
             </label>
-            <input
-              type="text"
+            <select
               id="sector"
               name="sector"
               defaultValue={initialData.sector}
               required
               className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-sm font-medium text-slate-800"
-              placeholder="Misal: Fotografer, Model, dsb"
-            />
+            >
+              <option value="Fashion Brand/UMKM">Fashion Brand/UMKM</option>
+              <option value="Photographer">Photographer</option>
+              <option value="Model">Model</option>
+              <option value="MUA/Stylist">MUA/Stylist</option>
+              <option value="Studio">Studio</option>
+              {!["Fashion Brand/UMKM", "Photographer", "Model", "MUA/Stylist", "Studio"].includes(initialData.sector) && (
+                <option value={initialData.sector}>{initialData.sector}</option>
+              )}
+            </select>
           </div>
 
           <div className="space-y-2 md:col-span-2">

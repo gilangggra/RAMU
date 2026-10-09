@@ -111,7 +111,7 @@ export function GlassServiceBookingFlow() {
                     setSelectedId(option.id);
                     setIsConfirmed(false);
                   }}
-                  className={`text-left rounded-[24px] p-5 transition-all cursor-pointer flex flex-col justify-between gap-4 relative overflow-hidden group ${
+                  className={`text-left rounded-[22px] p-5 transition-all cursor-pointer flex flex-col justify-between gap-4 relative overflow-hidden group ${
                     isSelected
                       ? "glass-card active ring-2 ring-[#4CC9FE]/40"
                       : "glass-card hover:bg-white/70"
@@ -235,7 +235,7 @@ export function GlassServiceBookingFlow() {
 
             {isConfirmed && (
               <div className="p-3 rounded-[16px] bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 text-xs text-center font-medium animate-fade-in">
-                ✅ Teknisi telah dialokasikan untuk jadwal <strong>{scheduledDate}</strong>.
+                Teknisi telah dialokasikan untuk jadwal <strong>{scheduledDate}</strong>.
               </div>
             )}
           </div>

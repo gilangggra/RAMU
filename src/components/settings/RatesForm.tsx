@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { updateServicePackagesAndRates } from "@/app/settings/actions";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 import {
   Save,
   Loader2,
@@ -170,7 +171,6 @@ export function RatesForm({
   const isStylist = selectedPresetRole === "STYLIST";
   const isVideographer = selectedPresetRole === "VIDEOGRAPHER";
   const isStudio = selectedPresetRole === "STUDIO";
-  const isDesigner = selectedPresetRole === "DESIGNER";
   const isPhotographer = selectedPresetRole === "PHOTOGRAPHER";
 
   function handlePackageChange(index: number, field: keyof ServicePackage, value: any) {
@@ -278,7 +278,7 @@ export function RatesForm({
       <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/50">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full btn-primary-pill text-white text-xs font-bold shadow-xs">
               <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
               <span>Pengaturan Tarif &amp; Paket Komersial</span>
             </div>
@@ -306,7 +306,6 @@ export function RatesForm({
                 className="flex-1 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-[#111827] focus:bg-white focus:border-[#4CC9FE] transition-colors cursor-pointer"
               >
                 <option value="BRAND">Fashion Brand/UMKM</option>
-                <option value="DESIGNER">Fashion Designer</option>
                 <option value="PHOTOGRAPHER">Photographer</option>
                 <option value="MODEL">Model</option>
                 <option value="MUA_STYLIST">MUA/Stylist</option>
@@ -316,10 +315,10 @@ export function RatesForm({
               <button
                 type="button"
                 onClick={() => handleApplyRolePreset(selectedPresetRole)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#4CC9FE] hover:bg-black text-white text-xs font-bold shrink-0 transition-colors shadow-xs cursor-pointer"
+                className="btn-primary-pill !text-xs !py-2 !px-4 text-white font-semibold cursor-pointer shrink-0 shadow-sm shadow-[#4CC9FE]/25"
                 title="Muat ulang paket & harga rekomendasi industri untuk role ini"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <Sparkles className="w-3.5 h-3.5 text-white" />
                 <span>Isi Standar</span>
               </button>
             </div>
@@ -358,13 +357,12 @@ export function RatesForm({
               </label>
               <span className="text-[10px] text-slate-400 font-medium">Tampil di kartu direktori</span>
             </div>
-            <input
-              type="text"
+            <CurrencyInput
               id="startingRate"
               value={startingRate}
-              onChange={(e) => setStartingRate(e.target.value)}
+              onChange={(val) => setStartingRate(val)}
               required
-              placeholder="Contoh: Mulai Rp 1,5 Jt / sesi"
+              placeholder="Mulai Rp 1.500.000 / sesi"
               className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-sm font-bold text-slate-800"
             />
             {/* QUICK RATE PILLS */}
@@ -378,9 +376,9 @@ export function RatesForm({
                     key={idx}
                     type="button"
                     onClick={() => setStartingRate(qr)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-all cursor-pointer ${
                       startingRate === qr
-                        ? "bg-[#4CC9FE] text-white font-bold border-[#4CC9FE]"
+                        ? "btn-primary-pill text-white font-bold border-transparent shadow-xs"
                         : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                     }`}
                   >
@@ -419,9 +417,9 @@ export function RatesForm({
                     key={idx}
                     type="button"
                     onClick={() => setTurnaroundTime(qt)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-all cursor-pointer ${
                       turnaroundTime === qt
-                        ? "bg-[#4CC9FE] text-white font-bold border-[#4CC9FE]"
+                        ? "btn-primary-pill text-white font-bold border-transparent shadow-xs"
                         : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                     }`}
                   >
@@ -447,7 +445,7 @@ export function RatesForm({
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5 max-w-2xl leading-relaxed">
-                Tentukan komitmen resource terstruktur (waktu, deliverables, hak siar, dan alat) sebagai patokan awal kolaborasi. RAMU membandingkan <em>lingkup kapasitas</em>, bukan sekadar harga nominal.
+                Tentukan 3 tingkatan paket kolaborasi siap-booking sebagai acuan awal bagi klien yang ingin memesan jasa Anda.
               </p>
             </div>
 
@@ -458,21 +456,12 @@ export function RatesForm({
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-[#111827] transition-colors cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>+ Tambah Tingkatan Paket</span>
+                <span>Tambah Tingkatan Paket</span>
               </button>
             )}
           </div>
 
-          {/* COLLABORATIVE ECONOMY NOTICE */}
-          <div className="p-4 rounded-2xl bg-sky-50/70 border border-sky-200/80 text-sky-950 text-xs space-y-1">
-            <div className="flex items-center gap-1.5 font-bold text-amber-900">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-              <span>Prinsip Paket di Ekosistem RAMU:</span>
-            </div>
-            <p className="text-[11px] leading-relaxed text-amber-900/90">
-              Paket bukanlah produk e-commerce siap beli, melainkan <strong>unit komersial dari resource Anda</strong> yang akan dipadukan dengan resource mitra lain dalam 1 proyek bersama. Angka tarif merupakan <strong>Listed Rate / Starting Anchor</strong> yang dapat dinegosiasikan saat perumusan SPK.
-            </p>
-          </div>
+
 
           {packages.length === 0 ? (
             <div className="p-8 text-center rounded-2xl border-2 border-dashed border-slate-200 space-y-3">
@@ -482,7 +471,7 @@ export function RatesForm({
               <button
                 type="button"
                 onClick={() => handleApplyRolePreset(selectedPresetRole)}
-                className="px-4 py-2 rounded-xl bg-[#4CC9FE] text-white font-bold text-xs font-bold uppercase tracking-wider cursor-pointer shadow-xs"
+                className="btn-primary-pill !text-xs !py-2 !px-5 text-white font-semibold cursor-pointer shadow-sm shadow-[#4CC9FE]/25"
               >
                 Muat 3 Paket dari Template
               </button>
@@ -509,7 +498,7 @@ export function RatesForm({
                           <select
                             value={tier}
                             onChange={(e) => handlePackageChange(idx, "tier", e.target.value)}
-                            className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-800 uppercase tracking-widest cursor-pointer"
+                            className="px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-800 uppercase tracking-widest cursor-pointer"
                           >
                             <option value="STARTER">Tier 1: Starter / Mini</option>
                             <option value="CAMPAIGN">Tier 2: Campaign (Standar)</option>
@@ -566,10 +555,9 @@ export function RatesForm({
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                               Listed Rate (Acuan) <span className="text-rose-500">*</span>
                             </label>
-                            <input
-                              type="text"
+                            <CurrencyInput
                               value={pkg.price}
-                              onChange={(e) => handlePackageChange(idx, "price", e.target.value)}
+                              onChange={(val) => handlePackageChange(idx, "price", val)}
                               required
                               placeholder="Rp 1.500.000"
                               className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-[#111827] focus:bg-white focus:border-[#4CC9FE]"
@@ -600,7 +588,7 @@ export function RatesForm({
                               onClick={() => handlePackageChange(idx, "unit", u)}
                               className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-colors cursor-pointer ${
                                 pkg.unit === u
-                                  ? "bg-[#4CC9FE] text-white font-bold border-[#4CC9FE]"
+                                  ? "btn-primary-pill text-white font-bold border-transparent shadow-xs"
                                   : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100"
                               }`}
                             >
@@ -610,64 +598,70 @@ export function RatesForm({
                         </div>
                       </div>
 
-                      {/* 4 STRUCTURED SCOPE DIMENSIONS */}
-                      <div className="space-y-3 pt-3 border-t border-slate-100 bg-slate-50/60 p-3 rounded-xl border border-slate-200/60">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-700 block">
-                          4 Pilar Lingkup Terstruktur (Scope):
-                        </span>
+                      {/* DETAIL LINGKUP & HAK SIAR (COLLAPSIBLE FOR MAXIMUM CLEANLINESS) */}
+                      <details className="group pt-2 border-t border-slate-100">
+                        <summary className="text-[11px] font-bold text-[#0284c7] hover:text-[#0369a1] cursor-pointer flex items-center justify-between py-1.5 list-none select-none">
+                          <span className="flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-[#4CC9FE]" />
+                            <span>Rincian Lingkup &amp; Lisensi (Opsional)</span>
+                          </span>
+                          <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-open:rotate-180 transition-transform" />
+                        </summary>
 
-                        <div>
-                          <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
-                            ⏱️ 1. Kapasitas Waktu / Shift
-                          </label>
-                          <input
-                            type="text"
-                            value={pkg.capacityDuration || ""}
-                            onChange={(e) => handlePackageChange(idx, "capacityDuration", e.target.value)}
-                            placeholder="Contoh: 4 Jam (Setengah Shift)"
-                            className="w-full px-2.5 py-1.5 rounded-md bg-white border border-slate-200 text-[11px] font-medium text-[#111827] focus:border-[#4CC9FE]"
-                          />
-                        </div>
+                        <div className="space-y-2.5 pt-2 mt-2 bg-slate-50/70 p-3 rounded-xl border border-slate-200/60">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
+                              Durasi Waktu / Shift
+                            </label>
+                            <input
+                              type="text"
+                              value={pkg.capacityDuration || ""}
+                              onChange={(e) => handlePackageChange(idx, "capacityDuration", e.target.value)}
+                              placeholder="mis. 4 Jam (Setengah Shift)"
+                              className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-medium text-[#111827] focus:border-[#4CC9FE] outline-hidden"
+                            />
+                          </div>
 
-                        <div>
-                          <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
-                            📦 2. Deliverables Nyata
-                          </label>
-                          <input
-                            type="text"
-                            value={pkg.deliverablesSummary || ""}
-                            onChange={(e) => handlePackageChange(idx, "deliverablesSummary", e.target.value)}
-                            placeholder="Contoh: 15 Foto Final Retouch + Semua File RAW"
-                            className="w-full px-2.5 py-1.5 rounded-md bg-white border border-slate-200 text-[11px] font-medium text-[#111827] focus:border-[#4CC9FE]"
-                          />
-                        </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
+                              Deliverables Utama
+                            </label>
+                            <input
+                              type="text"
+                              value={pkg.deliverablesSummary || ""}
+                              onChange={(e) => handlePackageChange(idx, "deliverablesSummary", e.target.value)}
+                              placeholder="mis. 15 Foto Retouch + RAW Files"
+                              className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-medium text-[#111827] focus:border-[#4CC9FE] outline-hidden"
+                            />
+                          </div>
 
-                        <div>
-                          <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
-                            ⚖️ 3. Hak Siar / Lisensi IP
-                          </label>
-                          <input
-                            type="text"
-                            value={pkg.usageRights || ""}
-                            onChange={(e) => handlePackageChange(idx, "usageRights", e.target.value)}
-                            placeholder="Contoh: Komersial Digital (Sosmed & Web) 1 Tahun"
-                            className="w-full px-2.5 py-1.5 rounded-md bg-white border border-slate-200 text-[11px] font-medium text-[#111827] focus:border-[#4CC9FE]"
-                          />
-                        </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
+                              Hak Siar / Lisensi
+                            </label>
+                            <input
+                              type="text"
+                              value={pkg.usageRights || ""}
+                              onChange={(e) => handlePackageChange(idx, "usageRights", e.target.value)}
+                              placeholder="mis. Sosmed & Web 1 Tahun"
+                              className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-medium text-[#111827] focus:border-[#4CC9FE] outline-hidden"
+                            />
+                          </div>
 
-                        <div>
-                          <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
-                            🛠️ 4. Peralatan / Fasilitas Terbawa
-                          </label>
-                          <input
-                            type="text"
-                            value={pkg.equipmentIncluded || ""}
-                            onChange={(e) => handlePackageChange(idx, "equipmentIncluded", e.target.value)}
-                            placeholder="Contoh: Kamera Sony A7IV + 2 Lensa + 1 Strobo Kit"
-                            className="w-full px-2.5 py-1.5 rounded-md bg-white border border-slate-200 text-[11px] font-medium text-[#111827] focus:border-[#4CC9FE]"
-                          />
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
+                              Peralatan / Fasilitas Terbawa
+                            </label>
+                            <input
+                              type="text"
+                              value={pkg.equipmentIncluded || ""}
+                              onChange={(e) => handlePackageChange(idx, "equipmentIncluded", e.target.value)}
+                              placeholder="mis. Sony A7IV + 2 Lensa + Strobe Kit"
+                              className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-medium text-[#111827] focus:border-[#4CC9FE] outline-hidden"
+                            />
+                          </div>
                         </div>
-                      </div>
+                      </details>
 
                       {/* EXTRA BULLET POINTS */}
                       <div className="space-y-2 pt-2 border-t border-slate-100">
@@ -745,14 +739,14 @@ export function RatesForm({
         {/* COLLAPSIBLE SPK & TERMS SECTION (CLEAN & STREAMLINED)              */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         <div className="rounded-2xl border border-slate-200 overflow-hidden bg-slate-50/40">
-          <div className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-b border-amber-200/60">
+          <div className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50 border-b border-slate-200">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-amber-700 shrink-0" />
+                <ShieldCheck className="w-5 h-5 text-slate-700 shrink-0" />
                 <h3 className="text-sm font-bold text-[#111827]">
                   Standar Kerja &amp; Proteksi SPK (Otomatis Aktif)
                 </h3>
-                <span className="px-2 py-0.5 rounded-full bg-sky-100 text-[#0284c7] text-[10px] font-black uppercase">
+                <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-black uppercase">
                   Proteksi 2-Arah
                 </span>
               </div>
@@ -873,10 +867,9 @@ export function RatesForm({
                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
                     Tarif Lembur (Overtime / Jam)
                   </label>
-                  <input
-                    type="text"
+                  <CurrencyInput
                     value={terms.overtimeRate}
-                    onChange={(e) => setTerms({ ...terms, overtimeRate: e.target.value })}
+                    onChange={(val) => setTerms({ ...terms, overtimeRate: val })}
                     placeholder="Rp 250.000 / jam"
                     className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-[#111827] focus:outline-none focus:border-[#4CC9FE]"
                   />
@@ -940,10 +933,9 @@ export function RatesForm({
                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
                     Biaya Revisi Tambahan (Over-Limit)
                   </label>
-                  <input
-                    type="text"
-                    value={terms.extraRevisionFee || "Rp 100.000 / foto tambahan"}
-                    onChange={(e) => setTerms({ ...terms, extraRevisionFee: e.target.value })}
+                  <CurrencyInput
+                    value={terms.extraRevisionFee || ""}
+                    onChange={(val) => setTerms({ ...terms, extraRevisionFee: val })}
                     placeholder="Rp 100.000 / foto tambahan"
                     className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-[#111827] focus:outline-none focus:border-[#4CC9FE]"
                   />
@@ -1096,7 +1088,7 @@ export function RatesForm({
                             roleSpecifics: { ...terms.roleSpecifics, pullingDepositResponsibility: e.target.value },
                           })
                         }
-                        placeholder="Biaya sewa/deposit baju desainer dibayarkan langsung oleh klien"
+                        placeholder="Biaya sewa/deposit wardrobe & busana brand dibayarkan langsung oleh klien"
                         className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800"
                       />
                     </div>
@@ -1230,63 +1222,6 @@ export function RatesForm({
                       <label htmlFor="cycloramaShoeTapeRequired" className="text-xs font-bold text-slate-700">
                         Wajib Lakban Khusus Sol Sepatu
                       </label>
-                    </div>
-                  </div>
-                )}
-
-                {/* ROLE: DESIGNER */}
-                {isDesigner && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                        Kebijakan Sesi Fitting Busana
-                      </label>
-                      <input
-                        type="text"
-                        value={terms.roleSpecifics.fittingPolicy || ""}
-                        onChange={(e) =>
-                          setTerms({
-                            ...terms,
-                            roleSpecifics: { ...terms.roleSpecifics, fittingPolicy: e.target.value },
-                          })
-                        }
-                        placeholder="Fitting busana dilakukan H-1 atau di lokasi sebelum sesi dimulai"
-                        className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                        Tanggung Jawab Laundry &amp; Dry Cleaning
-                      </label>
-                      <input
-                        type="text"
-                        value={terms.roleSpecifics.dryCleaningResponsibility || ""}
-                        onChange={(e) =>
-                          setTerms({
-                            ...terms,
-                            roleSpecifics: { ...terms.roleSpecifics, dryCleaningResponsibility: e.target.value },
-                          })
-                        }
-                        placeholder="Biaya laundry/dry cleaning busana pasca-sesi ditanggung oleh klien/peminjam"
-                        className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                        Larangan Modifikasi / Perombakan Busana (No Alteration)
-                      </label>
-                      <input
-                        type="text"
-                        value={terms.roleSpecifics.noAlteringPolicy || ""}
-                        onChange={(e) =>
-                          setTerms({
-                            ...terms,
-                            roleSpecifics: { ...terms.roleSpecifics, noAlteringPolicy: e.target.value },
-                          })
-                        }
-                        placeholder="Dilarang memotong, mengubah jahitan, atau merusak siluet busana tanpa izin tertulis desainer"
-                        className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800"
-                      />
                     </div>
                   </div>
                 )}

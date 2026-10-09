@@ -224,6 +224,7 @@ export async function updateBookingStatus(bookingId: string, status: "ACCEPTED" 
     }
 
     revalidatePath("/dashboard/bookings");
+    revalidatePath("/collaborations");
     revalidatePath(`/dashboard/bookings/${bookingId}`);
     revalidatePath("/dashboard");
     return { success: true };
@@ -499,6 +500,7 @@ export async function cancelBookingRequestAction(bookingId: string, reason?: str
     }
 
     revalidatePath("/dashboard/bookings");
+    revalidatePath("/collaborations");
     revalidatePath(`/dashboard/bookings/${bookingId}`);
     revalidatePath("/dashboard");
 
@@ -638,6 +640,7 @@ export async function rescheduleBookingRequestAction(data: RescheduleBookingData
     }
 
     revalidatePath("/dashboard/bookings");
+    revalidatePath("/collaborations");
     revalidatePath(`/dashboard/bookings/${data.bookingId}`);
     revalidatePath("/dashboard");
 
@@ -717,6 +720,7 @@ export async function completeBookingRequestAction(bookingId: string, notes?: st
     }
 
     revalidatePath("/dashboard/bookings");
+    revalidatePath("/collaborations");
     revalidatePath(`/dashboard/bookings/${bookingId}`);
     revalidatePath("/dashboard");
 
@@ -804,6 +808,7 @@ export async function reportBookingDisputeAction(input: ReportBookingDisputeInpu
 
     revalidatePath(`/dashboard/bookings/${bookingId}`);
     revalidatePath("/dashboard/bookings");
+    revalidatePath("/collaborations");
     return { success: true };
   } catch (error: any) {
     console.error("Error reporting booking dispute:", error);
@@ -921,6 +926,7 @@ export async function submitPaymentSlipAction(payload: PaymentSlipPayload) {
 
     revalidatePath(`/dashboard/bookings/${payload.bookingId}`);
     revalidatePath("/dashboard/bookings");
+    revalidatePath("/collaborations");
     return { success: true, slip: newSlip };
   } catch (error: any) {
     console.error("Error submitting payment slip:", error);
@@ -1003,6 +1009,7 @@ export async function verifyPaymentSlipAction(
 
     revalidatePath(`/dashboard/bookings/${bookingId}`);
     revalidatePath("/dashboard/bookings");
+    revalidatePath("/collaborations");
     return { success: true };
   } catch (error: any) {
     console.error("Error verifying payment slip:", error);

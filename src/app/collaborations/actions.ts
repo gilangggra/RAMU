@@ -58,15 +58,24 @@ async function ensureCollaborationParticipant(collaborationId: string, actorId: 
   return collab;
 }
 
-export async function initiateCollaboration(opportunityId: string) {
+export async function initiateCollaboration(
+  opportunityId: string,
+  proposalData?: {
+    proposedBudget?: string;
+    targetLaunch?: string;
+    costSharingModel?: string;
+    proposalMessage?: string;
+  }
+) {
   const actor = await getPrimaryActor();
 
   try {
-    const res = await initiateCollaborationFromOpportunity(opportunityId, actor.id);
+    const res = await initiateCollaborationFromOpportunity(opportunityId, actor.id, proposalData);
     revalidatePath("/collaborations");
     revalidatePath("/projects");
     revalidatePath(`/opportunities/${opportunityId}`);
     revalidatePath("/dashboard");
+    revalidatePath("/directory");
     return { success: true, collaborationId: res.collaborationId };
   } catch (error) {
     console.error("Error initiating collaboration:", error);

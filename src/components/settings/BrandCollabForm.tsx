@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { updateActorSpecs } from "@/app/settings/actions";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 import {
   Save,
   Loader2,
@@ -47,7 +48,7 @@ const COLLAB_TYPE_OPTIONS = [
     id: "Co-Branding & Kolaborasi Koleksi",
     icon: Handshake,
     title: "Co-Branding & Kolaborasi Koleksi",
-    desc: "Kerjasama desain koleksi bersama antara brand dan kreator/desainer untuk rilis terbatas.",
+    desc: "Kerjasama rilis koleksi bersama antara dua brand atau brand dan kreator untuk edisi terbatas.",
   },
   {
     id: "Casting Open",
@@ -196,11 +197,10 @@ export function BrandCollabForm({
             <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
               Budget / Kompensasi Kreator
             </label>
-            <input
-              type="text"
+            <CurrencyInput
               value={budgetRange}
-              onChange={(e) => setBudgetRange(e.target.value)}
-              placeholder="mis. Rp 1-5 Jt per campaign, atau Sesuai scope brief"
+              onChange={(val) => setBudgetRange(val)}
+              placeholder="Rp 2.500.000 per kampanye"
               className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] text-sm text-slate-800 font-medium transition-colors outline-none"
             />
             <p className="text-[10px] text-slate-400">Estimasi, bukan harga pasti. Bisa berupa range angka atau deskripsi.</p>

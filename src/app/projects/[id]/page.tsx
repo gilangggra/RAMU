@@ -81,7 +81,17 @@ export default async function ProjectBriefDetailPage({
   const allFilled = totalRoles > 0 && filledRoles === totalRoles;
 
   const timeline = (brief.timeline as { estimatedDuration?: string; targetLaunch?: string }) || {};
-  const budget = (brief.budget as { estimatedTotal?: string; notes?: string }) || {};
+  const budget = (brief.budget as { estimatedTotal?: string; notes?: string; roleFees?: Record<string, string> }) || {};
+  const roleFees = budget.roleFees || {};
+
+  const getRoleFee = (role: { roleLabel: string; description?: string | null }) => {
+    if (roleFees[role.roleLabel]) return roleFees[role.roleLabel];
+    if (role.description?.includes("[Estimasi Fee:")) {
+      const match = role.description.match(/\[Estimasi Fee:\s*([^\]]+)\]/);
+      if (match?.[1]) return match[1].trim();
+    }
+    return null;
+  };
 
   const statusBadges: Record<string, { label: string; badge: string; dot: string }> = {
     OPEN: {
@@ -160,7 +170,7 @@ export default async function ProjectBriefDetailPage({
   }
 
   const pageContent = (
-    <div className="space-y-8 max-w-6xl mx-auto pb-16">
+    <div className="space-y-6 w-full max-w-7xl mx-auto pb-16">
       {isGuest && (
         <div className="glass-card p-5 rounded-[22px] bg-amber-500/10 border-amber-400/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
           <div className="space-y-1">
@@ -192,14 +202,13 @@ export default async function ProjectBriefDetailPage({
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
-          <Link href="/projects" className="hover:text-slate-900 font-semibold transition-colors inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white border border-slate-200/80 shadow-2xs">
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Papan Proyek</span>
-          </Link>
-          <span className="text-slate-300">/</span>
-          <span className="text-slate-900 font-semibold">{brief.title}</span>
-        </div>
+        <Link
+          href="/projects"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 hover:bg-white text-slate-700 hover:text-slate-900 text-xs font-semibold border border-slate-200/80 shadow-2xs transition-all"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Kembali ke Papan Proyek</span>
+        </Link>
 
         <div className="flex items-center gap-2.5">
           <ShareProjectButton projectId={brief.id} projectTitle={brief.title} />
@@ -562,6 +571,8 @@ export default async function ProjectBriefDetailPage({
                 const status = userInterest ? userInterest.status : null;
                 const isMatched = matchContext?.roleId === role.id;
 
+                const fee = getRoleFee(role);
+
                 return (
                   <RoleSlot
                     key={role.id}
@@ -570,6 +581,7 @@ export default async function ProjectBriefDetailPage({
                     roleLabel={role.roleLabel}
                     assetCategory={role.assetCategory}
                     description={role.description}
+                    fee={fee}
                     maxCollaborators={role.maxCollaborators}
                     isFilled={role.isFilled}
                     interestCount={role.interests.length}
@@ -668,16 +680,43 @@ export default async function ProjectBriefDetailPage({
             <div className="p-5.5 space-y-3">
               <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <CircleDollarSign className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Skema Nilai & Gotong Royong</span>
+                <span>Skema Honorarium &amp; Anggaran SPK</span>
               </h4>
               <div className="space-y-2.5 pt-1 font-normal">
                 <div className="p-3.5 rounded-2xl bg-white/60 border border-white/80 shadow-2xs">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Estimasi Nilai Proyek</span>
-                  <span className="font-semibold text-slate-900 text-xs">{budget.estimatedTotal || "Model Gotong Royong / Revenue Share"}</span>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Estimasi Total Anggaran</span>
+                  <span className="font-semibold text-slate-900 text-xs">
+                    {budget.estimatedTotal || "Honorarium Flat per Peran"}
+                  </span>
                 </div>
+
+                <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 shadow-2xs space-y-1">
+                  <span className="text-[10px] uppercase font-bold text-emerald-800 tracking-wider block">Ketentuan Termin SPK</span>
+                  <p className="text-xs text-emerald-950 font-medium">
+                    Termin I DP 50% di muka &bull; Termin II Pelunasan 50% setelah deliverable disetujui
+                  </p>
+                </div>
+
+                {brief.neededRoles.some((r) => Boolean(getRoleFee(r))) && (
+                  <div className="p-3.5 rounded-2xl bg-white/60 border border-white/80 shadow-2xs space-y-2">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Rincian Hak per Peran</span>
+                    <div className="divide-y divide-slate-100 text-xs">
+                      {brief.neededRoles.map((r) => {
+                        const fee = getRoleFee(r);
+                        return (
+                          <div key={r.id} className="py-1.5 flex items-center justify-between gap-2">
+                            <span className="text-slate-700 font-medium truncate">{r.roleLabel}</span>
+                            <span className="font-bold text-slate-900 shrink-0">{fee || "Sesuai Negosiasi"}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {budget.notes && (
                   <div className="p-3.5 rounded-2xl bg-white/60 border border-white/80 shadow-2xs">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Catatan Pembagian</span>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Catatan Tambahan Biaya</span>
                     <span className="font-medium text-slate-700 leading-relaxed block text-xs">{budget.notes}</span>
                   </div>
                 )}
@@ -687,10 +726,10 @@ export default async function ProjectBriefDetailPage({
             <div className="p-5.5 space-y-2.5 font-normal">
               <div className="flex items-center gap-2">
                 <Handshake className="w-3.5 h-3.5 text-[#0284c7]" />
-                <p className="text-[11px] font-bold text-slate-900">Prinsip Hak Cipta & Kepemilikan (IP)</p>
+                <p className="text-[11px] font-bold text-slate-900">Perlindungan Kontrak SPK Digital</p>
               </div>
               <p className="text-[11px] text-slate-500 leading-relaxed">
-                Hak cipta orisinal aset tetap dimiliki masing-masing pencipta. Karya hasil kolaborasi dilindungi hak pakai bersama dan membagi dampak ekonomi luaran secara adil.
+                Seluruh kesepakatan honor dan hak guna karya (usage rights) dilindungi secara otomatis melalui draf SPK digital resmi RAMU dengan audit trail terverifikasi.
               </p>
             </div>
           </div>

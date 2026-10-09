@@ -127,6 +127,7 @@
   animation: pulse-glow 3s ease-in-out infinite;
 }
 
+/* Scrollbar styles - soft modern subtle scrollbar, no harsh black bars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -135,20 +136,30 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #252d29;
+  background: #cbd5e1;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #39423d;
+  background: #94a3b8;
 }
 
-/* Utility: hide scrollbar but keep functionality */
-.scrollbar-none {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+/* Firefox scrollbar */
+* {
+  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-width: thin;
 }
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
+
+/* Utility: hide scrollbar completely but keep smooth scroll functionality */
+.scrollbar-none,
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* ==========================================================================

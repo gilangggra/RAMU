@@ -97,7 +97,7 @@ export function RamuLogo({
         <div className="space-y-0.5">
           <span
             className={`block font-black tracking-[0.16em] leading-none ${
-              isWhite ? "text-white" : "text-stone-900"
+              isWhite ? "text-white" : "text-slate-900"
             }`}
             style={{ fontSize: Math.max(15, Math.round(height * 0.55)) }}
           >
@@ -106,7 +106,7 @@ export function RamuLogo({
           {subtitle && (
             <span
               className={`block font-semibold uppercase tracking-[0.2em] text-[9px] ${
-                isWhite ? "text-stone-400" : "text-stone-500"
+                isWhite ? "text-slate-400" : "text-slate-500"
               }`}
             >
               {typeof subtitle === "string" ? subtitle : "Platform Industri Kreatif"}
@@ -126,18 +126,18 @@ export function RamuLogo({
           <div className="flex items-center gap-2">
             <span
               className={`font-black tracking-[0.12em] leading-none ${
-                isWhite ? "text-white" : "text-stone-900"
+                isWhite ? "text-white" : "text-slate-900"
               }`}
               style={{ fontSize: Math.max(16, Math.round(height * 0.54)) }}
             >
               RAMU
             </span>
-            <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-md bg-stone-100 text-stone-700 border border-stone-200 shrink-0">
+            <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-md bg-sky-50 text-[#0284c7] border border-sky-200/60 shrink-0">
               Ecosystem
             </span>
           </div>
           {subtitle && (
-            <p className="text-[10px] text-stone-500 font-medium tracking-wider uppercase mt-0.5 truncate">
+            <p className="text-[10px] text-slate-500 font-medium tracking-wider uppercase mt-0.5 truncate">
               {typeof subtitle === "string" ? subtitle : "Platform Industri Kreatif"}
             </p>
           )}

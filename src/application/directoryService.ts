@@ -73,21 +73,21 @@ export async function getDirectoryActors(params: DirectoryFilterParams = {}) {
           { sector: { contains: "Tata Rias", mode: "insensitive" } },
         ],
       });
-    } else if (sLower.includes("brand") || sLower.includes("umkm") || sLower.includes("label")) {
+    } else if (
+      sLower.includes("brand") ||
+      sLower.includes("umkm") ||
+      sLower.includes("label") ||
+      sLower.includes("design") ||
+      sLower.includes("desain")
+    ) {
       andConditions.push({
         OR: [
           { sector: { contains: "Brand", mode: "insensitive" } },
           { sector: { contains: "UMKM", mode: "insensitive" } },
           { sector: { contains: "Label", mode: "insensitive" } },
-          { actorType: ActorType.BRAND },
-        ],
-      });
-    } else if (sLower.includes("design") || sLower.includes("desain")) {
-      andConditions.push({
-        OR: [
           { sector: { contains: "Designer", mode: "insensitive" } },
           { sector: { contains: "Desain", mode: "insensitive" } },
-          { sector: { contains: "Fashion Designer", mode: "insensitive" } },
+          { actorType: ActorType.BRAND },
         ],
       });
     } else if (sLower.includes("photo") || sLower.includes("foto")) {

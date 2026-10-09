@@ -32,7 +32,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
   const error = params.error;
 
   const userInitialName = user.user_metadata?.display_name || "";
-  const userInitialRole = user.user_metadata?.role || "Fashion Designer / Label";
+  const userInitialRole = user.user_metadata?.role || "Fashion Brand/UMKM";
   const userInitialLocation = user.user_metadata?.location || "Jakarta Selatan, Indonesia";
 
   const popularLocations = [
@@ -48,7 +48,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFE9DE] via-[#F3EDFF] via-60% to-[#E2F4FD] text-[#27213D] relative overflow-hidden selection:bg-[#FFB800]/40 selection:text-[#27213D] flex flex-col justify-between">
+    <div className="min-h-screen bg-gradient-to-br from-[#FFE9DE] via-[#F3EDFF] via-60% to-[#E2F4FD] text-[#0f172a] relative overflow-hidden selection:bg-[#FFB800]/40 selection:text-[#0f172a] flex flex-col justify-between">
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute -top-32 -left-32 w-[600px] h-[600px] bg-[#FFE4D6] rounded-full blur-[130px] opacity-70" />
         <div className="absolute top-1/3 -right-32 w-[600px] h-[600px] bg-[#EDE8FF] rounded-full blur-[140px] opacity-80" />
@@ -70,26 +70,26 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
       <Navbar />
 
       <div className="relative z-10 w-full max-w-2xl mx-auto pt-32 pb-16 md:pt-40 md:pb-24 px-4 sm:px-6 my-auto">
-        <div className="bg-white/95 backdrop-blur-md rounded-[36px] p-8 sm:p-11 shadow-[0_24px_64px_rgba(39,33,61,0.08)] border border-white/80 relative overflow-hidden">
-          <div className="absolute top-4 left-4 text-[10px] font-mono font-bold text-[#27213D]/20 select-none">┌</div>
-          <div className="absolute top-4 right-4 text-[10px] font-mono font-bold text-[#27213D]/20 select-none">┐</div>
-          <div className="absolute bottom-4 left-4 text-[10px] font-mono font-bold text-[#27213D]/20 select-none">└</div>
-          <div className="absolute bottom-4 right-4 text-[10px] font-mono font-bold text-[#27213D]/20 select-none">┘</div>
+        <div className="bg-white/95 backdrop-blur-md rounded-[22px] p-8 sm:p-11 shadow-[0_24px_64px_rgba(39,33,61,0.08)] border border-white/80 relative overflow-hidden">
+          <div className="absolute top-4 left-4 text-[10px] font-mono font-bold text-[#0f172a]/20 select-none">┌</div>
+          <div className="absolute top-4 right-4 text-[10px] font-mono font-bold text-[#0f172a]/20 select-none">┐</div>
+          <div className="absolute bottom-4 left-4 text-[10px] font-mono font-bold text-[#0f172a]/20 select-none">└</div>
+          <div className="absolute bottom-4 right-4 text-[10px] font-mono font-bold text-[#0f172a]/20 select-none">┘</div>
 
           <div className="flex items-center justify-between mb-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold uppercase tracking-wider text-[#27213D] shadow-xs">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF7ED] border border-[#F9D8C4] text-xs font-bold uppercase tracking-wider text-[#0f172a] shadow-xs">
               <Sparkles className="w-3.5 h-3.5 text-[#E59F00]" />
               <span>Profil Kreator & Aset</span>
             </div>
-            <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-[#FAF8F5] border border-stone-200 text-[#27213D]">
+            <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-[#FAF8F5] border border-slate-200 text-[#0f172a]">
               Tahap 2 / 2
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#27213D] tracking-tight mb-1.5">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight mb-1.5">
             Lengkapi Profil Kreatif Fashion & Visual
           </h1>
-          <p className="text-xs sm:text-sm text-[#716B7E] mb-6 leading-relaxed">
+          <p className="text-xs sm:text-sm text-[#475569] mb-6 leading-relaxed">
             Identitas brand, keahlian, dan kapasitas studio Anda diselaraskan oleh Engine RAMU untuk meramu tim kolaborasi editorial dan lookbook.
           </p>
 
@@ -103,15 +103,15 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
         </div>
       </div>
 
-      <footer className="relative z-10 border-t border-stone-200/60 py-6 text-center text-xs text-[#716B7E] bg-white/40 backdrop-blur-xs">
+      <footer className="relative z-10 border-t border-slate-200/60 py-6 text-center text-xs text-[#475569] bg-white/40 backdrop-blur-xs">
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>&copy; {new Date().getFullYear()} RAMU — Platform Kolaborasi Berbasis Komplementaritas Resource. Hak cipta dilindungi.</span>
           <div className="flex items-center gap-4 text-[11px]">
-            <Link href="/" className="hover:text-[#27213D]">Beranda</Link>
+            <Link href="/" className="hover:text-[#0f172a]">Beranda</Link>
             <span>•</span>
-            <Link href="/#how-it-works" className="hover:text-[#27213D]">Cara Kerja</Link>
+            <Link href="/#how-it-works" className="hover:text-[#0f172a]">Cara Kerja</Link>
             <span>•</span>
-            <Link href="/dashboard" className="hover:text-[#27213D]">Dashboard</Link>
+            <Link href="/dashboard" className="hover:text-[#0f172a]">Dashboard</Link>
           </div>
         </div>
       </footer>

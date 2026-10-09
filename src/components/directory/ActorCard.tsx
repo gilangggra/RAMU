@@ -264,12 +264,17 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
     sectorLower.includes("cinema")
   ) {
     startingRate = "Mulai Rp 1,8 Jt / video";
-  } else if (sectorLower.includes("designer") || sectorLower.includes("desain")) {
-    startingRate = "Mulai Rp 2,5 Jt / koleksi";
+  } else if (
+    actor.actorType === "BRAND" ||
+    (actor.actorType as string) === "MSME" ||
+    sectorLower.includes("brand") ||
+    sectorLower.includes("label") ||
+    sectorLower.includes("designer") ||
+    sectorLower.includes("desain")
+  ) {
+    startingRate = "Kemitraan & Produksi";
   } else if (sectorLower.includes("fotografi") || sectorLower.includes("photographer")) {
     startingRate = "Mulai Rp 1,5 Jt / sesi";
-  } else if (actor.actorType === "BRAND" || (actor.actorType as string) === "MSME") {
-    startingRate = "Katalog & Produksi";
   }
 
   const customServiceAsset = actor.assets.find(
@@ -342,7 +347,7 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
           {/* Complementarity Score or Status Badge */}
           {hasScore ? (
             <span
-              title={`Kecocokan AI ${complementarityScore}% dengan kebutuhan & brief aktif Anda`}
+              title={`Skor Kompatibilitas ${complementarityScore}% dengan kebutuhan & brief aktif Anda`}
               className="px-2 py-0.5 rounded-md bg-emerald-50/95 backdrop-blur-md text-emerald-800 border border-emerald-200/70 text-[10px] font-bold flex items-center gap-1 shadow-2xs"
             >
               <Zap className="w-2.5 h-2.5 text-emerald-600" />

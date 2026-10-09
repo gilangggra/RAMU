@@ -62,11 +62,11 @@ async function main() {
       {
         actorId: nala.id,
         category: AssetCategory.WARDROBE_PROP,
-        subtype: "Sisa Kain & Material Deadstock",
-        name: "Sisa Kain Produksi & Material Deadstock Berkualitas",
-        description: "Sisa material dari koleksi sebelumnya yang masih bisa di-upcycle atau dijadikan aksen",
-        roles: [AssetRole.INPUT, AssetRole.COMPONENT],
-        attributes: { capacity: 50, unit: "kg/bulan" },
+        subtype: "Sampel Busana Koleksi",
+        name: "Koleksi Sampel Busana Ready-to-Wear (15 Looks)",
+        description: "Sampel busana lengkap siap fitting untuk pemotretan katalog editorial dan kampanye komersial",
+        roles: [AssetRole.INPUT, AssetRole.COMPONENT, AssetRole.CREATIVE_ELEMENT],
+        attributes: { sample_sizes: "S, M, L", total_looks: 15 },
         sourceType: SourceType.SELF_REPORTED,
         confidenceLevel: ConfidenceLevel.HIGH,
         status: AssetStatus.ACTIVE,
@@ -74,9 +74,9 @@ async function main() {
       {
         actorId: nala.id,
         category: AssetCategory.SKILL_TALENT,
-        subtype: "Desain Fashion",
-        name: "Desain Fashion & Pattern Making",
-        description: "Tim desainer berpengalaman dalam merancang pola siluet kontemporer",
+        subtype: "Arahan Kreatif Brand",
+        name: "Arahan Estetika & DNA Koleksi Brand",
+        description: "Pengarah gaya dan identitas estetika koleksi busana siap rilis komersial",
         roles: [AssetRole.CAPABILITY, AssetRole.ENABLER],
         attributes: { team_size: 4, experience_years: 5 },
         sourceType: SourceType.SELF_REPORTED,
@@ -420,23 +420,23 @@ async function main() {
   console.log(`✓ Aktor selesai: ${model.name}`);
 
   // ─────────────────────────────────────
-  // 7. Actor: Atelier Nara (Fashion Designer)
+  // 7. Actor: Atelier Nara (Fashion Brand/UMKM)
   // ─────────────────────────────────────
   const designer = await prisma.actor.upsert({
     where: { id: "00000000-0000-0000-0000-000000000006" },
     update: {
-      sector: "Fashion Designer",
-      actorType: ActorType.INDIVIDUAL,
+      sector: "Fashion Brand/UMKM",
+      actorType: ActorType.BRAND,
     },
     create: {
       id: "00000000-0000-0000-0000-000000000006",
       ownerUserId: demoProfile.id,
       name: "Atelier Nara",
-      actorType: ActorType.INDIVIDUAL,
-      sector: "Fashion Designer",
+      actorType: ActorType.BRAND,
+      sector: "Fashion Brand/UMKM",
       location: "Bandung, Jawa Barat",
       description:
-        "Perancang busana avant-garde dan pattern maker independen yang merancang siluet kontemporer dengan bahan silk organza dan tenun.",
+        "Label busana avant-garde independen yang merancang siluet kontemporer dengan bahan silk organza dan tenun untuk pemotretan editorial dan runway.",
       contactEmail: "nara@ateliernara.design",
       status: ActorStatus.ACTIVE,
     },
@@ -461,8 +461,8 @@ async function main() {
   });
   console.log(`✓ Aktor selesai: ${designer.name}`);
 
-  console.log("\n[SEED] Seeding 6 Aktor Resmi RAMU selesai!");
-  console.log("   6 Aktor: Fashion Brand/UMKM, Fashion Designer, Photographer, Model, MUA/Stylist, Studio.");
+  console.log("\n[SEED] Seeding 5 Role Resmi RAMU selesai!");
+  console.log("   5 Role: Fashion Brand/UMKM, Photographer, Model, MUA/Stylist, Studio.");
 }
 
 main()

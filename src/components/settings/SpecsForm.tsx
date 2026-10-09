@@ -3,6 +3,7 @@
 import React, { useState, useRef } from "react";
 import { updateActorSpecs } from "@/app/settings/actions";
 import { ROLE_SPECS_PRESETS } from "@/lib/constants/roleSpecs";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 import {
   Save,
   Loader2,
@@ -106,11 +107,11 @@ function TagInputWithSuggestions({
 
       {/* Selected tags */}
       {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-200">
+        <div className="flex flex-wrap gap-1.5 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
           {tags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold bg-[#4CC9FE] text-white font-bold"
+              className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold btn-primary-pill text-white rounded-full shadow-xs"
             >
               <span>{tag}</span>
               <button
@@ -139,7 +140,7 @@ function TagInputWithSuggestions({
         <button
           type="button"
           onClick={addCustomTag}
-          className="px-3.5 py-2 bg-slate-200 text-slate-800 text-xs font-bold hover:bg-slate-300 transition-colors cursor-pointer"
+          className="px-4 py-2 rounded-xl btn-primary-pill text-white text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95"
         >
           + Tambah
         </button>
@@ -159,9 +160,9 @@ function TagInputWithSuggestions({
                   key={sug}
                   type="button"
                   onClick={() => toggleTag(sug)}
-                  className={`text-[11px] font-semibold px-2.5 py-1 border transition-all cursor-pointer ${
+                  className={`text-[11px] font-semibold px-3 py-1 rounded-full border transition-all cursor-pointer ${
                     isSelected
-                      ? "bg-[#4CC9FE] text-white font-bold border-[#4CC9FE]"
+                      ? "btn-primary-pill text-white font-bold border-transparent shadow-xs"
                       : "bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:text-slate-900"
                   }`}
                 >
@@ -202,15 +203,16 @@ export function SpecsForm({
     actorType === "COLLECTIVE" ||
     sectorLower.includes("brand") ||
     sectorLower.includes("label") ||
-    sectorLower.includes("agency");
+    sectorLower.includes("agency") ||
+    sectorLower.includes("designer") ||
+    sectorLower.includes("desain");
 
   const isModel = !isBrand && (sectorLower.includes("model") || sectorLower.includes("talent"));
   const isPhotographer = !isBrand && (sectorLower.includes("photographer") || sectorLower.includes("fotografi"));
   const isVideographer = !isBrand && (sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema"));
   const isMUA = !isBrand && (sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair"));
   const isStylist = !isBrand && (sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));
-  const isDesigner = !isBrand && (sectorLower.includes("designer") || sectorLower.includes("desain"));
-  const isStudio = !isBrand && !isModel && !isPhotographer && !isVideographer && !isMUA && !isStylist && !isDesigner && (actorType === "STUDIO" || sectorLower.includes("studio"));
+  const isStudio = !isBrand && !isModel && !isPhotographer && !isVideographer && !isMUA && !isStylist && (actorType === "STUDIO" || sectorLower.includes("studio"));
 
   const attrs = initialAttributes || {};
 
@@ -287,51 +289,46 @@ export function SpecsForm({
   }
 
   return (
-    <div className={`bg-white rounded-xl ${embedded ? "border-0" : "border border-slate-200 shadow-xs"} overflow-hidden`}>
+    <div className={`bg-white rounded-[22px] ${embedded ? "border-0" : "border border-slate-200/90 shadow-2xs"} overflow-hidden`}>
       {/* HEADER SECTION */}
       <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/50">
         <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
           {isPhotographer && (
-            <span className="text-emerald-700 bg-emerald-50 px-2.5 py-0.5 border border-emerald-200">
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider btn-primary-pill text-white shadow-xs">
               Fotografi &amp; Tata Cahaya
             </span>
           )}
           {isStudio && (
-            <span className="text-blue-700 bg-blue-50 px-2.5 py-0.5 border border-blue-200">
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider btn-primary-pill text-white shadow-xs">
               Spesifikasi Ruang Studio &amp; Cyclorama
             </span>
           )}
           {isBrand && (
-            <span className="text-amber-800 bg-amber-50 px-2.5 py-0.5 border border-amber-200">
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider btn-primary-pill text-white shadow-xs">
               Brand Fesyen / UMKM Ekosistem
             </span>
           )}
           {isModel && (
-            <span className="text-purple-700 bg-purple-50 px-2.5 py-0.5 border border-purple-200">
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider btn-primary-pill text-white shadow-xs">
               Comp Card &amp; Standar Agensi Model
             </span>
           )}
           {isMUA && (
-            <span className="text-rose-700 bg-rose-50 px-2.5 py-0.5 border border-rose-200">
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider btn-primary-pill text-white shadow-xs">
               Makeup &amp; Hair Styling Studio
             </span>
           )}
           {isStylist && (
-            <span className="text-indigo-700 bg-indigo-50 px-2.5 py-0.5 border border-indigo-200">
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider btn-primary-pill text-white shadow-xs">
               Wardrobe Styling &amp; Kurasi
             </span>
           )}
-          {isDesigner && (
-            <span className="text-pink-700 bg-pink-50 px-2.5 py-0.5 border border-pink-200">
-              Atelier &amp; Desain Busana
-            </span>
-          )}
           {isVideographer && (
-            <span className="text-cyan-700 bg-cyan-50 px-2.5 py-0.5 border border-cyan-200">
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider btn-primary-pill text-white shadow-xs">
               Sinematografi &amp; Cinema Gear
             </span>
           )}
-          <span>{actorSector}</span>
+          <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">{actorSector}</span>
         </div>
 
         <h2 className="text-xl font-bold text-[#111827]">
@@ -347,15 +344,13 @@ export function SpecsForm({
             ? `Kit Rias, Sanitasi & Kapasitas On-Set ${actorName}`
             : isStylist
             ? `Inventaris Styling & Wardrobe Equipment ${actorName}`
-            : isDesigner
-            ? `Kapasitas Atelier, Pola & Koleksi Sampel ${actorName}`
             : isVideographer
             ? `Cinema Camera Suite & Audio Kit ${actorName}`
             : `Spesifikasi Kolaborasi ${actorName}`}
         </h2>
 
         <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-          RAMU menggunakan triad spesifikasi (Kapabilitas, Sumber Daya Fisik, dan Batasan Operasional) agar sistem pencocokan kolaborasi dapat menghitung kompatibilitas proyek secara akurat dan transparan.
+          Lengkapi spesifikasi teknis, peralatan, dan kapasitas kerja Anda untuk mempermudah kecocokan proyek.
         </p>
       </div>
 
@@ -429,7 +424,7 @@ export function SpecsForm({
                     defaultValue={attrs.primary_camera || "Sony A7 IV"}
                     placeholder="Sony A7 IV / Canon EOS R5 / Hasselblad"
                     required
-                    className="w-full px-4 py-2.5 bg-white border border-slate-200 focus:border-[#4CC9FE] text-xs font-medium text-slate-800"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                   <div className="flex flex-wrap gap-1 pt-1">
                     {ROLE_SPECS_PRESETS.PHOTOGRAPHER.quickCameras.slice(0, 4).map((cam) => (
@@ -440,7 +435,7 @@ export function SpecsForm({
                           const el = document.getElementById("primary_camera") as HTMLInputElement;
                           if (el) el.value = cam;
                         }}
-                        className="text-[10px] px-2 py-0.5 bg-white border border-slate-200 hover:border-slate-400 text-slate-600"
+                        className="text-[10px] px-2.5 py-1 rounded-full bg-white border border-slate-200 hover:border-[#4CC9FE] hover:text-[#0284c7] text-slate-600 transition-all cursor-pointer shadow-2xs"
                       >
                         + {cam}
                       </button>
@@ -458,7 +453,7 @@ export function SpecsForm({
                     name="secondary_camera"
                     defaultValue={attrs.secondary_camera || ""}
                     placeholder="Sony A7 III / Canon EOS R6"
-                    className="w-full px-4 py-2.5 bg-white border border-slate-200 focus:border-[#4CC9FE] text-xs font-medium text-slate-800"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                   <span className="text-[10px] text-slate-400">Jaminan kelancaran saat kamera utama kendala</span>
                 </div>
@@ -481,7 +476,7 @@ export function SpecsForm({
               />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <label className="flex items-center gap-2 p-3 bg-white border border-slate-200 cursor-pointer hover:bg-slate-50">
+                <label className="flex items-center gap-2.5 p-3.5 rounded-xl bg-white border border-slate-200 hover:border-[#4CC9FE]/40 cursor-pointer hover:bg-slate-50/50 transition-all shadow-2xs">
                   <input
                     type="checkbox"
                     name="tethering_available"
@@ -495,7 +490,7 @@ export function SpecsForm({
                   </div>
                 </label>
 
-                <label className="flex items-center gap-2 p-3 bg-white border border-slate-200 cursor-pointer hover:bg-slate-50">
+                <label className="flex items-center gap-2.5 p-3.5 rounded-xl bg-white border border-slate-200 hover:border-[#4CC9FE]/40 cursor-pointer hover:bg-slate-50/50 transition-all shadow-2xs">
                   <input
                     type="checkbox"
                     name="drone_aerial"
@@ -531,7 +526,7 @@ export function SpecsForm({
                     name="shooting_duration_shift"
                     defaultValue={attrs.shooting_duration_shift || "4 Jam (Half-Day) / 8 Jam (Full-Day)"}
                     placeholder="Contoh: 4 Jam Half-Day"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -545,7 +540,7 @@ export function SpecsForm({
                     name="max_people_onset"
                     defaultValue={attrs.max_people_onset || 8}
                     placeholder="8"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -559,7 +554,7 @@ export function SpecsForm({
                     name="delivery_time_days"
                     defaultValue={attrs.delivery_time_days || 3}
                     placeholder="3"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
               </div>
@@ -601,7 +596,7 @@ export function SpecsForm({
                     defaultValue={attrs.area_sqm || 120}
                     placeholder="120"
                     required
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -617,7 +612,7 @@ export function SpecsForm({
                     defaultValue={attrs.ceiling_height_m || 4.5}
                     placeholder="4.5"
                     required
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -631,7 +626,7 @@ export function SpecsForm({
                     name="cyclorama_type"
                     defaultValue={attrs.cyclorama_type || "3-Wall Seamless Curve (White)"}
                     placeholder="3-Wall Seamless Curve (White)"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
               </div>
@@ -665,7 +660,7 @@ export function SpecsForm({
                     name="electrical_capacity"
                     defaultValue={attrs.electrical_capacity || "16.500 Watt (3-Phase)"}
                     placeholder="16.500 Watt (3-Phase)"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -722,7 +717,7 @@ export function SpecsForm({
                     name="max_people_capacity"
                     defaultValue={attrs.max_people_capacity || 15}
                     placeholder="15"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -736,7 +731,7 @@ export function SpecsForm({
                     name="operating_hours"
                     defaultValue={attrs.operating_hours || "08:00 – 22:00 WIB (Setiap Hari)"}
                     placeholder="08:00 – 22:00 WIB"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -750,7 +745,7 @@ export function SpecsForm({
                     name="overtime_policy"
                     defaultValue={attrs.overtime_policy || "Toleransi 15 Menit, Overtime Rp 150.000 / 30 Menit"}
                     placeholder="Toleransi 15 menit..."
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
               </div>
@@ -806,7 +801,7 @@ export function SpecsForm({
                   rows={2}
                   defaultValue={attrs.design_dna || "Minimalist Modern Silhouettes dengan Sentuhan Wastra Tenun Kontemporer"}
                   placeholder="Ceritakan estetika utama, siluet, dan filosofi rancangan brand Anda..."
-                  className="w-full px-4 py-2.5 bg-white border border-slate-200 text-xs font-medium text-slate-800 leading-relaxed"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden leading-relaxed"
                 />
               </div>
             </div>
@@ -831,7 +826,7 @@ export function SpecsForm({
                     name="sample_sizes_ready"
                     defaultValue={attrs.sample_sizes_ready || "S, M (Siap Fitting On-Set)"}
                     placeholder="S, M / All-size"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -845,7 +840,7 @@ export function SpecsForm({
                     name="sample_skus_count"
                     defaultValue={attrs.sample_skus_count || 15}
                     placeholder="15"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -859,7 +854,7 @@ export function SpecsForm({
                     name="capacity_monthly"
                     defaultValue={attrs.capacity_monthly || "500 - 1.000 Pcs / Bulan"}
                     placeholder="500 - 1.000 Pcs"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
               </div>
@@ -887,7 +882,7 @@ export function SpecsForm({
                 name="collaboration_needs"
                 initialValues={attrs.collaboration_needs || ["Photographer", "Model", "MUA/Stylist", "Studio"]}
                 suggestions={ROLE_SPECS_PRESETS.BRAND.quickCollabNeeds}
-                placeholder="Photographer, Model, MUA, Studio, Designer..."
+                placeholder="Photographer, Model, MUA, Stylist, Studio..."
               />
 
               <TagInputWithSuggestions
@@ -903,13 +898,12 @@ export function SpecsForm({
                   <label htmlFor="budget_range" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Rentang Anggaran Kolaborasi (Rp)
                   </label>
-                  <input
-                    type="text"
+                  <CurrencyInput
                     id="budget_range"
                     name="budget_range"
                     defaultValue={attrs.budget_range || "Rp 5.000.000 – Rp 15.000.000 per Kampanye"}
                     placeholder="Rp 5.000.000 – Rp 15.000.000"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -923,7 +917,7 @@ export function SpecsForm({
                     name="collab_timeline"
                     defaultValue={attrs.collab_timeline || "2 – 4 Minggu dari Brief hingga Peluncuran"}
                     placeholder="2 – 4 Minggu"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
               </div>
@@ -957,7 +951,7 @@ export function SpecsForm({
                     defaultValue={attrs.height_cm || 175}
                     placeholder="175"
                     required
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -971,7 +965,7 @@ export function SpecsForm({
                     name="weight_kg"
                     defaultValue={attrs.weight_kg || 52}
                     placeholder="52"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -986,7 +980,7 @@ export function SpecsForm({
                     defaultValue={attrs.bust_waist_hips || "84-60-89 cm"}
                     placeholder="84-60-89 cm"
                     required
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -1001,7 +995,7 @@ export function SpecsForm({
                     defaultValue={attrs.clothing_size || "S / 36 EU"}
                     placeholder="S / 36 EU"
                     required
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -1016,7 +1010,7 @@ export function SpecsForm({
                     defaultValue={attrs.shoe_size || "39 EU"}
                     placeholder="39 EU"
                     required
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -1030,7 +1024,7 @@ export function SpecsForm({
                     name="experience_years"
                     defaultValue={attrs.experience_years || 4}
                     placeholder="4"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
               </div>
@@ -1100,7 +1094,7 @@ export function SpecsForm({
                       name={`polaroid_caption_${idx}`}
                       defaultValue={slot.caption}
                       placeholder={`Keterangan ${slot.type}`}
-                      className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 text-[11px] font-medium text-slate-800"
+                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                     />
                   </div>
                 ))}
@@ -1142,7 +1136,7 @@ export function SpecsForm({
                   name="wardrobe_restrictions"
                   defaultValue={attrs.wardrobe_restrictions || "Casual, Formal, Modest (No Swimwear / No Sheer)"}
                   placeholder="Casual, Formal, Modest / Hijab..."
-                  className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                 />
                 <div className="flex flex-wrap gap-1 pt-1">
                   {ROLE_SPECS_PRESETS.MODEL.quickWardrobePolicies.map((pol) => (
@@ -1153,7 +1147,7 @@ export function SpecsForm({
                         const el = document.getElementById("wardrobe_restrictions") as HTMLInputElement;
                         if (el) el.value = pol;
                       }}
-                      className="text-[10px] px-2 py-0.5 bg-white border border-slate-200 hover:border-slate-400 text-slate-600"
+                      className="text-[10px] px-2.5 py-1 rounded-full bg-white border border-slate-200 hover:border-[#4CC9FE] hover:text-[#0284c7] text-slate-600 transition-all cursor-pointer shadow-2xs"
                     >
                       + {pol}
                     </button>
@@ -1172,7 +1166,7 @@ export function SpecsForm({
                     name="travel_radius"
                     defaultValue={attrs.travel_radius || "Jabodetabek & Luar Kota dengan Akomodasi"}
                     placeholder="Jabodetabek / Seluruh Indonesia"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -1265,7 +1259,7 @@ export function SpecsForm({
                       : "Disinfektan Kuas 70% Alkohol, Palet Stainless Steel, Aplikator Sekali Pakai (Disposable)"
                   }
                   placeholder="Disinfektan Kuas 70% Alkohol..."
-                  className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                 />
               </div>
             </div>
@@ -1290,7 +1284,7 @@ export function SpecsForm({
                     name="max_heads_per_session"
                     defaultValue={attrs.max_heads_per_session || 3}
                     placeholder="3"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -1304,7 +1298,7 @@ export function SpecsForm({
                     name="prep_time_minutes"
                     defaultValue={attrs.prep_time_minutes || 90}
                     placeholder="90"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -1318,159 +1312,15 @@ export function SpecsForm({
                     name="touchup_standby_hours"
                     defaultValue={attrs.touchup_standby_hours || 8}
                     placeholder="8"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
               </div>
             </div>
           </div>
         )}
-
         {/* ─────────────────────────────────────────────────────────────────── */}
-        {/* 6. FASHION DESIGNER SPECIFICATIONS                                 */}
-        {/* ─────────────────────────────────────────────────────────────────── */}
-        {isDesigner && (
-          <div className="space-y-8">
-            {/* SEKSI 1: DESIGN DISCIPLINES */}
-            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
-                <Scissors className="w-4 h-4 text-pink-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
-                  1. Disiplin Desain Busana &amp; DNA Atelier
-                </h3>
-              </div>
-
-              <TagInputWithSuggestions
-                label="Spesialisasi Desain Busana"
-                name="specialties"
-                initialValues={attrs.specialties || attrs.design_disciplines || ["Apparel Ready-to-Wear", "Contemporary Couture", "Wastra Nusantara & Batik"]}
-                suggestions={ROLE_SPECS_PRESETS.DESIGNER.quickSpecialties}
-                placeholder="Ready-to-Wear, Contemporary Couture, Wastra..."
-              />
-
-              <TagInputWithSuggestions
-                label="Kapabilitas Teknis Perancangan"
-                name="capabilities"
-                initialValues={attrs.capabilities || ["Moodboard & Trend Research", "Digital 2D Tech-Pack", "Pola Presisi (Pattern Making)", "Sampel Fisik Busana (Toille)"]}
-                suggestions={ROLE_SPECS_PRESETS.DESIGNER.quickCapabilities}
-                placeholder="Moodboard, Tech-Pack, Pola Presisi, Toille..."
-              />
-
-              <div className="space-y-1.5">
-                <label htmlFor="style_dna" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  DNA Desain &amp; Karakter Siluet
-                </label>
-                <textarea
-                  id="style_dna"
-                  name="style_dna"
-                  rows={2}
-                  defaultValue={attrs.style_dna || "Siluet Deconstructed dengan Sentuhan Draping Wastra & Palet Earth-Tone"}
-                  placeholder="Deskripsikan karakter siluet, estetika, dan DNA desain Anda..."
-                  className="w-full px-4 py-2.5 bg-white border border-slate-200 text-xs font-medium text-slate-800 leading-relaxed"
-                />
-              </div>
-            </div>
-
-            {/* SEKSI 2: WORKSHOP & SAMPLE ARCHIVE */}
-            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
-                <Layers className="w-4 h-4 text-pink-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
-                  2. Sumber Daya Workshop, Material &amp; Koleksi Sampel
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <label className="flex items-center gap-2 p-3 bg-white border border-slate-200 cursor-pointer hover:bg-slate-50">
-                  <input
-                    type="checkbox"
-                    name="sample_collection_ready"
-                    value="true"
-                    defaultChecked={Boolean(attrs.sample_collection_ready !== false)}
-                    className="w-4 h-4 rounded-md accent-[#0284c7]"
-                  />
-                  <div className="text-xs font-bold text-[#111827]">
-                    Menyediakan Sampel Siap Dipinjamkan (Wardrobe Pulling)
-                    <span className="block text-[10px] font-normal text-slate-400">Untuk pemotretan lookbook brand partner &amp; editorial</span>
-                  </div>
-                </label>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="sample_portfolio_count" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Jumlah Arsip Busana Siap Pakai (Look)
-                  </label>
-                  <input
-                    type="number"
-                    id="sample_portfolio_count"
-                    name="sample_portfolio_count"
-                    defaultValue={attrs.sample_portfolio_count || 25}
-                    placeholder="25"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
-                  />
-                </div>
-              </div>
-
-              <TagInputWithSuggestions
-                label="Material &amp; Kain yang Sering Diolah"
-                name="materials_swatches"
-                initialValues={attrs.materials_swatches || ["Kain Tenun Lurik & Sutra", "Linen Premium Import", "Deadstock Eco-Fabric"]}
-                suggestions={ROLE_SPECS_PRESETS.DESIGNER.quickMaterials}
-                placeholder="Tenun Lurik, Linen Premium, Deadstock Eco-Fabric..."
-              />
-            </div>
-
-            {/* SEKSI 3: PRODUCTION CAPACITY & COLLAB */}
-            <div className="p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/80 space-y-5 text-[#111827]">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
-                <Clock className="w-4 h-4 text-pink-700" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#111827]">
-                  3. Kapasitas Produksi &amp; Format Kolaborasi
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label htmlFor="sample_turnaround_days" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Turnaround Sampel Prototipe (Hari)
-                  </label>
-                  <input
-                    type="text"
-                    id="sample_turnaround_days"
-                    name="sample_turnaround_days"
-                    defaultValue={attrs.sample_turnaround_days || "7 – 14 Hari Kerja per Prototipe"}
-                    placeholder="7 – 14 Hari Kerja"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="batch_production_capacity" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Kapasitas Batch Produksi Busana
-                  </label>
-                  <input
-                    type="text"
-                    id="batch_production_capacity"
-                    name="batch_production_capacity"
-                    defaultValue={attrs.batch_production_capacity || "100 – 300 Pcs per Batch Koleksi Kapsul"}
-                    placeholder="100 – 300 Pcs per Batch"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
-                  />
-                </div>
-              </div>
-
-              <TagInputWithSuggestions
-                label="Format Kolaborasi yang Terbuka"
-                name="collab_types"
-                initialValues={attrs.collab_types || ["Co-Branding Koleksi Kapsul", "Peminjaman Wardrobe Lookbook", "Kemitraan Desain Brand UMKM"]}
-                suggestions={ROLE_SPECS_PRESETS.DESIGNER.quickCollabTypes}
-                placeholder="Co-Branding, Wardrobe Loan, Desain Kapsul..."
-              />
-            </div>
-          </div>
-        )}
-
-        {/* ─────────────────────────────────────────────────────────────────── */}
-        {/* 7. VIDEOGRAPHER SPECIFICATIONS                                     */}
+        {/* VIDEOGRAPHER SPECIFICATIONS                                       */}
         {/* ─────────────────────────────────────────────────────────────────── */}
         {isVideographer && (
           <div className="space-y-8">
@@ -1493,7 +1343,7 @@ export function SpecsForm({
                     name="primary_cinema_camera"
                     defaultValue={attrs.primary_cinema_camera || attrs.primary_camera || "Sony FX3 / FX6"}
                     placeholder="Sony FX3 / RED Komodo / BMPCC 6K"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -1507,7 +1357,7 @@ export function SpecsForm({
                     name="stabilizer_gimbal"
                     defaultValue={attrs.stabilizer_gimbal || "DJI RS 3 Pro Gimbal"}
                     placeholder="DJI RS 3 Pro Gimbal"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
               </div>
@@ -1530,7 +1380,7 @@ export function SpecsForm({
                     name="audio_rig"
                     defaultValue={attrs.audio_rig || "DJI Mic 2 Wireless + Rode NTG3 Shotgun"}
                     placeholder="DJI Mic 2, Rode VideoMic Pro..."
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
 
@@ -1544,7 +1394,7 @@ export function SpecsForm({
                     name="max_resolution"
                     defaultValue={attrs.max_resolution || "4K 60fps / 10-Bit 4:2:2 (S-Log3)"}
                     placeholder="4K 60fps 10-bit 4:2:2"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 text-xs font-medium text-slate-800"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs font-medium text-slate-800 transition-all outline-hidden"
                   />
                 </div>
               </div>
@@ -1561,7 +1411,7 @@ export function SpecsForm({
           <button
             type="submit"
             disabled={isPending}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#4CC9FE] hover:bg-[#38bbf5] text-white font-bold text-xs transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-xs cursor-pointer active:scale-95"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 rounded-full btn-primary-pill text-white font-bold text-xs transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-xs cursor-pointer active:scale-95"
           >
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             <span>{isPending ? "Menyimpan Spesifikasi..." : "Simpan Spesifikasi Terstruktur"}</span>

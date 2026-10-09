@@ -218,7 +218,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
               <div className="text-base font-black text-purple-700 mt-0.5">
                 {attributes.clothing_size || "S / 36 EU"}
               </div>
-              <div className="text-[10px] text-slate-500 font-medium">Kesesuaian Busana Desainer</div>
+              <div className="text-[10px] text-slate-500 font-medium">Kesesuaian Sampel Busana Brand</div>
             </div>
 
             <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/70">

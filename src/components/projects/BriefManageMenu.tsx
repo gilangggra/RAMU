@@ -18,6 +18,7 @@ import {
   closeProjectBriefAction,
   deleteProjectBriefAction,
 } from "@/app/projects/actions";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 
 const PROJECT_TYPES = [
   "Campaign Iklan",
@@ -271,8 +272,7 @@ export function BriefManageMenu({
                       onChange={(e) => setCompensationModel(e.target.value)}
                       className="w-full appearance-none px-4 py-2.5 pr-10 border border-slate-200/80 rounded-xl bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs text-slate-800 outline-none transition-colors cursor-pointer shadow-2xs"
                     >
-                      <option value="PAID">Fee Komersial Penuh (Paid Flat Fee)</option>
-                      <option value="REVENUE_SHARE">Bagi Hasil Komersial (Revenue Share)</option>
+                      <option value="PAID">Honorarium Flat per Peran (Paid Flat Fee)</option>
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
@@ -302,11 +302,10 @@ export function BriefManageMenu({
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Estimasi Nilai Proyek</label>
-                  <input
-                    type="text"
+                  <CurrencyInput
                     value={estimatedTotal}
-                    onChange={(e) => setEstimatedTotal(e.target.value)}
-                    placeholder="mis. Rp 5.000.000"
+                    onChange={(val) => setEstimatedTotal(val)}
+                    placeholder="Rp 5.000.000"
                     className="w-full px-4 py-2.5 border border-slate-200/80 rounded-xl bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 text-xs text-slate-800 outline-none transition-colors shadow-2xs"
                   />
                 </div>

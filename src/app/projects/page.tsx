@@ -466,7 +466,7 @@ export default async function ProjectsPage({
                   Rekomendasi Kolaborasi &amp; Sinergi Resource Komplementer
                 </h3>
                 <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                  Sistem RAMU menganalisis kompatibilitas aset, ketersediaan alat, dan kebutuhan para kreator di ekosistem untuk membentuk tim produksi ideal secara objektif, terukur, dan transparan.
+                  Fitur ini mengatasi hambatan biaya kapital: alih-alih membayar biaya sewa tinggi di muka, sistem mempertemukan kapasitas aset menganggur (studio, alat, keahlian) dengan kebutuhan mitra untuk mengeksekusi proyek bersama secara komplementer dengan perlindungan SPK digital.
                 </p>
               </div>
 
@@ -650,7 +650,7 @@ export default async function ProjectsPage({
                     Belum Ada Project Brief yang Anda Buat
                   </h3>
                   <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed font-normal">
-                    Mulai proyek produksi lookbook atau kampanye kreatif Anda sekarang, lalu manfaatkan AI Smart Crew untuk mengundang talenta komplementer.
+                    Mulai proyek produksi lookbook atau kampanye kreatif Anda sekarang, lalu manfaatkan sistem rekomendasi kru untuk mengundang talenta komplementer.
                   </p>
                 </div>
                 <Link
@@ -696,7 +696,7 @@ export default async function ProjectsPage({
                         className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0284c7] hover:text-[#0284c7] bg-white/80 hover:bg-white border border-white/80 px-3.5 py-1.5 rounded-full shadow-2xs transition-all"
                       >
                         <Sparkles className="w-3.5 h-3.5 text-[#0284c7]" />
-                        <span>Rekomendasi Kru AI</span>
+                        <span>Rekomendasi Kru Komplementer</span>
                       </Link>
                       <Link
                         href={`/projects/${brief.id}`}

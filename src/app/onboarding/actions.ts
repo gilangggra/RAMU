@@ -62,7 +62,6 @@ export async function createActorProfile(formData: FormData) {
 
   const ALLOWED_ACTOR_ROLES = [
     "Fashion Brand/UMKM",
-    "Fashion Designer",
     "Photographer",
     "Model",
     "MUA/Stylist",
@@ -72,12 +71,17 @@ export async function createActorProfile(formData: FormData) {
   let canonicalSector = sector;
   const sLower = (sector || "").toLowerCase();
 
-  if (sLower.includes("brand") || sLower.includes("label") || sLower.includes("umkm")) {
+  if (
+    sLower.includes("brand") ||
+    sLower.includes("label") ||
+    sLower.includes("umkm") ||
+    sLower.includes("designer") ||
+    sLower.includes("desain") ||
+    sLower.includes("perancang") ||
+    sLower.includes("pola")
+  ) {
     canonicalSector = "Fashion Brand/UMKM";
     actorType = ActorType.BRAND;
-  } else if (sLower.includes("designer") || sLower.includes("desain") || sLower.includes("perancang") || sLower.includes("pola")) {
-    canonicalSector = "Fashion Designer";
-    actorType = ActorType.INDIVIDUAL;
   } else if (sLower.includes("studio") || sLower.includes("ruang") || sLower.includes("cyclorama")) {
     canonicalSector = "Studio";
     actorType = ActorType.STUDIO;

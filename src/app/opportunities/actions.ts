@@ -33,6 +33,7 @@ export async function runOpportunityEngine() {
     revalidatePath("/projects");
     revalidatePath("/opportunities");
     revalidatePath("/collaborate");
+    revalidatePath("/directory");
     revalidatePath("/dashboard");
     return { success: true, count: result.count };
   } catch (error) {
