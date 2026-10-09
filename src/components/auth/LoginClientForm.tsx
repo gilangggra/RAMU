@@ -18,7 +18,7 @@ const DEMO_ACCOUNTS = [
   { email: "model@ramu.id", pass: "password123", role: "Model", name: "Go Young Jung" },
   { email: "mua@ramu.id", pass: "password123", role: "MUA/Stylist", name: "Glow & Form" },
   { email: "studio@ramu.id", pass: "password123", role: "Studio", name: "Studio Imaji" },
-  { email: "bernadya@gmail.com", pass: "password123", role: "Administrator", name: "bernadya (Admin)" },
+  { email: "bernadya@gmail.com", pass: "123456", role: "Administrator", name: "bernadya (Admin)" },
 ];
 
 export function LoginClientForm({ error, message, redirectTo = "/dashboard" }: LoginClientFormProps) {
@@ -109,11 +109,10 @@ export function LoginClientForm({ error, message, redirectTo = "/dashboard" }: L
                 key={acc.email}
                 type="button"
                 onClick={() => fillDemoAccount(acc.email, acc.pass, `${acc.name} (${acc.role})`)}
-                className={`px-2.5 py-1.5 rounded-lg text-left transition-all group cursor-pointer border ${
-                  isSelected
-                    ? "bg-white border-2 border-[#4CC9FE] text-slate-900 shadow-xs ring-1 ring-[#4CC9FE]/20"
-                    : "bg-white/70 hover:bg-white hover:border-[#4CC9FE]/30 border-slate-200/70 text-slate-700"
-                }`}
+                className={`px-2.5 py-1.5 rounded-lg text-left transition-all group cursor-pointer border ${isSelected
+                  ? "bg-white border-2 border-[#4CC9FE] text-slate-900 shadow-xs ring-1 ring-[#4CC9FE]/20"
+                  : "bg-white/70 hover:bg-white hover:border-[#4CC9FE]/30 border-slate-200/70 text-slate-700"
+                  }`}
               >
                 <div className="text-xs font-bold flex items-center justify-between">
                   <span className={`truncate ${isSelected ? "text-blue-700" : "text-slate-800 group-hover:text-blue-600"}`}>
