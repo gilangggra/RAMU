@@ -28,6 +28,7 @@ import {
   PlusCircle,
   Compass,
   FileText,
+  ArrowLeftRight,
 } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { RamuLogo } from "@/components/brand/RamuLogo";
@@ -39,6 +40,7 @@ interface ActorInfo {
   location?: string | null;
   actorType?: string;
   avatarUrl?: string | null;
+  contactEmail?: string | null;
   owner?: {
     avatarUrl?: string | null;
   } | null;
@@ -115,7 +117,9 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
 
   const isAdmin =
     actor.sector === "Platform Administrator" ||
-    actor.sector?.toLowerCase().includes("administrator");
+    actor.sector?.toLowerCase().includes("administrator") ||
+    actor.contactEmail?.toLowerCase().trim() === "bernadya@gmail.com" ||
+    actor.name?.toLowerCase().trim() === "bernadya";
 
   // Navigasi Terstruktur & Bersih: Menghilangkan tab redundan (profil publik sudah ada di footer)
   const navSections: NavSection[] = [
@@ -140,7 +144,8 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
           {
             title: "Administrator",
             items: [
-              { href: "/engine-insights", label: "Audit Kompatibilitas", icon: <BarChart3 className="w-4 h-4" />, badge: "Admin" },
+              { href: "/admin", label: "Pusat Kendali Admin", icon: <ShieldCheck className="w-4 h-4" />, badge: "Panel" },
+              { href: "/engine-insights", label: "Audit Kompatibilitas", icon: <BarChart3 className="w-4 h-4" />, badge: "Engine" },
             ],
           },
         ]
@@ -398,6 +403,15 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
               </Link>
 
               <div className="flex items-center gap-1 shrink-0 ml-1">
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    title="Buka Panel Admin"
+                    className="p-1.5 rounded-full text-slate-400 hover:text-[#0284c7] hover:bg-[#4CC9FE]/10 transition-colors shadow-2xs"
+                  >
+                    <ArrowLeftRight className="w-3.5 h-3.5" />
+                  </Link>
+                )}
                 <Link
                   href="/settings"
                   title="Pengaturan Akun"
@@ -445,6 +459,15 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
               </Link>
 
               <div className="flex flex-col items-center gap-1.5 border-t border-slate-200/70 pt-2 w-full">
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    title="Buka Panel Admin"
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-[#0284c7] hover:bg-[#4CC9FE]/10 transition-colors shadow-2xs"
+                  >
+                    <ArrowLeftRight className="w-4 h-4" />
+                  </Link>
+                )}
                 <Link
                   href="/settings"
                   title="Pengaturan Akun"

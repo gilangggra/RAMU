@@ -1,16 +1,23 @@
 import { prisma } from "@/infrastructure/database/prisma";
-import { Users } from "lucide-react";
 import { UserManagementClient } from "./UserManagementClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminUsersPage() {
-  const actors = await prisma.actor.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 100,
-    include: {
-      owner: { select: { email: true } },
-      _count: { select: { assets: true, bookingRequestsReceived: true } },
-    },
-  });
+  let actors: any[] = [];
+  try {
+    actors = await prisma.actor.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 100,
+      include: {
+        owner: { select: { email: true } },
+        _count: { select: { assets: true, bookingRequestsReceived: true } },
+      },
+    });
+  } catch (error) {
+    console.error("Gagal memuat data talenta & studio admin:", error);
+    actors = [];
+  }
 
   const statusCounts = {
     ACTIVE: actors.filter((a) => a.status === "ACTIVE").length,

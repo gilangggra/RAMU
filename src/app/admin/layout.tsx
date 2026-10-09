@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { prisma } from "@/infrastructure/database/prisma";
 
+import { isUserAdmin } from "@/lib/admin";
+
 export default async function AdminLayout({
   children,
 }: {
@@ -13,7 +15,7 @@ export default async function AdminLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || user.user_metadata?.is_admin !== true) {
+  if (!user || !isUserAdmin(user)) {
     redirect("/dashboard");
   }
 

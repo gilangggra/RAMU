@@ -5,14 +5,31 @@ import {
   ShoppingBag,
   Zap,
   TrendingUp,
-  Clock,
-  AlertTriangle,
   CheckCircle,
   ArrowRight,
-  Shield,
   ScrollText,
 } from "lucide-react";
 import Link from "next/link";
+
+export const dynamic = "force-dynamic";
+
+async function safeCount(fn: () => Promise<number>): Promise<number> {
+  try {
+    return await fn();
+  } catch (error) {
+    console.error("Gagal menjalankan safeCount:", error);
+    return 0;
+  }
+}
+
+async function safeFindMany<T>(fn: () => Promise<T[]>): Promise<T[]> {
+  try {
+    return await fn();
+  } catch (error) {
+    console.error("Gagal menjalankan safeFindMany:", error);
+    return [];
+  }
+}
 
 export default async function AdminDashboardPage() {
   const [
@@ -28,43 +45,48 @@ export default async function AdminDashboardPage() {
     pendingVerifications,
     openDisputes,
     recentActors,
-    recentBriefs,
     recentBookings,
     recentAuditLogs,
   ] = await Promise.all([
-    prisma.actor.count(),
-    prisma.actor.count({ where: { status: "ACTIVE" } }),
-    prisma.actor.count({ where: { status: "DRAFT" } }),
-    prisma.projectBrief.count(),
-    prisma.projectBrief.count({ where: { status: "OPEN" } }),
-    prisma.projectBrief.count({ where: { status: "IN_REVIEW" } }),
-    prisma.bookingRequest.count(),
-    prisma.bookingRequest.count({ where: { status: "PENDING" } }),
-    prisma.opportunity.count({ where: { status: { not: "ARCHIVED" } } }),
-    prisma.verificationRequest.count({ where: { status: "PENDING" } }),
-    prisma.dispute.count({ where: { status: { in: ["OPEN", "IN_MEDIATION"] } } }),
-    prisma.actor.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      include: { owner: { select: { email: true } } },
-    }),
-    prisma.projectBrief.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      include: { creatorActor: { select: { name: true, sector: true } } },
-    }),
-    prisma.bookingRequest.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      include: {
-        requester: { select: { name: true } },
-        target: { select: { name: true } },
-      },
-    }),
-    prisma.adminAuditLog.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 5,
-    }),
+    safeCount(() => prisma.actor.count()),
+    safeCount(() => prisma.actor.count({ where: { status: "ACTIVE" } })),
+    safeCount(() => prisma.actor.count({ where: { status: "DRAFT" } })),
+    safeCount(() => prisma.projectBrief.count()),
+    safeCount(() => prisma.projectBrief.count({ where: { status: "OPEN" } })),
+    safeCount(() => prisma.projectBrief.count({ where: { status: "IN_REVIEW" } })),
+    safeCount(() => prisma.bookingRequest.count()),
+    safeCount(() => prisma.bookingRequest.count({ where: { status: "PENDING" } })),
+    safeCount(() => prisma.opportunity.count({ where: { status: { not: "ARCHIVED" } } })),
+    safeCount(() => prisma.verificationRequest.count({ where: { status: "PENDING" } })),
+    safeCount(() => prisma.dispute.count({ where: { status: { in: ["OPEN", "IN_MEDIATION"] } } })),
+    safeFindMany(() =>
+      prisma.actor.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        select: {
+          id: true,
+          name: true,
+          sector: true,
+          status: true,
+        },
+      })
+    ),
+    safeFindMany(() =>
+      prisma.bookingRequest.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        include: {
+          requester: { select: { name: true } },
+          target: { select: { name: true } },
+        },
+      })
+    ),
+    safeFindMany(() =>
+      prisma.adminAuditLog.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      })
+    ),
   ]);
 
   const kpis = [
@@ -73,9 +95,7 @@ export default async function AdminDashboardPage() {
       value: totalActors,
       sub: `${activeActors} Aktif · ${draftActors} Draf`,
       icon: Users,
-      color: "from-amber-100 to-amber-50",
       iconColor: "text-amber-600",
-      border: "border-amber-200",
       href: "/admin/users",
     },
     {
@@ -83,9 +103,7 @@ export default async function AdminDashboardPage() {
       value: totalBriefs,
       sub: `${openBriefs} Terbuka · ${inReviewBriefs} Menunggu Review`,
       icon: FolderKanban,
-      color: "from-purple-100 to-purple-50",
       iconColor: "text-purple-600",
-      border: "border-purple-200",
       href: "/admin/projects",
     },
     {
@@ -93,9 +111,7 @@ export default async function AdminDashboardPage() {
       value: totalBookings,
       sub: `${pendingBookings} Menunggu Respons`,
       icon: ShoppingBag,
-      color: "from-emerald-100 to-emerald-50",
       iconColor: "text-emerald-600",
-      border: "border-emerald-200",
       href: "/admin/commerce",
     },
     {
@@ -103,9 +119,7 @@ export default async function AdminDashboardPage() {
       value: totalOpportunities,
       sub: "Dibentuk Matching Engine",
       icon: Zap,
-      color: "from-sky-100 to-sky-50",
       iconColor: "text-sky-600",
-      border: "border-sky-200",
       href: "/admin/users",
     },
   ];
@@ -113,39 +127,39 @@ export default async function AdminDashboardPage() {
   const urgentQueueItems = [
     ...(pendingVerifications > 0
       ? [
-          {
-            title: "Verifikasi Profil & Gear",
-            count: pendingVerifications,
-            desc: "Permintaan lencana verifikasi dan bukti alat kerja menunggu kurasi",
-            href: "/admin/verification",
-            badgeColor: "bg-amber-100 text-amber-800 border-amber-200",
-            dotColor: "bg-amber-500",
-          },
-        ]
+        {
+          title: "Verifikasi Profil & Gear",
+          count: pendingVerifications,
+          desc: "Permintaan lencana verifikasi dan bukti alat kerja menunggu kurasi",
+          href: "/admin/verification",
+          badgeColor: "bg-amber-100 text-amber-800 border-amber-200",
+          dotColor: "bg-amber-500",
+        },
+      ]
       : []),
     ...(inReviewBriefs > 0
       ? [
-          {
-            title: "Project Brief Baru",
-            count: inReviewBriefs,
-            desc: "Brief komersial baru membutuhkan persetujuan publikasi dari admin",
-            href: "/admin/projects",
-            badgeColor: "bg-purple-100 text-purple-800 border-purple-200",
-            dotColor: "bg-purple-500",
-          },
-        ]
+        {
+          title: "Project Brief Baru",
+          count: inReviewBriefs,
+          desc: "Brief komersial baru membutuhkan persetujuan publikasi dari admin",
+          href: "/admin/projects",
+          badgeColor: "bg-purple-100 text-purple-800 border-purple-200",
+          dotColor: "bg-purple-500",
+        },
+      ]
       : []),
     ...(openDisputes > 0
       ? [
-          {
-            title: "Sengketa Proyek Aktif",
-            count: openDisputes,
-            desc: "Kasus komplain atau eskalasi workspace membutuhkan intervensi mediasi",
-            href: "/admin/disputes",
-            badgeColor: "bg-rose-100 text-rose-800 border-rose-200",
-            dotColor: "bg-rose-500",
-          },
-        ]
+        {
+          title: "Sengketa Proyek Aktif",
+          count: openDisputes,
+          desc: "Kasus komplain atau eskalasi workspace membutuhkan intervensi mediasi",
+          href: "/admin/disputes",
+          badgeColor: "bg-rose-100 text-rose-800 border-rose-200",
+          dotColor: "bg-rose-500",
+        },
+      ]
       : []),
   ];
 
@@ -252,7 +266,7 @@ export default async function AdminDashboardPage() {
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="glass-icon-wrapper w-8 h-8 p-1.5">
-                  <Icon className="w-4 h-4 text-slate-600" />
+                  <Icon className={`w-4 h-4 ${kpi.iconColor || "text-slate-600"}`} />
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-[#0284c7] group-hover:translate-x-0.5 transition-all" />
               </div>
@@ -358,13 +372,12 @@ export default async function AdminDashboardPage() {
                     </div>
                   </div>
                   <span
-                    className={`text-[9px] font-semibold px-2 py-0.5 rounded-full border ${
-                      actor.status === "ACTIVE"
-                        ? "bg-emerald-50 text-emerald-700 border-emerald-200/70"
-                        : actor.status === "DRAFT"
+                    className={`text-[9px] font-semibold px-2 py-0.5 rounded-full border ${actor.status === "ACTIVE"
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-200/70"
+                      : actor.status === "DRAFT"
                         ? "bg-amber-50 text-amber-700 border-amber-200/70"
                         : "bg-slate-100 text-slate-600 border-slate-200/70"
-                    }`}
+                      }`}
                   >
                     {actor.status}
                   </span>
@@ -398,24 +411,23 @@ export default async function AdminDashboardPage() {
                   >
                     <div>
                       <p className="text-xs font-semibold text-[#111827]">
-                        {b.requester.name}{" "}
+                        {b.requester?.name || "Klien"}{" "}
                         <span className="text-slate-400 font-normal">→</span>{" "}
-                        {b.target.name}
+                        {b.target?.name || "Kreator"}
                       </p>
                       <p className="text-[10px] text-slate-400">
                         {new Date(b.createdAt).toLocaleDateString("id-ID")}
                       </p>
                     </div>
                     <span
-                      className={`text-[9px] font-semibold px-2 py-0.5 rounded-full border ${
-                        b.status === "ACCEPTED"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200/70"
-                          : b.status === "PENDING"
+                      className={`text-[9px] font-semibold px-2 py-0.5 rounded-full border ${b.status === "ACCEPTED"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200/70"
+                        : b.status === "PENDING"
                           ? "bg-amber-50 text-amber-700 border-amber-200/70"
                           : b.status === "DECLINED"
-                          ? "bg-rose-50 text-rose-700 border-rose-200/70"
-                          : "bg-slate-100 text-slate-600 border-slate-200/70"
-                      }`}
+                            ? "bg-rose-50 text-rose-700 border-rose-200/70"
+                            : "bg-slate-100 text-slate-600 border-slate-200/70"
+                        }`}
                     >
                       {b.status}
                     </span>

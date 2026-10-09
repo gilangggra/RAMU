@@ -6,5 +6,18 @@ import type { User } from "@supabase/supabase-js";
  */
 export function isUserAdmin(user: User | null | undefined): boolean {
   if (!user) return false;
-  return user.user_metadata?.is_admin === true;
+  const email = (user.email || "").toLowerCase().trim();
+  const metaRole = (user.user_metadata?.role || "").toLowerCase().trim();
+  const isAdminFlag = user.user_metadata?.is_admin === true;
+
+  return (
+    isAdminFlag ||
+    metaRole === "platform administrator" ||
+    metaRole === "administrator" ||
+    metaRole === "admin" ||
+    metaRole === "superadmin" ||
+    email === "bernadya@gmail.com" ||
+    email === "admin@ramu.id"
+  );
 }
+
