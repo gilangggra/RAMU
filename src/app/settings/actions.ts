@@ -66,10 +66,39 @@ export async function updateProfileBasicInfo(formData: FormData) {
       const buffer = Buffer.from(bytes);
       const ext = AVATAR_EXTENSIONS[avatarFile.type] || "jpg";
       const filename = `${user.id}-${Date.now()}.${ext}`;
-      const uploadDir = path.join(process.cwd(), "public", "uploads", "avatars");
-      await mkdir(uploadDir, { recursive: true });
-      await writeFile(path.join(uploadDir, filename), buffer);
-      newAvatarUrl = `/uploads/avatars/${filename}`;
+
+      let uploadedToCloud = false;
+      try {
+        const { data: storageData, error: storageError } = await supabase.storage
+          .from("avatars")
+          .upload(filename, buffer, {
+            contentType: avatarFile.type,
+            upsert: true,
+          });
+
+        if (!storageError && storageData) {
+          const { data: publicUrlData } = supabase.storage
+            .from("avatars")
+            .getPublicUrl(storageData.path);
+          if (publicUrlData?.publicUrl) {
+            newAvatarUrl = publicUrlData.publicUrl;
+            uploadedToCloud = true;
+          }
+        }
+      } catch (cloudErr) {
+        console.warn("Supabase storage avatar upload failed, falling back:", cloudErr);
+      }
+
+      if (!uploadedToCloud) {
+        try {
+          const uploadDir = path.join(process.cwd(), "public", "uploads", "avatars");
+          await mkdir(uploadDir, { recursive: true });
+          await writeFile(path.join(uploadDir, filename), buffer);
+          newAvatarUrl = `/uploads/avatars/${filename}`;
+        } catch (fsErr) {
+          console.warn("Local filesystem write failed (serverless environment):", fsErr);
+        }
+      }
     } else if (removeAvatar) {
       newAvatarUrl = null;
     }
@@ -470,14 +499,43 @@ export async function updateActorSpecs(formData: FormData) {
             const bytes = await file.arrayBuffer();
             const buffer = Buffer.from(bytes);
             const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-            const filename = `${Date.now()}-compcard-${i}-${safeName}`;
-            const uploadDir = path.join(process.cwd(), "public", "uploads", "compcards");
-            await mkdir(uploadDir, { recursive: true });
-            const filepath = path.join(uploadDir, filename);
-            await writeFile(filepath, buffer);
-            photoUrl = `/uploads/compcards/${filename}`;
+            const filename = `compcard-${actor.id}-${i}-${Date.now()}-${safeName}`;
+            let uploadedToCloud = false;
+
+            try {
+              const { data: storageData, error: storageError } = await supabase.storage
+                .from("portfolios")
+                .upload(`compcards/${filename}`, buffer, {
+                  contentType: file.type || "image/jpeg",
+                  upsert: true,
+                });
+
+              if (!storageError && storageData) {
+                const { data: publicUrlData } = supabase.storage
+                  .from("portfolios")
+                  .getPublicUrl(storageData.path);
+                if (publicUrlData?.publicUrl) {
+                  photoUrl = publicUrlData.publicUrl;
+                  uploadedToCloud = true;
+                }
+              }
+            } catch (cloudErr) {
+              console.warn("Cloud compcard upload failed, falling back:", cloudErr);
+            }
+
+            if (!uploadedToCloud) {
+              try {
+                const uploadDir = path.join(process.cwd(), "public", "uploads", "compcards");
+                await mkdir(uploadDir, { recursive: true });
+                const filepath = path.join(uploadDir, filename);
+                await writeFile(filepath, buffer);
+                photoUrl = `/uploads/compcards/${filename}`;
+              } catch (fsErr) {
+                console.warn("Local filesystem write failed (serverless environment):", fsErr);
+              }
+            }
           } catch (uploadErr) {
-            console.error(`Gagal menyimpan file polaroid ${i}:`, uploadErr);
+            console.error(`Gagal memproses file polaroid ${i}:`, uploadErr);
           }
         }
 

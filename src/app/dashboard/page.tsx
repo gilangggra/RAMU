@@ -30,6 +30,7 @@ import {
   Eye,
   Sparkles,
   Compass,
+  TrendingUp,
 } from "lucide-react";
 import { CoCreditRequestsCard, PendingCoCredit } from "@/components/dashboard/CoCreditRequestsCard";
 import { RecentNotificationsCard } from "@/components/dashboard/RecentNotificationsCard";
@@ -430,14 +431,166 @@ export default async function DashboardPage() {
         });
       }
     });
-
   return (
     <AppShell actor={{ ...primaryActor, avatarUrl: profile.avatarUrl }} activeRoute="/dashboard">
-      <div className="w-full">
-        {/* 3-COLUMN LINKEDIN WORKSPACE ARCHITECTURE */}
+      <div className="w-full space-y-6">
+
+        {/* 1. EXECUTIVE WELCOME HEADER & TOP KPI METRICS */}
+        <section className="bg-white/60 backdrop-blur-2xl border border-white/80 rounded-[24px] p-5 sm:p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-5">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">
+                  Selamat Datang, {primaryActor.name}
+                </h1>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#4CC9FE]/15 text-[#0284c7] border border-[#4CC9FE]/30">
+                  <Sparkles className="w-3 h-3 text-[#0284c7]" />
+                  {primaryActor.sector}
+                </span>
+                {primaryActor.location && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200/60">
+                    <MapPin className="w-3 h-3 text-slate-400" />
+                    {primaryActor.location}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                Pusat kendali ekosistem kreatif RAMU: kelola brief kebutuhan proyek, pantau pesanan komersial, dan bangun kemitraan komplementer.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+              <Link
+                href="/projects/new"
+                className="btn-primary-pill text-xs py-2 px-4 text-white font-semibold inline-flex items-center gap-1.5 shadow-md shadow-[#4CC9FE]/20"
+              >
+                <Plus className="w-3.5 h-3.5 text-white" />
+                <span>Inisiasi Brief</span>
+              </Link>
+              <Link
+                href="/directory?tab=matched"
+                className="px-4 py-2 rounded-full bg-white/90 hover:bg-white hover:text-[#0284c7] text-slate-800 text-xs font-semibold border border-white/90 shadow-2xs inline-flex items-center gap-1.5 transition-all"
+              >
+                <Users className="w-3.5 h-3.5 text-slate-500" />
+                <span>Rekomendasi Mitra</span>
+              </Link>
+              <Link
+                href={`/directory/${primaryActor.id}`}
+                className="px-4 py-2 rounded-full bg-white/90 hover:bg-white hover:text-[#0284c7] text-slate-800 text-xs font-semibold border border-white/90 shadow-2xs inline-flex items-center gap-1.5 transition-all"
+                title="Lihat bagaimana profil Anda tampil bagi kolaborator lain"
+              >
+                <span>Profil Publik</span>
+                <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
+              </Link>
+            </div>
+          </div>
+
+          {/* 4 TOP KPI METRICS CARDS */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-1">
+            {/* KPI 1: Brief Proyek */}
+            <Link
+              href="/projects"
+              className="p-4 rounded-2xl bg-white/70 hover:bg-white/95 border border-white/80 transition-all group shadow-2xs space-y-2 block"
+            >
+              <div className="flex items-center justify-between text-slate-500">
+                <span className="text-xs font-medium">Brief Terbuka</span>
+                <div className="w-7 h-7 rounded-full bg-[#4CC9FE]/15 text-[#0284c7] flex items-center justify-center">
+                  <Megaphone className="w-3.5 h-3.5" />
+                </div>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums">
+                  {briefStats.openBriefCount}
+                </span>
+                <span className="text-[11px] font-semibold text-[#0284c7] group-hover:underline">
+                  {briefStats.myBriefCount} dibuat Anda &rarr;
+                </span>
+              </div>
+            </Link>
+
+            {/* KPI 2: Workspace Aktif */}
+            <Link
+              href="/collaborations"
+              className="p-4 rounded-2xl bg-white/70 hover:bg-white/95 border border-white/80 transition-all group shadow-2xs space-y-2 block"
+            >
+              <div className="flex items-center justify-between text-slate-500">
+                <span className="text-xs font-medium">Workspace Aktif</span>
+                <div className="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <Handshake className="w-3.5 h-3.5" />
+                </div>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums">
+                  {userCollaborations.length}
+                </span>
+                <span className="text-[11px] font-semibold text-emerald-600 group-hover:underline">
+                  {completedCollabCount} selesai &rarr;
+                </span>
+              </div>
+            </Link>
+
+            {/* KPI 3: Pesanan Booking */}
+            <Link
+              href="/collaborations?section=contracts"
+              className={`p-4 rounded-2xl transition-all group shadow-2xs space-y-2 block border ${
+                pendingBookingCount > 0
+                  ? "bg-amber-50/90 hover:bg-amber-50 border-amber-300/80 ring-2 ring-amber-400/20"
+                  : "bg-white/70 hover:bg-white/95 border-white/80"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-slate-600">Pesanan Masuk</span>
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center ${
+                  pendingBookingCount > 0
+                    ? "bg-amber-500 text-white shadow-2xs"
+                    : "bg-slate-100 text-slate-600"
+                }`}>
+                  <Inbox className="w-3.5 h-3.5" />
+                </div>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums">
+                  {totalIncomingBookings}
+                </span>
+                {pendingBookingCount > 0 ? (
+                  <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500 text-white animate-pulse">
+                    {pendingBookingCount} Butuh Respons!
+                  </span>
+                ) : (
+                  <span className="text-[11px] font-semibold text-slate-500 group-hover:underline">
+                    Semua tuntas &rarr;
+                  </span>
+                )}
+              </div>
+            </Link>
+
+            {/* KPI 4: Nilai Ekonomi */}
+            <Link
+              href="/collaborations"
+              className="p-4 rounded-2xl bg-white/70 hover:bg-white/95 border border-white/80 transition-all group shadow-2xs space-y-2 block"
+            >
+              <div className="flex items-center justify-between text-slate-500">
+                <span className="text-xs font-medium">Nilai Transaksi SPK</span>
+                <div className="w-7 h-7 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                </div>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-base sm:text-lg font-black text-slate-900 tabular-nums truncate">
+                  {displayEconomicValue}
+                </span>
+                <span className="text-[11px] font-semibold text-purple-600 group-hover:underline shrink-0">
+                  Terverifikasi &rarr;
+                </span>
+              </div>
+            </Link>
+          </div>
+        </section>
+
+        {/* 2. 3-COLUMN STRUCTURED WORKSPACE */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
-          {/* LEFT COLUMN: IDENTITY ANCHOR & SHORTCUTS (3 Cols) */}
+          {/* LEFT COLUMN: IDENTITY & BUSINESS PROFILE (3 Cols) */}
           <aside className="lg:col-span-3 space-y-4 lg:sticky lg:top-6">
             {/* Identity Card */}
             <div className="rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] overflow-hidden">
@@ -480,23 +633,23 @@ export default async function DashboardPage() {
               {/* Quick Key Metrics */}
               <div className="border-t border-slate-100 mt-3.5 pt-3 px-4 pb-3 space-y-2 text-xs">
                 <div className="flex items-center justify-between text-slate-600">
-                  <span className="font-medium">Resource Anda</span>
+                  <span className="font-medium">Resource &amp; Fasilitas</span>
                   <span className="font-bold text-slate-900 tabular-nums">{inventoryResourceCount}</span>
                 </div>
                 <div className="flex items-center justify-between text-slate-600">
-                  <span className="font-medium">Brief Dibuat</span>
-                  <span className="font-bold text-slate-900 tabular-nums">{briefStats.myBriefCount}</span>
+                  <span className="font-medium">Karya Portofolio</span>
+                  <span className="font-bold text-slate-900 tabular-nums">{portfolioCount}</span>
                 </div>
                 <div className="flex items-center justify-between text-slate-600">
-                  <span className="font-medium">Pesanan Masuk</span>
-                  <span className="font-bold text-slate-900 tabular-nums">{pendingBookingCount}</span>
+                  <span className="font-medium">Mitra Terhubung</span>
+                  <span className="font-bold text-slate-900 tabular-nums">{totalPartnerCount}</span>
                 </div>
               </div>
 
               {/* Profile Readiness Bar */}
               <div className="border-t border-slate-100 pt-3 px-4 pb-3.5 space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-slate-600">Kesiapan Profil</span>
+                  <span className="font-medium text-slate-600">Kelengkapan Profil Bisnis</span>
                   <span className="font-bold text-slate-900 tabular-nums">
                     {readinessScore}%
                   </span>
@@ -511,76 +664,83 @@ export default async function DashboardPage() {
                   href="/settings"
                   className="font-semibold text-[#0284c7] hover:text-[#0369a1] inline-flex items-center gap-1 transition-colors"
                 >
-                  <span>Kelola Pengaturan Profil</span>
+                  <span>Lengkapi Data Rekening &amp; Jasa</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>
 
-            {/* Navigasi Cepat Card */}
-            <div className="p-4 sm:p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-1 text-xs">
-              <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2.5 py-1">
-                Navigasi Cepat
-              </h3>
-              <Link
-                href="/projects"
-                className="flex items-center justify-between px-2.5 py-2 rounded-xl text-slate-700 hover:bg-[#4CC9FE]/10 hover:text-[#0284c7] transition-all font-medium group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <Megaphone className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#0284c7] transition-colors" />
-                  <span>Brief Proyek</span>
-                </div>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 group-hover:bg-white group-hover:text-[#0284c7] border border-transparent group-hover:border-[#4CC9FE]/30 tabular-nums transition-colors">
-                  {briefStats.openBriefCount}
+            {/* Business Status & Readiness Summary (Replaced duplicate Navigasi Cepat!) */}
+            <div className="p-4 sm:p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-3 text-xs">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                <span className="font-bold text-slate-900 text-xs">Status Kemitraan</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                  Siap Berkolaborasi
                 </span>
-              </Link>
-              <Link
-                href="/showcase"
-                className="flex items-center justify-between px-2.5 py-2 rounded-xl text-slate-700 hover:bg-[#4CC9FE]/10 hover:text-[#0284c7] transition-all font-medium group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <Compass className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#0284c7] transition-colors" />
-                  <span>Karya Portofolio</span>
+              </div>
+
+              <div className="space-y-2 text-slate-600">
+                <div className="flex items-center justify-between">
+                  <span>Model Kompensasi:</span>
+                  <span className="font-semibold text-slate-900">
+                    {primaryActor.compensationModels && primaryActor.compensationModels.length > 0
+                      ? primaryActor.compensationModels.join(", ")
+                      : "Negosiasi SPK"}
+                  </span>
                 </div>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 group-hover:bg-white group-hover:text-[#0284c7] border border-transparent group-hover:border-[#4CC9FE]/30 tabular-nums transition-colors">
-                  {portfolioCount}
-                </span>
-              </Link>
-              <Link
-                href="/collaborations"
-                className="flex items-center justify-between px-2.5 py-2 rounded-xl text-slate-700 hover:bg-[#4CC9FE]/10 hover:text-[#0284c7] transition-all font-medium group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <Handshake className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#0284c7] transition-colors" />
-                  <span>Workspace &amp; SPK</span>
+                <div className="flex items-center justify-between">
+                  <span>Tipe Aktor:</span>
+                  <span className="font-semibold text-slate-900">
+                    {primaryActor.actorType === "BRAND" ? "Brand / UMKM" : "Talenta / Studio"}
+                  </span>
                 </div>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 group-hover:bg-white group-hover:text-[#0284c7] border border-transparent group-hover:border-[#4CC9FE]/30 tabular-nums transition-colors">
-                  {userCollaborations.length}
-                </span>
-              </Link>
-              <Link
-                href="/showcase"
-                className="flex items-center justify-between px-2.5 py-2 rounded-xl text-slate-700 hover:bg-[#4CC9FE]/10 hover:text-[#0284c7] transition-all font-medium group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <Eye className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#0284c7] transition-colors" />
-                  <span>Galeri Lookbook</span>
-                </div>
-              </Link>
-              <Link
-                href="/directory"
-                className="flex items-center justify-between px-2.5 py-2 rounded-xl text-slate-700 hover:bg-[#4CC9FE]/10 hover:text-[#0284c7] transition-all font-medium group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <Users className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#0284c7] transition-colors" />
-                  <span>Direktori Kreatif</span>
-                </div>
-              </Link>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
+                <Link
+                  href="/showcase"
+                  className="w-full py-2 px-3 rounded-xl bg-white/80 hover:bg-white text-slate-800 font-semibold border border-white/90 text-center shadow-2xs hover:text-[#0284c7] transition-all"
+                >
+                  + Tambah Karya Portofolio
+                </Link>
+                <Link
+                  href="/settings"
+                  className="w-full py-1.5 text-center text-slate-500 hover:text-slate-900 font-medium transition-colors"
+                >
+                  Pengaturan Akun &amp; Rekening &rarr;
+                </Link>
+              </div>
             </div>
           </aside>
 
-          {/* CENTER COLUMN: ACTION PROMPT & FEED (6 Cols) */}
+          {/* CENTER COLUMN: FEED & ACTIONS (6 Cols) */}
           <main className="lg:col-span-6 space-y-4 min-w-0">
+
+            {/* URGENT BOOKING ALERT BANNER (If pending bookings exist) */}
+            {pendingBookingCount > 0 && (
+              <div className="p-4 sm:p-5 rounded-[22px] bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-amber-500/5 border border-amber-300/80 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fade-in">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <Inbox className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-amber-950">
+                      Ada {pendingBookingCount} Pesanan Booking Menunggu Konfirmasi Anda
+                    </h3>
+                    <p className="text-xs text-amber-900/80 mt-0.5">
+                      Segera tanggapi dan tetapkan jadwal kesepakatan SPK resmi agar tidak kadaluarsa.
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href="/collaborations?section=contracts"
+                  className="px-4 py-2 rounded-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-2xs shrink-0 self-end sm:self-center"
+                >
+                  Tinjau Pesanan Sekarang
+                </Link>
+              </div>
+            )}
+
             {/* Optional Onboarding Checklist if profile readiness < 100% */}
             {readinessScore < 100 && (
               <OnboardingChecklistCard
@@ -597,7 +757,7 @@ export default async function DashboardPage() {
               />
             )}
 
-            {/* LinkedIn-Style Action Prompt Box */}
+            {/* Action Prompt Box */}
             <div className="p-4 sm:p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-3">
               <div className="flex items-center gap-3">
                 <ActorAvatar
@@ -610,7 +770,7 @@ export default async function DashboardPage() {
                   href="/projects/new"
                   className="flex-1 bg-white/70 hover:bg-white/95 border border-white/90 hover:border-[#4CC9FE]/50 text-slate-600 hover:text-slate-900 text-xs px-4 py-2.5 rounded-full transition-all font-medium flex items-center justify-between shadow-xs"
                 >
-                  <span>Mencari kolaborator atau tawarkan studio? Inisiasi brief...</span>
+                  <span>Mencari kolaborator atau tawarkan studio? Inisiasi brief proyek...</span>
                   <Plus className="w-3.5 h-3.5 text-slate-400" />
                 </Link>
               </div>
@@ -642,6 +802,7 @@ export default async function DashboardPage() {
 
             {/* Dashboard Feed Container with Clean Single-Tab Display */}
             <DashboardFeedContainer
+              pendingBookingCount={pendingBookingCount}
               coCreditSection={<CoCreditRequestsCard requests={pendingCoCredits} />}
               matchesSection={
                 <CollaborationMatchesWidget
@@ -912,10 +1073,10 @@ export default async function DashboardPage() {
                     <Users className="w-3.5 h-3.5 text-[#0284c7]" />
                   </div>
                   <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                    Rekomendasi Rekan
+                    Rekan Komplementer
                   </h3>
                 </div>
-                <span className="text-[11px] font-semibold text-slate-600">Komplementer</span>
+                <span className="text-[11px] font-semibold text-slate-600">Sektor Berbeda</span>
               </div>
 
               <div className="space-y-3">
@@ -946,7 +1107,7 @@ export default async function DashboardPage() {
 
                       <Link
                         href={`/directory/${actor.id}`}
-                        className="shrink-0 px-3.5 py-1.5 rounded-full bg-white/90 hover:bg-[#4CC9FE]/15 hover:border-[#4CC9FE]/40 hover:text-[#0284c7] border border-white/80 text-xs font-semibold text-slate-900 transition-all shadow-xs"
+                        className="shrink-0 px-3 py-1.5 rounded-full bg-white/90 hover:bg-[#4CC9FE]/15 hover:border-[#4CC9FE]/40 hover:text-[#0284c7] border border-white/80 text-xs font-semibold text-slate-900 transition-all shadow-xs"
                       >
                         + Ajak
                       </Link>
@@ -987,7 +1148,7 @@ export default async function DashboardPage() {
                   </div>
                   <p className="text-xs font-bold text-slate-900">Belum Ada Agenda Aktif</p>
                   <p className="text-xs text-slate-600 leading-relaxed max-w-xs mx-auto font-normal">
-                    Jadwal sesi foto, fitting, atau target milestone kolaborasi yang disetujui akan tercatat otomatis di sini.
+                    Jadwal sesi foto, fitting, atau milestone kolaborasi yang disetujui akan tercatat otomatis di sini.
                   </p>
                   <div className="pt-1">
                     <Link
@@ -1038,25 +1199,25 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            {/* Card 3: Kepastian SPK Digital RAMU */}
+            {/* Card 3: Jaminan Perlindungan SPK RAMU */}
             <div className="p-4 sm:p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-2.5">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-full bg-white/95 border border-white/80 shadow-2xs flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#0284c7]" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                 </div>
                 <h3 className="text-xs font-bold text-slate-900 tracking-tight">
-                  Kepastian SPK Digital
+                  Jaminan Transaksi SPK Digital
                 </h3>
               </div>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Setiap kesepakatan kolaborasi di RAMU dilindungi Surat Perjanjian Kerja (SPK) otomatis dan transparansi hak cipta karya bersama.
+                Setiap kesepakatan kolaborasi di RAMU dilindungi kontrak SPK otomatis, kepastian hak cipta karya, dan escrow pembayaran aman.
               </p>
               <div className="pt-0.5">
                 <Link
                   href="/collaborations"
                   className="inline-flex items-center gap-1 text-xs font-semibold text-[#0284c7] hover:text-[#0369a1] transition-colors"
                 >
-                  <span>Buka Draf SPK Proyek</span>
+                  <span>Buka Workspace &amp; SPK</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -1068,3 +1229,4 @@ export default async function DashboardPage() {
     </AppShell>
   );
 }
+

@@ -28,6 +28,7 @@ import {
   PlusCircle,
   Compass,
   FileText,
+  ArrowLeftRight,
 } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { RamuLogo } from "@/components/brand/RamuLogo";
@@ -39,6 +40,7 @@ interface ActorInfo {
   location?: string | null;
   actorType?: string;
   avatarUrl?: string | null;
+  contactEmail?: string | null;
   owner?: {
     avatarUrl?: string | null;
   } | null;
@@ -73,25 +75,14 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Synchronous initialization from in-memory cache or localStorage
+  // Initial state matches SSR (false) unless already cached in SPA memory to prevent hydration mismatch
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     if (cachedSidebarCollapsed !== null) return cachedSidebarCollapsed;
-    if (typeof window !== "undefined") {
-      try {
-        const saved = localStorage.getItem("ramu_sidebar_collapsed");
-        if (saved !== null) {
-          const val = saved === "true";
-          cachedSidebarCollapsed = val;
-          return val;
-        }
-      } catch {
-        // ignore
-      }
-    }
     return false;
   });
 
   const [hasInteracted, setHasInteracted] = useState(false);
+
 
   const initialAvatar = actor.avatarUrl || actor.owner?.avatarUrl || null;
   const [avatar, setAvatar] = useState<string | null>(initialAvatar);
@@ -126,7 +117,9 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
 
   const isAdmin =
     actor.sector === "Platform Administrator" ||
-    actor.sector?.toLowerCase().includes("administrator");
+    actor.sector?.toLowerCase().includes("administrator") ||
+    actor.contactEmail?.toLowerCase().trim() === "bernadya@gmail.com" ||
+    actor.name?.toLowerCase().trim() === "bernadya";
 
   // Navigasi Terstruktur & Bersih: Menghilangkan tab redundan (profil publik sudah ada di footer)
   const navSections: NavSection[] = [
@@ -151,7 +144,8 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
           {
             title: "Administrator",
             items: [
-              { href: "/engine-insights", label: "Audit Kompatibilitas", icon: <BarChart3 className="w-4 h-4" />, badge: "Admin" },
+              { href: "/admin", label: "Pusat Kendali Admin", icon: <ShieldCheck className="w-4 h-4" />, badge: "Panel" },
+              { href: "/engine-insights", label: "Audit Kompatibilitas", icon: <BarChart3 className="w-4 h-4" />, badge: "Engine" },
             ],
           },
         ]
@@ -234,7 +228,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
           <span>{section.title}</span>
         </div>
       )}
-      {isCollapsed && <div className="my-1.5 border-t border-slate-200/50" />}
+      {isCollapsed && <div className="my-2 border-t border-slate-200/50 w-7 mx-auto" />}
 
       <ul className="space-y-0.5">
         {section.items.map((item) => {
@@ -246,7 +240,9 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                 onClick={() => setMobileMenuOpen(false)}
                 title={isCollapsed ? item.label : undefined}
                 className={`group flex items-center rounded-xl text-[13px] transition-all relative ${
-                  isCollapsed ? "justify-center p-2.5" : "justify-between px-3 py-2"
+                  isCollapsed
+                    ? "w-9 h-9 mx-auto justify-center p-0"
+                    : "w-full justify-between px-3 py-2"
                 } ${
                   active
                     ? "bg-[#4CC9FE]/15 text-[#0284c7] font-bold border border-[#4CC9FE]/30 shadow-2xs"
@@ -275,6 +271,9 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                     {item.badge}
                   </span>
                 )}
+                {isCollapsed && item.badge && (
+                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#0284c7]" />
+                )}
               </Link>
             </li>
           );
@@ -287,12 +286,13 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
     <div className="min-h-screen app-background text-slate-900 font-sans selection:bg-[#4CC9FE]/25 selection:text-[#0284c7] relative">
       {/* DESKTOP SIDEBAR */}
       <aside
+        suppressHydrationWarning
         className={`hidden md:flex flex-col fixed left-0 top-0 bottom-0 bg-white/70 backdrop-blur-2xl border-r border-white/80 shadow-[0_4px_24px_rgba(0,0,0,0.02)] z-40 ${
           hasInteracted ? "transition-all duration-200 ease-in-out" : ""
         } ${isCollapsed ? "w-[60px]" : "w-64"}`}
       >
         {/* 1. CONTROL PANEL / WORKSPACE HEADER */}
-        <div className={`border-b border-white/80 ${isCollapsed ? "p-2.5" : "px-3 py-3"}`}>
+        <div className={`border-b border-white/80 ${isCollapsed ? "px-2.5 py-3" : "px-3 py-3"}`}>
           {!isCollapsed ? (
             <div className="flex items-center justify-between gap-2">
               <Link
@@ -332,7 +332,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
             <div className="flex flex-col items-center justify-center gap-2">
               <Link
                 href="/dashboard"
-                className="group p-1 flex items-center justify-center"
+                className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-white/80 transition-colors group"
                 title="RAMU — Workspace"
               >
                 <RamuLogo size={24} className="group-hover:scale-105 transition-transform" />
@@ -342,7 +342,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                 type="button"
                 onClick={toggleSidebar}
                 title="Perluas sidebar"
-                className="p-1.5 rounded-full text-slate-400 hover:text-slate-800 hover:bg-white/80 transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-800 hover:bg-white/80 transition-colors cursor-pointer"
                 aria-label="Perluas sidebar"
               >
                 <PanelLeftOpen className="w-4 h-4" />
@@ -354,14 +354,14 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
         {/* 2. NAVIGATION SECTIONS */}
         <div
           className={`flex-1 overflow-y-auto py-2.5 space-y-3 no-scrollbar ${
-            isCollapsed ? "px-2" : "px-2.5"
+            isCollapsed ? "px-2.5" : "px-2.5"
           }`}
         >
           {navSections.map(renderNavSection)}
         </div>
 
         {/* 4. PINNED BOTTOM USER PROFILE CARD */}
-        <div className={`border-t border-white/80 bg-white/40 backdrop-blur-md ${isCollapsed ? "p-2" : "p-2.5"}`}>
+        <div className={`border-t border-white/80 bg-white/40 backdrop-blur-md ${isCollapsed ? "px-2.5 py-2.5" : "p-2.5"}`}>
           {!isCollapsed ? (
             <div className="flex items-center justify-between p-2 rounded-2xl hover:bg-white/80 transition-all group">
               <Link
@@ -403,6 +403,15 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
               </Link>
 
               <div className="flex items-center gap-1 shrink-0 ml-1">
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    title="Buka Panel Admin"
+                    className="p-1.5 rounded-full text-slate-400 hover:text-[#0284c7] hover:bg-[#4CC9FE]/10 transition-colors shadow-2xs"
+                  >
+                    <ArrowLeftRight className="w-3.5 h-3.5" />
+                  </Link>
+                )}
                 <Link
                   href="/settings"
                   title="Pengaturan Akun"
@@ -425,7 +434,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
             <div className="flex flex-col items-center gap-2 py-0.5">
               <Link
                 href={isAdmin ? "/settings" : `/directory/${actor.id}`}
-                className="relative group p-0.5"
+                className="w-9 h-9 rounded-xl flex items-center justify-center relative group hover:opacity-90 transition-opacity"
                 title={`${actor.name} (${actor.sector})`}
               >
                 <div
@@ -446,24 +455,33 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                     <span>{actor.name.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
               </Link>
 
-              <div className="flex flex-col items-center gap-1 border-t border-slate-200/70 pt-1.5 w-full">
+              <div className="flex flex-col items-center gap-1.5 border-t border-slate-200/70 pt-2 w-full">
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    title="Buka Panel Admin"
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-[#0284c7] hover:bg-[#4CC9FE]/10 transition-colors shadow-2xs"
+                  >
+                    <ArrowLeftRight className="w-4 h-4" />
+                  </Link>
+                )}
                 <Link
                   href="/settings"
                   title="Pengaturan Akun"
-                  className="p-1.5 rounded-full text-slate-400 hover:text-slate-800 hover:bg-white transition-colors"
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-800 hover:bg-white/80 transition-colors"
                 >
-                  <Settings className="w-3.5 h-3.5" />
+                  <Settings className="w-4 h-4" />
                 </Link>
                 <form action={logout}>
                   <button
                     type="submit"
                     title="Keluar dari akun"
-                    className="p-1.5 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                   >
-                    <LogOut className="w-3.5 h-3.5" />
+                    <LogOut className="w-4 h-4" />
                   </button>
                 </form>
               </div>
@@ -568,8 +586,12 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
         } ${isCollapsed ? "md:pl-[60px]" : "md:pl-64"}`}
       >
         <main
-          className={`flex-1 px-4 py-6 sm:px-6 sm:py-6 lg:px-8 lg:py-6 w-full max-w-7xl xl:max-w-[1400px] mx-auto pb-24 md:pb-12 animate-fade-in ${
+          className={`flex-1 px-4 py-6 sm:px-6 sm:py-6 lg:px-8 lg:py-6 w-full mx-auto pb-24 md:pb-12 animate-fade-in ${
             hasInteracted ? "transition-all duration-200 ease-in-out" : ""
+          } ${
+            isCollapsed
+              ? "sidebar-collapsed-content max-w-none"
+              : "max-w-7xl"
           }`}
         >
           {children}

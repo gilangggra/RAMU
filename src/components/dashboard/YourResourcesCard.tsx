@@ -48,11 +48,11 @@ export function YourResourcesCard({ actorName, sector, isBrand, assets, totalCou
             <span>Kelola Spesifikasi</span>
           </Link>
           <Link
-            href="/showcase"
+            href="/settings/specs"
             className="btn-primary-pill inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold"
           >
             <Plus className="w-3.5 h-3.5 text-white" />
-            <span>Tambah Karya</span>
+            <span>Tambah Resource</span>
           </Link>
         </div>
       </div>
