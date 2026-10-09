@@ -47,6 +47,13 @@ export interface PhotographerAttributes {
   video_format?: string;
   editing_software?: string[];
   specialties?: string[];
+  capabilities?: string[];
+  backdrop_types?: string[];
+  tethering_available?: boolean;
+  shooting_duration_shift?: string;
+  max_people_onset?: number;
+  max_locations_per_day?: number;
+  deliverables?: string[];
   delivery_time_days?: number;
   rate_starting_at?: string;
   gear_showcase?: GearShowcaseItem[];
@@ -201,17 +208,17 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
   return (
     <div className="space-y-10">
 
-      <section className="p-7 sm:p-8 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
+      <section className="p-7 sm:p-8 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-blue-50 border border-blue-200 text-xs font-bold text-blue-700">
               <Camera className="w-3.5 h-3.5" />
               <span>Technical &amp; Production Gear Proof</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-stone-900 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               Peralatan Produksi &amp; Bukti Fisik Kamera {actorName}
             </h2>
-            <p className="text-xs text-stone-500">
+            <p className="text-xs text-slate-500">
               Seluruh optik kamera dan tata lampu di bawah ini telah terverifikasi fisik dan siap dipakai untuk produksi editorial maupun komersial.
             </p>
           </div>
@@ -223,7 +230,7 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
                 <span>Tarif: {attributes.rate_starting_at}</span>
               </div>
             )}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 text-stone-700 text-xs font-bold">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
               <span>Hardware On-Set Terverifikasi</span>
             </div>
@@ -233,7 +240,7 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
                 }}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+                className="btn-primary-pill !text-xs !py-1.5 !px-3.5 shadow-sm shadow-[#4CC9FE]/20 font-semibold cursor-pointer inline-flex items-center gap-1.5 text-white"
               >
                 <Pencil className="w-3.5 h-3.5" />
                 <span>Edit Spesifikasi</span>
@@ -243,51 +250,51 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-xl bg-stone-50/90 border border-stone-200/70 space-y-2">
-            <div className="flex items-center gap-2 text-stone-500">
+          <div className="p-4 rounded-xl bg-slate-50/90 border border-slate-200/70 space-y-2">
+            <div className="flex items-center gap-2 text-slate-500">
               <Aperture className="w-4 h-4 text-blue-600" />
               <span className="text-[10px] font-bold uppercase tracking-wider">Kamera Utama</span>
             </div>
-            <div className="text-sm font-black text-stone-900 leading-snug">
+            <div className="text-sm font-black text-slate-900 leading-snug">
               {attributes.primary_camera || "Sony Alpha A7R V (61MP Full-Frame)"}
             </div>
-            <div className="text-[11px] text-stone-500">
+            <div className="text-[11px] text-slate-500">
               Backup: {attributes.secondary_camera || "Sony Alpha A7 IV (33MP)"}
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-stone-50/90 border border-stone-200/70 space-y-2">
-            <div className="flex items-center gap-2 text-stone-500">
+          <div className="p-4 rounded-xl bg-slate-50/90 border border-slate-200/70 space-y-2">
+            <div className="flex items-center gap-2 text-slate-500">
               <Camera className="w-4 h-4 text-purple-600" />
               <span className="text-[10px] font-bold uppercase tracking-wider">Lensa G-Master</span>
             </div>
-            <div className="text-sm font-black text-stone-900 leading-snug">
+            <div className="text-sm font-black text-slate-900 leading-snug">
               {(attributes.lenses && attributes.lenses.length) ? `${attributes.lenses.length} Lensa Prime & Zoom` : "3 Lensa Prime & Zoom"}
             </div>
-            <div className="text-[11px] text-stone-500 truncate">
+            <div className="text-[11px] text-slate-500 truncate">
               {(attributes.lenses || ["24-70mm GM II", "85mm f/1.4 GM"]).slice(0, 2).join(", ")}
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-stone-50/90 border border-stone-200/70 space-y-2">
-            <div className="flex items-center gap-2 text-stone-500">
+          <div className="p-4 rounded-xl bg-slate-50/90 border border-slate-200/70 space-y-2">
+            <div className="flex items-center gap-2 text-slate-500">
               <Zap className="w-4 h-4 text-amber-500" />
               <span className="text-[10px] font-bold uppercase tracking-wider">Lighting Studio</span>
             </div>
-            <div className="text-sm font-black text-stone-900 leading-snug">
+            <div className="text-sm font-black text-slate-900 leading-snug">
               600Ws High-Speed Sync
             </div>
-            <div className="text-[11px] text-stone-500 truncate">
+            <div className="text-[11px] text-slate-500 truncate">
               {(attributes.lighting_gear || ["2x Godox AD600 Pro", "Octabox 120cm"]).slice(0, 1).join("")}
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-stone-50/90 border border-stone-200/70 space-y-2">
-            <div className="flex items-center gap-2 text-stone-500">
+          <div className="p-4 rounded-xl bg-slate-50/90 border border-slate-200/70 space-y-2">
+            <div className="flex items-center gap-2 text-slate-500">
               <Video className="w-4 h-4 text-emerald-600" />
               <span className="text-[10px] font-bold uppercase tracking-wider">Format Video &amp; Drone</span>
             </div>
-            <div className="text-sm font-black text-stone-900 leading-snug">
+            <div className="text-sm font-black text-slate-900 leading-snug">
               {attributes.video_format || "4K 60fps 10-bit 4:2:2"}
             </div>
             <div className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
@@ -296,33 +303,93 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
             </div>
           </div>
         </div>
+
+        {/* TRIAD SUMMARY: CAPABILITIES, OPERATIONAL LIMITS & DELIVERABLES */}
+        <div className="pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
+          {/* 1. Capabilities */}
+          <div className="space-y-2 p-3.5 bg-slate-50/60 rounded-xl border border-slate-200/60">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              Kapabilitas On-Set &amp; Genre
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {(attributes.specialties || ["Fashion", "Lookbook", "Editorial"]).map((sp) => (
+                <span key={sp} className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-800 text-[11px] font-semibold">
+                  {sp}
+                </span>
+              ))}
+              {(attributes.capabilities || ["Studio Photography", "Model Shoot"]).slice(0, 3).map((cap) => (
+                <span key={cap} className="px-2 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-800 text-[11px] font-semibold">
+                  {cap}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* 2. Operational Limits */}
+          <div className="space-y-2 p-3.5 bg-slate-50/60 rounded-xl border border-slate-200/60">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              Batas Kapasitas Operasional
+            </span>
+            <div className="space-y-1 text-[11px] text-slate-700">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">Durasi Shift:</span>
+                <span className="font-bold">{attributes.shooting_duration_shift || "4 Jam Half-Day / 8 Jam Full-Day"}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">Kapasitas Kru On-Set:</span>
+                <span className="font-bold">Maks {attributes.max_people_onset || 8} Orang</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">Tethering Monitor:</span>
+                <span className="font-bold text-emerald-700">{attributes.tethering_available ? "✓ Tersedia On-Set" : "Atas Permintaan"}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Deliverables */}
+          <div className="space-y-2 p-3.5 bg-slate-50/60 rounded-xl border border-slate-200/60">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              Deliverables &amp; Output Nyata
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {(attributes.deliverables || ["Foto Final Retouch High-Res", "Semua RAW via Drive", "Social Media Crops 9:16"]).map((del) => (
+                <span key={del} className="px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold">
+                  ✓ {del}
+                </span>
+              ))}
+              <span className="px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold">
+                Turnaround: {attributes.delivery_time_days || 3} Hari
+              </span>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <section className="p-7 sm:p-8 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-stone-100">
+      <section className="p-7 sm:p-8 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-purple-50 border border-purple-200 text-xs font-bold text-purple-700 mb-1">
               <Sparkles className="w-3.5 h-3.5 text-purple-600" />
               <span>Galeri Bukti Fisik Peralatan</span>
             </div>
-            <h3 className="text-xl font-black text-stone-900 tracking-tight">
+            <h3 className="text-xl font-black text-slate-900 tracking-tight">
               Koleksi Kamera, Lensa Optik &amp; Tata Cahaya On-Set
             </h3>
-            <p className="text-xs text-stone-500 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               Klik pada kartu peralatan untuk memeriksa foto close-up detail dan spesifikasi teknisnya.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1.5 bg-stone-100 p-1 rounded-xl">
+          <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
             {categories.map((cat) => (
               <button
                 key={cat}
                 type="button"
                 onClick={() => setFilterCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                   filterCategory === cat
-                    ? "bg-stone-900 text-white shadow-xs"
-                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-200/60"
+                    ? "btn-primary-pill text-white shadow-xs"
+                    : "text-slate-600 hover:text-[#0284c7] hover:bg-white/80"
                 }`}
               >
                 {cat === "ALL" ? "Semua Peralatan" : cat}
@@ -336,10 +403,10 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
             <div
               key={gear.id || gear.name}
               onClick={() => setSelectedGear(gear)}
-              className="group relative rounded-xl bg-stone-50 border border-stone-200/80 overflow-hidden hover:border-stone-900 hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer"
+              className="group relative rounded-xl bg-slate-50 border border-slate-200/80 overflow-hidden hover:border-slate-900 hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer"
             >
 
-              <div className="relative aspect-[4/3] w-full bg-stone-200 overflow-hidden">
+              <div className="relative aspect-[4/3] w-full bg-slate-200 overflow-hidden">
                 <img
                   src={gear.imageUrl}
                   alt={gear.name}
@@ -352,14 +419,14 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
                     {gear.category}
                   </span>
                   {gear.tag && (
-                    <span className="px-2 py-0.5 rounded-xl bg-amber-400 text-stone-950 text-[9px] font-black uppercase tracking-wider self-start">
+                    <span className="px-2 py-0.5 rounded-xl bg-amber-400 text-slate-950 text-[9px] font-black uppercase tracking-wider self-start">
                       {gear.tag}
                     </span>
                   )}
                 </div>
 
                 <div className="absolute top-3 right-3 z-10">
-                  <div className="w-8 h-8 rounded-2xl bg-white/80 backdrop-blur-md flex items-center justify-center text-stone-700 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
+                  <div className="w-8 h-8 rounded-2xl bg-white/80 backdrop-blur-md flex items-center justify-center text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
                     <Maximize2 className="w-4 h-4" />
                   </div>
                 </div>
@@ -374,21 +441,21 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
 
               <div className="p-5 flex-1 flex flex-col justify-between space-y-3 bg-white">
                 <div>
-                  <h4 className="text-base font-black text-stone-900 group-hover:text-amber-600 transition-colors leading-snug">
+                  <h4 className="text-base font-black text-slate-900 group-hover:text-amber-600 transition-colors leading-snug">
                     {gear.name}
                   </h4>
-                  <p className="text-xs text-stone-500 mt-1.5 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-slate-500 mt-1.5 line-clamp-2 leading-relaxed">
                     {gear.specs}
                   </p>
                 </div>
 
-                <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-[11px]">
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
                   <span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Hardware Ready</span>
                   </span>
                   {gear.condition && (
-                    <span className="text-stone-400 font-medium truncate max-w-[150px]">
+                    <span className="text-slate-400 font-medium truncate max-w-[150px]">
                       {gear.condition.split("•")[0]}
                     </span>
                   )}
@@ -399,20 +466,20 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
         </div>
       </section>
 
-      <section className="p-7 sm:p-8 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-6">
-        <div className="flex items-center justify-between pb-4 border-b border-stone-100">
+      <section className="p-7 sm:p-8 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-6">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           <div className="flex items-center gap-2">
             <Video className="w-4 h-4 text-emerald-600" />
-            <h3 className="text-xl font-black text-stone-900 tracking-tight">
+            <h3 className="text-xl font-black text-slate-900 tracking-tight">
               Video Showreel &amp; Behind The Scenes
             </h3>
           </div>
-          <span className="text-xs text-stone-500 font-medium hidden sm:inline">
+          <span className="text-xs text-slate-500 font-medium hidden sm:inline">
             Dokumentasi Alur Kerja On-Set
           </span>
         </div>
 
-        <div className="w-full aspect-video rounded-xl bg-stone-900 overflow-hidden relative group cursor-pointer border border-stone-200/50 shadow-md">
+        <div className="w-full aspect-video rounded-xl bg-slate-900 overflow-hidden relative group cursor-pointer border border-slate-200/50 shadow-md">
           <img
             src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&q=80"
             alt="Behind the scenes on set"
@@ -420,13 +487,13 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
           />
           <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors flex flex-col items-center justify-center gap-3">
             <div className="w-16 h-16 rounded-2xl bg-white/95 backdrop-blur-md shadow-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <div className="w-0 h-0 border-y-[10px] border-y-transparent border-l-[16px] border-l-[#1E1B2E] ml-1" />
+              <div className="w-0 h-0 border-y-[10px] border-y-transparent border-l-[16px] border-l-slate-900 ml-1" />
             </div>
             <div className="text-center">
               <span className="text-sm font-extrabold text-white drop-shadow-md block">
                 Putar Showreel &amp; BTS Sesi Pemotretan
               </span>
-              <span className="text-[11px] text-stone-300">
+              <span className="text-[11px] text-slate-300">
                 01:45 • Resolusi 4K Cinema • Color Graded
               </span>
             </div>
@@ -435,15 +502,15 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
       </section>
 
       {portfolioGallery.length > 0 && (
-        <section className="p-7 sm:p-8 rounded-2xl bg-white border border-stone-200/80 shadow-xs space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-stone-100">
+        <section className="p-7 sm:p-8 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-6">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
             <div className="flex items-center gap-2">
               <ImageIcon className="w-4 h-4 text-blue-600" />
-              <h3 className="text-xl font-black text-stone-900 tracking-tight">
+              <h3 className="text-xl font-black text-slate-900 tracking-tight">
                 Galeri Karya Hasil Produksi ({portfolioGallery.length})
               </h3>
             </div>
-            <span className="text-xs text-stone-500 font-medium">
+            <span className="text-xs text-slate-500 font-medium">
               Output Nyata Bersama Klien &amp; Brand
             </span>
           </div>
@@ -452,7 +519,7 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
             {portfolioGallery.map((item, idx) => (
               <div
                 key={idx}
-                className="break-inside-avoid mb-3 group relative cursor-pointer overflow-hidden rounded-xl bg-stone-100 border border-stone-200/80 shadow-xs hover:shadow-xl transition-all block"
+                className="break-inside-avoid mb-3 group relative cursor-pointer overflow-hidden rounded-xl bg-slate-100 border border-slate-200/80 shadow-xs hover:shadow-xl transition-all block"
                 onClick={() => setSelectedImage(item)}
               >
                 <img
@@ -468,7 +535,7 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
                       <span>{item.client}</span>
                     </div>
                     <h4 className="text-sm font-extrabold text-white leading-tight">{item.title}</h4>
-                    <p className="text-xs text-stone-300 font-medium">{item.role}</p>
+                    <p className="text-xs text-slate-300 font-medium">{item.role}</p>
                   </div>
                 </div>
               </div>
@@ -483,7 +550,7 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
           onClick={() => setSelectedGear(null)}
         >
           <div
-            className="relative max-w-2xl w-full bg-stone-900 text-white rounded-xl overflow-hidden shadow-2xl border border-white/10"
+            className="relative max-w-2xl w-full bg-slate-900 text-white rounded-xl overflow-hidden shadow-2xl border border-white/10"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -501,7 +568,7 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
                 className="w-full h-full object-contain"
               />
               <div className="absolute top-4 left-4">
-                <span className="px-3 py-1 rounded-xl bg-amber-400 text-stone-950 font-black text-xs uppercase tracking-wider">
+                <span className="px-3 py-1 rounded-xl bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider">
                   {selectedGear.category}
                 </span>
               </div>
@@ -518,15 +585,15 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
               </div>
 
               <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
                   Spesifikasi Teknis &amp; Kalibrasi
                 </span>
-                <p className="text-sm text-stone-200 leading-relaxed">
+                <p className="text-sm text-slate-200 leading-relaxed">
                   {selectedGear.specs}
                 </p>
               </div>
 
-              <div className="flex items-center justify-between text-xs pt-2 text-stone-400">
+              <div className="flex items-center justify-between text-xs pt-2 text-slate-400">
                 <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Tersedia untuk Booking &amp; Sesi Pemotretan</span>
@@ -534,7 +601,7 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
                 <button
                   type="button"
                   onClick={() => setSelectedGear(null)}
-                  className="px-4 py-2 rounded-2xl bg-white text-stone-950 font-bold text-xs hover:bg-stone-200 transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-2xl bg-white text-slate-950 font-bold text-xs hover:bg-slate-200 transition-colors cursor-pointer"
                 >
                   Tutup
                 </button>
@@ -556,7 +623,7 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
             <button
               type="button"
               onClick={() => setSelectedImage(null)}
-              className="absolute -top-12 right-0 p-2 text-white hover:text-stone-300 cursor-pointer"
+              className="absolute -top-12 right-0 p-2 text-white hover:text-slate-300 cursor-pointer"
             >
               <X className="w-6 h-6" />
             </button>
@@ -568,7 +635,7 @@ export function PhotographerSpecsCard({ attributes, actorName, isCurrentActor, a
             <div className="mt-4 p-4 text-center text-white space-y-1">
               <h3 className="text-lg font-bold">{selectedImage.title}</h3>
               {selectedImage.caption && (
-                <p className="text-xs text-stone-300 max-w-2xl mx-auto leading-relaxed">
+                <p className="text-xs text-slate-300 max-w-2xl mx-auto leading-relaxed">
                   {selectedImage.caption}
                 </p>
               )}

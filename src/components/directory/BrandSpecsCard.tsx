@@ -21,8 +21,16 @@ interface BrandGalleryPhoto {
 export interface BrandAttributes {
   design_dna?: string;
   sample_sizes_ready?: string;
+  sample_skus_count?: number;
   fabric_materials?: string[];
   capacity_monthly?: string;
+  brand_category?: string[];
+  product_types?: string[];
+  target_market?: string[];
+  collaboration_needs?: string[];
+  campaign_types?: string[];
+  budget_range?: string;
+  collab_timeline?: string;
   brand_gallery?: BrandGalleryPhoto[];
   styling_gallery?: BrandGalleryPhoto[];
   styling_specialties?: string[];
@@ -65,8 +73,8 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
   const materials = attributes.fabric_materials || attributes.styling_specialties || [];
 
   return (
-    <section className="p-7 sm:p-8 rounded-2xl bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
+    <section className="p-7 sm:p-8 rounded-2xl bg-white/95 border border-slate-200/80 shadow-xs space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800">
             <Sparkles className="w-3.5 h-3.5 text-amber-600" />
@@ -90,7 +98,7 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
               onClick={() => {
                 window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
               }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+              className="btn-primary-pill !text-xs !py-1.5 !px-3.5 shadow-sm shadow-[#4CC9FE]/20 font-semibold cursor-pointer inline-flex items-center gap-1.5 text-white"
             >
               <Pencil className="w-3.5 h-3.5" />
               <span>Edit Spesifikasi</span>
@@ -101,8 +109,8 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {attributes.design_dna && (
-          <div className="p-4 rounded-xl bg-stone-50/80 border border-stone-200/70 space-y-1 sm:col-span-2">
-            <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+          <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200/70 space-y-1 sm:col-span-2">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               DNA & Filosofi Desain
             </div>
             <div className="text-sm font-extrabold text-[#27213D]">
@@ -112,8 +120,8 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
         )}
 
         {attributes.capacity_monthly && (
-          <div className="p-4 rounded-xl bg-stone-50/80 border border-stone-200/70 space-y-1">
-            <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+          <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200/70 space-y-1">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               Kapasitas Produksi
             </div>
             <div className="text-sm font-extrabold text-[#E66A48]">
@@ -125,7 +133,7 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
 
       {materials.length > 0 && (
         <div className="space-y-2">
-          <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
+          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
             <Layers className="w-3.5 h-3.5 text-amber-600" />
             <span>Material Utama & Keahlian Khusus:</span>
           </div>
@@ -133,7 +141,7 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
             {materials.map((mat, i) => (
               <span
                 key={i}
-                className="px-3 py-1 rounded-xl bg-stone-50 border border-stone-200/80 text-xs font-bold text-[#27213D] flex items-center gap-1.5"
+                className="px-3 py-1 rounded-xl bg-slate-50 border border-slate-200/80 text-xs font-bold text-[#27213D] flex items-center gap-1.5"
               >
                 <PackageCheck className="w-3.5 h-3.5 text-emerald-600" />
                 <span>{mat}</span>
@@ -143,9 +151,57 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
         </div>
       )}
 
+      {/* COLLABORATION NEEDS & TARGET MARKET */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100 text-xs">
+        {(attributes.collaboration_needs && attributes.collaboration_needs.length > 0) && (
+          <div className="p-4 rounded-xl bg-amber-50/50 border border-amber-200/60 space-y-2">
+            <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider block">
+              Partner Kolaborasi yang Dibutuhkan:
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {attributes.collaboration_needs.map((need) => (
+                <span key={need} className="px-2.5 py-0.5 rounded-md bg-white border border-amber-300 text-amber-900 text-[11px] font-bold">
+                  + {need}
+                </span>
+              ))}
+            </div>
+            {attributes.budget_range && (
+              <div className="text-[11px] text-slate-600 pt-1">
+                <span className="font-semibold text-slate-700">Anggaran Proyek:</span> {attributes.budget_range}
+              </div>
+            )}
+          </div>
+        )}
+
+        {(attributes.target_market && attributes.target_market.length > 0) && (
+          <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200/70 space-y-2">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+              Target Audiens &amp; Tipe Kampanye:
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {attributes.target_market.map((tm) => (
+                <span key={tm} className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700 text-[11px] font-semibold">
+                  {tm}
+                </span>
+              ))}
+              {(attributes.campaign_types || []).slice(0, 2).map((ct) => (
+                <span key={ct} className="px-2 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-800 text-[11px] font-semibold">
+                  {ct}
+                </span>
+              ))}
+            </div>
+            {attributes.sample_skus_count && (
+              <div className="text-[11px] text-slate-600 pt-1">
+                <span className="font-semibold text-slate-700">Sampel Siap Sesi:</span> {attributes.sample_skus_count} Look Busana
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       {gallery.length > 0 && (
-        <div className="space-y-3 pt-2 border-t border-stone-100">
-          <div className="flex items-center justify-between text-xs font-bold text-stone-400 uppercase tracking-wider">
+        <div className="space-y-3 pt-2 border-t border-slate-100">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider">
             <span>Galeri Koleksi Lookbook</span>
             <span className="text-[11px] font-semibold text-[#716B7E]">Klik foto untuk resolusi penuh</span>
           </div>
@@ -155,7 +211,7 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
               <div
                 key={idx}
                 onClick={() => setSelectedPhoto(photo)}
-                className="break-inside-avoid mb-3 group cursor-pointer rounded-xl bg-stone-100 border border-stone-200/80 overflow-hidden hover:shadow-xl transition-all relative block"
+                className="break-inside-avoid mb-3 group cursor-pointer rounded-xl bg-slate-100 border border-slate-200/80 overflow-hidden hover:shadow-xl transition-all relative block"
               >
                 <img
                   src={photo.url}
@@ -169,7 +225,7 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
                       {photo.title}
                     </h4>
                     {photo.caption && (
-                      <p className="text-[11px] text-stone-300 line-clamp-2 font-medium">{photo.caption}</p>
+                      <p className="text-[11px] text-slate-300 line-clamp-2 font-medium">{photo.caption}</p>
                     )}
                     <div className="pt-1.5 flex items-center gap-1 text-[10px] font-bold text-amber-300">
                       <Maximize2 className="w-3 h-3" />
@@ -190,7 +246,7 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative max-w-4xl w-full bg-stone-900 rounded-xl overflow-hidden shadow-2xl border border-white/10"
+            className="relative max-w-4xl w-full bg-slate-900 rounded-xl overflow-hidden shadow-2xl border border-white/10"
           >
             <button
               type="button"
@@ -211,7 +267,7 @@ export function BrandSpecsCard({ attributes, brandName, isCurrentActor, actorAss
             <div className="p-6 bg-[#27213D] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-white/10">
               <div>
                 <h3 className="text-base font-extrabold">{selectedPhoto.title}</h3>
-                <p className="text-xs text-stone-400 mt-0.5">{selectedPhoto.caption}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{selectedPhoto.caption}</p>
               </div>
               <a
                 href={selectedPhoto.url}

@@ -13,7 +13,7 @@ export function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const isAuthPage = pathname?.startsWith("/login") || pathname?.startsWith("/register");
-  const isDarkNavbar = isAuthPage;
+  const isDarkNavbar = false;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -77,28 +77,36 @@ export function Navbar() {
         >
           <Link
             href="/#hero"
-            className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
+            className={`transition-colors py-1 hover:font-semibold ${
+              isDarkNavbar ? "hover:text-amber-300" : "hover:text-[#27213D]"
+            }`}
           >
             Beranda
           </Link>
           <Link
             href="/directory"
-            className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
+            className={`transition-colors py-1 hover:font-semibold ${
+              isDarkNavbar ? "hover:text-amber-300" : "hover:text-[#27213D]"
+            }`}
           >
             Direktori Talenta
           </Link>
           <Link
             href="/showcase"
-            className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold flex items-center gap-1"
+            className={`transition-colors py-1 hover:font-semibold flex items-center gap-1 ${
+              isDarkNavbar ? "hover:text-amber-300" : "hover:text-[#27213D]"
+            }`}
           >
             <span>Karya &amp; Inspirasi</span>
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
           </Link>
           <Link
             href="/projects"
-            className="hover:text-[#27213D] transition-colors py-1 hover:font-semibold"
+            className={`transition-colors py-1 hover:font-semibold ${
+              isDarkNavbar ? "hover:text-amber-300" : "hover:text-[#27213D]"
+            }`}
           >
-            Papan Proyek
+            Eksplorasi Proyek
           </Link>
         </nav>
 
@@ -122,7 +130,7 @@ export function Navbar() {
               </Link>
               <Link
                 href="/register"
-                className="px-6 py-2.5 rounded-full bg-[#FFB800] hover:bg-[#FFA800] active:scale-[0.98] text-[#1E1B2E] text-sm font-extrabold shadow-[0_4px_16px_rgba(255,184,0,0.35)] transition-all hover:scale-105"
+                className="px-6 py-2.5 rounded-full bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-stone-950 text-sm font-black shadow-[0_4px_16px_rgba(251,191,36,0.35)] transition-all hover:scale-105"
               >
                 Mulai Sekarang
               </Link>
@@ -132,7 +140,11 @@ export function Navbar() {
 
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden p-2 rounded-xl text-[#27213D] hover:bg-stone-100 transition-colors"
+          className={`md:hidden p-2 rounded-xl transition-colors ${
+            isDarkNavbar
+              ? "text-stone-300 hover:text-white hover:bg-white/10"
+              : "text-[#27213D] hover:bg-stone-100"
+          }`}
           aria-label="Buka Menu"
         >
           {mobileOpen ? (
@@ -168,26 +180,42 @@ export function Navbar() {
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden bg-[#FFFDFC] border-b border-stone-200 px-6 py-6 space-y-4 shadow-xl">
-          <nav className="flex flex-col gap-3 text-base font-medium text-[#716B7E]">
+        <div
+          className={`md:hidden border-b px-6 py-6 space-y-4 shadow-xl ${
+            isDarkNavbar
+              ? "bg-[#171523]/95 backdrop-blur-xl border-stone-800 text-stone-200"
+              : "bg-[#FFFDFC] border-stone-200 text-[#716B7E]"
+          }`}
+        >
+          <nav
+            className={`flex flex-col gap-3 text-base font-medium ${
+              isDarkNavbar ? "text-stone-300" : "text-[#716B7E]"
+            }`}
+          >
             <Link
               href="/#hero"
               onClick={() => setMobileOpen(false)}
-              className="hover:text-[#27213D] py-1.5"
+              className={`py-1.5 transition-colors ${
+                isDarkNavbar ? "hover:text-amber-300" : "hover:text-[#27213D]"
+              }`}
             >
               Beranda
             </Link>
             <Link
               href="/directory"
               onClick={() => setMobileOpen(false)}
-              className="hover:text-[#27213D] py-1.5"
+              className={`py-1.5 transition-colors ${
+                isDarkNavbar ? "hover:text-amber-300" : "hover:text-[#27213D]"
+              }`}
             >
               Direktori Talenta
             </Link>
             <Link
               href="/showcase"
               onClick={() => setMobileOpen(false)}
-              className="hover:text-[#27213D] py-1.5 flex items-center justify-between"
+              className={`py-1.5 flex items-center justify-between transition-colors ${
+                isDarkNavbar ? "hover:text-amber-300" : "hover:text-[#27213D]"
+              }`}
             >
               <span>Karya &amp; Inspirasi</span>
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
@@ -195,12 +223,18 @@ export function Navbar() {
             <Link
               href="/projects"
               onClick={() => setMobileOpen(false)}
-              className="hover:text-[#27213D] py-1.5"
+              className={`py-1.5 transition-colors ${
+                isDarkNavbar ? "hover:text-amber-300" : "hover:text-[#27213D]"
+              }`}
             >
-              Papan Proyek
+              Eksplorasi Proyek
             </Link>
           </nav>
-          <div className="pt-4 border-t border-stone-100 flex flex-col gap-3">
+          <div
+            className={`pt-4 border-t flex flex-col gap-3 ${
+              isDarkNavbar ? "border-stone-800" : "border-stone-100"
+            }`}
+          >
             {isLoggedIn ? (
               <Link
                 href="/dashboard"
@@ -214,14 +248,18 @@ export function Navbar() {
                 <Link
                   href="/login"
                   onClick={() => setMobileOpen(false)}
-                  className="w-full text-center py-2.5 rounded-full border border-stone-200 text-sm font-semibold text-[#27213D]"
+                  className={`w-full text-center py-2.5 rounded-full text-sm font-semibold transition-colors ${
+                    isDarkNavbar
+                      ? "border border-stone-700 bg-stone-900/80 text-stone-200 hover:bg-stone-800"
+                      : "border border-stone-200 text-[#27213D]"
+                  }`}
                 >
                   Masuk
                 </Link>
                 <Link
                   href="/register"
                   onClick={() => setMobileOpen(false)}
-                  className="w-full text-center py-2.5 rounded-full bg-[#FFB800] text-sm font-bold text-[#1E1B2E] shadow-md"
+                  className="w-full text-center py-2.5 rounded-full bg-amber-400 hover:bg-amber-300 text-sm font-black text-stone-950 shadow-md transition-all"
                 >
                   Mulai Sekarang
                 </Link>

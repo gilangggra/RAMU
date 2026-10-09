@@ -94,20 +94,20 @@ export function AdminShell({ adminName, adminAvatar, isDoubleRole = false, child
               href={href}
               onClick={() => setMobileMenuOpen(false)}
               title={isCollapsed ? label : undefined}
-              className={`group flex items-center rounded-lg text-[13px] transition-all duration-150 relative ${
+              className={`group flex items-center rounded-xl text-[13px] transition-all relative ${
                 isCollapsed
                   ? "justify-center p-2.5"
-                  : "justify-between px-2.5 py-1.5"
+                  : "justify-between px-3 py-2"
               } ${
                 active
-                  ? "bg-white text-stone-900 font-semibold shadow-[0_1px_3px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.03)] border border-stone-200/90"
-                  : "text-stone-600 hover:text-stone-900 hover:bg-stone-200/50 font-medium border border-transparent"
+                  ? "bg-[#4CC9FE]/15 text-[#0284c7] font-bold border border-[#4CC9FE]/30 shadow-2xs"
+                  : "text-slate-600 hover:text-[#111827] hover:bg-white/80 font-medium border border-transparent"
               }`}
             >
               <div className={`flex items-center min-w-0 ${isCollapsed ? "justify-center" : "gap-2.5"}`}>
                 <span
                   className={`shrink-0 transition-colors ${
-                    active ? "text-stone-900" : "text-stone-400 group-hover:text-stone-800"
+                    active ? "text-[#0284c7]" : "text-slate-400 group-hover:text-slate-800"
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -122,29 +122,29 @@ export function AdminShell({ adminName, adminAvatar, isDoubleRole = false, child
   );
 
   return (
-    <div className="min-h-screen bg-[#FDFDFC] text-stone-900 font-sans selection:bg-stone-200 selection:text-stone-900 relative overflow-x-hidden">
+    <div className="min-h-screen app-background text-slate-900 font-sans selection:bg-[#4CC9FE]/25 selection:text-[#0284c7] relative overflow-x-hidden">
       {/* DESKTOP SIDEBAR */}
       <aside
-        className={`hidden md:flex flex-col fixed left-0 top-0 bottom-0 bg-[#FBFBFA] border-r border-stone-200/75 z-40 transition-all duration-200 ease-in-out ${
+        className={`hidden md:flex flex-col fixed left-0 top-0 bottom-0 bg-white/70 backdrop-blur-2xl border-r border-white/80 shadow-[0_4px_24px_rgba(0,0,0,0.02)] z-40 transition-all duration-200 ease-in-out ${
           isCollapsed ? "w-[60px]" : "w-64"
         }`}
       >
         {/* HEADER / LOGO & COLLAPSE TOGGLE */}
-        <div className={`border-b border-stone-200/75 ${isCollapsed ? "p-2.5" : "px-3 py-3"}`}>
+        <div className={`border-b border-white/80 ${isCollapsed ? "p-2.5" : "px-3 py-3"}`}>
           {!isCollapsed ? (
             <div className="flex items-center justify-between gap-2">
               <Link href="/admin" className="flex items-center gap-2.5 group min-w-0 flex-1 hover:opacity-90 transition-opacity">
                 <RamuLogo size={24} className="shrink-0" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-bold text-[13px] text-stone-900 tracking-tight leading-none">
+                    <span className="font-extrabold text-[13px] text-[#111827] tracking-tight leading-none">
                       RAMU
                     </span>
-                    <span className="px-1.5 py-0.2 text-[9px] font-semibold bg-purple-50 text-purple-700 rounded border border-purple-200/70 leading-tight">
+                    <span className="px-2 py-0.5 text-[9px] font-bold bg-purple-50 text-purple-700 rounded-full border border-purple-200/70 leading-tight">
                       Admin
                     </span>
                   </div>
-                  <p className="text-[10px] text-stone-400 font-medium truncate mt-0.5 leading-none">
+                  <p className="text-[10px] text-[#4B5563] font-medium truncate mt-1 leading-none">
                     Control Panel
                   </p>
                 </div>
@@ -152,7 +152,8 @@ export function AdminShell({ adminName, adminAvatar, isDoubleRole = false, child
               <button
                 type="button"
                 onClick={() => setIsCollapsed(true)}
-                className="p-1 rounded-md text-stone-400 hover:text-stone-800 hover:bg-stone-200/60 transition-colors cursor-pointer shrink-0 ml-1"
+                title="Perkecil sidebar"
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-800 hover:bg-white/80 transition-colors cursor-pointer shrink-0"
                 aria-label="Perkecil sidebar"
               >
                 <PanelLeftClose className="w-4 h-4" />
@@ -166,7 +167,8 @@ export function AdminShell({ adminName, adminAvatar, isDoubleRole = false, child
               <button
                 type="button"
                 onClick={() => setIsCollapsed(false)}
-                className="p-1 rounded-md text-stone-400 hover:text-stone-800 hover:bg-stone-200/60 transition-colors cursor-pointer"
+                title="Perluas sidebar"
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-800 hover:bg-white/80 transition-colors cursor-pointer"
                 aria-label="Perluas sidebar"
               >
                 <PanelLeftOpen className="w-4 h-4" />
@@ -180,11 +182,11 @@ export function AdminShell({ adminName, adminAvatar, isDoubleRole = false, child
           {navItems.map((group, index) => (
             <div key={group.section} className="space-y-0.5">
               {!isCollapsed ? (
-                <div className="px-2.5 pt-2.5 pb-1 flex items-center justify-between text-[11px] font-semibold tracking-wider text-stone-400 uppercase select-none">
+                <div className="px-2.5 pt-3 pb-1 flex items-center justify-between text-[10px] font-bold tracking-wider text-slate-400 uppercase select-none">
                   <span>{group.section}</span>
                 </div>
               ) : index !== 0 ? (
-                <div className="my-1.5 border-t border-stone-200/50" />
+                <div className="my-1.5 border-t border-slate-200/50" />
               ) : null}
               {renderNavLinks(group.items)}
             </div>
@@ -192,83 +194,84 @@ export function AdminShell({ adminName, adminAvatar, isDoubleRole = false, child
         </div>
 
         {/* ADMIN PROFILE & FOOTER */}
-        <div className={`border-t border-stone-200/75 bg-[#FBFBFA] ${isCollapsed ? "p-2" : "p-2.5"}`}>
+        <div className={`border-t border-white/80 bg-white/40 backdrop-blur-md ${isCollapsed ? "p-2" : "p-2.5"}`}>
           {!isCollapsed ? (
-            <div className="p-1.5 rounded-lg border border-stone-200/80 bg-white shadow-2xs space-y-2">
-              <div className="flex items-center justify-between gap-2 p-1">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-md overflow-hidden bg-stone-900 text-stone-200 border border-stone-700 flex items-center justify-center font-bold text-[11px] shrink-0">
+            <div className="flex items-center justify-between p-2 rounded-2xl hover:bg-white/80 transition-all group">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                <div className="relative shrink-0">
+                  <div className="w-8 h-8 rounded-xl overflow-hidden bg-slate-900 text-slate-200 border border-slate-700 flex items-center justify-center font-bold text-xs ring-2 ring-white shadow-2xs">
                     {adminAvatar ? (
-                      <img
-                        src={adminAvatar}
-                        alt={adminName}
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={adminAvatar} alt={adminName} className="w-full h-full object-cover" />
                     ) : (
                       <span>{adminName.charAt(0).toUpperCase()}</span>
                     )}
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-[12px] font-semibold text-stone-900 truncate leading-tight">
-                      {adminName}
-                    </p>
-                    <p className="text-[10px] text-stone-400 font-medium truncate leading-tight mt-0.5">
-                      System Admin
-                    </p>
-                  </div>
+                  {/* Presence indicator dot */}
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
                 </div>
-                <form action={logout}>
-                  <button
-                    type="submit"
-                    title="Keluar dari akun"
-                    className="p-1 rounded text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                  </button>
-                </form>
+                <div className="min-w-0">
+                  <p className="text-[12px] font-bold text-[#111827] truncate leading-tight">
+                    {adminName}
+                  </p>
+                  <p className="text-[10px] text-[#4B5563] font-medium truncate leading-tight mt-0.5">
+                    System Admin
+                  </p>
+                </div>
               </div>
-              {isDoubleRole && (
-                <Link
-                  href="/dashboard"
-                  className="w-full py-1.5 px-2.5 rounded-md bg-stone-100 hover:bg-stone-200/70 text-stone-700 border border-stone-200 text-[11px] font-semibold text-center transition-colors flex items-center justify-center gap-1.5"
-                >
-                  <ArrowLeftRight className="w-3.5 h-3.5" />
-                  <span>Switch ke App User</span>
-                </Link>
-              )}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-2 py-0.5">
-              <div className="w-7 h-7 rounded-md overflow-hidden bg-stone-900 text-stone-200 border border-stone-700 flex items-center justify-center font-bold text-[11px]">
-                {adminAvatar ? (
-                  <img
-                    src={adminAvatar}
-                    alt={adminName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span>{adminName.charAt(0).toUpperCase()}</span>
-                )}
-              </div>
-              <div className="flex flex-col items-center gap-1 border-t border-stone-200/70 pt-1.5 w-full">
-                <form action={logout}>
-                  <button
-                    type="submit"
-                    title="Keluar dari akun"
-                    className="p-1 rounded text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                  </button>
-                </form>
+
+              <div className="flex items-center gap-1 shrink-0 ml-1">
                 {isDoubleRole && (
                   <Link
                     href="/dashboard"
                     title="Switch ke App User"
-                    className="p-1 rounded text-stone-400 hover:text-stone-800 hover:bg-stone-200/60 transition-colors"
+                    className="p-1.5 rounded-full text-slate-400 hover:text-[#0284c7] hover:bg-[#4CC9FE]/10 transition-colors shadow-2xs"
                   >
                     <ArrowLeftRight className="w-3.5 h-3.5" />
                   </Link>
                 )}
+                <form action={logout}>
+                  <button
+                    type="submit"
+                    title="Keluar dari akun"
+                    className="p-1.5 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer shadow-2xs"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                  </button>
+                </form>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2 py-0.5">
+              <div className="relative">
+                <div className="w-8 h-8 rounded-xl overflow-hidden bg-slate-900 text-slate-200 border border-slate-700 flex items-center justify-center font-bold text-xs">
+                  {adminAvatar ? (
+                    <img src={adminAvatar} alt={adminName} className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{adminName.charAt(0).toUpperCase()}</span>
+                  )}
+                </div>
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+              </div>
+
+              <div className="flex flex-col items-center gap-1 border-t border-slate-200/70 pt-1.5 w-full">
+                {isDoubleRole && (
+                  <Link
+                    href="/dashboard"
+                    title="Switch ke App User"
+                    className="p-1.5 rounded-full text-slate-400 hover:text-[#0284c7] hover:bg-[#4CC9FE]/10 transition-colors"
+                  >
+                    <ArrowLeftRight className="w-3.5 h-3.5" />
+                  </Link>
+                )}
+                <form action={logout}>
+                  <button
+                    type="submit"
+                    title="Keluar dari akun"
+                    className="p-1.5 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                  </button>
+                </form>
               </div>
             </div>
           )}
@@ -276,47 +279,42 @@ export function AdminShell({ adminName, adminAvatar, isDoubleRole = false, child
       </aside>
 
       {/* MOBILE HEADER */}
-      <header className="md:hidden sticky top-0 bg-[#FBFBFA]/95 backdrop-blur-md border-b border-stone-200/80 px-4 py-2.5 flex items-center justify-between z-30">
+      <header className="md:hidden sticky top-0 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 py-2.5 flex items-center justify-between z-30">
         <Link href="/admin" className="flex items-center gap-2">
-          <RamuLogo size={22} className="shrink-0" />
-          <span className="font-bold text-sm tracking-tight text-stone-900">RAMU Admin</span>
+          <RamuLogo size={22} className="shrink-0" theme="dark" />
+          <span className="font-extrabold text-sm tracking-tight text-slate-900">RAMU</span>
+          <span className="px-2 py-0.5 text-[9px] font-bold bg-purple-50 text-purple-700 rounded-full border border-purple-200/70">Admin</span>
         </Link>
 
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200/80 border border-stone-200 text-stone-800"
-          >
-            {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-          </button>
-        </div>
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="p-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 shadow-2xs"
+        >
+          {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+        </button>
       </header>
 
       {/* MOBILE SLIDE-OVER DRAWER MENU */}
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex flex-col justify-end">
-          <div className="bg-[#FBFBFA] border-t border-stone-200 p-5 rounded-t-2xl max-h-[85vh] overflow-y-auto space-y-4 shadow-xl">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-200/80">
+          <div className="bg-white/95 backdrop-blur-2xl border-t border-slate-200 p-5 rounded-t-[24px] max-h-[85vh] overflow-y-auto space-y-4 shadow-xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-lg overflow-hidden bg-stone-900 text-stone-200 border border-stone-700 flex items-center justify-center font-bold text-xs shrink-0">
+                <div className="w-9 h-9 rounded-xl overflow-hidden bg-slate-900 text-slate-200 border border-slate-700 flex items-center justify-center font-bold text-xs shrink-0">
                   {adminAvatar ? (
-                    <img
-                      src={adminAvatar}
-                      alt={adminName}
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={adminAvatar} alt={adminName} className="w-full h-full object-cover" />
                   ) : (
                     <span>{adminName.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-stone-900 truncate">{adminName}</p>
-                  <p className="text-[10px] text-stone-500 truncate">System Admin</p>
+                  <p className="text-xs font-bold text-slate-900 truncate">{adminName}</p>
+                  <p className="text-[10px] text-slate-500 truncate">System Admin</p>
                 </div>
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-stone-400 hover:text-stone-800 p-1.5 rounded-lg hover:bg-stone-200/60"
+                className="text-slate-400 hover:text-slate-800 p-1.5 rounded-full hover:bg-slate-100"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -324,18 +322,19 @@ export function AdminShell({ adminName, adminAvatar, isDoubleRole = false, child
 
             <div className="space-y-3">
               {navItems.map((group, index) => (
-                <div key={group.section} className={index !== 0 ? "pt-2 border-t border-stone-200/70" : ""}>
-                  <p className="text-[11px] font-semibold tracking-wider text-stone-400 uppercase mb-1">{group.section}</p>
+                <div key={group.section} className={index !== 0 ? "pt-2 border-t border-slate-200/70" : ""}>
+                  <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase mb-1 px-1">{group.section}</p>
                   {renderNavLinks(group.items)}
                 </div>
               ))}
             </div>
 
-            <div className="pt-3 border-t border-stone-200 space-y-2">
+            <div className="pt-3 border-t border-slate-200 space-y-2">
               {isDoubleRole && (
                 <Link
                   href="/dashboard"
-                  className="w-full py-2 rounded-lg bg-stone-100 text-stone-700 border border-stone-200 text-xs font-semibold text-center flex items-center justify-center gap-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full py-2.5 rounded-full bg-[#4CC9FE]/10 hover:bg-[#4CC9FE]/20 text-[#0284c7] text-xs font-semibold border border-[#4CC9FE]/30 flex items-center justify-center gap-2 transition-colors"
                 >
                   <ArrowLeftRight className="w-3.5 h-3.5" />
                   <span>Switch ke App User</span>
@@ -344,7 +343,7 @@ export function AdminShell({ adminName, adminAvatar, isDoubleRole = false, child
               <form action={logout}>
                 <button
                   type="submit"
-                  className="w-full py-2 rounded-lg bg-rose-50 text-rose-600 text-xs font-semibold border border-rose-200/80 flex items-center justify-center gap-2"
+                  className="w-full py-2.5 rounded-full bg-rose-50 text-rose-600 text-xs font-semibold border border-rose-200/80 flex items-center justify-center gap-2"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Keluar dari Akun</span>
@@ -361,9 +360,7 @@ export function AdminShell({ adminName, adminAvatar, isDoubleRole = false, child
           isCollapsed ? "md:pl-[60px]" : "md:pl-64"
         }`}
       >
-        <main
-          className={`flex-1 px-4 py-6 sm:px-6 sm:py-6 lg:px-8 lg:py-6 w-full max-w-7xl xl:max-w-[1400px] mx-auto space-y-6 animate-fade-in transition-all duration-200 ease-in-out`}
-        >
+        <main className="flex-1 px-4 py-6 sm:px-6 sm:py-6 lg:px-8 lg:py-6 w-full max-w-7xl xl:max-w-[1400px] mx-auto pb-24 md:pb-12 animate-fade-in">
           {children}
         </main>
       </div>

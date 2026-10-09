@@ -23,6 +23,7 @@ import {
   User,
   Palette,
   MapPin,
+  Trophy,
   ExternalLink,
   Sliders,
   CheckCircle2,
@@ -133,11 +134,12 @@ export function TearSheetModal({
   const [hoveredPinId, setHoveredPinId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [isPortraitVideoState, setIsPortraitVideoState] = useState(false);
   const creditRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const [userClaimedRole, setUserClaimedRole] = useState<string | null>(null);
   const [isClaiming, setIsClaiming] = useState(false);
-  const [claimedRoleInput, setClaimedRoleInput] = useState("Fashion Stylist / Wardrobe Designer");
+  const [claimedRoleInput, setClaimedRoleInput] = useState("Fashion Stylist / Wardrobe Stylist");
   const [customRoleInput, setCustomRoleInput] = useState("");
   const [claimDetailsInput, setClaimDetailsInput] = useState("");
   const [isClaimSubmitting, setIsClaimSubmitting] = useState(false);
@@ -152,12 +154,38 @@ export function TearSheetModal({
   const isVideo = item?.mediaType === "VIDEO" || !!item?.videoUrl;
   const parsedVideo = isVideo && item?.videoUrl ? parseVideoUrl(item.videoUrl) : null;
 
+  const isVerticalVideo = Boolean(
+    isVideo && (
+      item?.aspectRatio === "9:16" ||
+      item?.videoUrl?.includes("shorts/") ||
+      item?.videoUrl?.includes("tiktok.com") ||
+      item?.category?.toLowerCase().includes("reel") ||
+      item?.category?.toLowerCase().includes("tiktok") ||
+      item?.category?.toLowerCase().includes("vertikal") ||
+      isPortraitVideoState
+    )
+  );
+
+  const isPortraitImage = Boolean(
+    item && !isVideo && (
+      item.aspectRatio === "4:5" ||
+      item.aspectRatio === "3:4" ||
+      item.aspectRatio === "9:16" ||
+      item.category?.toLowerCase().includes("lookbook") ||
+      item.category?.toLowerCase().includes("busana") ||
+      item.category?.toLowerCase().includes("fashion") ||
+      item.category?.toLowerCase().includes("styling") ||
+      item.category?.toLowerCase().includes("potret")
+    )
+  );
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
     setImgLoaded(false);
+    setIsPortraitVideoState(false);
     setActivePinId(null);
     setHoveredPinId(null);
     setIsClaiming(false);
@@ -381,30 +409,39 @@ export function TearSheetModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 md:p-8 bg-stone-950/45 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 md:p-8 bg-slate-950/50 backdrop-blur-md animate-fade-in"
       onClick={onClose}
     >
 
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-6xl h-full md:h-[90vh] max-h-[880px] bg-white border border-stone-200/90 rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.16)] flex flex-col overflow-hidden text-stone-900"
+        className="relative w-full max-w-6xl h-full md:h-[90vh] max-h-[880px] bg-white border border-slate-200/90 rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.16)] flex flex-col overflow-hidden text-slate-900"
       >
 
-        <div className="h-14 shrink-0 px-4 sm:px-6 bg-white border-b border-stone-100 flex items-center justify-between gap-4">
+        <div className="h-14 shrink-0 px-4 sm:px-6 bg-white border-b border-slate-100 flex items-center justify-between gap-4">
 
           <div className="flex items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-stone-900" />
+            <span className="w-2 h-2 rounded-full bg-slate-900" />
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[11px] font-extrabold tracking-[0.22em] uppercase text-stone-900">
-                RAMU DOSSIER
+              <span className="font-mono text-[11px] font-extrabold tracking-[0.18em] uppercase text-slate-900">
+                RAMU DOSSIER &bull; LOOKBOOK EDITORIAL
               </span>
-              <span className="text-stone-300 hidden sm:inline">•</span>
-              <span className="text-[11px] font-mono text-stone-500 hidden sm:inline">
+              <span className="text-slate-300 hidden sm:inline">•</span>
+              <span className="text-[11px] font-mono text-slate-500 hidden sm:inline">
                 {tearSheetData.issueNumber} ({tearSheetData.edition})
               </span>
-              {isVideo && (
-                <span className="px-2 py-0.5 rounded-full bg-stone-900 text-stone-100 font-mono text-[9px] font-bold tracking-wider uppercase hidden sm:inline-flex items-center gap-1">
-                  <Play className="w-2.5 h-2.5 fill-current" /> CINEMA FILM
+              {isVideo ? (
+                <span className="px-2 py-0.5 rounded-full btn-primary-pill text-white font-mono text-[9px] font-bold tracking-wider uppercase hidden sm:inline-flex items-center gap-1 shadow-xs">
+                  <Play className="w-2.5 h-2.5 fill-current" /> {isVerticalVideo ? "REEL VERTIKAL 9:16" : "CINEMA FILM 16:9"}
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-mono text-[9px] font-bold tracking-wider uppercase hidden sm:inline-flex items-center gap-1 border border-slate-200">
+                  <Camera className="w-2.5 h-2.5 text-slate-500" />
+                  {isPortraitImage
+                    ? "LOOKBOOK PORTRET 4:5"
+                    : item.aspectRatio === "1:1"
+                    ? "PERSEGI 1:1"
+                    : "LANSKAP EDITORIAL"}
                 </span>
               )}
             </div>
@@ -414,36 +451,36 @@ export function TearSheetModal({
             <button
               type="button"
               onClick={() => setShowGuaranteeModal(true)}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-stone-200/90 hover:border-stone-400 bg-stone-50/70 hover:bg-stone-100 text-stone-700 text-xs transition-all cursor-pointer shadow-2xs"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200/90 hover:border-slate-400 bg-slate-50/70 hover:bg-slate-100 text-slate-700 text-xs transition-all cursor-pointer shadow-2xs"
               title="Klik untuk membuka Sertifikat Keaslian & Anti-Catfishing"
             >
               <span className={`w-1.5 h-1.5 rounded-full ${isFullyVerified ? "bg-emerald-500" : "bg-amber-500"}`} />
-              <span className="font-mono text-[10px] uppercase tracking-wider text-stone-500 hidden sm:inline">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500 hidden sm:inline">
                 {isFullyVerified ? "VERIFIKASI PENUH" : "VERIFIKASI KRU"}
               </span>
-              <span className="text-[11px] font-bold text-stone-900">
+              <span className="text-[11px] font-bold text-slate-900">
                 {isFullyVerified ? "100% Terverifikasi" : `${verifiedCount}/${totalCount} Terkonfirmasi`}
               </span>
-              <span className="text-stone-400 text-[10px]">↗</span>
+              <span className="text-slate-400 text-[10px]">↗</span>
             </button>
 
-            <div className="flex items-center gap-1 bg-stone-50 border border-stone-200/80 rounded-full px-2 py-0.5 shadow-2xs">
+            <div className="flex items-center gap-1 bg-slate-50 border border-slate-200/80 rounded-full px-2 py-0.5 shadow-2xs">
               <button
                 type="button"
                 onClick={handlePrev}
                 title="Karya Sebelumnya (Panah Kiri)"
-                className="w-5 h-5 rounded-full hover:bg-stone-200/80 flex items-center justify-center text-stone-600 hover:text-stone-950 transition-colors"
+                className="w-5 h-5 rounded-full hover:bg-slate-200/80 flex items-center justify-center text-slate-600 hover:text-slate-950 transition-colors cursor-pointer"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
-              <span className="font-mono text-[10px] px-1 font-bold text-stone-600">
+              <span className="font-mono text-[10px] px-1 font-bold text-slate-600">
                 {String(currentIndex + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}
               </span>
               <button
                 type="button"
                 onClick={handleNext}
                 title="Karya Selanjutnya (Panah Kanan)"
-                className="w-5 h-5 rounded-full hover:bg-stone-200/80 flex items-center justify-center text-stone-600 hover:text-stone-950 transition-colors"
+                className="w-5 h-5 rounded-full hover:bg-slate-200/80 flex items-center justify-center text-slate-600 hover:text-slate-950 transition-colors cursor-pointer"
               >
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -454,7 +491,7 @@ export function TearSheetModal({
             type="button"
             onClick={onClose}
             title="Tutup (Esc)"
-            className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200/80 border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-950 transition-all hover:scale-105 active:scale-95"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200/80 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-950 transition-all hover:scale-105 active:scale-95 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -462,29 +499,29 @@ export function TearSheetModal({
 
         <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
 
-          <div className="flex-1 min-h-0 relative bg-[#0D0D0C] lg:bg-[#FBFBFA] border-b lg:border-b-0 lg:border-r border-stone-100 flex items-center justify-center overflow-hidden p-3 sm:p-6 md:p-8 select-none">
+          <div className="flex-1 min-h-0 relative bg-[#0D0D0C] lg:bg-slate-50/50 border-b lg:border-b-0 lg:border-r border-slate-100 flex items-center justify-center overflow-hidden p-3 sm:p-6 md:p-8 select-none">
 
             <button
               type="button"
               onClick={handlePrev}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/90 hover:bg-white border border-stone-200/90 shadow-md backdrop-blur-md flex items-center justify-center text-stone-700 hover:text-stone-950 transition-all hover:scale-110 active:scale-95 hidden md:flex"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/90 hover:bg-white border border-slate-200/90 shadow-md backdrop-blur-md flex items-center justify-center text-slate-700 hover:text-slate-950 transition-all hover:scale-110 active:scale-95 hidden md:flex cursor-pointer"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               type="button"
               onClick={handleNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/90 hover:bg-white border border-stone-200/90 shadow-md backdrop-blur-md flex items-center justify-center text-stone-700 hover:text-stone-950 transition-all hover:scale-110 active:scale-95 hidden md:flex"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/90 hover:bg-white border border-slate-200/90 shadow-md backdrop-blur-md flex items-center justify-center text-slate-700 hover:text-slate-950 transition-all hover:scale-110 active:scale-95 hidden md:flex cursor-pointer"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
 
             {isVideo && parsedVideo ? (
-              <div className="relative w-full max-w-4xl max-h-[calc(90vh-140px)] flex items-center justify-center p-2">
+              <div className="relative w-full max-w-4xl max-h-[calc(90vh-140px)] flex items-center justify-center p-2 z-10">
                 {parsedVideo.embedUrl ? (
                   <div
-                    className={`relative w-full overflow-hidden rounded-2xl shadow-[0_24px_70px_rgba(0,0,0,0.35)] border border-stone-800 bg-black ${
-                      item.aspectRatio === "9:16" ? "max-w-[360px] aspect-[9/16]" : "aspect-video"
+                    className={`relative w-full overflow-hidden rounded-2xl shadow-[0_24px_70px_rgba(0,0,0,0.4)] border border-slate-800 bg-black ${
+                      isVerticalVideo ? "max-w-[360px] aspect-[9/16] ring-1 ring-white/10" : "aspect-video"
                     }`}
                   >
                     <iframe
@@ -503,8 +540,14 @@ export function TearSheetModal({
                       controls
                       playsInline
                       autoPlay
-                      className={`max-w-full max-h-[calc(90vh-140px)] rounded-2xl shadow-[0_24px_70px_rgba(0,0,0,0.35)] border border-stone-800/80 bg-black object-contain ${
-                        item.aspectRatio === "9:16" ? "max-w-[360px] aspect-[9/16]" : ""
+                      onLoadedMetadata={(e) => {
+                        const v = e.currentTarget;
+                        if (v.videoHeight > v.videoWidth * 1.2) {
+                          setIsPortraitVideoState(true);
+                        }
+                      }}
+                      className={`max-w-full max-h-[calc(90vh-140px)] rounded-2xl shadow-[0_24px_70px_rgba(0,0,0,0.4)] border border-slate-800/80 bg-black object-contain ${
+                        isVerticalVideo ? "max-w-[360px] aspect-[9/16] ring-1 ring-white/10" : ""
                       }`}
                     />
                   </div>
@@ -512,9 +555,21 @@ export function TearSheetModal({
               </div>
             ) : (
               <div className="relative inline-flex items-center justify-center max-w-full max-h-full">
+                {/* Ambient Blurred Backdrop for Photos */}
+                {item.imageUrl && (
+                  <div className="absolute inset-0 overflow-hidden pointer-events-none select-none z-0">
+                    <img
+                      src={item.imageUrl}
+                      alt=""
+                      aria-hidden="true"
+                      className="w-full h-full object-cover scale-125 filter blur-3xl opacity-25 brightness-95 transform-gpu"
+                    />
+                  </div>
+                )}
+
                 {!imgLoaded && (
-                  <div className="w-[380px] h-[520px] max-w-full bg-stone-200/60 rounded-2xl animate-pulse flex items-center justify-center">
-                    <span className="font-mono text-xs text-stone-400 tracking-wider">
+                  <div className="w-[380px] h-[520px] max-w-full bg-slate-200/60 rounded-2xl animate-pulse flex items-center justify-center z-10">
+                    <span className="font-mono text-xs text-slate-400 tracking-wider">
                       MEMUAT RESOLUSI TINGGI...
                     </span>
                   </div>
@@ -524,7 +579,7 @@ export function TearSheetModal({
                   src={item.imageUrl}
                   alt={item.title}
                   onLoad={() => setImgLoaded(true)}
-                  className={`max-w-full max-h-[calc(90vh-140px)] object-contain rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.07)] border border-stone-200/50 transition-opacity duration-500 ${
+                  className={`max-w-full max-h-[calc(90vh-140px)] object-contain rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.12)] border border-slate-200/60 relative z-10 transition-opacity duration-500 ${
                     imgLoaded ? "opacity-100" : "opacity-0"
                   }`}
                 />
@@ -534,19 +589,19 @@ export function TearSheetModal({
 
           <div className="w-full lg:w-[420px] xl:w-[460px] shrink-0 bg-white flex flex-col h-full min-h-0 overflow-hidden">
 
-            <div className="flex-1 min-h-0 overflow-y-auto p-6 sm:p-7 space-y-6">
+            <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar scrollbar-none p-6 sm:p-7 space-y-6">
 
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-[10px] font-mono tracking-[0.2em] text-stone-400 uppercase">
+                <div className="flex items-center justify-between text-[10px] font-mono tracking-[0.2em] text-slate-400 uppercase">
                   <span>{item.category}</span>
                   <span>{item.actor.location || "Indonesia"}</span>
                 </div>
 
-                <h2 className="text-2xl sm:text-[26px] font-extrabold text-stone-950 tracking-tight leading-[1.25] font-serif pt-0.5">
+                <h2 className="text-2xl sm:text-[26px] font-extrabold text-slate-950 tracking-tight leading-[1.25] font-serif pt-0.5">
                   {tearSheetData.title}
                 </h2>
 
-                <div className="flex items-center justify-between gap-3 pt-2 pb-3.5 border-b border-stone-100">
+                <div className="flex items-center justify-between gap-3 pt-2 pb-3.5 border-b border-slate-100">
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div
                       className={`w-7 h-7 rounded-full bg-gradient-to-br ${item.actor.avatarBg} flex items-center justify-center text-xs font-bold text-black shrink-0 shadow-2xs`}
@@ -557,12 +612,12 @@ export function TearSheetModal({
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <Link
                           href={`/directory/${realActorId}`}
-                          className="text-xs font-bold text-stone-900 hover:text-amber-800 transition-colors truncate block"
+                          className="text-xs font-bold text-slate-900 hover:text-[#0284c7] transition-colors truncate block"
                         >
                           {item.actor.name}
                         </Link>
                         {isOwner && (
-                          <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-amber-100 text-amber-900 font-mono font-black border border-amber-300">
+                          <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-sky-50 text-[#0284c7] font-mono font-bold border border-sky-200">
                             KARYA ANDA
                           </span>
                         )}
@@ -571,8 +626,18 @@ export function TearSheetModal({
                             KOLABORASI ANDA
                           </span>
                         )}
+                        {item.collaborationId && (
+                          <Link
+                            href={`/collaborations/${item.collaborationId}`}
+                            className="text-[9px] px-2 py-0.5 rounded-md bg-sky-50 text-[#0284c7] font-bold border border-sky-200 hover:bg-sky-100 transition-colors flex items-center gap-1 shrink-0"
+                            title="Buka Ruang Kerja & SPK Kolaborasi Resmi"
+                          >
+                            <Trophy className="w-2.5 h-2.5 text-[#0284c7] inline" />
+                            <span>Karya Kolaborasi RAMU</span>
+                          </Link>
+                        )}
                       </div>
-                      <span className="text-[10px] text-stone-500 font-mono block truncate">
+                      <span className="text-[10px] text-slate-500 font-mono block truncate">
                         {item.actor.sector}
                       </span>
                     </div>
@@ -590,7 +655,7 @@ export function TearSheetModal({
                   </button>
                 </div>
 
-                <p className="text-[13px] text-stone-600 leading-relaxed font-sans pt-1">
+                <p className="text-[13px] text-slate-600 leading-relaxed font-sans pt-1">
                   {tearSheetData.concept}
                 </p>
               </div>
@@ -633,7 +698,7 @@ export function TearSheetModal({
               )}
 
               {isCoCreditor && isPendingCoCredit && (
-                <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-white border border-amber-300/80 text-xs text-stone-900 space-y-2.5 animate-fade-in shadow-2xs">
+                <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-white border border-amber-300/80 text-xs text-slate-900 space-y-2.5 animate-fade-in shadow-2xs">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <ShieldCheck className="w-4 h-4 text-amber-600" />
@@ -649,7 +714,7 @@ export function TearSheetModal({
                         : "Menunggu Konfirmasi Anda"}
                     </span>
                   </div>
-                  <p className="text-[11px] text-stone-600 leading-snug">
+                  <p className="text-[11px] text-slate-600 leading-snug">
                     {myCredit?.claimedByActorId === currentActorId
                       ? `Anda telah mengajukan klaim peran sebagai ${myCredit?.role}. Pemilik portofolio akan meninjau dan memvalidasi kontribusi Anda.`
                       : `Kreator menyematkan Anda sebagai ${myCredit?.role}. Konfirmasi sekarang untuk mengaktifkan sertifikat anti-catfishing dan menyinkronkan karya ini ke portofolio profil Anda.`}
@@ -693,17 +758,17 @@ export function TearSheetModal({
                 </div>
               )}
 
-              <div className="space-y-2 pt-4 border-t border-stone-100">
+              <div className="space-y-2 pt-4 border-t border-slate-100">
                 <div className="flex items-center justify-between pb-1">
-                  <span className="font-mono text-[10px] font-bold tracking-[0.25em] text-stone-400 uppercase">
+                  <span className="font-mono text-[10px] font-bold tracking-[0.25em] text-slate-400 uppercase">
                     PRODUCTION CREDITS
                   </span>
-                  <span className="text-[10px] font-mono text-stone-400">
+                  <span className="text-[10px] font-mono text-slate-400">
                     {verifiedCount}/{totalCount} CONFIRMED
                   </span>
                 </div>
 
-                <div className="divide-y divide-stone-100">
+                <div className="divide-y divide-slate-100">
                   {activeCredits.map((credit, idx) => {
                     const profileHref = credit.actorId
                       ? `/directory/${credit.actorId}`
@@ -716,24 +781,24 @@ export function TearSheetModal({
                         key={idx}
                         href={profileHref}
                         className={`group py-2.5 flex items-center justify-between gap-3 text-xs -mx-2 px-2 rounded-lg transition-colors ${
-                          isThisUser ? "bg-amber-50/60 hover:bg-amber-100/60" : "hover:bg-stone-50/80"
+                          isThisUser ? "bg-amber-50/60 hover:bg-amber-100/60" : "hover:bg-slate-50/80"
                         }`}
                         title={`Buka profil ${credit.name} (${credit.role})`}
                       >
 
                         <div className="w-[42%] shrink-0 min-w-0">
-                          <span className="font-mono text-[10px] uppercase tracking-wider text-stone-400 group-hover:text-stone-700 truncate block">
+                          <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400 group-hover:text-slate-700 truncate block">
                             {credit.role}
                           </span>
                         </div>
 
                         <div className="w-[58%] flex items-center justify-end gap-2 min-w-0">
                           <div className="text-right min-w-0">
-                            <span className="font-medium text-stone-900 group-hover:text-stone-950 truncate block">
+                            <span className="font-medium text-slate-900 group-hover:text-slate-950 truncate block">
                               {credit.name} {isThisUser && <span className="text-amber-800 font-bold">(Anda)</span>}
                             </span>
                             {credit.handle && (
-                              <span className="text-[10px] font-mono text-stone-400 group-hover:text-stone-500 block truncate">
+                              <span className="text-[10px] font-mono text-slate-400 group-hover:text-slate-500 block truncate">
                                 {credit.handle}
                               </span>
                             )}
@@ -751,7 +816,7 @@ export function TearSheetModal({
                             />
                           ) : credit.status === "EXTERNAL" ? (
                             <span
-                              className="w-1.5 h-1.5 rounded-full bg-stone-300 shrink-0"
+                              className="w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0"
                               title="Kredit Eksternal"
                             />
                           ) : (
@@ -768,7 +833,7 @@ export function TearSheetModal({
               </div>
 
               {!isOwner && !isCoCreditor && (
-                <div className="pt-4 border-t border-stone-100 space-y-2">
+                <div className="pt-4 border-t border-slate-100 space-y-2">
                   {claimSuccessMessage && (
                     <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold flex items-center gap-2 animate-fade-in shadow-2xs">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -785,13 +850,13 @@ export function TearSheetModal({
                       <button
                         type="button"
                         onClick={handleRevokeClaim}
-                        className="text-[10px] text-stone-400 hover:text-stone-700 underline shrink-0 cursor-pointer ml-2"
+                        className="text-[10px] text-slate-400 hover:text-slate-700 underline shrink-0 cursor-pointer ml-2"
                       >
                         Reset
                       </button>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between text-xs text-stone-500 py-1">
+                    <div className="flex items-center justify-between text-xs text-slate-500 py-1">
                       <span>Terlibat dalam produksi karya ini?</span>
                       {currentActorId ? (
                         <button
@@ -800,15 +865,15 @@ export function TearSheetModal({
                             setIsClaiming(!isClaiming);
                             setClaimError(null);
                           }}
-                          className="font-bold text-[#1E1B2E] hover:text-amber-800 underline text-xs cursor-pointer inline-flex items-center gap-1"
+                          className="font-bold text-[#0284c7] hover:text-[#0369a1] underline text-xs cursor-pointer inline-flex items-center gap-1"
                         >
-                          <Sparkles className="w-3 h-3 text-amber-500" />
+                          <Sparkles className="w-3 h-3 text-[#0284c7]" />
                           <span>{isClaiming ? "Tutup Form" : "Klaim Kredit Kru ↗"}</span>
                         </button>
                       ) : (
                         <Link
                           href="/login"
-                          className="font-bold text-[#1E1B2E] hover:text-amber-800 underline text-xs"
+                          className="font-bold text-[#0284c7] hover:text-[#0369a1] underline text-xs"
                         >
                           Masuk untuk Klaim ↗
                         </Link>
@@ -817,18 +882,18 @@ export function TearSheetModal({
                   )}
 
                   {isClaiming && (
-                    <div className="p-4 rounded-xl bg-stone-50 border border-stone-200/90 space-y-3 animate-fade-in text-xs shadow-inner">
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/90 space-y-3 animate-fade-in text-xs shadow-inner">
                       <div>
-                        <label className="block text-[10px] font-mono uppercase font-bold text-stone-700 mb-1">
+                        <label className="block text-[10px] font-mono uppercase font-bold text-slate-700 mb-1">
                           Pilih Peran Anda di Tim Produksi:
                         </label>
                         <select
                           value={claimedRoleInput}
                           onChange={(e) => setClaimedRoleInput(e.target.value)}
-                          className="w-full text-xs p-2.5 rounded-lg bg-white border border-stone-300 text-stone-900 focus:outline-none focus:ring-1 focus:ring-stone-400 font-medium"
+                          className="w-full text-xs p-2.5 rounded-lg bg-white border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0284c7]/30 focus:border-[#0284c7] font-medium"
                         >
                           <option value="Fotografi / Asisten Lighting">Fotografi / Asisten Lighting</option>
-                          <option value="Fashion Stylist / Wardrobe Designer">Fashion Stylist / Wardrobe Designer</option>
+                          <option value="Fashion Stylist / Wardrobe Stylist">Fashion Stylist / Wardrobe Stylist</option>
                           <option value="Hair & Makeup Artist (HMUA)">Hair & Makeup Artist (HMUA)</option>
                           <option value="Model / Talent">Model / Talent</option>
                           <option value="Art Director / Set Designer">Art Director / Set Designer</option>
@@ -840,7 +905,7 @@ export function TearSheetModal({
 
                       {claimedRoleInput === "LAINNYA" && (
                         <div>
-                          <label className="block text-[10px] font-mono uppercase font-bold text-stone-700 mb-1">
+                          <label className="block text-[10px] font-mono uppercase font-bold text-slate-700 mb-1">
                             Tuliskan Nama Peran Anda:
                           </label>
                           <input
@@ -848,13 +913,13 @@ export function TearSheetModal({
                             value={customRoleInput}
                             onChange={(e) => setCustomRoleInput(e.target.value)}
                             placeholder="Contoh: Digital Imaging Specialist, Gaffer..."
-                            className="w-full text-xs p-2.5 rounded-lg bg-white border border-stone-300 text-stone-900 focus:outline-none focus:ring-1 focus:ring-stone-400 font-medium"
+                            className="w-full text-xs p-2.5 rounded-lg bg-white border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0284c7]/30 focus:border-[#0284c7] font-medium"
                           />
                         </div>
                       )}
 
                       <div>
-                        <label className="block text-[10px] font-mono uppercase font-bold text-stone-700 mb-1">
+                        <label className="block text-[10px] font-mono uppercase font-bold text-slate-700 mb-1">
                           Catatan Kontribusi / Bukti Terlibat (Opsional):
                         </label>
                         <textarea
@@ -862,7 +927,7 @@ export function TearSheetModal({
                           onChange={(e) => setClaimDetailsInput(e.target.value)}
                           placeholder="Jelaskan secara singkat peran atau kapabilitas Anda dalam produksi bersama ini..."
                           rows={2}
-                          className="w-full text-xs p-2.5 rounded-lg bg-white border border-stone-300 text-stone-900 focus:outline-none focus:ring-1 focus:ring-stone-400 font-medium resize-none"
+                          className="w-full text-xs p-2.5 rounded-lg bg-white border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0284c7]/30 focus:border-[#0284c7] font-medium resize-none"
                         />
                       </div>
 
@@ -877,7 +942,7 @@ export function TearSheetModal({
                           type="button"
                           onClick={handleConfirmClaim}
                           disabled={isClaimSubmitting}
-                          className="flex-1 py-2 px-3 rounded-lg bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 shadow-xs"
+                          className="flex-1 py-2.5 px-3 rounded-xl btn-primary-pill text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 shadow-sm shadow-[#4CC9FE]/20"
                         >
                           {isClaimSubmitting ? (
                             <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
@@ -892,7 +957,7 @@ export function TearSheetModal({
                             setIsClaiming(false);
                             setClaimError(null);
                           }}
-                          className="py-2 px-3 rounded-lg bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-semibold cursor-pointer"
+                          className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer transition-colors"
                         >
                           Batal
                         </button>
@@ -903,15 +968,15 @@ export function TearSheetModal({
               )}
 
               {tearSheetData.technicalSpecs && (
-                <div className="pt-4 border-t border-stone-100 text-[10px] font-mono text-stone-500 space-y-1.5">
-                  <span className="font-bold uppercase tracking-wider text-stone-400 block">
+                <div className="pt-4 border-t border-slate-100 text-[10px] font-mono text-slate-500 space-y-1.5">
+                  <span className="font-bold uppercase tracking-wider text-slate-400 block">
                     PRODUCTION GEAR
                   </span>
-                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-stone-700">
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-slate-700">
                     <span>{tearSheetData.technicalSpecs.camera}</span>
-                    <span className="text-stone-300">•</span>
+                    <span className="text-slate-300">•</span>
                     <span>{tearSheetData.technicalSpecs.lens}</span>
-                    <span className="text-stone-300">•</span>
+                    <span className="text-slate-300">•</span>
                     <span>{tearSheetData.technicalSpecs.lighting}</span>
                   </div>
                 </div>
@@ -921,19 +986,19 @@ export function TearSheetModal({
                 {tearSheetData.tags.map((tag, idx) => (
                   <span
                     key={idx}
-                    className="px-2 py-0.5 rounded-md bg-stone-100 text-[10px] font-mono text-stone-600"
+                    className="px-2 py-0.5 rounded-md bg-slate-100 text-[10px] font-mono text-slate-600"
                   >
                     #{tag}
                   </span>
                 ))}
               </div>
 
-              <div className="pt-4 border-t border-stone-100 flex items-center justify-between text-[10px] font-mono text-stone-400">
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-[10px] font-mono text-slate-400">
                 <span>RAMU PROTOCOL • UU NO. 28/2014</span>
                 <button
                   type="button"
                   onClick={() => setShowGuaranteeModal(true)}
-                  className="hover:text-stone-700 underline cursor-pointer"
+                  className="hover:text-slate-700 underline cursor-pointer"
                 >
                   Jaminan Anti-Catfishing ↗
                 </button>
@@ -941,7 +1006,7 @@ export function TearSheetModal({
 
             </div>
 
-            <div className="p-4 sm:p-5 bg-white border-t border-stone-100 flex items-center gap-2.5 shrink-0">
+            <div className="p-4 sm:p-5 bg-white border-t border-slate-100 flex items-center gap-2.5 shrink-0">
 
               {isOwner ? (
                 <>
@@ -951,29 +1016,29 @@ export function TearSheetModal({
                     className={`h-11 px-3.5 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer ${
                       copied
                         ? "bg-emerald-50 border-emerald-300 text-emerald-800"
-                        : "bg-white hover:bg-stone-50 border-stone-200 text-stone-700"
+                        : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700"
                     }`}
                     title="Salin Format Kredit untuk Caption Instagram"
                   >
-                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-stone-500" />}
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
                     <span className="hidden sm:inline">{copied ? "Tersalin" : "Salin IG"}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={handleSharePitchWA}
-                    className="h-11 px-3.5 rounded-xl bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                    className="h-11 px-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
                     title="Kirim presentasi portofolio ke Klien via WhatsApp"
                   >
-                    <Share2 className="w-3.5 h-3.5 text-stone-500" />
+                    <Share2 className="w-3.5 h-3.5 text-slate-500" />
                     <span className="hidden sm:inline">Kirim Pitch</span>
                   </button>
 
                   <Link
                     href="/dashboard/showcase"
-                    className="flex-1 h-11 px-4 rounded-xl bg-stone-900 hover:bg-black text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-98"
+                    className="flex-1 h-11 px-4 rounded-xl btn-primary-pill text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-[#4CC9FE]/25 active:scale-98"
                   >
-                    <Sliders className="w-3.5 h-3.5 text-amber-400" />
+                    <Sliders className="w-3.5 h-3.5 text-white" />
                     <span>Kelola Portofolio</span>
                   </Link>
                 </>
@@ -984,7 +1049,7 @@ export function TearSheetModal({
                     type="button"
                     disabled={isConfirming}
                     onClick={handleRejectMyCredit}
-                    className="h-11 px-3.5 rounded-xl bg-stone-100 hover:bg-rose-50 hover:text-rose-700 border border-stone-200 text-stone-600 text-xs font-semibold transition-all flex items-center justify-center gap-1 shrink-0 cursor-pointer disabled:opacity-50"
+                    className="h-11 px-3.5 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-700 border border-slate-200 text-slate-600 text-xs font-semibold transition-all flex items-center justify-center gap-1 shrink-0 cursor-pointer disabled:opacity-50"
                     title="Tolak penyematan kredit jika Anda tidak terlibat"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -1014,11 +1079,11 @@ export function TearSheetModal({
                     className={`h-11 px-3.5 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer ${
                       copied
                         ? "bg-emerald-50 border-emerald-300 text-emerald-800"
-                        : "bg-white hover:bg-stone-50 border-stone-200 text-stone-700"
+                        : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700"
                     }`}
                     title="Salin Format Kredit untuk Caption Instagram"
                   >
-                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-stone-500" />}
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
                     <span className="hidden sm:inline">{copied ? "Tersalin" : "Salin IG"}</span>
                   </button>
 
@@ -1031,18 +1096,18 @@ export function TearSheetModal({
                         tearSheetData.edition
                       )
                     }
-                    className="h-11 px-3.5 rounded-xl bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                    className="h-11 px-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
                     title="Bagikan Bukti Sertifikat via WhatsApp"
                   >
-                    <Share2 className="w-3.5 h-3.5 text-stone-500" />
+                    <Share2 className="w-3.5 h-3.5 text-slate-500" />
                     <span className="hidden sm:inline">Bukti WA</span>
                   </button>
 
                   <Link
                     href={`/directory/${currentActorId}`}
-                    className="flex-1 h-11 px-4 rounded-xl bg-stone-900 hover:bg-black text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-98"
+                    className="flex-1 h-11 px-4 rounded-xl btn-primary-pill text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-[#4CC9FE]/25 active:scale-98"
                   >
-                    <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
+                    <ExternalLink className="w-3.5 h-3.5 text-white" />
                     <span>Lihat di Profil Saya</span>
                   </Link>
                 </>
@@ -1055,11 +1120,11 @@ export function TearSheetModal({
                     className={`h-11 px-3.5 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer ${
                       copied
                         ? "bg-emerald-50 border-emerald-300 text-emerald-800"
-                        : "bg-white hover:bg-stone-50 border-stone-200 text-stone-700"
+                        : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700"
                     }`}
                     title="Salin Format Kredit untuk Caption Instagram"
                   >
-                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-stone-500" />}
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
                     <span className="hidden sm:inline">{copied ? "Tersalin" : "Salin IG"}</span>
                   </button>
 
@@ -1072,10 +1137,10 @@ export function TearSheetModal({
                         tearSheetData.edition
                       )
                     }
-                    className="h-11 px-3.5 rounded-xl bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                    className="h-11 px-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
                     title="Bagikan Bukti Sertifikat via WhatsApp"
                   >
-                    <Share2 className="w-3.5 h-3.5 text-stone-500" />
+                    <Share2 className="w-3.5 h-3.5 text-slate-500" />
                     <span className="hidden sm:inline">Bukti WA</span>
                   </button>
 
@@ -1086,20 +1151,20 @@ export function TearSheetModal({
                         onClose();
                         onBookAuthor();
                       }}
-                      className="flex-1 h-11 px-4 rounded-xl bg-stone-900 hover:bg-black text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-98"
+                      className="flex-1 h-11 px-4 rounded-xl btn-primary-pill text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-[#4CC9FE]/25 active:scale-98"
                     >
                       <span>Ajak Tim Ini Berkolaborasi</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
+                      <ArrowRight className="w-3.5 h-3.5 text-white" />
                     </button>
                   ) : (
                     <Link
                       href={`/projects/new?title=${encodeURIComponent(
                         `Kolaborasi Sinergis: ${item.title}`
                       )}&category=${encodeURIComponent(item.category)}`}
-                      className="flex-1 h-11 px-4 rounded-xl bg-stone-900 hover:bg-black text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 shadow-sm hover:scale-[1.01] active:scale-98"
+                      className="flex-1 h-11 px-4 rounded-xl btn-primary-pill text-white font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 shadow-md shadow-[#4CC9FE]/25 active:scale-98"
                     >
                       <span>Ajak Tim Ini Berkolaborasi</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
+                      <ArrowRight className="w-3.5 h-3.5 text-white" />
                     </Link>
                   )}
                 </>
@@ -1113,7 +1178,7 @@ export function TearSheetModal({
 
         {showGuaranteeModal && (
           <div
-            className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-stone-950/60 backdrop-blur-sm animate-fade-in"
+            className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in"
             onClick={(e) => {
               e.stopPropagation();
               setShowGuaranteeModal(false);
@@ -1121,15 +1186,15 @@ export function TearSheetModal({
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl border border-stone-200 text-stone-900 space-y-5 animate-scale-up"
+              className="relative w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl border border-slate-200 text-slate-900 space-y-5 animate-scale-up"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2.5">
                   <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md">
                     <ShieldCheck className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-black text-sm text-stone-900 tracking-tight">
+                    <h3 className="font-black text-sm text-slate-900 tracking-tight">
                       SERTIFIKAT KEASLIAN PORTOFOLIO
                     </h3>
                     <p className="text-[11px] font-mono text-emerald-800 font-bold">
@@ -1140,31 +1205,31 @@ export function TearSheetModal({
                 <button
                   type="button"
                   onClick={() => setShowGuaranteeModal(false)}
-                  className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-500 cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] uppercase font-bold text-stone-500">
+                  <span className="font-mono text-[10px] uppercase font-bold text-slate-500">
                     ID SERTIFIKAT RAMU
                   </span>
-                  <span className="font-mono text-xs font-black text-stone-900 bg-white px-2 py-0.5 rounded border border-stone-200">
+                  <span className="font-mono text-xs font-black text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
                     #{tearSheetData.antiCatfishingCertificateId}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] uppercase font-bold text-stone-500">
+                  <span className="font-mono text-[10px] uppercase font-bold text-slate-500">
                     JUDUL KARYA
                   </span>
-                  <span className="text-xs font-bold text-stone-900 truncate max-w-[200px]">
+                  <span className="text-xs font-bold text-slate-900 truncate max-w-[200px]">
                     {tearSheetData.title}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] uppercase font-bold text-stone-500">
+                  <span className="font-mono text-[10px] uppercase font-bold text-slate-500">
                     STATUS VERIFIKASI
                   </span>
                   <span className="text-[11px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
@@ -1174,20 +1239,20 @@ export function TearSheetModal({
               </div>
 
               <div className="space-y-2">
-                <h4 className="text-[11px] font-mono font-black text-stone-700 uppercase">
+                <h4 className="text-[11px] font-mono font-black text-slate-700 uppercase">
                   Daftar Kru Produksi Terverifikasi Bersama:
                 </h4>
                 <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
                   {tearSheetData.credits.map((c, i) => (
                     <div
                       key={i}
-                      className="p-2 rounded-xl bg-white border border-stone-200 flex items-center justify-between text-xs"
+                      className="p-2 rounded-xl bg-white border border-slate-200 flex items-center justify-between text-xs"
                     >
                       <div className="flex items-center gap-2">
                         <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                         <div>
-                          <span className="font-bold text-stone-900">{c.name}</span>
-                          <span className="text-[10px] text-stone-400 font-mono ml-1.5">
+                          <span className="font-bold text-slate-900">{c.name}</span>
+                          <span className="text-[10px] text-slate-400 font-mono ml-1.5">
                             ({c.role})
                           </span>
                         </div>
@@ -1225,7 +1290,7 @@ export function TearSheetModal({
                 <button
                   type="button"
                   onClick={() => setShowGuaranteeModal(false)}
-                  className="py-2.5 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 font-semibold text-xs transition-all cursor-pointer"
+                  className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition-all cursor-pointer"
                 >
                   Tutup
                 </button>

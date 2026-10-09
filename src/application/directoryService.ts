@@ -63,49 +63,70 @@ export async function getDirectoryActors(params: DirectoryFilterParams = {}) {
   }
 
   if (sector && sector !== "ALL") {
-    if (sector === "MUA/Stylist") {
+    const sLower = sector.toLowerCase();
+    if (sLower.includes("mua") || sLower.includes("stylist") || sLower.includes("makeup")) {
       andConditions.push({
         OR: [
           { sector: { contains: "MUA", mode: "insensitive" } },
           { sector: { contains: "Stylist", mode: "insensitive" } },
           { sector: { contains: "Makeup", mode: "insensitive" } },
+          { sector: { contains: "Tata Rias", mode: "insensitive" } },
         ],
       });
-    } else if (sector === "Fashion Brand/UMKM") {
+    } else if (
+      sLower.includes("brand") ||
+      sLower.includes("umkm") ||
+      sLower.includes("label") ||
+      sLower.includes("design") ||
+      sLower.includes("desain")
+    ) {
       andConditions.push({
         OR: [
           { sector: { contains: "Brand", mode: "insensitive" } },
           { sector: { contains: "UMKM", mode: "insensitive" } },
           { sector: { contains: "Label", mode: "insensitive" } },
+          { sector: { contains: "Designer", mode: "insensitive" } },
+          { sector: { contains: "Desain", mode: "insensitive" } },
           { actorType: ActorType.BRAND },
         ],
       });
-    } else if (sector === "Fashion Designer") {
-      andConditions.push({
-        OR: [
-          { sector: { contains: "Designer", mode: "insensitive" } },
-          { sector: { contains: "Desain", mode: "insensitive" } },
-        ],
-      });
-    } else if (sector === "Photographer") {
+    } else if (sLower.includes("photo") || sLower.includes("foto")) {
       andConditions.push({
         OR: [
           { sector: { contains: "Photographer", mode: "insensitive" } },
           { sector: { contains: "Fotografi", mode: "insensitive" } },
+          { sector: { contains: "Fotografer", mode: "insensitive" } },
           { sector: { contains: "Foto", mode: "insensitive" } },
         ],
       });
-    } else if (sector === "Model") {
+    } else if (sLower.includes("video")) {
+      andConditions.push({
+        OR: [
+          { sector: { contains: "Videographer", mode: "insensitive" } },
+          { sector: { contains: "Videografi", mode: "insensitive" } },
+          { sector: { contains: "Video", mode: "insensitive" } },
+        ],
+      });
+    } else if (sLower.includes("director") || sLower.includes("pengarah")) {
+      andConditions.push({
+        OR: [
+          { sector: { contains: "Creative Director", mode: "insensitive" } },
+          { sector: { contains: "Director", mode: "insensitive" } },
+          { sector: { contains: "Pengarah Kreatif", mode: "insensitive" } },
+        ],
+      });
+    } else if (sLower.includes("model") || sLower.includes("talent")) {
       andConditions.push({
         OR: [
           { sector: { contains: "Model", mode: "insensitive" } },
           { sector: { contains: "Talent", mode: "insensitive" } },
         ],
       });
-    } else if (sector === "Studio") {
+    } else if (sLower.includes("studio") || sLower.includes("venue")) {
       andConditions.push({
         OR: [
           { sector: { contains: "Studio", mode: "insensitive" } },
+          { sector: { contains: "Venue", mode: "insensitive" } },
           { actorType: ActorType.STUDIO },
         ],
       });
@@ -118,7 +139,13 @@ export async function getDirectoryActors(params: DirectoryFilterParams = {}) {
 
   if (location && location !== "ALL") {
     andConditions.push({
-      location: { contains: location, mode: "insensitive" },
+      OR: [
+        { location: { contains: location, mode: "insensitive" } },
+        { location: { contains: "Seluruh Indonesia", mode: "insensitive" } },
+        { location: { contains: "Nasional", mode: "insensitive" } },
+        { location: { contains: "Travel Ready", mode: "insensitive" } },
+        { description: { contains: "luar kota", mode: "insensitive" } },
+      ],
     });
   }
 
@@ -129,9 +156,28 @@ export async function getDirectoryActors(params: DirectoryFilterParams = {}) {
   }
 
   if (compensation && compensation !== "ALL") {
-    andConditions.push({
-      compensationModels: { has: compensation },
-    });
+    const cUpper = compensation.toUpperCase();
+    if (cUpper === "PAID") {
+      andConditions.push({
+        OR: [
+          { compensationModels: { has: "PAID" } },
+          { compensationModels: { has: "Paid" } },
+          { compensationModels: { has: "Commercial" } },
+        ],
+      });
+    } else if (cUpper === "REVENUE_SHARE") {
+      andConditions.push({
+        OR: [
+          { compensationModels: { has: "REVENUE_SHARE" } },
+          { compensationModels: { has: "Bagi Hasil" } },
+          { compensationModels: { has: "Revenue Share" } },
+        ],
+      });
+    } else {
+      andConditions.push({
+        compensationModels: { has: compensation },
+      });
+    }
   }
 
   if (search && search.trim() !== "") {

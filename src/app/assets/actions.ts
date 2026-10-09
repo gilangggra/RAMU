@@ -36,7 +36,7 @@ export async function createAsset(formData: FormData) {
   const description = (formData.get("description") as string)?.trim();
   const rolesRaw = formData.getAll("roles") as string[];
 
-  const returnTo = (formData.get("returnTo") as string) || "/readiness?tab=assets";
+  const returnTo = (formData.get("returnTo") as string) || "/showcase";
   const baseUrl = returnTo.split("?")[0];
   const queryStr = returnTo.includes("?") ? returnTo.slice(returnTo.indexOf("?")) : "";
 
@@ -112,8 +112,8 @@ export async function createAsset(formData: FormData) {
   }
 
   clearRecommendationsCache();
-  revalidatePath("/readiness");
-  revalidatePath("/assets");
+  revalidatePath("/showcase");
+  revalidatePath("/settings");
   revalidatePath("/dashboard");
   redirect(returnTo);
 }
@@ -127,7 +127,7 @@ export async function archiveAsset(assetId: string) {
   });
 
   clearRecommendationsCache();
-  revalidatePath("/readiness");
-  revalidatePath("/assets");
+  revalidatePath("/showcase");
+  revalidatePath("/settings");
   revalidatePath("/dashboard");
 }

@@ -2,11 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
-
 import { syncUserProfile } from "@/lib/profileSync";
 import { isUserAdmin } from "@/lib/admin";
 
@@ -16,7 +13,7 @@ export async function login(formData: FormData) {
   let redirectTo = (formData.get("redirectTo") as string) || "/dashboard";
 
   if (!email || !password) {
-    redirect(`/login?error=${encodeURIComponent("Email dan password wajib diisi")}`);
+    return { error: "Email dan kata sandi wajib diisi." };
   }
 
   const supabase = await createClient();
@@ -32,7 +29,7 @@ export async function login(formData: FormData) {
     } else if (error.message.includes("Email not confirmed")) {
       errorMsg = "Email belum dikonfirmasi. Silakan cek kotak masuk email Anda.";
     }
-    redirect(`/login?error=${encodeURIComponent(errorMsg)}`);
+    return { error: errorMsg };
   }
 
   if (data.user) {
@@ -77,61 +74,29 @@ export async function signup(formData: FormData) {
   const password = formData.get("password") as string;
   const displayName = (formData.get("displayName") as string)?.trim();
   const role = ((formData.get("role") as string) || (formData.get("sector") as string))?.trim();
-  const location = (formData.get("location") as string)?.trim();
-  const actorType = (formData.get("actorType") as string)?.trim() || "STUDIO";
-
-  const bio = (formData.get("bio") as string)?.trim();
-  const address = (formData.get("address") as string)?.trim();
-  const skillsRaw = formData.get("skills") as string;
-  const website = (formData.get("website") as string)?.trim();
-  const phone = (formData.get("phone") as string)?.trim();
-  const receiveNotifications = formData.get("receiveNotifications") === "true";
-
-  let parsedSkills: string[] = [];
-  try {
-    if (skillsRaw) {
-      parsedSkills = JSON.parse(skillsRaw);
-    }
-  } catch {
-    parsedSkills = skillsRaw ? skillsRaw.split(",").map((s) => s.trim()).filter(Boolean) : [];
-  }
-
-  const specialization = (formData.get("specialization") as string)?.trim();
-  if (specialization && !parsedSkills.includes(specialization)) {
-    parsedSkills.unshift(specialization);  
-  }
+  const location = (formData.get("location") as string)?.trim() || "Jakarta Selatan, Indonesia";
 
   if (!email || !password || !displayName) {
-    redirect(`/register?error=${encodeURIComponent("Nama, email, dan kata sandi wajib diisi.")}`);
+    return { error: "Nama, email, dan kata sandi wajib diisi." };
   }
 
   if (password.length < 6) {
-    redirect(`/register?error=${encodeURIComponent("Kata sandi minimal harus 6 karakter.")}`);
+    return { error: "Kata sandi minimal harus 6 karakter." };
   }
 
-  const avatarFile = formData.get("avatarFile") as File | null;
-  let finalAvatarUrl: string | null = null;
+  // Canonical mapping to exactly 5 official RAMU roles & ActorTypes
+  const ROLE_MAP: Record<string, { sector: string; actorType: "BRAND" | "STUDIO" | "INDIVIDUAL" }> = {
+    "Fashion Brand/UMKM": { sector: "Fashion Brand/UMKM", actorType: "BRAND" },
+    "Fashion Designer": { sector: "Fashion Brand/UMKM", actorType: "BRAND" }, // mapped to brand
+    "Photographer": { sector: "Photographer", actorType: "INDIVIDUAL" },
+    "Model": { sector: "Model", actorType: "INDIVIDUAL" },
+    "MUA/Stylist": { sector: "MUA/Stylist", actorType: "INDIVIDUAL" },
+    "Studio": { sector: "Studio", actorType: "STUDIO" },
+  };
 
-  if (avatarFile && avatarFile.size > 0 && typeof avatarFile.arrayBuffer === "function") {
-    try {
-      const bytes = await avatarFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const safeName = avatarFile.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-      const filename = `${Date.now()}-${safeName}`;
-      const uploadDir = path.join(process.cwd(), "public", "uploads", "avatars");
-      await mkdir(uploadDir, { recursive: true });
-      const filepath = path.join(uploadDir, filename);
-      await writeFile(filepath, buffer);
-      finalAvatarUrl = `/uploads/avatars/${filename}`;
-    } catch (uploadErr) {
-      console.error("Gagal menyimpan file avatar saat pendaftaran:", uploadErr);
-    }
-  }
-
-  if (!finalAvatarUrl) {
-    const rawAvatarUrl = (formData.get("avatarUrl") as string)?.trim();
-    if (rawAvatarUrl) finalAvatarUrl = rawAvatarUrl;
-  }
+  const matched = ROLE_MAP[role] || { sector: "Photographer", actorType: "INDIVIDUAL" };
+  const canonicalSector = matched.sector;
+  const canonicalActorType = matched.actorType;
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
@@ -144,18 +109,26 @@ export async function signup(formData: FormData) {
       // Never trust or forward client-supplied role/admin values to Auth metadata.
       data: {
         display_name: displayName,
-        avatar_url: finalAvatarUrl || undefined,
-        location: location || undefined,
-        bio: bio || undefined,
-        website: website || undefined,
-        phone: phone || undefined,
-        notifications_enabled: receiveNotifications,
+        role: canonicalSector,
+        location: location,
       },
     },
   });
 
   if (error) {
-    redirect(`/register?error=${encodeURIComponent(error.message)}`);
+    let errorMsg = error.message;
+    if (error.message.includes("User already registered") || error.message.includes("already exists")) {
+      errorMsg = "Alamat email ini sudah terdaftar. Silakan langsung masuk ke akun Anda atau gunakan email lain.";
+    } else if (error.message.includes("Password should be at least")) {
+      errorMsg = "Kata sandi terlalu pendek. Gunakan minimal 6 karakter.";
+    } else if (error.message.includes("Invalid email")) {
+      errorMsg = "Format alamat email tidak valid.";
+    }
+    return { error: errorMsg };
+  }
+
+  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    return { error: "Alamat email ini sudah terdaftar di sistem. Silakan langsung masuk melalui halaman login." };
   }
 
   if (data.user) {
@@ -164,84 +137,35 @@ export async function signup(formData: FormData) {
         data.user.id,
         data.user.email ?? email,
         displayName,
-        finalAvatarUrl || data.user.user_metadata?.avatar_url || data.user.user_metadata?.picture
+        null
       );
-
-      if (bio) {
-        await prisma.profile.update({
-          where: { id: data.user.id },
-          data: { bio },
-        }).catch(() => {});
-      }
-
-      const fullLocation = address ? `${address}, ${location}` : location;
 
       const existingActor = await prisma.actor.findFirst({
         where: { ownerUserId: data.user.id },
       });
 
-      let actorId = existingActor?.id;
-
-      const validActorType = (["INDIVIDUAL", "STUDIO", "MSME", "COLLECTIVE"].includes(actorType) ? actorType : "STUDIO") as any;
-
       if (!existingActor) {
-        const newActor = await prisma.actor.create({
+        await prisma.actor.create({
           data: {
             ownerUserId: data.user.id,
             name: displayName,
-            actorType: validActorType,
-            sector: role || "Fashion & Visual Production",
-            location: fullLocation || "Indonesia",
-            description: bio || null,
-            websiteUrl: website || null,
-            contactPhone: phone || null,
+            actorType: canonicalActorType,
+            sector: canonicalSector,
+            location: location,
+            description: null,
             contactEmail: email,
             status: "ACTIVE",
           },
         });
-        actorId = newActor.id;
       } else {
         await prisma.actor.update({
           where: { id: existingActor.id },
           data: {
-            actorType: validActorType,
-            sector: role || existingActor.sector,
-            location: fullLocation || existingActor.location,
-            description: bio || existingActor.description,
-            websiteUrl: website || existingActor.websiteUrl,
-            contactPhone: phone || existingActor.contactPhone,
+            actorType: canonicalActorType,
+            sector: canonicalSector,
+            location: location,
           },
         });
-      }
-
-      if (actorId && parsedSkills.length > 0) {
-        for (const skill of parsedSkills) {
-          const existingAsset = await prisma.asset.findFirst({
-            where: {
-              actorId: actorId,
-              name: skill,
-            },
-          });
-
-          if (!existingAsset) {
-            await prisma.asset.create({
-              data: {
-                actorId: actorId,
-                category: "SKILL_TALENT",
-                subtype: "Keahlian Spesifik",
-                name: skill,
-                roles: ["CAPABILITY"],
-                sourceType: "SELF_REPORTED",
-                confidenceLevel: "HIGH",
-                status: "ACTIVE",
-                attributes: {
-                  tags: ["Onboarding", "Skill"],
-                  selfReported: true,
-                },
-              },
-            }).catch(() => {});
-          }
-        }
       }
 
       revalidatePath("/", "layout");
@@ -250,7 +174,7 @@ export async function signup(formData: FormData) {
       if (e?.message?.includes("NEXT_REDIRECT")) {
         throw e;
       }
-      console.error("Gagal menyimpan profil & aset lokal:", e);
+      console.error("Gagal menyimpan profil & aktor lokal:", e);
     }
   }
 

@@ -5,7 +5,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     code: 'FASHION_CAPSULE',
     name: 'Kampanye Koleksi Kapsul & Editorial Lookbook',
     description:
-      'Membentuk lini koleksi eksklusif terbatas dengan memadukan rancangan busana desainer, penata gaya (stylist), fotografer editorial, dan talenta model.',
+      'Membentuk lini koleksi eksklusif terbatas dengan memadukan koleksi busana brand, penata gaya (stylist), fotografer editorial, dan talenta model.',
     category: 'COMMERCIAL_CAMPAIGN',
     version: 1,
     minParticipants: 2,
@@ -13,7 +13,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     requiredRoles: [
       {
         code: 'TEXTILE_MATERIAL',
-        label: 'Koleksi Busana / Desainer',
+        label: 'Koleksi Sampel Busana Brand',
         required: true,
         minCount: 1,
         acceptedCategories: ['WARDROBE_PROP', 'PORTFOLIO_WORK'],
@@ -69,7 +69,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     },
     generateDescription: (ctx: TitleContext) => {
       const actorNames = ctx.actors.map((a) => a.name).join(', ');
-      return `Kolaborasi penciptaan kampanye lookbook terpadu antara ${actorNames}. Menyatukan koleksi busana desainer dan kapabilitas visual editorial menjadi rilis berkelas internasional.`;
+      return `Kolaborasi penciptaan kampanye lookbook terpadu antara ${actorNames}. Menyatukan koleksi busana brand dan kapabilitas visual editorial menjadi rilis berkelas internasional.`;
     },
   },
 
@@ -201,7 +201,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     code: 'PRODUCT_PHOTOSHOOT',
     name: 'Sesi Foto Editorial & Casting Model',
     description:
-      'Menghubungkan langsung desainer busana yang membutuhkan dokumentasi komersial dengan fotografer fashion dan talenta model.',
+      'Menghubungkan langsung fashion brand yang membutuhkan dokumentasi komersial dengan fotografer fashion dan talenta model.',
     category: 'CREATIVE_PRODUCTION',
     version: 1,
     minParticipants: 2,
@@ -209,7 +209,7 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
     requiredRoles: [
       {
         code: 'PRODUCT_OWNER',
-        label: 'Desainer / Pemilik Koleksi Busana',
+        label: 'Fashion Brand / Pemilik Koleksi Busana',
         required: true,
         minCount: 1,
         acceptedCategories: ['PORTFOLIO_WORK', 'WARDROBE_PROP'],
@@ -245,46 +245,46 @@ export const OPPORTUNITY_PATTERNS: OpportunityPatternDef[] = [
   },
   {
     code: 'DESIGN_TO_PRODUCTION',
-    name: 'Hilirisasi Desain ke Atelier & Garmen',
+    name: 'Kolaborasi Lookbook & Kampanye Wardrobe',
     description:
-      'Menghubungkan perancang busana dengan atelier jahit dan workshop garmen untuk memproduksi sampel desain menjadi koleksi siap pakai.',
+      'Menghubungkan label busana dengan fotografer dan tim visual untuk memproduksi katalog lookbook editorial berkualitas internasional.',
     category: 'CREATIVE_PRODUCTION',
     version: 1,
     minParticipants: 2,
     maxParticipants: 3,
     requiredRoles: [
       {
-        code: 'ATELIER_WORKSHOP',
-        label: 'Atelier Jahit & Workshop Garmen',
+        code: 'WARDROBE_BRAND',
+        label: 'Koleksi Busana & Wardrobe Brand',
         required: true,
         minCount: 1,
-        acceptedCategories: ['WARDROBE_PROP', 'STUDIO_SPACE', 'SKILL_TALENT'],
-        acceptedRoles: ['SKILL_TALENT', 'COMPONENT', 'INPUT'],
+        acceptedCategories: ['WARDROBE_PROP', 'PORTFOLIO_WORK'],
+        acceptedRoles: ['COMPONENT', 'INPUT', 'CREATIVE_ELEMENT'],
       },
       {
-        code: 'DESIGN_OR_COMPONENT',
-        label: 'Sketsa Desain & Pola Busana',
+        code: 'VISUAL_CREATOR',
+        label: 'Fotografer & Tim Visual Studio',
         required: true,
         minCount: 1,
-        acceptedCategories: ['SKILL_TALENT', 'WARDROBE_PROP'],
-        acceptedRoles: ['CREATIVE_ELEMENT', 'COMPONENT'],
+        acceptedCategories: ['SKILL_TALENT', 'STUDIO_SPACE', 'EQUIPMENT'],
+        acceptedRoles: ['SKILL_TALENT', 'ENABLER'],
       },
     ],
     optionalRoles: [],
     expectedOutputs: [
-      'Prototipe & Sampel Koleksi Baru',
-      'Standardisasi Mutu & Jahitan Kualitas Tinggi',
-      'Produksi Batch Terbatas Siap Rilis',
+      'Lookbook Editorial 15-Look Resolusi Penuh',
+      'Aset Visual Kampanye Siap Publikasi',
+      'Pemberian Co-Credit Resmi Seluruh Tim',
     ],
     allowedRelationships: ['PRODUCTION_CHAIN', 'CAPABILITY_GAP', 'PRODUCT_COMBINATION'],
-    preferredGoals: ['COMMERCIAL_CAMPAIGN', 'SKILL_DEVELOPMENT', 'REVENUE_GENERATION'],
+    preferredGoals: ['COMMERCIAL_CAMPAIGN', 'BRAND_AWARENESS', 'REVENUE_GENERATION'],
     generateTitle: (ctx: TitleContext) => {
-      const names = ctx.actors.map((a) => a.name).join(' & ');
-      return `Produksi Lini Busana Kolaboratif: ${names}`;
+      const names = ctx.actors.map((a) => a.name).join(' × ');
+      return `Lookbook Editorial & Kampanye Mode: ${names}`;
     },
     generateDescription: (ctx: TitleContext) => {
       const names = ctx.actors.map((a) => a.name).join(' dan ');
-      return `Sinergi perancangan mode dan kapasitas produksi atelier antara ${names} untuk memproduksi lini busana berkualitas tinggi dengan presisi jahitan standar butik.`;
+      return `Kolaborasi pembuatan materi promosi visual lookbook antara ${names} untuk mengangkat narasi koleksi busana ke standar publikasi komersial.`;
     },
   },
   {

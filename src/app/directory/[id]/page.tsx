@@ -9,6 +9,7 @@ import {
   Mail,
   Globe,
   ArrowLeft,
+  ArrowUpRight,
   MessageCircle,
   CheckCircle2,
   Pencil,
@@ -18,10 +19,15 @@ import {
   Camera,
 } from "lucide-react";
 import { parseSocialLinks, InstagramIcon } from "@/lib/socialUtils";
+import { getActorBookedDatesAction } from "@/app/api/bookings/actions";
 import { ActorDetailTabs } from "@/components/directory/ActorDetailTabs";
 import { BookingButton } from "@/components/directory/BookingButton";
 import { OpenEditModalButton } from "@/components/directory/OpenEditModalButton";
 import { ActorAvatar } from "@/components/ui/ActorAvatar";
+import { ProfileCompatibilityBanner } from "@/components/directory/ProfileCompatibilityBanner";
+import { ActorMobileActionBar } from "@/components/directory/ActorMobileActionBar";
+import { Navbar } from "@/components/landing/Navbar";
+import { ShareProfileButton } from "@/components/directory/ShareProfileButton";
 
 export async function generateMetadata({
   params,
@@ -39,31 +45,49 @@ export async function generateMetadata({
 
 export default async function DirectoryDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ tab?: string; edit?: string }>;
 }) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
+  let currentActor = null;
+  if (user) {
+    currentActor = await prisma.actor.findFirst({
+      where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
+      orderBy: { createdAt: "asc" },
+    });
+  }
 
-  const currentActor = await prisma.actor.findFirst({
-    where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
-    orderBy: { createdAt: "asc" },
-  });
-
-  if (!currentActor) redirect("/onboarding");
+  const isGuest = !currentActor;
 
   const { id } = await params;
+  const sParams = searchParams ? await searchParams : {};
+  const rawTab = (sParams?.tab || "").toLowerCase();
+  const initialTab: "portfolio" | "rates" | "specs" | "collaborations" | "about" | "reviews" =
+    rawTab === "rates" || rawTab === "tarif" || rawTab === "paket"
+      ? "rates"
+      : rawTab === "specs" || rawTab === "spesifikasi"
+      ? "specs"
+      : rawTab === "collaborations" || rawTab === "proyek"
+      ? "collaborations"
+      : rawTab === "about" || rawTab === "tentang"
+      ? "about"
+      : rawTab === "reviews" || rawTab === "ulasan"
+      ? "reviews"
+      : "portfolio";
+
   const actor = await getDirectoryActorById(id);
 
   if (!actor) {
     notFound();
   }
 
-  const isCurrentActor = currentActor.id === actor.id;
+  const isCurrentActor = currentActor ? currentActor.id === actor.id : false;
 
   const potentialOtherAssets = await prisma.asset.findMany({
     where: {
@@ -123,6 +147,8 @@ export default async function DirectoryDetailPage({
     },
   });
 
+  const bookedDates = await getActorBookedDatesAction(actor.id);
+
 
 
   const sectorLower = actor.sector.toLowerCase();
@@ -137,7 +163,10 @@ export default async function DirectoryDetailPage({
     actorTypeUpper === "COLLECTIVE" ||
     sectorLower.includes("brand") ||
     sectorLower.includes("label") ||
-    sectorLower.includes("umkm");
+    sectorLower.includes("umkm") ||
+    sectorLower.includes("designer") ||
+    sectorLower.includes("desain") ||
+    sectorLower.includes("atelier");
 
   // Studio: explicitly studio type, or named Studio Imaji, or sector contains studio and not photographer
   const isStudio =
@@ -149,9 +178,8 @@ export default async function DirectoryDetailPage({
   const isModel = !isBrand && !isStudio && (sectorLower.includes("model") || sectorLower.includes("talent"));
   const isMua = !isBrand && !isStudio && (sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair"));
   const isStylist = !isBrand && !isStudio && !isMua && (sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));
-  const isDesigner = !isBrand && !isStudio && (sectorLower.includes("designer") || sectorLower.includes("desain") || sectorLower.includes("atelier"));
   const isVideo = !isBrand && !isStudio && (sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema"));
-  const isPhotog = !isBrand && !isStudio && !isVideo && !isModel && !isMua && !isStylist && !isDesigner;
+  const isPhotog = !isBrand && !isStudio && !isVideo && !isModel && !isMua && !isStylist;
 
   // Role-Aware Primary Preview Image Resolution
   let previewImage: string | null = null;
@@ -352,16 +380,6 @@ export default async function DirectoryDetailPage({
     metric3Value = "Cinema 4K & DaVinci 10-Bit";
     metric4Label = "Proteksi Kerja";
     metric4Value = "SPK Digital & Hak Lisensi";
-  } else if (isDesigner) {
-    roleBadgeLabel = "Fashion Designer & Atelier";
-    cardOverlayBadge = "Atelier & Desainer Terverifikasi";
-    availabilityBadge = "Tersedia untuk Kolaborasi";
-    startingRate = "Mulai Rp 2,5 Jt / koleksi";
-    turnaroundTime = "7 – 14 Hari Kerja";
-    metric3Label = "Keahlian Desain";
-    metric3Value = "Pattern Making & Sampling";
-    metric4Label = "Proteksi HKI";
-    metric4Value = "NDA & SPK Hak Cipta Desain";
   } else if (isPhotog) {
     roleBadgeLabel = "Fotografer Mode & Komersial";
     cardOverlayBadge = "Fotografer Terkurasi";
@@ -387,6 +405,7 @@ export default async function DirectoryDetailPage({
     turnaroundTime = customAttrs.turnaround_time;
   }
   const customTermsConfig = customAttrs.terms_and_conditions || null;
+  const availabilityData = (customAttrs?.availability as any) || null;
 
   const rawPhone = actor.contactPhone || "";
   const cleanPhone = rawPhone.replace(/[^0-9]/g, "").replace(/^0/, "62");
@@ -403,7 +422,6 @@ export default async function DirectoryDetailPage({
       (isVideo && a.attributes && typeof a.attributes === "object" && ("primary_cinema_camera" in (a.attributes as any) || "stabilizer_gimbal" in (a.attributes as any))) ||
       (isMua && a.attributes && typeof a.attributes === "object" && ("makeup_styles" in (a.attributes as any) || "primary_kit_brands" in (a.attributes as any))) ||
       (isStylist && a.attributes && typeof a.attributes === "object" && ("styling_specialties" in (a.attributes as any) || "onset_equipment" in (a.attributes as any) || "wardrobe_archive_count" in (a.attributes as any))) ||
-      (isDesigner && a.attributes && typeof a.attributes === "object" && ("design_disciplines" in (a.attributes as any) || "primary_software" in (a.attributes as any))) ||
       (isBrand && a.attributes && typeof a.attributes === "object" && ("brand_gallery" in (a.attributes as any) || "sample_sizes_ready" in (a.attributes as any) || "design_dna" in (a.attributes as any)))
   );
   const specsAttrs = (specsAsset?.attributes && typeof specsAsset.attributes === "object")
@@ -477,19 +495,6 @@ export default async function DirectoryDetailPage({
       headerTags.push(specsAttrs.aesthetic_dna.length > 28 ? specsAttrs.aesthetic_dna.slice(0, 28) + "..." : specsAttrs.aesthetic_dna);
     }
     headerTags.push("Garment Steamer & Fitting Kit");
-  } else if (isDesigner) {
-    if (Array.isArray(specsAttrs.design_disciplines) && specsAttrs.design_disciplines.length > 0) {
-      headerTags.push(specsAttrs.design_disciplines[0]);
-    } else {
-      headerTags.push("Visual Identity & Fashion");
-    }
-    if (Array.isArray(specsAttrs.primary_software) && specsAttrs.primary_software.length > 0) {
-      headerTags.push(specsAttrs.primary_software.slice(0, 2).join(" & "));
-    }
-    if (specsAttrs.style_dna) {
-      headerTags.push(specsAttrs.style_dna.length > 28 ? specsAttrs.style_dna.slice(0, 28) + "..." : specsAttrs.style_dna);
-    }
-    headerTags.push("Deliverables Siap Rilis");
   } else {
     if (Array.isArray(specsAttrs.specialties) && specsAttrs.specialties.length > 0) {
       headerTags.push(...specsAttrs.specialties.slice(0, 3));
@@ -500,318 +505,397 @@ export default async function DirectoryDetailPage({
 
   const displayHeaderTags = Array.from(new Set(headerTags)).filter(Boolean).slice(0, 4);
 
-  return (
-    <AppShell actor={currentActor} activeRoute="/directory">
-      <div className="max-w-6xl mx-auto pb-24">
-
-        <div className="mb-8">
-          <Link
-            href="/directory"
-            className="inline-flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-stone-400 hover:text-[#1E1B2E] transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Kembali ke Direktori</span>
-          </Link>
+  const pageContent = (
+    <div className="w-full max-w-7xl mx-auto pb-24">
+      {isGuest && (
+        <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <p className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                Mode Penampil Tamu
+              </p>
+            </div>
+            <p className="text-xs text-slate-600">
+              Anda sedang melihat profil portofolio kreator di RAMU. Masuk atau daftar akun untuk memulai kolaborasi resmi, kirim brief, dan booking talent.
+            </p>
+          </div>
+          <div className="flex items-center gap-2.5 shrink-0">
+            <Link
+              href={`/login?redirect=/directory/${actor.id}`}
+              className="px-4 py-2 text-xs font-semibold text-slate-800 bg-white border border-slate-200 hover:bg-slate-50 rounded-full transition-all shadow-xs"
+            >
+              Masuk
+            </Link>
+            <Link
+              href="/register"
+              className="btn-primary-pill !text-xs !py-2 !px-4 text-white font-semibold rounded-full shadow-md shadow-[#4CC9FE]/25 transition-all"
+            >
+              Daftar Gratis
+            </Link>
+          </div>
         </div>
+      )}
 
-        <section className="mb-12 pt-1">
-          <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-12 pb-10 border-b border-stone-200">
-            {/* Left Column: Media Card with Badge & Verified Trust Strip */}
-            <div className="w-full sm:w-72 md:w-80 shrink-0">
-              <div className="aspect-[3/4] w-full bg-stone-100 border border-stone-200/90 rounded-2xl relative overflow-hidden shadow-xs group">
-                {previewImage ? (
-                  <img
-                    src={previewImage}
-                    alt={actor.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                ) : actor.owner?.avatarUrl ? (
-                  <img
-                    src={actor.owner.avatarUrl}
-                    alt={actor.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-stone-900 text-white flex items-center justify-center text-4xl font-semibold tracking-tight">
-                    {actor.name.slice(0, 2).toUpperCase()}
-                  </div>
-                )}
+      <div className="mb-6">
+        <Link
+          href="/directory"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white border border-slate-200/80 text-xs font-semibold text-slate-600 hover:text-slate-900 shadow-2xs transition-all w-fit group"
+        >
+          <ArrowLeft className="w-3.5 h-3.5 text-slate-400 group-hover:-translate-x-0.5 transition-transform" />
+          <span>Kembali ke Direktori</span>
+        </Link>
+      </div>
 
-                {/* Owner hover quick-action to edit photo */}
-                {isCurrentActor && (
-                  <div className="absolute inset-0 bg-stone-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-auto">
-                    <OpenEditModalButton
-                      initialTab="profile"
-                      label="Ubah Foto Profil"
-                      className="px-4 py-2 bg-white/95 hover:bg-white text-stone-900 text-xs font-semibold rounded-xl shadow-md flex items-center gap-2 cursor-pointer transition-all hover:scale-105"
-                      iconClassName="text-stone-700"
-                    />
-                  </div>
-                )}
-
-                {/* Role / Trust Micro Badge Overlay */}
-                <div className="absolute top-3 left-3">
-                  <span className="px-2.5 py-1 bg-white/95 backdrop-blur-md rounded-full text-[9px] font-bold uppercase tracking-wider text-stone-800 shadow-2xs border border-stone-200/60 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                    <span>{cardOverlayBadge}</span>
-                  </span>
+      {/* ============================================================ */}
+      {/* HERO SECTION: GLASS CARD CONTAINER                          */}
+      {/* ============================================================ */}
+      <section className="rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] p-6 sm:p-8 lg:p-10 mb-8 relative overflow-hidden">
+        <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-12">
+          {/* Left Column: Media Card with Badge & Verified Trust Strip */}
+          <div className="w-full sm:w-72 md:w-80 shrink-0">
+            <div className="aspect-[3/4] w-full bg-slate-100 border border-slate-200/80 rounded-2xl relative overflow-hidden shadow-sm group">
+              {previewImage ? (
+                <img
+                  src={previewImage}
+                  alt={actor.name}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              ) : actor.owner?.avatarUrl ? (
+                <img
+                  src={actor.owner.avatarUrl}
+                  alt={actor.name}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              ) : (
+                <div className="w-full h-full bg-slate-900 text-white flex items-center justify-center text-4xl font-semibold tracking-tight">
+                  {actor.name.slice(0, 2).toUpperCase()}
                 </div>
+              )}
 
-                <div className="absolute bottom-3 left-3">
-                  <span className="px-2.5 py-1 bg-stone-950/80 backdrop-blur-md rounded-full text-[9px] font-semibold text-white shadow-2xs border border-white/10 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>RAMU Ecosystem Verified</span>
-                  </span>
+              {/* Owner hover quick-action to edit photo */}
+              {isCurrentActor && (
+                <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-auto">
+                  <OpenEditModalButton
+                    initialTab="profile"
+                    label="Ubah Foto Profil"
+                    className="btn-primary-pill !text-xs !py-2 !px-4 text-white shadow-md flex items-center gap-2 cursor-pointer transition-all hover:scale-105"
+                    iconClassName="text-white"
+                  />
                 </div>
+              )}
+
+              {/* Role / Trust Micro Badge Overlay */}
+              <div className="absolute top-3 left-3">
+                <span className="px-3 py-1 bg-white/95 backdrop-blur-md rounded-full text-[9px] font-bold uppercase tracking-wider text-slate-800 shadow-xs border border-slate-200/60 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                  <span>{cardOverlayBadge}</span>
+                </span>
               </div>
 
-              {/* Trust Badge Strip */}
-              <div className="mt-3 px-3 py-2 bg-stone-50 border border-stone-200/80 rounded-xl flex items-center justify-between text-[11px]">
-                <span className="text-stone-500 font-medium flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span>Peer-Verified Co-Credit</span>
-                </span>
-                <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md">
-                  100% Anti-Catfishing
+              <div className="absolute bottom-3 left-3">
+                <span className="px-3 py-1 bg-slate-950/80 backdrop-blur-md rounded-full text-[9px] font-semibold text-white shadow-xs border border-white/10 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>RAMU Ecosystem Verified</span>
                 </span>
               </div>
             </div>
 
-            {/* Right Column: Information, Badges, KPIs, Action Buttons */}
-            <div className="flex-1 flex flex-col justify-between min-h-[360px] w-full">
-              <div>
-                {/* Role Pill & Availability status */}
-                <div className="flex flex-wrap items-center gap-2.5 text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-3">
-                  <span className="px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-800 border border-stone-200">
-                    {roleBadgeLabel}
+            {/* Trust Badge Strip */}
+            <div className="mt-3 px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl flex items-center justify-between text-xs">
+              <span className="text-slate-600 font-medium flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>Peer-Verified Co-Credit</span>
+              </span>
+              <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-full">
+                100% Anti-Catfishing
+              </span>
+            </div>
+          </div>
+
+          {/* Right Column: Information, Badges, KPIs, Action Buttons */}
+          <div className="flex-1 flex flex-col justify-between min-h-[360px] w-full">
+            <div>
+              {/* Role Pill & Availability status */}
+              <div className="flex flex-wrap items-center gap-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-3">
+                <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-800 border border-slate-200/80">
+                  {roleBadgeLabel}
+                </span>
+                <span className="w-1 h-1 rounded-full bg-slate-300" />
+                <span className="text-emerald-700 flex items-center gap-1.5 font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                  {availabilityBadge}
+                </span>
+              </div>
+
+              {/* Actor Name + Official Avatar Badge */}
+              <div className="flex items-center gap-3.5 mb-3">
+                <ActorAvatar
+                  name={actor.name}
+                  avatarUrl={actor.owner?.avatarUrl}
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border border-slate-200/90 bg-white shadow-xs shrink-0"
+                  textClassName="text-base sm:text-lg font-bold"
+                />
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight flex items-center gap-2.5">
+                  <span>{actor.name}</span>
+                </h1>
+              </div>
+
+              {/* Metadata Row (Location, Socials, Email) */}
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-slate-500 mb-4">
+                {actor.location && (
+                  <div className="flex items-center gap-1.5 text-slate-700">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{actor.location}</span>
+                  </div>
+                )}
+                {socialLinks.instagram && (
+                  <a
+                    href={socialLinks.instagram.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 hover:text-slate-900 transition-colors"
+                  >
+                    <InstagramIcon className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Instagram</span>
+                  </a>
+                )}
+                {socialLinks.website && (
+                  <a
+                    href={socialLinks.website.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 hover:text-slate-900 transition-colors"
+                  >
+                    <Globe className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Website</span>
+                  </a>
+                )}
+                {actor.contactEmail && (
+                  <a
+                    href={`mailto:${actor.contactEmail}`}
+                    className="flex items-center gap-1.5 hover:text-slate-900 transition-colors lowercase font-normal"
+                  >
+                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{actor.contactEmail}</span>
+                  </a>
+                )}
+              </div>
+
+              {/* Description / Bio */}
+              <p className="text-sm font-normal text-slate-600 leading-relaxed max-w-2xl mb-4">
+                {actor.description ||
+                  `${actor.name} adalah entitas kreatif terverifikasi di ekosistem RAMU, berfokus pada kolaborasi komersial, produksi visual estetis, dan sinergi proyek industri busana kontemporer.`}
+              </p>
+
+              {/* Dynamic Role-Specific Specs & Capability Tags */}
+              <div className="flex flex-wrap items-center gap-1.5 mb-6">
+                {displayHeaderTags.map((tag, idx) => (
+                  <span
+                    key={idx}
+                    className="px-3 py-1 bg-white/90 border border-slate-200/90 rounded-full text-xs font-semibold text-slate-700 shadow-2xs"
+                  >
+                    {tag}
                   </span>
-                  <span className="w-1 h-1 rounded-full bg-stone-300" />
-                  <span className="text-emerald-700 flex items-center gap-1.5 font-bold">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                    {availabilityBadge}
+                ))}
+              </div>
+            </div>
+
+            {/* 4-Metric KPI Grid */}
+            <div className="space-y-5 pt-1">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-white/70 backdrop-blur-md border border-white/90 rounded-[20px] shadow-2xs">
+                <div className="space-y-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                    {isStudio ? "Tarif Sewa" : isBrand ? "Skema Biaya" : "Estimasi Tarif"}
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-900 truncate block">
+                    {startingRate}
                   </span>
                 </div>
-
-                {/* Actor Name + Official Avatar Badge */}
-                <div className="flex items-center gap-3.5 mb-3">
-                  <ActorAvatar
-                    name={actor.name}
-                    avatarUrl={actor.owner?.avatarUrl}
-                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border border-stone-200/90 bg-white shadow-2xs shrink-0"
-                    textClassName="text-base sm:text-lg font-bold"
-                  />
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-stone-900 tracking-tight leading-tight flex items-center gap-2.5">
-                    <span>{actor.name}</span>
-                  </h1>
+                <div className="space-y-0.5 sm:border-l border-slate-200/80 sm:pl-3">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                    Waktu Kerja
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-900 truncate block">
+                    {turnaroundTime}
+                  </span>
                 </div>
-
-                {/* Metadata Row (Location, Socials, Email) */}
-                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-stone-500 mb-4">
-                  {actor.location && (
-                    <div className="flex items-center gap-1.5 text-stone-700">
-                      <MapPin className="w-3.5 h-3.5 text-stone-400" />
-                      <span>{actor.location}</span>
-                    </div>
-                  )}
-                  {socialLinks.instagram && (
-                    <a
-                      href={socialLinks.instagram.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-1.5 hover:text-stone-900 transition-colors"
-                    >
-                      <InstagramIcon className="w-3.5 h-3.5 text-stone-400" />
-                      <span>Instagram</span>
-                    </a>
-                  )}
-                  {socialLinks.website && (
-                    <a
-                      href={socialLinks.website.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-1.5 hover:text-stone-900 transition-colors"
-                    >
-                      <Globe className="w-3.5 h-3.5 text-stone-400" />
-                      <span>Website</span>
-                    </a>
-                  )}
-                  {actor.contactEmail && (
-                    <a
-                      href={`mailto:${actor.contactEmail}`}
-                      className="flex items-center gap-1.5 hover:text-stone-900 transition-colors lowercase font-normal"
-                    >
-                      <Mail className="w-3.5 h-3.5 text-stone-400" />
-                      <span>{actor.contactEmail}</span>
-                    </a>
-                  )}
+                <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-slate-200/80 sm:pl-3 pt-2 sm:pt-0">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                    {metric3Label}
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-900 truncate block">
+                    {metric3Value}
+                  </span>
                 </div>
-
-                {/* Description / Bio */}
-                <p className="text-sm font-normal text-stone-600 leading-relaxed max-w-2xl mb-4">
-                  {actor.description ||
-                    `${actor.name} adalah entitas kreatif terverifikasi di ekosistem RAMU, berfokus pada kolaborasi komersial, produksi visual estetis, dan sinergi proyek industri busana kontemporer.`}
-                </p>
-
-                {/* Dynamic Role-Specific Specs & Capability Tags */}
-                <div className="flex flex-wrap items-center gap-1.5 mb-6">
-                  {displayHeaderTags.map((tag, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2.5 py-1 bg-white border border-stone-200/90 rounded-lg text-[11px] font-medium text-stone-700 shadow-2xs"
-                    >
-                      {tag}
-                    </span>
-                  ))}
+                <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-slate-200/80 sm:pl-3 pt-2 sm:pt-0">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                    {metric4Label}
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-emerald-800 truncate block">
+                    {metric4Value}
+                  </span>
                 </div>
               </div>
 
-              {/* 4-Metric Attio KPI Grid */}
-              <div className="space-y-5 pt-1">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-stone-50/90 border border-stone-200/80 rounded-xl">
-                  <div className="space-y-0.5">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-stone-400 block">
-                      {isStudio ? "Tarif Sewa" : isBrand ? "Skema Biaya" : "Estimasi Tarif"}
-                    </span>
-                    <span className="text-xs sm:text-sm font-bold text-stone-900 truncate block">
-                      {startingRate}
-                    </span>
-                  </div>
-                  <div className="space-y-0.5 sm:border-l border-stone-200/80 sm:pl-3">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-stone-400 block">
-                      Waktu Kerja
-                    </span>
-                    <span className="text-xs sm:text-sm font-bold text-stone-900 truncate block">
-                      {turnaroundTime}
-                    </span>
-                  </div>
-                  <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/80 sm:pl-3 pt-2 sm:pt-0">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-stone-400 block">
-                      {metric3Label}
-                    </span>
-                    <span className="text-xs sm:text-sm font-bold text-stone-900 truncate block">
-                      {metric3Value}
-                    </span>
-                  </div>
-                  <div className="space-y-0.5 border-t sm:border-t-0 sm:border-l border-stone-200/80 sm:pl-3 pt-2 sm:pt-0">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-stone-400 block">
-                      {metric4Label}
-                    </span>
-                    <span className="text-xs sm:text-sm font-bold text-emerald-800 truncate block">
-                      {metric4Value}
-                    </span>
-                  </div>
-                </div>
+              {/* Action CTAs */}
+              <div>
+                {!isCurrentActor ? (
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <ShareProfileButton actorId={actor.id} actorName={actor.name} />
 
-                {/* Action CTAs */}
-                <div>
-                  {!isCurrentActor ? (
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap items-center gap-2.5">
-                        <BookingButton
-                          targetId={actor.id}
-                          targetName={actor.name}
-                          targetSector={actor.sector}
-                          targetType={actor.actorType}
-                          label={
-                            isBrand
-                              ? "Ajukan Pitch Kolaborasi"
-                              : isStudio
-                              ? "Sewa Studio Sekarang"
-                              : isModel
-                              ? "Booking Model / Fitting"
-                              : isMua
-                              ? "Booking MUA & Hair Artist"
-                              : isStylist
-                              ? "Booking Fashion Stylist"
-                              : isDesigner
-                              ? "Mulai Proyek Desain"
-                              : isVideo
-                              ? "Inisiasi Kerja Sama Video"
-                              : "Booking Fotografer"
-                          }
-                          termsConfig={customTermsConfig}
-                        />
+                      {!isGuest ? (
+                        <>
+                          <BookingButton
+                            targetId={actor.id}
+                            targetName={actor.name}
+                            targetSector={actor.sector}
+                            targetType={actor.actorType}
+                            label={
+                              isBrand
+                                ? "Ajukan Pitch Kolaborasi"
+                                : isStudio
+                                ? "Sewa Studio Sekarang"
+                                : isModel
+                                ? "Booking Model / Fitting"
+                                : isMua
+                                ? "Booking MUA & Hair Artist"
+                                : isStylist
+                                ? "Booking Fashion Stylist"
+                                : isVideo
+                                ? "Inisiasi Kerja Sama Video"
+                                : "Booking Fotografer"
+                            }
+                            termsConfig={customTermsConfig}
+                          />
 
-                        <Link
-                          href={`/messages?with=${actor.id}`}
-                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-xl transition-all shadow-xs"
-                          title="Kirim pesan langsung & diskusikan brief di dalam platform RAMU"
-                        >
-                          <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
-                          <span>Chat &amp; Brief Proyek</span>
-                        </Link>
-
-                        {isBrand && (
                           <Link
-                            href={`/projects?tab=browse&search=${encodeURIComponent(actor.name)}`}
-                            className="inline-flex items-center gap-2 px-4 py-2.5 border border-stone-300 hover:border-stone-900 text-stone-700 hover:text-stone-900 text-xs font-semibold rounded-xl bg-white hover:bg-stone-50 transition-all shadow-xs"
+                            href={`/messages?with=${actor.id}`}
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/90 hover:bg-white text-[#0284c7] hover:text-[#0369a1] border border-[#4CC9FE]/40 hover:border-[#4CC9FE] text-xs font-bold rounded-full transition-all shadow-xs active:scale-95"
+                            title="Kirim pesan langsung & diskusikan brief di dalam platform RAMU"
                           >
-                            <Search className="w-3.5 h-3.5 text-stone-400" />
-                            <span>Lihat Brief Proyek</span>
+                            <MessageSquare className="w-3.5 h-3.5 text-[#0284c7]" />
+                            <span>Chat &amp; Brief Proyek</span>
                           </Link>
-                        )}
+                        </>
+                      ) : (
+                        <Link
+                          href={`/login?redirect=/directory/${actor.id}`}
+                          className="btn-primary-pill !text-xs !py-2.5 !px-6 shadow-md shadow-[#4CC9FE]/25 text-white font-bold flex items-center gap-2 active:scale-95 transition-all"
+                        >
+                          <span>Masuk untuk Kolaborasi</span>
+                          <ArrowUpRight className="w-3.5 h-3.5 text-white" />
+                        </Link>
+                      )}
 
-                        {waLink && (
-                          <a
-                            href={waLink}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-2 px-4 py-2.5 border border-emerald-600/30 hover:border-emerald-600 bg-emerald-50/70 hover:bg-emerald-100/70 text-emerald-800 text-xs font-semibold rounded-xl transition-all shadow-xs"
-                            title={isStudio ? "Tanya ketersediaan jadwal studio via WhatsApp" : "Gunakan WhatsApp untuk konfirmasi darurat hari-H"}
-                          >
-                            <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>WhatsApp ({isStudio ? "Jadwal Studio" : "Darurat On-Set"})</span>
-                          </a>
-                        )}
+                      {isBrand && (
+                        <Link
+                          href={`/projects?tab=browse&search=${encodeURIComponent(actor.name)}`}
+                          className="inline-flex items-center gap-2 px-4 py-2.5 border border-slate-200/90 hover:border-[#4CC9FE] text-slate-700 hover:text-[#0284c7] text-xs font-semibold rounded-full bg-white/90 hover:bg-slate-50 transition-all shadow-xs"
+                        >
+                          <Search className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Lihat Brief Proyek</span>
+                        </Link>
+                      )}
 
-                        {actor.contactEmail && !waLink && (
-                          <a
-                            href={`mailto:${actor.contactEmail}?subject=${encodeURIComponent(`Penawaran Proyek Kolaborasi - ${actor.name}`)}`}
-                            className="inline-flex items-center gap-2 px-4 py-2.5 border border-stone-300 hover:border-stone-900 text-stone-700 hover:text-stone-900 text-xs font-semibold rounded-xl bg-white hover:bg-stone-50 transition-all shadow-xs"
-                          >
-                            <Mail className="w-3.5 h-3.5 text-stone-500" />
-                            <span>Kirim Email</span>
-                          </a>
-                        )}
-                      </div>
+                      {waLink && (
+                        <a
+                          href={waLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2.5 border border-emerald-600/30 hover:border-emerald-600 bg-emerald-50/70 hover:bg-emerald-100/70 text-emerald-800 text-xs font-semibold rounded-full transition-all shadow-xs active:scale-95"
+                          title={isStudio ? "Tanya ketersediaan jadwal studio via WhatsApp" : "Gunakan WhatsApp untuk konfirmasi darurat hari-H"}
+                        >
+                          <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>WhatsApp ({isStudio ? "Jadwal Studio" : "Darurat On-Set"})</span>
+                        </a>
+                      )}
 
-                      <div className="flex items-center gap-1.5 text-[11px] text-stone-500">
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        <span>
-                          Seluruh negosiasi, brief, dan SPK Kontrak Multi-Pihak resmi terlindungi aman dalam ekosistem RAMU.
-                        </span>
-                      </div>
+                      {actor.contactEmail && !waLink && (
+                        <a
+                          href={`mailto:${actor.contactEmail}?subject=${encodeURIComponent(`Penawaran Proyek Kolaborasi - ${actor.name}`)}`}
+                          className="inline-flex items-center gap-2 px-4 py-2.5 border border-slate-200/90 hover:border-[#4CC9FE] text-slate-700 hover:text-[#0284c7] text-xs font-semibold rounded-full bg-white/90 hover:bg-slate-50 transition-all shadow-xs"
+                        >
+                          <Mail className="w-3.5 h-3.5 text-slate-500" />
+                          <span>Kirim Email</span>
+                        </a>
+                      )}
                     </div>
-                  ) : (
-                    <div className="flex flex-wrap items-center gap-3">
-                      <OpenEditModalButton
-                        initialTab="profile"
-                        label="Edit Halaman Profil"
-                        iconClassName="text-blue-300"
-                      />
-                      <Link
-                        href="/dashboard/showcase"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 border border-stone-300 hover:border-stone-900 text-stone-700 hover:text-stone-900 text-xs font-semibold rounded-xl bg-white hover:bg-stone-50 transition-all shadow-xs"
-                      >
-                        <span>Kelola Portofolio</span>
-                      </Link>
+
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>
+                        Seluruh negosiasi, brief, dan SPK Kontrak Multi-Pihak resmi terlindungi aman dalam ekosistem RAMU.
+                      </span>
                     </div>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap items-center gap-3">
+                    <ShareProfileButton actorId={actor.id} actorName={actor.name} />
+                    <OpenEditModalButton
+                      initialTab="profile"
+                      label="Edit Halaman Profil"
+                    />
+                    <Link
+                      href="/dashboard/showcase"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#4CC9FE]/30 hover:border-[#4CC9FE] text-[#0284c7] hover:text-[#0369a1] text-xs font-bold rounded-full bg-white/90 hover:bg-white transition-all shadow-xs"
+                    >
+                      <span>Kelola Portofolio</span>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <div className="border-t border-stone-200 pt-12">
-          <ActorDetailTabs
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            actor={actorWithCoCredits as any}
-            isCurrentActor={isCurrentActor}
-            registeredActors={registeredActors}
+      {!isCurrentActor && !isGuest && (
+        <div className="mb-8">
+          <ProfileCompatibilityBanner
+            targetActor={actor}
+            currentActor={currentActor}
+            termsConfig={customTermsConfig}
           />
         </div>
+      )}
+
+      <div className="pt-2">
+        <ActorDetailTabs
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          actor={actorWithCoCredits as any}
+          isCurrentActor={isCurrentActor}
+          registeredActors={registeredActors}
+          initialTab={initialTab}
+          bookedDates={bookedDates}
+          availabilityData={availabilityData}
+        />
       </div>
+
+      {!isCurrentActor && !isGuest && (
+        <ActorMobileActionBar
+          actor={actor}
+          termsConfig={customTermsConfig}
+        />
+      )}
+    </div>
+  );
+
+  if (isGuest || !currentActor) {
+    return (
+      <div className="min-h-screen app-background text-slate-900 font-sans selection:bg-[#4CC9FE]/25 selection:text-[#0284c7] relative">
+        <Navbar />
+        <main className="pt-28 px-4 sm:px-6 md:px-10 max-w-7xl mx-auto">
+          {pageContent}
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <AppShell actor={currentActor} activeRoute="/directory">
+      {pageContent}
     </AppShell>
   );
 }

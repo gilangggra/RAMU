@@ -9,77 +9,63 @@ import {
   EyeOff,
   ArrowRight,
   ArrowLeft,
-  Globe,
-  Phone,
-  Plus,
-  X,
-  Building,
-  Bell,
   Check,
   User,
-  Camera,
-  Sparkles,
-  Palette,
-  Video,
   Scissors,
   Star,
   Brush,
   Package,
+  Building,
+  Camera,
   ChevronDown,
+  Mail,
+  Lock,
+  Sparkles,
 } from "lucide-react";
 import { signup } from "@/app/(auth)/actions";
 
 interface RegisterClientFormProps {
   initialError?: string;
+  redirectTo?: string;
 }
 
-const ACTOR_TYPES = [
+const FIVE_OFFICIAL_ROLES = [
   {
-    id: "INDIVIDUAL",
-    icon: User,
-    title: "Individual Creative",
-    desc: "Fotografer, model, stylist, MUA, dan seniman mandiri.",
-  },
-  {
-    id: "STUDIO",
-    icon: Package,
-    title: "Studio / Tim",
-    desc: "Studio foto, tim produksi, atau grup kreatif terorganisir.",
-  },
-  {
-    id: "MSME",
+    role: "Fashion Brand/UMKM",
+    badge: "Brand & Klien",
     icon: Building,
-    title: "Brand / Label / MSME",
-    desc: "Fashion label, agensi, atau bisnis kreatif terstruktur.",
+    desc: "Label mode & apparel",
+    placeholder: "misal: Maison Nusantara",
+  },
+  {
+    role: "Photographer",
+    badge: "Visual & Kamera",
+    icon: Camera,
+    desc: "Fotografer fashion & editorial",
+    placeholder: "misal: Lensa Kreatif Studio",
+  },
+  {
+    role: "Model",
+    badge: "Model & Muse",
+    icon: Star,
+    desc: "Talent visual & muse busana",
+    placeholder: "misal: Clara Salsabila",
+  },
+  {
+    role: "MUA/Stylist",
+    badge: "Beauty & Style",
+    icon: Brush,
+    desc: "Makeup & wardrobe stylist",
+    placeholder: "misal: Glow & Form Artistry",
+  },
+  {
+    role: "Studio",
+    badge: "Venue & Gear",
+    icon: Package,
+    desc: "Studio foto & ruang produksi",
+    placeholder: "misal: Studio Imaji Space",
   },
 ];
-
-const ROLES_BY_TYPE: Record<string, { icon: React.ElementType; label: string; desc: string }[]> = {
-  INDIVIDUAL: [
-    { icon: Camera, label: "Fashion Photographer", desc: "Fotografi editorial & kampanye" },
-    { icon: Star, label: "Model / Visual Talent", desc: "Pemodelan dan talent visual" },
-    { icon: Scissors, label: "Fashion Stylist", desc: "Styling dan wardrobe editorial" },
-    { icon: Brush, label: "Makeup & Hair Artist (MUA)", desc: "Kecantikan & riasan profesional" },
-    { icon: Video, label: "Videographer / Fashion Film", desc: "Film fesyen & konten video" },
-    { icon: Palette, label: "Creative & Art Director", desc: "Konsep & arah visual kreatif" },
-    { icon: Package, label: "Set Designer / Props", desc: "Dekorasi set dan properti" },
-    { icon: Sparkles, label: "Lainnya", desc: "Peran kreatif lainnya" },
-  ],
-  STUDIO: [
-    { icon: Camera, label: "Studio Fotografi", desc: "Penyewaan & produksi studio foto" },
-    { icon: Video, label: "Studio Videografi", desc: "Produksi film & konten video" },
-    { icon: Palette, label: "Creative Studio", desc: "Agensi kreatif & art direction" },
-    { icon: Package, label: "Production House", desc: "Rumah produksi multi-disiplin" },
-    { icon: Sparkles, label: "Lainnya", desc: "Studio atau layanan lainnya" },
-  ],
-  MSME: [
-    { icon: Scissors, label: "Fashion Designer / Label", desc: "Brand & label fashion lokal" },
-    { icon: Palette, label: "Fashion Agency / Producer", desc: "Agensi & produser fesyen" },
-    { icon: Star, label: "Model Agency", desc: "Agensi manajemen talent & model" },
-    { icon: Package, label: "Textile & Material Brand", desc: "Brand bahan & tekstil" },
-    { icon: Sparkles, label: "Lainnya", desc: "Bisnis kreatif lainnya" },
-  ],
-};
 
 const POPULAR_LOCATIONS = [
   "Jakarta Selatan, Indonesia",
@@ -93,716 +79,373 @@ const POPULAR_LOCATIONS = [
   "Medan, Sumatera Utara",
 ];
 
-const SUGGESTED_SKILLS = [
-  "Analog 35mm & Medium Format",
-  "High-End Beauty Retouching",
-  "Creative Set Design & Props",
-  "Visual Identity & Concept",
-  "Commercial Fashion Film",
-];
-
-const SPECIALIZATIONS_BY_ROLE: Record<string, { label: string; desc: string }[]> = {
-  "Fashion Photographer": [
-    { label: "Editorial & High-Fashion", desc: "Pemotretan majalah dan kampanye high-end" },
-    { label: "Commercial & Lookbook", desc: "Katalog produk dan kampanye komersial brand" },
-    { label: "Runway & Backstage", desc: "Dokumentasi acara fashion show dan live event" },
-    { label: "Street Style & Portrait", desc: "Gaya jalanan dan potret individu" },
-  ],
-  "Model / Visual Talent": [
-    { label: "Fashion & Runway", desc: "Model panggung peragaan dan fashion show" },
-    { label: "Commercial & Print", desc: "Iklan cetak, katalog, dan kampanye komersial" },
-    { label: "Beauty & Parts", desc: "Spesialisasi wajah, rambut, kosmetik, atau bagian tubuh" },
-    { label: "Alternative & Inclusive", desc: "Karakter unik, plus-size, androgini, dll" },
-  ],
-  "Fashion Stylist": [
-    { label: "Editorial Styling", desc: "Penataan gaya untuk publikasi dan majalah" },
-    { label: "Commercial & Advertising", desc: "Penataan gaya untuk kampanye iklan brand" },
-    { label: "Personal & Celebrity", desc: "Penataan gaya pribadi untuk tokoh atau artis" },
-    { label: "Wardrobe & TV/Film", desc: "Manajemen kostum untuk produksi audiovisual" },
-  ],
-  "Fashion Designer / Label": [
-    { label: "Ready-to-Wear (RTW)", desc: "Pakaian siap pakai untuk produksi massal/terbatas" },
-    { label: "Haute Couture & Custom", desc: "Pakaian rancangan khusus dan pesanan eksklusif" },
-    { label: "Accessories & Jewelry", desc: "Perhiasan, tas, sepatu, dan aksesoris fashion" },
-    { label: "Streetwear & Urban", desc: "Gaya jalanan kasual kontemporer" },
-  ],
-  "Makeup & Hair Artist (MUA)": [
-    { label: "Editorial & Avant-Garde", desc: "Riasan eksperimental untuk fashion show/majalah" },
-    { label: "Commercial Beauty", desc: "Riasan bersih untuk katalog dan iklan" },
-    { label: "Bridal & Glamour", desc: "Riasan pernikahan dan acara formal" },
-    { label: "SFX & Theatrical", desc: "Efek khusus dan riasan karakter" },
-  ]
-};
-
-type Step = 1 | 2 | 3 | 4 | 5;
-
-const STEP_LABELS = ["Tipe Akun", "Peran", "Spesialisasi", "Kredensial", "Profil"];
-
-export function RegisterClientForm({ initialError }: RegisterClientFormProps) {
-  const [step, setStep] = useState<Step>(1);
-  const [actorType, setActorType] = useState("");
-  const [selectedRole, setSelectedRole] = useState("");
-  const [specialization, setSpecialization] = useState("");
-
+export function RegisterClientForm({ initialError, redirectTo }: RegisterClientFormProps) {
+  const [selectedRole, setSelectedRole] = useState(FIVE_OFFICIAL_ROLES[0]);
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [location, setLocation] = useState(POPULAR_LOCATIONS[0]);
 
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const avatarInputRef = React.useRef<HTMLInputElement>(null);
-
-  const [bio, setBio] = useState("");
-  const [address, setAddress] = useState("");
-  const [skills, setSkills] = useState<string[]>([]);
-  const [skillInput, setSkillInput] = useState("");
-  const [website, setWebsite] = useState("");
-  const [phone, setPhone] = useState("");
-  const [receiveNotifications, setReceiveNotifications] = useState(true);
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [stepError, setStepError] = useState("");
+  const [formError, setFormError] = useState(initialError || "");
   const [isPending, startTransition] = useTransition();
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setStepError("Ukuran foto profil maksimal 5 MB.");
-        return;
-      }
-      setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file));
-      setStepError("");
-    }
-  };
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setFormError("");
 
-  const handleRemoveAvatar = () => {
-    setAvatarFile(null);
-    if (avatarPreview) {
-      URL.revokeObjectURL(avatarPreview);
-      setAvatarPreview(null);
-    }
-    if (avatarInputRef.current) {
-      avatarInputRef.current.value = "";
-    }
-  };
-
-  const specializationsForRole = SPECIALIZATIONS_BY_ROLE[selectedRole] || [];
-  const hasSpecializationStep = specializationsForRole.length > 0;
-
-  const validateAndNext = () => {
-    setStepError("");
-    if (step === 1 && !actorType) { setStepError("Pilih satu tipe akun untuk melanjutkan."); return; }
-    if (step === 2 && !selectedRole) { setStepError("Pilih peran yang menggambarkan Anda."); return; }
-
-    if (step === 2 && !hasSpecializationStep) {
-      setStep(4);
+    if (!displayName.trim()) {
+      setFormError("Nama profil / studio / brand wajib diisi.");
       return;
     }
-
-    if (step === 3 && !specialization) { setStepError("Pilih setidaknya satu spesialisasi utama."); return; }
-
-    if (step === 4) {
-      if (!displayName.trim()) { setStepError("Nama profil wajib diisi."); return; }
-      if (!email.trim() || !email.includes("@")) { setStepError("Alamat email tidak valid."); return; }
-      if (password.length < 6) { setStepError("Kata sandi minimal 6 karakter."); return; }
+    if (!email.trim() || !email.includes("@")) {
+      setFormError("Format alamat email tidak valid.");
+      return;
     }
-
-    setStep((prev) => (prev + 1) as Step);
-  };
-
-  const handleBack = () => {
-    setStepError("");
-    if (step === 4 && !hasSpecializationStep) {
-      setStep(2);
-    } else {
-      setStep((prev) => (prev - 1) as Step);
+    if (password.length < 6) {
+      setFormError("Kata sandi minimal harus 6 karakter.");
+      return;
     }
-  };
-
-  const handleAddSkill = (val?: string) => {
-    const v = (val || skillInput).trim();
-    if (v && !skills.includes(v)) { setSkills([...skills, v]); setSkillInput(""); }
-  };
-
-  const handleFinalSubmit = (skipOptional: boolean = false) => {
-    setIsSubmitting(true);
-    setStepError("");
+    if (password !== confirmPassword) {
+      setFormError("Konfirmasi kata sandi tidak cocok. Silakan periksa kembali.");
+      return;
+    }
 
     const formData = new FormData();
     formData.set("displayName", displayName.trim());
     formData.set("email", email.trim());
     formData.set("password", password);
-    formData.set("role", selectedRole);
-    formData.set("specialization", specialization);
-    formData.set("actorType", actorType || "INDIVIDUAL");
+    formData.set("role", selectedRole.role);
     formData.set("location", location);
-
-    if (!skipOptional) {
-      if (avatarFile) {
-        formData.set("avatarFile", avatarFile);
-      }
-      formData.set("bio", bio.trim());
-      formData.set("address", address.trim());
-      formData.set("skills", JSON.stringify(skills));
-      formData.set("website", website.trim());
-      formData.set("phone", phone.trim());
-    } else {
-      formData.set("bio", "");
-      formData.set("address", "");
-      formData.set("skills", JSON.stringify([]));
-      formData.set("website", "");
-      formData.set("phone", "");
+    if (redirectTo) {
+      formData.set("redirectTo", redirectTo);
     }
-    formData.set("receiveNotifications", receiveNotifications ? "true" : "false");
 
     startTransition(async () => {
       try {
-        await signup(formData);
+        const res = await signup(formData);
+        if (res?.error) {
+          setFormError(res.error);
+        }
       } catch (err: any) {
         if (err?.message?.includes("NEXT_REDIRECT")) {
-
           return;
         }
-        setIsSubmitting(false);
-        setStepError(err?.message || "Terjadi kesalahan saat mendaftar. Silakan coba lagi.");
+        setFormError(err?.message || "Gagal mendaftar akun. Silakan coba lagi.");
       }
     });
   };
 
-  const rolesForType = actorType ? (ROLES_BY_TYPE[actorType] || []) : [];
-
   return (
-    <div className="w-full max-w-xl mx-auto">
+    <div className="w-full max-w-4xl mx-auto bg-white/85 backdrop-blur-2xl border border-white/90 rounded-2xl sm:rounded-[28px] p-4 sm:p-7 shadow-[0_20px_50px_rgba(28,40,70,0.06)] relative text-slate-900 transition-all">
 
-      <div className="mb-8 sm:mb-10">
-        <div className="flex items-center justify-between mb-3">
-          {(() => {
-            const visualLabels = hasSpecializationStep
-              ? STEP_LABELS
-              : STEP_LABELS.filter(l => l !== "Spesialisasi");
+      {/* Grid Responsif: Desktop 2 Kolom Seimbang, Mobile Rapi & Terstruktur */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-5 md:gap-6 items-start">
 
-            return visualLabels.map((label, index) => {
-              const visualStepNum = index + 1;
+        {/* Bagian 1: Pilih Peran (5 Kolom di Desktop) */}
+        <div className="md:col-span-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-black flex items-center justify-center md:hidden">1</span>
+                <h1 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
+                  Pilih Peran Anda
+                </h1>
+              </div>
+              <p className="text-[11px] text-slate-500 font-medium">
+                1 dari 6 peran resmi di ekosistem RAMU
+              </p>
+            </div>
+            <Link
+              href="/"
+              className="text-slate-400 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100/80 active:scale-95 transition-all"
+              title="Kembali ke Beranda"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Link>
+          </div>
 
-              let actualStepForVisual = visualStepNum as Step;
-              if (!hasSpecializationStep && visualStepNum > 2) {
-                actualStepForVisual = (visualStepNum + 1) as Step;
-              }
-
-              const done = step > actualStepForVisual;
-              const active = step === actualStepForVisual;
+          {/* Grid 5 Peran: 2 Kolom dengan feedback sentuhan (active:scale-[0.98]) */}
+          <div className="grid grid-cols-2 gap-2">
+            {FIVE_OFFICIAL_ROLES.map((item) => {
+              const Icon = item.icon;
+              const isSelected = selectedRole.role === item.role;
 
               return (
-                <React.Fragment key={label}>
-                  <div className="flex flex-col items-center gap-1.5 shrink-0">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-500 ${
-                      done ? "bg-amber-400 text-stone-950 shadow-[0_4px_12px_rgba(251,191,36,0.4)]"
-                      : active ? "bg-[#1E1B2E] text-white ring-2 ring-amber-400 ring-offset-2 ring-offset-transparent"
-                      : "bg-stone-100 text-stone-400"
-                    }`}>
-                      {done ? <Check className="w-4 h-4" /> : <span>{visualStepNum}</span>}
-                    </div>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider hidden sm:block ${
-                      active ? "text-[#1E1B2E]" : done ? "text-amber-600" : "text-stone-400"
-                    }`}>{label}</span>
+                <button
+                  key={item.role}
+                  type="button"
+                  onClick={() => {
+                    setSelectedRole(item);
+                    if (formError) setFormError("");
+                  }}
+                  className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all duration-150 cursor-pointer relative flex flex-col justify-between gap-1.5 active:scale-[0.98] ${
+                    isSelected
+                      ? "bg-white border-2 border-[#4CC9FE] shadow-sm ring-2 ring-[#4CC9FE]/20"
+                      : "bg-white/60 hover:bg-white/90 border border-slate-100 hover:border-[#4CC9FE]/30 shadow-2xs"
+                  }`}
+                >
+                  <div
+                    className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+                      isSelected
+                        ? "bg-[#4CC9FE] text-white shadow-xs"
+                        : "bg-white text-slate-700 border border-slate-100 shadow-2xs"
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
                   </div>
-                  {index < visualLabels.length - 1 && (
-                    <div className="flex-1 h-0.5 mx-2 bg-stone-200 overflow-hidden rounded-full">
-                      <div className={`h-full bg-amber-400 transition-all duration-500 ${done ? "w-full" : "w-0"}`} />
+
+                  <div>
+                    <div className="text-xs font-bold text-slate-900 leading-snug">
+                      {item.role}
                     </div>
-                  )}
-                </React.Fragment>
+                    <div className="text-[10px] text-slate-500 truncate font-medium">
+                      {item.desc}
+                    </div>
+                  </div>
+
+                  <div className="pt-0.5">
+                    <div
+                      className={`w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all ${
+                        isSelected
+                          ? "bg-[#4CC9FE] text-white"
+                          : "border border-slate-300 bg-white/60"
+                      }`}
+                    >
+                      {isSelected && <Check className="w-2 h-2 stroke-[3]" />}
+                    </div>
+                  </div>
+                </button>
               );
-            });
-          })()}
-        </div>
-      </div>
+            })}
+          </div>
 
-      <div className="bg-white rounded-[28px] shadow-[0_16px_48px_rgba(39,33,61,0.10)] border border-stone-100 overflow-hidden">
-
-        <div className="px-8 pt-8 pb-6 border-b border-stone-100">
-          <h1 className="text-xl sm:text-2xl font-black text-[#1E1B2E] tracking-tight">
-            {step === 1 && "Pilih Tipe Akun"}
-            {step === 2 && "Pilih Peran Anda"}
-            {step === 3 && `Spesialisasi ${selectedRole}`}
-            {step === 4 && "Buat Akun"}
-            {step === 5 && "Lengkapi Profil"}
-          </h1>
-          <p className="text-sm text-stone-500 mt-1 leading-relaxed">
-            {step === 1 && "Pilih kategori yang paling menggambarkan bentuk operasional Anda."}
-            {step === 2 && "Pilih satu peran yang paling sesuai dengan pekerjaan utama Anda."}
-            {step === 3 && "Pilih sub-kategori spesialisasi utama Anda untuk pencocokan yang lebih akurat."}
-            {step === 4 && "Masukkan detail akun Anda untuk bergabung ke ekosistem RAMU."}
-            {step === 5 && "Tambahkan detail profil agar kreator lain mudah menemukan Anda. (Opsional)"}
-          </p>
+          {/* Info Pendukung */}
+          <div className="p-2.5 rounded-xl bg-blue-50/70 border border-blue-100/70 text-[11px] text-slate-600 flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+            <span className="leading-tight">
+              Peran menentukan kecocokan peluang kolaborasi otomatis di direktori.
+            </span>
+          </div>
         </div>
 
-        <div className="px-8 py-7">
+        {/* Bagian 2: Formulir Data Akun (7 Kolom di Desktop, Pembatas Bersih di Mobile) */}
+        <div className="md:col-span-7 md:pl-5 md:border-l md:border-slate-200/70 pt-4 md:pt-0 border-t md:border-t-0 border-slate-100 space-y-3">
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-black flex items-center justify-center md:hidden">2</span>
+              <h2 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
+                Lengkapi Data Akun
+              </h2>
+            </div>
+            <p className="text-[11px] text-slate-500 font-medium">
+              Identitas dasar untuk profil resmi dan akses workspace RAMU.
+            </p>
+          </div>
 
-          {(stepError || (step === 4 && initialError)) && (
-            <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
-              <span>{stepError || initialError}</span>
+          {formError && (
+            <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-start gap-2 font-medium">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+              <span className="leading-snug">{formError}</span>
             </div>
           )}
 
-          <form onSubmit={(e) => e.preventDefault()}>
+          <form onSubmit={handleSubmit} className="space-y-2.5">
 
-            {step === 1 && (
-              <div className="space-y-3">
-                {ACTOR_TYPES.map((type) => {
-                  const Icon = type.icon;
-                  const isSelected = actorType === type.id;
-                  return (
-                    <button
-                      key={type.id}
-                      type="button"
-                      onClick={() => setActorType(type.id)}
-                      className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all duration-200 cursor-pointer ${
-                        isSelected
-                          ? "border-[#1E1B2E] bg-[#1E1B2E]"
-                          : "border-stone-200 bg-stone-50 hover:border-stone-300 hover:bg-white"
-                      }`}
-                    >
-                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                        isSelected ? "bg-amber-400" : "bg-white border border-stone-200"
-                      }`}>
-                        <Icon className={`w-5 h-5 ${isSelected ? "text-stone-950" : "text-stone-500"}`} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className={`text-sm font-bold tracking-tight ${isSelected ? "text-white" : "text-[#1E1B2E]"}`}>
-                          {type.title}
-                        </div>
-                        <div className={`text-xs mt-0.5 leading-snug ${isSelected ? "text-stone-300" : "text-stone-500"}`}>
-                          {type.desc}
-                        </div>
-                      </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                        isSelected ? "border-amber-400 bg-amber-400" : "border-stone-300"
-                      }`}>
-                        {isSelected && <Check className="w-3 h-3 text-stone-950" />}
-                      </div>
-                    </button>
-                  );
-                })}
+            {/* Nama Profil */}
+            <div className="space-y-1">
+              <label htmlFor="displayName" className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                Nama Profil / Label / Studio *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <User className="w-3.5 h-3.5" />
+                </div>
+                <input
+                  id="displayName"
+                  name="displayName"
+                  type="text"
+                  required
+                  value={displayName}
+                  onChange={(e) => {
+                    setDisplayName(e.target.value);
+                    if (formError) setFormError("");
+                  }}
+                  placeholder={selectedRole.placeholder}
+                  className="w-full pl-8.5 pr-3 py-2.5 sm:py-2 rounded-xl bg-white/70 border border-slate-200 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all font-medium"
+                />
               </div>
-            )}
-
-            {step === 2 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {rolesForType.map((role) => {
-                  const Icon = role.icon;
-                  const isSelected = selectedRole === role.label;
-                  return (
-                    <button
-                      key={role.label}
-                      type="button"
-                      onClick={() => setSelectedRole(role.label)}
-                      className={`flex items-start gap-3 p-3.5 rounded-xl border-2 text-left transition-all duration-200 cursor-pointer ${
-                        isSelected
-                          ? "border-[#1E1B2E] bg-[#1E1B2E]"
-                          : "border-stone-200 bg-stone-50 hover:border-stone-300 hover:bg-white"
-                      }`}
-                    >
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                        isSelected ? "bg-amber-400" : "bg-white border border-stone-200"
-                      }`}>
-                        <Icon className={`w-4 h-4 ${isSelected ? "text-stone-950" : "text-stone-500"}`} />
-                      </div>
-                      <div>
-                        <div className={`text-xs font-bold ${isSelected ? "text-white" : "text-[#1E1B2E]"}`}>{role.label}</div>
-                        <div className={`text-[11px] mt-0.5 leading-snug ${isSelected ? "text-stone-400" : "text-stone-500"}`}>{role.desc}</div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {step === 3 && hasSpecializationStep && (
-              <div className="space-y-3">
-                {specializationsForRole.map((spec) => {
-                  const isSelected = specialization === spec.label;
-                  return (
-                    <button
-                      key={spec.label}
-                      type="button"
-                      onClick={() => setSpecialization(spec.label)}
-                      className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 text-left transition-all duration-200 cursor-pointer ${
-                        isSelected
-                          ? "border-[#1E1B2E] bg-stone-50 shadow-sm"
-                          : "border-stone-200 bg-white hover:border-stone-300"
-                      }`}
-                    >
-                      <div className="flex-1 pr-4">
-                        <div className={`text-sm font-bold tracking-tight ${isSelected ? "text-[#1E1B2E]" : "text-stone-700"}`}>
-                          {spec.label}
-                        </div>
-                        <div className="text-[11px] text-stone-500 mt-1 leading-snug">
-                          {spec.desc}
-                        </div>
-                      </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                        isSelected ? "border-[#1E1B2E] bg-[#1E1B2E]" : "border-stone-300"
-                      }`}>
-                        {isSelected && <Check className="w-3 h-3 text-white" />}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {step === 4 && (
-              <div className="space-y-5">
-                <div className="space-y-1.5">
-                  <label htmlFor="displayNameInput" className="block text-xs font-bold text-stone-500 uppercase tracking-wider">
-                    Nama Profil / Label / Studio *
-                  </label>
-                  <input
-                    id="displayNameInput"
-                    type="text"
-                    required
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        validateAndNext();
-                      }
-                    }}
-                    placeholder="misal: Maison Nusantara / Studio Arkha / Nadia Kirana"
-                    className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 border-2 border-stone-200 text-sm text-[#1E1B2E] placeholder-stone-400 focus:outline-none focus:border-[#1E1B2E] focus:bg-white transition-all font-medium"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="emailInput" className="block text-xs font-bold text-stone-500 uppercase tracking-wider">
-                    Alamat Email *
-                  </label>
-                  <input
-                    id="emailInput"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        validateAndNext();
-                      }
-                    }}
-                    placeholder="nama@studioanda.id"
-                    className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 border-2 border-stone-200 text-sm text-[#1E1B2E] placeholder-stone-400 focus:outline-none focus:border-[#1E1B2E] focus:bg-white transition-all font-medium"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="passwordInput" className="block text-xs font-bold text-stone-500 uppercase tracking-wider">
-                      Kata Sandi *
-                    </label>
-                    <span className="text-[11px] text-stone-400">Min. 6 karakter</span>
-                  </div>
-                  <div className="relative">
-                    <input
-                      id="passwordInput"
-                      type={showPassword ? "text" : "password"}
-                      required
-                      minLength={6}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          validateAndNext();
-                        }
-                      }}
-                      placeholder="Masukkan kata sandi"
-                      className="w-full pl-4 pr-11 py-3.5 rounded-2xl bg-stone-50 border-2 border-stone-200 text-sm text-[#1E1B2E] placeholder-stone-400 focus:outline-none focus:border-[#1E1B2E] focus:bg-white transition-all font-medium"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-stone-400 hover:text-stone-600 cursor-pointer"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider">
-                    <MapPin className="w-3.5 h-3.5 inline mr-1" />
-                    Lokasi / Basis Studio *
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      className="w-full pl-4 pr-10 py-3.5 rounded-2xl bg-stone-50 border-2 border-stone-200 text-sm text-[#1E1B2E] appearance-none focus:outline-none focus:border-[#1E1B2E] focus:bg-white transition-all font-medium cursor-pointer"
-                    >
-                      {POPULAR_LOCATIONS.map((loc) => (
-                        <option key={loc} value={loc}>{loc}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {step === 5 && (
-              <div className="space-y-5">
-                <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 leading-relaxed">
-                  <strong>Opsional:</strong> Informasi ini membantu Engine RAMU mencocokkan Anda dengan peluang kolaborasi yang lebih tepat. Anda juga dapat melewatinya sekarang dan mengisinya nanti di Pengaturan Akun.
-                </div>
-
-                <div className="p-4 rounded-2xl bg-stone-50 border-2 border-stone-200 flex flex-col sm:flex-row items-center gap-4">
-                  <div
-                    onClick={() => avatarInputRef.current?.click()}
-                    className="w-16 h-16 rounded-full overflow-hidden border-2 border-dashed border-stone-300 bg-white hover:border-[#1E1B2E] transition-all flex items-center justify-center cursor-pointer shrink-0 group relative shadow-xs"
-                  >
-                    {avatarPreview ? (
-                      <img
-                        src={avatarPreview}
-                        alt="Preview Foto Profil"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center text-stone-400 group-hover:text-[#1E1B2E] transition-colors">
-                        <Camera className="w-5 h-5" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold">
-                      {avatarPreview ? "Ubah" : "Pilih"}
-                    </div>
-                  </div>
-
-                  <div className="flex-1 text-center sm:text-left space-y-1">
-                    <p className="text-xs font-bold text-[#1E1B2E]">Foto Profil (Opsional)</p>
-                    <p className="text-[11px] text-stone-500 leading-relaxed">
-                      Unggah foto wajah atau logo studio Anda. Format JPG, PNG, atau WebP (maks. 5 MB).
-                    </p>
-                    <div className="flex items-center justify-center sm:justify-start gap-2 pt-1">
-                      <button
-                        type="button"
-                        onClick={() => avatarInputRef.current?.click()}
-                        className="text-xs font-bold text-amber-700 hover:text-amber-800 cursor-pointer"
-                      >
-                        {avatarPreview ? "Ganti Foto" : "Pilih File Foto"}
-                      </button>
-                      {avatarPreview && (
-                        <>
-                          <span className="text-stone-300">·</span>
-                          <button
-                            type="button"
-                            onClick={handleRemoveAvatar}
-                            className="text-xs font-bold text-rose-500 hover:text-rose-700 cursor-pointer"
-                          >
-                            Hapus
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  <input
-                    type="file"
-                    ref={avatarInputRef}
-                    accept="image/png, image/jpeg, image/jpg, image/webp"
-                    className="hidden"
-                    onChange={handleAvatarChange}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="bio" className="block text-xs font-bold text-stone-500 uppercase tracking-wider">
-                    Bio / Deskripsi Kreatif
-                  </label>
-                  <textarea
-                    id="bio"
-                    rows={3}
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    placeholder="Ceritakan estetika, fokus karya, atau konsep visual yang biasa Anda garap..."
-                    className="w-full px-4 py-3 rounded-2xl bg-stone-50 border-2 border-stone-200 text-sm text-[#1E1B2E] placeholder-stone-400 focus:outline-none focus:border-[#1E1B2E] focus:bg-white transition-all font-medium resize-none leading-relaxed"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider">
-                      Keahlian & Spesialisasi
-                    </label>
-                    <span className="text-[10px] text-stone-400">Tekan Enter untuk menambah</span>
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={skillInput}
-                      onChange={(e) => setSkillInput(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddSkill(); } }}
-                      placeholder="e.g. Editorial, Analog 35mm, Runway..."
-                      className="w-full pl-4 pr-12 py-3 rounded-2xl bg-stone-50 border-2 border-stone-200 text-sm text-[#1E1B2E] placeholder-stone-400 focus:outline-none focus:border-[#1E1B2E] focus:bg-white transition-all font-medium"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleAddSkill()}
-                      className="absolute inset-y-1.5 right-1.5 w-8 rounded-xl bg-stone-200 hover:bg-[#1E1B2E] hover:text-white text-stone-500 transition-colors flex items-center justify-center cursor-pointer"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                  </div>
-                  {skills.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {skills.map((skill) => (
-                        <span key={skill} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#1E1B2E] text-xs font-bold text-white">
-                          {skill}
-                          <button type="button" onClick={() => setSkills(skills.filter(s => s !== skill))} className="text-stone-400 hover:text-white ml-0.5 cursor-pointer">
-                            <X className="w-3 h-3" />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {SUGGESTED_SKILLS.map((sug) => !skills.includes(sug) && (
-                      <button key={sug} type="button" onClick={() => handleAddSkill(sug)}
-                        className="text-[10px] px-2.5 py-1 rounded-full border border-stone-200 text-stone-500 hover:border-[#1E1B2E] hover:text-[#1E1B2E] transition-colors cursor-pointer">
-                        + {sug}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider">Website / Portofolio</label>
-                    <div className="relative">
-                      <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
-                      <input
-                        type="url"
-                        value={website}
-                        onChange={(e) => setWebsite(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            handleFinalSubmit(false);
-                          }
-                        }}
-                        placeholder="https://instagram.com/..."
-                        className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-stone-50 border-2 border-stone-200 text-sm text-[#1E1B2E] placeholder-stone-400 focus:outline-none focus:border-[#1E1B2E] focus:bg-white transition-all font-medium"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider">WhatsApp / Telepon</label>
-                    <div className="relative">
-                      <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            handleFinalSubmit(false);
-                          }
-                        }}
-                        placeholder="+62 812-3456-7890"
-                        className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-stone-50 border-2 border-stone-200 text-sm text-[#1E1B2E] placeholder-stone-400 focus:outline-none focus:border-[#1E1B2E] focus:bg-white transition-all font-medium"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-stone-50 border-2 border-stone-200 flex items-center justify-between gap-4">
-                  <div>
-                    <div className="text-sm font-bold text-[#1E1B2E] flex items-center gap-1.5">
-                      <Bell className="w-4 h-4 text-amber-500" />
-                      Notifikasi Kolaborasi
-                    </div>
-                    <p className="text-xs text-stone-500 mt-0.5">Dapatkan info peluang kolaborasi & matchmaking.</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setReceiveNotifications(!receiveNotifications)}
-                    role="switch"
-                    aria-checked={receiveNotifications}
-                    className={`w-12 h-6 rounded-full p-0.5 transition-colors shrink-0 cursor-pointer ${receiveNotifications ? "bg-[#1E1B2E]" : "bg-stone-300"}`}
-                  >
-                    <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${receiveNotifications ? "translate-x-6" : "translate-x-0"}`} />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between gap-3 pt-6 mt-6 border-t border-stone-100">
-              <div className="flex items-center gap-2">
-                {step > 1 ? (
-                  <button
-                    key={`back-btn-step-${step}`}
-                    type="button"
-                    onClick={handleBack}
-                    disabled={isSubmitting || isPending}
-                    className="flex items-center gap-1.5 px-5 py-3 rounded-2xl border-2 border-stone-200 text-sm font-bold text-stone-500 hover:border-stone-300 hover:text-[#1E1B2E] transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    <ArrowLeft className="w-4 h-4" /> Kembali
-                  </button>
-                ) : (
-                  <Link href="/" className="flex items-center gap-1.5 px-5 py-3 rounded-2xl border-2 border-stone-200 text-sm font-bold text-stone-500 hover:border-stone-300 hover:text-[#1E1B2E] transition-all">
-                    <ArrowLeft className="w-4 h-4" /> Beranda
-                  </Link>
-                )}
-                {step === 5 && (
-                  <button
-                    key="skip-btn-step-5"
-                    type="button"
-                    onClick={() => handleFinalSubmit(true)}
-                    disabled={isSubmitting || isPending}
-                    className="text-xs font-semibold text-stone-400 hover:text-stone-700 px-3 py-2 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
-                  >
-                    Lewati Tahap Ini
-                  </button>
-                )}
-              </div>
-
-              {step < 5 ? (
-                <button
-                  key={`next-btn-step-${step}`}
-                  type="button"
-                  onClick={validateAndNext}
-                  className="flex items-center gap-2 px-7 py-3.5 rounded-2xl bg-[#1E1B2E] hover:bg-black text-white text-sm font-black shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-95 cursor-pointer"
-                >
-                  Lanjut <ArrowRight className="w-4 h-4" />
-                </button>
-              ) : (
-                <button
-                  key="submit-btn-step-5"
-                  type="button"
-                  onClick={() => handleFinalSubmit(false)}
-                  disabled={isSubmitting || isPending}
-                  className="flex items-center gap-2 px-7 py-3.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-stone-950 text-sm font-black shadow-[0_8px_24px_rgba(251,191,36,0.35)] hover:shadow-[0_12px_30px_rgba(251,191,36,0.45)] hover:-translate-y-0.5 transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  {(isSubmitting || isPending) ? "Mendaftarkan Profil..." : "Selesaikan & Buka Akun"} {!(isSubmitting || isPending) && <ArrowRight className="w-4 h-4" />}
-                </button>
-              )}
             </div>
+
+            {/* Email */}
+            <div className="space-y-1">
+              <label htmlFor="email" className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                Alamat Email *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <Mail className="w-3.5 h-3.5" />
+                </div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (formError) setFormError("");
+                  }}
+                  placeholder="nama@studioanda.id"
+                  className="w-full pl-8.5 pr-3 py-2.5 sm:py-2 rounded-xl bg-white/70 border border-slate-200 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all font-medium"
+                />
+              </div>
+            </div>
+
+            {/* Kata Sandi & Konfirmasi Sandi */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="password" className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                    Kata Sandi *
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-mono">Min. 6 kar.</span>
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <Lock className="w-3.5 h-3.5" />
+                  </div>
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (formError) setFormError("");
+                    }}
+                    placeholder="Kata sandi"
+                    className="w-full pl-8.5 pr-8 py-2.5 sm:py-2 rounded-xl bg-white/70 border border-slate-200 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all font-medium"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                    title={showPassword ? "Sembunyikan sandi" : "Lihat sandi"}
+                  >
+                    {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="confirmPassword" className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                    Konfirmasi *
+                  </label>
+                  {confirmPassword.length > 0 && (
+                    <span className={`text-[10px] font-bold ${password === confirmPassword ? "text-emerald-600" : "text-rose-500"}`}>
+                      {password === confirmPassword ? "✓ Cocok" : "✗ Beda"}
+                    </span>
+                  )}
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <Lock className="w-3.5 h-3.5" />
+                  </div>
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    required
+                    minLength={6}
+                    value={confirmPassword}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      if (formError) setFormError("");
+                    }}
+                    placeholder="Ulangi sandi"
+                    className={`w-full pl-8.5 pr-8 py-2.5 sm:py-2 rounded-xl bg-white/70 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 transition-all font-medium border ${
+                      confirmPassword.length > 0
+                        ? password === confirmPassword
+                          ? "border-emerald-500/60 focus:border-emerald-500 focus:ring-emerald-500/10"
+                          : "border-rose-400 focus:border-rose-500 focus:ring-rose-500/10"
+                        : "border-slate-200 focus:border-[#4CC9FE] focus:ring-[#4CC9FE]/20"
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                    title={showConfirmPassword ? "Sembunyikan sandi" : "Lihat sandi"}
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Lokasi */}
+            <div className="space-y-1">
+              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                Basis Kota / Lokasi *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-blue-600">
+                  <MapPin className="w-3.5 h-3.5" />
+                </div>
+                <select
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="w-full pl-8.5 pr-8 py-2.5 sm:py-2 rounded-xl bg-white/70 border border-slate-200 text-base sm:text-sm text-slate-900 appearance-none focus:outline-none focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all font-medium cursor-pointer"
+                >
+                  {POPULAR_LOCATIONS.map((loc) => (
+                    <option key={loc} value={loc} className="bg-white text-slate-900">{loc}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Tombol Submit Nyaman Dijangkau Jempol */}
+            <button
+              type="submit"
+              disabled={isPending}
+              className="w-full py-3 sm:py-2.5 px-4 rounded-xl bg-[#4CC9FE] hover:bg-[#38bbf5] active:scale-[0.98] text-white font-bold text-sm shadow-md shadow-[#4CC9FE]/30 transition-all flex items-center justify-center gap-2 cursor-pointer mt-1 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isPending ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Mendaftarkan Akun...</span>
+                </>
+              ) : (
+                <>
+                  <span>Daftar Akun &amp; Buka Workspace</span>
+                  <ArrowRight className="w-4 h-4 text-white" />
+                </>
+              )}
+            </button>
           </form>
+
+          {/* Link ke Login */}
+          <div className="pt-1.5 text-center text-xs text-slate-500">
+            Sudah memiliki akun terdaftar?{" "}
+            <Link
+              href={redirectTo ? `/login?redirectTo=${encodeURIComponent(redirectTo)}` : "/login"}
+              className="font-bold text-[#0284c7] hover:text-[#0369a1] hover:underline"
+            >
+              Masuk ke akun Anda →
+            </Link>
+          </div>
+
         </div>
+
       </div>
 
-      <p className="text-center text-sm text-stone-500 mt-6">
-        Sudah punya akun?{" "}
-        <Link href="/login" className="font-bold text-[#1E1B2E] hover:text-amber-600 transition-colors underline decoration-stone-300">
-          Masuk di sini
-        </Link>
-      </p>
     </div>
   );
 }

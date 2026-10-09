@@ -64,6 +64,14 @@ export async function generateAndSaveOpportunities(options?: {
       needs: {
         where: { status: 'ACTIVE' },
       },
+      createdProjectBriefs: {
+        where: { status: 'OPEN' },
+        include: {
+          neededRoles: {
+            where: { isFilled: false },
+          },
+        },
+      },
       constraints: true,
     },
   });
@@ -98,15 +106,28 @@ export async function generateAndSaveOpportunities(options?: {
       description: g.description,
       priority: g.priority,
     })),
-    needs: a.needs.map((n) => ({
-      id: n.id,
-      actorId: n.actorId,
-      relatedGoalId: n.relatedGoalId,
-      category: n.category,
-      title: n.title,
-      description: n.description,
-      priority: n.priority,
-    })),
+    needs: [
+      ...a.needs.map((n) => ({
+        id: n.id,
+        actorId: n.actorId,
+        relatedGoalId: n.relatedGoalId,
+        category: n.category,
+        title: n.title,
+        description: n.description,
+        priority: n.priority,
+      })),
+      ...a.createdProjectBriefs.flatMap((b) =>
+        b.neededRoles.map((r) => ({
+          id: r.id,
+          actorId: a.id,
+          relatedGoalId: null,
+          category: r.assetCategory as string,
+          title: `Brief: ${r.roleLabel}`,
+          description: r.description || `Peran ${r.roleLabel} untuk ${b.title}`,
+          priority: 1,
+        }))
+      ),
+    ],
     constraints: a.constraints.map((c) => ({
       id: c.id,
       actorId: c.actorId,
@@ -149,7 +170,7 @@ export async function generateAndSaveOpportunities(options?: {
       description: opp.description,
       targetMarket: opp.targetMarket as unknown as Prisma.InputJsonValue,
       expectedOutputs: opp.expectedOutputs as unknown as Prisma.InputJsonValue,
-      status: OpportunityStatus.GENERATED,
+      status: existing ? existing.status : OpportunityStatus.GENERATED,
       feasibilityStatus,
       freshnessStatus: FreshnessStatus.CURRENT,
       explanation: opp.explanation as unknown as Prisma.InputJsonValue,
@@ -201,9 +222,15 @@ export async function generateAndSaveOpportunities(options?: {
       }).catch(() => {});
     }
 
+    const [validAssetIds, validGoalIds, validNeedIds] = await Promise.all([
+      prisma.asset.findMany({ select: { id: true } }).then((list) => new Set(list.map((x) => x.id))),
+      prisma.goal.findMany({ select: { id: true } }).then((list) => new Set(list.map((x) => x.id))),
+      prisma.need.findMany({ select: { id: true } }).then((list) => new Set(list.map((x) => x.id))),
+    ]);
+
     const seenAssets = new Set<string>();
     for (const a of opp.assets) {
-      if (seenAssets.has(a.assetId)) continue;
+      if (seenAssets.has(a.assetId) || !validAssetIds.has(a.assetId)) continue;
       seenAssets.add(a.assetId);
       await prisma.opportunityAsset.create({
         data: {
@@ -216,6 +243,7 @@ export async function generateAndSaveOpportunities(options?: {
     }
 
     for (const gid of opp.goalsSupported) {
+      if (!validGoalIds.has(gid)) continue;
       await prisma.opportunityGoal.create({
         data: {
           opportunityId,
@@ -225,6 +253,7 @@ export async function generateAndSaveOpportunities(options?: {
     }
 
     for (const nid of opp.needsAddressed) {
+      if (!validNeedIds.has(nid)) continue;
       await prisma.opportunityNeed.create({
         data: {
           opportunityId,
@@ -322,11 +351,63 @@ export async function getOpportunities(filter?: {
       needs: {
         include: { need: true },
       },
+      collaborationPlans: {
+        include: {
+          collaboration: {
+            select: { id: true, status: true },
+          },
+        },
+      },
     },
     orderBy: {
       createdAt: 'desc',
     },
   });
+
+  if (list.length === 0 && filter?.actorId) {
+    try {
+      await generateAndSaveOpportunities({ focusActorId: filter.actorId });
+      return prisma.opportunity.findMany({
+        where,
+        include: {
+          pattern: true,
+          participants: {
+            include: {
+              actor: true,
+            },
+          },
+          assets: {
+            include: {
+              asset: true,
+            },
+          },
+          scores: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
+          constraintEvaluations: true,
+          goals: {
+            include: { goal: true },
+          },
+          needs: {
+            include: { need: true },
+          },
+          collaborationPlans: {
+            include: {
+              collaboration: {
+                select: { id: true, status: true },
+              },
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    } catch (err) {
+      console.error("Auto-trigger opportunity engine failed:", err);
+    }
+  }
 
   return list;
 }
@@ -362,6 +443,13 @@ export async function getOpportunityById(id: string) {
       },
       needs: {
         include: { need: true },
+      },
+      collaborationPlans: {
+        include: {
+          collaboration: {
+            select: { id: true, status: true },
+          },
+        },
       },
       feedbacks: {
         include: { actor: true },

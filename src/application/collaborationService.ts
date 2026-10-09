@@ -6,8 +6,10 @@ import {
   TaskStatus,
   TaskPriority,
   MilestoneStatus,
+  OpportunityStatus,
   Prisma,
 } from "@prisma/client";
+import { createNotification } from "@/application/notificationService";
 
 function getCollaborationBlueprint(patternCode: string, opp: any, initiatorActorId: string) {
   const code = patternCode || opp.pattern?.code || "";
@@ -16,85 +18,74 @@ function getCollaborationBlueprint(patternCode: string, opp: any, initiatorActor
   if (code === "DESIGN_TO_PRODUCTION") {
     return {
       budget: {
-        estimatedTotal: "Rp 25.000.000",
-        costSharingModel: "Biaya kain ditanggung desainer, ongkos jahit atelier per potong (CMT)",
-        notes: "Uji coba batch perdana 20-30 potong busana sebelum produksi lanjutan.",
+        estimatedTotal: "Rp 15.000.000",
+        costSharingModel: "Penyediaan sampel busana oleh brand, biaya produksi visual (studio, lighting, fotografer) disepakati bersama",
+        notes: "Produksi lookbook editorial 15-look untuk katalog dan kampanye komersial.",
       },
       timeline: {
-        estimatedDuration: "4-5 Minggu",
+        estimatedDuration: "2-3 Minggu",
         targetLaunch: "Bulan Depan",
         phases: [
-          "Fase 1: Penyelarasan Sketsa & Pemilihan Bahan Kain",
-          "Fase 2: Pembuatan Pola & Sampel Busana (Toile)",
-          "Fase 3: Sesi Fitting Sampel & Revisi Jahitan",
-          "Fase 4: Pengerjaan Batch Busana Terbatas",
-          "Fase 5: Quality Control & Peluncuran Koleksi",
+          "Fase 1: Penyelarasan Moodboard & Kurasi Look Busana",
+          "Fase 2: Fitting Sampel Busana & Penataan Wardrobe",
+          "Fase 3: Sesi Pemotretan di Studio Daylight",
+          "Fase 4: Seleksi Foto & Retouch Resolusi Penuh",
+          "Fase 5: Peluncuran Kampanye Visual & Pembagian Co-Credit",
         ],
       },
       revenueModel: {
         modelType: "REVENUE_SHARE",
-        description: "Bagi hasil margin penjualan atau sistem fee produksi atelier per helai busana.",
-        proposedSplit: "Proporsional sesuai kesepakatan produksi busana",
+        description: "Bagi hasil penjualan kampanye atau fee komersial sesuai SPK resmi platform.",
+        proposedSplit: "Proporsional sesuai kesepakatan produksi visual",
       },
       ownershipRules: {
-        brandModel: "Brand Desainer (Powered by Atelier Workshop)",
-        guidelines: "Desain dipasarkan di bawah nama label perancang dengan kredit atelier pembuat.",
+        brandModel: "Brand / Klien Pemilik Koleksi",
+        guidelines: "Aset foto dipublikasikan di bawah nama brand dengan pencantuman kredit resmi seluruh kru.",
       },
       ipRules: {
-        originalIp: "Hak cipta desain busana & pola potongan tetap milik eksklusif perancang busana.",
-        derivativeWorks: "Atelier dilarang mereproduksi pola atau desain serupa untuk pihak ketiga.",
+        originalIp: "Hak cipta visual dipegang fotografer, hak cipta produk/merek dipegang oleh brand.",
+        derivativeWorks: "Brand berhak menggunakan foto final untuk seluruh materi promosi dan e-commerce resmi.",
       },
       tasks: [
         {
-          title: "Penyelarasan Sketsa Teknis & Pilihan Kain",
-          description: "Menyerahkan lembar kerja desain, spesifikasi ukuran, dan sampel material kain ke atelier.",
+          title: "Penyusunan Moodboard & Seleksi 15 Look Busana",
+          description: "Menentukan palet warna, siluet outfit, dan arahan pencahayaan.",
           priority: TaskPriority.HIGH,
           assignedActorId: initiatorActorId,
         },
         {
-          title: "Pembuatan Pola Dasar & Jahit Sampel Awal (Toile)",
-          description: "Atelier membuat pola busana fisik dan menjahit satu prototipe pertama untuk uji coba siluet.",
+          title: "Sesi Fitting & Penataan Gaya Wardrobe",
+          description: "Uji kecocokan busana pada model sebelum hari pemotretan.",
           priority: TaskPriority.HIGH,
           assignedActorId: otherActorId,
         },
         {
-          title: "Sesi Fitting Model & Penyesuaian Jahitan",
-          description: "Mencoba prototipe pada tubuh model/manekin untuk memastikan kenyamanan dan jatuh kain.",
+          title: "Eksekusi Pemotretan di Studio",
+          description: "Pengambilan gambar foto katalog dan editorial high-fashion.",
           priority: TaskPriority.HIGH,
           assignedActorId: initiatorActorId,
         },
         {
-          title: "Pengerjaan Produksi Batch Busana Terbatas",
-          description: "Eksekusi pemotongan kain dan penjahitan seluruh batch sesuai standar kerapihan butik.",
+          title: "Kurasi Hasil & Retouch Final High-Res",
+          description: "Pembersihan warna dan penyerahan master file tanpa watermark.",
           priority: TaskPriority.MEDIUM,
           assignedActorId: otherActorId,
-        },
-        {
-          title: "Pemeriksaan Kualitas Akhir (Final QC) & Packaging",
-          description: "Pengecekan benang, kancing, label pakaian, dan pengepakan rapi siap kirim.",
-          priority: TaskPriority.MEDIUM,
-          assignedActorId: initiatorActorId,
         },
       ],
       milestones: [
         {
-          title: "Sketsa Teknis & Material Disepakati",
-          description: "Spesifikasi desain dan bahan kain telah diterima atelier.",
+          title: "Moodboard & Look Terverifikasi",
+          description: "Seluruh outfit dan konsep visual disetujui bersama.",
           status: MilestoneStatus.IN_PROGRESS,
         },
         {
-          title: "Sampel Fisik Pertama (Toile) Disetujui",
-          description: "Fitting prototipe berhasil tanpa revisi pola mayor.",
+          title: "Sesi Pemotretan Studio Selesai",
+          description: "Seluruh frame selesai diambil sesuai call sheet.",
           status: MilestoneStatus.PENDING,
         },
         {
-          title: "Batch Koleksi Selesai Dijahit & Lolos QC",
-          description: "Seluruh kuantitas pakaian selesai dengan standar butik.",
-          status: MilestoneStatus.PENDING,
-        },
-        {
-          title: "Koleksi Busana Siap Rilis ke Pasar",
-          description: "Pakaian siap dikirim ke pembeli atau dipajang di butik/katalog.",
+          title: "Serah Terima Foto High-Res & Co-Credit",
+          description: "Aset final selesai diretouch dan siap dipublikasikan.",
           status: MilestoneStatus.PENDING,
         },
       ],
@@ -304,7 +295,7 @@ function getCollaborationBlueprint(patternCode: string, opp: any, initiatorActor
       guidelines: "Karya dirilis di bawah kredit kolaboratif bersama (Label Busana × Studio Visual).",
     },
     ipRules: {
-      originalIp: "Hak cipta busana & rancangan tetap milik desainer; hak cipta foto karya milik fotografer.",
+      originalIp: "Hak cipta busana & koleksi tetap milik brand; hak cipta foto karya milik fotografer.",
       derivativeWorks: "Hak pakai komersial untuk materi promosi digital, lookbook e-commerce, dan editorial bersama.",
     },
     tasks: [
@@ -364,9 +355,17 @@ function getCollaborationBlueprint(patternCode: string, opp: any, initiatorActor
   };
 }
 
+export interface InitiateCollaborationOptions {
+  proposedBudget?: string;
+  targetLaunch?: string;
+  costSharingModel?: string;
+  proposalMessage?: string;
+}
+
 export async function initiateCollaborationFromOpportunity(
   opportunityId: string,
-  initiatorActorId: string
+  initiatorActorId: string,
+  options?: InitiateCollaborationOptions
 ) {
   const existingPlan = await prisma.collaborationPlan.findFirst({
     where: { opportunityId },
@@ -404,6 +403,18 @@ export async function initiateCollaborationFromOpportunity(
 
   const blueprint = getCollaborationBlueprint(opp.patternCode, opp, initiatorActorId);
 
+  const budgetData = {
+    ...blueprint.budget,
+    ...(options?.proposedBudget ? { estimatedTotal: options.proposedBudget } : {}),
+    ...(options?.costSharingModel ? { costSharingModel: options.costSharingModel } : {}),
+    ...(options?.proposalMessage ? { notes: options.proposalMessage } : {}),
+  };
+
+  const timelineData = {
+    ...blueprint.timeline,
+    ...(options?.targetLaunch ? { targetLaunch: options.targetLaunch } : {}),
+  };
+
   const plan = await prisma.collaborationPlan.create({
     data: {
       opportunityId: opp.id,
@@ -411,8 +422,8 @@ export async function initiateCollaborationFromOpportunity(
       title: opp.title,
       objective: opp.description,
       expectedOutputs: (opp.expectedOutputs as unknown as Prisma.InputJsonValue) || [],
-      budget: blueprint.budget as unknown as Prisma.InputJsonValue,
-      timeline: blueprint.timeline as unknown as Prisma.InputJsonValue,
+      budget: budgetData as unknown as Prisma.InputJsonValue,
+      timeline: timelineData as unknown as Prisma.InputJsonValue,
       revenueModel: blueprint.revenueModel as unknown as Prisma.InputJsonValue,
       ownershipRules: blueprint.ownershipRules as unknown as Prisma.InputJsonValue,
       ipRules: blueprint.ipRules as unknown as Prisma.InputJsonValue,
@@ -507,12 +518,45 @@ export async function initiateCollaborationFromOpportunity(
   await prisma.decision.create({
     data: {
       collaborationId: collaboration.id,
-      title: "Persetujuan Inisiasi Proyek Kolaboratif",
-      decision: `Membentuk ruang kerja kolaborasi berdasarkan rekomendasi Deterministic Resource Compatibility Engine pola "${opp.pattern?.name || opp.patternCode}".`,
+      title: "Proposal Inisiasi & Term Negosiasi Awal",
+      decision: options?.proposalMessage
+        ? `Inisiasi diajukan oleh inisiator: "${options.proposalMessage}". Estimasi nilai: ${options.proposedBudget || blueprint.budget.estimatedTotal}, target rilis: ${options.targetLaunch || blueprint.timeline.targetLaunch}.`
+        : `Membentuk ruang kerja kolaborasi berdasarkan rekomendasi Deterministic Resource Compatibility Engine pola "${opp.pattern?.name || opp.patternCode}".`,
       reason: "Komplementaritas resource dan keselarasan peran dinilai memenuhi kriteria kelayakan 4 pilar.",
-      agreedByActors: opp.participants.map((p) => p.actorId) as unknown as Prisma.InputJsonValue,
+      agreedByActors: [initiatorActorId] as unknown as Prisma.InputJsonValue,
     },
   });
+
+  // Update opportunity status to IN_COLLABORATION
+  await prisma.opportunity.update({
+    where: { id: opp.id },
+    data: { status: OpportunityStatus.IN_COLLABORATION },
+  });
+
+  // Send notification to other participants about the initiated collaboration
+  const initiatorName =
+    opp.participants.find((p) => p.actorId === initiatorActorId)?.actor?.name ||
+    "Mitra Kolaborasi";
+
+  for (const p of opp.participants) {
+    if (p.actorId !== initiatorActorId) {
+      await createNotification({
+        actorId: p.actorId,
+        title: "Undangan Kolaborasi Komplementer Baru",
+        message: options?.proposalMessage
+          ? `${initiatorName} mengundang Anda berkolaborasi dalam "${opp.title}": "${options.proposalMessage}"`
+          : `${initiatorName} telah menginisiasi ruang kerja kolaborasi untuk proyek "${opp.title}". Tinjau proposal dan sepakati kesepakatan bersama.`,
+        type: "COLLABORATION_STARTED",
+        link: `/collaborations/${collaboration.id}`,
+        metadata: {
+          collaborationId: collaboration.id,
+          opportunityId: opp.id,
+          initiatorActorId,
+          proposalMessage: options?.proposalMessage,
+        },
+      });
+    }
+  }
 
   return {
     success: true,

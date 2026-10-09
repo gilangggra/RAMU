@@ -19,13 +19,14 @@ export interface CreateProjectBriefInput {
   targetOutput: string;
   location?: string;
   timeline?: { estimatedDuration?: string; targetLaunch?: string };
-  budget?: { estimatedTotal?: string; notes?: string };
+  budget?: { estimatedTotal?: string; roleFees?: Record<string, string>; notes?: string };
   aestheticStyle?: string;
   compensationModel?: string;
   neededRoles: {
     roleLabel: string;
     assetCategory: string;
     description?: string;
+    fee?: string;
     maxCollaborators?: number;
   }[];
 }
@@ -67,6 +68,20 @@ export async function createProjectBrief(
   creatorActorId: string,
   input: CreateProjectBriefInput
 ) {
+  const roleFees: Record<string, string> = {
+    ...((input.budget as any)?.roleFees || {}),
+  };
+  input.neededRoles.forEach((r) => {
+    if (r.fee) {
+      roleFees[r.roleLabel] = r.fee;
+    }
+  });
+
+  const finalBudget = {
+    ...(input.budget || {}),
+    roleFees,
+  };
+
   const brief = await prisma.projectBrief.create({
     data: {
       creatorActorId,
@@ -76,15 +91,17 @@ export async function createProjectBrief(
       targetOutput: input.targetOutput,
       location: input.location || null,
       timeline: (input.timeline || {}) as unknown as Prisma.InputJsonValue,
-      budget: (input.budget || {}) as unknown as Prisma.InputJsonValue,
+      budget: finalBudget as unknown as Prisma.InputJsonValue,
       aestheticStyle: input.aestheticStyle || null,
-      compensationModel: input.compensationModel || null,
+      compensationModel: input.compensationModel || "PAID",
       status: ProjectBriefStatus.OPEN,
       neededRoles: {
         create: input.neededRoles.map((r) => ({
           roleLabel: r.roleLabel,
           assetCategory: r.assetCategory as any,
-          description: r.description || null,
+          description: r.fee
+            ? (r.description ? `${r.description} • [Honor: ${r.fee}]` : `Honor: ${r.fee}`)
+            : (r.description || null),
           maxCollaborators: r.maxCollaborators ?? 1,
         })),
       },
@@ -275,9 +292,25 @@ export async function getProjectBriefs(filter?: {
       roleConditions.push({ roleLabel: { contains: "venue", mode: "insensitive" } });
     } else if (rc.includes("foto")) {
       roleConditions.push({ roleLabel: { contains: "photographer", mode: "insensitive" } });
+      roleConditions.push({ roleLabel: { contains: "fotografi", mode: "insensitive" } });
+      roleConditions.push({ roleLabel: { contains: "kamera", mode: "insensitive" } });
     } else if (rc.includes("model")) {
       roleConditions.push({ roleLabel: { contains: "talent", mode: "insensitive" } });
       roleConditions.push({ roleLabel: { contains: "muse", mode: "insensitive" } });
+      roleConditions.push({ roleLabel: { contains: "peraga", mode: "insensitive" } });
+    } else if (rc.includes("stylist") || rc.includes("wardrobe") || rc.includes("gaya")) {
+      roleConditions.push({ roleLabel: { contains: "stylist", mode: "insensitive" } });
+      roleConditions.push({ roleLabel: { contains: "wardrobe", mode: "insensitive" } });
+      roleConditions.push({ roleLabel: { contains: "penata", mode: "insensitive" } });
+    } else if (rc.includes("mua") || rc.includes("makeup") || rc.includes("rias") || rc.includes("hair")) {
+      roleConditions.push({ roleLabel: { contains: "mua", mode: "insensitive" } });
+      roleConditions.push({ roleLabel: { contains: "makeup", mode: "insensitive" } });
+      roleConditions.push({ roleLabel: { contains: "rias", mode: "insensitive" } });
+      roleConditions.push({ roleLabel: { contains: "hair", mode: "insensitive" } });
+    } else if (rc.includes("brand") || rc.includes("umkm") || rc.includes("label")) {
+      roleConditions.push({ roleLabel: { contains: "brand", mode: "insensitive" } });
+      roleConditions.push({ roleLabel: { contains: "umkm", mode: "insensitive" } });
+      roleConditions.push({ roleLabel: { contains: "label", mode: "insensitive" } });
     } else if (rc.includes("props") || rc.includes("set")) {
       roleConditions.push({ assetCategory: "WARDROBE_PROP" });
       roleConditions.push({ roleLabel: { contains: "properti", mode: "insensitive" } });
@@ -365,9 +398,26 @@ export async function expressInterest(
   message?: string,
   proposedAssetIds?: string[]
 ) {
+  const brief = await prisma.projectBrief.findUnique({
+    where: { id: briefId },
+    select: { id: true, title: true, creatorActorId: true, status: true },
+  });
+  if (!brief) {
+    throw new Error('Brief proyek tidak ditemukan.');
+  }
+  if (brief.creatorActorId === actorId) {
+    throw new Error('Anda tidak dapat mendaftar pada brief yang Anda buat sendiri.');
+  }
+  if (brief.status !== 'OPEN') {
+    throw new Error('Brief proyek ini sudah tidak menerima pendaftaran baru.');
+  }
+
   const role = await prisma.projectBriefRole.findUnique({ where: { id: roleId } });
   if (!role || role.isFilled) {
     throw new Error('Peran ini sudah terisi atau tidak ditemukan.');
+  }
+  if (role.briefId !== briefId) {
+    throw new Error('Peran yang dipilih tidak sesuai dengan brief proyek ini.');
   }
 
   const existing = await prisma.collaborationInterest.findUnique({
@@ -447,6 +497,15 @@ export async function acceptCollaborator(interestId: string, initiatorActorId: s
   if (!interest) throw new Error('Interest tidak ditemukan.');
   if (interest.brief.creatorActorId !== initiatorActorId) {
     throw new Error('Hanya pembuat brief yang dapat menerima kolaborator.');
+  }
+  if (interest.brief.status !== 'OPEN') {
+    throw new Error('Brief ini sudah ditutup atau tidak aktif.');
+  }
+  if (interest.status !== InterestStatus.PENDING) {
+    throw new Error('Lamaran ini sudah tidak dalam status menunggu konfirmasi.');
+  }
+  if (interest.role.isFilled) {
+    throw new Error('Peran ini sudah terisi.');
   }
 
   // Find other candidates for this role to notify them that the slot is filled
@@ -647,6 +706,9 @@ export async function declineCollaborator(interestId: string, initiatorActorId: 
   if (interest.brief.creatorActorId !== initiatorActorId) {
     throw new Error('Hanya pembuat brief yang dapat menolak kolaborator.');
   }
+  if (interest.status !== InterestStatus.PENDING) {
+    throw new Error('Lamaran ini sudah tidak dalam status menunggu respon.');
+  }
 
   await prisma.collaborationInterest.update({
     where: { id: interestId },
@@ -676,6 +738,9 @@ export async function withdrawInterest(interestId: string, actorId: string) {
 
   if (!interest) throw new Error('Interest tidak ditemukan.');
   if (interest.actorId !== actorId) throw new Error('Bukan milik Anda.');
+  if (interest.status !== InterestStatus.PENDING) {
+    throw new Error('Lamaran ini sudah tidak dalam status menunggu respon.');
+  }
 
   await prisma.collaborationInterest.update({
     where: { id: interestId },
@@ -693,6 +758,10 @@ export async function inviteActorToBriefRole(
   roleId: string,
   customMessage?: string
 ) {
+  if (targetActorId === initiatorActorId) {
+    throw new Error('Anda tidak dapat mengundang diri Anda sendiri ke peran ini.');
+  }
+
   const initiator = await prisma.actor.findUnique({
     where: { id: initiatorActorId },
     select: { id: true, name: true },
@@ -701,11 +770,14 @@ export async function inviteActorToBriefRole(
 
   const brief = await prisma.projectBrief.findUnique({
     where: { id: briefId },
-    select: { id: true, title: true, creatorActorId: true },
+    select: { id: true, title: true, creatorActorId: true, status: true },
   });
   if (!brief) throw new Error('Brief tidak ditemukan.');
   if (brief.creatorActorId !== initiatorActorId) {
     throw new Error('Hanya inisiator proyek yang dapat mengundang kolaborator.');
+  }
+  if (brief.status !== 'OPEN') {
+    throw new Error('Brief proyek ini tidak sedang dalam status aktif/terbuka.');
   }
 
   const role = await prisma.projectBriefRole.findUnique({
@@ -713,6 +785,9 @@ export async function inviteActorToBriefRole(
   });
   if (!role || role.isFilled) {
     throw new Error('Peran ini sudah terisi atau tidak ditemukan.');
+  }
+  if (role.briefId !== briefId) {
+    throw new Error('Peran yang dipilih tidak sesuai dengan brief proyek ini.');
   }
 
   const targetActor = await prisma.actor.findUnique({
@@ -812,6 +887,9 @@ export async function respondToProjectInvitation(
   }
   if (interest.status !== InterestStatus.PENDING) {
     throw new Error('Undangan ini sudah tidak dalam status menunggu respon.');
+  }
+  if (interest.brief.status !== 'OPEN') {
+    throw new Error('Brief proyek ini sudah ditutup atau tidak aktif.');
   }
 
   if (response === 'DECLINE') {
@@ -919,7 +997,7 @@ export async function respondToProjectInvitation(
     try {
       await createNotification({
         actorId: interest.brief.creatorActorId,
-        title: "Undangan Diterima & Tim Lengkap! 🚀",
+        title: "Undangan Diterima & Tim Lengkap!",
         message: `${interest.actor.name} menerima undangan Anda. Seluruh peran pada proyek "${interest.brief.title}" kini telah lengkap dan ruang kolaborasi resmi aktif!`,
         type: "COLLABORATION_STARTED",
         link: collaborationId ? `/collaborations/${collaborationId}` : `/projects/${interest.briefId}`,
@@ -980,7 +1058,7 @@ export async function respondToProjectInvitation(
     try {
       await createNotification({
         actorId: interest.brief.creatorActorId,
-        title: "Undangan Kolaborasi Diterima! 🎉",
+        title: "Undangan Kolaborasi Diterima!",
         message: `${interest.actor.name} telah menerima undangan Anda untuk peran "${interest.role.roleLabel}" pada proyek "${interest.brief.title}".`,
         type: "INTEREST_ACCEPTED",
         link: `/projects/${interest.briefId}`,
@@ -1056,6 +1134,8 @@ export async function formCollaborationFromBrief(
     const plan = await prisma.collaborationPlan.findFirst({
       where: { collaboration: { id: brief.collaborationId } },
     });
+    const budgetData = (brief.budget as Record<string, any>) || {};
+    const roleFees = (budgetData.roleFees as Record<string, string>) || {};
 
     for (const role of brief.neededRoles) {
       for (const interest of role.interests) {
@@ -1069,13 +1149,16 @@ export async function formCollaborationFromBrief(
             },
           });
           if (plan) {
+            const feeForRole = roleFees[role.roleLabel] || roleFees[role.assetCategory] || null;
             await prisma.collaborationRole.create({
               data: {
                 collaborationPlanId: plan.id,
                 actorId: interest.actorId,
                 roleCode: role.assetCategory,
                 responsibility: role.roleLabel,
-                contribution: 'Menyediakan aset dan kapabilitas sesuai peran dalam kolaborasi',
+                contribution: feeForRole
+                  ? `Alokasi Honor: ${feeForRole} (Termin DP 50% & Pelunasan 50%)`
+                  : 'Menyediakan aset dan kapabilitas sesuai peran dalam kolaborasi',
                 status: 'ACCEPTED',
               },
             });
@@ -1107,8 +1190,9 @@ export async function formCollaborationFromBrief(
     }
   }
 
-  const budgetData = (brief.budget as Record<string, unknown>) || {};
-  const timelineData = (brief.timeline as Record<string, unknown>) || {};
+  const budgetData = (brief.budget as Record<string, any>) || {};
+  const timelineData = (brief.timeline as Record<string, any>) || {};
+  const roleFees = (budgetData.roleFees as Record<string, string>) || {};
 
   const plan = await prisma.collaborationPlan.create({
     data: {
@@ -1118,7 +1202,8 @@ export async function formCollaborationFromBrief(
       expectedOutputs: [brief.targetOutput] as unknown as Prisma.InputJsonValue,
       budget: {
         estimatedTotal: budgetData?.estimatedTotal || 'Disepakati bersama',
-        costSharingModel: 'Proporsional sesuai kontribusi peran',
+        costSharingModel: 'Honorarium Profesional Flat per Peran (Termin DP 50% & Pelunasan 50%)',
+        roleFees,
         notes: budgetData?.notes || '',
       } as unknown as Prisma.InputJsonValue,
       timeline: {
@@ -1126,9 +1211,9 @@ export async function formCollaborationFromBrief(
         targetLaunch: timelineData?.targetLaunch || 'Bulan Depan',
       } as unknown as Prisma.InputJsonValue,
       revenueModel: {
-        modelType: 'REVENUE_SHARE',
-        description: 'Bagi hasil proporsional berdasarkan peran dan kontribusi masing-masing kolaborator.',
-        proposedSplit: 'Dapat dinegosiasikan oleh seluruh pihak',
+        modelType: 'FIXED_FEE',
+        description: 'Honorarium profesional per peran dengan termin pembayaran DP 50% di muka dan pelunasan 50% pasca-produksi.',
+        roleFees,
       } as unknown as Prisma.InputJsonValue,
       ownershipRules: {
         brandModel: 'Co-Branding Bersama',
@@ -1143,13 +1228,16 @@ export async function formCollaborationFromBrief(
   });
 
   for (const p of participants) {
+    const feeForRole = roleFees[p.roleLabel] || roleFees[p.roleCode] || null;
     await prisma.collaborationRole.create({
       data: {
         collaborationPlanId: plan.id,
         actorId: p.actorId,
         roleCode: p.roleCode,
         responsibility: p.roleLabel,
-        contribution: 'Menyediakan aset dan kapabilitas sesuai peran dalam kolaborasi',
+        contribution: feeForRole
+          ? `Alokasi Honor: ${feeForRole} (Termin DP 50% & Pelunasan 50%)`
+          : 'Menyediakan aset dan kapabilitas sesuai peran dalam kolaborasi',
         status: p.actorId === initiatorActorId ? 'ACCEPTED' : 'PENDING',
       },
     });
@@ -1306,11 +1394,19 @@ export async function getProjectBriefDashboardStats(actorId: string) {
   const recentOpenBriefs = await prisma.projectBrief.findMany({
     where: { status: ProjectBriefStatus.OPEN, creatorActorId: { not: actorId } },
     orderBy: { createdAt: 'desc' },
-    take: 3,
+    take: 5,
     include: {
-      creatorActor: { select: { name: true, sector: true } },
+      creatorActor: {
+        select: {
+          id: true,
+          name: true,
+          sector: true,
+          location: true,
+          owner: { select: { avatarUrl: true } },
+        },
+      },
       neededRoles: {
-        select: { id: true, roleLabel: true, isFilled: true },
+        select: { id: true, roleLabel: true, isFilled: true, assetCategory: true },
       },
     },
   });
@@ -1337,21 +1433,12 @@ export async function getCrewRecommendationsForBrief(
     where: {
       status: 'ACTIVE',
       id: { not: brief.creatorActorId },
-      ...(neededCategories.length > 0
-        ? {
-            assets: {
-              some: {
-                status: 'ACTIVE',
-                category: { in: neededCategories as any },
-              },
-            },
-          }
-        : {}),
     },
     select: {
       id: true,
       name: true,
       sector: true,
+      actorType: true,
       location: true,
       description: true,
       aestheticStyles: true,
@@ -1389,6 +1476,33 @@ export async function getCrewRecommendationsForBrief(
         if (actorCategories.includes(role.assetCategory)) {
           score += 50;
           matchReasons.push('Kategori Aset Cocok');
+        } else {
+          // Fallback matching: analisa keselarasan sektor dan profil ke peran brief
+          const roleLabelLower = (role.roleLabel || '').toLowerCase();
+          const categoryLower = (role.assetCategory || '').toLowerCase();
+          const sectorLower = (actor.sector || '').toLowerCase();
+          const descLower = (actor.description || '').toLowerCase();
+
+          const isDirectSectorMatch =
+            sectorLower.includes(roleLabelLower) ||
+            roleLabelLower.includes(sectorLower) ||
+            descLower.includes(roleLabelLower);
+
+          const isDomainSynonymMatch =
+            (roleLabelLower.includes('foto') && sectorLower.includes('foto')) ||
+            (roleLabelLower.includes('model') && (sectorLower.includes('model') || sectorLower.includes('talent') || sectorLower.includes('muse'))) ||
+            (roleLabelLower.includes('styl') && (sectorLower.includes('styl') || sectorLower.includes('mua'))) ||
+            (roleLabelLower.includes('mua') && (sectorLower.includes('mua') || sectorLower.includes('make') || sectorLower.includes('styl'))) ||
+            ((roleLabelLower.includes('wardrobe') || roleLabelLower.includes('penata')) && (sectorLower.includes('stylist') || sectorLower.includes('mua'))) ||
+            (roleLabelLower.includes('studio') && (sectorLower.includes('studio') || actor.actorType === 'STUDIO')) ||
+            ((roleLabelLower.includes('brand') || roleLabelLower.includes('umkm') || roleLabelLower.includes('label')) && (sectorLower.includes('brand') || sectorLower.includes('umkm') || actor.actorType === 'BRAND')) ||
+            (categoryLower.includes('talent') && (sectorLower.includes('model') || sectorLower.includes('kreator'))) ||
+            (categoryLower.includes('studio') && actor.actorType === 'STUDIO');
+
+          if (isDirectSectorMatch || isDomainSynonymMatch) {
+            score += 35;
+            matchReasons.push('Sektor Talenta Sesuai');
+          }
         }
 
         if (
@@ -1405,7 +1519,8 @@ export async function getCrewRecommendationsForBrief(
           if (
             actorLoc.includes(briefLoc) ||
             briefLoc.includes(actorLoc) ||
-            briefLoc.includes('remote')
+            briefLoc.includes('remote') ||
+            actorLoc.includes('remote')
           ) {
             score += 15;
             matchReasons.push('Lokasi Sesuai');
@@ -1422,8 +1537,7 @@ export async function getCrewRecommendationsForBrief(
 
         return { actor, matchScore: score, matchReasons };
       })
-
-      .filter((c) => c.matchScore >= 50)
+      .filter((c) => c.matchScore >= 35)
       .sort((a, b) => b.matchScore - a.matchScore)
       .slice(0, 4);
 

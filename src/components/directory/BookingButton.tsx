@@ -11,9 +11,10 @@ interface BookingButtonProps {
   targetType: string;
   label?: string;
   termsConfig?: any;
+  bookedDates?: string[];
 }
 
-export function BookingButton({ targetId, targetName, targetSector, targetType, label, termsConfig }: BookingButtonProps) {
+export function BookingButton({ targetId, targetName, targetSector, targetType, label, termsConfig, bookedDates = [] }: BookingButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -21,9 +22,9 @@ export function BookingButton({ targetId, targetName, targetSector, targetType, 
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="px-6 py-3 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer group"
+        className="btn-primary-pill !text-xs !py-2.5 !px-6 shadow-md shadow-[#4CC9FE]/20 flex items-center gap-2 cursor-pointer group active:scale-95"
       >
-        <PlusCircle className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+        <PlusCircle className="w-4 h-4 text-white group-hover:rotate-90 transition-transform" />
         <span>{label || "Booking Request"}</span>
       </button>
 
@@ -35,6 +36,7 @@ export function BookingButton({ targetId, targetName, targetSector, targetType, 
         targetSector={targetSector}
         targetType={targetType}
         termsConfig={termsConfig}
+        bookedDates={bookedDates}
       />
     </>
   );

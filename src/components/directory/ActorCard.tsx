@@ -264,12 +264,17 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
     sectorLower.includes("cinema")
   ) {
     startingRate = "Mulai Rp 1,8 Jt / video";
-  } else if (sectorLower.includes("designer") || sectorLower.includes("desain")) {
-    startingRate = "Mulai Rp 2,5 Jt / koleksi";
+  } else if (
+    actor.actorType === "BRAND" ||
+    (actor.actorType as string) === "MSME" ||
+    sectorLower.includes("brand") ||
+    sectorLower.includes("label") ||
+    sectorLower.includes("designer") ||
+    sectorLower.includes("desain")
+  ) {
+    startingRate = "Kemitraan & Produksi";
   } else if (sectorLower.includes("fotografi") || sectorLower.includes("photographer")) {
     startingRate = "Mulai Rp 1,5 Jt / sesi";
-  } else if (actor.actorType === "BRAND" || (actor.actorType as string) === "MSME") {
-    startingRate = "Katalog & Produksi";
   }
 
   const customServiceAsset = actor.assets.find(
@@ -311,10 +316,10 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
   return (
     <Link
       href={`/directory/${actor.id}`}
-      className="group w-full rounded-2xl border border-stone-200/80 bg-white p-2.5 sm:p-3 shadow-2xs hover:shadow-md hover:border-stone-300 transition-all duration-200 flex flex-col justify-between cursor-pointer select-none"
+      className="group w-full rounded-2xl border border-slate-200/80 bg-white p-2.5 sm:p-3 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between cursor-pointer select-none"
     >
       {/* 1. MEDIA PREVIEW CONTAINER */}
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-stone-100 mb-3">
+      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-slate-100 mb-3">
         {!imageError && previewImage ? (
           <img
             src={previewImage}
@@ -324,9 +329,9 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-stone-100 text-stone-400 p-6 text-center">
-            <span className="text-3xl font-bold text-stone-300 mb-1">{initials}</span>
-            <span className="text-[10px] font-semibold tracking-wider text-stone-400 uppercase truncate max-w-full">
+          <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 text-slate-400 p-6 text-center">
+            <span className="text-3xl font-bold text-slate-300 mb-1">{initials}</span>
+            <span className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase truncate max-w-full">
               {actor.name}
             </span>
           </div>
@@ -335,26 +340,26 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
         {/* Floating Top Badges */}
         <div className="absolute top-2 left-2 right-2 flex items-center justify-between gap-1.5 z-20 pointer-events-none">
           {/* Entity Type Pill */}
-          <span className="px-2 py-0.5 rounded-md bg-stone-900/80 backdrop-blur-md text-[10px] font-semibold text-white tracking-wide border border-white/10 shadow-2xs">
+          <span className="px-2 py-0.5 rounded-md bg-slate-900/80 backdrop-blur-md text-[10px] font-semibold text-white tracking-wide border border-white/10 shadow-2xs">
             {isStudio ? "Studio Foto" : isBrand ? "Brand Fashion" : "Kreator"}
           </span>
 
           {/* Complementarity Score or Status Badge */}
           {hasScore ? (
             <span
-              title={`Kecocokan AI ${complementarityScore}% dengan kebutuhan & brief aktif Anda`}
+              title={`Skor Kompatibilitas ${complementarityScore}% dengan kebutuhan & brief aktif Anda`}
               className="px-2 py-0.5 rounded-md bg-emerald-50/95 backdrop-blur-md text-emerald-800 border border-emerald-200/70 text-[10px] font-bold flex items-center gap-1 shadow-2xs"
             >
               <Zap className="w-2.5 h-2.5 text-emerald-600" />
               <span>{complementarityScore}% Cocok</span>
             </span>
           ) : isBrand ? (
-            <span className="px-2 py-0.5 rounded-md bg-white/90 backdrop-blur-md text-stone-800 border border-stone-200/70 text-[10px] font-semibold flex items-center gap-1 shadow-2xs">
+            <span className="px-2 py-0.5 rounded-md bg-white/90 backdrop-blur-md text-slate-800 border border-slate-200/70 text-[10px] font-semibold flex items-center gap-1 shadow-2xs">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               <span>Buka Kolaborasi</span>
             </span>
           ) : (
-            <span className="px-2 py-0.5 rounded-md bg-white/90 backdrop-blur-md text-stone-800 border border-stone-200/70 text-[10px] font-semibold flex items-center gap-1 shadow-2xs">
+            <span className="px-2 py-0.5 rounded-md bg-white/90 backdrop-blur-md text-slate-800 border border-slate-200/70 text-[10px] font-semibold flex items-center gap-1 shadow-2xs">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               <span>Siap Kerja</span>
             </span>
@@ -371,22 +376,22 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
               </>
             ) : previewType === "COMP_CARD" ? (
               <>
-                <Sparkles className="w-2.5 h-2.5 text-stone-300" />
+                <Sparkles className="w-2.5 h-2.5 text-slate-300" />
                 <span>{previewBadgeLabel || "Comp Card"}</span>
               </>
             ) : previewType === "AVATAR" ? (
               <>
-                <User className="w-2.5 h-2.5 text-stone-300" />
+                <User className="w-2.5 h-2.5 text-slate-300" />
                 <span>{previewBadgeLabel || "Foto Profil"}</span>
               </>
             ) : previewType === "STUDIO" ? (
               <>
-                <Building2 className="w-2.5 h-2.5 text-stone-300" />
+                <Building2 className="w-2.5 h-2.5 text-slate-300" />
                 <span>{previewBadgeLabel || "Area Studio"}</span>
               </>
             ) : (
               <>
-                <Camera className="w-2.5 h-2.5 text-stone-300" />
+                <Camera className="w-2.5 h-2.5 text-slate-300" />
                 <span>{previewBadgeLabel || "Karya Unggulan"}</span>
               </>
             )}
@@ -395,7 +400,7 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
 
         {/* Hover Action Pill */}
         <div className="absolute inset-x-2 bottom-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none flex justify-center">
-          <span className="px-3 py-1.5 rounded-lg bg-stone-900/90 backdrop-blur-md text-white text-[11px] font-semibold shadow-md flex items-center gap-1.5 border border-white/10">
+          <span className="px-3 py-1.5 rounded-lg bg-slate-900/90 backdrop-blur-md text-white text-[11px] font-semibold shadow-md flex items-center gap-1.5 border border-white/10">
             <span>
               {isBrand
                 ? "Ajukan Kolaborasi"
@@ -403,7 +408,7 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
                 ? "Lihat Studio & Sewa"
                 : "Lihat Profil & Sewa"}
             </span>
-            <ArrowUpRight className="w-3 h-3 text-stone-400" />
+            <ArrowUpRight className="w-3 h-3 text-slate-400" />
           </span>
         </div>
       </div>
@@ -415,20 +420,20 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
             <ActorAvatar
               name={actor.name}
               avatarUrl={actor.owner?.avatarUrl}
-              className="w-7 h-7 rounded-full border border-stone-200/80 shrink-0 shadow-2xs"
+              className="w-7 h-7 rounded-full border border-slate-200/80 shrink-0 shadow-2xs"
               textClassName="text-[10px]"
             />
             <div className="min-w-0">
-              <h3 className="text-xs sm:text-[13px] font-bold text-stone-900 line-clamp-1 group-hover:text-stone-700 transition-colors">
+              <h3 className="text-xs sm:text-[13px] font-bold text-slate-900 line-clamp-1 group-hover:text-slate-700 transition-colors">
                 {actor.name}
               </h3>
-              <p className="text-[11px] font-medium text-stone-500 truncate">
+              <p className="text-[11px] font-medium text-slate-500 truncate">
                 {actor.sector}
               </p>
             </div>
           </div>
           {actor.location && (
-            <span className="text-[10px] text-stone-400 font-medium shrink-0 flex items-center gap-0.5 self-start mt-0.5">
+            <span className="text-[10px] text-slate-400 font-medium shrink-0 flex items-center gap-0.5 self-start mt-0.5">
               <MapPin className="w-2.5 h-2.5" />
               {actor.location.split(",")[0]}
             </span>
@@ -436,22 +441,22 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
         </div>
 
         {/* Bottom Specs & Rate Strip */}
-        <div className="pt-2 border-t border-stone-100 space-y-1.5">
+        <div className="pt-2 border-t border-slate-100 space-y-1.5">
           {isBrand ? (
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider">
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
                 Peluang Kolaborasi
               </span>
-              <span className="font-semibold text-stone-800 tracking-tight">
+              <span className="font-semibold text-slate-800 tracking-tight">
                 {brandCollabLabel}
               </span>
             </div>
           ) : (
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider">
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
                 Estimasi Tarif
               </span>
-              <span className="font-semibold text-stone-900 tracking-tight font-mono text-[11px]">
+              <span className="font-semibold text-slate-900 tracking-tight font-mono text-[11px]">
                 {startingRate}
               </span>
             </div>
@@ -462,11 +467,11 @@ export function ActorCard({ actor, complementarityScore }: ActorCardProps) {
               className="flex items-center justify-between pt-0.5"
               title="Kecocokan aset talenta dengan brief atau kebutuhan proyek aktif Anda"
             >
-              <span className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider">
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
                 Kecocokan Brief
               </span>
               <div className="flex items-center gap-1.5">
-                <div className="w-16 h-1 bg-stone-100 rounded-full overflow-hidden">
+                <div className="w-16 h-1 bg-slate-100 rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full bg-emerald-500 transition-all"
                     style={{ width: `${complementarityScore}%` }}

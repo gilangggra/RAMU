@@ -37,6 +37,10 @@ export interface ModelAttributes {
   skin_undertone?: string;
   experience_years?: number;
   specialties?: string[];
+  capabilities?: string[];
+  wardrobe_restrictions?: string;
+  chaperone_allowed?: boolean;
+  travel_radius?: string;
   comp_card?: CompCardPhoto[];
   portfolio_gallery?: PortfolioGalleryItem[];
   video_reel_title?: string;
@@ -116,8 +120,8 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
   return (
     <div className="space-y-8">
 
-      <section className="p-7 sm:p-8 rounded-2xl bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100">
+      <section className="p-7 sm:p-8 rounded-2xl bg-white/95 border border-slate-200/80 shadow-xs space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-purple-50 border border-purple-200 text-xs font-bold text-purple-700">
               <Camera className="w-3.5 h-3.5" />
@@ -130,7 +134,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
 
           <div className="flex items-center gap-3 shrink-0">
             {attributes.video_reel_title && (
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200/80 text-xs font-semibold text-[#27213D]">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 border border-slate-200/80 text-xs font-semibold text-[#27213D]">
                 <Film className="w-4 h-4 text-[#E66A48]" />
                 <span>{attributes.video_reel_title}</span>
               </div>
@@ -141,7 +145,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent("open-edit-modal", { detail: { tab: "specs" } }));
                 }}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-xs cursor-pointer"
+                className="btn-primary-pill !text-xs !py-1.5 !px-3.5 shadow-sm shadow-[#4CC9FE]/20 font-semibold cursor-pointer inline-flex items-center gap-1.5 text-white"
               >
                 <Pencil className="w-3.5 h-3.5" />
                 <span>Edit Comp Card</span>
@@ -152,7 +156,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
 
         {compCardPhotos.length > 0 && (
           <div className="space-y-3">
-            <div className="flex items-center justify-between text-xs font-bold text-stone-400 uppercase tracking-wider">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider">
               <span>Polaroid Angles (Natural Light • Zero Makeup)</span>
               <span className="text-[11px] font-semibold text-[#716B7E]">Klik foto untuk memperbesar</span>
             </div>
@@ -162,7 +166,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
                 <div
                   key={idx}
                   onClick={() => setSelectedImage({ url: photo.url, title: photo.type, caption: photo.caption })}
-                  className="break-inside-avoid mb-3 group relative cursor-pointer overflow-hidden rounded-xl bg-stone-100 border border-stone-200/80 hover:shadow-xl transition-all block"
+                  className="break-inside-avoid mb-3 group relative cursor-pointer overflow-hidden rounded-xl bg-slate-100 border border-slate-200/80 hover:shadow-xl transition-all block"
                 >
                   <img
                     src={photo.url}
@@ -173,7 +177,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
                     <div className="space-y-1 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
                       <div className="text-xs font-bold text-white uppercase tracking-wider">{photo.type}</div>
-                      <p className="text-[11px] text-stone-300 line-clamp-2 font-medium">{photo.caption}</p>
+                      <p className="text-[11px] text-slate-300 line-clamp-2 font-medium">{photo.caption}</p>
                       <div className="pt-1.5 flex items-center gap-1 text-[10px] font-bold text-amber-300">
                         <Maximize2 className="w-3 h-3" />
                         <span>Perbesar Foto</span>
@@ -186,65 +190,65 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
           </div>
         )}
 
-        <div className="space-y-3 pt-4 border-t border-stone-100">
-          <div className="flex items-center gap-2 text-xs font-bold text-stone-400 uppercase tracking-wider">
+        <div className="space-y-3 pt-4 border-t border-slate-100">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
             <Ruler className="w-3.5 h-3.5 text-[#E66A48]" />
             <span>Pengukuran Tubuh & Fitting Specs</span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-3.5 rounded-xl bg-stone-50/80 border border-stone-200/70">
-              <div className="text-[10px] font-bold text-stone-400 uppercase">Tinggi Badan</div>
+            <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/70">
+              <div className="text-[10px] font-bold text-slate-400 uppercase">Tinggi Badan</div>
               <div className="text-lg font-black text-[#27213D] mt-0.5">
                 {attributes.height_cm ? `${attributes.height_cm} cm` : "-"}
               </div>
-              <div className="text-[10px] text-stone-500 font-medium">Standard Editorial</div>
+              <div className="text-[10px] text-slate-500 font-medium">Standard Editorial</div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-stone-50/80 border border-stone-200/70">
-              <div className="text-[10px] font-bold text-stone-400 uppercase">B-W-H (Dada/Pinggang/Pinggul)</div>
+            <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/70">
+              <div className="text-[10px] font-bold text-slate-400 uppercase">B-W-H (Dada/Pinggang/Pinggul)</div>
               <div className="text-base font-black text-[#27213D] mt-0.5">
                 {attributes.bust_waist_hips || "84-60-89 cm"}
               </div>
-              <div className="text-[10px] text-stone-500 font-medium">Proporsional Lookbook</div>
+              <div className="text-[10px] text-slate-500 font-medium">Proporsional Lookbook</div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-stone-50/80 border border-stone-200/70">
-              <div className="text-[10px] font-bold text-stone-400 uppercase">Ukuran Baju (Sample)</div>
+            <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/70">
+              <div className="text-[10px] font-bold text-slate-400 uppercase">Ukuran Baju (Sample)</div>
               <div className="text-base font-black text-purple-700 mt-0.5">
                 {attributes.clothing_size || "S / 36 EU"}
               </div>
-              <div className="text-[10px] text-stone-500 font-medium">Kesesuaian Busana Desainer</div>
+              <div className="text-[10px] text-slate-500 font-medium">Kesesuaian Sampel Busana Brand</div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-stone-50/80 border border-stone-200/70">
-              <div className="text-[10px] font-bold text-stone-400 uppercase">Ukuran Sepatu</div>
+            <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/70">
+              <div className="text-[10px] font-bold text-slate-400 uppercase">Ukuran Sepatu</div>
               <div className="text-base font-black text-[#27213D] mt-0.5">
                 {attributes.shoe_size || "39 EU"}
               </div>
-              <div className="text-[10px] text-stone-500 font-medium">Standard Runway Footwear</div>
+              <div className="text-[10px] text-slate-500 font-medium">Standard Runway Footwear</div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-            <div className="p-3 rounded-xl bg-stone-50/50 border border-stone-200/60 text-xs flex items-center justify-between">
-              <span className="text-stone-500">Warna Rambut:</span>
+            <div className="p-3 rounded-xl bg-slate-50/50 border border-slate-200/60 text-xs flex items-center justify-between">
+              <span className="text-slate-500">Warna Rambut:</span>
               <span className="font-bold text-[#27213D]">{attributes.hair_color || "Hitam Alami"}</span>
             </div>
-            <div className="p-3 rounded-xl bg-stone-50/50 border border-stone-200/60 text-xs flex items-center justify-between">
-              <span className="text-stone-500">Warna Mata:</span>
+            <div className="p-3 rounded-xl bg-slate-50/50 border border-slate-200/60 text-xs flex items-center justify-between">
+              <span className="text-slate-500">Warna Mata:</span>
               <span className="font-bold text-[#27213D]">{attributes.eye_color || "Cokelat Tua"}</span>
             </div>
-            <div className="p-3 rounded-xl bg-stone-50/50 border border-stone-200/60 text-xs flex items-center justify-between">
-              <span className="text-stone-500">Skin Undertone:</span>
+            <div className="p-3 rounded-xl bg-slate-50/50 border border-slate-200/60 text-xs flex items-center justify-between">
+              <span className="text-slate-500">Skin Undertone:</span>
               <span className="font-bold text-[#27213D]">{attributes.skin_undertone || "Warm Olive"}</span>
             </div>
           </div>
         </div>
 
         {attributes.specialties && attributes.specialties.length > 0 && (
-          <div className="space-y-2 pt-2 border-t border-stone-100">
-            <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">
+          <div className="space-y-2 pt-2 border-t border-slate-100">
+            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
               Spesialisasi & Bidang Modeling
             </div>
             <div className="flex flex-wrap gap-2">
@@ -260,11 +264,55 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
             </div>
           </div>
         )}
+
+        {/* CAPABILITIES & WARDROBE RESTRICTIONS STRIP */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100 text-xs">
+          {(attributes.capabilities && attributes.capabilities.length > 0) && (
+            <div className="p-3.5 rounded-xl bg-purple-50/50 border border-purple-200/60 space-y-2">
+              <span className="text-[10px] font-bold text-purple-900 uppercase tracking-wider block">
+                Kapabilitas &amp; Ekspresi On-Set:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {attributes.capabilities.map((cap) => (
+                  <span key={cap} className="px-2.5 py-0.5 rounded-md bg-white border border-purple-200 text-purple-800 text-[11px] font-semibold">
+                    ✓ {cap}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/70 space-y-2">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+              Kebijakan Wardrobe &amp; Akomodasi:
+            </span>
+            <div className="space-y-1 text-[11px] text-slate-700">
+              {attributes.wardrobe_restrictions && (
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-slate-500 shrink-0">Batasan Wardrobe:</span>
+                  <span className="font-bold text-right">{attributes.wardrobe_restrictions}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">Pendamping On-Set:</span>
+                <span className="font-bold text-emerald-700">
+                  {attributes.chaperone_allowed ? "✓ Manajer / Chaperone Diizinkan" : "Independen"}
+                </span>
+              </div>
+              {attributes.travel_radius && (
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Jangkauan Kerja:</span>
+                  <span className="font-semibold text-slate-800">{attributes.travel_radius}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </section>
 
       {portfolioGallery.length > 0 && (
-        <section className="p-7 sm:p-8 rounded-2xl bg-white/95 border border-stone-200/80 shadow-xs space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-stone-100">
+        <section className="p-7 sm:p-8 rounded-2xl bg-white/95 border border-slate-200/80 shadow-xs space-y-6">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800">
                 <Sparkles className="w-3.5 h-3.5 text-amber-600" />
@@ -274,7 +322,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
                 Portofolio Kampanye Visual
               </h2>
             </div>
-            <span className="text-xs font-bold text-stone-400">
+            <span className="text-xs font-bold text-slate-400">
               {portfolioGallery.length} Karya Pilihan
             </span>
           </div>
@@ -284,7 +332,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
               <div
                 key={idx}
                 onClick={() => setSelectedImage({ url: item.url, title: item.title, caption: `${item.role} • ${item.client}` })}
-                className="break-inside-avoid mb-3 group cursor-pointer rounded-xl bg-stone-100 border border-stone-200/80 overflow-hidden hover:shadow-xl transition-all relative block"
+                className="break-inside-avoid mb-3 group cursor-pointer rounded-xl bg-slate-100 border border-slate-200/80 overflow-hidden hover:shadow-xl transition-all relative block"
               >
                 <img
                   src={item.url}
@@ -298,7 +346,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
                       <span className="px-2 py-0.5 rounded-2xl bg-white/20 backdrop-blur-md text-[9px] font-bold text-white uppercase tracking-wider">
                         {item.role}
                       </span>
-                      <span className="text-[10px] text-stone-300 font-medium">
+                      <span className="text-[10px] text-slate-300 font-medium">
                         Klien: {item.client}
                       </span>
                     </div>
@@ -322,7 +370,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative max-w-4xl w-full bg-stone-900 rounded-xl overflow-hidden shadow-2xl border border-white/10"
+            className="relative max-w-4xl w-full bg-slate-900 rounded-xl overflow-hidden shadow-2xl border border-white/10"
           >
             <button
               type="button"
@@ -344,7 +392,7 @@ export function ModelCompCard({ attributes, actorName, avatarUrl, isCurrentActor
               <div>
                 <h3 className="text-base font-extrabold">{selectedImage.title}</h3>
                 {selectedImage.caption && (
-                  <p className="text-xs text-stone-400 mt-0.5">{selectedImage.caption}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">{selectedImage.caption}</p>
                 )}
               </div>
               <a

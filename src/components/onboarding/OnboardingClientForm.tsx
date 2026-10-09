@@ -41,20 +41,13 @@ interface OfficialRoleOption {
   desc: string;
 }
 
-const SIX_OFFICIAL_ROLES: OfficialRoleOption[] = [
+const FIVE_OFFICIAL_ROLES: OfficialRoleOption[] = [
   {
     role: "Fashion Brand/UMKM",
     actorType: "BRAND",
     icon: Building,
     badge: "Brand & Klien",
     desc: "Brand mode, label busana, atau UMKM apparel yang merekrut kru & memproduksi kampanye.",
-  },
-  {
-    role: "Fashion Designer",
-    actorType: "INDIVIDUAL",
-    icon: Scissors,
-    badge: "Kreator Busana",
-    desc: "Perancang busana, pattern maker, dan desainer fesyen independen.",
   },
   {
     role: "Photographer",
@@ -108,22 +101,19 @@ export function OnboardingClientForm({
 }: OnboardingClientFormProps) {
   const getInitialRole = (roleStr: string): OfficialRoleOption => {
     const r = (roleStr || "").toLowerCase();
-    if (r.includes("brand") || r.includes("label") || r.includes("umkm")) {
-      return SIX_OFFICIAL_ROLES[0];
-    }
-    if (r.includes("designer") || r.includes("desain") || r.includes("perancang")) {
-      return SIX_OFFICIAL_ROLES[1];
+    if (r.includes("brand") || r.includes("label") || r.includes("umkm") || r.includes("designer") || r.includes("desain")) {
+      return FIVE_OFFICIAL_ROLES[0];
     }
     if (r.includes("model") || r.includes("talent") || r.includes("muse")) {
-      return SIX_OFFICIAL_ROLES[3];
+      return FIVE_OFFICIAL_ROLES[2];
     }
     if (r.includes("mua") || r.includes("makeup") || r.includes("stylist") || r.includes("wardrobe")) {
-      return SIX_OFFICIAL_ROLES[4];
+      return FIVE_OFFICIAL_ROLES[3];
     }
     if (r.includes("studio") || r.includes("ruang")) {
-      return SIX_OFFICIAL_ROLES[5];
+      return FIVE_OFFICIAL_ROLES[4];
     }
-    return SIX_OFFICIAL_ROLES[2]; // Default Photographer
+    return FIVE_OFFICIAL_ROLES[1]; // Default Photographer
   };
 
   const [selectedRole, setSelectedRole] = useState<OfficialRoleOption>(() =>
@@ -139,14 +129,14 @@ export function OnboardingClientForm({
         </div>
       )}
 
-      {/* 1. SELEKSI 6 PERAN RESMI */}
+      {/* 1. SELEKSI 5 PERAN RESMI */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <label className="block text-xs font-bold uppercase tracking-wider text-[#27213D]">
             1. Peran Resmi Anda di RAMU *
           </label>
           <span className="text-[11px] text-[#716B7E] font-medium">
-            Eksklusif 6 Entitas Ekosistem
+            Eksklusif 5 Entitas Ekosistem
           </span>
         </div>
 
@@ -154,7 +144,7 @@ export function OnboardingClientForm({
         <input type="hidden" name="actorType" value={selectedRole.actorType} />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {SIX_OFFICIAL_ROLES.map((item) => {
+          {FIVE_OFFICIAL_ROLES.map((item) => {
             const Icon = item.icon;
             const isSelected = selectedRole.role === item.role;
             return (
@@ -405,9 +395,8 @@ export function OnboardingClientForm({
             </label>
             <div className="space-y-2 pt-1">
               {[
-                { id: "PAID", label: "Paid (Tarif Profesional Berbayar)" },
-                { id: "TFP", label: "TFP / Barter Portofolio Non-Komersial" },
-                { id: "REVENUE_SHARE", label: "Bagi Hasil (Revenue Share / Royalty)" },
+                { id: "PAID", label: "Paid (Fee Komersial Berbayar Penuh)" },
+                { id: "REVENUE_SHARE", label: "Bagi Hasil (Revenue Share / Royalti Komersial)" },
               ].map((model) => (
                 <label key={model.id} className="flex items-center gap-2.5 cursor-pointer group">
                   <div className="relative flex items-center justify-center shrink-0">

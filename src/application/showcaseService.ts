@@ -18,6 +18,7 @@ export interface ShowcaseItem {
   aspectRatio?: string | null;
   isOwner?: boolean;
   isCoCreditor?: boolean;
+  collaborationId?: string | null;
   tearSheet?: any;
   availableActors?: { id: string; name: string; sector: string; location: string | null; owner?: { avatarUrl: string | null } | null }[];
   actor: {
@@ -170,7 +171,33 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
     const mediaType: "IMAGE" | "VIDEO" = attrs.media_type || (attrs.video_url ? "VIDEO" : "IMAGE");
     const videoUrl: string | null = attrs.video_url || null;
     const videoSource = attrs.video_source || (videoUrl ? "EXTERNAL" : null);
-    const aspectRatio = attrs.aspect_ratio || "16:9";
+    let aspectRatio = attrs.aspect_ratio || null;
+    if (!aspectRatio) {
+      const lowerCat = displayCategory.toLowerCase();
+      const lowerName = asset.name.toLowerCase();
+      if (
+        lowerCat.includes("reel") ||
+        lowerCat.includes("tiktok") ||
+        lowerCat.includes("vertikal") ||
+        (videoUrl && videoUrl.includes("shorts/"))
+      ) {
+        aspectRatio = "9:16";
+      } else if (
+        lowerCat.includes("lookbook") ||
+        lowerCat.includes("busana") ||
+        lowerCat.includes("ready-to-wear") ||
+        lowerCat.includes("styling") ||
+        lowerCat.includes("fashion") ||
+        lowerName.includes("lookbook") ||
+        lowerName.includes("koleksi")
+      ) {
+        aspectRatio = "4:5";
+      } else if (mediaType === "VIDEO") {
+        aspectRatio = "16:9";
+      } else {
+        aspectRatio = "4:5";
+      }
+    }
 
     if (!imageUrl) {
       imageUrl = FALLBACK_IMAGES[index % FALLBACK_IMAGES.length];
@@ -183,6 +210,11 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
       .join("")
       .toUpperCase();
 
+    const collabId =
+      (attrs.collaborationId as string) ||
+      (attrs.tear_sheet as any)?.collaborationId ||
+      null;
+
     showcaseItems.push({
       id: asset.id,
       title: asset.name,
@@ -194,6 +226,7 @@ export async function getShowcaseAssets(params: ShowcaseFilterParams = {}): Prom
       aspectRatio,
       isOwner,
       isCoCreditor,
+      collaborationId: collabId,
       tearSheet,
       availableActors: allActors,
       actor: {

@@ -130,7 +130,7 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
   return (
     <div className="space-y-4">
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white border border-stone-200/90 shadow-2xs">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white/60 backdrop-blur-md border border-white/75 shadow-2xs">
         <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
           {[
             { id: "ALL", label: "Semua Akun" },
@@ -144,10 +144,10 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
             <button
               key={tab.id}
               onClick={() => setFilter(tab.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all shrink-0 cursor-pointer ${
                 filter === tab.id
-                  ? "bg-stone-900 text-white shadow-2xs"
-                  : "bg-white text-stone-600 hover:text-stone-900 hover:bg-stone-100 border border-stone-200/80"
+                  ? "bg-[#4CC9FE] text-white shadow-2xs"
+                  : "bg-white text-slate-600 hover:text-[#111827] hover:bg-white/80 border border-slate-200/80"
               }`}
             >
               {tab.label}
@@ -155,66 +155,66 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
           ))}
         </div>
 
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-stone-50 border border-stone-200 sm:w-64">
-          <Search className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 sm:w-64">
+          <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
           <input
             type="text"
             placeholder="Cari talenta atau email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full text-xs text-stone-900 outline-none bg-transparent placeholder:text-stone-400"
+            className="w-full text-xs text-slate-900 outline-none bg-transparent placeholder:text-slate-400"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl bg-white border border-stone-200/90 overflow-hidden shadow-2xs">
+      <div className="rounded-2xl bg-white/60 backdrop-blur-md border border-white/75 overflow-hidden shadow-2xs">
         {filtered.length === 0 ? (
           <div className="p-12 text-center space-y-2">
-            <Users className="w-8 h-8 text-stone-300 mx-auto" />
-            <p className="text-xs font-semibold text-stone-700">Tidak ada profil yang cocok</p>
-            <p className="text-[11px] text-stone-400 font-normal">Silakan ubah filter atau kata kunci pencarian Anda.</p>
+            <Users className="w-8 h-8 text-slate-300 mx-auto" />
+            <p className="text-xs font-semibold text-slate-700">Tidak ada profil yang cocok</p>
+            <p className="text-[11px] text-slate-400 font-normal">Silakan ubah filter atau kata kunci pencarian Anda.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-stone-200/80 bg-stone-50/70">
-                  <th className="text-left px-4 py-3 text-[10px] font-bold text-stone-500 uppercase tracking-wider">
+                <tr className="border-b border-white/80 bg-white/30">
+                  <th className="text-left px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                     Talenta &amp; Sektor
                   </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold text-stone-500 uppercase tracking-wider">
+                  <th className="text-left px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                     Badge &amp; Kurasi
                   </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold text-stone-500 uppercase tracking-wider">
+                  <th className="text-left px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                     Status Akun
                   </th>
-                  <th className="text-left px-4 py-3 text-[10px] font-bold text-stone-500 uppercase tracking-wider">
+                  <th className="text-left px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                     Aset &amp; Booking
                   </th>
-                  <th className="text-right px-4 py-3 text-[10px] font-bold text-stone-500 uppercase tracking-wider">
+                  <th className="text-right px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                     Intervensi Status
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100">
+              <tbody className="divide-y divide-slate-100/60">
                 {filtered.map((actor) => (
-                  <tr key={actor.id} className="hover:bg-stone-50/50 transition-colors">
+                  <tr key={actor.id} className="hover:bg-white/60 transition-colors">
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-stone-100 text-stone-800 border border-stone-200 flex items-center justify-center text-xs font-bold shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center text-xs font-bold shrink-0">
                           {actor.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-semibold text-stone-900">{actor.name}</span>
-                            <span className="text-[9px] font-semibold px-1.5 py-0.2 bg-stone-100 text-stone-600 rounded border border-stone-200/60">
+                            <span className="text-xs font-semibold text-[#111827]">{actor.name}</span>
+                            <span className="text-[9px] font-semibold px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded-full border border-slate-200/60">
                               {actor.actorType}
                             </span>
                           </div>
-                          <p className="text-[11px] text-stone-500">{actor.sector}</p>
+                          <p className="text-[11px] text-slate-500">{actor.sector}</p>
                           {actor.owner?.email && (
-                            <p className="text-[10px] text-stone-400">{actor.owner.email}</p>
+                            <p className="text-[10px] text-slate-400">{actor.owner.email}</p>
                           )}
                         </div>
                       </div>
@@ -225,12 +225,12 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
                       <div className="flex items-center gap-2">
                         {/* Verified Badge */}
                         {actor.isVerified ? (
-                          <span className="inline-flex items-center gap-1 text-[9px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/70">
+                          <span className="inline-flex items-center gap-1 text-[9px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/70">
                             <ShieldCheck className="w-3 h-3 text-emerald-600" />
                             Verified
                           </span>
                         ) : (
-                          <span className="text-[10px] text-stone-400 italic">Belum Verifikasi</span>
+                          <span className="text-[10px] text-slate-400 italic">Belum Verifikasi</span>
                         )}
 
                         {/* Curated Spotlight Toggle Button */}
@@ -238,10 +238,10 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
                           type="button"
                           disabled={isPending}
                           onClick={() => handleToggleCurated(actor)}
-                          className={`inline-flex items-center gap-1 text-[9px] font-semibold px-2 py-0.5 rounded border transition-colors cursor-pointer ${
+                          className={`inline-flex items-center gap-1 text-[9px] font-semibold px-2 py-0.5 rounded-full border transition-colors cursor-pointer ${
                             actor.isCurated
                               ? "bg-amber-50 text-amber-800 border-amber-200/80 shadow-2xs"
-                              : "bg-white text-stone-500 border-stone-200 hover:text-stone-900 hover:bg-stone-50"
+                              : "bg-white text-slate-500 border-slate-200 hover:text-slate-900 hover:bg-slate-50"
                           }`}
                           title={actor.isCurated ? "Hapus dari Curated Spotlight" : "Pajang di Curated Spotlight"}
                         >
@@ -254,11 +254,11 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
                     {/* Status Display */}
                     <td className="px-4 py-3.5">
                       <span
-                        className={`text-[9px] font-semibold px-2 py-0.5 rounded border ${
+                        className={`text-[9px] font-semibold px-2 py-0.5 rounded-full border ${
                           actor.status === "ACTIVE"
                             ? "bg-emerald-50 text-emerald-700 border-emerald-200/70"
                             : actor.status === "DRAFT"
-                            ? "bg-stone-100 text-stone-600 border-stone-200/70"
+                            ? "bg-slate-100 text-slate-600 border-slate-200/70"
                             : actor.status === "PAUSED"
                             ? "bg-sky-50 text-sky-700 border-sky-200/70"
                             : actor.status === "SUSPENDED"
@@ -272,10 +272,10 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
 
                     {/* Assets & Bookings */}
                     <td className="px-4 py-3.5">
-                      <p className="text-xs text-stone-700 font-medium">
+                      <p className="text-xs text-slate-700 font-medium">
                         {actor._count.assets} Aset Portofolio
                       </p>
-                      <p className="text-[10px] text-stone-400">
+                      <p className="text-[10px] text-slate-400">
                         {actor._count.bookingRequestsReceived} Pesanan Booking
                       </p>
                     </td>
@@ -286,7 +286,7 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
                         <Link
                           href={`/directory/${actor.id}`}
                           target="_blank"
-                          className="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-[11px] font-semibold transition-colors inline-flex items-center gap-1 border border-stone-200/60"
+                          className="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold transition-colors inline-flex items-center gap-1 border border-slate-200/60"
                         >
                           <span>Profil</span>
                           <ArrowRight className="w-2.5 h-2.5" />
@@ -298,7 +298,7 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
                             type="button"
                             disabled={isPending}
                             onClick={() => handleStatusChangeRequest(actor, "ACTIVE")}
-                            className="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/70 text-[10px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
+                            className="px-2 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/70 text-[10px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
                             title="Aktifkan Akun"
                           >
                             <CheckCircle2 className="w-3 h-3" />
@@ -311,7 +311,7 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
                             type="button"
                             disabled={isPending}
                             onClick={() => handleStatusChangeRequest(actor, "SUSPENDED")}
-                            className="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/70 text-[10px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
+                            className="px-2 py-1 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/70 text-[10px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
                             title="Tangguhkan Akun (Suspend)"
                           >
                             <AlertTriangle className="w-3 h-3" />
@@ -324,7 +324,7 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
                             type="button"
                             disabled={isPending}
                             onClick={() => handleStatusChangeRequest(actor, "BANNED")}
-                            className="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/70 text-[10px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
+                            className="px-2 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/70 text-[10px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
                             title="Blokir Akun Permanen (Ban)"
                           >
                             <Ban className="w-3 h-3" />
@@ -343,12 +343,12 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
 
       {/* Mandatory Sanction Reason Modal */}
       {selectedActor && targetStatus && (
-        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl border border-stone-200 space-y-4">
-            <div className="flex items-center justify-between border-b border-stone-200/80 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-[24px] p-6 shadow-xl border border-white/75 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
               <div className="flex items-center gap-2">
                 <ShieldAlert className="w-4 h-4 text-rose-600" />
-                <h3 className="text-xs font-bold text-stone-900">
+                <h3 className="text-xs font-bold text-[#111827]">
                   Pemberian Sanksi Akun: {selectedActor.name}
                 </h3>
               </div>
@@ -358,19 +358,19 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
                   setSelectedActor(null);
                   setTargetStatus(null);
                 }}
-                className="p-1 rounded-lg hover:bg-stone-100 text-stone-400 hover:text-stone-600"
+                className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200/70 text-xs text-amber-900 leading-relaxed font-normal">
+            <div className="p-3 rounded-2xl bg-amber-50/80 border border-amber-200/70 text-xs text-amber-900 leading-relaxed font-normal">
               Anda akan mengubah status akun ini menjadi <strong>{targetStatus}</strong>.
               Tindakan ini akan membatasi akses kreator dan tercatat secara permanen di <strong>User Sanction Log</strong> dan <strong>Admin Audit Trail</strong>.
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-stone-700">
+              <label className="text-xs font-semibold text-slate-700">
                 Alasan Penangguhan / Pemblokiran (Wajib diisi):
               </label>
               <textarea
@@ -378,7 +378,7 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
                 value={sanctionReason}
                 onChange={(e) => setSanctionReason(e.target.value)}
                 placeholder="Contoh: Laporan terverifikasi mengenai plagiarisme portofolio atau pelanggaran kontrak komersial..."
-                className="w-full p-3 rounded-lg border border-stone-200 text-xs text-stone-900 focus:border-stone-900 focus:ring-1 focus:ring-stone-900 outline-none leading-relaxed"
+                className="w-full p-3 rounded-2xl border border-slate-200 text-xs text-slate-900 focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 outline-none leading-relaxed"
               />
             </div>
 
@@ -389,7 +389,7 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
                   setSelectedActor(null);
                   setTargetStatus(null);
                 }}
-                className="px-3.5 py-2 rounded-lg border border-stone-200 text-xs font-semibold text-stone-700 hover:bg-stone-50"
+                className="px-3.5 py-2 rounded-full border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
               >
                 Batal
               </button>
@@ -397,7 +397,7 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
                 type="button"
                 disabled={isPending}
                 onClick={handleSanctionSubmit}
-                className="px-3.5 py-2 rounded-lg text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 transition-colors cursor-pointer shadow-2xs"
+                className="px-3.5 py-2 rounded-full text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 transition-colors cursor-pointer shadow-2xs"
               >
                 {isPending ? "Menyimpan..." : `Konfirmasi ${targetStatus}`}
               </button>

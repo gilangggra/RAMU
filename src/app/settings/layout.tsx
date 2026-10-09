@@ -3,10 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { AppShell } from "@/components/layout/AppShell";
 import { SettingsNav } from "@/components/settings/SettingsNav";
+import { PublicProfileBanner } from "@/components/settings/PublicProfileBanner";
 
 export const metadata = {
-  title: "Pengaturan | RAMU",
-  description: "Kelola profil, preferensi, dan portofolio kolaborasi Anda.",
+  title: "Pengaturan Akun & Operasional | RAMU",
+  description: "Kelola rekening pencairan SPK, ketersediaan jadwal, notifikasi, dan keamanan akun Anda.",
 };
 
 export default async function SettingsLayout({
@@ -53,23 +54,25 @@ export default async function SettingsLayout({
 
   return (
     <AppShell actor={actor} activeRoute="/settings">
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className="w-full max-w-7xl mx-auto space-y-6 pb-16">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#1E1B2E] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             Pengaturan Akun
           </h1>
-          <p className="text-sm text-stone-500 mt-1">
-            Kelola identitas publik dan preferensi kolaborasi Anda di ekosistem RAMU.
+          <p className="text-xs sm:text-sm text-slate-600 mt-1">
+            Pusat konfigurasi rekening pencairan dana SPK, status ketersediaan, notifikasi, dan keamanan akun Anda.
           </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
-          <SettingsNav isBrand={isBrand} />
+        {/* Public vs Private Cross-Link Banner */}
+        <PublicProfileBanner actorId={actor.id} />
+
+        <div className="flex flex-col lg:flex-row gap-8 items-start pt-2">
+          <SettingsNav isBrand={isBrand} actorId={actor.id} />
 
           <div className="flex-1 min-w-0 w-full">
             {children}
           </div>
-
         </div>
       </div>
     </AppShell>

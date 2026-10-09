@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { updateServicePackagesAndRates } from "@/app/settings/actions";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 import {
   Save,
   Loader2,
@@ -20,9 +21,10 @@ import {
   RoleCategory,
   detectRoleCategory,
   ServicePackage,
+  PackageTier,
 } from "@/lib/constants/rolePresets";
 
-export type { ServicePackage };
+export type { ServicePackage, PackageTier };
 
 export type UsageRightsScope = "ORGANIC_SOCIAL" | "PAID_ADS_DIGITAL" | "COMMERCIAL_OOH" | "FULL_BUYOUT";
 export type UsageRightsDuration = "6_MONTHS" | "1_YEAR" | "2_YEARS" | "PERPETUAL";
@@ -169,7 +171,6 @@ export function RatesForm({
   const isStylist = selectedPresetRole === "STYLIST";
   const isVideographer = selectedPresetRole === "VIDEOGRAPHER";
   const isStudio = selectedPresetRole === "STUDIO";
-  const isDesigner = selectedPresetRole === "DESIGNER";
   const isPhotographer = selectedPresetRole === "PHOTOGRAPHER";
 
   function handlePackageChange(index: number, field: keyof ServicePackage, value: any) {
@@ -203,15 +204,21 @@ export function RatesForm({
   }
 
   function handleAddNewPackage() {
-    if (packages.length >= 4) return;
+    if (packages.length >= 3) return;
+    const tier = packages.length === 0 ? "STARTER" : packages.length === 1 ? "CAMPAIGN" : "COMMERCIAL";
+    const tierTitle = tier === "STARTER" ? "Paket Starter / Mini" : tier === "CAMPAIGN" ? "Paket Kampanye Standar" : "Paket Komersial Lengkap";
     setPackages([
       ...packages,
       {
-        title: `Paket Layanan ${packages.length + 1}`,
-        subtitle: "Deskripsi singkat cakupan layanan yang diberikan",
+        tier,
+        title: tierTitle,
+        subtitle: "Deskripsi singkat komitmen resource dan spesifikasi output",
         price: "Rp 1.500.000",
-        unit: currentPreset.commonUnits[0] || "per sesi",
-        popular: false,
+        unit: currentPreset.commonUnits[0] || "per 4 jam",
+        capacityDuration: "4 Jam (Setengah Shift)",
+        deliverablesSummary: "Output terstandar kualitas tinggi",
+        usageRights: "Komersial Digital (Sosmed & Web) 1 Tahun",
+        equipmentIncluded: "Peralatan utama siap pakai on-set",
         features: ["Deliverable output terstandar kualitas tinggi", "Gratis 1x revisi minor"],
       },
     ]);
@@ -263,31 +270,31 @@ export function RatesForm({
     <div
       className={
         embedded
-          ? "bg-white rounded-2xl border border-stone-200/90 shadow-2xs overflow-hidden"
-          : "bg-white rounded-3xl border border-stone-200 shadow-[0_8px_30px_rgba(39,33,61,0.04)] overflow-hidden"
+          ? "bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden"
+          : "bg-white rounded-3xl border border-slate-200 shadow-[0_8px_30px_rgba(39,33,61,0.04)] overflow-hidden"
       }
     >
       {/* HEADER SECTION */}
-      <div className="p-6 sm:p-8 border-b border-stone-100 bg-stone-50/50">
+      <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/50">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full btn-primary-pill text-white text-xs font-bold shadow-xs">
               <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
               <span>Pengaturan Tarif &amp; Paket Komersial</span>
             </div>
-            <h2 className="text-xl font-extrabold text-[#1E1B2E]">Tarif, Paket Layanan &amp; Ketentuan SPK</h2>
-            <p className="text-sm text-stone-500 max-w-xl">
+            <h2 className="text-xl font-extrabold text-[#111827]">Tarif, Paket Layanan &amp; Ketentuan SPK</h2>
+            <p className="text-sm text-slate-500 max-w-xl">
               Tentukan harga acuan, paket layanan siap booking, dan standar kerja Anda untuk mempermudah calon klien memilih jasa Anda.
             </p>
           </div>
 
           {/* ROLE PRESET QUICK SWITCHER */}
-          <div className="p-4 rounded-2xl bg-white border border-stone-200/90 shadow-2xs space-y-3 lg:w-96 shrink-0">
+          <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-3 lg:w-96 shrink-0">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                 Template Standar Profesi
               </span>
-              <span className="px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 text-[10px] font-bold">
+              <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold">
                 {currentPreset.roleBadge}
               </span>
             </div>
@@ -296,10 +303,9 @@ export function RatesForm({
               <select
                 value={selectedPresetRole}
                 onChange={(e) => handleApplyRolePreset(e.target.value as RoleCategory)}
-                className="flex-1 px-3 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:bg-white focus:border-[#1E1B2E] transition-colors cursor-pointer"
+                className="flex-1 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-[#111827] focus:bg-white focus:border-[#4CC9FE] transition-colors cursor-pointer"
               >
                 <option value="BRAND">Fashion Brand/UMKM</option>
-                <option value="DESIGNER">Fashion Designer</option>
                 <option value="PHOTOGRAPHER">Photographer</option>
                 <option value="MODEL">Model</option>
                 <option value="MUA_STYLIST">MUA/Stylist</option>
@@ -309,14 +315,14 @@ export function RatesForm({
               <button
                 type="button"
                 onClick={() => handleApplyRolePreset(selectedPresetRole)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold shrink-0 transition-colors shadow-xs cursor-pointer"
+                className="btn-primary-pill !text-xs !py-2 !px-4 text-white font-semibold cursor-pointer shrink-0 shadow-sm shadow-[#4CC9FE]/25"
                 title="Muat ulang paket & harga rekomendasi industri untuk role ini"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <Sparkles className="w-3.5 h-3.5 text-white" />
                 <span>Isi Standar</span>
               </button>
             </div>
-            <p className="text-[11px] text-stone-400 leading-tight">
+            <p className="text-[11px] text-slate-400 leading-tight">
               1-Klik mengisi harga, paket populer, dan proteksi SPK sesuai standar pasar.
             </p>
           </div>
@@ -342,27 +348,26 @@ export function RatesForm({
         )}
 
         {/* TOP PARAMETERS: ESTIMATED STARTING RATE & TURNAROUND */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-2xl bg-stone-50/70 border border-stone-200/80">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-2xl bg-slate-50/70 border border-slate-200/80">
           {/* STARTING RATE */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label htmlFor="startingRate" className="text-xs font-bold text-[#1E1B2E] uppercase tracking-wider">
+              <label htmlFor="startingRate" className="text-xs font-bold text-[#111827] uppercase tracking-wider">
                 Estimasi Tarif Awal (Mulai Dari) <span className="text-rose-500">*</span>
               </label>
-              <span className="text-[10px] text-stone-400 font-medium">Tampil di kartu direktori</span>
+              <span className="text-[10px] text-slate-400 font-medium">Tampil di kartu direktori</span>
             </div>
-            <input
-              type="text"
+            <CurrencyInput
               id="startingRate"
               value={startingRate}
-              onChange={(e) => setStartingRate(e.target.value)}
+              onChange={(val) => setStartingRate(val)}
               required
-              placeholder="Contoh: Mulai Rp 1,5 Jt / sesi"
-              className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200 focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-bold text-stone-800"
+              placeholder="Mulai Rp 1.500.000 / sesi"
+              className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-sm font-bold text-slate-800"
             />
             {/* QUICK RATE PILLS */}
             <div className="space-y-1.5">
-              <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider block">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
                 Pilihan Cepat Standar {currentPreset.roleBadge}:
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -371,10 +376,10 @@ export function RatesForm({
                     key={idx}
                     type="button"
                     onClick={() => setStartingRate(qr)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-all cursor-pointer ${
                       startingRate === qr
-                        ? "bg-[#1E1B2E] text-white border-[#1E1B2E]"
-                        : "bg-white text-stone-600 border-stone-200 hover:border-stone-300 hover:bg-stone-50"
+                        ? "btn-primary-pill text-white font-bold border-transparent shadow-xs"
+                        : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                     }`}
                   >
                     {qr}
@@ -387,10 +392,10 @@ export function RatesForm({
           {/* TURNAROUND TIME */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label htmlFor="turnaroundTime" className="text-xs font-bold text-[#1E1B2E] uppercase tracking-wider">
+              <label htmlFor="turnaroundTime" className="text-xs font-bold text-[#111827] uppercase tracking-wider">
                 Estimasi Waktu Pengerjaan (Turnaround) <span className="text-rose-500">*</span>
               </label>
-              <span className="text-[10px] text-stone-400 font-medium">Tampil di ringkasan profil</span>
+              <span className="text-[10px] text-slate-400 font-medium">Tampil di ringkasan profil</span>
             </div>
             <input
               type="text"
@@ -399,11 +404,11 @@ export function RatesForm({
               onChange={(e) => setTurnaroundTime(e.target.value)}
               required
               placeholder="Contoh: 3 – 5 Hari Kerja (atau Selesai On-Set)"
-              className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200 focus:border-[#1E1B2E] focus:ring-2 focus:ring-[#1E1B2E]/10 transition-all text-sm font-bold text-stone-800"
+              className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-sm font-bold text-slate-800"
             />
             {/* QUICK TURNAROUND PILLS */}
             <div className="space-y-1.5">
-              <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider block">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
                 Pilihan Cepat Waktu Serah Terima:
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -412,10 +417,10 @@ export function RatesForm({
                     key={idx}
                     type="button"
                     onClick={() => setTurnaroundTime(qt)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-all cursor-pointer ${
                       turnaroundTime === qt
-                        ? "bg-[#1E1B2E] text-white border-[#1E1B2E]"
-                        : "bg-white text-stone-600 border-stone-200 hover:border-stone-300 hover:bg-stone-50"
+                        ? "btn-primary-pill text-white font-bold border-transparent shadow-xs"
+                        : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                     }`}
                   >
                     {qt}
@@ -427,180 +432,247 @@ export function RatesForm({
         </div>
 
         {/* PACKAGES SECTION */}
+        {/* PACKAGES SECTION — STANDARDIZED 3-TIER COLLABORATION RESOURCES */}
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-stone-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-[#1E1B2E]">
-                  Daftar Paket Layanan Siap Booking ({packages.length}/4)
+                <h3 className="text-sm font-bold uppercase tracking-wider text-[#111827]">
+                  3 Tingkatan Paket Kapasitas Kolaborasi ({packages.length}/3)
                 </h3>
-                <span className="px-2 py-0.5 rounded-full bg-stone-100 text-[10px] font-bold text-stone-600">
-                  Direkomendasikan 2-3 Paket
+                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-[10px] font-bold text-emerald-800 border border-emerald-200/70">
+                  Terstandarisasi 3 Tingkat
                 </span>
               </div>
-              <p className="text-xs text-stone-400 mt-0.5">
-                Klien dapat memilih salah satu paket ini untuk langsung mengajukan reservasi atau rekrutmen.
+              <p className="text-xs text-slate-500 mt-0.5 max-w-2xl leading-relaxed">
+                Tentukan 3 tingkatan paket kolaborasi siap-booking sebagai acuan awal bagi klien yang ingin memesan jasa Anda.
               </p>
             </div>
 
-            {packages.length < 4 && (
+            {packages.length < 3 && (
               <button
                 type="button"
                 onClick={handleAddNewPackage}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-xs font-bold text-[#1E1B2E] transition-colors cursor-pointer shrink-0"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-[#111827] transition-colors cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>+ Tambah Paket Baru</span>
+                <span>Tambah Tingkatan Paket</span>
               </button>
             )}
           </div>
 
+
+
           {packages.length === 0 ? (
-            <div className="p-8 text-center rounded-2xl border-2 border-dashed border-stone-200 space-y-3">
-              <p className="text-xs text-stone-500 font-medium">
-                Belum ada paket kustom yang dibuat. Sistem saat ini masih menggunakan rekomendasi standar industri.
+            <div className="p-8 text-center rounded-2xl border-2 border-dashed border-slate-200 space-y-3">
+              <p className="text-xs text-slate-500 font-medium">
+                Belum ada paket kustom yang dibuat. Muat 3 tingkatan paket rekomendasi standar industri untuk peran Anda.
               </p>
               <button
                 type="button"
                 onClick={() => handleApplyRolePreset(selectedPresetRole)}
-                className="px-4 py-2 rounded-xl bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider cursor-pointer shadow-xs"
+                className="btn-primary-pill !text-xs !py-2 !px-5 text-white font-semibold cursor-pointer shadow-sm shadow-[#4CC9FE]/25"
               >
-                Muat Paket dari Template
+                Muat 3 Paket dari Template
               </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {packages.map((pkg, idx) => (
-                <div
-                  key={idx}
-                  className={`p-6 rounded-2xl border transition-all space-y-5 flex flex-col justify-between ${
-                    pkg.popular
-                      ? "bg-white border-[#1E1B2E] ring-2 ring-[#1E1B2E]/10 shadow-sm"
-                      : "bg-white border-stone-200 shadow-2xs"
-                  }`}
-                >
-                  <div className="space-y-4">
-                    {/* PACKAGE HEADER */}
-                    <div className="flex items-center justify-between pb-2 border-b border-stone-100">
-                      <span className="px-2.5 py-0.5 rounded-full bg-stone-100 text-[10px] font-bold text-stone-700 uppercase tracking-widest">
-                        Paket {idx + 1}
-                      </span>
+              {packages.map((pkg, idx) => {
+                const tier = pkg.tier || (idx === 0 ? "STARTER" : idx === 1 ? "CAMPAIGN" : "COMMERCIAL");
+                const isCampaign = tier === "CAMPAIGN";
 
-                      <div className="flex items-center gap-2">
-                        <label className="flex items-center gap-1.5 text-[11px] font-bold text-stone-700 cursor-pointer select-none">
-                          <input
-                            type="checkbox"
-                            checked={Boolean(pkg.popular)}
-                            onChange={(e) => handlePackageChange(idx, "popular", e.target.checked)}
-                            className="rounded border-stone-300 text-[#1E1B2E] focus:ring-[#1E1B2E]"
-                          />
-                          <span>Paling Populer</span>
-                        </label>
+                return (
+                  <div
+                    key={idx}
+                    className={`p-6 rounded-2xl border transition-all space-y-5 flex flex-col justify-between ${
+                      isCampaign
+                        ? "bg-white border-[#4CC9FE] ring-2 ring-[#4CC9FE]/20 shadow-sm"
+                        : "bg-white border-slate-200 shadow-2xs"
+                    }`}
+                  >
+                    <div className="space-y-4">
+                      {/* PACKAGE HEADER & TIER */}
+                      <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={tier}
+                            onChange={(e) => handlePackageChange(idx, "tier", e.target.value)}
+                            className="px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-800 uppercase tracking-widest cursor-pointer"
+                          >
+                            <option value="STARTER">Tier 1: Starter / Mini</option>
+                            <option value="CAMPAIGN">Tier 2: Campaign (Standar)</option>
+                            <option value="COMMERCIAL">Tier 3: Commercial Full</option>
+                          </select>
+                        </div>
 
                         {packages.length > 1 && (
                           <button
                             type="button"
                             onClick={() => handleRemovePackage(idx)}
-                            className="p-1 rounded-md text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                            title="Hapus paket ini"
+                            className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                            title="Hapus tingkatan paket ini"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         )}
                       </div>
-                    </div>
 
-                    {/* TITLE & DESCRIPTION */}
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
-                          Nama Paket <span className="text-rose-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={pkg.title}
-                          onChange={(e) => handlePackageChange(idx, "title", e.target.value)}
-                          required
-                          placeholder="Misal: Lookbook Half-Day"
-                          className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:bg-white focus:border-[#1E1B2E]"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
-                          Deskripsi Singkat
-                        </label>
-                        <textarea
-                          value={pkg.subtitle}
-                          onChange={(e) => handlePackageChange(idx, "subtitle", e.target.value)}
-                          rows={2}
-                          placeholder="Misal: Sesi foto katalog 15 look untuk rilis koleksi baru"
-                          className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-normal text-stone-600 focus:bg-white focus:border-[#1E1B2E] resize-none"
-                        />
-                      </div>
-                    </div>
-
-                    {/* PRICE & BILLING UNIT */}
-                    <div className="space-y-2 pt-2 border-t border-stone-100">
-                      <div className="grid grid-cols-2 gap-3">
+                      {/* TITLE & DESCRIPTION */}
+                      <div className="space-y-3">
                         <div>
-                          <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
-                            Harga Tarif <span className="text-rose-500">*</span>
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                            Nama Paket <span className="text-rose-500">*</span>
                           </label>
                           <input
                             type="text"
-                            value={pkg.price}
-                            onChange={(e) => handlePackageChange(idx, "price", e.target.value)}
+                            value={pkg.title}
+                            onChange={(e) => handlePackageChange(idx, "title", e.target.value)}
                             required
-                            placeholder="Rp 1.500.000"
-                            className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:bg-white focus:border-[#1E1B2E]"
+                            placeholder="Misal: Lookbook Half-Day"
+                            className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-[#111827] focus:bg-white focus:border-[#4CC9FE]"
                           />
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
-                            Satuan Penagihan <span className="text-rose-500">*</span>
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                            Deskripsi Singkat
                           </label>
-                          <input
-                            type="text"
-                            value={pkg.unit}
-                            onChange={(e) => handlePackageChange(idx, "unit", e.target.value)}
-                            required
-                            placeholder="per 4 jam / per sesi"
-                            className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-700 focus:bg-white focus:border-[#1E1B2E]"
+                          <textarea
+                            value={pkg.subtitle}
+                            onChange={(e) => handlePackageChange(idx, "subtitle", e.target.value)}
+                            rows={2}
+                            placeholder="Misal: Sesi foto katalog 15 look untuk rilis koleksi baru"
+                            className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-normal text-slate-600 focus:bg-white focus:border-[#4CC9FE] resize-none"
                           />
                         </div>
                       </div>
 
-                      {/* QUICK UNIT PILLS */}
-                      <div className="flex flex-wrap gap-1 pt-1">
-                        {currentPreset.commonUnits.map((u, uIdx) => (
-                          <button
-                            key={uIdx}
-                            type="button"
-                            onClick={() => handlePackageChange(idx, "unit", u)}
-                            className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-colors cursor-pointer ${
-                              pkg.unit === u
-                                ? "bg-[#1E1B2E] text-white border-[#1E1B2E]"
-                                : "bg-stone-50 text-stone-500 border-stone-200 hover:bg-stone-100"
-                            }`}
-                          >
-                            {u}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                      {/* PRICE & BILLING UNIT */}
+                      <div className="space-y-2 pt-2 border-t border-slate-100">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                              Listed Rate (Acuan) <span className="text-rose-500">*</span>
+                            </label>
+                            <CurrencyInput
+                              value={pkg.price}
+                              onChange={(val) => handlePackageChange(idx, "price", val)}
+                              required
+                              placeholder="Rp 1.500.000"
+                              className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-[#111827] focus:bg-white focus:border-[#4CC9FE]"
+                            />
+                          </div>
 
-                    {/* DELIVERABLES & FEATURES */}
-                    <div className="space-y-2 pt-2 border-t border-stone-100">
-                      <div className="flex items-center justify-between">
-                        <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
-                          Poin Output &amp; Deliverables ({pkg.features.length})
-                        </label>
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                              Satuan Penagihan <span className="text-rose-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={pkg.unit}
+                              onChange={(e) => handlePackageChange(idx, "unit", e.target.value)}
+                              required
+                              placeholder="per 4 jam / per sesi"
+                              className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-700 focus:bg-white focus:border-[#4CC9FE]"
+                            />
+                          </div>
+                        </div>
+
+                        {/* QUICK UNIT PILLS */}
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {currentPreset.commonUnits.map((u, uIdx) => (
+                            <button
+                              key={uIdx}
+                              type="button"
+                              onClick={() => handlePackageChange(idx, "unit", u)}
+                              className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-colors cursor-pointer ${
+                                pkg.unit === u
+                                  ? "btn-primary-pill text-white font-bold border-transparent shadow-xs"
+                                  : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100"
+                              }`}
+                            >
+                              {u}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* DETAIL LINGKUP & HAK SIAR (COLLAPSIBLE FOR MAXIMUM CLEANLINESS) */}
+                      <details className="group pt-2 border-t border-slate-100">
+                        <summary className="text-[11px] font-bold text-[#0284c7] hover:text-[#0369a1] cursor-pointer flex items-center justify-between py-1.5 list-none select-none">
+                          <span className="flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-[#4CC9FE]" />
+                            <span>Rincian Lingkup &amp; Lisensi (Opsional)</span>
+                          </span>
+                          <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-open:rotate-180 transition-transform" />
+                        </summary>
+
+                        <div className="space-y-2.5 pt-2 mt-2 bg-slate-50/70 p-3 rounded-xl border border-slate-200/60">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
+                              Durasi Waktu / Shift
+                            </label>
+                            <input
+                              type="text"
+                              value={pkg.capacityDuration || ""}
+                              onChange={(e) => handlePackageChange(idx, "capacityDuration", e.target.value)}
+                              placeholder="mis. 4 Jam (Setengah Shift)"
+                              className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-medium text-[#111827] focus:border-[#4CC9FE] outline-hidden"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
+                              Deliverables Utama
+                            </label>
+                            <input
+                              type="text"
+                              value={pkg.deliverablesSummary || ""}
+                              onChange={(e) => handlePackageChange(idx, "deliverablesSummary", e.target.value)}
+                              placeholder="mis. 15 Foto Retouch + RAW Files"
+                              className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-medium text-[#111827] focus:border-[#4CC9FE] outline-hidden"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
+                              Hak Siar / Lisensi
+                            </label>
+                            <input
+                              type="text"
+                              value={pkg.usageRights || ""}
+                              onChange={(e) => handlePackageChange(idx, "usageRights", e.target.value)}
+                              placeholder="mis. Sosmed & Web 1 Tahun"
+                              className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-medium text-[#111827] focus:border-[#4CC9FE] outline-hidden"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
+                              Peralatan / Fasilitas Terbawa
+                            </label>
+                            <input
+                              type="text"
+                              value={pkg.equipmentIncluded || ""}
+                              onChange={(e) => handlePackageChange(idx, "equipmentIncluded", e.target.value)}
+                              placeholder="mis. Sony A7IV + 2 Lensa + Strobe Kit"
+                              className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-medium text-[#111827] focus:border-[#4CC9FE] outline-hidden"
+                            />
+                          </div>
+                        </div>
+                      </details>
+
+                      {/* EXTRA BULLET POINTS */}
+                      <div className="space-y-2 pt-2 border-t border-slate-100">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            Poin Rincian Tambahan ({pkg.features.length})
+                          </label>
                         <button
                           type="button"
                           onClick={() => handleAddFeature(idx, "")}
-                          className="text-[10px] font-bold text-[#1E1B2E] hover:underline cursor-pointer"
+                          className="text-[10px] font-bold text-[#111827] hover:underline cursor-pointer"
                         >
                           + Tambah Baris
                         </button>
@@ -616,13 +688,13 @@ export function RatesForm({
                               onChange={(e) => handleFeatureChange(idx, fIdx, e.target.value)}
                               required
                               placeholder="Misal: 15 Foto final retouch resolusi tinggi"
-                              className="w-full px-2.5 py-1.5 rounded-lg bg-stone-50 border border-stone-200 text-[11px] text-stone-700 focus:bg-white focus:border-[#1E1B2E]"
+                              className="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] text-slate-700 focus:bg-white focus:border-[#4CC9FE]"
                             />
                             {pkg.features.length > 1 && (
                               <button
                                 type="button"
                                 onClick={() => handleRemoveFeature(idx, fIdx)}
-                                className="p-1 text-stone-400 hover:text-rose-500 cursor-pointer"
+                                className="p-1 text-slate-400 hover:text-rose-500 cursor-pointer"
                                 title="Hapus poin ini"
                               >
                                 &times;
@@ -634,7 +706,7 @@ export function RatesForm({
 
                       {/* QUICK DELIVERABLE SUGGESTIONS */}
                       <div className="pt-2">
-                        <span className="text-[9px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                           + Tambah Cepat Deliverable Populer:
                         </span>
                         <div className="flex flex-wrap gap-1">
@@ -647,7 +719,7 @@ export function RatesForm({
                                   handleAddFeature(idx, tag);
                                 }
                               }}
-                              className="px-2 py-0.5 rounded-md bg-stone-100 hover:bg-stone-200 text-[10px] font-medium text-stone-600 transition-colors cursor-pointer"
+                              className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-[10px] font-medium text-slate-600 transition-colors cursor-pointer"
                             >
                               + {tag}
                             </button>
@@ -657,27 +729,28 @@ export function RatesForm({
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              );
+            })}
+          </div>
+        )}
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* COLLAPSIBLE SPK & TERMS SECTION (CLEAN & STREAMLINED)              */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <div className="rounded-2xl border border-stone-200 overflow-hidden bg-stone-50/40">
-          <div className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-b border-amber-200/60">
+        <div className="rounded-2xl border border-slate-200 overflow-hidden bg-slate-50/40">
+          <div className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50 border-b border-slate-200">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-amber-700 shrink-0" />
-                <h3 className="text-sm font-bold text-[#1E1B2E]">
+                <ShieldCheck className="w-5 h-5 text-slate-700 shrink-0" />
+                <h3 className="text-sm font-bold text-[#111827]">
                   Standar Kerja &amp; Proteksi SPK (Otomatis Aktif)
                 </h3>
-                <span className="px-2 py-0.5 rounded-full bg-amber-200/80 text-amber-900 text-[10px] font-black uppercase">
+                <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-black uppercase">
                   Proteksi 2-Arah
                 </span>
               </div>
-              <p className="text-xs text-stone-600 font-light">
+              <p className="text-xs text-slate-600 font-light">
                 Kontrak kerja resmi otomatis mengikat klien saat booking untuk mencegah telat bayar, revisi tanpa batas, dan lembur gratis.
               </p>
             </div>
@@ -685,13 +758,13 @@ export function RatesForm({
             <button
               type="button"
               onClick={() => setShowTermsDetails(!showTermsDetails)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-300 hover:border-[#1E1B2E] text-xs font-bold text-stone-700 hover:text-[#1E1B2E] transition-all shadow-2xs shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-300 hover:border-[#4CC9FE] text-xs font-bold text-slate-700 hover:text-[#111827] transition-all shadow-2xs shrink-0 cursor-pointer"
             >
               <span>{showTermsDetails ? "Sembunyikan Rincian SPK" : "Sesuaikan Klausul SPK"}</span>
               {showTermsDetails ? (
-                <ChevronUp className="w-4 h-4 text-stone-500" />
+                <ChevronUp className="w-4 h-4 text-slate-500" />
               ) : (
-                <ChevronDown className="w-4 h-4 text-stone-500" />
+                <ChevronDown className="w-4 h-4 text-slate-500" />
               )}
             </button>
           </div>
@@ -699,27 +772,27 @@ export function RatesForm({
           {/* SUMMARY BADGES (SHOWN WHEN COLLAPSED) */}
           {!showTermsDetails && (
             <div className="p-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3 rounded-xl bg-white border border-stone-200/80 space-y-0.5">
-                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Uang Muka (DP)</span>
-                <span className="text-xs font-bold text-[#1E1B2E] block">DP {terms.dpPercentage}% Kunci Jadwal</span>
+              <div className="p-3 rounded-xl bg-white border border-slate-200/80 space-y-0.5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Uang Muka (DP)</span>
+                <span className="text-xs font-bold text-[#111827] block">DP {terms.dpPercentage}% Kunci Jadwal</span>
                 <span className="text-[10px] text-emerald-700 font-medium block">Watermark safe</span>
               </div>
 
-              <div className="p-3 rounded-xl bg-white border border-stone-200/80 space-y-0.5">
-                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Batas Revisi</span>
-                <span className="text-xs font-bold text-[#1E1B2E] block">Maksimal {terms.maxRevisions}x Minor</span>
-                <span className="text-[10px] text-stone-500 font-medium block">Over-limit: {terms.extraRevisionFee}</span>
+              <div className="p-3 rounded-xl bg-white border border-slate-200/80 space-y-0.5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Batas Revisi</span>
+                <span className="text-xs font-bold text-[#111827] block">Maksimal {terms.maxRevisions}x Minor</span>
+                <span className="text-[10px] text-slate-500 font-medium block">Over-limit: {terms.extraRevisionFee}</span>
               </div>
 
-              <div className="p-3 rounded-xl bg-white border border-stone-200/80 space-y-0.5">
-                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Durasi Shift Kerja</span>
-                <span className="text-xs font-bold text-[#1E1B2E] block">{terms.shiftHours} Jam Standar</span>
-                <span className="text-[10px] text-stone-500 font-medium block">Lembur: {terms.overtimeRate}</span>
+              <div className="p-3 rounded-xl bg-white border border-slate-200/80 space-y-0.5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Durasi Shift Kerja</span>
+                <span className="text-xs font-bold text-[#111827] block">{terms.shiftHours} Jam Standar</span>
+                <span className="text-[10px] text-slate-500 font-medium block">Lembur: {terms.overtimeRate}</span>
               </div>
 
-              <div className="p-3 rounded-xl bg-white border border-stone-200/80 space-y-0.5">
-                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Lisensi Karya</span>
-                <span className="text-xs font-bold text-[#1E1B2E] block">
+              <div className="p-3 rounded-xl bg-white border border-slate-200/80 space-y-0.5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Lisensi Karya</span>
+                <span className="text-xs font-bold text-[#111827] block">
                   {terms.usageRightsScope === "ORGANIC_SOCIAL"
                     ? "Medsos & Web"
                     : terms.usageRightsScope === "PAID_ADS_DIGITAL"
@@ -739,47 +812,47 @@ export function RatesForm({
           {showTermsDetails && (
             <div className="p-6 space-y-6">
               {/* ROW 1: PAYMENT & SHIFT HOURS */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs">
                 <div>
-                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
                     Uang Muka (DP Kunci Tanggal)
                   </label>
                   <select
                     value={terms.dpPercentage}
                     onChange={(e) => setTerms({ ...terms, dpPercentage: Number(e.target.value) })}
-                    className="w-full px-3 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E]"
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-[#111827] focus:outline-none focus:border-[#4CC9FE]"
                   >
                     <option value={30}>30% (Fleksibel UMKM)</option>
                     <option value={50}>50% (Standar Industri - Rekomendasi)</option>
                     <option value={70}>70% (Proyek Produksi Berat)</option>
                   </select>
-                  <p className="text-[10px] text-stone-400 mt-1">DP mengikat slot jadwal talenta.</p>
+                  <p className="text-[10px] text-slate-400 mt-1">DP mengikat slot jadwal talenta.</p>
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
                     Skema Termin Pembayaran
                   </label>
                   <select
                     value={terms.paymentMilestoneScheme || "50_50_WATERMARK"}
                     onChange={(e) => setTerms({ ...terms, paymentMilestoneScheme: e.target.value as any })}
-                    className="w-full px-3 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E]"
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-[#111827] focus:outline-none focus:border-[#4CC9FE]"
                   >
                     <option value="50_50_WATERMARK">DP 50% + Pelunasan (Watermark Safe)</option>
                     <option value="30_40_30">Termin 30% - 40% - 30% (Bertahap)</option>
                     <option value="100_UPFRONT">100% Pembayaran di Awal (Full Upfront)</option>
                   </select>
-                  <p className="text-[10px] text-stone-400 mt-1">Pelunasan sebelum file master diserahkan.</p>
+                  <p className="text-[10px] text-slate-400 mt-1">Pelunasan sebelum file master diserahkan.</p>
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
                     Batas Durasi Shift Standar
                   </label>
                   <select
                     value={terms.shiftHours}
                     onChange={(e) => setTerms({ ...terms, shiftHours: Number(e.target.value) })}
-                    className="w-full px-3 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E]"
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-[#111827] focus:outline-none focus:border-[#4CC9FE]"
                   >
                     <option value={3}>3 Jam (Sesi Ringkas)</option>
                     <option value={4}>4 Jam (Half-Day)</option>
@@ -787,34 +860,33 @@ export function RatesForm({
                     <option value={8}>8 Jam (Full-Day)</option>
                     <option value={12}>12 Jam (Produksi Besar)</option>
                   </select>
-                  <p className="text-[10px] text-stone-400 mt-1">Termasuk 1 jam istirahat.</p>
+                  <p className="text-[10px] text-slate-400 mt-1">Termasuk 1 jam istirahat.</p>
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
                     Tarif Lembur (Overtime / Jam)
                   </label>
-                  <input
-                    type="text"
+                  <CurrencyInput
                     value={terms.overtimeRate}
-                    onChange={(e) => setTerms({ ...terms, overtimeRate: e.target.value })}
+                    onChange={(val) => setTerms({ ...terms, overtimeRate: val })}
                     placeholder="Rp 250.000 / jam"
-                    className="w-full px-3 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E]"
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-[#111827] focus:outline-none focus:border-[#4CC9FE]"
                   />
-                  <p className="text-[10px] text-stone-400 mt-1">Toleransi keterlambatan 30 menit.</p>
+                  <p className="text-[10px] text-slate-400 mt-1">Toleransi keterlambatan 30 menit.</p>
                 </div>
               </div>
 
               {/* ROW 2: USAGE RIGHTS & REVISIONS */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-5 rounded-2xl bg-amber-50/40 border border-amber-200/70">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-5 rounded-2xl bg-slate-50 border border-slate-200">
                 <div>
-                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
                     Ruang Lingkup Lisensi (Usage Scope)
                   </label>
                   <select
                     value={terms.usageRightsScope || "ORGANIC_SOCIAL"}
                     onChange={(e) => setTerms({ ...terms, usageRightsScope: e.target.value as any })}
-                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E]"
+                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-[#111827] focus:outline-none focus:border-[#4CC9FE]"
                   >
                     <option value="ORGANIC_SOCIAL">Medsos Organik &amp; Web Brand</option>
                     <option value="PAID_ADS_DIGITAL">Iklan Berbayar Digital (+Meta/TikTok Ads)</option>
@@ -825,13 +897,13 @@ export function RatesForm({
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
                     Durasi Lisensi Hak Pakai
                   </label>
                   <select
                     value={terms.usageRightsDuration || "1_YEAR"}
                     onChange={(e) => setTerms({ ...terms, usageRightsDuration: e.target.value as any })}
-                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E]"
+                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-[#111827] focus:outline-none focus:border-[#4CC9FE]"
                   >
                     <option value="6_MONTHS">6 Bulan (Musiman / Seasonal)</option>
                     <option value="1_YEAR">1 Tahun (Standar Industri)</option>
@@ -842,42 +914,41 @@ export function RatesForm({
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
                     Batas Maksimal Revisi Minor
                   </label>
                   <select
                     value={terms.maxRevisions}
                     onChange={(e) => setTerms({ ...terms, maxRevisions: Number(e.target.value) })}
-                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E]"
+                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-[#111827] focus:outline-none focus:border-[#4CC9FE]"
                   >
                     <option value={1}>1x Revisi Minor</option>
                     <option value={2}>2x Revisi Minor (Standar)</option>
                     <option value={3}>3x Revisi Minor</option>
                   </select>
-                  <p className="text-[10px] text-stone-400 mt-1">Ganti konsep = addendum baru.</p>
+                  <p className="text-[10px] text-slate-400 mt-1">Ganti konsep = addendum baru.</p>
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
                     Biaya Revisi Tambahan (Over-Limit)
                   </label>
-                  <input
-                    type="text"
-                    value={terms.extraRevisionFee || "Rp 100.000 / foto tambahan"}
-                    onChange={(e) => setTerms({ ...terms, extraRevisionFee: e.target.value })}
+                  <CurrencyInput
+                    value={terms.extraRevisionFee || ""}
+                    onChange={(val) => setTerms({ ...terms, extraRevisionFee: val })}
                     placeholder="Rp 100.000 / foto tambahan"
-                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#1E1B2E]"
+                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-[#111827] focus:outline-none focus:border-[#4CC9FE]"
                   />
-                  <p className="text-[10px] text-stone-400 mt-1">Charge per foto/putaran ekstra.</p>
+                  <p className="text-[10px] text-slate-400 mt-1">Charge per foto/putaran ekstra.</p>
                 </div>
               </div>
 
               {/* ROW 3: ROLE-SPECIFIC PROFESIONAL CLAUSES */}
-              <div className="p-5 rounded-2xl bg-white border border-stone-200 space-y-4 shadow-2xs">
-                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-                  <span className="text-xs font-bold text-[#1E1B2E] uppercase tracking-wider flex items-center gap-2">
+              <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-4 shadow-2xs">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <span className="text-xs font-bold text-[#111827] uppercase tracking-wider flex items-center gap-2">
                     <span>Ketentuan Khusus Profesi:</span>
-                    <span className="px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 text-[11px] font-bold">
+                    <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-bold">
                       {currentPreset.name}
                     </span>
                   </span>
@@ -891,7 +962,7 @@ export function RatesForm({
                 {isModel && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                         Batasan Busana (Wardrobe Scope)
                       </label>
                       <input
@@ -904,11 +975,11 @@ export function RatesForm({
                           })
                         }
                         placeholder="Misal: Casual, Modest / Hijab, Formal"
-                        className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                         Masa Lisensi Hak Pakai (Usage Rights)
                       </label>
                       <input
@@ -921,7 +992,7 @@ export function RatesForm({
                           })
                         }
                         placeholder="Misal: 1 Tahun Digital Media (Medsos & Web)"
-                        className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800"
                       />
                     </div>
                     <div className="flex items-center gap-2 pt-6">
@@ -935,9 +1006,9 @@ export function RatesForm({
                             roleSpecifics: { ...terms.roleSpecifics, chaperoneAllowed: e.target.checked },
                           })
                         }
-                        className="w-4 h-4 rounded text-[#1E1B2E] border-stone-300 focus:ring-[#1E1B2E]"
+                        className="w-4 h-4 rounded text-[#111827] border-slate-300 focus:ring-[#4CC9FE]"
                       />
-                      <label htmlFor="chaperoneAllowed" className="text-xs font-bold text-stone-700">
+                      <label htmlFor="chaperoneAllowed" className="text-xs font-bold text-slate-700">
                         Hak Membawa 1 Pendamping di Lokasi
                       </label>
                     </div>
@@ -948,7 +1019,7 @@ export function RatesForm({
                 {isMUA && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                         Batas Jumlah Wajah Dirias Termasuk Paket
                       </label>
                       <input
@@ -961,11 +1032,11 @@ export function RatesForm({
                             roleSpecifics: { ...terms.roleSpecifics, maxHeadsIncluded: Number(e.target.value) },
                           })
                         }
-                        className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                         Waktu Persiapan Minimum Sebelum On-Set
                       </label>
                       <input
@@ -978,11 +1049,11 @@ export function RatesForm({
                           })
                         }
                         placeholder="Misal: 90 Menit sebelum sesi foto"
-                        className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                         Biaya Tambahan per Orang di Luar Paket
                       </label>
                       <input
@@ -995,7 +1066,7 @@ export function RatesForm({
                           })
                         }
                         placeholder="Misal: Rp 350.000 / orang tambahan"
-                        className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800"
                       />
                     </div>
                   </div>
@@ -1005,7 +1076,7 @@ export function RatesForm({
                 {isStylist && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                         Ketentuan Uang Sewa / Deposit Peminjaman Busana
                       </label>
                       <input
@@ -1017,12 +1088,12 @@ export function RatesForm({
                             roleSpecifics: { ...terms.roleSpecifics, pullingDepositResponsibility: e.target.value },
                           })
                         }
-                        placeholder="Biaya sewa/deposit baju desainer dibayarkan langsung oleh klien"
-                        className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                        placeholder="Biaya sewa/deposit wardrobe & busana brand dibayarkan langsung oleh klien"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                         Tanggung Jawab Kerusakan / Noda Busana di Set
                       </label>
                       <input
@@ -1035,7 +1106,7 @@ export function RatesForm({
                           })
                         }
                         placeholder="Ganti rugi noda/robekan busana di set ditanggung klien/brand"
-                        className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800"
                       />
                     </div>
                   </div>
@@ -1045,7 +1116,7 @@ export function RatesForm({
                 {isVideographer && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                         Format Output Aspek Rasio Utama
                       </label>
                       <input
@@ -1058,11 +1129,11 @@ export function RatesForm({
                           })
                         }
                         placeholder="Misal: 1x Reels 9:16 (30-45 detik)"
-                        className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                         Ketentuan Ganti Musik Latar
                       </label>
                       <input
@@ -1075,7 +1146,7 @@ export function RatesForm({
                           })
                         }
                         placeholder="Ganti musik setelah final cut dikenakan biaya re-editing"
-                        className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800"
                       />
                     </div>
                     <div className="flex items-center gap-2 pt-6">
@@ -1089,9 +1160,9 @@ export function RatesForm({
                             roleSpecifics: { ...terms.roleSpecifics, musicLicenseIncluded: e.target.checked },
                           })
                         }
-                        className="w-4 h-4 rounded text-[#1E1B2E] border-stone-300 focus:ring-[#1E1B2E]"
+                        className="w-4 h-4 rounded text-[#111827] border-slate-300 focus:ring-[#4CC9FE]"
                       />
-                      <label htmlFor="musicLicenseIncluded" className="text-xs font-bold text-stone-700">
+                      <label htmlFor="musicLicenseIncluded" className="text-xs font-bold text-slate-700">
                         Jaminan Musik Bebas Klaim Hak Cipta
                       </label>
                     </div>
@@ -1102,7 +1173,7 @@ export function RatesForm({
                 {isStudio && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                         Kapasitas Maksimal Orang di Studio
                       </label>
                       <input
@@ -1115,11 +1186,11 @@ export function RatesForm({
                             roleSpecifics: { ...terms.roleSpecifics, maxCrewCapacity: Number(e.target.value) },
                           })
                         }
-                        className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                         Biaya Lembur Perpanjangan Shift
                       </label>
                       <input
@@ -1132,7 +1203,7 @@ export function RatesForm({
                           })
                         }
                         placeholder="Rp 150.000 per 30 menit"
-                        className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800"
                       />
                     </div>
                     <div className="flex items-center gap-2 pt-6">
@@ -1146,68 +1217,11 @@ export function RatesForm({
                             roleSpecifics: { ...terms.roleSpecifics, cycloramaShoeTapeRequired: e.target.checked },
                           })
                         }
-                        className="w-4 h-4 rounded text-[#1E1B2E] border-stone-300 focus:ring-[#1E1B2E]"
+                        className="w-4 h-4 rounded text-[#111827] border-slate-300 focus:ring-[#4CC9FE]"
                       />
-                      <label htmlFor="cycloramaShoeTapeRequired" className="text-xs font-bold text-stone-700">
+                      <label htmlFor="cycloramaShoeTapeRequired" className="text-xs font-bold text-slate-700">
                         Wajib Lakban Khusus Sol Sepatu
                       </label>
-                    </div>
-                  </div>
-                )}
-
-                {/* ROLE: DESIGNER */}
-                {isDesigner && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
-                        Kebijakan Sesi Fitting Busana
-                      </label>
-                      <input
-                        type="text"
-                        value={terms.roleSpecifics.fittingPolicy || ""}
-                        onChange={(e) =>
-                          setTerms({
-                            ...terms,
-                            roleSpecifics: { ...terms.roleSpecifics, fittingPolicy: e.target.value },
-                          })
-                        }
-                        placeholder="Fitting busana dilakukan H-1 atau di lokasi sebelum sesi dimulai"
-                        className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
-                        Tanggung Jawab Laundry &amp; Dry Cleaning
-                      </label>
-                      <input
-                        type="text"
-                        value={terms.roleSpecifics.dryCleaningResponsibility || ""}
-                        onChange={(e) =>
-                          setTerms({
-                            ...terms,
-                            roleSpecifics: { ...terms.roleSpecifics, dryCleaningResponsibility: e.target.value },
-                          })
-                        }
-                        placeholder="Biaya laundry/dry cleaning busana pasca-sesi ditanggung oleh klien/peminjam"
-                        className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
-                        Larangan Modifikasi / Perombakan Busana (No Alteration)
-                      </label>
-                      <input
-                        type="text"
-                        value={terms.roleSpecifics.noAlteringPolicy || ""}
-                        onChange={(e) =>
-                          setTerms({
-                            ...terms,
-                            roleSpecifics: { ...terms.roleSpecifics, noAlteringPolicy: e.target.value },
-                          })
-                        }
-                        placeholder="Dilarang memotong, mengubah jahitan, atau merusak siluet busana tanpa izin tertulis desainer"
-                        className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
-                      />
                     </div>
                   </div>
                 )}
@@ -1216,7 +1230,7 @@ export function RatesForm({
                 {isPhotographer && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                         Kebijakan Penyerahan File Mentah (RAW)
                       </label>
                       <input
@@ -1229,7 +1243,7 @@ export function RatesForm({
                           })
                         }
                         placeholder="File JPG resolusi tinggi; RAW tidak diserahkan"
-                        className="w-full px-3 py-2 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800"
                       />
                     </div>
                     <div className="flex items-center gap-2 pt-6">
@@ -1243,9 +1257,9 @@ export function RatesForm({
                             roleSpecifics: { ...terms.roleSpecifics, colorAccuracyCommitment: e.target.checked },
                           })
                         }
-                        className="w-4 h-4 rounded text-[#1E1B2E] border-stone-300 focus:ring-[#1E1B2E]"
+                        className="w-4 h-4 rounded text-[#111827] border-slate-300 focus:ring-[#4CC9FE]"
                       />
-                      <label htmlFor="colorAccuracyCommitment" className="text-xs font-bold text-stone-700">
+                      <label htmlFor="colorAccuracyCommitment" className="text-xs font-bold text-slate-700">
                         Jaminan Akurasi Warna Produk Asli
                       </label>
                     </div>
@@ -1257,9 +1271,9 @@ export function RatesForm({
         </div>
 
         {/* BOTTOM ACTION BAR */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-stone-100">
-          <div className="flex items-center gap-2 text-xs text-stone-500">
-            <Info className="w-4 h-4 text-stone-400 shrink-0" />
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-100">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
+            <Info className="w-4 h-4 text-slate-400 shrink-0" />
             <span>Tarif dan paket akan otomatis tampil di halaman profil publik &amp; form booking Anda.</span>
           </div>
 
@@ -1268,7 +1282,7 @@ export function RatesForm({
               <button
                 type="button"
                 onClick={onCancel}
-                className="px-5 py-3 rounded-xl border border-stone-300 text-stone-700 font-bold text-xs uppercase tracking-wider hover:bg-stone-50 transition-colors cursor-pointer"
+                className="px-5 py-3 rounded-full bg-white/80 hover:bg-white border border-slate-200 text-slate-700 font-semibold text-xs transition-colors cursor-pointer shadow-2xs"
               >
                 Batal
               </button>
@@ -1276,7 +1290,7 @@ export function RatesForm({
             <button
               type="submit"
               disabled={isPending}
-              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold uppercase tracking-widest transition-all shadow-sm disabled:opacity-50 cursor-pointer"
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full btn-primary-pill text-white text-xs font-bold shadow-md shadow-[#4CC9FE]/25 transition-all shadow-xs disabled:opacity-50 cursor-pointer active:scale-95"
             >
               {isPending ? (
                 <>

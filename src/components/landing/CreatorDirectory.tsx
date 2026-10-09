@@ -4,12 +4,12 @@ import { ArrowRight, Camera, Palette, Users, Video, Building, Star } from "lucid
 
 const categories = [
   {
-    id: "cat-fashion-designer",
-    label: "Fashion Designer",
-    icon: Palette,
-    count: "84 kreator",
+    id: "cat-fashion-brand",
+    label: "Fashion Brand & UMKM",
+    icon: Building,
+    count: "84 brand",
     accent: "#3e8363",
-    href: "/directory?sector=Fashion%20Designer",
+    href: "/directory?sector=Fashion%20Brand/UMKM",
     img: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=500&auto=format&fit=crop",
   },
   {
@@ -18,7 +18,7 @@ const categories = [
     icon: Camera,
     count: "121 kreator",
     accent: "#FFD45A",
-    href: "/directory?sector=Fotografi",
+    href: "/directory?sector=Photographer",
     img: "https://images.unsplash.com/photo-1567721913486-6585f069b3e8?q=80&w=500&auto=format&fit=crop",
   },
   {
@@ -36,7 +36,7 @@ const categories = [
     icon: Video,
     count: "63 kreator",
     accent: "#F7C8D0",
-    href: "/directory?sector=Videografi",
+    href: "/directory?sector=Videographer",
     img: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=500&auto=format&fit=crop",
   },
   {

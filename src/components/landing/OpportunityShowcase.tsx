@@ -9,7 +9,7 @@ export function OpportunityShowcase() {
       title: "Autumn/Winter Editorial Campaign",
       pattern: "Editorial Fashion",
       roles: [
-        { role: "Fashion Designer", asset: "Koleksi Kapsul 12 Looks" },
+        { role: "Fashion Brand/UMKM", asset: "Koleksi Kapsul 12 Looks" },
         { role: "Fotografer Editorial", asset: "Analog 35mm & Medium Format" },
         { role: "Fashion Stylist", asset: "Kurasi Wardrobe & Aksesori" },
       ],
@@ -60,7 +60,7 @@ export function OpportunityShowcase() {
           </div>
 
           <Link
-            href="/collaborate"
+            href="/directory?tab=matched"
             className="inline-flex items-center gap-3 px-6 py-3 rounded-full border border-stone-200 text-xs font-semibold uppercase tracking-widest text-[#1E1B2E] hover:bg-stone-200 transition-colors shrink-0 group"
           >
             <span>Buka Hub Kompatibilitas</span>

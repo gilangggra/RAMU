@@ -129,11 +129,44 @@ export async function updateProfileBasicInfo(formData: FormData) {
       finalWebsiteUrl = websiteUrl;
     }
 
+    let canonicalSector = sector;
+    let newActorType = actor.actorType;
+    const sLower = (sector || "").toLowerCase();
+    const isAdmin = sLower.includes("admin") || sLower.includes("administrator");
+
+    if (!isAdmin) {
+      if (
+        sLower.includes("brand") ||
+        sLower.includes("label") ||
+        sLower.includes("umkm") ||
+        sLower.includes("designer") ||
+        sLower.includes("desain") ||
+        sLower.includes("perancang") ||
+        sLower.includes("pola")
+      ) {
+        canonicalSector = "Fashion Brand/UMKM";
+        newActorType = "BRAND";
+      } else if (sLower.includes("studio") || sLower.includes("ruang") || sLower.includes("cyclorama")) {
+        canonicalSector = "Studio";
+        newActorType = "STUDIO";
+      } else if (sLower.includes("model") || sLower.includes("talent") || sLower.includes("peraga") || sLower.includes("muse")) {
+        canonicalSector = "Model";
+        newActorType = "INDIVIDUAL";
+      } else if (sLower.includes("mua") || sLower.includes("makeup") || sLower.includes("hair") || sLower.includes("stylist") || sLower.includes("wardrobe")) {
+        canonicalSector = "MUA/Stylist";
+        newActorType = "INDIVIDUAL";
+      } else if (sLower.includes("foto") || sLower.includes("photo") || sLower.includes("kamera")) {
+        canonicalSector = "Photographer";
+        newActorType = "INDIVIDUAL";
+      }
+    }
+
     await prisma.actor.update({
       where: { id: actor.id },
       data: {
         name,
-        sector,
+        sector: canonicalSector,
+        actorType: newActorType,
         description: description || null,
         location: location || null,
         websiteUrl: finalWebsiteUrl,
@@ -320,6 +353,19 @@ export async function getCurrentUserAvatar(): Promise<string | null> {
   }
 }
 
+function parseListInput(val: FormDataEntryValue | null): string[] {
+  if (!val) return [];
+  const str = val.toString().trim();
+  if (!str) return [];
+  try {
+    const parsed = JSON.parse(str);
+    if (Array.isArray(parsed)) return parsed.map((s) => String(s).trim()).filter(Boolean);
+  } catch {
+    // split by comma fallback
+  }
+  return str.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
 export async function updateActorSpecs(formData: FormData) {
   try {
     const supabase = await createClient();
@@ -362,15 +408,14 @@ export async function updateActorSpecs(formData: FormData) {
     const existingAsset = actor.assets.find(
       (a) =>
         (isModel && (a.subtype.toLowerCase().includes("model") || (a.attributes && typeof a.attributes === "object" && "comp_card" in (a.attributes as any)))) ||
-        (isStudio && (a.subtype.toLowerCase().includes("studio") || (a.attributes && typeof a.attributes === "object" && "cyclorama_type" in (a.attributes as any)))) ||
-        (isPhotographer && a.attributes && typeof a.attributes === "object" && "primary_camera" in (a.attributes as any)) ||
+        (isStudio && (a.subtype.toLowerCase().includes("studio") || (a.attributes && typeof a.attributes === "object" && ("cyclorama_type" in (a.attributes as any) || "area_sqm" in (a.attributes as any))))) ||
+        (isPhotographer && a.attributes && typeof a.attributes === "object" && ("primary_camera" in (a.attributes as any) || "lenses" in (a.attributes as any))) ||
         (isVideographer && a.attributes && typeof a.attributes === "object" && ("primary_cinema_camera" in (a.attributes as any) || "stabilizer_gimbal" in (a.attributes as any))) ||
         (isMUA && a.attributes && typeof a.attributes === "object" && ("makeup_styles" in (a.attributes as any) || "primary_kit_brands" in (a.attributes as any))) ||
         (isStylist && a.attributes && typeof a.attributes === "object" && ("styling_specialties" in (a.attributes as any) || "onset_equipment" in (a.attributes as any))) ||
-        (isDesigner && a.attributes && typeof a.attributes === "object" && ("design_disciplines" in (a.attributes as any) || "primary_software" in (a.attributes as any))) ||
-        (isBrand && a.attributes && typeof a.attributes === "object" && ("sample_sizes_ready" in (a.attributes as any) || "fabric_materials" in (a.attributes as any) || "design_dna" in (a.attributes as any) || "collab_types" in (a.attributes as any)))
+        (isDesigner && a.attributes && typeof a.attributes === "object" && ("design_disciplines" in (a.attributes as any) || "primary_software" in (a.attributes as any) || "sample_turnaround_days" in (a.attributes as any))) ||
+        (isBrand && a.attributes && typeof a.attributes === "object" && ("sample_sizes_ready" in (a.attributes as any) || "fabric_materials" in (a.attributes as any) || "design_dna" in (a.attributes as any) || "brand_category" in (a.attributes as any) || "collab_types" in (a.attributes as any)))
     );
-
 
     const existingAttrs = (existingAsset?.attributes && typeof existingAsset.attributes === "object")
       ? (existingAsset.attributes as Record<string, unknown>)
@@ -389,16 +434,11 @@ export async function updateActorSpecs(formData: FormData) {
       const skin_undertone = formData.get("skin_undertone")?.toString().trim() || undefined;
       const experience_years = formData.get("experience_years") ? Number(formData.get("experience_years")) : undefined;
       const video_reel_title = formData.get("video_reel_title")?.toString().trim() || undefined;
-
-      const rawSpecialties = formData.get("specialties")?.toString().trim();
-      let specialties: string[] = [];
-      if (rawSpecialties) {
-        try {
-          specialties = JSON.parse(rawSpecialties);
-        } catch {
-          specialties = rawSpecialties.split(",").map((s) => s.trim()).filter(Boolean);
-        }
-      }
+      const specialties = parseListInput(formData.get("specialties"));
+      const capabilities = parseListInput(formData.get("capabilities"));
+      const wardrobe_restrictions = formData.get("wardrobe_restrictions")?.toString().trim();
+      const chaperone_allowed = formData.get("chaperone_allowed") === "true";
+      const travel_radius = formData.get("travel_radius")?.toString().trim();
 
       if (height_cm) newAttributes.height_cm = height_cm;
       if (weight_kg) newAttributes.weight_kg = weight_kg;
@@ -410,6 +450,10 @@ export async function updateActorSpecs(formData: FormData) {
       if (skin_undertone) newAttributes.skin_undertone = skin_undertone;
       if (experience_years) newAttributes.experience_years = experience_years;
       if (specialties.length > 0) newAttributes.specialties = specialties;
+      if (capabilities.length > 0) newAttributes.capabilities = capabilities;
+      if (wardrobe_restrictions) newAttributes.wardrobe_restrictions = wardrobe_restrictions;
+      newAttributes.chaperone_allowed = chaperone_allowed;
+      if (travel_radius) newAttributes.travel_radius = travel_radius;
       if (video_reel_title) newAttributes.video_reel_title = video_reel_title;
 
       const compCardList: Array<{ type: string; url: string; caption: string }> = [];
@@ -450,21 +494,35 @@ export async function updateActorSpecs(formData: FormData) {
         newAttributes.comp_card = compCardList;
       }
     } else if (isPhotographer) {
+      const specialties = parseListInput(formData.get("specialties"));
+      const capabilities = parseListInput(formData.get("capabilities"));
       const primary_camera = formData.get("primary_camera")?.toString().trim();
       const secondary_camera = formData.get("secondary_camera")?.toString().trim();
-      const rawLenses = formData.get("lenses")?.toString().trim();
-      const rawLighting = formData.get("lighting_gear")?.toString().trim();
+      const lenses = parseListInput(formData.get("lenses"));
+      const lighting_gear = parseListInput(formData.get("lighting_gear"));
       const drone_aerial = formData.get("drone_aerial") === "true";
+      const backdrop_types = parseListInput(formData.get("backdrop_types"));
+      const tethering_available = formData.get("tethering_available") === "true";
+      const shooting_duration_shift = formData.get("shooting_duration_shift")?.toString().trim();
+      const max_people_onset = formData.get("max_people_onset") ? Number(formData.get("max_people_onset")) : undefined;
+      const max_locations_per_day = formData.get("max_locations_per_day") ? Number(formData.get("max_locations_per_day")) : undefined;
+      const deliverables = parseListInput(formData.get("deliverables"));
+      const delivery_time_days = formData.get("delivery_time_days") ? Number(formData.get("delivery_time_days")) : undefined;
 
+      if (specialties.length > 0) newAttributes.specialties = specialties;
+      if (capabilities.length > 0) newAttributes.capabilities = capabilities;
       if (primary_camera) newAttributes.primary_camera = primary_camera;
       if (secondary_camera) newAttributes.secondary_camera = secondary_camera;
-      if (rawLenses) {
-        newAttributes.lenses = rawLenses.split(",").map((s) => s.trim()).filter(Boolean);
-      }
-      if (rawLighting) {
-        newAttributes.lighting_gear = rawLighting.split(",").map((s) => s.trim()).filter(Boolean);
-      }
+      if (lenses.length > 0) newAttributes.lenses = lenses;
+      if (lighting_gear.length > 0) newAttributes.lighting_gear = lighting_gear;
       newAttributes.drone_aerial = drone_aerial;
+      if (backdrop_types.length > 0) newAttributes.backdrop_types = backdrop_types;
+      newAttributes.tethering_available = tethering_available;
+      if (shooting_duration_shift) newAttributes.shooting_duration_shift = shooting_duration_shift;
+      if (max_people_onset) newAttributes.max_people_onset = max_people_onset;
+      if (max_locations_per_day) newAttributes.max_locations_per_day = max_locations_per_day;
+      if (deliverables.length > 0) newAttributes.deliverables = deliverables;
+      if (delivery_time_days) newAttributes.delivery_time_days = delivery_time_days;
     } else if (isVideographer) {
       const primary_cinema_camera =
         formData.get("primary_cinema_camera")?.toString().trim() ||
@@ -475,6 +533,10 @@ export async function updateActorSpecs(formData: FormData) {
       const audio_rig = formData.get("audio_rig")?.toString().trim() || formData.get("audio_gear")?.toString().trim();
       const max_resolution = formData.get("max_resolution")?.toString().trim() || "4K 60fps / 10-Bit 4:2:2";
       const drone_aerial = formData.get("drone_aerial") === "true";
+      const specialties = parseListInput(formData.get("specialties"));
+      const capabilities = parseListInput(formData.get("capabilities"));
+      const deliverables = parseListInput(formData.get("deliverables"));
+      const delivery_time_days = formData.get("delivery_time_days") ? Number(formData.get("delivery_time_days")) : undefined;
 
       if (primary_cinema_camera) {
         newAttributes.primary_cinema_camera = primary_cinema_camera;
@@ -484,7 +546,7 @@ export async function updateActorSpecs(formData: FormData) {
         newAttributes.secondary_camera = secondary_camera;
       }
       if (rawLenses) {
-        const parsedLenses = rawLenses.split(",").map((s) => s.trim()).filter(Boolean);
+        const parsedLenses = parseListInput(rawLenses);
         newAttributes.lenses = parsedLenses;
         newAttributes.cine_lenses = parsedLenses;
       }
@@ -498,115 +560,159 @@ export async function updateActorSpecs(formData: FormData) {
       }
       if (max_resolution) newAttributes.max_resolution = max_resolution;
       newAttributes.drone_aerial = drone_aerial;
+      if (specialties.length > 0) newAttributes.specialties = specialties;
+      if (capabilities.length > 0) newAttributes.capabilities = capabilities;
+      if (deliverables.length > 0) newAttributes.deliverables = deliverables;
+      if (delivery_time_days) newAttributes.delivery_time_days = delivery_time_days;
     } else if (isMUA) {
-      const rawKitBrands = formData.get("primary_kit_brands")?.toString().trim();
-      const rawMakeupStyles = formData.get("makeup_styles")?.toString().trim();
-      const rawHairSpecialties = formData.get("hair_specialties")?.toString().trim();
+      const specialties = parseListInput(formData.get("specialties"));
+      const services = parseListInput(formData.get("services"));
+      const primary_kit_brands = parseListInput(formData.get("primary_kit_brands"));
+      const hair_tools = parseListInput(formData.get("hair_tools"));
+      const hair_specialties = parseListInput(formData.get("hair_specialties"));
+      const onset_equipment = parseListInput(formData.get("onset_equipment"));
+      const sanitation_standards = parseListInput(formData.get("sanitation_standards"));
+      const max_heads_per_session = formData.get("max_heads_per_session") ? Number(formData.get("max_heads_per_session")) : undefined;
+      const prep_time_minutes = formData.get("prep_time_minutes") ? Number(formData.get("prep_time_minutes")) : undefined;
       const touchup_standby_hours = formData.get("touchup_standby_hours") ? Number(formData.get("touchup_standby_hours")) : undefined;
       const experience_years = formData.get("experience_years") ? Number(formData.get("experience_years")) : undefined;
-      const sanitation = formData.get("sanitation_standards")?.toString().trim();
 
-      if (rawKitBrands) {
-        newAttributes.primary_kit_brands = rawKitBrands.split(",").map((s) => s.trim()).filter(Boolean);
+      if (specialties.length > 0) {
+        newAttributes.specialties = specialties;
+        newAttributes.makeup_styles = specialties;
       }
-      if (rawMakeupStyles) {
-        newAttributes.makeup_styles = rawMakeupStyles.split(",").map((s) => s.trim()).filter(Boolean);
-      }
-      if (rawHairSpecialties) {
-        newAttributes.hair_specialties = rawHairSpecialties.split(",").map((s) => s.trim()).filter(Boolean);
-      }
+      if (services.length > 0) newAttributes.services = services;
+      if (primary_kit_brands.length > 0) newAttributes.primary_kit_brands = primary_kit_brands;
+      if (hair_tools.length > 0) newAttributes.hair_tools = hair_tools;
+      if (hair_specialties.length > 0) newAttributes.hair_specialties = hair_specialties;
+      if (onset_equipment.length > 0) newAttributes.onset_equipment = onset_equipment;
+      if (sanitation_standards.length > 0) newAttributes.sanitation_standards = sanitation_standards;
+      if (max_heads_per_session) newAttributes.max_heads_per_session = max_heads_per_session;
+      if (prep_time_minutes) newAttributes.prep_time_minutes = prep_time_minutes;
       if (touchup_standby_hours) newAttributes.touchup_standby_hours = touchup_standby_hours;
       if (experience_years) newAttributes.experience_years = experience_years;
-      if (sanitation) {
-        newAttributes.sanitation_standards = sanitation.split(",").map((s) => s.trim()).filter(Boolean);
-      }
     } else if (isStylist) {
-      const rawSpecialties =
-        formData.get("styling_specialties")?.toString().trim() ||
-        formData.get("specialties")?.toString().trim();
-      const rawOnsetEquipment = formData.get("onset_equipment")?.toString().trim();
+      const specialties = parseListInput(formData.get("styling_specialties") || formData.get("specialties"));
+      const services = parseListInput(formData.get("services"));
+      const onset_equipment = parseListInput(formData.get("onset_equipment"));
       const wardrobe_archive_count = formData.get("wardrobe_archive_count") ? Number(formData.get("wardrobe_archive_count")) : undefined;
-      const rawShowroom = formData.get("showroom_partners")?.toString().trim();
+      const showroom_partners = parseListInput(formData.get("showroom_partners"));
       const aesthetic_dna = formData.get("aesthetic_dna")?.toString().trim();
+      const max_heads_per_session = formData.get("max_heads_per_session") ? Number(formData.get("max_heads_per_session")) : undefined;
+      const prep_time_minutes = formData.get("prep_time_minutes") ? Number(formData.get("prep_time_minutes")) : undefined;
+      const touchup_standby_hours = formData.get("touchup_standby_hours") ? Number(formData.get("touchup_standby_hours")) : undefined;
 
-      if (rawSpecialties) {
-        newAttributes.styling_specialties = rawSpecialties.split(",").map((s) => s.trim()).filter(Boolean);
+      if (specialties.length > 0) {
+        newAttributes.styling_specialties = specialties;
+        newAttributes.specialties = specialties;
       }
-      if (rawOnsetEquipment) {
-        newAttributes.onset_equipment = rawOnsetEquipment.split(",").map((s) => s.trim()).filter(Boolean);
-      }
+      if (services.length > 0) newAttributes.services = services;
+      if (onset_equipment.length > 0) newAttributes.onset_equipment = onset_equipment;
       if (wardrobe_archive_count) newAttributes.wardrobe_archive_count = wardrobe_archive_count;
-      if (rawShowroom) {
-        newAttributes.showroom_partners = rawShowroom.split(",").map((s) => s.trim()).filter(Boolean);
-      }
+      if (showroom_partners.length > 0) newAttributes.showroom_partners = showroom_partners;
       if (aesthetic_dna) newAttributes.aesthetic_dna = aesthetic_dna;
+      if (max_heads_per_session) newAttributes.max_heads_per_session = max_heads_per_session;
+      if (prep_time_minutes) newAttributes.prep_time_minutes = prep_time_minutes;
+      if (touchup_standby_hours) newAttributes.touchup_standby_hours = touchup_standby_hours;
     } else if (isDesigner) {
-      const rawDisciplines = formData.get("design_disciplines")?.toString().trim();
+      const specialties = parseListInput(formData.get("specialties") || formData.get("design_disciplines"));
+      const capabilities = parseListInput(formData.get("capabilities"));
+      const sample_collection_ready = formData.get("sample_collection_ready") === "true";
+      const materials_swatches = parseListInput(formData.get("materials_swatches"));
+      const sewing_equipment = parseListInput(formData.get("sewing_equipment"));
+      const sample_portfolio_count = formData.get("sample_portfolio_count") ? Number(formData.get("sample_portfolio_count")) : undefined;
+      const sample_turnaround_days = formData.get("sample_turnaround_days")?.toString().trim();
+      const batch_production_capacity = formData.get("batch_production_capacity")?.toString().trim();
+      const collab_types = parseListInput(formData.get("collab_types"));
       const style_dna = formData.get("style_dna")?.toString().trim();
-      const rawSoftware = formData.get("primary_software")?.toString().trim();
-      const rawDeliverables = formData.get("deliverables")?.toString().trim();
+      const primary_software = parseListInput(formData.get("primary_software"));
+      const deliverables = parseListInput(formData.get("deliverables"));
 
-      if (rawDisciplines) {
-        newAttributes.design_disciplines = rawDisciplines.split(",").map((s) => s.trim()).filter(Boolean);
+      if (specialties.length > 0) {
+        newAttributes.specialties = specialties;
+        newAttributes.design_disciplines = specialties;
       }
+      if (capabilities.length > 0) newAttributes.capabilities = capabilities;
+      newAttributes.sample_collection_ready = sample_collection_ready;
+      if (materials_swatches.length > 0) newAttributes.materials_swatches = materials_swatches;
+      if (sewing_equipment.length > 0) newAttributes.sewing_equipment = sewing_equipment;
+      if (sample_portfolio_count) newAttributes.sample_portfolio_count = sample_portfolio_count;
+      if (sample_turnaround_days) newAttributes.sample_turnaround_days = sample_turnaround_days;
+      if (batch_production_capacity) newAttributes.batch_production_capacity = batch_production_capacity;
+      if (collab_types.length > 0) newAttributes.collab_types = collab_types;
       if (style_dna) newAttributes.style_dna = style_dna;
-      if (rawSoftware) {
-        newAttributes.primary_software = rawSoftware.split(",").map((s) => s.trim()).filter(Boolean);
-      }
-      if (rawDeliverables) {
-        newAttributes.deliverables = rawDeliverables.split(",").map((s) => s.trim()).filter(Boolean);
-      }
+      if (primary_software.length > 0) newAttributes.primary_software = primary_software;
+      if (deliverables.length > 0) newAttributes.deliverables = deliverables;
     } else if (isBrand) {
-      // Brand Specs (dari tab Spesifikasi)
+      // Brand Identity & DNA
+      const brand_category = parseListInput(formData.get("brand_category"));
+      const product_types = parseListInput(formData.get("product_types"));
+      const target_market = parseListInput(formData.get("target_market"));
       const design_dna = formData.get("design_dna")?.toString().trim();
+
+      // Physical Resources & Samples
       const sample_sizes_ready = formData.get("sample_sizes_ready")?.toString().trim();
-      const rawFabric = formData.get("fabric_materials")?.toString().trim();
+      const sample_skus_count = formData.get("sample_skus_count") ? Number(formData.get("sample_skus_count")) : undefined;
+      const fabric_materials = parseListInput(formData.get("fabric_materials"));
       const capacity_monthly = formData.get("capacity_monthly")?.toString().trim();
 
-      if (design_dna) newAttributes.design_dna = design_dna;
-      if (sample_sizes_ready) newAttributes.sample_sizes_ready = sample_sizes_ready;
-      if (rawFabric) {
-        newAttributes.fabric_materials = rawFabric.split(",").map((s) => s.trim()).filter(Boolean);
-      }
-      if (capacity_monthly) newAttributes.capacity_monthly = capacity_monthly;
-
-      // Brand Collaboration Preferences (dari tab Kerjasama)
-      const rawCollabTypes = formData.get("collab_types")?.toString().trim();
+      // Collaboration Needs & Projects
+      const collaboration_needs = parseListInput(formData.get("collaboration_needs"));
+      const campaign_types = parseListInput(formData.get("campaign_types"));
       const budget_range = formData.get("budget_range")?.toString().trim();
       const collab_timeline = formData.get("collab_timeline")?.toString().trim();
       const creator_requirements = formData.get("creator_requirements")?.toString().trim();
+      const collab_types = parseListInput(formData.get("collab_types"));
       const collab_notes = formData.get("collab_notes")?.toString().trim();
 
-      if (rawCollabTypes) {
-        try {
-          newAttributes.collab_types = JSON.parse(rawCollabTypes);
-        } catch {
-          newAttributes.collab_types = rawCollabTypes.split(",").map((s) => s.trim()).filter(Boolean);
-        }
-      }
+      if (brand_category.length > 0) newAttributes.brand_category = brand_category;
+      if (product_types.length > 0) newAttributes.product_types = product_types;
+      if (target_market.length > 0) newAttributes.target_market = target_market;
+      if (design_dna) newAttributes.design_dna = design_dna;
+      if (sample_sizes_ready) newAttributes.sample_sizes_ready = sample_sizes_ready;
+      if (sample_skus_count) newAttributes.sample_skus_count = sample_skus_count;
+      if (fabric_materials.length > 0) newAttributes.fabric_materials = fabric_materials;
+      if (capacity_monthly) newAttributes.capacity_monthly = capacity_monthly;
+      if (collaboration_needs.length > 0) newAttributes.collaboration_needs = collaboration_needs;
+      if (campaign_types.length > 0) newAttributes.campaign_types = campaign_types;
       if (budget_range) newAttributes.budget_range = budget_range;
       if (collab_timeline) newAttributes.collab_timeline = collab_timeline;
       if (creator_requirements) newAttributes.creator_requirements = creator_requirements;
+      if (collab_types.length > 0) newAttributes.collab_types = collab_types;
       if (collab_notes !== undefined) newAttributes.collab_notes = collab_notes;
     } else if (isStudio) {
       const area_sqm = formData.get("area_sqm") ? Number(formData.get("area_sqm")) : undefined;
       const ceiling_height_m = formData.get("ceiling_height_m") ? Number(formData.get("ceiling_height_m")) : undefined;
+      const space_type = parseListInput(formData.get("space_type"));
       const cyclorama_type = formData.get("cyclorama_type")?.toString().trim();
       const electrical_capacity = formData.get("electrical_capacity")?.toString().trim();
-      const rawFacilities = formData.get("facilities")?.toString().trim();
+      const lighting_gear = parseListInput(formData.get("lighting_gear"));
+      const available_setups = parseListInput(formData.get("available_setups"));
+      const props_available = formData.get("props_available") === "true";
+      const facilities = parseListInput(formData.get("facilities"));
+      const max_people_capacity = formData.get("max_people_capacity") ? Number(formData.get("max_people_capacity")) : undefined;
+      const max_crew_capacity = formData.get("max_crew_capacity") ? Number(formData.get("max_crew_capacity")) : undefined;
+      const operating_hours = formData.get("operating_hours")?.toString().trim();
+      const overtime_policy = formData.get("overtime_policy")?.toString().trim();
 
       if (area_sqm) newAttributes.area_sqm = area_sqm;
       if (ceiling_height_m) newAttributes.ceiling_height_m = ceiling_height_m;
+      if (space_type.length > 0) newAttributes.space_type = space_type;
       if (cyclorama_type) newAttributes.cyclorama_type = cyclorama_type;
       if (electrical_capacity) newAttributes.electrical_capacity = electrical_capacity;
-      if (rawFacilities) {
-        newAttributes.facilities = rawFacilities.split(",").map((s) => s.trim()).filter(Boolean);
-      }
+      if (lighting_gear.length > 0) newAttributes.lighting_gear = lighting_gear;
+      if (available_setups.length > 0) newAttributes.available_setups = available_setups;
+      newAttributes.props_available = props_available;
+      if (facilities.length > 0) newAttributes.facilities = facilities;
+      if (max_people_capacity) newAttributes.max_people_capacity = max_people_capacity;
+      if (max_crew_capacity) newAttributes.max_crew_capacity = max_crew_capacity;
+      if (operating_hours) newAttributes.operating_hours = operating_hours;
+      if (overtime_policy) newAttributes.overtime_policy = overtime_policy;
     } else {
-      const specialties = formData.get("specialties")?.toString().trim();
-      if (specialties) {
-        newAttributes.specialties = specialties.split(",").map((s) => s.trim()).filter(Boolean);
-      }
+      const specialties = parseListInput(formData.get("specialties"));
+      const capabilities = parseListInput(formData.get("capabilities"));
+      if (specialties.length > 0) newAttributes.specialties = specialties;
+      if (capabilities.length > 0) newAttributes.capabilities = capabilities;
     }
 
     if (existingAsset) {
@@ -677,5 +783,275 @@ export async function updateActorSpecs(formData: FormData) {
   } catch (error: any) {
     console.error("Error updating specs:", error);
     return { success: false, error: error.message || "Gagal menyimpan spesifikasi." };
+  }
+}
+
+async function getOrCreateServiceAsset(actorId: string, actorName: string) {
+  let asset = await prisma.asset.findFirst({
+    where: {
+      actorId,
+      subtype: "OPERATIONAL_SETTINGS",
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (!asset) {
+    asset = await prisma.asset.create({
+      data: {
+        actorId,
+        category: "SKILL_TALENT",
+        subtype: "OPERATIONAL_SETTINGS",
+        name: `Layanan & Rekening ${actorName}`,
+        description: `Pengaturan rekening pencairan dan ketersediaan ${actorName}`,
+        roles: ["CAPABILITY"],
+        attributes: {},
+        sourceType: "SELF_REPORTED",
+        confidenceLevel: "HIGH",
+        status: "ACTIVE",
+      },
+    });
+  }
+
+  return asset;
+}
+
+export async function updatePayoutSettingsAction(formData: FormData) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized: Silakan login terlebih dahulu.");
+
+    const actor = await prisma.actor.findFirst({
+      where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
+    });
+    if (!actor) throw new Error("Profil aktor tidak ditemukan.");
+
+    const bankName = formData.get("bankName")?.toString().trim();
+    const accountNumber = formData.get("accountNumber")?.toString().trim();
+    const accountHolder = formData.get("accountHolder")?.toString().trim();
+    const defaultDpPercentageRaw = formData.get("defaultDpPercentage")?.toString().trim();
+    const paymentInstructions = formData.get("paymentInstructions")?.toString().trim();
+    const npwpOrNik = formData.get("npwpOrNik")?.toString().trim() || "";
+    const taxScheme = formData.get("taxScheme")?.toString().trim() || "NETT";
+    const taxClassification = formData.get("taxClassification")?.toString().trim() || "INDIVIDUAL_FREELANCE";
+
+    if (!bankName || !accountNumber || !accountHolder) {
+      throw new Error("Nama Bank, Nomor Rekening, dan Nama Pemilik Rekening wajib diisi.");
+    }
+
+    const defaultDpPercentage = defaultDpPercentageRaw ? parseInt(defaultDpPercentageRaw, 10) : 50;
+
+    const asset = await getOrCreateServiceAsset(actor.id, actor.name);
+    const attrs = (asset.attributes && typeof asset.attributes === "object")
+      ? (asset.attributes as Record<string, any>)
+      : {};
+
+    const updatedAttrs = {
+      ...attrs,
+      payoutAccount: {
+        bankName,
+        accountNumber,
+        accountHolder,
+        defaultDpPercentage,
+        paymentInstructions: paymentInstructions || "",
+        npwpOrNik,
+        taxScheme,
+        taxClassification,
+        updatedAt: new Date().toISOString(),
+      },
+    };
+
+    await prisma.asset.update({
+      where: { id: asset.id },
+      data: { attributes: updatedAttrs },
+    });
+
+    revalidatePath("/settings");
+    revalidatePath("/settings/payout");
+    revalidatePath("/dashboard/bookings");
+    revalidatePath("/dashboard");
+
+    return { success: true, message: "Rekening pencairan dana berhasil disimpan." };
+  } catch (error: any) {
+    console.error("Error updating payout settings:", error);
+    return { success: false, error: error.message || "Gagal menyimpan rekening pencairan." };
+  }
+}
+
+export async function updateAvailabilitySettingsAction(formData: FormData) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized: Silakan login terlebih dahulu.");
+
+    const actor = await prisma.actor.findFirst({
+      where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
+    });
+    if (!actor) throw new Error("Profil aktor tidak ditemukan.");
+
+    const isAvailable = formData.get("isAvailable") === "true";
+    const statusNote = formData.get("statusNote")?.toString().trim() || "";
+    const timezone = formData.get("timezone")?.toString().trim() || "WIB";
+    const operationalHours = formData.get("operationalHours")?.toString().trim() || "08:00 - 18:00";
+    const defaultStorageUrl = formData.get("defaultStorageUrl")?.toString().trim() || "";
+
+    const asset = await getOrCreateServiceAsset(actor.id, actor.name);
+    const attrs = (asset.attributes && typeof asset.attributes === "object")
+      ? (asset.attributes as Record<string, any>)
+      : {};
+
+    const updatedAttrs = {
+      ...attrs,
+      availability: {
+        isAvailable,
+        statusNote,
+        timezone,
+        operationalHours,
+        defaultStorageUrl,
+        updatedAt: new Date().toISOString(),
+      },
+    };
+
+    await prisma.asset.update({
+      where: { id: asset.id },
+      data: { attributes: updatedAttrs },
+    });
+
+    revalidatePath("/settings");
+    revalidatePath("/settings/availability");
+    revalidatePath("/directory");
+    revalidatePath(`/directory/${actor.id}`);
+
+    return { success: true, message: "Status ketersediaan dan jam operasional berhasil diperbarui." };
+  } catch (error: any) {
+    console.error("Error updating availability settings:", error);
+    return { success: false, error: error.message || "Gagal memperbarui status ketersediaan." };
+  }
+}
+
+export async function updateLegalDefaultsAction(formData: FormData) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized: Silakan login terlebih dahulu.");
+
+    const actor = await prisma.actor.findFirst({
+      where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
+    });
+    if (!actor) throw new Error("Profil aktor tidak ditemukan.");
+
+    const customClauses = formData.get("customClauses")?.toString().trim() || "";
+    const defaultLicensing = formData.get("defaultLicensing")?.toString().trim() || "COMMERCIAL_LIMITED";
+    const autoNda = formData.get("autoNda") === "true";
+    const requireSampleCare = formData.get("requireSampleCare") === "true";
+    const coCreditRule = formData.get("coCreditRule")?.toString().trim() || "";
+
+    const asset = await getOrCreateServiceAsset(actor.id, actor.name);
+    const attrs = (asset.attributes && typeof asset.attributes === "object")
+      ? (asset.attributes as Record<string, any>)
+      : {};
+
+    const updatedAttrs = {
+      ...attrs,
+      legalDefaults: {
+        customClauses,
+        defaultLicensing,
+        autoNda,
+        requireSampleCare,
+        coCreditRule,
+        updatedAt: new Date().toISOString(),
+      },
+    };
+
+    await prisma.asset.update({
+      where: { id: asset.id },
+      data: { attributes: updatedAttrs },
+    });
+
+    revalidatePath("/settings");
+    revalidatePath("/settings/legal");
+    revalidatePath("/dashboard/bookings");
+
+    return { success: true, message: "Template klausul SPK dan hak cipta bawaan berhasil diperbarui." };
+  } catch (error: any) {
+    console.error("Error updating legal defaults:", error);
+    return { success: false, error: error.message || "Gagal menyimpan template SPK." };
+  }
+}
+
+export async function updatePasswordAction(formData: FormData) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized: Silakan login terlebih dahulu.");
+
+    const newPassword = formData.get("newPassword")?.toString();
+    const confirmPassword = formData.get("confirmPassword")?.toString();
+
+    if (!newPassword || newPassword.length < 6) {
+      throw new Error("Kata sandi baru minimal harus terdiri dari 6 karakter.");
+    }
+
+    if (newPassword !== confirmPassword) {
+      throw new Error("Konfirmasi kata sandi tidak cocok.");
+    }
+
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (error) {
+      throw new Error(error.message || "Gagal memperbarui kata sandi.");
+    }
+
+    return { success: true, message: "Kata sandi Anda berhasil diperbarui." };
+  } catch (error: any) {
+    console.error("Error updating password:", error);
+    return { success: false, error: error.message || "Gagal memperbarui kata sandi." };
+  }
+}
+
+export async function updateNotificationSettingsAction(formData: FormData) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized: Silakan login terlebih dahulu.");
+
+    const actor = await prisma.actor.findFirst({
+      where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
+    });
+    if (!actor) throw new Error("Profil aktor tidak ditemukan.");
+
+    const notifyBooking = formData.get("notifyBooking") === "true";
+    const notifyMessage = formData.get("notifyMessage") === "true";
+    const notifyBriefDigest = formData.get("notifyBriefDigest") === "true";
+
+    const asset = await getOrCreateServiceAsset(actor.id, actor.name);
+    const attrs = (asset.attributes && typeof asset.attributes === "object")
+      ? (asset.attributes as Record<string, any>)
+      : {};
+
+    const updatedAttrs = {
+      ...attrs,
+      notificationPreferences: {
+        notifyBooking,
+        notifyMessage,
+        notifyBriefDigest,
+        updatedAt: new Date().toISOString(),
+      },
+    };
+
+    await prisma.asset.update({
+      where: { id: asset.id },
+      data: { attributes: updatedAttrs },
+    });
+
+    revalidatePath("/settings");
+    revalidatePath("/settings/notifications");
+
+    return { success: true, message: "Preferensi notifikasi berhasil disimpan." };
+  } catch (error: any) {
+    console.error("Error updating notification settings:", error);
+    return { success: false, error: error.message || "Gagal menyimpan preferensi notifikasi." };
   }
 }
