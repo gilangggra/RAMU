@@ -42,6 +42,9 @@ RAMU_AGENT_REFACTOR.md
 # vercel
 .vercel
 
+# local tools / cache
+.freebuff/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
