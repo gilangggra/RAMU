@@ -61,13 +61,43 @@ export async function createAsset(formData: FormData) {
       const buffer = Buffer.from(bytes);
       const safeName = imageFile.name.replace(/[^a-zA-Z0-9.-]/g, "_");
       const filename = `${Date.now()}-${safeName}`;
-      const uploadDir = path.join(process.cwd(), "public", "uploads", "assets");
-      await mkdir(uploadDir, { recursive: true });
-      const filepath = path.join(uploadDir, filename);
-      await writeFile(filepath, buffer);
-      finalImageUrl = `/uploads/assets/${filename}`;
+      let uploadedToCloud = false;
+
+      try {
+        const supabase = await createClient();
+        const { data: storageData, error: storageError } = await supabase.storage
+          .from("portfolios")
+          .upload(`assets/${filename}`, buffer, {
+            contentType: imageFile.type || "image/jpeg",
+            upsert: true,
+          });
+
+        if (!storageError && storageData) {
+          const { data: publicUrlData } = supabase.storage
+            .from("portfolios")
+            .getPublicUrl(storageData.path);
+          if (publicUrlData?.publicUrl) {
+            finalImageUrl = publicUrlData.publicUrl;
+            uploadedToCloud = true;
+          }
+        }
+      } catch (cloudErr) {
+        console.warn("Supabase storage asset upload failed, falling back to local:", cloudErr);
+      }
+
+      if (!uploadedToCloud) {
+        try {
+          const uploadDir = path.join(process.cwd(), "public", "uploads", "assets");
+          await mkdir(uploadDir, { recursive: true });
+          const filepath = path.join(uploadDir, filename);
+          await writeFile(filepath, buffer);
+          finalImageUrl = `/uploads/assets/${filename}`;
+        } catch (fsErr) {
+          console.warn("Local filesystem write failed (serverless environment):", fsErr);
+        }
+      }
     } catch (uploadErr) {
-      console.error("Gagal menyimpan file foto aset:", uploadErr);
+      console.error("Gagal memproses file foto aset:", uploadErr);
     }
   }
 

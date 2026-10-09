@@ -75,14 +75,18 @@ export async function createShowcaseAsset(formData: FormData) {
       }
 
       if (!uploadedToCloud) {
-        const videoUploadDir = path.join(process.cwd(), 'public', 'uploads', 'portfolios', 'videos');
         try {
-          await mkdir(videoUploadDir, { recursive: true });
-        } catch (e) {}
-        const videoFilePath = path.join(videoUploadDir, cleanVideoName);
-        await writeFile(videoFilePath, videoBuffer);
-        videoUrl = `/uploads/portfolios/videos/${cleanVideoName}`;
-        videoSource = "DIRECT_UPLOAD";
+          const videoUploadDir = path.join(process.cwd(), 'public', 'uploads', 'portfolios', 'videos');
+          try {
+            await mkdir(videoUploadDir, { recursive: true });
+          } catch (e) {}
+          const videoFilePath = path.join(videoUploadDir, cleanVideoName);
+          await writeFile(videoFilePath, videoBuffer);
+          videoUrl = `/uploads/portfolios/videos/${cleanVideoName}`;
+          videoSource = "DIRECT_UPLOAD";
+        } catch (fsErr) {
+          console.warn("Local video write failed (serverless read-only):", fsErr);
+        }
       }
     }
 
@@ -115,13 +119,17 @@ export async function createShowcaseAsset(formData: FormData) {
       }
 
       if (!uploadedToCloud) {
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'portfolios');
         try {
-          await mkdir(uploadDir, { recursive: true });
-        } catch (e) {}
-        const filepath = path.join(uploadDir, filename);
-        await writeFile(filepath, buffer);
-        imageUrl = `/uploads/portfolios/${filename}`;
+          const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'portfolios');
+          try {
+            await mkdir(uploadDir, { recursive: true });
+          } catch (e) {}
+          const filepath = path.join(uploadDir, filename);
+          await writeFile(filepath, buffer);
+          imageUrl = `/uploads/portfolios/${filename}`;
+        } catch (fsErr) {
+          console.warn("Local image write failed (serverless read-only):", fsErr);
+        }
       }
     }
 

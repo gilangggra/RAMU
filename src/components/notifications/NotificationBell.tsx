@@ -201,7 +201,9 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
           if (!isOpen) loadNotifications();
         }}
         title="Notifikasi & Pembaruan"
-        className={`relative p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 transition-colors cursor-pointer flex items-center justify-center ${
+        className={`relative ${
+          isCollapsed ? "w-9 h-9 p-0" : "p-2"
+        } rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 transition-colors cursor-pointer flex items-center justify-center ${
           isOpen ? "bg-slate-100 text-slate-900" : ""
         }`}
         aria-label="Buka notifikasi"
@@ -217,10 +219,10 @@ export function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolea
       {/* DROPDOWN PANEL */}
       {isOpen && (
         <div
-          className={`absolute z-50 mt-2 bg-white/95 backdrop-blur-xl border border-white/80 rounded-[22px] shadow-2xl overflow-hidden animate-fade-in ${
+          className={`absolute z-50 bg-white/95 backdrop-blur-xl border border-white/80 rounded-[22px] shadow-2xl overflow-hidden animate-fade-in ${
             isCollapsed
-              ? "left-0 sm:left-12 top-0 w-[320px] sm:w-[380px]"
-              : "right-0 sm:left-auto w-[320px] sm:w-[380px]"
+              ? "left-12 top-0 w-[320px] sm:w-[380px]"
+              : "right-0 md:right-auto md:left-0 top-full mt-2 w-[320px] sm:w-[380px]"
           }`}
           style={{ maxWidth: "calc(100vw - 2rem)" }}
         >

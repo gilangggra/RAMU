@@ -1,19 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
-import { Handshake, Layers, Briefcase, Inbox, Bell } from "lucide-react";
+import { Handshake, Layers, Briefcase, Inbox, TrendingUp } from "lucide-react";
 
 interface DashboardFeedContainerProps {
   matchesSection: React.ReactNode;
   resourcesSection: React.ReactNode;
   outcomeSection?: React.ReactNode;
   briefsSection: React.ReactNode;
-  bookingsSection: React.ReactNode;
-  notificationsSection: React.ReactNode;
-  coCreditSection: React.ReactNode;
+  bookingsSection?: React.ReactNode;
+  notificationsSection?: React.ReactNode;
+  coCreditSection?: React.ReactNode;
+  pendingBookingCount?: number;
 }
 
-type TabKey = "briefs" | "matches" | "resources" | "bookings" | "notifications";
+type TabKey = "briefs" | "matches" | "resources" | "outcomes" | "bookings";
 
 export function DashboardFeedContainer({
   matchesSection,
@@ -23,15 +24,16 @@ export function DashboardFeedContainer({
   bookingsSection,
   notificationsSection,
   coCreditSection,
+  pendingBookingCount = 0,
 }: DashboardFeedContainerProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("briefs");
 
-  const tabs = [
-    { key: "briefs" as TabKey, label: "Brief Proyek", icon: Briefcase },
-    { key: "matches" as TabKey, label: "Rekomendasi Match", icon: Handshake },
-    { key: "resources" as TabKey, label: "Resource & Studio", icon: Layers },
-    { key: "bookings" as TabKey, label: "Pesanan Masuk", icon: Inbox },
-    { key: "notifications" as TabKey, label: "Aktivitas", icon: Bell },
+  const tabs: { key: TabKey; label: string; icon: any; badge?: number }[] = [
+    { key: "briefs", label: "Brief Proyek", icon: Briefcase },
+    { key: "matches", label: "Rekomendasi Match", icon: Handshake },
+    { key: "resources", label: "Resource & Studio", icon: Layers },
+    ...(outcomeSection ? [{ key: "outcomes" as TabKey, label: "Dampak & Luaran SPK", icon: TrendingUp }] : []),
+    ...(bookingsSection ? [{ key: "bookings" as TabKey, label: "Pesanan Masuk", icon: Inbox, badge: pendingBookingCount }] : []),
   ];
 
   return (
@@ -47,7 +49,7 @@ export function DashboardFeedContainer({
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs transition-all cursor-pointer ${
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs transition-all cursor-pointer ${
                   isActive
                     ? "bg-white/95 text-[#111827] font-bold shadow-xs border border-white/80"
                     : "text-[#4B5563] hover:text-[#111827] font-medium hover:bg-white/50"
@@ -55,13 +57,18 @@ export function DashboardFeedContainer({
               >
                 <Icon className={`w-3.5 h-3.5 ${isActive ? "text-[#0284c7]" : "text-slate-400"}`} />
                 <span>{tab.label}</span>
+                {Boolean(tab.badge && tab.badge > 0) && (
+                  <span className="px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-amber-500 text-white leading-none">
+                    {tab.badge}
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* FEED CONTENT: FOCUSED PER TAB (NO OVERWHELMING STACK) */}
+      {/* FEED CONTENT: FOCUSED PER TAB */}
       <div className="space-y-4 animate-fade-in">
         {coCreditSection}
 
@@ -70,22 +77,19 @@ export function DashboardFeedContainer({
         )}
 
         {activeTab === "matches" && (
-          <section className="space-y-4">
-            {matchesSection}
-            {outcomeSection}
-          </section>
+          <section className="space-y-4">{matchesSection}</section>
         )}
 
         {activeTab === "resources" && (
           <section className="space-y-3">{resourcesSection}</section>
         )}
 
-        {activeTab === "bookings" && (
-          <section className="space-y-3">{bookingsSection}</section>
+        {activeTab === "outcomes" && outcomeSection && (
+          <section className="space-y-3">{outcomeSection}</section>
         )}
 
-        {activeTab === "notifications" && (
-          <section className="space-y-3">{notificationsSection}</section>
+        {activeTab === "bookings" && bookingsSection && (
+          <section className="space-y-3">{bookingsSection}</section>
         )}
       </div>
     </div>
