@@ -8,12 +8,21 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum UserRole {
+  CLIENT
+  COLLECTOR
+  MEMBER
+  OWNER
+  SUPERADMIN
+}
+
 model Profile {
   id          String   @id @default(uuid()) @db.Uuid
   email       String   @unique
   displayName String   @map("display_name")
   avatarUrl   String?  @map("avatar_url")
   bio         String?
+  role        UserRole @default(MEMBER)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
   actors      Actor[]
@@ -33,6 +42,9 @@ model Actor {
   contactPhone String?     @map("contact_phone")
   websiteUrl   String?     @map("website_url")
   status       ActorStatus @default(DRAFT)
+  isVerified   Boolean     @default(false) @map("is_verified")
+  isCurated    Boolean     @default(false) @map("is_curated")
+  verifiedBadgeAt DateTime? @map("verified_badge_at")
   aestheticStyles    String[]    @default([]) @map("aesthetic_styles")
   experienceLevel    String?     @map("experience_level")
   compensationModels String[]    @default([]) @map("compensation_models")
@@ -62,6 +74,10 @@ model Actor {
 
   bookingRequestsSent          BookingRequest[]              @relation("BookingRequester")
   bookingRequestsReceived      BookingRequest[]              @relation("BookingTarget")
+
+  verificationRequests         VerificationRequest[]
+  sanctionLogs                 UserSanctionLog[]
+  reportedDisputes             Dispute[]                     @relation("ReportedDisputes")
 
   @@index([ownerUserId])
   @@index([status])
@@ -171,6 +187,8 @@ enum ActorStatus {
   ACTIVE
   PAUSED
   ARCHIVED
+  SUSPENDED
+  BANNED
 }
 
 enum ActorType {
@@ -839,6 +857,7 @@ enum ProjectBriefStatus {
   FILLED
   CLOSED
   CANCELLED
+  TAKEN_DOWN
 }
 
 enum InterestStatus {
@@ -866,9 +885,175 @@ model BookingRequest {
 
   requester   Actor    @relation("BookingRequester", fields: [requesterId], references: [id], onDelete: Cascade)
   target      Actor    @relation("BookingTarget", fields: [targetId], references: [id], onDelete: Cascade)
+  disputes    Dispute[]
 
   @@index([requesterId])
   @@index([targetId])
   @@index([status])
   @@map("booking_requests")
 }
+
+// ==============================================================================
+// ADMIN ENGINE & GOVERNANCE MODELS
+// ==============================================================================
+
+model AdminAuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  adminId      String   @map("admin_id") @db.Uuid
+  adminName    String?  @map("admin_name")
+  actionType   String   @map("action_type")
+  targetEntity String   @map("target_entity")
+  targetId     String?  @map("target_id")
+  detailsJson  Json?    @default("{}") @map("details_json")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([adminId])
+  @@index([actionType])
+  @@index([targetEntity])
+  @@index([createdAt])
+  @@map("admin_audit_logs")
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REVISION_REQUESTED
+}
+
+model VerificationRequest {
+  id              String             @id @default(uuid()) @db.Uuid
+  actorId         String             @map("actor_id") @db.Uuid
+  status          VerificationStatus @default(PENDING)
+  gearProofUrls   String[]           @default([]) @map("gear_proof_urls")
+  portfolioUrl    String?            @map("portfolio_url")
+  notes           String?
+  reviewedBy      String?            @map("reviewed_by") @db.Uuid
+  rejectionReason String?            @map("rejection_reason")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  actor           Actor              @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([actorId])
+  @@index([status])
+  @@map("verification_requests")
+}
+
+enum SanctionAction {
+  SUSPEND
+  BAN
+  WARN
+  UNBAN
+  RESTORE
+}
+
+model UserSanctionLog {
+  id        String         @id @default(uuid()) @db.Uuid
+  actorId   String         @map("actor_id") @db.Uuid
+  adminId   String         @map("admin_id") @db.Uuid
+  action    SanctionAction
+  reason    String
+  createdAt DateTime       @default(now()) @map("created_at")
+
+  actor     Actor          @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([actorId])
+  @@index([adminId])
+  @@map("user_sanction_logs")
+}
+
+model TaxonomySector {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique
+  slug      String   @unique
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("taxonomy_sectors")
+}
+
+model AestheticTag {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique
+  slug      String   @unique
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("aesthetic_tags")
+}
+
+model RoleBlueprint {
+  id               String   @id @default(uuid()) @db.Uuid
+  roleName         String   @unique @map("role_name")
+  skillsArray      String[] @default([]) @map("skills_array")
+  recommendedTools String[] @default([]) @map("recommended_tools")
+  rateJunior       String?  @map("rate_junior")
+  rateMid          String?  @map("rate_mid")
+  rateSenior       String?  @map("rate_senior")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("role_blueprints")
+}
+
+enum DisputeStatus {
+  OPEN
+  IN_MEDIATION
+  RESOLVED
+  DISMISSED
+}
+
+model Dispute {
+  id              String         @id @default(uuid()) @db.Uuid
+  bookingId       String?        @map("booking_id") @db.Uuid
+  reporterId      String         @map("reporter_id") @db.Uuid
+  reason          String
+  evidenceUrls    String[]       @default([]) @map("evidence_urls")
+  status          DisputeStatus  @default(OPEN)
+  resolutionNotes String?        @map("resolution_notes")
+  adminId         String?        @map("admin_id") @db.Uuid
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  reporter        Actor          @relation("ReportedDisputes", fields: [reporterId], references: [id], onDelete: Cascade)
+  booking         BookingRequest? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  @@index([reporterId])
+  @@index([bookingId])
+  @@index([status])
+  @@map("disputes")
+}
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  actorId   String   @map("actor_id") @db.Uuid
+  title     String
+  message   String
+  type      String   @default("INFO")
+  link      String?
+  isRead    Boolean  @default(false) @map("is_read")
+  metadata  Json?    @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([actorId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model DirectMessage {
+  id               String   @id @default(uuid()) @db.Uuid
+  senderActorId    String   @map("sender_actor_id") @db.Uuid
+  recipientActorId String   @map("recipient_actor_id") @db.Uuid
+  content          String
+  messageType      String?  @default("TEXT") @map("message_type")
+  metadata         Json?    @default("{}")
+  isRead           Boolean? @default(false) @map("is_read")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@index([senderActorId])
+  @@index([recipientActorId])
+  @@index([createdAt])
+  @@map("direct_messages")
+}
+
