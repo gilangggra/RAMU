@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition, useRef, useEffect } from "react";
+import React, { useState, useTransition, useRef, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import {
   X,
@@ -18,7 +18,17 @@ import {
   Play,
   Volume2,
   UploadCloud,
-  ArrowRight
+  ArrowRight,
+  Maximize2,
+  Smartphone,
+  Info,
+  CheckCircle2,
+  Trash2,
+  Search,
+  ExternalLink,
+  Layers,
+  Sliders,
+  Sparkle
 } from "lucide-react";
 import { createShowcaseAsset } from "@/app/api/assets/actions";
 import { useRouter } from "next/navigation";
@@ -67,24 +77,29 @@ interface InputHotspot {
   notes?: string;
 }
 
-const CATEGORY_ROLES: { category: HotspotCategory; label: string; defaultRole: string; icon: React.ElementType }[] = [
+const CATEGORY_ROLES: {
+  category: HotspotCategory;
+  label: string;
+  defaultRole: string;
+  icon: React.ElementType;
+}[] = [
   { category: "cinematography", label: "Penyutradaraan & Sinematografi", defaultRole: "Film Director / DoP", icon: Video },
   { category: "photography", label: "Fotografi & Lighting", defaultRole: "Director of Photography", icon: Camera },
-  { category: "wardrobe", label: "Wardrobe & Styling", defaultRole: "Fashion Designer / Stylist", icon: Shirt },
+  { category: "wardrobe", label: "Wardrobe & Styling", defaultRole: "Fashion Stylist & Wardrobe", icon: Shirt },
   { category: "hmua", label: "Makeup & Hair (HMUA)", defaultRole: "Lead Beauty & Hair Stylist", icon: Sparkles },
   { category: "talent", label: "Model & Talent", defaultRole: "Editorial Muse / Model", icon: User },
   { category: "art_direction", label: "Art Direction & Pascaproduksi", defaultRole: "Art Director & Colorist", icon: Palette },
   { category: "sound", label: "Penata Suara & Musik", defaultRole: "Sound Designer / Music", icon: Volume2 },
 ];
 
-const CATEGORY_COLORS: Record<HotspotCategory, { bg: string; text: string; border: string }> = {
-  cinematography: { bg: "bg-purple-500", text: "text-purple-700", border: "border-purple-300" },
-  photography: { bg: "bg-emerald-500", text: "text-emerald-700", border: "border-emerald-300" },
-  wardrobe: { bg: "bg-indigo-500", text: "text-indigo-700", border: "border-indigo-300" },
-  hmua: { bg: "bg-rose-500", text: "text-rose-700", border: "border-rose-300" },
-  talent: { bg: "bg-amber-500", text: "text-amber-800", border: "border-amber-300" },
-  art_direction: { bg: "bg-sky-500", text: "text-sky-700", border: "border-sky-300" },
-  sound: { bg: "bg-cyan-500", text: "text-cyan-700", border: "border-cyan-300" },
+const CATEGORY_COLORS: Record<HotspotCategory, { bg: string; text: string; border: string; ring: string }> = {
+  cinematography: { bg: "bg-purple-500", text: "text-purple-700", border: "border-purple-300", ring: "ring-purple-400" },
+  photography: { bg: "bg-emerald-500", text: "text-emerald-700", border: "border-emerald-300", ring: "ring-emerald-400" },
+  wardrobe: { bg: "bg-indigo-500", text: "text-indigo-700", border: "border-indigo-300", ring: "ring-indigo-400" },
+  hmua: { bg: "bg-rose-500", text: "text-rose-700", border: "border-rose-300", ring: "ring-rose-400" },
+  talent: { bg: "bg-amber-500", text: "text-amber-800", border: "border-amber-300", ring: "ring-amber-400" },
+  art_direction: { bg: "bg-sky-500", text: "text-sky-700", border: "border-sky-300", ring: "ring-sky-400" },
+  sound: { bg: "bg-cyan-500", text: "text-cyan-700", border: "border-cyan-300", ring: "ring-cyan-400" },
 };
 
 function detectCategoryFromSector(sector: string): HotspotCategory {
@@ -118,14 +133,17 @@ export function ShowcaseUploadModal({
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"basics" | "tearsheet">("basics");
 
+  // Media Config
   const [mediaType, setMediaType] = useState<"IMAGE" | "VIDEO">("IMAGE");
   const [videoSourceType, setVideoSourceType] = useState<"URL" | "FILE">("URL");
   const [videoUrl, setVideoUrl] = useState("");
   const [selectedVideoFile, setSelectedVideoFile] = useState<File | null>(null);
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
-  const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16" | "1:1">("16:9");
+  const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16" | "4:5" | "1:1" | "4:3">("4:5");
   const [isCapturingPoster, setIsCapturingPoster] = useState(false);
+  const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
 
+  // Artwork Basics
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
@@ -133,6 +151,7 @@ export function ShowcaseUploadModal({
   const [description, setDescription] = useState("");
   const [projectUrl, setProjectUrl] = useState("");
 
+  // Credits & Tear-Sheet
   const [credits, setCredits] = useState<InputCredit[]>([
     {
       id: "credit-1",
@@ -145,6 +164,7 @@ export function ShowcaseUploadModal({
   ]);
   const [hotspots, setHotspots] = useState<InputHotspot[]>([]);
 
+  // Add Credit State
   const [newCategory, setNewCategory] = useState<HotspotCategory>("wardrobe");
   const [newName, setNewName] = useState("");
   const [newHandle, setNewHandle] = useState("");
@@ -152,12 +172,14 @@ export function ShowcaseUploadModal({
   const [selectedActorId, setSelectedActorId] = useState<string | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  // Production Gear
   const [camera, setCamera] = useState("");
   const [lens, setLens] = useState("");
   const [lighting, setLighting] = useState("");
 
   const photoCanvasRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -194,6 +216,25 @@ export function ShowcaseUploadModal({
       const url = URL.createObjectURL(file);
       setImagePreview(url);
       setError("");
+
+      // Auto-detect image aspect ratio from uploaded file
+      const img = new Image();
+      img.onload = () => {
+        setImageDimensions({ width: img.width, height: img.height });
+        const ratio = img.width / img.height;
+        if (ratio <= 0.65) {
+          setAspectRatio("9:16");
+        } else if (ratio <= 0.9) {
+          setAspectRatio("4:5");
+        } else if (ratio <= 1.15) {
+          setAspectRatio("1:1");
+        } else if (ratio >= 1.55) {
+          setAspectRatio("16:9");
+        } else {
+          setAspectRatio("4:3");
+        }
+      };
+      img.src = url;
     }
   };
 
@@ -208,6 +249,18 @@ export function ShowcaseUploadModal({
       const blobUrl = URL.createObjectURL(file);
       setVideoPreviewUrl(blobUrl);
       setError("");
+
+      // Auto-detect video orientation
+      const videoEl = document.createElement("video");
+      videoEl.preload = "metadata";
+      videoEl.onloadedmetadata = () => {
+        if (videoEl.videoHeight > videoEl.videoWidth * 1.2) {
+          setAspectRatio("9:16");
+        } else {
+          setAspectRatio("16:9");
+        }
+      };
+      videoEl.src = blobUrl;
 
       if (!imagePreview) {
         setIsCapturingPoster(true);
@@ -229,6 +282,10 @@ export function ShowcaseUploadModal({
     const parsed = parseVideoUrl(val.trim());
     if (parsed && parsed.thumbnailUrl && !selectedFile && !imagePreview) {
       setImagePreview(parsed.thumbnailUrl);
+    }
+    const lower = val.toLowerCase();
+    if (lower.includes("shorts/") || lower.includes("tiktok.com") || lower.includes("reel")) {
+      setAspectRatio("9:16");
     }
   };
 
@@ -259,74 +316,65 @@ export function ShowcaseUploadModal({
       category: newCategory,
       role: roleConfig?.defaultRole || "Kolaborator",
       name: newName.trim(),
-      handle: newHandle.trim()
-        ? (newHandle.startsWith("@") ? newHandle : `@${newHandle}`)
-        : `@${newName.toLowerCase().replace(/[\s&.]+/g, "_")}`,
-      details: newDetails.trim() || "Kontributor Kreatif Terverifikasi",
-      actorId: selectedActorId || undefined
+      handle: newHandle.trim() || `@${newName.trim().toLowerCase().replace(/[\s&.]+/g, "_")}`,
+      details: newDetails.trim() || roleConfig?.label || "Kontributor Kreatif",
+      actorId: selectedActorId || undefined,
     };
 
-    setCredits([...credits, newCredit]);
+    setCredits((prev) => [...prev, newCredit]);
     setNewName("");
     setNewHandle("");
     setNewDetails("");
     setSelectedActorId(null);
-    setShowSuggestions(false);
   };
 
   const handleRemoveCredit = (id: string) => {
-    setCredits(credits.filter((c) => c.id !== id));
+    setCredits((prev) => prev.filter((c) => c.id !== id));
+    setHotspots((prev) => prev.filter((h) => h.id !== id));
   };
 
   const handlePhotoClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!photoCanvasRef.current) return;
     const rect = photoCanvasRef.current.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const clickY = e.clientY - rect.top;
+    const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+    const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
 
-    const x = Math.round((clickX / rect.width) * 100);
-    const y = Math.round((clickY / rect.height) * 100);
-
-    const assignedCredit = credits[hotspots.length % credits.length] || {
-      category: "wardrobe" as HotspotCategory,
-      role: "Wardrobe / Detail",
-      name: "Detail Karya",
-      handle: "@kreator",
-      details: "Fokus Visual"
-    };
+    const activeCredit = credits[credits.length - 1];
+    const roleConfig = CATEGORY_ROLES.find((r) => r.category === (activeCredit?.category || "wardrobe"));
 
     const newPin: InputHotspot = {
       id: `pin-${Date.now()}`,
-      category: assignedCredit.category,
-      title: assignedCredit.role,
-      role: assignedCredit.role,
-      creatorName: assignedCredit.name,
-      creatorHandle: assignedCredit.handle,
-      x: Math.max(5, Math.min(95, x)),
-      y: Math.max(5, Math.min(95, y)),
+      category: activeCredit ? activeCredit.category : "wardrobe",
+      title: activeCredit ? activeCredit.name : "Karya Busana",
+      role: activeCredit ? activeCredit.role : (roleConfig?.defaultRole || "Designer"),
+      creatorName: activeCredit ? activeCredit.name : "Brand / Kreator",
+      creatorHandle: activeCredit ? activeCredit.handle : "@creator",
+      x,
+      y,
       details: [
-        { label: "Karya", value: assignedCredit.details || "Elemen Visual" }
+        { label: "Departemen", value: roleConfig?.label || "Wardrobe" },
+        { label: "Posisi Titik", value: `${x}% x ${y}%` }
       ],
-      notes: "Disematkan via Hotspot Pin RAMU."
+      notes: "Interactive Spotlight Tear-Sheet"
     };
 
-    setHotspots([...hotspots, newPin]);
+    setHotspots((prev) => [...prev, newPin]);
   };
 
   const handleRemovePin = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setHotspots(hotspots.filter((h) => h.id !== id));
+    setHotspots((prev) => prev.filter((h) => h.id !== id));
   };
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !subtype) {
-      setError("Mohon lengkapi judul dan kategori karya.");
+    if (!title.trim()) {
+      setError("Judul karya wajib diisi.");
       return;
     }
 
     if (mediaType === "IMAGE" && !selectedFile && !imagePreview) {
-      setError("Mohon pilih foto cover portofolio Anda.");
+      setError("Mohon pilih file foto cover untuk karya Anda.");
       return;
     }
 
@@ -349,9 +397,9 @@ export function ShowcaseUploadModal({
       formData.append("description", description);
       formData.append("projectUrl", projectUrl);
       formData.append("mediaType", mediaType);
+      formData.append("aspectRatio", aspectRatio);
 
       if (mediaType === "VIDEO") {
-        formData.append("aspectRatio", aspectRatio);
         if (videoSourceType === "FILE" && selectedVideoFile) {
           formData.append("videoFile", selectedVideoFile);
           formData.append("videoSource", "DIRECT_UPLOAD");
@@ -380,155 +428,200 @@ export function ShowcaseUploadModal({
             name: c.name,
             handle: c.handle,
             details: c.details,
-            actorId: c.actorId || undefined,
-            verified: isUploader,
-            status: isUploader ? "VERIFIED" : (c.actorId ? "PENDING" : "EXTERNAL"),
-            isUploader,
-            verifiedBy: isUploader ? "Pemilik Portofolio (Uploader)" : undefined,
-            verificationTimestamp: isUploader ? new Date().toISOString() : undefined
+            actorId: c.actorId || null,
+            status: isUploader ? "VERIFIED" : "PENDING",
+            verified: isUploader ? true : false,
+            isUploader: isUploader ? true : false,
+            verifiedBy: isUploader ? "Pemilik Portofolio (Uploader)" : null,
+            verificationTimestamp: isUploader ? new Date().toISOString() : null,
           };
         }),
-        hotspots: hotspots.length > 0 ? hotspots : undefined,
-        technicalSpecs: (camera || lens || lighting) ? {
-          camera: camera || undefined,
-          lens: lens || undefined,
-          lighting: lighting || undefined
-        } : undefined
+        hotspots: hotspots.map((h) => ({
+          category: h.category,
+          title: h.title,
+          role: h.role,
+          creatorName: h.creatorName,
+          creatorHandle: h.creatorHandle,
+          x: h.x,
+          y: h.y,
+          details: h.details,
+          notes: h.notes,
+        })),
+        specs: {
+          camera: camera.trim() || undefined,
+          lens: lens.trim() || undefined,
+          lighting: lighting.trim() || undefined,
+        },
       };
 
       formData.append("tearSheet", JSON.stringify(tearSheetPayload));
 
-      const res = await createShowcaseAsset(formData);
-      if (res.success) {
-        setTitle("");
-        setDescription("");
-        setProjectUrl("");
-        setSelectedFile(null);
-        setImagePreview(null);
-        setSelectedVideoFile(null);
-        setVideoPreviewUrl(null);
-        setVideoUrl("");
-        setMediaType("IMAGE");
-        setVideoSourceType("URL");
-        setHotspots([]);
-        setActiveTab("basics");
-        onClose();
-        if (onSuccess) onSuccess();
-        router.refresh();
-      } else {
-        setError(res.error || "Gagal menambahkan karya");
+      try {
+        const res = await createShowcaseAsset(formData);
+        if (res.success) {
+          if (onSuccess) onSuccess();
+          onClose();
+          router.refresh();
+        } else {
+          setError(res.error || "Gagal mengunggah portofolio.");
+        }
+      } catch (err: any) {
+        setError(err?.message || "Terjadi kesalahan saat memproses portofolio.");
       }
     });
-  }
+  };
+
+  // Preview container aspect ratio class
+  const previewAspectClass = useMemo(() => {
+    if (aspectRatio === "9:16") return "aspect-[9/16] max-w-[260px] mx-auto";
+    if (aspectRatio === "4:5") return "aspect-[4/5] max-w-[320px] mx-auto";
+    if (aspectRatio === "1:1") return "aspect-square max-w-[320px] mx-auto";
+    if (aspectRatio === "4:3") return "aspect-[4/3] w-full";
+    return "aspect-video w-full";
+  }, [aspectRatio]);
 
   if (!isOpen || !mounted) return null;
 
-  const modalNode = (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-[100000] flex items-center justify-center p-3 sm:p-5 md:p-8 bg-stone-950/45 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-[100000] flex items-center justify-center p-3 sm:p-5 md:p-8 bg-slate-950/60 backdrop-blur-md animate-fade-in"
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-4xl h-full md:h-[90vh] max-h-[860px] bg-white border border-stone-200/90 rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.16)] flex flex-col overflow-hidden text-stone-900"
+        className="relative w-full max-w-4xl h-full md:h-[90vh] max-h-[880px] bg-white border border-slate-200/90 rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.2)] flex flex-col overflow-hidden text-slate-900"
       >
-        <div className="h-16 shrink-0 px-6 bg-white border-b border-stone-200/80 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shadow-2xs">
-              <Sparkles className="w-4 h-4" />
+        {/* 1. MODAL HEADER */}
+        <div className="shrink-0 px-6 py-4 bg-white border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-full bg-sky-50 border border-sky-200 text-[#0284c7] flex items-center justify-center shadow-2xs shrink-0">
+              <Sparkles className="w-5 h-5" />
             </div>
-            <div>
-              <h3 className="text-base font-black text-stone-900">Unggah Karya &amp; Tear-Sheet</h3>
-              <p className="text-[11px] text-stone-500 font-medium">Kurasi portofolio dengan kredit kolaborasi terverifikasi</p>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-extrabold text-slate-900 truncate">
+                  Unggah Karya &amp; Kurasi Portofolio
+                </h3>
+                <span className="hidden sm:inline-flex text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-sky-50 text-[#0284c7] font-bold border border-sky-200">
+                  RAMU DOSSIER
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 font-medium truncate">
+                Publikasikan mahakarya visual dengan verifikasi tim &amp; spesifikasi proporsional
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center p-1 bg-stone-100 rounded-full border border-stone-200/80">
+          <div className="flex items-center gap-2.5 self-end sm:self-auto shrink-0">
+            {/* Step Selector Tabs (Consistent Capsule Pills) */}
+            <div className="flex items-center p-1 bg-slate-100 rounded-full border border-slate-200/80">
+              <button
+                type="button"
+                onClick={() => setActiveTab("basics")}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === "basics"
+                    ? "btn-primary-pill text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <span>1. Media &amp; Konsep</span>
+                {imagePreview && <Check className="w-3 h-3 text-white" />}
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("tearsheet")}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeTab === "tearsheet"
+                    ? "btn-primary-pill text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <span>2. Tim &amp; Tear-Sheet</span>
+                <span
+                  className={`text-[9px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                    activeTab === "tearsheet"
+                      ? "bg-white/20 text-white"
+                      : "bg-sky-100 text-[#0284c7]"
+                  }`}
+                >
+                  {credits.length} Kru
+                </span>
+              </button>
+            </div>
+
             <button
               type="button"
-              onClick={() => setActiveTab("basics")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                activeTab === "basics"
-                  ? "bg-white text-stone-950 shadow-xs"
-                  : "text-stone-500 hover:text-stone-900"
-              }`}
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200/80 text-slate-500 hover:text-slate-900 flex items-center justify-center transition-colors cursor-pointer"
+              title="Tutup (Esc)"
             >
-              1. Info Karya *
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("tearsheet")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === "tearsheet"
-                  ? "bg-white text-amber-900 shadow-xs"
-                  : "text-stone-500 hover:text-stone-900"
-              }`}
-            >
-              <span>2. Kredit Tim Kolaborasi</span>
-              <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 font-mono font-bold">
-                OPSIONAL
-              </span>
+              <X className="w-4 h-4" />
             </button>
           </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-900 flex items-center justify-center transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
         </div>
 
+        {/* 2. FORM BODY */}
         <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col overflow-hidden">
           {error && (
-            <div className="mx-6 mt-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold shrink-0">
-              {error}
+            <div className="mx-6 mt-4 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold shrink-0 flex items-center gap-2">
+              <X className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 
+          {/* TAB 1: MEDIA & BASICS */}
           {activeTab === "basics" && (
-            <div className="flex-1 min-h-0 overflow-y-auto p-6 sm:p-8 space-y-5">
-              <div className="flex items-center gap-2 p-1.5 bg-stone-100/90 rounded-2xl w-fit border border-stone-200/80 mb-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMediaType("IMAGE");
-                    if (subtype === "Video Komersial") setSubtype("Fotografi");
-                  }}
-                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    mediaType === "IMAGE"
-                      ? "bg-white text-stone-900 shadow-xs"
-                      : "text-stone-500 hover:text-stone-900"
-                  }`}
-                >
-                  <ImageIcon className="w-3.5 h-3.5 text-stone-700" />
-                  <span>Portofolio Foto</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMediaType("VIDEO");
-                    if (subtype === "Fotografi") setSubtype("Video Komersial");
-                  }}
-                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    mediaType === "VIDEO"
-                      ? "bg-stone-950 text-white shadow-xs"
-                      : "text-stone-500 hover:text-stone-900"
-                  }`}
-                >
-                  <Film className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Portofolio Video / Sinema</span>
-                </button>
+            <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar scrollbar-none p-6 sm:p-7 space-y-6">
+              {/* Media Type Segmented Pills (Capsule Pills) */}
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center p-1 bg-slate-100 rounded-full border border-slate-200/80">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMediaType("IMAGE");
+                      if (subtype === "Video Komersial") setSubtype("Fotografi");
+                    }}
+                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                      mediaType === "IMAGE"
+                        ? "btn-primary-pill text-white shadow-xs"
+                        : "text-slate-600 hover:text-slate-900 bg-transparent"
+                    }`}
+                  >
+                    <ImageIcon className="w-3.5 h-3.5" />
+                    <span>Portofolio Foto &amp; Lookbook</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMediaType("VIDEO");
+                      if (subtype === "Fotografi") setSubtype("Video Komersial");
+                    }}
+                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                      mediaType === "VIDEO"
+                        ? "btn-primary-pill text-white shadow-xs"
+                        : "text-slate-600 hover:text-slate-900 bg-transparent"
+                    }`}
+                  >
+                    <Film className="w-3.5 h-3.5" />
+                    <span>Portofolio Video &amp; Sinema</span>
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                  <Info className="w-3.5 h-3.5 text-[#0284c7]" />
+                  <span>Mendukung orientasi potret, vertikal (reels), dan lanskap</span>
+                </div>
               </div>
 
+              {/* PHOTO UPLOAD FLOW */}
               {mediaType === "IMAGE" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="space-y-4">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                  {/* Left Column: Form Details (7 cols) */}
+                  <div className="lg:col-span-7 space-y-4">
                     <div>
-                      <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                         Judul Karya *
                       </label>
                       <input
@@ -537,90 +630,217 @@ export function ShowcaseUploadModal({
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Contoh: Fall Fashion Campaign 'Silk Horizon'"
-                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                        className="w-full px-4 py-2.5 bg-slate-50/70 border border-slate-200/90 rounded-xl text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE] transition-all"
                       />
                     </div>
 
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Kategori Spesifik *
+                        </label>
+                        <select
+                          value={subtype}
+                          onChange={(e) => setSubtype(e.target.value)}
+                          className="w-full px-4 py-2.5 bg-slate-50/70 border border-slate-200/90 rounded-xl text-sm font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE] transition-all cursor-pointer"
+                        >
+                          <option value="Fotografi">Fotografi</option>
+                          <option value="Koleksi Lookbook">Koleksi Lookbook</option>
+                          <option value="Fashion Styling">Fashion Styling</option>
+                          <option value="Desain Grafis">Desain Grafis</option>
+                          <option value="3D & Animasi">3D & Animasi</option>
+                          <option value="Lainnya">Lainnya</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                          <span>Orientasi Rasio *</span>
+                          {imageDimensions && (
+                            <span className="text-[10px] text-emerald-600 font-mono font-bold lowercase">
+                              auto-detected
+                            </span>
+                          )}
+                        </label>
+                        <select
+                          value={aspectRatio}
+                          onChange={(e) => setAspectRatio(e.target.value as any)}
+                          className="w-full px-4 py-2.5 bg-slate-50/70 border border-slate-200/90 rounded-xl text-sm font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE] transition-all cursor-pointer"
+                        >
+                          <option value="4:5">4:5 (Portret Editorial Lookbook)</option>
+                          <option value="9:16">9:16 (Vertikal Penuh / Reels / Story)</option>
+                          <option value="16:9">16:9 (Lanskap Sinematik)</option>
+                          <option value="1:1">1:1 (Persegi Square)</option>
+                          <option value="4:3">4:3 (Lanskap Klasik)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Quick Aspect Ratio Shortcut Buttons (Capsule Pills) */}
                     <div>
-                      <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
-                        Kategori Spesifik *
-                      </label>
-                      <select
-                        value={subtype}
-                        onChange={(e) => setSubtype(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
-                      >
-                        <option value="Fotografi">Fotografi</option>
-                        <option value="Fashion Styling">Fashion Styling</option>
-                        <option value="Desain Grafis">Desain Grafis</option>
-                        <option value="3D & Animasi">3D & Animasi</option>
-                        <option value="Lainnya">Lainnya</option>
-                      </select>
+                      <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                        Pilihan Cepat Format:
+                      </span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {[
+                          { val: "4:5", label: "4:5 Portret", icon: Camera },
+                          { val: "9:16", label: "9:16 Vertikal", icon: Smartphone },
+                          { val: "16:9", label: "16:9 Lanskap", icon: Maximize2 },
+                          { val: "1:1", label: "1:1 Persegi", icon: Layers },
+                        ].map((btn) => (
+                          <button
+                            key={btn.val}
+                            type="button"
+                            onClick={() => setAspectRatio(btn.val as any)}
+                            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                              aspectRatio === btn.val
+                                ? "bg-sky-50 text-[#0284c7] border-2 border-[#4CC9FE] shadow-2xs"
+                                : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900"
+                            }`}
+                          >
+                            <btn.icon className="w-3.5 h-3.5" />
+                            <span>{btn.label}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                        <LinkIcon className="w-3.5 h-3.5 text-stone-500" /> Tautan Proyek (Opsional)
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                        <LinkIcon className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Tautan Proyek (Opsional)</span>
                       </label>
                       <input
                         type="url"
                         value={projectUrl}
                         onChange={(e) => setProjectUrl(e.target.value)}
-                        placeholder="https://behance.net/... atau tautan eksternal"
-                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                        placeholder="https://behance.net/... atau portofolio eksternal"
+                        className="w-full px-4 py-2.5 bg-slate-50/70 border border-slate-200/90 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE] transition-all"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
-                        Deskripsi Singkat
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Deskripsi &amp; Konsep Visual
                       </label>
                       <textarea
                         rows={3}
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Ceritakan konsep karya, siluet, atau peranan Anda dalam kolaborasi ini..."
-                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40 resize-none"
+                        placeholder="Ceritakan konsep karya, tema styling, teknik pencahayaan, atau peranan Anda..."
+                        className="w-full px-4 py-2.5 bg-slate-50/70 border border-slate-200/90 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE] transition-all resize-none"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                      <ImageIcon className="w-3.5 h-3.5 text-stone-500" /> Foto Cover Karya *
-                    </label>
+                  {/* Right Column: Studio Live Frame Dropzone (5 cols) */}
+                  <div className="lg:col-span-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                        <Camera className="w-3.5 h-3.5 text-slate-500" />
+                        <span>{imagePreview ? "Pratinjau Bingkai Karya *" : "Berkas Foto Karya *"}</span>
+                      </label>
+                      {imagePreview && (
+                        <span className="text-[10px] text-[#0284c7] font-mono font-bold bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200">
+                          Format {aspectRatio}
+                        </span>
+                      )}
+                    </div>
 
-                    <div className="relative border-2 border-dashed border-stone-200 hover:border-amber-400/80 rounded-2xl p-4 bg-stone-50/60 transition-colors flex flex-col items-center justify-center min-h-[260px] text-center overflow-hidden">
+                    <div className="relative border-2 border-dashed border-slate-200/90 hover:border-[#4CC9FE] rounded-2xl p-5 bg-slate-50/50 hover:bg-sky-50/20 transition-all flex flex-col items-center justify-center min-h-[320px] text-center overflow-hidden">
                       {imagePreview ? (
-                        <div className="relative w-full h-[240px] flex items-center justify-center">
-                          <img
-                            src={imagePreview}
-                            alt="Preview"
-                            className="max-h-full max-w-full object-contain rounded-xl shadow-xs"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setImagePreview(null);
-                              setSelectedFile(null);
-                            }}
-                            className="absolute top-2 right-2 p-1.5 rounded-full bg-stone-900/80 hover:bg-rose-600 text-white text-xs transition-colors cursor-pointer"
+                        <div className="relative w-full flex flex-col items-center justify-center space-y-3.5">
+                          {/* Adaptive Frame Box */}
+                          <div
+                            className={`relative overflow-hidden rounded-2xl bg-slate-950 shadow-md ${previewAspectClass} border border-slate-200/90 transition-all duration-300 w-full`}
                           >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
+                            {/* Ambient Blur Backdrop */}
+                            <div className="absolute inset-0 overflow-hidden pointer-events-none select-none z-0">
+                              <img
+                                src={imagePreview}
+                                alt=""
+                                aria-hidden="true"
+                                className="w-full h-full object-cover scale-125 filter blur-xl opacity-40 brightness-90 transform-gpu"
+                              />
+                            </div>
+
+                            {/* Main Framed Artwork */}
+                            <img
+                              src={imagePreview}
+                              alt="Preview"
+                              className="w-full h-full object-cover object-top relative z-5"
+                            />
+
+                            {/* Format Pill on Top */}
+                            <div className="absolute top-2.5 left-2.5 z-10 px-2.5 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-white text-[10px] font-mono font-bold flex items-center gap-1 border border-white/20">
+                              <span>{aspectRatio}</span>
+                              {imageDimensions && (
+                                <span className="text-slate-300">
+                                  ({imageDimensions.width}x{imageDimensions.height})
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Remove Button */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setImagePreview(null);
+                                setSelectedFile(null);
+                                setImageDimensions(null);
+                              }}
+                              className="absolute top-2.5 right-2.5 z-10 p-1.5 rounded-full bg-slate-900/80 hover:bg-rose-600 text-white transition-colors cursor-pointer shadow-md"
+                              title="Hapus Foto"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <label className="px-4 py-2 rounded-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-2xs cursor-pointer inline-flex items-center gap-1.5">
+                              <UploadCloud className="w-3.5 h-3.5 text-slate-500" />
+                              <span>Ganti Foto</span>
+                              <input
+                                type="file"
+                                accept="image/png, image/jpeg, image/jpg, image/webp"
+                                onChange={handleImageFileChange}
+                                className="hidden"
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setImagePreview(null);
+                                setSelectedFile(null);
+                                setImageDimensions(null);
+                              }}
+                              className="px-4 py-2 rounded-full bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-all shadow-2xs cursor-pointer inline-flex items-center gap-1.5"
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                              <span>Hapus</span>
+                            </button>
+                          </div>
                         </div>
                       ) : (
-                        <label className="cursor-pointer flex flex-col items-center space-y-2 w-full h-full py-8">
-                          <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200/90 text-amber-700 flex items-center justify-center shadow-xs">
+                        <label className="cursor-pointer flex flex-col items-center justify-center space-y-3.5 w-full h-full py-10 group">
+                          <div className="w-14 h-14 rounded-full bg-sky-50 border border-sky-200/90 text-[#0284c7] flex items-center justify-center shadow-xs group-hover:scale-105 group-hover:bg-[#4CC9FE] group-hover:text-white transition-all">
                             <UploadCloud className="w-6 h-6" />
                           </div>
-                          <span className="text-xs font-bold text-stone-800">
-                            Pilih File Foto dari Perangkat
-                          </span>
-                          <span className="text-[11px] text-stone-400 max-w-[220px]">
-                            Mendukung JPG, PNG, atau WebP (hingga 15 MB)
-                          </span>
+                          <div className="space-y-1">
+                            <span className="text-sm font-extrabold text-slate-900 block group-hover:text-[#0284c7] transition-colors">
+                              Pilih File Foto dari Perangkat
+                            </span>
+                            <span className="text-xs text-slate-500 block max-w-xs">
+                              Mendukung JPG, PNG, atau WebP resolusi tinggi (hingga 15 MB)
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-mono pt-1">
+                            <span className="bg-white px-2.5 py-0.5 rounded-full border border-slate-200/80 shadow-2xs">Potret 4:5</span>
+                            <span className="bg-white px-2.5 py-0.5 rounded-full border border-slate-200/80 shadow-2xs">Reels 9:16</span>
+                            <span className="bg-white px-2.5 py-0.5 rounded-full border border-slate-200/80 shadow-2xs">Lanskap 16:9</span>
+                          </div>
                           <input
+                            ref={fileInputRef}
                             type="file"
                             accept="image/png, image/jpeg, image/jpg, image/webp"
                             onChange={handleImageFileChange}
@@ -633,11 +853,13 @@ export function ShowcaseUploadModal({
                 </div>
               )}
 
+              {/* VIDEO UPLOAD FLOW */}
               {mediaType === "VIDEO" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="space-y-4">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                  {/* Left Column: Form Details (7 cols) */}
+                  <div className="lg:col-span-7 space-y-4">
                     <div>
-                      <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                         Judul Karya Video *
                       </label>
                       <input
@@ -645,70 +867,71 @@ export function ShowcaseUploadModal({
                         required
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Contoh: Commercial Lookbook Film 'Eclipse'"
-                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                        placeholder="Contoh: Commercial Lookbook Fashion Film 'Eclipse'"
+                        className="w-full px-4 py-2.5 bg-slate-50/70 border border-slate-200/90 rounded-xl text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE] transition-all"
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                           Kategori *
                         </label>
                         <select
                           value={subtype}
                           onChange={(e) => setSubtype(e.target.value)}
-                          className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                          className="w-full px-4 py-2.5 bg-slate-50/70 border border-slate-200/90 rounded-xl text-sm font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE] transition-all cursor-pointer"
                         >
                           <option value="Video Komersial">Video Komersial</option>
-                          <option value="Fashion Styling">Fashion Styling</option>
-                          <option value="3D & Animasi">3D & Animasi</option>
+                          <option value="Fashion Styling">Fashion Styling Film</option>
+                          <option value="3D & Animasi">3D &amp; Animasi</option>
                           <option value="Lainnya">Lainnya</option>
                         </select>
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
-                          Rasio Layar *
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Rasio Layar Video *
                         </label>
                         <select
                           value={aspectRatio}
                           onChange={(e) => setAspectRatio(e.target.value as any)}
-                          className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                          className="w-full px-4 py-2.5 bg-slate-50/70 border border-slate-200/90 rounded-xl text-sm font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE] transition-all cursor-pointer"
                         >
-                          <option value="16:9">16:9 (Landscape Cinema)</option>
-                          <option value="9:16">9:16 (Vertical Reels/TikTok)</option>
+                          <option value="16:9">16:9 (Lanskap Cinema YouTube)</option>
+                          <option value="9:16">9:16 (Vertikal Reels / TikTok / Shorts)</option>
                           <option value="1:1">1:1 (Persegi Square)</option>
+                          <option value="4:5">4:5 (Portret Editorial)</option>
                         </select>
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider">
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                         Sumber Video *
                       </label>
-                      <div className="flex items-center gap-2 p-1 bg-stone-100 rounded-xl w-fit">
+                      <div className="flex items-center p-1 bg-slate-100 rounded-full border border-slate-200/80 w-fit">
                         <button
                           type="button"
                           onClick={() => setVideoSourceType("URL")}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                             videoSourceType === "URL"
-                              ? "bg-white text-stone-900 shadow-2xs"
-                              : "text-stone-500 hover:text-stone-800"
+                              ? "bg-white text-slate-900 shadow-2xs"
+                              : "text-slate-500 hover:text-slate-800"
                           }`}
                         >
-                          Streaming Link (YouTube/Vimeo)
+                          Tautan Streaming (YouTube / Shorts / Vimeo)
                         </button>
                         <button
                           type="button"
                           onClick={() => setVideoSourceType("FILE")}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                             videoSourceType === "FILE"
-                              ? "bg-white text-stone-900 shadow-2xs"
-                              : "text-stone-500 hover:text-stone-800"
+                              ? "bg-white text-slate-900 shadow-2xs"
+                              : "text-slate-500 hover:text-slate-800"
                           }`}
                         >
-                          File MP4 / Direct Upload
+                          Unggah File MP4 / WebM
                         </button>
                       </div>
 
@@ -719,20 +942,20 @@ export function ShowcaseUploadModal({
                             value={videoUrl}
                             onChange={(e) => handleExternalVideoUrlChange(e.target.value)}
                             placeholder="https://www.youtube.com/watch?v=... atau https://vimeo.com/..."
-                            className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                            className="w-full px-4 py-2.5 bg-slate-50/70 border border-slate-200/90 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE] transition-all"
                           />
-                          <p className="text-[10px] text-stone-500">
-                            Masukkan tautan YouTube, Vimeo, atau link file video streaming .mp4 langsung.
+                          <p className="text-[10px] text-slate-500">
+                            Mendukung tautan YouTube reguler, YouTube Shorts (otomatis 9:16), Vimeo, atau tautan file MP4.
                           </p>
                         </div>
                       ) : (
                         <div className="pt-1">
                           {selectedVideoFile ? (
-                            <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 flex items-center justify-between">
-                              <div className="flex items-center gap-2 text-xs font-bold text-amber-950 truncate">
-                                <Film className="w-4 h-4 text-amber-600 shrink-0" />
+                            <div className="p-3 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-between">
+                              <div className="flex items-center gap-2 text-xs font-bold text-slate-900 truncate">
+                                <Film className="w-4 h-4 text-[#0284c7] shrink-0" />
                                 <span className="truncate">{selectedVideoFile.name}</span>
-                                <span className="text-[10px] text-amber-700/80 font-mono shrink-0">
+                                <span className="text-[10px] text-slate-500 font-mono shrink-0">
                                   ({(selectedVideoFile.size / (1024 * 1024)).toFixed(1)} MB)
                                 </span>
                               </div>
@@ -748,9 +971,14 @@ export function ShowcaseUploadModal({
                               </button>
                             </div>
                           ) : (
-                            <label className="border border-dashed border-stone-300 hover:border-amber-400 p-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer bg-stone-50/50 hover:bg-stone-50 transition-colors">
-                              <UploadCloud className="w-4 h-4 text-stone-500" />
-                              <span className="text-xs font-bold text-stone-700">Pilih File Video MP4 / WebM</span>
+                            <label className="border-2 border-dashed border-slate-200/90 hover:border-[#4CC9FE] p-5 rounded-2xl flex flex-col items-center justify-center gap-1.5 cursor-pointer bg-slate-50/50 hover:bg-sky-50/20 transition-all">
+                              <UploadCloud className="w-5 h-5 text-slate-500" />
+                              <span className="text-xs font-bold text-slate-800">
+                                Pilih File Video dari Perangkat (MP4 / WebM)
+                              </span>
+                              <span className="text-[10px] text-slate-400">
+                                Ukuran maksimal hingga 100 MB
+                              </span>
                               <input
                                 type="file"
                                 accept="video/mp4, video/webm, video/quicktime"
@@ -764,25 +992,39 @@ export function ShowcaseUploadModal({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1.5">
-                        Deskripsi Video
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Sinopsis / Deskripsi Video
                       </label>
                       <textarea
                         rows={2}
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Uraikan sinopsis, tone visual, atau spesifikasi format video..."
-                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40 resize-none"
+                        className="w-full px-4 py-2.5 bg-slate-50/70 border border-slate-200/90 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE] transition-all resize-none"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-4">
+                  {/* Right Column: Live Player & Cover Poster (5 cols) */}
+                  <div className="lg:col-span-5 space-y-4">
                     <div>
-                      <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                        <Play className="w-3.5 h-3.5 text-stone-500" /> Preview Pemutaran Video
-                      </label>
-                      <div className="relative border border-stone-200 rounded-2xl bg-stone-950 aspect-video flex items-center justify-center overflow-hidden">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                          <Play className="w-3.5 h-3.5 text-slate-500" />
+                          <span>Pratinjau Pemutaran Video</span>
+                        </label>
+                        <span className="text-[10px] text-[#0284c7] font-mono font-bold bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200">
+                          {aspectRatio}
+                        </span>
+                      </div>
+
+                      <div
+                        className={`relative border border-slate-200 rounded-2xl bg-slate-950 flex items-center justify-center overflow-hidden shadow-xs transition-all ${
+                          aspectRatio === "9:16"
+                            ? "aspect-[9/16] max-w-[220px] mx-auto ring-1 ring-white/10"
+                            : "aspect-video w-full"
+                        }`}
+                      >
                         {videoPreviewUrl ? (
                           <video
                             src={videoPreviewUrl}
@@ -796,28 +1038,28 @@ export function ShowcaseUploadModal({
                             allowFullScreen
                           />
                         ) : (
-                          <div className="flex flex-col items-center justify-center text-stone-500 text-xs font-medium space-y-1">
+                          <div className="flex flex-col items-center justify-center text-slate-400 text-xs font-medium space-y-1.5 p-6 text-center">
                             <Film className="w-8 h-8 opacity-40 mb-1" />
-                            <span>Preview video akan muncul di sini</span>
+                            <span>Preview video akan aktif setelah URL atau file dipilih</span>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider flex items-center gap-1.5">
-                          <ImageIcon className="w-3.5 h-3.5 text-stone-500" /> Poster Cover Video *
+                    <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-200/90 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                          <ImageIcon className="w-3.5 h-3.5 text-slate-500" /> Poster Cover Video *
                         </label>
                         {isCapturingPoster && (
-                          <span className="text-[10px] text-amber-600 animate-pulse font-medium">
-                            Mengambil frame poster...
+                          <span className="text-[10px] text-[#0284c7] animate-pulse font-medium">
+                            Mengambil frame...
                           </span>
                         )}
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <div className="relative w-24 h-16 rounded-xl border border-stone-200 bg-stone-100 overflow-hidden flex items-center justify-center shrink-0">
+                        <div className="relative w-20 h-16 rounded-xl border border-slate-200 bg-slate-200/60 overflow-hidden flex items-center justify-center shrink-0 shadow-2xs">
                           {imagePreview ? (
                             <img
                               src={imagePreview}
@@ -825,14 +1067,14 @@ export function ShowcaseUploadModal({
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <ImageIcon className="w-5 h-5 text-stone-400" />
+                            <ImageIcon className="w-5 h-5 text-slate-400" />
                           )}
                         </div>
 
-                        <div className="flex-1">
-                          <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold transition-colors cursor-pointer">
-                            <UploadCloud className="w-3.5 h-3.5" />
-                            <span>Unggah Poster Kustom</span>
+                        <div className="flex-1 min-w-0">
+                          <label className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 text-xs font-bold transition-all shadow-2xs cursor-pointer">
+                            <UploadCloud className="w-3.5 h-3.5 text-slate-500" />
+                            <span>Ganti Poster Cover</span>
                             <input
                               type="file"
                               accept="image/*"
@@ -840,8 +1082,8 @@ export function ShowcaseUploadModal({
                               className="hidden"
                             />
                           </label>
-                          <p className="text-[10px] text-stone-400 mt-1">
-                            Poster ini tampil di galeri showcase sebelum video diputar.
+                          <p className="text-[10px] text-slate-400 mt-1">
+                            Tampil di galeri sebelum video diputar
                           </p>
                         </div>
                       </div>
@@ -852,43 +1094,50 @@ export function ShowcaseUploadModal({
             </div>
           )}
 
+          {/* TAB 2: TEAR-SHEET & TEAM CREDITS */}
           {activeTab === "tearsheet" && (
-            <div className="flex-1 min-h-0 overflow-y-auto p-6 sm:p-8 space-y-6">
-              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/90 text-amber-950 text-xs space-y-1">
-                <div className="font-extrabold flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-amber-600" />
-                  <span>Kredit Tim Resmi &bull; Peer-Verified Co-Credit (Anti-Catfishing)</span>
+            <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar scrollbar-none p-6 sm:p-7 space-y-6">
+              {/* Educational Banner */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-sky-50 via-sky-50/50 to-indigo-50/40 border border-sky-200/90 text-slate-900 text-xs space-y-1.5">
+                <div className="font-extrabold flex items-center gap-2 text-[#0284c7]">
+                  <Sparkles className="w-4 h-4 text-[#0284c7]" />
+                  <span>Interactive Hotspot Tear-Sheet &bull; Peer-Verified Co-Credit</span>
                 </div>
-                <p className="text-amber-800/90 leading-relaxed text-[11px]">
-                  Tandai kreator atau studio terdaftar di RAMU yang terlibat dalam produksi ini. Karya ini akan otomatis terhubung ke profil dan portofolio resmi mereka.
+                <p className="text-slate-600 leading-relaxed text-[11px]">
+                  Tandai seluruh rekan tim atau studio terdaftar di RAMU (Fotografer, MUA, Stylist, Model, Studio). Karya ini otomatis tersambung ke profil resmi mereka dan terverifikasi secara silang untuk mencegah catfishing.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-3">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                {/* Left: Hotspot Canvas (5 cols) */}
+                <div className="lg:col-span-5 space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-stone-600 uppercase tracking-wider">
-                      Titik Hotspot Interaktif (Opsional)
+                    <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                      Titik Hotspot Interaktif
                     </span>
-                    <span className="text-[10px] text-stone-400">
-                      Klik foto untuk menyematkan pin
+                    <span className="text-[10px] text-slate-400">
+                      Klik foto untuk pasang pin
                     </span>
                   </div>
 
                   <div
                     ref={photoCanvasRef}
                     onClick={handlePhotoClick}
-                    className="relative w-full aspect-[4/5] bg-stone-900 rounded-2xl overflow-hidden cursor-crosshair border border-stone-200 select-none shadow-xs group"
+                    className={`relative w-full ${previewAspectClass} bg-slate-950 rounded-2xl overflow-hidden cursor-crosshair border border-slate-200 select-none shadow-md group`}
                   >
                     {imagePreview ? (
-                      <img
-                        src={imagePreview}
-                        alt="Canvas"
-                        className="w-full h-full object-cover pointer-events-none"
-                      />
+                      <>
+                        <img
+                          src={imagePreview}
+                          alt="Canvas"
+                          className="w-full h-full object-cover object-top pointer-events-none"
+                        />
+                        <div className="absolute inset-0 bg-black/10 pointer-events-none group-hover:bg-transparent transition-colors" />
+                      </>
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-stone-400 text-xs">
-                        Pilih foto di Tab 1 terlebih dahulu
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 text-xs p-6 text-center space-y-1">
+                        <ImageIcon className="w-6 h-6 opacity-40 mb-1" />
+                        <span>Pilih foto cover di Tab 1 untuk mengaktifkan titik hotspot</span>
                       </div>
                     )}
 
@@ -901,44 +1150,48 @@ export function ShowcaseUploadModal({
                           className="absolute -translate-x-1/2 -translate-y-1/2 z-20 group/pin"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <div className={`w-6 h-6 rounded-full ${color.bg} text-white font-bold text-[10px] flex items-center justify-center shadow-lg border-2 border-white ring-2 ring-black/20 hover:scale-125 transition-transform`}>
+                          <div
+                            className={`w-6 h-6 rounded-full ${color.bg} text-white font-bold text-[10px] flex items-center justify-center shadow-lg border-2 border-white ring-2 ring-black/20 hover:scale-125 transition-transform cursor-pointer`}
+                          >
                             {pin.title.charAt(0)}
                           </div>
 
-                          <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 hidden group-hover/pin:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-stone-900 text-white text-[10px] font-semibold whitespace-nowrap z-30 shadow-md">
+                          <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 hidden group-hover/pin:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900 text-white text-[10px] font-semibold whitespace-nowrap z-30 shadow-md">
                             <span>{pin.creatorName} ({pin.role})</span>
                             <button
                               type="button"
                               onClick={(e) => handleRemovePin(pin.id, e)}
-                              className="text-stone-400 hover:text-rose-400 ml-1 cursor-pointer"
+                              className="text-slate-400 hover:text-rose-400 ml-1 cursor-pointer"
                             >
-                              <X className="w-3 h-3" />
+                              <X className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </div>
                       );
                     })}
                   </div>
+                  <p className="text-[10px] text-slate-400 italic text-center">
+                    Pin di atas akan tampil interaktif saat karya dibuka di Dossier lookbook.
+                  </p>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/90 space-y-3">
-                    <span className="block text-[11px] font-bold text-stone-700 uppercase tracking-wider">
-                      + Tambah Kredit Kru / Kolaborator
+                {/* Right: Add Team Member Form & Specs (7 cols) */}
+                <div className="lg:col-span-7 space-y-4">
+                  {/* Add Member Card */}
+                  <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-200/90 space-y-3">
+                    <span className="block text-xs font-bold text-slate-800 uppercase tracking-wider">
+                      + Tambahkan Kredit Rekan Tim / Kolaborator
                     </span>
 
                     <div className="space-y-2.5">
                       <div>
-                        <label className="block text-[10px] font-bold text-stone-500 uppercase mb-1">
-                          Kategori Departemen
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                          Departemen / Kategori Peran
                         </label>
                         <select
                           value={newCategory}
-                          onChange={(e) => {
-                            const cat = e.target.value as HotspotCategory;
-                            setNewCategory(cat);
-                          }}
-                          className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                          onChange={(e) => setNewCategory(e.target.value as HotspotCategory)}
+                          className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE] cursor-pointer"
                         >
                           {CATEGORY_ROLES.map((role) => (
                             <option key={role.category} value={role.category}>
@@ -949,40 +1202,43 @@ export function ShowcaseUploadModal({
                       </div>
 
                       <div className="relative">
-                        <label className="block text-[10px] font-bold text-stone-500 uppercase mb-1">
-                          Nama Kreator / Cari Talenta RAMU
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                          Nama Kreator / Cari Profil di RAMU
                         </label>
-                        <input
-                          ref={searchInputRef}
-                          type="text"
-                          value={newName}
-                          onChange={(e) => {
-                            setNewName(e.target.value);
-                            setShowSuggestions(true);
-                            if (selectedActorId) setSelectedActorId(null);
-                          }}
-                          onFocus={() => setShowSuggestions(true)}
-                          placeholder="Ketik nama untuk mencari pelaku terdaftar..."
-                          className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
-                        />
+                        <div className="relative">
+                          <input
+                            ref={searchInputRef}
+                            type="text"
+                            value={newName}
+                            onChange={(e) => {
+                              setNewName(e.target.value);
+                              setShowSuggestions(true);
+                              if (selectedActorId) setSelectedActorId(null);
+                            }}
+                            onFocus={() => setShowSuggestions(true)}
+                            placeholder="Ketik nama kreator atau studio terdaftar..."
+                            className="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE]"
+                          />
+                          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        </div>
 
                         {showSuggestions && filteredSuggestions.length > 0 && (
-                          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-stone-200 rounded-xl shadow-lg z-30 overflow-hidden divide-y divide-stone-100 max-h-48 overflow-y-auto">
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-30 overflow-hidden divide-y divide-slate-100 max-h-48 overflow-y-auto no-scrollbar scrollbar-none">
                             {filteredSuggestions.map((actor) => (
                               <button
                                 key={actor.id}
                                 type="button"
                                 onClick={() => handleSelectActor(actor)}
-                                className="w-full text-left px-3 py-2 hover:bg-amber-50 flex items-center justify-between text-xs transition-colors cursor-pointer"
+                                className="w-full text-left px-3.5 py-2 hover:bg-sky-50 flex items-center justify-between text-xs transition-colors cursor-pointer"
                               >
                                 <div>
-                                  <div className="font-bold text-stone-900 flex items-center gap-1.5">
+                                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
                                     <span>{actor.name}</span>
-                                    <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 font-mono font-bold">
-                                      Terdaftar
+                                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-mono font-bold">
+                                      Terdaftar di RAMU
                                     </span>
                                   </div>
-                                  <div className="text-[10px] text-stone-500">
+                                  <div className="text-[10px] text-slate-500">
                                     {actor.sector} &bull; {actor.location || "Indonesia"}
                                   </div>
                                 </div>
@@ -995,27 +1251,27 @@ export function ShowcaseUploadModal({
 
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <label className="block text-[10px] font-bold text-stone-500 uppercase mb-1">
-                            Handle / Tag Akun
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                            Handle Instagram / Medsos
                           </label>
                           <input
                             type="text"
                             value={newHandle}
                             onChange={(e) => setNewHandle(e.target.value)}
                             placeholder="@handle"
-                            className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs text-stone-900 focus:outline-none"
+                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE]"
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold text-stone-500 uppercase mb-1">
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
                             Peran / Kontribusi
                           </label>
                           <input
                             type="text"
                             value={newDetails}
                             onChange={(e) => setNewDetails(e.target.value)}
-                            placeholder="Misal: Lead MUA"
-                            className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs text-stone-900 focus:outline-none"
+                            placeholder="Misal: Lead MUA &amp; Hair"
+                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE]"
                           />
                         </div>
                       </div>
@@ -1024,41 +1280,42 @@ export function ShowcaseUploadModal({
                         type="button"
                         onClick={handleAddCredit}
                         disabled={!newName.trim()}
-                        className="w-full py-2 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-bold disabled:opacity-50 transition-all cursor-pointer shadow-xs"
+                        className="w-full py-2.5 rounded-full btn-primary-pill text-white text-xs font-bold disabled:opacity-50 transition-all cursor-pointer shadow-md shadow-[#4CC9FE]/25 active:scale-95"
                       >
-                        + Tambahkan ke Daftar Kru
+                        + Sematkan ke Daftar Kredit Tim
                       </button>
                     </div>
                   </div>
 
+                  {/* List of Attached Crew */}
                   <div className="space-y-2">
-                    <span className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider">
+                    <span className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                       Daftar Tim Terpasang ({credits.length})
                     </span>
 
-                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                    <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1 no-scrollbar scrollbar-none">
                       {credits.map((c) => {
                         const color = CATEGORY_COLORS[c.category] || CATEGORY_COLORS.wardrobe;
                         return (
                           <div
                             key={c.id}
-                            className="p-2.5 rounded-xl bg-white border border-stone-200 flex items-center justify-between gap-3 text-xs"
+                            className="p-2.5 rounded-xl bg-white border border-slate-200/90 flex items-center justify-between gap-3 text-xs shadow-2xs hover:border-slate-300 transition-colors"
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
                               <span className={`w-2 h-2 rounded-full ${color.bg} shrink-0`} />
                               <div className="min-w-0">
-                                <div className="font-bold text-stone-900 flex items-center gap-1.5">
+                                <div className="font-bold text-slate-900 flex items-center gap-1.5">
                                   <span className="truncate">{c.name}</span>
-                                  <span className="font-mono text-[10px] text-stone-400">
+                                  <span className="font-mono text-[10px] text-slate-400">
                                     {c.handle}
                                   </span>
                                   {c.actorId && (
-                                    <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 shrink-0">
-                                      Terhubung
+                                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 shrink-0">
+                                      Terhubung Akun
                                     </span>
                                   )}
                                 </div>
-                                <span className="text-[10px] text-stone-500 truncate block">
+                                <span className="text-[10px] text-slate-500 truncate block">
                                   {c.role} &bull; {c.details}
                                 </span>
                               </div>
@@ -1066,10 +1323,10 @@ export function ShowcaseUploadModal({
                             <button
                               type="button"
                               onClick={() => handleRemoveCredit(c.id)}
-                              className="text-stone-400 hover:text-rose-500 p-1 shrink-0 transition-colors cursor-pointer"
+                              className="text-slate-400 hover:text-rose-500 p-1 shrink-0 transition-colors cursor-pointer"
                               title="Hapus kredit"
                             >
-                              <X className="w-3.5 h-3.5" />
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         );
@@ -1077,9 +1334,11 @@ export function ShowcaseUploadModal({
                     </div>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
-                    <span className="block text-[10px] font-mono font-bold text-stone-600 uppercase tracking-wider">
-                      Spesifikasi Gear &amp; Studio (Opsional)
+                  {/* Gear Specs Accordion Card */}
+                  <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-200/90 space-y-2.5">
+                    <span className="block text-[10px] font-mono font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+                      <Sliders className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Spesifikasi Gear &amp; Studio (Opsional)</span>
                     </span>
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <input
@@ -1087,21 +1346,21 @@ export function ShowcaseUploadModal({
                         value={camera}
                         onChange={(e) => setCamera(e.target.value)}
                         placeholder="Kamera (misal: Sony A7IV)"
-                        className="px-2.5 py-1.5 bg-white border border-stone-200 rounded-lg text-[11px]"
+                        className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#4CC9FE]"
                       />
                       <input
                         type="text"
                         value={lens}
                         onChange={(e) => setLens(e.target.value)}
-                        placeholder="Lensa (misal: 85mm f/1.4)"
-                        className="px-2.5 py-1.5 bg-white border border-stone-200 rounded-lg text-[11px]"
+                        placeholder="Lensa (misal: 85mm f/1.4 GM)"
+                        className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#4CC9FE]"
                       />
                       <input
                         type="text"
                         value={lighting}
                         onChange={(e) => setLighting(e.target.value)}
-                        placeholder="Lighting (misal: Profoto B10X Octabox)"
-                        className="col-span-2 px-2.5 py-1.5 bg-white border border-stone-200 rounded-lg text-[11px]"
+                        placeholder="Lighting (misal: Profoto B10X Plus + Softbox 120cm)"
+                        className="col-span-2 px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#4CC9FE]"
                       />
                     </div>
                   </div>
@@ -1110,11 +1369,12 @@ export function ShowcaseUploadModal({
             </div>
           )}
 
-          <div className="h-16 shrink-0 px-6 bg-white border-t border-stone-200/80 flex items-center justify-between gap-3">
+          {/* 3. MODAL FOOTER ACTION BAR (Consistent Capsule Pills & Brand Palette) */}
+          <div className="shrink-0 px-6 py-4 bg-white border-t border-slate-200/80 flex items-center justify-between gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition-colors cursor-pointer"
+              className="px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-bold transition-all cursor-pointer shadow-2xs"
             >
               Batal
             </button>
@@ -1124,35 +1384,35 @@ export function ShowcaseUploadModal({
                 <button
                   type="button"
                   onClick={() => setActiveTab("tearsheet")}
-                  className="px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200/80 text-slate-800 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 >
-                  <span>Atur Kredit Tim (Tear-Sheet)</span>
+                  <span>Lanjut: Atur Tim &amp; Tear-Sheet</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={() => setActiveTab("basics")}
-                  className="px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold transition-all cursor-pointer"
+                  className="px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200/80 text-slate-800 text-xs font-bold transition-all cursor-pointer shadow-2xs"
                 >
-                  &larr; Kembali ke Info Karya
+                  &larr; Kembali ke Media &amp; Konsep
                 </button>
               )}
 
               <button
                 type="submit"
                 disabled={isPending}
-                className="px-6 py-2.5 rounded-xl bg-[#1E1B2E] hover:bg-black text-white text-xs font-bold transition-all shadow-md flex items-center gap-2 disabled:opacity-70 active:scale-95 cursor-pointer"
+                className="px-6 py-2.5 rounded-full btn-primary-pill text-white text-xs font-bold transition-all shadow-md shadow-[#4CC9FE]/25 flex items-center gap-2 disabled:opacity-70 active:scale-95 cursor-pointer"
               >
                 {isPending ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-                    <span>Menyimpan...</span>
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    <span>Menyimpan Karya...</span>
                   </>
                 ) : (
                   <>
-                    <Check className="w-4 h-4 text-emerald-400" />
-                    <span>Simpan &amp; Publikasikan Karya</span>
+                    <Check className="w-4 h-4 text-white" />
+                    <span>Publikasikan Mahakarya</span>
                   </>
                 )}
               </button>
@@ -1160,8 +1420,7 @@ export function ShowcaseUploadModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
-
-  return createPortal(modalNode, document.body);
 }

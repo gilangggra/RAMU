@@ -47,12 +47,6 @@ export async function updateSession(request: NextRequest) {
   const isProtectedRoute =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/onboarding") ||
-    pathname.startsWith("/readiness") ||
-    pathname.startsWith("/assets") ||
-    pathname.startsWith("/goals") ||
-    pathname.startsWith("/needs") ||
-    pathname.startsWith("/constraints") ||
-    pathname.startsWith("/opportunities") ||
     pathname.startsWith("/collaborations") ||
     (pathname.startsWith("/projects") && !isProjectDetail) ||
     pathname.startsWith("/messages") ||

@@ -7,5 +7,5 @@ export default async function OpportunitiesPage({
   searchParams: Promise<{ feasibility?: string; scope?: string; actorId?: string }>;
 }) {
   await searchParams;
-  redirect("/collaborate");
+  redirect("/directory?tab=matched");
 }

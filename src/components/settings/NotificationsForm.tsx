@@ -61,7 +61,7 @@ export function NotificationsForm({ initialData }: NotificationsFormProps) {
       showBrowserPushNotification({
         title: "Notifikasi RAMU Aktif",
         message: "Anda akan menerima pemberitahuan instan saat ada pesanan atau pesan baru.",
-        link: "/dashboard/bookings",
+        link: "/collaborations?section=contracts",
       });
       setMessage({ type: "success", text: "Push notification peramban berhasil diaktifkan!" });
     } else if (perm === "denied") {

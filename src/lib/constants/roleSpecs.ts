@@ -72,7 +72,7 @@ export interface BrandSpecs {
   fabric_materials: string[];       // e.g. ["Linen Organik", "Katun Rayon Twill", "Sutra ATBM Garut", "Tencel Eco-Friendly"]
   capacity_monthly?: string;        // e.g. "500 - 1.000 Pcs / Bulan"
   // Collaboration Needs & Projects
-  collaboration_needs: string[];    // e.g. ["Photographer", "Model", "MUA/Stylist", "Studio", "Fashion Designer"]
+  collaboration_needs: string[];    // e.g. ["Photographer", "Model", "MUA/Stylist", "Studio"]
   campaign_types: string[];         // e.g. ["Product Launch Koleksi Baru", "Lookbook Musiman", "Social Media Viral Campaign", "Editorial Majalah"]
   budget_range: string;             // e.g. "Rp 5.000.000 – Rp 15.000.000 per Kampanye"
   collab_timeline?: string;         // e.g. "2 – 4 Minggu dari Brief hingga Peluncuran"
@@ -124,24 +124,6 @@ export interface MuaStylistSpecs {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 6. FASHION DESIGNER SPECIFICATIONS
-// ─────────────────────────────────────────────────────────────────────────────
-export interface DesignerSpecs {
-  // Specialization & Design Disciplines
-  specialties: string[];             // e.g. ["Ready-to-Wear Capsule", "Contemporary Couture", "Modest Luxury", "Wastra & Draping"]
-  capabilities: string[];           // e.g. ["Concept & Moodboard", "Digital 2D Tech-Pack", "Pola Presisi (Pattern Making)", "Sampel Fisik (Toille)", "Supervisi Fitting"]
-  // Resources & Workshop Assets
-  sample_collection_ready: boolean; // Memiliki arsip busana sampel siap pakai/pulling
-  materials_swatches: string[];     // e.g. ["Kain Tenun Lurik & Sutra", "Linen Premium", "Deadstock Eco-Fabric", "Wool & Twill"]
-  sewing_equipment: string[];       // e.g. ["Mesin Jahit Industri Juki", "Mesin Obras 4-Benang", "Manekin Draping Standar Atelier", "Alat Press Panas"]
-  sample_portfolio_count?: number;  // e.g. 25 outfit arsip
-  // Production Capacity & Turnaround
-  sample_turnaround_days: string;   // e.g. "7 – 14 Hari Kerja per Prototipe"
-  batch_production_capacity: string;// e.g. "100 – 300 Pcs per Batch Koleksi Kapsul"
-  collab_types: string[];           // e.g. ["Co-Branding Koleksi Bersama", "Peminjaman Wardrobe Lookbook", "Desain Seragam Korporat Eksklusif"]
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // ROLE QUICK SUGGESTIONS (Controlled Vocabulary / Chips for High UX)
 // ─────────────────────────────────────────────────────────────────────────────
 export const ROLE_SPECS_PRESETS = {
@@ -163,7 +145,7 @@ export const ROLE_SPECS_PRESETS = {
     quickProductTypes: ["Ready-to-Wear Clothing", "Outerwear & Blazer", "Dresses & Gown", "Bags & Leather Goods", "Footwear", "Scarves & Hijab"],
     quickTargetMarkets: ["Gen Z (18-24)", "Young Adults (25-35)", "Professional Working Class", "Premium & High-End Luxury", "Family & Kids"],
     quickFabrics: ["Linen Organik", "Katun Rayon Twill", "Sutra ATBM Garut", "Tencel Eco-Friendly", "Denim Selvedge", "Tenun Ikat Tradisional", "Wool & Cashmere"],
-    quickCollabNeeds: ["Photographer", "Model", "MUA/Stylist", "Studio", "Fashion Designer", "Videographer"],
+    quickCollabNeeds: ["Photographer", "Model", "MUA/Stylist", "Studio", "Videographer"],
     quickCampaignTypes: ["Product Launch Koleksi Baru", "Lookbook Musiman (Spring/Summer)", "Social Media Viral Reels", "Editorial Majalah Fesyen", "Katalog Marketplace Bersih"],
   },
   MODEL: {
@@ -176,11 +158,5 @@ export const ROLE_SPECS_PRESETS = {
     quickServices: ["Makeup HD 4K Tahan Panas", "Hair Styling & Hijab Do Rapi", "Wardrobe Styling Head-to-Toe", "Touch-Up On-Set Standby", "Peminjaman Aksesoris & Fitting"],
     quickKitBrands: ["Charlotte Tilbury", "MAC Cosmetics", "Dior Backstage", "NARS", "Make Up For Ever HD", "Fenty Beauty", "Hypoallergenic Certified"],
     quickOnsetGear: ["Garment Steamer Uap Panas", "Gantungan Baju Roll Portable", "Klem Fitting Busana Studio", "Lint Roller & Anti-Static Spray", "Pita Perekat Busana & Fashion Tape"],
-  },
-  DESIGNER: {
-    quickSpecialties: ["Apparel Ready-to-Wear", "Contemporary Couture", "Modest Luxury", "Wastra Nusantara & Batik", "Zero-Waste Sustainable Fashion"],
-    quickCapabilities: ["Moodboard & Trend Research", "Digital 2D Tech-Pack", "Pola Presisi (Pattern Making)", "Sampel Fisik Busana (Toille)", "Supervisi Fitting Model", "Sourcing Kain & Material"],
-    quickMaterials: ["Kain Tenun Lurik & Sutra", "Linen Premium Import", "Deadstock Eco-Fabric", "Katun Rayon Lembut", "Twill & Wool Blend"],
-    quickCollabTypes: ["Co-Branding Koleksi Kapsul", "Peminjaman Wardrobe Lookbook", "Kemitraan Desain Brand UMKM", "Custom Outfit Editorial"],
   },
 };

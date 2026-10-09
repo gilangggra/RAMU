@@ -61,6 +61,7 @@ export async function createProjectBriefAction(formData: FormData) {
     roleLabel: string;
     assetCategory: string;
     description?: string;
+    fee?: string;
     maxCollaborators?: number;
   }[] = [];
 

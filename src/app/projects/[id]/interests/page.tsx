@@ -59,25 +59,13 @@ export default async function ProjectInterestsPage({
 
   return (
     <AppShell actor={actor} activeRoute="/projects">
-      <div className="space-y-8 max-w-6xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
-            <Link href="/projects" className="hover:text-[#0284c7] font-semibold transition-colors">
-              Papan Proyek
-            </Link>
-            <span>/</span>
-            <Link href={`/projects/${brief.id}`} className="hover:text-[#0284c7] font-semibold transition-colors">
-              {brief.title}
-            </Link>
-            <span>/</span>
-            <span className="text-slate-900 font-bold">Kelola Peminat</span>
-          </div>
-
+      <div className="space-y-6 w-full max-w-7xl mx-auto pb-16">
+        <div className="flex items-center justify-between">
           <Link
             href={`/projects/${brief.id}`}
-            className="px-4 py-2 rounded-full bg-white/80 hover:bg-white text-xs font-semibold text-slate-700 hover:text-slate-900 border border-slate-200/80 shadow-2xs transition-colors inline-flex items-center gap-1.5 self-start sm:self-auto"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white border border-slate-200/80 text-xs font-semibold text-slate-600 hover:text-slate-900 shadow-2xs transition-all w-fit group"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
+            <ArrowLeft className="w-3.5 h-3.5 text-slate-400 group-hover:-translate-x-0.5 transition-transform" />
             <span>Kembali ke Detail Brief</span>
           </Link>
         </div>

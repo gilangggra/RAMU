@@ -64,20 +64,20 @@ export default async function CollaborationDetailPage({
 
   return (
     <AppShell actor={actor} activeRoute="/collaborations">
-      <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="space-y-3.5 w-full max-w-7xl mx-auto pb-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <Link
             href="/collaborations"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-500 hover:text-stone-900 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 hover:bg-white text-slate-700 hover:text-slate-900 text-xs font-semibold border border-slate-200/80 shadow-2xs transition-all"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Kembali ke Workspace Aktif</span>
+            <span>Kembali ke Workspace &amp; Kontrak</span>
           </Link>
 
           <div className="flex items-center gap-2.5">
             {linkedBooking && (
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 hidden md:inline">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 hidden md:inline">
                   Dasar Perikatan:
                 </span>
                 <ViewSpkButton booking={linkedBooking as any} />
@@ -87,10 +87,10 @@ export default async function CollaborationDetailPage({
             {collaboration.plan?.opportunityId && (
               <Link
                 href={`/opportunities/${collaboration.plan.opportunityId}`}
-                className="text-xs font-medium text-stone-700 hover:text-stone-900 bg-white hover:bg-stone-50 border border-stone-200 rounded-lg px-3 py-1.5 shadow-2xs inline-flex items-center gap-1.5 transition-colors"
+                className="text-xs font-semibold text-slate-700 hover:text-[#0284c7] bg-white/80 hover:bg-white border border-white/80 shadow-2xs rounded-full px-3.5 py-1.5 inline-flex items-center gap-1.5 transition-colors"
               >
                 <span>Lihat Peluang Asal</span>
-                <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
+                <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
               </Link>
             )}
           </div>

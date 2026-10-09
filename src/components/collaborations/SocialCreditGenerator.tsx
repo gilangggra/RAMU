@@ -38,7 +38,7 @@ interface SocialCreditGeneratorProps {
 }
 
 const FASHION_ROLE_PRESETS = [
-  "Wardrobe & Fashion Design",
+  "Fashion Brand & Wardrobe Collection",
   "Photography & Visual Direction",
   "Fashion Stylist",
   "Makeup & Hair Styling (MUA)",
@@ -314,22 +314,18 @@ export function SocialCreditGenerator({
   return (
     <div className={`space-y-6 ${className}`}>
 
-      <div className="p-6 sm:p-8 rounded-[32px] bg-gradient-to-br from-[#1E1B2E] via-[#2A243D] to-[#1E1B2E] text-white shadow-xl shadow-[#1E1B2E]/10 relative overflow-hidden">
-
-        <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#E66A48]/10 rounded-full blur-2xl pointer-events-none" />
-
+      <div className="p-6 sm:p-8 rounded-[22px] glass-card border border-white/80 shadow-2xs text-slate-800 relative overflow-hidden">
         <div className="relative z-10 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1.5">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[11px] font-bold tracking-wider uppercase text-amber-300">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#4CC9FE]/15 border border-[#4CC9FE]/30 text-[11px] font-bold tracking-wider uppercase text-[#0284c7]">
+                <Sparkles className="w-3.5 h-3.5 text-[#0284c7]" />
                 <span>Publikasi & Distribusi Karya</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-light tracking-tight text-white">
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
                 Social Media Credit & Production Tag Generator
               </h2>
-              <p className="text-xs sm:text-sm text-stone-300 max-w-2xl font-light leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-600 max-w-2xl font-normal leading-relaxed">
                 Format kredit tim kreatif, akun media sosial, dan roster call sheet satu-klik untuk rilis Instagram Feed, TikTok BTS, Story Sticker, Press Release Lookbook, dan Call Sheet lapangan.
               </p>
             </div>
@@ -338,10 +334,10 @@ export function SocialCreditGenerator({
               <button
                 type="button"
                 onClick={() => setShowConfig(!showConfig)}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer shadow-2xs ${
                   showConfig
-                    ? "bg-amber-500 text-[#1E1B2E]"
-                    : "bg-white/10 hover:bg-white/20 text-white border border-white/15"
+                    ? "btn-primary-pill text-white"
+                    : "bg-white hover:bg-slate-50 text-slate-800 border border-slate-200/80"
                 }`}
               >
                 <Sliders className="w-3.5 h-3.5" />
@@ -351,14 +347,14 @@ export function SocialCreditGenerator({
                 type="button"
                 onClick={resetToDefault}
                 title="Kembalikan ke data awal partisipan"
-                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-stone-300 hover:text-white border border-white/15 transition-colors cursor-pointer"
+                className="p-2 rounded-full bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200/80 shadow-2xs transition-colors cursor-pointer"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-white/10">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-4 border-t border-slate-100">
             {[
               {
                 id: "instagram",
@@ -392,19 +388,19 @@ export function SocialCreditGenerator({
                   key={fmt.id}
                   type="button"
                   onClick={() => setFormatType(fmt.id as any)}
-                  className={`p-3 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`p-3.5 rounded-[18px] text-left transition-all cursor-pointer flex flex-col justify-between ${
                     isActive
-                      ? "bg-white text-[#1E1B2E] shadow-lg shadow-black/20 font-bold scale-[1.02]"
-                      : "bg-white/5 hover:bg-white/10 text-stone-300 hover:text-white border border-white/10"
+                      ? "bg-white text-slate-900 border-2 border-[#4CC9FE] shadow-sm font-bold scale-[1.01]"
+                      : "bg-white/60 hover:bg-white text-slate-600 border border-slate-200/80 hover:border-slate-300"
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <Icon className={`w-4 h-4 ${isActive ? "text-[#E66A48]" : "text-stone-400"}`} />
-                    {isActive && <div className="w-2 h-2 rounded-full bg-[#E66A48]" />}
+                    <Icon className={`w-4 h-4 ${isActive ? "text-[#0284c7]" : "text-slate-400"}`} />
+                    {isActive && <div className="w-2 h-2 rounded-full bg-[#0284c7]" />}
                   </div>
                   <div className="mt-2">
                     <div className="text-xs font-bold leading-tight">{fmt.label}</div>
-                    <div className={`text-[10px] ${isActive ? "text-stone-500" : "text-stone-400"} font-light`}>
+                    <div className={`text-[10px] ${isActive ? "text-slate-500" : "text-slate-400"} font-light`}>
                       {fmt.sub}
                     </div>
                   </div>
@@ -416,14 +412,14 @@ export function SocialCreditGenerator({
       </div>
 
       {showConfig && (
-        <div className="p-6 rounded-[28px] bg-white border border-stone-200/90 shadow-sm space-y-6 animate-fade-in">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-100 pb-4">
+        <div className="p-6 sm:p-7 rounded-[22px] glass-card border border-white/80 shadow-2xs space-y-6 animate-fade-in">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div>
-              <h3 className="text-sm font-bold text-[#1E1B2E] uppercase tracking-wider flex items-center gap-2">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <Users className="w-4 h-4 text-amber-500" />
                 <span>Sesuaikan Daftar Kredit & Handle Media Sosial</span>
               </h3>
-              <p className="text-xs text-stone-500 font-light mt-0.5">
+              <p className="text-xs text-slate-500 font-light mt-0.5">
                 Ketik nama akun Instagram/TikTok tim Anda. Live preview di bawah akan langsung terupdate secara real-time.
               </p>
             </div>
@@ -439,7 +435,7 @@ export function SocialCreditGenerator({
           </div>
 
           <div className="space-y-1.5 max-w-lg">
-            <label className="text-xs font-bold uppercase tracking-wider text-stone-600">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
               Judul Proyek / Kampanye
             </label>
             <input
@@ -447,12 +443,12 @@ export function SocialCreditGenerator({
               value={projectTitle}
               onChange={(e) => setProjectTitle(e.target.value)}
               placeholder="Contoh: Modest Chic Spring 2026 Lookbook"
-              className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-sm text-[#1E1B2E] focus:outline-none focus:border-[#E66A48] focus:bg-white"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-[#4CC9FE] focus:bg-white"
             />
           </div>
 
           <div className="space-y-3">
-            <div className="grid grid-cols-12 gap-3 text-[11px] font-bold uppercase tracking-wider text-stone-400 px-2 hidden sm:grid">
+            <div className="grid grid-cols-12 gap-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2 hidden sm:grid">
               <div className="col-span-4">Peran Mode / Produksi</div>
               <div className="col-span-4">Nama Kru / Brand / Talent</div>
               <div className="col-span-3">Handle Akun (@...)</div>
@@ -462,11 +458,11 @@ export function SocialCreditGenerator({
             {credits.map((item) => (
               <div
                 key={item.id}
-                className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 p-3 rounded-2xl bg-stone-50/70 border border-stone-200/80 items-center hover:bg-stone-50 transition-colors"
+                className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 p-3 rounded-[22px] bg-slate-50/70 border border-slate-200/80 items-center hover:bg-slate-50 transition-colors"
               >
 
                 <div className="sm:col-span-4">
-                  <div className="text-[10px] font-bold text-stone-500 uppercase sm:hidden mb-1">Peran</div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase sm:hidden mb-1">Peran</div>
                   <div className="relative">
                     <input
                       type="text"
@@ -474,7 +470,7 @@ export function SocialCreditGenerator({
                       value={item.role}
                       onChange={(e) => updateCredit(item.id, "role", e.target.value)}
                       placeholder="Contoh: Fashion Stylist"
-                      className="w-full px-3 py-2 rounded-xl bg-white border border-stone-200 text-xs font-bold text-[#1E1B2E] focus:outline-none focus:border-[#E66A48]"
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#4CC9FE]"
                     />
                     <datalist id="fashion-roles-list">
                       {FASHION_ROLE_PRESETS.map((preset) => (
@@ -485,24 +481,24 @@ export function SocialCreditGenerator({
                 </div>
 
                 <div className="sm:col-span-4">
-                  <div className="text-[10px] font-bold text-stone-500 uppercase sm:hidden mb-1">Nama</div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase sm:hidden mb-1">Nama</div>
                   <input
                     type="text"
                     value={item.name}
                     onChange={(e) => updateCredit(item.id, "name", e.target.value)}
                     placeholder="Nama talent / label"
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-stone-200 text-xs text-[#1E1B2E] focus:outline-none focus:border-[#E66A48]"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#4CC9FE]"
                   />
                 </div>
 
                 <div className="sm:col-span-3">
-                  <div className="text-[10px] font-bold text-stone-500 uppercase sm:hidden mb-1">Handle</div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase sm:hidden mb-1">Handle</div>
                   <input
                     type="text"
                     value={item.handle}
                     onChange={(e) => updateCredit(item.id, "handle", e.target.value)}
                     placeholder="@akun_ig"
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-stone-200 text-xs font-mono text-[#E66A48] focus:outline-none focus:border-[#E66A48]"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-mono text-[#0284c7] focus:outline-none focus:border-[#4CC9FE]"
                   />
                 </div>
 
@@ -511,7 +507,7 @@ export function SocialCreditGenerator({
                     type="button"
                     onClick={() => removeCreditItem(item.id)}
                     title="Hapus baris kredit ini"
-                    className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -520,10 +516,10 @@ export function SocialCreditGenerator({
             ))}
           </div>
 
-          <div className="pt-4 border-t border-stone-100 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-3">
-              <label className="text-xs font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
-                <Tag className="w-3.5 h-3.5 text-[#E66A48]" />
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+                <Tag className="w-3.5 h-3.5 text-[#0284c7]" />
                 <span>Pilih Tagar (Hashtags) Terkurasi</span>
               </label>
               <div className="flex flex-wrap gap-1.5">
@@ -546,12 +542,12 @@ export function SocialCreditGenerator({
                   value={newTagInput}
                   onChange={(e) => setNewTagInput(e.target.value)}
                   placeholder="Tambah tagar baru (tanpa #)..."
-                  className="px-3 py-1.5 rounded-xl bg-stone-50 border border-stone-200 text-xs text-[#1E1B2E] focus:outline-none focus:border-[#E66A48] grow"
+                  className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-[#4CC9FE] grow"
                 />
                 <button
                   type="submit"
                   disabled={!newTagInput.trim()}
-                  className="px-3 py-1.5 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 disabled:opacity-40 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 disabled:opacity-40 transition-colors cursor-pointer"
                 >
                   Tambah
                 </button>
@@ -559,26 +555,26 @@ export function SocialCreditGenerator({
             </div>
 
             <div className="space-y-3">
-              <label className="text-xs font-bold uppercase tracking-wider text-stone-600">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
                 Opsi Tambahan
               </label>
               <div className="space-y-2">
-                <label className="flex items-center gap-2.5 text-xs text-[#1E1B2E] font-medium cursor-pointer">
+                <label className="flex items-center gap-2.5 text-xs text-slate-900 font-medium cursor-pointer">
                   <input
                     type="checkbox"
                     checked={includePlatformTag}
                     onChange={(e) => setIncludePlatformTag(e.target.checked)}
-                    className="rounded border-stone-300 text-[#E66A48] focus:ring-[#E66A48] w-4 h-4"
+                    className="rounded border-slate-300 text-[#0284c7] focus:ring-[#E66A48] w-4 h-4"
                   />
                   <span>Sertakan Tag Platform RAMU (@ramu.ecosystem)</span>
                 </label>
 
-                <label className="flex items-center gap-2.5 text-xs text-[#1E1B2E] font-medium cursor-pointer">
+                <label className="flex items-center gap-2.5 text-xs text-slate-900 font-medium cursor-pointer">
                   <input
                     type="checkbox"
                     checked={includeHashtags}
                     onChange={(e) => setIncludeHashtags(e.target.checked)}
-                    className="rounded border-stone-300 text-[#E66A48] focus:ring-[#E66A48] w-4 h-4"
+                    className="rounded border-slate-300 text-[#0284c7] focus:ring-[#E66A48] w-4 h-4"
                   />
                   <span>Sertakan Kumpulan Hashtag Mode di Akhir Caption</span>
                 </label>
@@ -588,18 +584,18 @@ export function SocialCreditGenerator({
         </div>
       )}
 
-      <div className="p-6 sm:p-8 rounded-[32px] bg-white border border-stone-200/90 shadow-[0_15px_40px_rgba(30,27,46,0.04)] space-y-6">
+      <div className="p-6 sm:p-8 rounded-[22px] glass-card border border-white/80 shadow-2xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-[#1E1B2E] tracking-tight">
+              <h3 className="text-base font-bold text-slate-900 tracking-tight">
                 Live Preview Kredit Format{" "}
-                <span className="text-[#E66A48] uppercase text-xs font-black px-2 py-0.5 rounded-md bg-[#FFF7ED] border border-[#F9D8C4]">
+                <span className="text-[#0284c7] uppercase text-xs font-black px-2 py-0.5 rounded-md bg-[#FFF7ED] border border-[#F9D8C4]">
                   {formatType}
                 </span>
               </h3>
             </div>
-            <div className="flex items-center gap-3 text-xs text-stone-500 font-light">
+            <div className="flex items-center gap-3 text-xs text-slate-500 font-light">
               <span>{charCount} Karakter</span>
               <span>•</span>
               <span className={mentionCount > 30 ? "text-rose-600 font-bold" : ""}>
@@ -613,19 +609,17 @@ export function SocialCreditGenerator({
               type="button"
               onClick={handleDownloadTxt}
               title="Unduh format teks ini (.txt)"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-[#1E1B2E] text-xs font-bold transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-bold transition-all cursor-pointer"
             >
-              <Download className="w-3.5 h-3.5 text-stone-600" />
+              <Download className="w-3.5 h-3.5 text-slate-600" />
               <span className="hidden sm:inline">Unduh .txt</span>
             </button>
 
             <button
               type="button"
               onClick={handleCopy}
-              className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs transition-all shadow-md cursor-pointer ${
-                copied
-                  ? "bg-emerald-600 text-white shadow-emerald-600/30 scale-105"
-                  : "bg-gradient-to-r from-amber-500 to-[#E66A48] hover:from-amber-600 hover:to-[#d85c3b] text-white shadow-[#E66A48]/25 hover:shadow-lg"
+              className={`btn-primary-pill inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-bold text-xs text-white shadow-md shadow-[#4CC9FE]/25 cursor-pointer ${
+                copied ? "!bg-emerald-600 !shadow-emerald-600/30 scale-105" : ""
               }`}
             >
               {copied ? (
@@ -643,21 +637,21 @@ export function SocialCreditGenerator({
           </div>
         </div>
 
-        <div className="relative rounded-2xl bg-[#1E1B2E] text-stone-100 p-5 sm:p-6 border border-stone-800 shadow-inner group">
+        <div className="relative rounded-[18px] bg-slate-900 text-slate-100 p-5 sm:p-6 border border-slate-800 shadow-inner group">
 
-          <div className="flex items-center justify-between pb-3 mb-3 border-b border-stone-800 text-[11px] text-stone-400 font-mono">
+          <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800 text-[11px] text-slate-400 font-mono">
             <div className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
               <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
               <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
-              <span className="ml-2 text-stone-400">format-{formatType}.txt</span>
+              <span className="ml-2 text-slate-400">format-{formatType}.txt</span>
             </div>
-            <div className="text-[10px] text-stone-500 uppercase tracking-widest font-sans font-bold">
+            <div className="text-[10px] text-slate-500 uppercase tracking-widest font-sans font-bold">
               Siap Salin & Tempel
             </div>
           </div>
 
-          <pre className="font-mono text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap select-all overflow-x-auto text-stone-200">
+          <pre className="font-mono text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap select-all overflow-x-auto text-slate-200">
             {generatedText}
           </pre>
 
@@ -671,7 +665,7 @@ export function SocialCreditGenerator({
           </button>
         </div>
 
-        <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 flex items-start gap-3">
+        <div className="p-4 rounded-[18px] bg-amber-50/80 border border-amber-200/80 flex items-start gap-3">
           <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
           <div className="text-xs text-amber-950 font-light leading-relaxed">
             <strong className="font-bold text-amber-900">Tips Rilis Editorial:</strong> Di Instagram Stories, pilih opsi{" "}

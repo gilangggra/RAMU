@@ -105,14 +105,14 @@ export function Toaster() {
           <div
             key={item.id}
             role="alert"
-            className={`pointer-events-auto flex items-start gap-3 p-4 rounded-2xl shadow-xl border backdrop-blur-md transition-all duration-200 animate-in slide-in-from-top-2 fade-in ${
+            className={`pointer-events-auto flex items-start gap-3 p-4 rounded-[20px] shadow-xl border backdrop-blur-md transition-all duration-200 animate-in slide-in-from-top-2 fade-in ${
               isError
                 ? "bg-rose-50/95 border-rose-200 text-rose-950"
                 : isSuccess
                 ? "bg-emerald-50/95 border-emerald-200 text-emerald-950"
                 : isWarning
                 ? "bg-amber-50/95 border-amber-200 text-amber-950"
-                : "bg-white/95 border-stone-200 text-stone-900"
+                : "bg-white/95 border-slate-200/80 text-slate-900"
             }`}
           >
             {/* Icon */}
@@ -164,7 +164,7 @@ export function Toaster() {
             {/* Close button */}
             <button
               onClick={() => toast.dismiss(item.id)}
-              className="shrink-0 p-1 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 transition-colors"
+              className="shrink-0 p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/50 transition-colors"
               aria-label="Tutup notifikasi"
             >
               <X className="w-4 h-4" />

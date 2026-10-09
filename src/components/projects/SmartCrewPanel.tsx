@@ -198,7 +198,7 @@ export function SmartCrewPanel({ recommendations, briefId }: SmartCrewPanelProps
             <span>{isRefreshing ? "Memperbarui..." : "Segarkan"}</span>
           </button>
           <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-[#4CC9FE]/15 text-[#0284c7] border border-[#4CC9FE]/30">
-            AI-POWERED
+            KOMPLEMENTER
           </span>
         </div>
       </div>

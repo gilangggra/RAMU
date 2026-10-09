@@ -29,20 +29,13 @@ interface RegisterClientFormProps {
   redirectTo?: string;
 }
 
-const SIX_OFFICIAL_ROLES = [
+const FIVE_OFFICIAL_ROLES = [
   {
     role: "Fashion Brand/UMKM",
     badge: "Brand & Klien",
     icon: Building,
     desc: "Label mode & apparel",
     placeholder: "misal: Maison Nusantara",
-  },
-  {
-    role: "Fashion Designer",
-    badge: "Kreator Busana",
-    icon: Scissors,
-    desc: "Perancang & pembuat pola",
-    placeholder: "misal: Atelier Nara",
   },
   {
     role: "Photographer",
@@ -87,7 +80,7 @@ const POPULAR_LOCATIONS = [
 ];
 
 export function RegisterClientForm({ initialError, redirectTo }: RegisterClientFormProps) {
-  const [selectedRole, setSelectedRole] = useState(SIX_OFFICIAL_ROLES[0]);
+  const [selectedRole, setSelectedRole] = useState(FIVE_OFFICIAL_ROLES[0]);
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -174,9 +167,9 @@ export function RegisterClientForm({ initialError, redirectTo }: RegisterClientF
             </Link>
           </div>
 
-          {/* Grid 6 Peran: 2 Kolom dengan feedback sentuhan (active:scale-[0.98]) */}
+          {/* Grid 5 Peran: 2 Kolom dengan feedback sentuhan (active:scale-[0.98]) */}
           <div className="grid grid-cols-2 gap-2">
-            {SIX_OFFICIAL_ROLES.map((item) => {
+            {FIVE_OFFICIAL_ROLES.map((item) => {
               const Icon = item.icon;
               const isSelected = selectedRole.role === item.role;
 

@@ -4,6 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createProjectBriefAction } from "@/app/projects/actions";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
+import { formatCurrencyInput, parseCurrencyToNumber, formatRupiah } from "@/lib/currency";
 import {
   Lightbulb,
   MapPin,
@@ -34,19 +36,6 @@ import {
 } from "lucide-react";
 
 const ROLE_BLUEPRINTS = [
-  {
-    id: "DESIGNER",
-    label: "Fashion Designer",
-    icon: Scissors,
-    category: "SKILL_TALENT",
-    desc: "Perancang busana, pattern maker, dan desainer koleksi lookbook.",
-    specializations: [
-      "Fashion Designer Utama",
-      "Pattern Maker Presisi",
-      "Ready-to-Wear Specialist",
-      "Couture & Modest Designer",
-    ],
-  },
   {
     id: "PHOTOGRAPHER",
     label: "Photographer",
@@ -152,6 +141,7 @@ const PROJECT_PRESET_TEMPLATES = [
         roleLabel: "Fashion Photographer",
         assetCategory: "SKILL_TALENT",
         description: "Foto studio lighting bersih & editing warna natural.",
+        fee: "Rp 2.500.000",
         maxCollaborators: 1,
       },
       {
@@ -160,6 +150,7 @@ const PROJECT_PRESET_TEMPLATES = [
         roleLabel: "Model Utama Lookbook",
         assetCategory: "SKILL_TALENT",
         description: "Tinggi min 168cm, pengalaman lookbook katalog.",
+        fee: "Rp 2.000.000",
         maxCollaborators: 1,
       },
       {
@@ -168,6 +159,7 @@ const PROJECT_PRESET_TEMPLATES = [
         roleLabel: "Editorial Makeup Artist",
         assetCategory: "SKILL_TALENT",
         description: "Makeup natural glowing & touch up on-set.",
+        fee: "Rp 1.500.000",
         maxCollaborators: 1,
       },
     ],
@@ -191,6 +183,7 @@ const PROJECT_PRESET_TEMPLATES = [
         roleLabel: "E-Commerce Packshot",
         assetCategory: "SKILL_TALENT",
         description: "Pencahayaan presisi detail bahan & warna akurat.",
+        fee: "Rp 2.000.000",
         maxCollaborators: 1,
       },
       {
@@ -199,6 +192,7 @@ const PROJECT_PRESET_TEMPLATES = [
         roleLabel: "Studio Foto Cyclorama",
         assetCategory: "STUDIO_SPACE",
         description: "Studio cyclorama putih dengan fasilitas AC dan ruang ganti.",
+        fee: "Rp 1.500.000",
         maxCollaborators: 1,
       },
     ],
@@ -207,21 +201,22 @@ const PROJECT_PRESET_TEMPLATES = [
   },
   {
     id: "editorial_collab",
-    label: "Editorial Mode (Kolaborasi Tim)",
-    badge: "Portofolio Bersama",
-    title: "Editorial Fashion Spread Kolaboratif",
+    label: "Editorial Mode (Produksi Lengkap)",
+    badge: "Kampanye Penuh",
+    title: "Editorial Fashion Spread Tim Profesional",
     description:
-      "Proyek kolaborasi eksperimental untuk membangun portofolio editorial bersama, mengeksplorasi konsep busana wastra kontemporer dengan publikasi di media sosial.",
+      "Proyek kampanye editorial terpadu untuk busana wastra kontemporer dengan tim lengkap dan publikasi resmi media sosial.",
     projectType: "Kolaborasi Produk Baru",
     aestheticStyle: "High-Fashion",
     targetOutput: "Editorial Spread 8 Halaman & Short Teaser",
     roles: [
       {
         id: "1",
-        blueprintId: "DESIGNER",
-        roleLabel: "Fashion Designer Utama",
+        blueprintId: "MUA_STYLIST",
+        roleLabel: "Fashion Wardrobe Stylist",
         assetCategory: "SKILL_TALENT",
-        description: "Penyedia sampel 4 koleksi busana wastra.",
+        description: "Kurasi dan penataan 4-6 look busana untuk pemotretan editorial.",
+        fee: "Rp 1.500.000",
         maxCollaborators: 1,
       },
       {
@@ -230,6 +225,7 @@ const PROJECT_PRESET_TEMPLATES = [
         roleLabel: "Editorial High-Fashion",
         assetCategory: "SKILL_TALENT",
         description: "Konsep visual dramatis & lighting sinematik.",
+        fee: "Rp 2.500.000",
         maxCollaborators: 1,
       },
       {
@@ -238,11 +234,12 @@ const PROJECT_PRESET_TEMPLATES = [
         roleLabel: "Editorial Fashion Muse",
         assetCategory: "SKILL_TALENT",
         description: "Ekspresif & pose dinamis editorial.",
+        fee: "Rp 2.000.000",
         maxCollaborators: 1,
       },
     ],
-    compensationModel: "REVENUE_SHARE",
-    estimatedTotal: "Bagi Hasil / Portofolio Bersama",
+    compensationModel: "PAID",
+    estimatedTotal: "Rp 6.000.000",
   },
 ];
 
@@ -252,6 +249,7 @@ interface RoleInput {
   roleLabel: string;
   assetCategory: string;
   description: string;
+  fee?: string;
   maxCollaborators: number;
 }
 
@@ -305,16 +303,23 @@ export default function NewProjectBriefPage() {
         roleLabel: "",
         assetCategory: "SKILL_TALENT",
         description: "",
+        fee: "",
         maxCollaborators: 1,
       },
     ]);
   }
 
   function updateRole(id: string, field: keyof RoleInput, value: string | number) {
+    const finalVal = field === "fee" ? formatCurrencyInput(String(value)) : value;
     setRoles((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, [field]: value } : r))
+      prev.map((r) => (r.id === id ? { ...r, [field]: finalVal } : r))
     );
   }
+
+  const totalRolesFeeSum = roles.reduce(
+    (acc, r) => acc + parseCurrencyToNumber(r.fee),
+    0
+  );
 
   function removeRole(id: string) {
     if (roles.length === 1) return;
@@ -332,7 +337,7 @@ export default function NewProjectBriefPage() {
     formData.set("location", location);
     formData.set("estimatedDuration", estimatedDuration);
     formData.set("targetLaunch", targetLaunch);
-    formData.set("compensationModel", compensationModel);
+    formData.set("compensationModel", "PAID");
     formData.set("estimatedTotal", estimatedTotal);
     formData.set("budgetNotes", budgetNotes);
     formData.set("aestheticStyle", aestheticStyle);
@@ -341,10 +346,11 @@ export default function NewProjectBriefPage() {
       JSON.stringify(
         roles
           .filter((r) => r.roleLabel.trim())
-          .map(({ roleLabel, assetCategory, description, maxCollaborators }) => ({
+          .map(({ roleLabel, assetCategory, description, fee, maxCollaborators }) => ({
             roleLabel: roleLabel.trim(),
             assetCategory,
             description: description.trim() || undefined,
+            fee: fee?.trim() || undefined,
             maxCollaborators,
           }))
       )
@@ -649,7 +655,7 @@ export default function NewProjectBriefPage() {
                 <div className="p-4 rounded-2xl bg-sky-50/70 border border-sky-200/80 text-xs text-[#0284c7] flex items-center gap-2.5 shadow-2xs">
                   <Lightbulb className="w-4 h-4 text-[#0284c7] shrink-0" />
                   <span>
-                    Pilih kategori peran utama, lalu tentukan spesialisasi yang Anda butuhkan agar AI Matchmaking merekomendasikan talenta secara presisi.
+                    Pilih kategori peran utama, lalu tentukan spesialisasi yang Anda butuhkan agar sistem komplementaritas merekomendasikan talenta secara presisi.
                   </span>
                 </div>
 
@@ -827,17 +833,34 @@ export default function NewProjectBriefPage() {
                             </div>
                           </div>
 
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold uppercase text-slate-500">
-                              Persyaratan / Konteks Khusus (Opsional)
-                            </label>
-                            <textarea
-                              value={role.description}
-                              onChange={(e) => updateRole(role.id, "description", e.target.value)}
-                              placeholder="Contoh: Membawa perlengkapan kamera sendiri, atau memiliki pengalaman lookbook katalog..."
-                              rows={2}
-                              className="w-full px-4 py-2 rounded-xl bg-white border border-slate-200/80 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all resize-none shadow-2xs"
-                            />
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-bold uppercase text-slate-500">
+                                Estimasi Honor / Fee Peran (Rp) *
+                              </label>
+                              <CurrencyInput
+                                value={role.fee || ""}
+                                onChange={(val) => updateRole(role.id, "fee", val)}
+                                placeholder="Rp 2.500.000"
+                                className="w-full px-4 py-2 rounded-xl bg-white border border-slate-200/80 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all shadow-2xs font-medium"
+                              />
+                              <p className="text-[10px] text-slate-400">
+                                Otomatis dialokasikan ke draf SPK: Termin I DP 50% &amp; Termin II Pelunasan 50%.
+                              </p>
+                            </div>
+
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-bold uppercase text-slate-500">
+                                Persyaratan / Konteks Khusus (Opsional)
+                              </label>
+                              <textarea
+                                value={role.description}
+                                onChange={(e) => updateRole(role.id, "description", e.target.value)}
+                                placeholder="Contoh: Membawa perlengkapan kamera sendiri, atau memiliki pengalaman lookbook katalog..."
+                                rows={2}
+                                className="w-full px-4 py-2 rounded-xl bg-white border border-slate-200/80 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all resize-none shadow-2xs"
+                              />
+                            </div>
                           </div>
                         </div>
                       )}
@@ -917,48 +940,93 @@ export default function NewProjectBriefPage() {
                 <div className="p-5 rounded-[22px] bg-white/70 border border-white/80 space-y-4 shadow-2xs">
                   <div className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
                     <CircleDollarSign className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Skema Kompensasi &amp; Anggaran</span>
+                    <span>Skema Honorarium Flat &amp; Anggaran SPK</span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/80 text-xs text-emerald-900 flex items-start gap-2.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="font-bold">Standar Honorarium Pasti &amp; Transparan</p>
+                      <p className="text-[11px] text-emerald-800 leading-relaxed font-normal">
+                        Platform RAMU menerapkan skema <strong>Honorarium Profesional Flat per Peran</strong> (tanpa bagi hasil spekulatif). Besaran honor dipecah otomatis ke dalam draf SPK digital dengan alokasi <strong>Termin I (DP 50%)</strong> di awal dan <strong>Termin II (Pelunasan 50%)</strong> setelah karya disetujui.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 pt-1">
+                    <label className="text-xs font-semibold text-slate-700 block">
+                      Rincian Honor Per Peran yang Ditetapkan:
+                    </label>
+                    <div className="border border-slate-200/80 rounded-xl overflow-hidden bg-white shadow-2xs">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-slate-50 text-slate-600 border-b border-slate-200/80 text-[10px] uppercase font-bold tracking-wider">
+                          <tr>
+                            <th className="py-2 px-3">Slot Peran</th>
+                            <th className="py-2 px-3">Estimasi Fee</th>
+                            <th className="py-2 px-3 text-amber-800">Termin I (DP 50%)</th>
+                            <th className="py-2 px-3 text-emerald-800">Termin II (Pelunasan 50%)</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {roles.map((r, i) => {
+                            const feeClean = (r.fee || "").trim();
+                            return (
+                              <tr key={r.id} className="hover:bg-slate-50/50">
+                                <td className="py-2.5 px-3 font-semibold text-slate-900">
+                                  {r.roleLabel || `Slot Peran #${i + 1}`}
+                                </td>
+                                <td className="py-2.5 px-3 font-bold text-slate-900">
+                                  {feeClean || <span className="text-slate-400 font-normal italic">Terbuka Negosiasi</span>}
+                                </td>
+                                <td className="py-2.5 px-3 text-amber-900 font-medium">
+                                  {feeClean ? "50% di muka" : "—"}
+                                </td>
+                                <td className="py-2.5 px-3 text-emerald-900 font-medium">
+                                  {feeClean ? "50% pelunasan" : "—"}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-slate-700">
-                        Skema Imbalan
-                      </label>
-                      <select
-                        value={compensationModel}
-                        onChange={(e) => setCompensationModel(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200/80 text-xs text-slate-900 focus:outline-none focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all cursor-pointer shadow-2xs font-medium"
-                      >
-                        <option value="PAID">Fee Komersial Berbayar (Paid Flat Fee)</option>
-                        <option value="REVENUE_SHARE">Bagi Hasil Komersial (Revenue Share)</option>
-                      </select>
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-slate-700">
+                          Estimasi Anggaran Total Proyek
+                        </label>
+                        {totalRolesFeeSum > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setEstimatedTotal(formatRupiah(totalRolesFeeSum))}
+                            className="text-[11px] text-[#0284c7] hover:underline font-semibold cursor-pointer"
+                          >
+                            Gunakan Total Honor ({formatRupiah(totalRolesFeeSum)})
+                          </button>
+                        )}
+                      </div>
+                      <CurrencyInput
+                        value={estimatedTotal}
+                        onChange={(val) => setEstimatedTotal(val)}
+                        placeholder="Rp 6.000.000"
+                        className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200/80 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all shadow-2xs font-medium"
+                      />
                     </div>
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-slate-700">
-                        Estimasi Anggaran Total
+                        Catatan Biaya Tambahan (Opsional)
                       </label>
                       <input
-                        value={estimatedTotal}
-                        onChange={(e) => setEstimatedTotal(e.target.value)}
-                        placeholder="misal: Rp 5.000.000 / Terbuka Negosiasi"
+                        value={budgetNotes}
+                        onChange={(e) => setBudgetNotes(e.target.value)}
+                        placeholder="misal: Biaya konsumsi dan transportasi di lokasi ditanggung inisiator..."
                         className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200/80 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all shadow-2xs"
                       />
                     </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-700">
-                      Catatan Tambahan Mengenai Budget
-                    </label>
-                    <textarea
-                      value={budgetNotes}
-                      onChange={(e) => setBudgetNotes(e.target.value)}
-                      placeholder="misal: Biaya konsumsi dan transportasi di lokasi ditanggung inisiator..."
-                      rows={2}
-                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200/80 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all resize-none shadow-2xs"
-                    />
                   </div>
                 </div>
               </div>
@@ -1024,8 +1092,8 @@ export default function NewProjectBriefPage() {
                           <CircleDollarSign className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                           <span className="font-semibold text-slate-900">
                             {estimatedTotal
-                              ? `${estimatedTotal} (${compensationModel === "PAID" ? "Fee Berbayar" : "Bagi Hasil"})`
-                              : `Kompensasi: ${compensationModel}`}
+                              ? `${estimatedTotal} (Honorarium Flat per Peran)`
+                              : "Honorarium Flat per Peran"}
                           </span>
                         </div>
                         {budgetNotes && (
@@ -1057,19 +1125,26 @@ export default function NewProjectBriefPage() {
                       .map((role, idx) => (
                         <div
                           key={role.id}
-                          className="p-3 bg-white/80 border border-slate-200/70 rounded-xl flex items-center gap-2.5 text-xs shadow-2xs"
+                          className="p-3 bg-white/80 border border-slate-200/70 rounded-xl flex items-center justify-between gap-2.5 text-xs shadow-2xs"
                         >
-                          <span className="w-6 h-6 rounded-lg bg-[#4CC9FE]/15 text-[#0284c7] flex items-center justify-center text-[10px] font-bold shrink-0">
-                            {idx + 1}
-                          </span>
-                          <div className="min-w-0">
-                            <span className="font-bold text-slate-900 block truncate">
-                              {role.roleLabel}
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span className="w-6 h-6 rounded-lg bg-[#4CC9FE]/15 text-[#0284c7] flex items-center justify-center text-[10px] font-bold shrink-0">
+                              {idx + 1}
                             </span>
-                            <span className="text-[10px] text-slate-500 block">
-                              {CATEGORY_LABELS[role.assetCategory] || role.assetCategory}
-                            </span>
+                            <div className="min-w-0">
+                              <span className="font-bold text-slate-900 block truncate">
+                                {role.roleLabel}
+                              </span>
+                              <span className="text-[10px] text-slate-500 block">
+                                {CATEGORY_LABELS[role.assetCategory] || role.assetCategory}
+                              </span>
+                            </div>
                           </div>
+                          {role.fee && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+                              {role.fee}
+                            </span>
+                          )}
                         </div>
                       ))}
                   </div>

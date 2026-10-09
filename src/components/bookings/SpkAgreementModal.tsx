@@ -132,8 +132,8 @@ export function SpkAgreementModal({ isOpen, onClose, booking }: SpkAgreementModa
   const isMua = !isStudio && !isModel && (targetSectorLower.includes("mua") || targetSectorLower.includes("makeup"));
   const isStylist = !isStudio && !isModel && !isMua && (targetSectorLower.includes("stylist") || targetSectorLower.includes("wardrobe"));
   const isVideographer = !isStudio && !isModel && !isMua && !isStylist && (targetSectorLower.includes("video") || targetSectorLower.includes("film"));
-  const isDesigner = !isStudio && !isModel && !isMua && !isStylist && !isVideographer && (targetSectorLower.includes("design") || targetSectorLower.includes("fashion") || targetSectorLower.includes("busana"));
-  const isPhotographer = !isStudio && !isModel && !isMua && !isStylist && !isVideographer && !isDesigner;
+  const isBrand = !isStudio && !isModel && !isMua && !isStylist && !isVideographer && (booking.target.actorType === "BRAND" || targetSectorLower.includes("brand") || targetSectorLower.includes("label") || targetSectorLower.includes("umkm") || targetSectorLower.includes("design") || targetSectorLower.includes("busana"));
+  const isPhotographer = !isStudio && !isModel && !isMua && !isStylist && !isVideographer && !isBrand;
 
   async function handleExportPdf() {
     setIsExportingPdf(true);
@@ -172,7 +172,7 @@ Platform: RAMU Creative Ecosystem (PSE Terdaftar)
 *RINGKASAN PASAL KESEPAKATAN:*
 - Pasal 1 (Jadwal): ${formattedDate} (Shift: ${terms.shiftHours} Jam)
 - Pasal 2 (Biaya & Termin): ${booking.budget || "Sesuai kesepakatan"} | ${milestoneInfo.title}
-- Pasal 3 (Lembur): Rp ${terms.overtimeRate}/jam (Toleransi ${terms.gracePeriodMinutes} mnt)
+- Pasal 3 (Lembur): ${terms.overtimeRate?.startsWith("Rp") ? terms.overtimeRate : `Rp ${terms.overtimeRate}`} (Toleransi ${terms.gracePeriodMinutes} mnt)
 - Pasal 4 (Revisi & Serah Terima): Maksimal ${terms.maxRevisions}x revisi minor; Deemed Acceptance 7 hari kalender
 - Pasal 5 (Hak Cipta & Lisensi): ${getUsageScopeLabel(terms.usageRightsScope).split(" (")[0]} selama ${getUsageDurationLabel(terms.usageRightsDuration).split(" —")[0]}. Watermark protection berlaku sebelum pelunasan.
 - Pasal 6 (Proteksi): Garansi 100% refund jika Pihak II No-Show; DP hangus jika Pihak I batal <48 jam.
@@ -202,18 +202,18 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/70 backdrop-blur-xs overflow-y-auto">
 
-      <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-stone-300 overflow-hidden my-auto max-h-[94vh] flex flex-col font-sans">
+      <div className="relative w-full max-w-4xl bg-white rounded-[22px] shadow-2xl border border-slate-300 overflow-hidden my-auto max-h-[94vh] flex flex-col font-sans">
 
-        <div className="print:hidden flex items-center justify-between px-6 py-3.5 border-b border-stone-200 bg-stone-100/80">
+        <div className="print:hidden flex items-center justify-between px-6 py-3.5 border-b border-slate-200 bg-slate-100/80">
           <div className="flex items-center gap-2.5">
-            <span className="p-1.5 rounded-lg bg-stone-900 text-amber-400">
+            <span className="p-1.5 rounded-lg bg-slate-900 text-amber-400">
               <FileText className="w-4 h-4" />
             </span>
             <div>
-              <h2 className="text-xs sm:text-sm font-bold text-stone-900">
+              <h2 className="text-xs sm:text-sm font-bold text-slate-900">
                 Surat Perjanjian Kerja Sama Jasa (Format Standar Indonesia)
               </h2>
-              <p className="text-[11px] text-stone-500 font-mono">{spkNomorResmi}</p>
+              <p className="text-[11px] text-slate-500 font-mono">{spkNomorResmi}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -221,7 +221,7 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
               type="button"
               onClick={handleExportPdf}
               disabled={isExportingPdf}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer disabled:opacity-50 shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer disabled:opacity-50 shadow-xs"
               title="Unduh Lembar SPK Resmi dalam Format Dokumen PDF"
             >
               <Download className={`w-3.5 h-3.5 ${isExportingPdf ? "animate-bounce" : ""}`} />
@@ -229,7 +229,7 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
             </button>
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-stone-300 text-stone-700 text-xs font-semibold hover:bg-stone-50 transition-colors cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors cursor-pointer shadow-xs"
               title="Cetak Dokumen Resmi A4"
             >
               <Printer className="w-3.5 h-3.5" />
@@ -247,7 +247,7 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
             </a>
             <button
               onClick={handleCopySummary}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-stone-300 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
               title="Salin Rangkuman Teks"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
@@ -255,38 +255,38 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 text-stone-400 hover:text-stone-800 hover:bg-stone-200 rounded-lg transition-colors cursor-pointer ml-1"
+              className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer ml-1"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        <div id="spk-printable-area" className="p-8 sm:p-12 overflow-y-auto space-y-6 text-stone-900 bg-white">
+        <div id="spk-printable-area" className="p-8 sm:p-12 overflow-y-auto space-y-6 text-slate-900 bg-white">
 
-          <div className="flex items-center justify-between border-b-2 border-stone-900 pb-5">
+          <div className="flex items-center justify-between border-b-2 border-slate-900 pb-5">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-stone-900 text-amber-400 flex items-center justify-center font-black text-2xl tracking-tighter shadow-xs">
+              <div className="w-12 h-12 rounded-xl bg-slate-900 text-amber-400 flex items-center justify-center font-black text-2xl tracking-tighter shadow-xs">
                 R
               </div>
               <div>
-                <div className="text-xl font-black tracking-tight text-stone-950 flex items-center gap-2">
+                <div className="text-xl font-black tracking-tight text-slate-950 flex items-center gap-2">
                   <span>RAMU INDONESIA</span>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-900 uppercase tracking-widest border border-amber-300">
                     Protokol Sah
                   </span>
                 </div>
-                <div className="text-[11px] text-stone-600 font-medium">
+                <div className="text-[11px] text-slate-600 font-medium">
                   Ekosistem Kolaborasi & Pelindung Transaksi Kreatif Nasional
                 </div>
-                <div className="text-[10px] text-stone-400">
+                <div className="text-[10px] text-slate-400">
                   Layanan Penyelenggara Sistem Elektronik (PSE) &bull; www.ramu.id
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-xs font-mono font-bold text-stone-950">{spkNomorResmi}</div>
-              <div className="text-[11px] text-stone-500">Klasifikasi: SPK-JASA-KREATIF</div>
+              <div className="text-xs font-mono font-bold text-slate-950">{spkNomorResmi}</div>
+              <div className="text-[11px] text-slate-500">Klasifikasi: SPK-JASA-KREATIF</div>
               <div className="text-[10px] text-emerald-700 font-semibold flex items-center justify-end gap-1 mt-0.5">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 <span>Tervalidasi Sistem RAMU</span>
@@ -295,36 +295,36 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
           </div>
 
           <div className="text-center pt-2 pb-1">
-            <h1 className="text-base sm:text-lg font-black uppercase tracking-wider text-stone-950 border-b border-stone-200 pb-2 inline-block">
+            <h1 className="text-base sm:text-lg font-black uppercase tracking-wider text-slate-950 border-b border-slate-200 pb-2 inline-block">
               SURAT PERJANJIAN KERJA SAMA PELAKSANAAN JASA
             </h1>
-            <p className="text-xs font-mono text-stone-600 mt-1 font-semibold">
+            <p className="text-xs font-mono text-slate-600 mt-1 font-semibold">
               Nomor: {spkNomorResmi}
             </p>
           </div>
 
-          <div className="text-xs text-stone-700 space-y-3 leading-relaxed">
+          <div className="text-xs text-slate-700 space-y-3 leading-relaxed">
             <p>
               Pada hari ini, <strong>{createdFullDate}</strong>, telah dibuat dan disepakati perjanjian kerja sama pelaksanaan jasa secara elektronik melalui platform RAMU oleh dan antara pihak-pihak di bawah ini:
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
 
-              <div className="p-4 rounded-xl border border-stone-300 bg-stone-50/70 space-y-1.5">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500 flex items-center gap-1.5 border-b border-stone-200 pb-1">
-                  <Building2 className="w-3 h-3 text-stone-500" />
+              <div className="p-4 rounded-xl border border-slate-300 bg-slate-50/70 space-y-1.5">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5 border-b border-slate-200 pb-1">
+                  <Building2 className="w-3 h-3 text-slate-500" />
                   <span>PIHAK PERTAMA (Pemberi Kerja / Klien)</span>
                 </div>
-                <div className="text-sm font-bold text-stone-950">{booking.requester.name}</div>
-                <div className="text-[11px] text-stone-600">Sektor / Bidang: {booking.requester.sector}</div>
+                <div className="text-sm font-bold text-slate-950">{booking.requester.name}</div>
+                <div className="text-[11px] text-slate-600">Sektor / Bidang: {booking.requester.sector}</div>
                 {booking.requester.location && (
-                  <div className="text-[11px] text-stone-600">Domisili / Lokasi: {booking.requester.location}</div>
+                  <div className="text-[11px] text-slate-600">Domisili / Lokasi: {booking.requester.location}</div>
                 )}
                 {booking.requester.contactPhone && (
-                  <div className="text-[11px] text-stone-600">No. Kontak: {booking.requester.contactPhone}</div>
+                  <div className="text-[11px] text-slate-600">No. Kontak: {booking.requester.contactPhone}</div>
                 )}
                 {booking.requester.contactEmail && (
-                  <div className="text-[11px] text-stone-600">Email: {booking.requester.contactEmail}</div>
+                  <div className="text-[11px] text-slate-600">Email: {booking.requester.contactEmail}</div>
                 )}
               </div>
 
@@ -333,34 +333,34 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
                   <User className="w-3 h-3 text-amber-700" />
                   <span>PIHAK KEDUA (Penyedia Jasa / Talenta Kreatif)</span>
                 </div>
-                <div className="text-sm font-bold text-stone-950">{booking.target.name}</div>
-                <div className="text-[11px] text-stone-600">
+                <div className="text-sm font-bold text-slate-950">{booking.target.name}</div>
+                <div className="text-[11px] text-slate-600">
                   Profesi: {booking.target.sector} ({booking.target.actorType})
                 </div>
                 {booking.target.location && (
-                  <div className="text-[11px] text-stone-600">Domisili / Lokasi: {booking.target.location}</div>
+                  <div className="text-[11px] text-slate-600">Domisili / Lokasi: {booking.target.location}</div>
                 )}
                 {booking.target.contactPhone && (
-                  <div className="text-[11px] text-stone-600">No. Kontak: {booking.target.contactPhone}</div>
+                  <div className="text-[11px] text-slate-600">No. Kontak: {booking.target.contactPhone}</div>
                 )}
                 {booking.target.contactEmail && (
-                  <div className="text-[11px] text-stone-600">Email: {booking.target.contactEmail}</div>
+                  <div className="text-[11px] text-slate-600">Email: {booking.target.contactEmail}</div>
                 )}
               </div>
             </div>
 
-            <p className="text-[11px] text-stone-600 italic">
+            <p className="text-[11px] text-slate-600 italic">
               PIHAK PERTAMA dan PIHAK KEDUA secara bersama-sama selanjutnya disebut sebagai <strong>&ldquo;PARA PIHAK&rdquo;</strong>. PARA PIHAK sepakat untuk mengikatkan diri dalam Surat Perjanjian Kerja ini dengan ketentuan dan pasal-pasal sebagai berikut:
             </p>
           </div>
 
-          <div className="space-y-5 text-xs text-stone-800 leading-relaxed border-t border-stone-200 pt-4">
+          <div className="space-y-5 text-xs text-slate-800 leading-relaxed border-t border-slate-200 pt-4">
 
             <div className="space-y-1.5">
-              <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
+              <h3 className="font-bold text-slate-950 text-xs uppercase tracking-wide">
                 PASAL 1: RUANG LINGKUP PEKERJAAN &amp; JADWAL PELAKSANAAN
               </h3>
-              <ol className="list-decimal pl-5 space-y-1 text-stone-700 text-[11px]">
+              <ol className="list-decimal pl-5 space-y-1 text-slate-700 text-[11px]">
                 <li>
                   PIHAK PERTAMA menunjuk PIHAK KEDUA dan PIHAK KEDUA bersedia melaksanakan jasa profesional dalam bidang <strong>{booking.target.sector}</strong>.
                 </li>
@@ -389,16 +389,16 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
             </div>
 
             <div className="space-y-1.5">
-              <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
+              <h3 className="font-bold text-slate-950 text-xs uppercase tracking-wide">
                 PASAL 2: BIAYA JASA &amp; TATA CARA PEMBAYARAN BERTAHAP
               </h3>
-              <ol className="list-decimal pl-5 space-y-1 text-stone-700 text-[11px]">
+              <ol className="list-decimal pl-5 space-y-1 text-slate-700 text-[11px]">
                 <li>
                   Total nilai honorarium/jasa yang disepakati untuk pelaksanaan pekerjaan ini adalah sebesar{" "}
-                  <strong className="text-stone-950">{booking.budget || "Sesuai tarif paket resmi"}</strong>.
+                  <strong className="text-slate-950">{booking.budget || "Sesuai tarif paket resmi"}</strong>.
                 </li>
                 <li>
-                  Mekanisme pembayaran mengacu pada skema: <strong className="text-stone-950">{milestoneInfo.title}</strong>.
+                  Mekanisme pembayaran mengacu pada skema: <strong className="text-slate-950">{milestoneInfo.title}</strong>.
                   <ul className="list-disc pl-5 mt-1 space-y-1">
                     <li>
                       <strong>Tahap I (Uang Muka / DP {terms.dpPercentage}%)</strong>: Wajib disetorkan oleh PIHAK PERTAMA guna mengunci (*lock slot*) jadwal kerja, persiapan kru, dan penahanan tanggal dari tawaran pihak lain.
@@ -421,10 +421,10 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
             </div>
 
             <div className="space-y-1.5">
-              <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
+              <h3 className="font-bold text-slate-950 text-xs uppercase tracking-wide">
                 PASAL 3: WAKTU KERJA, TOLERANSI, DAN KETENTUAN LEMBUR (OVERTIME)
               </h3>
-              <ol className="list-decimal pl-5 space-y-1 text-stone-700 text-[11px]">
+              <ol className="list-decimal pl-5 space-y-1 text-slate-700 text-[11px]">
                 <li>
                   Waktu kerja dihitung sejak kehadiran PIHAK KEDUA di lokasi kerja atau waktu panggilan (*call time*) yang disepakati.
                 </li>
@@ -432,16 +432,16 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
                   Diberikan batas toleransi (*grace period*) keterlambatan teknis maksimal <strong>{terms.gracePeriodMinutes} menit</strong> tanpa pembebanan biaya tambahan.
                 </li>
                 <li>
-                  Apabila durasi produksi melampaui batas {terms.shiftHours} jam atas permintaan atau kendala di pihak PIHAK PERTAMA, maka diberlakukan biaya lembur (*overtime fee*) sebesar <strong>Rp {terms.overtimeRate} per jam</strong> yang wajib ditambahkan pada tagihan pelunasan.
+                  Apabila durasi produksi melampaui batas {terms.shiftHours} jam atas permintaan atau kendala di pihak PIHAK PERTAMA, maka diberlakukan biaya lembur (*overtime fee*) sebesar <strong>{terms.overtimeRate?.startsWith("Rp") ? terms.overtimeRate : `Rp ${terms.overtimeRate}`}</strong> yang wajib ditambahkan pada tagihan pelunasan.
                 </li>
               </ol>
             </div>
 
             <div className="space-y-1.5">
-              <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
+              <h3 className="font-bold text-slate-950 text-xs uppercase tracking-wide">
                 PASAL 4: HASIL KARYA, BATAS REVISI, DAN KETENTUAN KHUSUS PROFESI
               </h3>
-              <ol className="list-decimal pl-5 space-y-1 text-stone-700 text-[11px]">
+              <ol className="list-decimal pl-5 space-y-1 text-slate-700 text-[11px]">
                 <li>
                   <strong>Batasan Revisi Minor (Termasuk dalam Jasa)</strong>: Pekerjaan mencakup maksimal <strong>{terms.maxRevisions} (dua) kali putaran revisi minor</strong> yang terbatas pada: penyesuaian pencahayaan/kontras (*exposure/color tone*), pemotongan/pembingkaian (*cropping/framing*), perapian noda debu latar atau cela kulit minor, dan seleksi draf dalam batas toleransi wajar brief.
                 </li>
@@ -449,11 +449,11 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
                   <strong>Batasan Revisi Mayor (Dikenakan Biaya Tambahan)</strong>: Perubahan konsep visual di luar moodboard yang telah disetujui, penggantian talenta/busana/lokasi pasca-produksi, manipulasi komposit grafis berat (*heavy compositing/CGI*), atau permintaan pengambilan gambar ulang (*reshoot*) diklasifikasikan sebagai Pekerjaan Tambahan dan dikenakan adendum biaya terpisah atau biaya revisi ekstra ({terms.extraRevisionFee || "Rp 100.000 / foto"}).
                 </li>
                 <li>
-                  <strong>Protokol Pemeliharaan Busana Sampel &amp; Alat Produksi</strong>: PARA PIHAK wajib menjaga seluruh sampel busana desainer, properti panggung, dan peralatan teknis (kamera, lensa, tata cahaya) dengan prinsip kehati-hatian wajar (*duty of care*). Kerusakan permanen, noda busana, atau kerusakan alat akibat kelalaian berat (*gross negligence*) menjadi tanggung jawab pihak yang melakukan tindakan fisik langsung tersebut.
+                  <strong>Protokol Pemeliharaan Busana Sampel &amp; Alat Produksi</strong>: PARA PIHAK wajib menjaga seluruh sampel busana brand/wardrobe, properti panggung, dan peralatan teknis (kamera, lensa, tata cahaya) dengan prinsip kehati-hatian wajar (*duty of care*). Kerusakan permanen, noda busana, atau kerusakan alat akibat kelalaian berat (*gross negligence*) menjadi tanggung jawab pihak yang melakukan tindakan fisik langsung tersebut.
                 </li>
 
                 <li>
-                  <strong>Garansi Kesesuaian Ukuran Busana &amp; Sampel Desainer (Wardrobe Sizing Match Guarantee)</strong>: PARA PIHAK wajib memastikan kecocokan ukuran busana sampel sebelum sesi produksi. Khusus talenta model, PIHAK KEDUA menjamin data ukuran tubuh pada Comp Card (Tinggi Badan, Lingkar Dada, Lingkar Pinggang, Lingkar Pinggul, Ukuran Sepatu) akurat dan mutakhir dalam 30 (tiga puluh) hari terakhir. PIHAK PERTAMA (Brand/Stylist/Desainer) bertanggung jawab menyediakan busana sampel yang sesuai dengan batas toleransi ukuran tersebut dan dilarang memaksakan pemakaian busana yang berisiko merusak jahitan atau mengorbankan kenyamanan fisik talenta.
+                  <strong>Garansi Kesesuaian Ukuran Busana &amp; Sampel Brand (Wardrobe Sizing Match Guarantee)</strong>: PARA PIHAK wajib memastikan kecocokan ukuran busana sampel sebelum sesi produksi. Khusus talenta model, PIHAK KEDUA menjamin data ukuran tubuh pada Comp Card (Tinggi Badan, Lingkar Dada, Lingkar Pinggang, Lingkar Pinggul, Ukuran Sepatu) akurat dan mutakhir dalam 30 (tiga puluh) hari terakhir. PIHAK PERTAMA (Brand/Stylist) bertanggung jawab menyediakan busana sampel yang sesuai dengan batas toleransi ukuran tersebut dan dilarang memaksakan pemakaian busana yang berisiko merusak jahitan atau mengorbankan kenyamanan fisik talenta.
                 </li>
                 <li>
                   <strong>Batas Garansi Retensi Arsip Berkas Master (90 Hari Kalender)</strong>: PIHAK KEDUA (Fotografer/Videografer/Kreator) berkewajiban menyimpan cadangan arsip berkas master hasil pekerjaan beresolusi penuh (<em>High-Res &amp; Clean Master File</em>) minimal selama <strong>90 (sembilan puluh) hari kalender</strong> terhitung sejak tanggal serah terima final disetujui. Setelah lewat batas 90 hari, PIHAK PERTAMA bertanggung jawab penuh atas penyimpanan berkas lokalnya dan PIHAK KEDUA dibebaskan dari tanggung jawab kehilangan data serta berhak mengenakan biaya pemulihan arsip (<em>archival retrieval fee</em>) jika diminta mengirimkan ulang.
@@ -487,9 +487,9 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
                     <strong>Ketentuan Khusus Videografi</strong>: Luaran video sesuai rasio ({terms.roleSpecifics.aspectRatiosIncluded || "16:9 Landscape & 9:16 Vertikal"}). {terms.roleSpecifics.musicLicenseIncluded ? "Sudah termasuk royalti musik komersial standar." : "Lisensi musik komersial khusus disediakan oleh PIHAK PERTAMA."}
                   </li>
                 )}
-                {isDesigner && (
+                {isBrand && (
                   <li>
-                    <strong>Ketentuan Khusus Desainer Busana (Fashion Designer)</strong>: {terms.roleSpecifics.fittingPolicy || "Fitting busana dilakukan H-1 atau di lokasi sebelum sesi dimulai"}. {terms.roleSpecifics.dryCleaningResponsibility || "Biaya laundry/dry cleaning busana pasca-sesi ditanggung oleh PIHAK PERTAMA selaku peminjam/penyelenggara"}. {terms.roleSpecifics.noAlteringPolicy || "Dilarang memotong, mengubah jahitan, atau merusak siluet busana tanpa izin tertulis desainer"}. Hak cipta desain dan pola tetap melekat pada desainer, dan PIHAK PERTAMA wajib mencantumkan tag/kredit nama desainer pada seluruh materi publikasi.
+                    <strong>Ketentuan Khusus Sampel Busana &amp; Produk Brand</strong>: {terms.roleSpecifics.fittingPolicy || "Fitting sampel busana dilakukan sebelum sesi produksi dimulai"}. {terms.roleSpecifics.dryCleaningResponsibility || "Biaya penatu/dry cleaning busana pasca-sesi ditanggung oleh penyelenggara produksi"}. {terms.roleSpecifics.noAlteringPolicy || "Dilarang memotong, mengubah jahitan, atau merusak siluet busana tanpa izin tertulis brand"}. Hak merek dan produk tetap melekat pada brand, dan seluruh tim wajib mencantumkan tag/kredit nama brand pada seluruh materi publikasi.
                   </li>
                 )}
                 {isPhotographer && (
@@ -505,15 +505,15 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
                 <Award className="w-3.5 h-3.5 text-amber-700" />
                 <span>PASAL 5: HAK CIPTA, LISENSI PENGGUNAAN (USAGE RIGHTS), DAN HAK CITRA DIRI</span>
               </h3>
-              <ol className="list-decimal pl-5 space-y-1 text-stone-800 text-[11px]">
+              <ol className="list-decimal pl-5 space-y-1 text-slate-800 text-[11px]">
                 <li>
                   <strong>Kepemilikan Hak Cipta</strong>: Hak Cipta (Hak Moral dan Hak Ekonomi Dasar) atas seluruh karya asli foto, rekaman video, rancangan busana, dan hasil kreatif tetap merupakan milik sah dan melekat pada PIHAK KEDUA sebagai Pencipta berdasarkan Undang-Undang No. 28 Tahun 2014 tentang Hak Cipta.
                 </li>
                 <li>
-                  <strong>Ruang Lingkup Lisensi Penggunaan</strong>: PIHAK KEDUA memberikan hak pakai/lisensi non-eksklusif kepada PIHAK PERTAMA khusus untuk media: <strong className="text-stone-950">{getUsageScopeLabel(terms.usageRightsScope)}</strong>.
+                  <strong>Ruang Lingkup Lisensi Penggunaan</strong>: PIHAK KEDUA memberikan hak pakai/lisensi non-eksklusif kepada PIHAK PERTAMA khusus untuk media: <strong className="text-slate-950">{getUsageScopeLabel(terms.usageRightsScope)}</strong>.
                 </li>
                 <li>
-                  <strong>Jangka Waktu Lisensi</strong>: Lisensi penayangan berlaku selama <strong className="text-stone-950">{getUsageDurationLabel(terms.usageRightsDuration)}</strong> terhitung sejak tanggal pelunasan biaya jasa diselesaikan penuh.
+                  <strong>Jangka Waktu Lisensi</strong>: Lisensi penayangan berlaku selama <strong className="text-slate-950">{getUsageDurationLabel(terms.usageRightsDuration)}</strong> terhitung sejak tanggal pelunasan biaya jasa diselesaikan penuh.
                 </li>
                 <li>
                   <strong>Hak Citra Diri (Likeness Rights)</strong>: Khusus talenta model, penayangan wajah, postur tubuh, dan citra diri dibatasi hanya pada ruang lingkup media dan durasi yang disepakati di atas. Penggunaan untuk keperluan di luar cakupan ini wajib memperoleh persetujuan tertulis terpisah.
@@ -528,10 +528,10 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
             </div>
 
             <div className="space-y-1.5">
-              <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
+              <h3 className="font-bold text-slate-950 text-xs uppercase tracking-wide">
                 PASAL 6: PEMBATALAN, KETIDAKHADIRAN, DAN JAMINAN REFUND DUA ARAH
               </h3>
-              <ol className="list-decimal pl-5 space-y-1 text-stone-700 text-[11px]">
+              <ol className="list-decimal pl-5 space-y-1 text-slate-700 text-[11px]">
                 <li>
                   <strong>Jaminan untuk PIHAK PERTAMA (Garansi Anti No-Show)</strong>: Apabila PIHAK KEDUA berhalangan hadir pada tanggal pelaksanaan tanpa menyediakan pengganti dengan kualifikasi setara yang disetujui PIHAK PERTAMA, maka seluruh Uang Muka (DP) yang telah dibayarkan wajib dikembalikan <strong>100% penuh</strong> kepada PIHAK PERTAMA paling lambat 1x24 jam.
                 </li>
@@ -542,10 +542,10 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
             </div>
 
             <div className="space-y-1.5">
-              <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
+              <h3 className="font-bold text-slate-950 text-xs uppercase tracking-wide">
                 PASAL 7: KEADAAN MEMAKSA (FORCE MAJEURE) &amp; KONTINGENSI CUACA BURUK
               </h3>
-              <ol className="list-decimal pl-5 space-y-1.5 text-stone-700 text-[11px]">
+              <ol className="list-decimal pl-5 space-y-1.5 text-slate-700 text-[11px]">
                 <li>
                   <strong>Keadaan Memaksa Umum</strong>: Dalam hal terjadi peristiwa di luar kendali PARA PIHAK seperti bencana alam, kebakaran, kerusuhan massal, kecelakaan fatal, atau sakit mendadak yang dibuktikan dengan surat keterangan resmi rumah sakit, PARA PIHAK sepakat untuk menjadwalkan ulang (*reschedule*) pelaksanaan pekerjaan tanpa dikenakan penalti.
                 </li>
@@ -559,10 +559,10 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
             </div>
 
             <div className="space-y-1.5">
-              <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
+              <h3 className="font-bold text-slate-950 text-xs uppercase tracking-wide">
                 PASAL 8: PERLINDUNGAN HUBUNGAN BISNIS AGENSI &amp; ANTI-CIRCUMVENTION (12 BULAN)
               </h3>
-              <ol className="list-decimal pl-5 space-y-1 text-stone-700 text-[11px]">
+              <ol className="list-decimal pl-5 space-y-1 text-slate-700 text-[11px]">
                 <li>
                   <strong>Larangan Pembajakan Klien Langsung (Non-Circumvention)</strong>: Dalam hal penugasan atau hubungan kerja ini diinisiasi oleh Agensi, Production House (PH), Kolektif, atau Perantara Resmi yang memperkenalkan talenta dengan Klien Brand Pihak Ketiga, maka selama masa perjanjian dan untuk jangka waktu <strong>12 (dua belas) bulan kalender</strong> setelah tanggal penyelesaian proyek, PIHAK KEDUA dilarang melakukan kontak bisnis mandiri secara langsung (<em>direct soliciting/circumvention</em>) dengan Klien pihak ketiga tersebut untuk jenis pekerjaan yang serupa tanpa persetujuan tertulis dari inisiator awal.
                 </li>
@@ -573,10 +573,10 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
             </div>
 
             <div className="space-y-1.5">
-              <h3 className="font-bold text-stone-950 text-xs uppercase tracking-wide">
+              <h3 className="font-bold text-slate-950 text-xs uppercase tracking-wide">
                 PASAL 9: PENYELESAIAN PERSELISIHAN &amp; KETENTUAN HUKUM
               </h3>
-              <ol className="list-decimal pl-5 space-y-1 text-stone-700 text-[11px]">
+              <ol className="list-decimal pl-5 space-y-1 text-slate-700 text-[11px]">
                 <li>
                   Segala perselisihan yang timbul dari pelaksanaan Perjanjian ini akan diselesaikan terlebih dahulu melalui musyawarah mufakat secara kekeluargaan, dengan difasilitasi oleh platform RAMU sebagai penyedia catatan jejak digital (*audit trail*).
                 </li>
@@ -590,8 +590,8 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
             </div>
           </div>
 
-          <div className="pt-6 border-t-2 border-stone-900 space-y-4">
-            <p className="text-[11px] text-stone-600 leading-relaxed">
+          <div className="pt-6 border-t-2 border-slate-900 space-y-4">
+            <p className="text-[11px] text-slate-600 leading-relaxed">
               Demikian Draf Surat Perjanjian Kerja Sama Jasa ini disusun dan disetujui secara sadar, sukarela, dan tanpa paksaan oleh PARA PIHAK melalui persetujuan digital di platform RAMU sebagai kesepakatan acuan bersama dalam pelaksanaan proyek.
             </p>
             <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-900 text-[10px] leading-relaxed">
@@ -601,49 +601,49 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
             <div className="grid grid-cols-2 gap-8 pt-4">
 
               <div className="text-center space-y-2">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
                   PIHAK PERTAMA (Pemberi Kerja)
                 </div>
-                <div className="h-16 flex flex-col items-center justify-center border border-dashed border-stone-300 rounded-xl bg-stone-50 p-2">
+                <div className="h-16 flex flex-col items-center justify-center border border-dashed border-slate-300 rounded-xl bg-slate-50 p-2">
                   <span className="text-[9px] font-mono text-emerald-700 font-bold bg-emerald-100 px-2.5 py-0.5 rounded border border-emerald-300">
                     DISETUJUI DIGITAL VIA RAMU
                   </span>
-                  <span className="text-[9px] text-stone-400 font-mono mt-1">
+                  <span className="text-[9px] text-slate-400 font-mono mt-1">
                     Timestamp: {dateObj.toISOString().slice(0, 19).replace("T", " ")} WIB
                   </span>
                 </div>
-                <div className="font-bold text-stone-950 text-xs border-t border-stone-400 pt-1 mt-1">
+                <div className="font-bold text-slate-950 text-xs border-t border-slate-400 pt-1 mt-1">
                   {booking.requester.name}
                 </div>
-                <div className="text-[10px] text-stone-500">Pemberi Kerja / Klien</div>
+                <div className="text-[10px] text-slate-500">Pemberi Kerja / Klien</div>
               </div>
 
               <div className="text-center space-y-2">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
                   PIHAK KEDUA (Pelaksana Jasa)
                 </div>
-                <div className="h-16 flex flex-col items-center justify-center border border-dashed border-stone-300 rounded-xl bg-stone-50 p-2">
+                <div className="h-16 flex flex-col items-center justify-center border border-dashed border-slate-300 rounded-xl bg-slate-50 p-2">
                   <span className="text-[9px] font-mono text-emerald-700 font-bold bg-emerald-100 px-2.5 py-0.5 rounded border border-emerald-300">
                     TERVERIFIKASI PROTOKOL RAMU
                   </span>
-                  <span className="text-[9px] text-stone-400 font-mono mt-1">
+                  <span className="text-[9px] text-slate-400 font-mono mt-1">
                     Ref ID: {booking.id.slice(0, 12)}
                   </span>
                 </div>
-                <div className="font-bold text-stone-950 text-xs border-t border-stone-400 pt-1 mt-1">
+                <div className="font-bold text-slate-950 text-xs border-t border-slate-400 pt-1 mt-1">
                   {booking.target.name}
                 </div>
-                <div className="text-[10px] text-stone-500">{booking.target.sector} / Penyedia Jasa</div>
+                <div className="text-[10px] text-slate-500">{booking.target.sector} / Penyedia Jasa</div>
               </div>
             </div>
 
             {/* AUDIT TRAIL KRIPTOGRAFIS SHA-256 RESMI RAMU */}
-            <div className="pt-4 border-t border-stone-200 space-y-2.5">
-              <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200/90 text-stone-700 space-y-2">
-                <div className="flex items-center justify-between border-b border-stone-200/60 pb-2">
+            <div className="pt-4 border-t border-slate-200 space-y-2.5">
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/90 text-slate-700 space-y-2">
+                <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
                   <div className="flex items-center gap-2">
                     <Fingerprint className="w-4 h-4 text-emerald-700" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-stone-900">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900">
                       Sertifikasi Kriptografis &amp; Jejak Audit Digital (Digital Audit Trail)
                     </span>
                   </div>
@@ -654,16 +654,16 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[10px]">
                   <div>
-                    <span className="text-stone-400 block font-semibold">Fingerprint Dokumen (SHA-256 Checksum):</span>
-                    <span className="font-mono text-stone-900 font-bold break-all select-all">{auditTrail.sha256Hash}</span>
+                    <span className="text-slate-400 block font-semibold">Fingerprint Dokumen (SHA-256 Checksum):</span>
+                    <span className="font-mono text-slate-900 font-bold break-all select-all">{auditTrail.sha256Hash}</span>
                   </div>
                   <div>
-                    <span className="text-stone-400 block font-semibold">Rujukan Bukti Elektronik Sah:</span>
-                    <span className="text-stone-800 font-medium">{auditTrail.legalStandard}</span>
+                    <span className="text-slate-400 block font-semibold">Rujukan Bukti Elektronik Sah:</span>
+                    <span className="text-slate-800 font-medium">{auditTrail.legalStandard}</span>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-[9px] text-stone-500 pt-1 border-t border-stone-200/60 gap-1">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-[9px] text-slate-500 pt-1 border-t border-slate-200/60 gap-1">
                   <span>Penyelenggara Sistem Elektronik (PSE): RAMU Creative Tech Ecosystem</span>
                   <span className="font-mono">Timestamp Hash: {auditTrail.timestampIso}</span>
                 </div>
@@ -672,14 +672,14 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
           </div>
         </div>
 
-        <div className="print:hidden px-6 py-3 border-t border-stone-200 bg-stone-50 flex items-center justify-between text-xs text-stone-600">
+        <div className="print:hidden px-6 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-600">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
             <span>Dokumen tersimpan aman &amp; mengikat kedua belah pihak di RAMU</span>
           </div>
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-stone-900 hover:bg-black text-white rounded-xl font-bold transition-colors cursor-pointer text-xs shadow-xs"
+            className="px-5 py-2 bg-slate-900 hover:bg-black text-white rounded-xl font-bold transition-colors cursor-pointer text-xs shadow-xs"
           >
             Tutup Dokumen
           </button>

@@ -20,6 +20,7 @@ export interface ProjectBriefRole {
   id: string;
   roleLabel: string;
   assetCategory: string;
+  description?: string | null;
   isFilled: boolean;
   interests?: { id: string; status: string }[];
 }
@@ -120,7 +121,7 @@ export function ProjectBriefCard({
       (uSector.includes("mua") && (rLabel.includes("makeup") || rLabel.includes("mua"))) ||
       (uSector.includes("model") && rLabel.includes("model")) ||
       (uSector.includes("stylist") && rLabel.includes("stylist")) ||
-      (uSector.includes("desain") && rLabel.includes("desain"))
+      (uSector.includes("brand") && rLabel.includes("brand"))
     );
   };
 
@@ -129,10 +130,19 @@ export function ProjectBriefCard({
   );
 
   // Formatting compensation label & budget
-  const compKey = (compensationModel || "").toUpperCase();
   const estimatedTotal = budget?.estimatedTotal;
+  const roleFees = (budget?.roleFees as Record<string, string>) || {};
   const targetLaunch = timeline?.targetLaunch;
   const estimatedDuration = timeline?.estimatedDuration;
+
+  const getRoleFee = (role: { roleLabel: string; description?: string | null }) => {
+    if (roleFees[role.roleLabel]) return roleFees[role.roleLabel];
+    if (role.description?.includes("[Estimasi Fee:")) {
+      const match = role.description.match(/\[Estimasi Fee:\s*([^\]]+)\]/);
+      if (match?.[1]) return match[1].trim();
+    }
+    return null;
+  };
 
   // Render Compensation Badge
   const renderCompensationBadge = () => {
@@ -140,22 +150,23 @@ export function ProjectBriefCard({
       return (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs">
           <CircleDollarSign className="w-3.5 h-3.5 text-emerald-600" />
-          <span>{estimatedTotal}</span>
+          <span>Fee: {estimatedTotal}</span>
         </span>
       );
     }
-    if (compKey === "REVENUE_SHARE") {
+    const hasAnyFee = Object.keys(roleFees).length > 0;
+    if (hasAnyFee) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-sky-50 text-sky-800 border border-sky-200/80 shadow-2xs">
-          <CircleDollarSign className="w-3.5 h-3.5 text-sky-600" />
-          <span>Bagi Hasil Komersial</span>
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs">
+          <CircleDollarSign className="w-3.5 h-3.5 text-emerald-600" />
+          <span>Estimasi Fee per Peran</span>
         </span>
       );
     }
     return (
       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs">
         <CircleDollarSign className="w-3.5 h-3.5 text-emerald-600" />
-        <span>Fee Komersial (Paid)</span>
+        <span>Honorarium Flat per Peran</span>
       </span>
     );
   };
@@ -237,6 +248,7 @@ export function ProjectBriefCard({
             <div className="flex flex-wrap gap-1.5">
               {neededRoles.slice(0, 3).map((role) => {
                 const matchesUser = checkRoleMatchesUser(role.roleLabel);
+                const fee = getRoleFee(role);
                 return (
                   <span
                     key={role.id}
@@ -248,7 +260,10 @@ export function ProjectBriefCard({
                         : "bg-white/80 text-slate-700 border-white/80 font-medium"
                     }`}
                   >
-                    {role.roleLabel}
+                    <span>{role.roleLabel}</span>
+                    {fee && !role.isFilled && (
+                      <span className="ml-1 opacity-90 font-bold">&bull; {fee}</span>
+                    )}
                   </span>
                 );
               })}
@@ -414,6 +429,7 @@ export function ProjectBriefCard({
           <div className="flex flex-wrap gap-1.5">
             {neededRoles.map((role) => {
               const matchesUser = checkRoleMatchesUser(role.roleLabel);
+              const fee = getRoleFee(role);
               return (
                 <span
                   key={role.id}
@@ -435,6 +451,9 @@ export function ProjectBriefCard({
                     />
                   )}
                   <span>{role.roleLabel}</span>
+                  {fee && !role.isFilled && (
+                    <span className="font-semibold text-emerald-700 ml-0.5">&bull; {fee}</span>
+                  )}
                   {matchesUser && !role.isFilled && (
                     <span className="text-[9px] font-bold text-white/90 ml-0.5">
                       (Anda)

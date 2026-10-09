@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { X, Calendar, Loader2, CheckCircle2, ArrowRight, ShieldCheck, Clock, Sparkles, Building2, Lock, AlertCircle } from "lucide-react";
 import { createBookingRequest } from "@/app/api/bookings/actions";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 import {
   ServicePackage,
   TermsAndConditionsConfig,
@@ -338,7 +339,7 @@ export function BookingModal({
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jadwal Fitting &amp; Serah Terima Busana (Opsional)</label>
             <input
               type="text"
-              placeholder="Misal: Fitting H-1 di studio desainer"
+              placeholder="Misal: Fitting H-1 sebelum sesi pemotretan"
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
               value={details.fittingSchedule || ""}
               onChange={(e) => handleDetailChange("fittingSchedule", e.target.value)}
@@ -585,11 +586,11 @@ export function BookingModal({
 
             <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
               <Link
-                href="/dashboard/bookings"
+                href="/collaborations?section=contracts"
                 onClick={handleClose}
                 className="w-full sm:w-auto px-6 py-3 btn-primary-pill text-white rounded-full text-xs uppercase tracking-wider font-bold transition-colors inline-flex items-center justify-center gap-2 shadow-md shadow-[#4CC9FE]/25"
               >
-                <span>Pantau Status di Dashboard</span>
+                <span>Pantau Status di Workspace &amp; Kontrak</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <button
@@ -671,19 +672,19 @@ export function BookingModal({
                       </span>
                     </div>
                     <div className="space-y-0.5">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">📦 2. Deliverables Utama:</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">2. Deliverables Utama:</span>
                       <span className="font-semibold text-slate-800 block pl-3">
                         {selectedPackage.deliverablesSummary || selectedPackage.features?.[0] || "Sesuai rincian paket terdaftar"}
                       </span>
                     </div>
                     <div className="space-y-0.5">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">⚖️ 3. Hak Siar / Lisensi IP:</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">3. Hak Siar / Lisensi IP:</span>
                       <span className="font-semibold text-slate-800 block pl-3">
                         {selectedPackage.usageRights || getUsageScopeLabel(selectedUsageScope)}
                       </span>
                     </div>
                     <div className="space-y-0.5">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">🛠️ 4. Alat &amp; Fasilitas:</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">4. Alat &amp; Fasilitas:</span>
                       <span className="font-semibold text-slate-800 block pl-3">
                         {selectedPackage.equipmentIncluded || "Peralatan standar siap pakai on-set"}
                       </span>
@@ -801,12 +802,11 @@ export function BookingModal({
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
                       {isBrand ? "Estimasi Anggaran / Nilai Kerjasama (Opsional)" : "Penawaran Budget (Opsional)"}
                     </label>
-                    <input
-                      type="text"
-                      placeholder={isBrand ? "Misal: Rp 5.000.000 / Terbuka Negosiasi Fee Komersial" : "Misal: Rp 5.000.000 atau Rate Standar"}
+                    <CurrencyInput
+                      placeholder="Rp 5.000.000"
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                       value={budget}
-                      onChange={(e) => setBudget(e.target.value)}
+                      onChange={(val) => setBudget(val)}
                     />
                   </div>
 

@@ -69,7 +69,7 @@ export function StylistSpecsCard({ attributes, actorName, isCurrentActor, actorA
   ];
 
   const showroomPartners = attributes.showroom_partners || [
-    "Showroom Desainer Mode Jakarta & Bandung",
+    "Showroom Brand Mode Jakarta & Bandung",
     "Arsip Vintage & Rare Fashion Koleksi Pribadi",
     "Jejaring Pengrajin Kain Tradisional (Tenun & Batik)",
     "Studio Aksesoris & Perhiasan Etnik Nusantara",

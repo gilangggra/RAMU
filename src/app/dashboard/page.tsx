@@ -29,6 +29,7 @@ import {
   SlidersHorizontal,
   Eye,
   Sparkles,
+  Compass,
 } from "lucide-react";
 import { CoCreditRequestsCard, PendingCoCredit } from "@/components/dashboard/CoCreditRequestsCard";
 import { RecentNotificationsCard } from "@/components/dashboard/RecentNotificationsCard";
@@ -439,7 +440,7 @@ export default async function DashboardPage() {
           {/* LEFT COLUMN: IDENTITY ANCHOR & SHORTCUTS (3 Cols) */}
           <aside className="lg:col-span-3 space-y-4 lg:sticky lg:top-6">
             {/* Identity Card */}
-            <div className="rounded-[24px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] overflow-hidden">
+            <div className="rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] overflow-hidden">
               <div className="h-18 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 relative">
                 <span className="absolute top-2.5 right-2.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/15 backdrop-blur-md text-white border border-white/20">
                   {primaryActor.sector}
@@ -460,17 +461,17 @@ export default async function DashboardPage() {
                 <div className="mt-2.5 space-y-0.5">
                   <Link
                     href={`/directory/${primaryActor.id}`}
-                    className="font-bold text-sm text-[#111827] hover:text-[#0284c7] transition-colors block"
+                    className="font-bold text-sm text-slate-900 hover:text-[#0284c7] transition-colors block"
                   >
                     {primaryActor.name}
                   </Link>
-                  <p className="text-xs text-[#4B5563] font-medium">
+                  <p className="text-xs text-slate-600 font-medium">
                     {primaryActor.location || "Indonesia"}
                   </p>
                 </div>
 
                 {primaryActor.description && (
-                  <p className="text-xs text-[#4B5563] mt-2 leading-relaxed">
+                  <p className="text-xs text-slate-600 mt-2 leading-relaxed">
                     {primaryActor.description}
                   </p>
                 )}
@@ -478,25 +479,25 @@ export default async function DashboardPage() {
 
               {/* Quick Key Metrics */}
               <div className="border-t border-slate-100 mt-3.5 pt-3 px-4 pb-3 space-y-2 text-xs">
-                <div className="flex items-center justify-between text-[#4B5563]">
+                <div className="flex items-center justify-between text-slate-600">
                   <span className="font-medium">Resource Anda</span>
-                  <span className="font-bold text-[#111827] tabular-nums">{inventoryResourceCount}</span>
+                  <span className="font-bold text-slate-900 tabular-nums">{inventoryResourceCount}</span>
                 </div>
-                <div className="flex items-center justify-between text-[#4B5563]">
+                <div className="flex items-center justify-between text-slate-600">
                   <span className="font-medium">Brief Dibuat</span>
-                  <span className="font-bold text-[#111827] tabular-nums">{briefStats.myBriefCount}</span>
+                  <span className="font-bold text-slate-900 tabular-nums">{briefStats.myBriefCount}</span>
                 </div>
-                <div className="flex items-center justify-between text-[#4B5563]">
+                <div className="flex items-center justify-between text-slate-600">
                   <span className="font-medium">Pesanan Masuk</span>
-                  <span className="font-bold text-[#111827] tabular-nums">{pendingBookingCount}</span>
+                  <span className="font-bold text-slate-900 tabular-nums">{pendingBookingCount}</span>
                 </div>
               </div>
 
               {/* Profile Readiness Bar */}
               <div className="border-t border-slate-100 pt-3 px-4 pb-3.5 space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-[#4B5563]">Kesiapan Profil</span>
-                  <span className="font-bold text-[#111827] tabular-nums">
+                  <span className="font-medium text-slate-600">Kesiapan Profil</span>
+                  <span className="font-bold text-slate-900 tabular-nums">
                     {readinessScore}%
                   </span>
                 </div>
@@ -507,17 +508,17 @@ export default async function DashboardPage() {
                   />
                 </div>
                 <Link
-                  href="/readiness"
+                  href="/settings"
                   className="font-semibold text-[#0284c7] hover:text-[#0369a1] inline-flex items-center gap-1 transition-colors"
                 >
-                  <span>Kelola Kesiapan Profil</span>
+                  <span>Kelola Pengaturan Profil</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>
 
             {/* Navigasi Cepat Card */}
-            <div className="p-4 sm:p-5 rounded-[24px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-1 text-xs">
+            <div className="p-4 sm:p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-1 text-xs">
               <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2.5 py-1">
                 Navigasi Cepat
               </h3>
@@ -534,15 +535,15 @@ export default async function DashboardPage() {
                 </span>
               </Link>
               <Link
-                href="/readiness"
+                href="/showcase"
                 className="flex items-center justify-between px-2.5 py-2 rounded-xl text-slate-700 hover:bg-[#4CC9FE]/10 hover:text-[#0284c7] transition-all font-medium group"
               >
                 <div className="flex items-center gap-2.5">
-                  <Layers className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#0284c7] transition-colors" />
-                  <span>Inventaris &amp; Alat</span>
+                  <Compass className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#0284c7] transition-colors" />
+                  <span>Karya Portofolio</span>
                 </div>
                 <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 group-hover:bg-white group-hover:text-[#0284c7] border border-transparent group-hover:border-[#4CC9FE]/30 tabular-nums transition-colors">
-                  {inventoryResourceCount}
+                  {portfolioCount}
                 </span>
               </Link>
               <Link
@@ -597,7 +598,7 @@ export default async function DashboardPage() {
             )}
 
             {/* LinkedIn-Style Action Prompt Box */}
-            <div className="p-4 sm:p-5 rounded-[24px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-3">
+            <div className="p-4 sm:p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-3">
               <div className="flex items-center gap-3">
                 <ActorAvatar
                   name={primaryActor.name}
@@ -607,7 +608,7 @@ export default async function DashboardPage() {
                 />
                 <Link
                   href="/projects/new"
-                  className="flex-1 bg-white/70 hover:bg-white/95 border border-white/90 hover:border-[#4CC9FE]/50 text-[#4B5563] hover:text-[#111827] text-xs px-4 py-2.5 rounded-full transition-all font-medium flex items-center justify-between shadow-xs"
+                  className="flex-1 bg-white/70 hover:bg-white/95 border border-white/90 hover:border-[#4CC9FE]/50 text-slate-600 hover:text-slate-900 text-xs px-4 py-2.5 rounded-full transition-all font-medium flex items-center justify-between shadow-xs"
                 >
                   <span>Mencari kolaborator atau tawarkan studio? Inisiasi brief...</span>
                   <Plus className="w-3.5 h-3.5 text-slate-400" />
@@ -623,14 +624,14 @@ export default async function DashboardPage() {
                   <span className="truncate font-semibold">Inisiasi Brief</span>
                 </Link>
                 <Link
-                  href="/readiness"
+                  href="/showcase"
                   className="inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-full text-slate-700 hover:text-[#0284c7] hover:bg-[#4CC9FE]/10 transition-all group"
                 >
-                  <Layers className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#0284c7] transition-colors" />
-                  <span className="truncate font-semibold">Tawarkan Alat</span>
+                  <Compass className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#0284c7] transition-colors" />
+                  <span className="truncate font-semibold">Upload Karya</span>
                 </Link>
                 <Link
-                  href="/collaborate"
+                  href="/directory?tab=matched"
                   className="inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-full text-slate-700 hover:text-[#0284c7] hover:bg-[#4CC9FE]/10 transition-all group"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#0284c7] transition-colors" />
@@ -680,7 +681,7 @@ export default async function DashboardPage() {
                   <div className="flex items-center justify-between px-1">
                     <div className="flex items-center gap-2">
                       <Megaphone className="w-4 h-4 text-slate-700" />
-                      <h2 className="text-sm font-bold text-[#111827] tracking-tight">
+                      <h2 className="text-sm font-bold text-slate-900 tracking-tight">
                         Peluang Kolaborasi Terbuka
                       </h2>
                       <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#4CC9FE]/15 text-[#0284c7] border border-[#4CC9FE]/30">
@@ -699,13 +700,13 @@ export default async function DashboardPage() {
 
                   {/* Empty state or Brief cards */}
                   {briefStats.recentOpenBriefs.length === 0 ? (
-                    <div className="p-8 rounded-[24px] bg-white/50 backdrop-blur-xl border border-dashed border-white/90 text-center space-y-2.5 shadow-xs">
+                    <div className="p-8 rounded-[22px] bg-white/50 backdrop-blur-xl border border-dashed border-white/90 text-center space-y-2.5 shadow-xs">
                       <div className="w-10 h-10 rounded-full bg-white/95 border border-white/90 shadow-xs flex items-center justify-center mx-auto text-slate-400">
                         <Megaphone className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-[#111827]">Belum ada brief terbuka</p>
-                        <p className="text-xs text-[#4B5563] max-w-sm mx-auto mt-0.5">
+                        <p className="text-xs font-bold text-slate-900">Belum ada brief terbuka</p>
+                        <p className="text-xs text-slate-600 max-w-sm mx-auto mt-0.5">
                           Inisiasi brief proyek Anda sendiri untuk mengundang kolaborator komplementer.
                         </p>
                       </div>
@@ -724,7 +725,7 @@ export default async function DashboardPage() {
                         return (
                           <article
                             key={brief.id}
-                            className="p-5 sm:p-6 rounded-[24px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] hover:bg-white/75 hover:border-white transition-all space-y-3.5 group"
+                            className="p-5 sm:p-6 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] hover:bg-white/75 hover:border-white transition-all space-y-3.5 group"
                           >
                             {/* Creator Info Header */}
                             <div className="flex items-start justify-between gap-3">
@@ -738,11 +739,11 @@ export default async function DashboardPage() {
                                 <div className="min-w-0">
                                   <Link
                                     href={`/directory/${brief.creatorActor?.id || ""}`}
-                                    className="font-bold text-sm text-[#111827] hover:text-[#0284c7] transition-colors truncate block"
+                                    className="font-bold text-sm text-slate-900 hover:text-[#0284c7] transition-colors truncate block"
                                   >
                                     {brief.creatorActor?.name}
                                   </Link>
-                                  <p className="text-xs text-[#4B5563] font-medium">
+                                  <p className="text-xs text-slate-600 font-medium">
                                     {brief.creatorActor?.sector} {brief.creatorActor?.location ? `• ${brief.creatorActor.location}` : ""}
                                   </p>
                                 </div>
@@ -756,12 +757,12 @@ export default async function DashboardPage() {
                             {/* Brief Title & Description Preview */}
                             <div className="space-y-1">
                               <Link href={`/projects/${brief.id}`} className="block">
-                                <h3 className="font-bold text-sm sm:text-base text-[#111827] group-hover:text-[#0284c7] transition-colors leading-snug">
+                                <h3 className="font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#0284c7] transition-colors leading-snug">
                                   {brief.title}
                                 </h3>
                               </Link>
                               {brief.description && (
-                                <p className="text-xs text-[#4B5563] leading-relaxed font-normal">
+                                <p className="text-xs text-slate-600 leading-relaxed font-normal">
                                   {brief.description}
                                 </p>
                               )}
@@ -806,11 +807,11 @@ export default async function DashboardPage() {
                 </div>
               }
               bookingsSection={
-                <div className="p-5 sm:p-6 rounded-[24px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-4">
+                <div className="p-5 sm:p-6 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-4">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div className="flex items-center gap-2">
                       <Inbox className="w-4 h-4 text-slate-700" />
-                      <h2 className="text-sm font-bold text-[#111827] tracking-tight">
+                      <h2 className="text-sm font-bold text-slate-900 tracking-tight">
                         Pesanan Booking Masuk
                       </h2>
                       {pendingBookingCount > 0 && (
@@ -821,7 +822,7 @@ export default async function DashboardPage() {
                     </div>
 
                     <Link
-                      href="/dashboard/bookings"
+                      href="/collaborations?section=contracts"
                       className="text-xs font-semibold text-[#0284c7] hover:text-[#0369a1] inline-flex items-center gap-1 transition-colors"
                     >
                       <span>Semua Pesanan ({totalIncomingBookings})</span>
@@ -830,12 +831,12 @@ export default async function DashboardPage() {
                   </div>
 
                   {recentBookings.length === 0 ? (
-                    <div className="p-8 rounded-[24px] bg-white/50 backdrop-blur-xl border border-dashed border-white/90 text-center space-y-2.5 shadow-xs">
+                    <div className="p-8 rounded-[22px] bg-white/50 backdrop-blur-xl border border-dashed border-white/90 text-center space-y-2.5 shadow-xs">
                       <div className="w-10 h-10 rounded-full bg-white/95 border border-white/90 shadow-xs flex items-center justify-center mx-auto text-slate-400">
                         <Inbox className="w-4 h-4" />
                       </div>
-                      <p className="text-xs font-bold text-[#111827]">Belum ada pesanan booking baru</p>
-                      <p className="text-xs text-[#4B5563] max-w-sm mx-auto font-normal">
+                      <p className="text-xs font-bold text-slate-900">Belum ada pesanan booking baru</p>
+                      <p className="text-xs text-slate-600 max-w-sm mx-auto font-normal">
                         Pesanan langsung dari brand atau kreator lain akan muncul di sini.
                       </p>
                     </div>
@@ -845,7 +846,7 @@ export default async function DashboardPage() {
                         const details = b.details as { serviceType?: string; notes?: string } | null;
                         const statusColor =
                           b.status === "ACCEPTED"
-                            ? "bg-white/90 text-[#111827] border-white/80"
+                            ? "bg-white/90 text-slate-900 border-white/80"
                             : b.status === "DECLINED"
                             ? "bg-rose-50/80 text-rose-700 border-rose-200/80"
                             : "bg-white/80 text-slate-700 border-white/80";
@@ -864,14 +865,14 @@ export default async function DashboardPage() {
                           >
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
-                                <span className="font-bold text-sm text-[#111827]">
+                                <span className="font-bold text-sm text-slate-900">
                                   {b.requester.name}
                                 </span>
                                 <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-white/90 text-slate-700 border border-white/80 shadow-2xs">
                                   {b.requester.sector}
                                 </span>
                               </div>
-                              <p className="text-xs text-[#4B5563] leading-relaxed">
+                              <p className="text-xs text-slate-600 leading-relaxed">
                                 {details?.serviceType || details?.notes || "Permintaan jasa kreatif langsung."}
                               </p>
                             </div>
@@ -881,7 +882,7 @@ export default async function DashboardPage() {
                                 {statusLabel}
                               </span>
                               <Link
-                                href="/dashboard/bookings"
+                                href="/collaborations?section=contracts"
                                 className="text-xs font-semibold text-[#0284c7] hover:text-[#0369a1] inline-flex items-center gap-1 transition-colors"
                               >
                                 <span>Tanggapi</span>
@@ -904,17 +905,17 @@ export default async function DashboardPage() {
           {/* RIGHT COLUMN: REKOMENDASI & AGENDA (3 Cols) */}
           <aside className="lg:col-span-3 space-y-4 lg:sticky lg:top-6">
             {/* Card 1: Rekomendasi Rekan Kolaborator */}
-            <div className="p-4 sm:p-5 rounded-[24px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-3.5">
+            <div className="p-4 sm:p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-3.5">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-full bg-white/95 border border-white/80 shadow-2xs flex items-center justify-center">
                     <Users className="w-3.5 h-3.5 text-[#0284c7]" />
                   </div>
-                  <h3 className="text-sm font-bold text-[#111827] tracking-tight">
+                  <h3 className="text-sm font-bold text-slate-900 tracking-tight">
                     Rekomendasi Rekan
                   </h3>
                 </div>
-                <span className="text-[11px] font-semibold text-[#4B5563]">Komplementer</span>
+                <span className="text-[11px] font-semibold text-slate-600">Komplementer</span>
               </div>
 
               <div className="space-y-3">
@@ -934,10 +935,10 @@ export default async function DashboardPage() {
                           <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-[#111827] group-hover:text-[#0284c7] transition-colors">
+                          <p className="text-xs font-bold text-slate-900 group-hover:text-[#0284c7] transition-colors">
                             {actor.name}
                           </p>
-                          <p className="text-[11px] text-[#4B5563] font-medium leading-tight mt-0.5">
+                          <p className="text-[11px] text-slate-600 font-medium leading-tight mt-0.5">
                             {actor.sector} {actor.location ? `• ${actor.location}` : ""}
                           </p>
                         </div>
@@ -945,7 +946,7 @@ export default async function DashboardPage() {
 
                       <Link
                         href={`/directory/${actor.id}`}
-                        className="shrink-0 px-3.5 py-1.5 rounded-full bg-white/90 hover:bg-[#4CC9FE]/15 hover:border-[#4CC9FE]/40 hover:text-[#0284c7] border border-white/80 text-xs font-semibold text-[#111827] transition-all shadow-xs"
+                        className="shrink-0 px-3.5 py-1.5 rounded-full bg-white/90 hover:bg-[#4CC9FE]/15 hover:border-[#4CC9FE]/40 hover:text-[#0284c7] border border-white/80 text-xs font-semibold text-slate-900 transition-all shadow-xs"
                       >
                         + Ajak
                       </Link>
@@ -964,17 +965,17 @@ export default async function DashboardPage() {
             </div>
 
             {/* Card 2: Agenda & Jadwal Produksi */}
-            <div className="p-4 sm:p-5 rounded-[24px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-3.5">
+            <div className="p-4 sm:p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-3.5">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-full bg-white/95 border border-white/80 shadow-2xs flex items-center justify-center">
                     <Calendar className="w-3.5 h-3.5 text-[#0284c7]" />
                   </div>
-                  <h3 className="text-sm font-bold text-[#111827] tracking-tight">
+                  <h3 className="text-sm font-bold text-slate-900 tracking-tight">
                     Agenda Produksi
                   </h3>
                 </div>
-                <span className="text-xs text-[#4B5563] font-semibold tabular-nums">
+                <span className="text-xs text-slate-600 font-semibold tabular-nums">
                   {agendaItems.length} Terjadwal
                 </span>
               </div>
@@ -984,8 +985,8 @@ export default async function DashboardPage() {
                   <div className="w-8 h-8 rounded-full bg-white/95 border border-white/80 shadow-2xs flex items-center justify-center mx-auto text-slate-400">
                     <Calendar className="w-4 h-4" />
                   </div>
-                  <p className="text-xs font-bold text-[#111827]">Belum Ada Agenda Aktif</p>
-                  <p className="text-xs text-[#4B5563] leading-relaxed max-w-xs mx-auto font-normal">
+                  <p className="text-xs font-bold text-slate-900">Belum Ada Agenda Aktif</p>
+                  <p className="text-xs text-slate-600 leading-relaxed max-w-xs mx-auto font-normal">
                     Jadwal sesi foto, fitting, atau target milestone kolaborasi yang disetujui akan tercatat otomatis di sini.
                   </p>
                   <div className="pt-1">
@@ -1006,7 +1007,7 @@ export default async function DashboardPage() {
                       href={item.href}
                       className="block p-3.5 rounded-[18px] bg-white/70 hover:bg-white/95 border border-white/90 transition-all space-y-1 group shadow-xs"
                     >
-                      <div className="flex items-center justify-between text-xs font-medium text-[#4B5563]">
+                      <div className="flex items-center justify-between text-xs font-medium text-slate-600">
                         <span className="flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5 text-slate-400" />
                           <span>{item.dateLabel}</span>
@@ -1015,10 +1016,10 @@ export default async function DashboardPage() {
                           {item.badge}
                         </span>
                       </div>
-                      <h4 className="text-xs font-bold text-[#111827] group-hover:text-[#0284c7] transition-colors leading-snug">
+                      <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#0284c7] transition-colors leading-snug">
                         {item.title}
                       </h4>
-                      <p className="text-xs text-[#4B5563] flex items-center gap-1.5 leading-relaxed">
+                      <p className="text-xs text-slate-600 flex items-center gap-1.5 leading-relaxed">
                         <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                         <span>{item.locationLabel}</span>
                       </p>
@@ -1038,16 +1039,16 @@ export default async function DashboardPage() {
             </div>
 
             {/* Card 3: Kepastian SPK Digital RAMU */}
-            <div className="p-4 sm:p-5 rounded-[24px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-2.5">
+            <div className="p-4 sm:p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-2.5">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-full bg-white/95 border border-white/80 shadow-2xs flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-3.5 h-3.5 text-[#0284c7]" />
                 </div>
-                <h3 className="text-xs font-bold text-[#111827] tracking-tight">
+                <h3 className="text-xs font-bold text-slate-900 tracking-tight">
                   Kepastian SPK Digital
                 </h3>
               </div>
-              <p className="text-xs text-[#4B5563] leading-relaxed font-normal">
+              <p className="text-xs text-slate-600 leading-relaxed font-normal">
                 Setiap kesepakatan kolaborasi di RAMU dilindungi Surat Perjanjian Kerja (SPK) otomatis dan transparansi hak cipta karya bersama.
               </p>
               <div className="pt-0.5">

@@ -22,6 +22,7 @@ import {
   verifyPaymentSlipAction,
 } from "@/app/api/bookings/actions";
 import { toast } from "@/components/ui/Toast";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 
 export interface PaymentSlipItem {
   id: string;
@@ -171,18 +172,18 @@ export function PaymentSlipManager({
   const hasPelunasanVerified = slips.some((s) => s.stage === "PELUNASAN" && s.status === "VERIFIED");
 
   return (
-    <div className="bg-white border border-stone-200/80 rounded-2xl shadow-2xs overflow-hidden">
+    <div className="bg-white border border-slate-200/80 rounded-[22px] shadow-2xs overflow-hidden">
       {/* Header */}
-      <div className="px-5 py-4 bg-stone-50/70 border-b border-stone-200/70 flex flex-wrap items-center justify-between gap-3">
+      <div className="px-5 py-4 bg-slate-50/70 border-b border-slate-200/70 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs border border-emerald-200">
             <CreditCard className="w-3.5 h-3.5 text-emerald-700" />
           </div>
           <div>
-            <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
               Verifikasi Mutasi Transfer Perbankan
             </h3>
-            <p className="text-[10px] text-stone-500">
+            <p className="text-[10px] text-slate-500">
               Konfirmasi penerimaan DP &amp; Pelunasan dua arah bebas modus slip palsu
             </p>
           </div>
@@ -191,9 +192,9 @@ export function PaymentSlipManager({
         {isRequester && (
           <button
             onClick={() => setIsOpenForm(!isOpenForm)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
           >
-            <UploadCloud className="w-3.5 h-3.5 text-stone-300" />
+            <UploadCloud className="w-3.5 h-3.5 text-slate-300" />
             <span>{isOpenForm ? "Tutup Form" : "Unggah Bukti Transfer"}</span>
           </button>
         )}
@@ -206,7 +207,7 @@ export function PaymentSlipManager({
           <div className={`p-3.5 rounded-xl border flex items-start justify-between ${
             hasDpVerified
               ? "bg-emerald-50/60 border-emerald-200/80 text-emerald-950"
-              : "bg-stone-50/70 border-stone-200/80 text-stone-700"
+              : "bg-slate-50/70 border-slate-200/80 text-slate-700"
           }`}>
             <div className="space-y-1">
               <span className="text-[10px] font-bold uppercase tracking-wider block opacity-70">
@@ -225,7 +226,7 @@ export function PaymentSlipManager({
                   <Check className="w-2.5 h-2.5" /> Lunas Sah
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-stone-200 text-stone-600 text-[10px] font-medium">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-medium">
                   Belum Verifikasi
                 </span>
               )}
@@ -236,7 +237,7 @@ export function PaymentSlipManager({
           <div className={`p-3.5 rounded-xl border flex items-start justify-between ${
             hasPelunasanVerified
               ? "bg-emerald-50/60 border-emerald-200/80 text-emerald-950"
-              : "bg-stone-50/70 border-stone-200/80 text-stone-700"
+              : "bg-slate-50/70 border-slate-200/80 text-slate-700"
           }`}>
             <div className="space-y-1">
               <span className="text-[10px] font-bold uppercase tracking-wider block opacity-70">
@@ -255,7 +256,7 @@ export function PaymentSlipManager({
                   <Check className="w-2.5 h-2.5" /> Lunas 100%
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-stone-200 text-stone-600 text-[10px] font-medium">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-medium">
                   Belum Lunas
                 </span>
               )}
@@ -265,13 +266,13 @@ export function PaymentSlipManager({
 
         {/* Form Upload Slip oleh Requester */}
         {isOpenForm && isRequester && (
-          <form onSubmit={handleSubmitSlip} className="p-4 rounded-xl bg-stone-50 border border-stone-200/90 space-y-4 text-xs animate-fade-in">
-            <div className="flex items-center justify-between pb-2 border-b border-stone-200/70">
-              <span className="font-bold text-stone-900 text-xs flex items-center gap-1.5">
-                <UploadCloud className="w-4 h-4 text-stone-600" />
+          <form onSubmit={handleSubmitSlip} className="p-4 rounded-xl bg-slate-50 border border-slate-200/90 space-y-4 text-xs animate-fade-in">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200/70">
+              <span className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                <UploadCloud className="w-4 h-4 text-slate-600" />
                 <span>Form Konfirmasi Transfer Pembayaran</span>
               </span>
-              <span className="text-[10px] font-mono text-stone-500">{refCode}</span>
+              <span className="text-[10px] font-mono text-slate-500">{refCode}</span>
             </div>
 
             {targetBankDetails && (targetBankDetails.accountNumber || targetBankDetails.bankName) && (
@@ -283,11 +284,11 @@ export function PaymentSlipManager({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="font-semibold text-stone-700 block mb-1">Tahap Pembayaran *</label>
+                <label className="font-semibold text-slate-700 block mb-1">Tahap Pembayaran *</label>
                 <select
                   value={stage}
                   onChange={(e) => setStage(e.target.value as any)}
-                  className="w-full px-3 py-2 rounded-lg border border-stone-300 bg-white text-xs font-semibold text-stone-900 focus:outline-none focus:border-stone-900"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-900"
                 >
                   <option value="DP">Uang Muka (DP {dpPercentage}%)</option>
                   <option value="PELUNASAN">Pelunasan Akhir ({100 - dpPercentage}%)</option>
@@ -295,97 +296,107 @@ export function PaymentSlipManager({
               </div>
 
               <div>
-                <label className="font-semibold text-stone-700 block mb-1">Nominal yang Ditransfer *</label>
-                <input
-                  type="text"
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-semibold text-slate-700 block">Nominal yang Ditransfer *</label>
+                  {((stage === "DP" && dpAmountEst > 0) || (stage === "PELUNASAN" && pelunasanAmountEst > 0)) && (
+                    <button
+                      type="button"
+                      onClick={() => setAmount(formatRupiah(stage === "DP" ? dpAmountEst : pelunasanAmountEst))}
+                      className="text-[11px] text-[#0284c7] hover:underline font-semibold cursor-pointer"
+                    >
+                      Isi Sesuai SPK ({formatRupiah(stage === "DP" ? dpAmountEst : pelunasanAmountEst)})
+                    </button>
+                  )}
+                </div>
+                <CurrencyInput
                   required
-                  placeholder={stage === "DP" && numericBudget > 0 ? formatRupiah(dpAmountEst) : "Contoh: Rp 2.500.000"}
+                  placeholder={stage === "DP" && numericBudget > 0 ? formatRupiah(dpAmountEst) : "Rp 2.500.000"}
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-stone-300 bg-white text-xs text-stone-900 focus:outline-none focus:border-stone-900 font-mono"
+                  onChange={(val) => setAmount(val)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-stone-700 block mb-1">Bank Pengirim Anda *</label>
+                <label className="font-semibold text-slate-700 block mb-1">Bank Pengirim Anda *</label>
                 <input
                   type="text"
                   required
                   placeholder="Contoh: BCA / Mandiri / BNI / CIMB"
                   value={bankName}
                   onChange={(e) => setBankName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-stone-300 bg-white text-xs text-stone-900 focus:outline-none focus:border-stone-900"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-stone-700 block mb-1">Nomor Rekening Pengirim (Opsional)</label>
+                <label className="font-semibold text-slate-700 block mb-1">Nomor Rekening Pengirim (Opsional)</label>
                 <input
                   type="text"
                   placeholder="Nomor rekening (kosongkan jika via QRIS/E-Wallet)"
                   value={accountNumber}
                   onChange={(e) => setAccountNumber(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-stone-300 bg-white text-xs text-stone-900 focus:outline-none focus:border-stone-900 font-mono"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-stone-700 block mb-1">Nama Pemilik Rekening Pengirim (Opsional)</label>
+                <label className="font-semibold text-slate-700 block mb-1">Nama Pemilik Rekening Pengirim (Opsional)</label>
                 <input
                   type="text"
                   placeholder="Nama pengirim sesuai mutasi bank"
                   value={accountHolder}
                   onChange={(e) => setAccountHolder(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-stone-300 bg-white text-xs text-stone-900 focus:outline-none focus:border-stone-900"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-stone-700 block mb-1">Nomor Referensi Transaksi (RRN / Jurnal) (Opsional)</label>
+                <label className="font-semibold text-slate-700 block mb-1">Nomor Referensi Transaksi (RRN / Jurnal) (Opsional)</label>
                 <input
                   type="text"
                   placeholder="Contoh: 202610080123 (Kosongkan jika tidak ada)"
                   value={referenceNumber}
                   onChange={(e) => setReferenceNumber(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-stone-300 bg-white text-xs text-stone-900 focus:outline-none focus:border-stone-900 font-mono"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono"
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="font-semibold text-stone-700 block mb-1">Tautan Bukti Slip Transfer (Opsional)</label>
+                <label className="font-semibold text-slate-700 block mb-1">Tautan Bukti Slip Transfer (Opsional)</label>
                 <input
                   type="url"
                   placeholder="https://drive.google.com/... atau tautan gambar screenshot slip"
                   value={slipUrl}
                   onChange={(e) => setSlipUrl(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-stone-300 bg-white text-xs text-stone-900 focus:outline-none focus:border-stone-900"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="font-semibold text-stone-700 block mb-1">Catatan Tambahan (Opsional)</label>
+                <label className="font-semibold text-slate-700 block mb-1">Catatan Tambahan (Opsional)</label>
                 <input
                   type="text"
                   placeholder="Contoh: Sudah ditransfer via BCA Mobile pada pk 14:15 WIB"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-stone-300 bg-white text-xs text-stone-900 focus:outline-none focus:border-stone-900"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-200">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
               <button
                 type="button"
                 onClick={() => setIsOpenForm(false)}
-                className="px-3.5 py-1.5 rounded-lg border border-stone-300 text-stone-600 hover:bg-stone-100 text-xs font-semibold cursor-pointer"
+                className="px-3.5 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 text-xs font-semibold cursor-pointer"
               >
                 Batal
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-bold shadow-2xs cursor-pointer inline-flex items-center gap-1.5"
+                className="px-4 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-bold shadow-2xs cursor-pointer inline-flex items-center gap-1.5"
               >
                 {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Kirim Bukti Transfer</span>
@@ -396,11 +407,11 @@ export function PaymentSlipManager({
 
         {/* Daftar Bukti Transfer yang Tersimpan */}
         {slips.length === 0 ? (
-          <div className="p-4 rounded-xl bg-stone-50 border border-dashed border-stone-200 text-center space-y-1">
-            <p className="text-xs font-medium text-stone-600">
+          <div className="p-4 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-center space-y-1">
+            <p className="text-xs font-medium text-slate-600">
               Belum ada bukti transfer perbankan yang diunggah.
             </p>
-            <p className="text-[10px] text-stone-400">
+            <p className="text-[10px] text-slate-400">
               {isRequester
                 ? "Silakan klik tombol 'Unggah Bukti Transfer' di atas setelah melakukan transfer."
                 : "Pemberi kerja akan mengunggah bukti transfer setelah transaksi diproses."}
@@ -408,7 +419,7 @@ export function PaymentSlipManager({
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
               Riwayat Bukti Transfer &amp; Audit Status
             </div>
 
@@ -426,15 +437,15 @@ export function PaymentSlipManager({
                       ? "bg-emerald-50/40 border-emerald-200"
                       : isRejected
                       ? "bg-rose-50/40 border-rose-200"
-                      : "bg-white border-stone-200/90 shadow-2xs"
+                      : "bg-white border-slate-200/90 shadow-2xs"
                   }`}
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-xs text-stone-900">
+                      <span className="font-bold text-xs text-slate-900">
                         {slip.stage === "DP" ? `Uang Muka (DP ${dpPercentage}%)` : `Pelunasan (${100 - dpPercentage}%)`}
                       </span>
-                      <span className="font-mono text-xs font-bold text-stone-900 bg-stone-100 px-2 py-0.5 rounded border border-stone-200">
+                      <span className="font-mono text-xs font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                         {slip.amount}
                       </span>
                     </div>
@@ -464,21 +475,21 @@ export function PaymentSlipManager({
                   {/* Rincian data rekening */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
                     <div>
-                      <span className="text-stone-400 block font-medium">Bank Pengirim:</span>
-                      <span className="font-semibold text-stone-800">{slip.bankName}</span>
+                      <span className="text-slate-400 block font-medium">Bank Pengirim:</span>
+                      <span className="font-semibold text-slate-800">{slip.bankName}</span>
                     </div>
                     <div>
-                      <span className="text-stone-400 block font-medium">No. Rek / Pengirim:</span>
-                      <span className="font-mono font-semibold text-stone-800">{slip.accountNumber}</span>
-                      <span className="block text-[10px] text-stone-500">a.n {slip.accountHolder}</span>
+                      <span className="text-slate-400 block font-medium">No. Rek / Pengirim:</span>
+                      <span className="font-mono font-semibold text-slate-800">{slip.accountNumber}</span>
+                      <span className="block text-[10px] text-slate-500">a.n {slip.accountHolder}</span>
                     </div>
                     <div>
-                      <span className="text-stone-400 block font-medium">No. Referensi (RRN):</span>
-                      <span className="font-mono font-bold text-stone-900 break-all select-all">{slip.referenceNumber}</span>
+                      <span className="text-slate-400 block font-medium">No. Referensi (RRN):</span>
+                      <span className="font-mono font-bold text-slate-900 break-all select-all">{slip.referenceNumber}</span>
                     </div>
                     <div>
-                      <span className="text-stone-400 block font-medium">Waktu Kirim:</span>
-                      <span className="text-stone-600">
+                      <span className="text-slate-400 block font-medium">Waktu Kirim:</span>
+                      <span className="text-slate-600">
                         {new Date(slip.submittedAt).toLocaleString("id-ID", {
                           day: "numeric",
                           month: "short",
@@ -495,9 +506,9 @@ export function PaymentSlipManager({
                         href={slip.slipUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-[11px] font-bold text-stone-900 bg-stone-100 hover:bg-stone-200 px-2.5 py-1 rounded-md transition-colors"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-md transition-colors"
                       >
-                        <ExternalLink className="w-3 h-3 text-stone-500" />
+                        <ExternalLink className="w-3 h-3 text-slate-500" />
                         <span>Buka Lampiran Gambar Slip Transfer</span>
                       </a>
                     </div>
@@ -511,8 +522,8 @@ export function PaymentSlipManager({
 
                   {/* Tombol aksi Talenta (Penyedia Jasa) untuk Konfirmasi Rekening */}
                   {isTarget && isPending && (
-                    <div className="pt-2 border-t border-stone-200/60 flex flex-wrap items-center justify-between gap-2">
-                      <p className="text-[10px] text-stone-500">
+                    <div className="pt-2 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-[10px] text-slate-500">
                         Harap cek mutasi m-Banking Anda dengan nomor referensi di atas sebelum mengonfirmasi.
                       </p>
                       <div className="flex items-center gap-2">
@@ -544,42 +555,42 @@ export function PaymentSlipManager({
       {/* Modal Tolak / Koreksi Slip */}
       {rejectModalSlipId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white border border-stone-200 rounded-2xl shadow-xl max-w-md w-full overflow-hidden space-y-0 text-xs">
-            <div className="p-4 border-b border-stone-100 flex items-center justify-between bg-rose-50/70">
+          <div className="bg-white border border-slate-200 rounded-[22px] shadow-xl max-w-md w-full overflow-hidden space-y-0 text-xs">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-rose-50/70">
               <span className="font-bold text-rose-950 flex items-center gap-1.5">
                 <AlertCircle className="w-4 h-4 text-rose-600" />
                 <span>Klarifikasi Mutasi Rekening Belum Ditemukan</span>
               </span>
               <button
                 onClick={() => setRejectModalSlipId(null)}
-                className="text-stone-400 hover:text-stone-700"
+                className="text-slate-400 hover:text-slate-700"
               >
                 &times;
               </button>
             </div>
 
             <div className="p-4 space-y-3">
-              <p className="text-stone-600 leading-relaxed">
+              <p className="text-slate-600 leading-relaxed">
                 Jika dana belum masuk ke mutasi rekening Anda, mohon berikan alasan agar pihak pemesan dapat memeriksa ke pihak bank pengirim atau mengirimkan slip yang benar.
               </p>
 
               <div>
-                <label className="font-semibold text-stone-700 block mb-1">Alasan / Penjelasan *</label>
+                <label className="font-semibold text-slate-700 block mb-1">Alasan / Penjelasan *</label>
                 <textarea
                   rows={3}
                   required
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
                   placeholder="Contoh: Dicek pada mutasi pk 14:30 belum ada dana masuk dengan nominal atau ref tersebut..."
-                  className="w-full p-2.5 rounded-lg border border-stone-300 text-xs text-stone-900 focus:outline-none focus:border-stone-900"
+                  className="w-full p-2.5 rounded-lg border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-slate-900"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-100">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setRejectModalSlipId(null)}
-                  className="px-3 py-1.5 rounded-lg border border-stone-300 text-stone-600 hover:bg-stone-50 font-semibold"
+                  className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 font-semibold"
                 >
                   Batal
                 </button>

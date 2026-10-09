@@ -101,21 +101,21 @@ export function OnboardingChecklistCard({
     },
     {
       id: "resources",
-      title: "Peralatan & Kapasitas Menganggur",
+      title: "Spesifikasi Alat & Kapasitas Kerja",
       desc: isBrand
-        ? "Daftarkan kain sisa, manekin, atau kuota studio yang bisa disinergikan."
-        : "Daftarkan kamera cadangan, lighting studio, atau hari kosong untuk monetisasi.",
+        ? "Lengkapi spesifikasi koleksi brand, ukuran sampel busana, atau kuota produksi."
+        : "Lengkapi spesifikasi kamera, lighting kit studio, atau keahlian teknis Anda.",
       isDone: hasSpecs,
-      href: "/readiness",
-      cta: hasSpecs ? "Kelola Resource" : "Daftarkan Aset",
+      href: "/settings/specs",
+      cta: hasSpecs ? "Ubah Spesifikasi" : "Lengkapi Spesifikasi",
       icon: Layers,
-      badge: "+25% Kesiapan",
+      badge: "+25% Profil",
     },
     {
       id: "portfolio",
       title: isBrand ? "Inisiasi Brief Proyek Pertama" : "Unggah Portofolio & Tear-Sheet",
       desc: isBrand
-        ? "Buat brief pencarian fotografer, model, desainer, atau studio foto."
+        ? "Buat brief pencarian fotografer, model, stylist, atau studio foto."
         : "Unggah karya visual terbaik dan klaim co-credit dengan kolaborator.",
       isDone: hasPortfolioOrBrief ?? hasPortfolio,
       href: isBrand ? "/projects/new" : "/showcase",
@@ -132,7 +132,7 @@ export function OnboardingChecklistCard({
   const isAllDone = completedCount === tasks.length;
 
   return (
-    <section className="w-full rounded-[24px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] relative overflow-hidden text-[#111827]">
+    <section className="w-full rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] relative overflow-hidden text-[#0f172a]">
       {/* Header Bar */}
       <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/80">
         <div className="flex items-center gap-3 min-w-0">
@@ -144,11 +144,11 @@ export function OnboardingChecklistCard({
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#4CC9FE]/15 text-[#0284c7] border border-[#4CC9FE]/30">
                 {isAllDone ? "Profil Terverifikasi" : "Panduan Profil"}
               </span>
-              <span className="text-xs text-[#4B5563] font-medium">
+              <span className="text-xs text-[#475569] font-medium">
                 {completedCount} dari {tasks.length} Selesai ({progressPercent}%)
               </span>
             </div>
-            <h2 className="text-xs sm:text-sm font-semibold text-[#111827] tracking-tight mt-1">
+            <h2 className="text-xs sm:text-sm font-semibold text-[#0f172a] tracking-tight mt-1">
               {isAllDone
                 ? `Profil ${actorName} sudah lengkap dan siap berkolaborasi`
                 : `Lengkapi profil untuk memaksimalkan peluang kerja sama`}
@@ -161,7 +161,7 @@ export function OnboardingChecklistCard({
           <button
             type="button"
             onClick={toggleCollapse}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white text-[#111827] border border-white/80 text-xs font-semibold transition-all cursor-pointer shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white text-[#0f172a] border border-white/80 text-xs font-semibold transition-all cursor-pointer shadow-xs"
             title={collapsed ? "Tampilkan daftar tugas" : "Ciutkan"}
           >
             {collapsed ? (
@@ -236,12 +236,12 @@ export function OnboardingChecklistCard({
 
                     <h3
                       className={`text-xs font-semibold leading-tight ${
-                        task.isDone ? "text-slate-400 line-through" : "text-[#111827] group-hover:text-[#0284c7]"
+                        task.isDone ? "text-slate-400 line-through" : "text-[#0f172a] group-hover:text-[#0284c7]"
                       }`}
                     >
                       {task.title}
                     </h3>
-                    <p className="text-xs text-[#4B5563] leading-relaxed">
+                    <p className="text-xs text-[#475569] leading-relaxed">
                       {task.desc}
                     </p>
                   </div>

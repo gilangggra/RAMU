@@ -316,7 +316,7 @@ export function OpportunityCard({
           href={`/opportunities/${id}`}
           className="btn-primary-pill inline-flex items-center gap-1.5 px-4 py-1.5 text-[11px] font-semibold shadow-md shadow-[#4CC9FE]/20 cursor-pointer"
         >
-          <span>Mulai Kolaborasi</span>
+          <span>Tinjau &amp; Inisiasi</span>
           <ArrowRight className="w-3.5 h-3.5 text-white" />
         </Link>
       </div>

@@ -19,7 +19,7 @@ import {
   MessageSquare,
   Users,
   Layers,
-  SlidersHorizontal,
+  Sparkles,
 } from "lucide-react";
 import {
   BookingStatusManager,
@@ -59,12 +59,29 @@ interface BookingsClientViewProps {
   primaryActor: BookingActor;
   incomingBookings: BookingItem[];
   outgoingBookings: BookingItem[];
+  embedded?: boolean;
+}
+
+function formatBudgetDisplay(budget?: string | null): string {
+  if (!budget) return "Sesuai kesepakatan";
+  const trimmed = budget.trim();
+  if (/^rp/i.test(trimmed)) return trimmed;
+  const numeric = Number(trimmed.replace(/[^0-9.-]+/g, ""));
+  if (!isNaN(numeric) && numeric > 0 && /^\d+$/.test(trimmed)) {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(numeric);
+  }
+  return trimmed;
 }
 
 export function BookingsClientView({
   primaryActor,
   incomingBookings,
   outgoingBookings,
+  embedded = false,
 }: BookingsClientViewProps) {
   const [activeTab, setActiveTab] = useState<"incoming" | "outgoing" | "all">("incoming");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
@@ -130,128 +147,148 @@ export function BookingsClientView({
 
   return (
     <div className="space-y-6 w-full">
-      {/* 1. ATTIO HEADER BANNER */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-stone-200/70">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-stone-900">
-            Manajemen Pesanan &amp; SPK
-          </h1>
-          <p className="text-xs text-stone-500 mt-0.5">
-            Pantau pesanan masuk, permintaan sewa terkirim, dan kepastian kontrak kerja resmi platform RAMU.
-          </p>
-        </div>
+      {/* 1. HEADER BANNER */}
+      {!embedded && (
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-white/80">
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-[#0f172a]">
+                Manajemen Kolaborasi &amp; Kontrak SPK
+              </h1>
+              <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#4CC9FE]/15 text-[#0284c7] text-[10px] font-bold border border-[#4CC9FE]/30">
+                <Sparkles className="w-3 h-3 text-[#0284c7]" />
+                Ekosistem RAMU
+              </span>
+            </div>
+            <p className="text-xs text-[#475569] mt-1">
+              Kelola kolaborasi masuk, pengajuan kerja sama kreatif, dan kepastian kontrak kerja resmi (SPK) platform RAMU.
+            </p>
+          </div>
 
-        <div className="flex items-center gap-2">
-          <Link
-            href="/messages"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-700 text-xs font-medium border border-stone-200/80 shadow-2xs transition-colors"
-          >
-            <MessageSquare className="w-3.5 h-3.5 text-stone-500" />
-            <span>Buka Messenger</span>
-          </Link>
-          <Link
-            href="/directory"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-semibold shadow-2xs transition-colors"
-          >
-            <Users className="w-3.5 h-3.5 text-stone-300" />
-            <span>Cari Mitra Baru</span>
-          </Link>
-        </div>
-      </header>
+          <div className="flex items-center gap-2.5 shrink-0">
+            <Link
+              href="/messages"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/80 hover:bg-white hover:text-[#0284c7] text-[#0f172a] text-xs font-semibold border border-white/80 shadow-xs transition-all cursor-pointer"
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
+              <span>Buka Messenger</span>
+            </Link>
+            <Link
+              href="/directory"
+              className="btn-primary-pill !text-xs !py-2 !px-4.5 text-white font-semibold shadow-md shadow-[#4CC9FE]/25 inline-flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
+            >
+              <Users className="w-3.5 h-3.5 text-white" />
+              <span>Eksplorasi Mitra Baru</span>
+            </Link>
+          </div>
+        </header>
+      )}
 
-      {/* 2. ATTIO 4-TILE ANALYTIC RIBBON */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="p-4 rounded-xl bg-white border border-stone-200/80 shadow-2xs space-y-2 group hover:border-stone-300 transition-colors">
-          <div className="flex items-center justify-between text-xs font-medium text-stone-500">
-            <span className="truncate">Menunggu Respons</span>
-            <Clock className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-700 transition-colors shrink-0" />
+      {/* 2. METRIC ANALYTIC RIBBON (MATCHES DASHBOARD [24px] CARDS) */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+        {/* Tile 1 */}
+        <div className="p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-2.5 transition-all group hover:bg-white/80 hover:border-white">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600 truncate">Menunggu Konfirmasi</span>
+            <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100/80 shadow-2xs">
+              <Clock className="w-4 h-4" />
+            </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-stone-900 font-mono">
+            <span className="text-2xl font-black tracking-tight text-[#0f172a] font-mono">
               {pendingIncomingCount}
             </span>
             {pendingIncomingCount > 0 ? (
-              <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/60 inline-flex items-center gap-1">
+              <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/80 inline-flex items-center gap-1.5 shadow-2xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                 Perlu Tindakan
               </span>
             ) : (
-              <span className="text-[10px] font-semibold text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded border border-stone-200/60">
+              <span className="text-[11px] font-semibold text-slate-500 bg-white/80 px-2.5 py-0.5 rounded-full border border-slate-200/60 shadow-2xs">
                 Terkendali
               </span>
             )}
           </div>
-          <p className="text-[11px] text-stone-400 truncate">Pesanan masuk siap ditinjau</p>
+          <p className="text-[11px] text-slate-400 truncate">Kolaborasi masuk siap ditinjau</p>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-stone-200/80 shadow-2xs space-y-2 group hover:border-stone-300 transition-colors">
-          <div className="flex items-center justify-between text-xs font-medium text-stone-500">
-            <span className="truncate">Pesanan Masuk Aktif</span>
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+        {/* Tile 2 */}
+        <div className="p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-2.5 transition-all group hover:bg-white/80 hover:border-white">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600 truncate">Kolaborasi Disetujui</span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100/80 shadow-2xs">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-stone-900 font-mono">
+            <span className="text-2xl font-black tracking-tight text-[#0f172a] font-mono">
               {activeIncomingCount}
             </span>
-            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60">
+            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/80 shadow-2xs">
               Disetujui
             </span>
           </div>
-          <p className="text-[11px] text-stone-400 truncate">Jadwal &amp; kontrak kerja terikat</p>
+          <p className="text-[11px] text-slate-400 truncate">Jadwal &amp; kontrak kerja terikat</p>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-stone-200/80 shadow-2xs space-y-2 group hover:border-stone-300 transition-colors">
-          <div className="flex items-center justify-between text-xs font-medium text-stone-500">
-            <span className="truncate">Permintaan Saya</span>
-            <Send className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-700 transition-colors shrink-0" />
+        {/* Tile 3 */}
+        <div className="p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-2.5 transition-all group hover:bg-white/80 hover:border-white">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600 truncate">Pengajuan Terkirim</span>
+            <div className="w-8 h-8 rounded-xl bg-sky-50 text-[#0284c7] flex items-center justify-center shrink-0 border border-sky-100/80 shadow-2xs">
+              <Send className="w-4 h-4" />
+            </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-stone-900 font-mono">
+            <span className="text-2xl font-black tracking-tight text-[#0f172a] font-mono">
               {totalOutgoingCount}
             </span>
-            <span className="text-[10px] font-semibold text-stone-600 bg-stone-100 px-1.5 py-0.5 rounded border border-stone-200/70">
+            <span className="text-[11px] font-semibold text-slate-600 bg-white/80 px-2.5 py-0.5 rounded-full border border-slate-200/70 shadow-2xs">
               Terkirim
             </span>
           </div>
-          <p className="text-[11px] text-stone-400 truncate">Proposal / booking ke mitra lain</p>
+          <p className="text-[11px] text-slate-400 truncate">Proposal &amp; booking ke mitra</p>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-stone-200/80 shadow-2xs space-y-2 group hover:border-stone-300 transition-colors">
-          <div className="flex items-center justify-between text-xs font-medium text-stone-500">
-            <span className="truncate">Ruang Kolaborasi</span>
-            <Handshake className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-700 transition-colors shrink-0" />
+        {/* Tile 4 */}
+        <div className="p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-2.5 transition-all group hover:bg-white/80 hover:border-white">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600 truncate">Workspace Aktif</span>
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100/80 shadow-2xs">
+              <Handshake className="w-4 h-4" />
+            </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-stone-900 font-mono">
+            <span className="text-2xl font-black tracking-tight text-[#0f172a] font-mono">
               {[...incomingBookings, ...outgoingBookings].filter((b) => b.details?.collaborationId).length}
             </span>
-            <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200/60">
+            <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200/80 shadow-2xs">
               Workspace Aktif
             </span>
           </div>
-          <p className="text-[11px] text-stone-400 truncate">Tugas &amp; serah terima terintegrasi</p>
+          <p className="text-[11px] text-slate-400 truncate">Tugas &amp; serah terima terintegrasi</p>
         </div>
       </section>
 
       {/* 3. CONTROLS: SEGMENTED TABS, FILTER & SEARCH */}
-      <div className="bg-white p-3.5 rounded-xl border border-stone-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-        {/* Segmented Tab */}
-        <div className="inline-flex items-center bg-stone-100 p-1 rounded-lg text-xs font-medium text-stone-600">
+      <div className="bg-white/60 backdrop-blur-2xl p-3 sm:p-3.5 rounded-[22px] border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-3">
+        {/* Segmented Tab with Project Blue Active State */}
+        <div className="inline-flex items-center gap-1.5 p-1 rounded-full bg-slate-100/80 border border-slate-200/60">
           <button
             onClick={() => setActiveTab("incoming")}
-            className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer rounded-full active:scale-95 ${
               activeTab === "incoming"
-                ? "bg-white text-stone-900 shadow-2xs font-semibold"
-                : "hover:text-stone-900"
+                ? "btn-primary-pill text-white shadow-md shadow-[#4CC9FE]/25 border-transparent"
+                : "bg-white/80 hover:bg-white text-slate-600 hover:text-[#0284c7] border border-white/80 shadow-2xs"
             }`}
           >
             <Inbox className="w-3.5 h-3.5" />
-            <span>Pesanan Masuk</span>
+            <span>Kolaborasi Masuk</span>
             <span
-              className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                pendingIncomingCount > 0
-                  ? "bg-stone-900 text-white"
-                  : "bg-stone-200 text-stone-600"
+              className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                activeTab === "incoming"
+                  ? "bg-white/25 text-white"
+                  : "bg-slate-200 text-slate-700"
               }`}
             >
               {incomingBookings.length}
@@ -260,29 +297,35 @@ export function BookingsClientView({
 
           <button
             onClick={() => setActiveTab("outgoing")}
-            className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer rounded-full active:scale-95 ${
               activeTab === "outgoing"
-                ? "bg-white text-stone-900 shadow-2xs font-semibold"
-                : "hover:text-stone-900"
+                ? "btn-primary-pill text-white shadow-md shadow-[#4CC9FE]/25 border-transparent"
+                : "bg-white/80 hover:bg-white text-slate-600 hover:text-[#0284c7] border border-white/80 shadow-2xs"
             }`}
           >
             <Send className="w-3.5 h-3.5" />
-            <span>Permintaan Saya</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-stone-200 text-stone-600 font-bold">
+            <span>Pengajuan Terkirim</span>
+            <span
+              className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                activeTab === "outgoing"
+                  ? "bg-white/25 text-white"
+                  : "bg-slate-200 text-slate-700"
+              }`}
+            >
               {outgoingBookings.length}
             </span>
           </button>
 
           <button
             onClick={() => setActiveTab("all")}
-            className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer rounded-full active:scale-95 ${
               activeTab === "all"
-                ? "bg-white text-stone-900 shadow-2xs font-semibold"
-                : "hover:text-stone-900"
+                ? "btn-primary-pill text-white shadow-md shadow-[#4CC9FE]/25 border-transparent"
+                : "bg-white/80 hover:bg-white text-slate-600 hover:text-[#0284c7] border border-white/80 shadow-2xs"
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
-            <span>Semua</span>
+            <span>Semua Riwayat</span>
           </button>
         </div>
 
@@ -293,10 +336,10 @@ export function BookingsClientView({
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full sm:w-auto px-3 py-1.5 bg-stone-50/80 border border-stone-200/80 rounded-lg text-xs text-stone-800 font-medium focus:bg-white focus:outline-hidden focus:border-stone-400 focus:ring-2 focus:ring-stone-200/50 transition-all cursor-pointer"
+              className="w-full sm:w-auto px-3.5 py-2 bg-white/80 border border-slate-200/90 rounded-xl text-xs text-slate-800 font-semibold focus:bg-white focus:outline-hidden focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all cursor-pointer shadow-2xs"
             >
               <option value="ALL">Semua Status</option>
-              <option value="PENDING">Menunggu Respons</option>
+              <option value="PENDING">Menunggu Konfirmasi</option>
               <option value="NEGOTIATING">Reschedule Diajukan</option>
               <option value="ACCEPTED">Disetujui (Aktif)</option>
               <option value="WORKSPACE">Workspace Aktif</option>
@@ -308,13 +351,13 @@ export function BookingsClientView({
 
           {/* Search Input */}
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari partner, SPK, rincian..."
-              className="w-full sm:w-64 pl-9 pr-3 py-1.5 bg-stone-50/80 border border-stone-200/80 rounded-lg text-xs text-stone-900 placeholder:text-stone-400 focus:bg-white focus:outline-hidden focus:border-stone-400 focus:ring-2 focus:ring-stone-200/50 transition-all"
+              placeholder="Cari mitra, nomor SPK, judul..."
+              className="w-full sm:w-64 pl-9 pr-3.5 py-2 bg-white/80 border border-slate-200/90 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-hidden focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all font-medium shadow-2xs"
             />
           </div>
         </div>
@@ -322,34 +365,44 @@ export function BookingsClientView({
 
       {/* 4. BOOKINGS LIST */}
       {currentList.length === 0 ? (
-        <div className="p-12 bg-white border border-stone-200/80 rounded-2xl text-center shadow-2xs space-y-3">
-          <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center text-stone-400 mx-auto">
-            <Inbox className="w-6 h-6" />
+        <div className="p-12 sm:p-14 bg-white/60 backdrop-blur-2xl border border-white/80 rounded-[22px] text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-3.5 max-w-xl mx-auto my-6">
+          <div className="w-14 h-14 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-[#0284c7] mx-auto shadow-2xs">
+            <Inbox className="w-7 h-7" />
           </div>
-          <h3 className="text-sm font-semibold text-stone-900">
-            {searchQuery || statusFilter !== "ALL"
-              ? "Tidak ada transaksi yang sesuai filter"
-              : activeTab === "incoming"
-              ? "Belum ada pesanan masuk"
-              : activeTab === "outgoing"
-              ? "Anda belum mengajukan pesanan / sewa"
-              : "Belum ada data transaksi"}
-          </h3>
-          <p className="text-xs text-stone-500 max-w-sm mx-auto leading-relaxed">
-            {searchQuery || statusFilter !== "ALL"
-              ? "Coba sesuaikan kata kunci pencarian atau ubah filter status di atas."
-              : "Seluruh tawaran dari perpesanan resmi RAMU maupun booking dari direktori akan tercatat rapi di sini."}
-          </p>
-          {(searchQuery || statusFilter !== "ALL") && (
+          <div className="space-y-1">
+            <h3 className="text-sm font-bold text-[#0f172a]">
+              {searchQuery || statusFilter !== "ALL"
+                ? "Tidak ada data yang sesuai filter"
+                : activeTab === "incoming"
+                ? "Belum ada kolaborasi masuk"
+                : activeTab === "outgoing"
+                ? "Belum ada pengajuan kolaborasi terkirim"
+                : "Belum ada riwayat kolaborasi"}
+            </h3>
+            <p className="text-xs text-[#475569] max-w-sm mx-auto leading-relaxed">
+              {searchQuery || statusFilter !== "ALL"
+                ? "Coba sesuaikan kata kunci pencarian atau ubah opsi filter status di atas."
+                : "Seluruh kesepakatan dari direktori profil maupun negosiasi di messenger resmi RAMU akan tercatat aman dengan proteksi SPK di sini."}
+            </p>
+          </div>
+          {searchQuery || statusFilter !== "ALL" ? (
             <button
               onClick={() => {
                 setSearchQuery("");
                 setStatusFilter("ALL");
               }}
-              className="text-xs font-semibold text-stone-900 underline hover:text-black cursor-pointer pt-1"
+              className="inline-flex items-center px-4.5 py-2 rounded-full bg-white/80 hover:bg-white text-slate-800 text-xs font-semibold cursor-pointer border border-white/80 shadow-xs transition-colors"
             >
               Reset Filter
             </button>
+          ) : (
+            <Link
+              href="/directory"
+              className="btn-primary-pill !text-xs !py-2.5 !px-6 text-white font-semibold shadow-md shadow-[#4CC9FE]/25 inline-flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
+            >
+              <Users className="w-3.5 h-3.5 text-white" />
+              <span>Jelajahi Mitra &amp; Talenta</span>
+            </Link>
           )}
         </div>
       ) : (
@@ -363,54 +416,54 @@ export function BookingsClientView({
             return (
               <div
                 key={booking.id}
-                className="p-5 sm:p-6 bg-white border border-stone-200/80 rounded-2xl shadow-2xs hover:border-stone-300 transition-all space-y-4"
+                className="p-5 sm:p-6 bg-white/60 backdrop-blur-2xl border border-white/80 rounded-[22px] shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] hover:bg-white/80 hover:border-white transition-all space-y-4"
               >
                 {/* Header: Partner + Status + Ref + Detail */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-stone-100">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-stone-900 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs ring-2 ring-white">
                       {partner.name.slice(0, 2).toUpperCase()}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
                         <Link
                           href={`/directory/${partner.id}`}
-                          className="font-semibold text-stone-900 hover:underline inline-flex items-center gap-1 text-sm group"
+                          className="font-bold text-[#0f172a] hover:text-[#0284c7] inline-flex items-center gap-1 text-sm group transition-colors"
                         >
                           <span>{partner.name}</span>
-                          <ArrowUpRight className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-900 transition-colors" />
+                          <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0284c7] transition-colors" />
                         </Link>
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 border border-stone-200/60">
-                          {isIncoming ? "Pemesan / Klien" : "Penyedia Jasa"}
+                        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white/80 text-slate-700 border border-slate-200/80 shadow-2xs">
+                          {isIncoming ? "Pihak Pemrakarsa / Klien" : "Mitra Pelaksana"}
                         </span>
                       </div>
-                      <div className="text-xs text-stone-500">{partner.sector}</div>
+                      <div className="text-xs font-medium text-[#475569] mt-0.5">{partner.sector}</div>
                     </div>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
                     <StatusBadge status={booking.status} collaborationId={collabId} />
-                    <span className="text-[11px] font-mono text-stone-400 px-2 py-0.5 rounded-md bg-stone-50 border border-stone-200/60">
+                    <span className="text-[11px] font-mono text-slate-500 px-2.5 py-0.5 rounded-full bg-white/80 border border-slate-200/70 shadow-2xs">
                       {refCode}
                     </span>
                     <Link
                       href={`/dashboard/bookings/${booking.id}`}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-stone-50 hover:bg-stone-100 text-stone-700 text-xs font-semibold border border-stone-200/80 transition-colors"
+                      className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/80 hover:bg-white text-slate-700 text-xs font-semibold border border-white/80 transition-colors shadow-2xs"
                     >
                       <span>Detail</span>
-                      <ChevronRight className="w-3 h-3 text-stone-400" />
+                      <ChevronRight className="w-3 h-3 text-slate-400" />
                     </Link>
                   </div>
                 </div>
 
-                {/* Key Info: Date, Budget, Details */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 bg-stone-50/70 p-3.5 rounded-xl border border-stone-200/60 text-xs">
+                {/* Key Info: Date, Budget, Details (Inner Panel 2xl) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 bg-white/50 backdrop-blur-md p-4 rounded-2xl border border-slate-200/60 text-xs">
                   <div>
-                    <div className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-                      <Calendar className="w-3 h-3 text-stone-400" />
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                      <Calendar className="w-3 h-3 text-slate-400" />
                       <span>Tanggal Pelaksanaan</span>
                     </div>
-                    <div className="font-semibold text-stone-900">
+                    <div className="font-bold text-[#0f172a]">
                       {new Date(booking.startDate).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "long",
@@ -426,16 +479,16 @@ export function BookingsClientView({
                   </div>
 
                   <div>
-                    <div className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-1">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                       Komitmen Anggaran
                     </div>
-                    <div className="font-bold text-stone-900">
-                      {booking.budget || "Sesuai kesepakatan"}
+                    <div className="font-black text-[#0f172a] font-mono text-sm">
+                      {formatBudgetDisplay(booking.budget)}
                     </div>
                   </div>
 
                   <div className="sm:col-span-2 lg:col-span-1">
-                    <div className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-1">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                       Rincian &amp; Spesifikasi
                     </div>
                     <BookingDetailsBadgeList details={booking.details} />
@@ -450,7 +503,7 @@ export function BookingsClientView({
                 />
 
                 {/* Action Bar */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-stone-100">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
                   <div className="flex flex-wrap items-center gap-2">
                     <ViewSpkButton booking={booking as any} />
                     <BookingContactActions
@@ -464,7 +517,7 @@ export function BookingsClientView({
                     />
                   </div>
 
-                  {/* Contextual Action */}
+                  {/* Contextual Action (Matching Project Blue Pill) */}
                   <div className="flex items-center gap-2 shrink-0">
                     {(booking.status === "PENDING" || booking.status === "NEGOTIATING") && isIncoming && (
                       <BookingStatusManager
@@ -507,7 +560,7 @@ export function BookingsClientView({
 
 function BookingDetailsBadgeList({ details }: { details: any }) {
   if (!details || typeof details !== "object") {
-    return <span className="text-stone-400 italic text-xs">Standar platform</span>;
+    return <span className="text-slate-400 italic text-xs">Standar platform</span>;
   }
 
   const entries = Object.entries(details).filter(
@@ -516,12 +569,13 @@ function BookingDetailsBadgeList({ details }: { details: any }) {
       key !== "agreedTerms" &&
       key !== "offerMessageId" &&
       key !== "source" &&
+      key !== "dispute" &&
       val &&
       String(val).trim() !== ""
   );
 
   if (entries.length === 0) {
-    return <span className="text-stone-400 italic text-xs">Standar platform</span>;
+    return <span className="text-slate-400 italic text-xs">Standar platform</span>;
   }
 
   const labelMap: Record<string, string> = {
@@ -551,18 +605,18 @@ function BookingDetailsBadgeList({ details }: { details: any }) {
         return (
           <span
             key={k}
-            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white border border-stone-200/80 text-[10px] text-stone-700 shadow-2xs max-w-[200px] truncate"
+            className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white border border-slate-200/80 text-[10px] text-slate-700 shadow-2xs max-w-[200px] truncate"
           >
-            <span className="font-semibold text-stone-900">{labelMap[k] || k}:</span>
+            <span className="font-bold text-[#0f172a]">{labelMap[k] || k}:</span>
             {isUrl ? (
               <a
                 href={valStr}
                 target="_blank"
                 rel="noreferrer"
-                className="text-stone-900 font-semibold hover:underline inline-flex items-center gap-0.5"
+                className="text-[#0284c7] font-semibold hover:underline inline-flex items-center gap-0.5"
               >
                 <span>Link</span>
-                <ExternalLink className="w-2.5 h-2.5 text-stone-400" />
+                <ExternalLink className="w-2.5 h-2.5 text-[#0284c7]" />
               </a>
             ) : (
               <span className="truncate">{valStr}</span>
@@ -571,7 +625,7 @@ function BookingDetailsBadgeList({ details }: { details: any }) {
         );
       })}
       {entries.length > 3 && (
-        <span className="text-[10px] text-stone-400 px-1.5 py-0.5 rounded bg-stone-100 font-medium">
+        <span className="text-[10px] text-slate-500 px-2 py-0.5 rounded-full bg-slate-100 font-semibold border border-slate-200/60">
           +{entries.length - 3} lainnya
         </span>
       )}
@@ -588,7 +642,7 @@ function StatusBadge({
 }) {
   if (status === "COMPLETED") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-semibold border border-emerald-200/80 shadow-2xs">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200/80 shadow-2xs">
         <CheckCircle2 className="w-3 h-3 text-emerald-600" />
         <span>Selesai (Tuntas)</span>
       </span>
@@ -596,15 +650,15 @@ function StatusBadge({
   }
   if (collaborationId) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-stone-900 text-white text-[10px] font-semibold tracking-wider shadow-2xs">
-        <Handshake className="w-3 h-3 text-stone-300" />
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/80 text-[10px] font-bold shadow-2xs">
+        <Handshake className="w-3 h-3 text-indigo-600" />
         <span>Workspace Aktif</span>
       </span>
     );
   }
   if (status === "ACCEPTED") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-200/60">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200/70 shadow-2xs">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
         <span>Disetujui</span>
       </span>
@@ -612,7 +666,7 @@ function StatusBadge({
   }
   if (status === "NEGOTIATING") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-semibold border border-blue-200/60">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold border border-blue-200/70 shadow-2xs">
         <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
         <span>Reschedule Diajukan</span>
       </span>
@@ -620,24 +674,24 @@ function StatusBadge({
   }
   if (status === "CANCELLED") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-600 text-[10px] font-semibold border border-stone-200/70">
-        <span className="w-1.5 h-1.5 rounded-full bg-stone-400" />
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-semibold border border-slate-200/70 shadow-2xs">
+        <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
         <span>Dibatalkan</span>
       </span>
     );
   }
   if (status === "DECLINED") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 text-[10px] font-semibold border border-rose-200/60">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-[10px] font-bold border border-rose-200/70 shadow-2xs">
         <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
         <span>Ditolak</span>
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-semibold border border-amber-200/60">
+    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200/70 shadow-2xs">
       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-      <span>Menunggu Respons</span>
+      <span>Menunggu Konfirmasi</span>
     </span>
   );
 }

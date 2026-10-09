@@ -47,7 +47,6 @@ import { ModelCompCard, ModelAttributes } from "./ModelCompCard";
 import { StudioSpecsCard, StudioAttributes } from "./StudioSpecsCard";
 import { BrandSpecsCard, BrandAttributes } from "./BrandSpecsCard";
 import { PhotographerSpecsCard, PhotographerAttributes } from "./PhotographerSpecsCard";
-import { DesignerSpecsCard, DesignerAttributes } from "./DesignerSpecsCard";
 import { MuaSpecsCard } from "./MuaSpecsCard";
 import { StylistSpecsCard } from "./StylistSpecsCard";
 import { VideographerSpecsCard } from "./VideographerSpecsCard";
@@ -280,13 +279,6 @@ export function ActorDetailTabs({
       ("primary_camera" in a.attributes || "lenses" in a.attributes || "drone_aerial" in a.attributes)
   );
 
-  const designerAsset = actor.assets.find(
-    (a) =>
-      a.attributes &&
-      typeof a.attributes === "object" &&
-      ("primary_software" in a.attributes || "design_disciplines" in a.attributes || "deliverables" in a.attributes || "style_dna" in a.attributes)
-  );
-
   const stylistAsset = actor.assets.find(
     (a) =>
       a.subtype.toLowerCase().includes("styl") ||
@@ -311,7 +303,7 @@ export function ActorDetailTabs({
   const hasStudioSpaceAsset = actor.assets.some(
     (a) => a.category === "STUDIO_SPACE" || a.subtype.toLowerCase().includes("studio")
   );
-  const isBrand = actor.actorType === "BRAND" || (actor.actorType as string) === "MSME" || actor.actorType === "COLLECTIVE" || Boolean(brandAsset) || sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("umkm");
+  const isBrand = actor.actorType === "BRAND" || (actor.actorType as string) === "MSME" || actor.actorType === "COLLECTIVE" || Boolean(brandAsset) || sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("umkm") || sectorLower.includes("designer") || sectorLower.includes("desain");
   const isIndividualSector = !isBrand && (
     sectorLower.includes("photographer") ||
     sectorLower.includes("fotografi") ||
@@ -324,9 +316,7 @@ export function ActorDetailTabs({
     sectorLower.includes("makeup") ||
     sectorLower.includes("hair") ||
     sectorLower.includes("stylist") ||
-    sectorLower.includes("wardrobe") ||
-    sectorLower.includes("designer") ||
-    sectorLower.includes("desain")
+    sectorLower.includes("wardrobe")
   );
 
   const isStudio = !isIndividualSector && !isBrand && (hasStudioSpaceAsset || Boolean(studioAsset) || actor.actorType === "STUDIO" || sectorLower.includes("studio"));
@@ -335,13 +325,11 @@ export function ActorDetailTabs({
   const isStylist = !isBrand && !isStudio && !isModel && !isMUA && (Boolean(stylistAsset) || sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));
   const isVideographer = !isBrand && !isStudio && !isModel && !isMUA && !isStylist && (Boolean(videographerAsset) || sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema"));
   const isPhotographer = !isBrand && !isStudio && !isModel && !isMUA && !isStylist && !isVideographer && (Boolean(photographerAsset) || sectorLower.includes("photographer") || sectorLower.includes("fotografi"));
-  const isDesigner = !isBrand && !isStudio && !isModel && !isMUA && !isStylist && !isVideographer && !isPhotographer && (Boolean(designerAsset) || sectorLower.includes("designer") || sectorLower.includes("desain"));
 
   const modelAttrs = modelAsset?.attributes as ModelAttributes | undefined;
   const studioAttrs = studioAsset?.attributes as StudioAttributes | undefined;
   const brandAttrs = brandAsset?.attributes as BrandAttributes | undefined;
   const photographerAttrs = photographerAsset?.attributes as PhotographerAttributes | undefined;
-  const designerAttrs = designerAsset?.attributes as DesignerAttributes | undefined;
 
   const portfolioAssets = actor.assets.filter((a) => a.category === "PORTFOLIO_WORK");
   const otherAssets = actor.assets.filter((a) => a.category !== "PORTFOLIO_WORK");
@@ -466,7 +454,6 @@ export function ActorDetailTabs({
   const explicitSpecialties: string[] = [];
   if (modelAttrs?.specialties) explicitSpecialties.push(...modelAttrs.specialties);
   if (photographerAttrs?.specialties) explicitSpecialties.push(...photographerAttrs.specialties);
-  if (designerAttrs?.design_disciplines) explicitSpecialties.push(...designerAttrs.design_disciplines);
 
   for (const asset of actor.assets) {
     if (asset.category === "SKILL_TALENT") {
@@ -545,8 +532,6 @@ export function ActorDetailTabs({
     ? "Makeup Kit & Standar Rias"
     : isStylist
     ? "Wardrobe & Alat Styling"
-    : isDesigner
-    ? "Disiplin & Material Desain"
     : isBrand
     ? "Katalog & Identitas Brand"
     : "Spesifikasi Teknis & Alat";
@@ -585,7 +570,7 @@ export function ActorDetailTabs({
   return (
     <div className="space-y-8">
       {/* Segmented Pill Tabs Navigation Bar */}
-      <div className="p-1.5 bg-slate-100/90 backdrop-blur-sm rounded-full border border-slate-200/80 inline-flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-full">
+      <div className="p-1.5 bg-slate-100/90 backdrop-blur-sm rounded-full border border-slate-200/80 inline-flex items-center gap-1.5 overflow-x-auto no-scrollbar scrollbar-none max-w-full">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -593,10 +578,10 @@ export function ActorDetailTabs({
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`px-5 py-2 whitespace-nowrap text-xs font-bold rounded-full transition-all cursor-pointer ${
+              className={`px-5 py-2 whitespace-nowrap text-xs font-bold rounded-full transition-all cursor-pointer outline-none focus:outline-none focus-visible:outline-none focus:ring-0 select-none ${
                 isActive
                   ? "bg-white text-slate-900 shadow-xs border border-slate-200/60"
-                  : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
+                  : "text-slate-500 hover:text-slate-900 hover:bg-white/50 border border-transparent"
               }`}
             >
               {tab.label}
@@ -639,7 +624,7 @@ export function ActorDetailTabs({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scrollbar-none py-1">
                 {[
                   { id: "ALL", label: "Semua Karya" },
                   { id: "Fashion Campaign", label: "Fashion Campaign" },
@@ -651,9 +636,9 @@ export function ActorDetailTabs({
                     key={item.id}
                     type="button"
                     onClick={() => setPortfolioFilter(item.id)}
-                    className={`inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer select-none border rounded-full whitespace-nowrap active:scale-95 ${
+                    className={`inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer select-none border rounded-full whitespace-nowrap active:scale-95 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 ${
                       portfolioFilter === item.id
-                        ? "btn-primary-pill !py-1.5 !px-4 text-white font-semibold shadow-md shadow-[#4CC9FE]/25"
+                        ? "btn-primary-pill !py-1.5 !px-4 text-white font-semibold shadow-md shadow-[#4CC9FE]/25 border-transparent"
                         : "bg-white/90 hover:bg-white text-slate-600 hover:text-[#0284c7] border-slate-200/80 hover:border-[#4CC9FE]/40"
                     }`}
                   >
@@ -870,7 +855,7 @@ export function ActorDetailTabs({
                 {/* Tipe Kerjasama */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {collabTypes.map((type, idx) => (
-                    <div key={idx} className="p-5 bg-white border border-slate-200/80 shadow-xs space-y-2 hover:border-slate-900 transition-colors">
+                    <div key={idx} className="p-5 bg-white border border-slate-200/80 shadow-xs space-y-2 hover:border-[#0284c7] transition-colors">
                       <div className="w-9 h-9 rounded bg-slate-100 flex items-center justify-center text-slate-700 mb-1">
                         {renderCollabIcon(type)}
                       </div>
@@ -880,7 +865,7 @@ export function ActorDetailTabs({
                         {type === "Product Seeding / Gifting" && "Brand mengirimkan produk gratis kepada kreator pilihan untuk konten organik tanpa kewajiban posting."}
                         {type === "Revenue Share / Affiliate" && "Kreator mendapatkan komisi dari setiap konversi/penjualan yang dihasilkan melalui kode unik mereka."}
                         {type === "Barter / Trade for Content" && "Pertukaran nilai: brand menyediakan produk/jasa, kreator menyediakan konten berkualitas."}
-                        {type === "Co-Branding & Kolaborasi Koleksi" && "Kerjasama desain koleksi bersama antara brand dan kreator/desainer untuk rilis terbatas."}
+                        {type === "Co-Branding & Kolaborasi Koleksi" && "Kerjasama rilis koleksi bersama antara dua brand atau brand dan kreator untuk edisi terbatas."}
                         {type === "Casting Open" && "Brand membuka casting terbuka untuk model, fotografer, atau kreator untuk proyek tertentu."}
                         {!["Paid Campaign", "Product Seeding / Gifting", "Revenue Share / Affiliate", "Barter / Trade for Content", "Co-Branding & Kolaborasi Koleksi", "Casting Open"].includes(type) && "Jenis kerjasama terbuka sesuai kesepakatan bersama."}
                       </p>
@@ -1045,7 +1030,7 @@ export function ActorDetailTabs({
                   key={idx}
                   className={`relative flex flex-col justify-between p-6 rounded-[22px] border transition-all duration-300 ${
                     isHighlighted
-                      ? "bg-white border-slate-900 shadow-lg ring-1 ring-slate-900"
+                      ? "bg-white border-[#0284c7] shadow-lg ring-1 ring-[#0284c7]/30"
                       : "bg-white border-slate-200 shadow-sm hover:border-slate-400"
                   }`}
                 >
@@ -1268,11 +1253,7 @@ export function ActorDetailTabs({
             <StylistSpecsCard attributes={(stylistAsset?.attributes as any) || {}} actorName={actor.name} isCurrentActor={isCurrentActor} actorAssets={actor.assets} />
           )}
 
-          {isDesigner && (
-            <DesignerSpecsCard attributes={designerAttrs || {}} actorName={actor.name} isCurrentActor={isCurrentActor} actorAssets={actor.assets} />
-          )}
-
-          {isBrand && !isStudio && !isModel && !isPhotographer && !isDesigner && !isVideographer && !isMUA && !isStylist && (
+          {isBrand && !isStudio && !isModel && !isPhotographer && !isVideographer && !isMUA && !isStylist && (
             <BrandSpecsCard attributes={brandAttrs || {}} brandName={actor.name} isCurrentActor={isCurrentActor} actorAssets={actor.assets} />
           )}
 
@@ -1413,16 +1394,16 @@ export function ActorDetailTabs({
                         </span>
                         <div className="flex flex-wrap gap-1.5">
                           <span className="px-2 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-800 text-[10px] font-bold">
-                            📷 Photography
+                            Photography
                           </span>
                           <span className="px-2 py-0.5 rounded-md bg-purple-50 border border-purple-200 text-purple-800 text-[10px] font-bold">
-                            🏛️ Studio Space
+                            Studio Space
                           </span>
                           <span className="px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-800 text-[10px] font-bold">
-                            💃 Fashion Model
+                            Fashion Model
                           </span>
                           <span className="px-2 py-0.5 rounded-md bg-sky-50 border border-sky-200 text-sky-800 rounded-full text-[10px] font-bold">
-                            💄 MUA &amp; Hair
+                            MUA &amp; Hair
                           </span>
                         </div>
                       </div>
@@ -1484,16 +1465,16 @@ export function ActorDetailTabs({
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     <span className="px-2 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-800 text-[10px] font-bold">
-                      📷 Photography
+                      Photography
                     </span>
                     <span className="px-2 py-0.5 rounded-md bg-purple-50 border border-purple-200 text-purple-800 text-[10px] font-bold">
-                      🏛️ Studio Space
+                      Studio Space
                     </span>
                     <span className="px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-800 text-[10px] font-bold">
-                      💃 Fashion Model
+                      Fashion Model
                     </span>
                     <span className="px-2 py-0.5 rounded-md bg-sky-50 border border-sky-200 text-sky-800 rounded-full text-[10px] font-bold">
-                      💄 MUA &amp; Hair
+                      MUA &amp; Hair
                     </span>
                   </div>
                 </div>

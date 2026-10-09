@@ -22,37 +22,37 @@ export function YourResourcesCard({ actorName, sector, isBrand, assets, totalCou
   const totalAssets = totalCount ?? assets.length;
 
   return (
-    <div className="p-5 md:p-6 rounded-[24px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-5">
+    <div className="p-5 md:p-6 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <div>
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-[#0284c7]" />
-            <h2 className="text-base font-bold text-[#111827] tracking-tight">
+            <h2 className="text-base font-bold text-[#0f172a] tracking-tight">
               Aset &amp; Inventaris Anda
             </h2>
             <span className="text-[10px] font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/70">
               {totalAssets} Terdaftar
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1 leading-relaxed max-w-xl font-normal">
+          <p className="text-xs text-slate-600 mt-1 leading-relaxed max-w-xl font-normal">
             Peralatan, fasilitas studio, dan kapasitas kerja yang Anda sediakan untuk kolaborasi.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <Link
-            href="/readiness"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white hover:text-[#0284c7] text-[#111827] border border-white/80 text-xs font-semibold transition-all shrink-0 shadow-xs"
+            href="/settings/specs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white hover:text-[#0284c7] text-[#0f172a] border border-white/80 text-xs font-semibold transition-all shrink-0 shadow-xs"
           >
             <Layers className="w-3.5 h-3.5 text-slate-500" />
-            <span>Kelola Inventaris</span>
+            <span>Kelola Spesifikasi</span>
           </Link>
           <Link
-            href="/readiness?tab=assets"
+            href="/showcase"
             className="btn-primary-pill inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold"
           >
             <Plus className="w-3.5 h-3.5 text-white" />
-            <span>Tambah Aset</span>
+            <span>Tambah Karya</span>
           </Link>
         </div>
       </div>
@@ -67,7 +67,7 @@ export function YourResourcesCard({ actorName, sector, isBrand, assets, totalCou
             </p>
           </div>
           <Link
-            href="/readiness"
+            href="/settings/specs"
             className="inline-flex items-center gap-1 text-xs font-semibold text-[#0284c7] hover:text-[#0369a1] hover:underline pt-1"
           >
             <span>Daftarkan Sekarang</span>
@@ -122,7 +122,7 @@ export function YourResourcesCard({ actorName, sector, isBrand, assets, totalCou
                   )}
 
                   <div>
-                    <h3 className="text-xs sm:text-sm font-semibold text-[#111827] group-hover:text-[#0284c7] transition-colors leading-snug">
+                    <h3 className="text-xs sm:text-sm font-semibold text-[#0f172a] group-hover:text-[#0284c7] transition-colors leading-snug">
                       {asset.name}
                     </h3>
 
@@ -144,7 +144,7 @@ export function YourResourcesCard({ actorName, sector, isBrand, assets, totalCou
                     </span>
                   </span>
                   <Link
-                    href="/readiness?tab=assets"
+                    href="/settings/specs"
                     className="font-medium text-[#0284c7] hover:text-[#0369a1] hover:underline"
                   >
                     Detail &rarr;
@@ -158,10 +158,10 @@ export function YourResourcesCard({ actorName, sector, isBrand, assets, totalCou
           {assets.length > 6 && (
             <div className="pt-1 text-center">
               <Link
-                href="/readiness?tab=assets"
+                href="/settings/specs"
                 className="text-xs font-semibold text-[#0284c7] hover:text-[#0369a1] transition-colors inline-flex items-center gap-1"
               >
-                <span>Lihat Seluruh {totalAssets} Aset di Inventaris</span>
+                <span>Lihat Seluruh {totalAssets} Aset di Profil</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -181,7 +181,7 @@ export function YourResourcesCard({ actorName, sector, isBrand, assets, totalCou
         </div>
 
         <Link
-          href="/readiness"
+          href="/settings/availability"
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-medium text-xs border border-slate-200 shrink-0 transition-colors shadow-2xs"
         >
           <span>Atur Ketersediaan</span>

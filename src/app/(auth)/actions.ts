@@ -79,10 +79,10 @@ export async function signup(formData: FormData) {
     return { error: "Kata sandi minimal harus 6 karakter." };
   }
 
-  // Canonical mapping to exactly 6 official RAMU roles & ActorTypes
+  // Canonical mapping to exactly 5 official RAMU roles & ActorTypes
   const ROLE_MAP: Record<string, { sector: string; actorType: "BRAND" | "STUDIO" | "INDIVIDUAL" }> = {
     "Fashion Brand/UMKM": { sector: "Fashion Brand/UMKM", actorType: "BRAND" },
-    "Fashion Designer": { sector: "Fashion Designer", actorType: "INDIVIDUAL" },
+    "Fashion Designer": { sector: "Fashion Brand/UMKM", actorType: "BRAND" }, // mapped to brand
     "Photographer": { sector: "Photographer", actorType: "INDIVIDUAL" },
     "Model": { sector: "Model", actorType: "INDIVIDUAL" },
     "MUA/Stylist": { sector: "MUA/Stylist", actorType: "INDIVIDUAL" },

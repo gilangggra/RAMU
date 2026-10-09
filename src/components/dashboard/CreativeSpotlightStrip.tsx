@@ -26,11 +26,11 @@ const FEATURED_CAMPAIGNS: CreativeCampaignItem[] = [
   {
     id: "campaign-1",
     title: "Lookbook Kampanye Kapsul Silk Organza & Linen",
-    subtitle: "Kolaborasi produksi lookbook komersial 15-look menggabungkan desainer, studio daylight, fotografer, dan muse.",
+    subtitle: "Kolaborasi produksi lookbook komersial 15-look menggabungkan brand fashion, studio daylight, fotografer, dan muse.",
     coverImage: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop",
     category: "Lookbook Kampanye Fesyen",
     collaborators: [
-      { name: "Atelier Nara", role: "Desainer Busana" },
+      { name: "Atelier Nara", role: "Brand & Label Busana" },
       { name: "Studio Imaji", role: "Studio Cyclorama" },
       { name: "Lensa Kreatif", role: "Fotografer & Lighting" },
       { name: "Go Young Jung", role: "Talenta Muse" },
@@ -45,7 +45,7 @@ const FEATURED_CAMPAIGNS: CreativeCampaignItem[] = [
   {
     id: "campaign-2",
     title: "Editorial Katalog Musim Gugur Minimalis",
-    subtitle: "Pemanfaatan sisa kain deadstock berkualitas tinggi dengan studio daylight dan pencahayaan Profoto.",
+    subtitle: "Pemotretan katalog busana musim gugur ready-to-wear dengan studio daylight dan pencahayaan Profoto.",
     coverImage: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1200&auto=format&fit=crop",
     category: "Editorial Lookbook",
     collaborators: [
@@ -64,31 +64,31 @@ const FEATURED_CAMPAIGNS: CreativeCampaignItem[] = [
 
 export function CreativeSpotlightStrip() {
   return (
-    <div className="rounded-[24px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] overflow-hidden">
+    <div className="rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] overflow-hidden">
       {/* SECTION HEADER */}
       <div className="px-5 py-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/80 bg-white/40">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-white/95 border border-white/80 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
-            ✨
+          <div className="w-9 h-9 rounded-full bg-white/95 border border-white/80 text-[#0284c7] flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+            <Sparkles className="w-4 h-4 text-[#0284c7]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-[#111827] tracking-tight">
+              <h2 className="text-sm font-bold text-[#0f172a] tracking-tight">
                 Panggung Kolaborasi &amp; Lookbook Terbitan Komunitas
               </h2>
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-semibold border border-emerald-200/70">
                 Karya Nyata Ekosistem
               </span>
             </div>
-            <p className="text-xs text-[#4B5563] font-normal mt-0.5">
-              Contoh nyata sinergi desainer, fotografer, studio, dan muse yang terwujud di RAMU melalui SPK resmi.
+            <p className="text-xs text-[#475569] font-normal mt-0.5">
+              Contoh nyata sinergi brand fashion, fotografer, studio, stylist, dan muse yang terwujud di RAMU melalui SPK resmi.
             </p>
           </div>
         </div>
 
         <Link
           href="/showcase"
-          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white hover:text-[#0284c7] text-[#111827] text-xs font-semibold border border-white/80 transition-all shrink-0 shadow-xs"
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white hover:text-[#0284c7] text-[#0f172a] text-xs font-semibold border border-white/80 transition-all shrink-0 shadow-xs"
         >
           <Eye className="w-3.5 h-3.5 text-slate-500" />
           <span>Jelajahi Galeri Lookbook</span>

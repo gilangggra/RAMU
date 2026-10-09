@@ -57,9 +57,9 @@ const KIND_CONFIG: Record<
   },
   task_created: {
     icon: CheckSquare,
-    bg: "bg-stone-50",
-    iconColor: "text-stone-500",
-    dot: "bg-stone-300",
+    bg: "bg-slate-50",
+    iconColor: "text-slate-500",
+    dot: "bg-slate-300",
   },
   milestone_reached: {
     icon: Target,
@@ -69,9 +69,9 @@ const KIND_CONFIG: Record<
   },
   milestone_pending: {
     icon: Circle,
-    bg: "bg-stone-50",
-    iconColor: "text-stone-400",
-    dot: "bg-stone-200",
+    bg: "bg-slate-50",
+    iconColor: "text-slate-400",
+    dot: "bg-slate-200",
   },
   decision_recorded: {
     icon: Scroll,
@@ -302,18 +302,18 @@ export function CollaborationActivityFeed({
   }
 
   return (
-    <section className="rounded-[24px] overflow-hidden border border-stone-200/80 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+    <section className="rounded-[22px] overflow-hidden border border-white/80 glass-card shadow-2xs">
 
-      <div className="px-6 py-4 border-b border-stone-100 flex items-center justify-between">
+      <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-[#1E1B2E] flex items-center justify-center">
-            <Clock className="w-3.5 h-3.5 text-amber-400" />
+          <div className="w-7 h-7 rounded-full bg-white/95 border border-white/80 shadow-2xs flex items-center justify-center">
+            <Clock className="w-3.5 h-3.5 text-[#0284c7]" />
           </div>
           <div>
-            <h3 className="text-sm font-extrabold text-[#1E1B2E] tracking-tight">
+            <h3 className="text-sm font-bold text-slate-900 tracking-tight">
               Aktivitas Kolaborasi
             </h3>
-            <p className="text-[10px] text-stone-400 mt-0.5">
+            <p className="text-[10px] text-slate-400 mt-0.5">
               {activities.length} event · urut terbaru
             </p>
           </div>
@@ -325,21 +325,21 @@ export function CollaborationActivityFeed({
         </div>
       </div>
 
-      <div className="px-6 py-4 space-y-5 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-transparent">
+      <div className="px-6 py-4 space-y-5 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
         {groups.map((group) => (
           <div key={group.label} className="space-y-3">
 
             <div className="flex items-center gap-3">
-              <div className="h-px flex-1 bg-stone-100" />
-              <span className="text-[9px] font-extrabold uppercase tracking-widest text-stone-400 shrink-0">
+              <div className="h-px flex-1 bg-slate-100" />
+              <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-400 shrink-0">
                 {group.label}
               </span>
-              <div className="h-px flex-1 bg-stone-100" />
+              <div className="h-px flex-1 bg-slate-100" />
             </div>
 
             <div className="relative space-y-1 pl-5">
 
-              <div className="absolute left-[7px] top-4 bottom-4 w-px bg-stone-100" />
+              <div className="absolute left-[7px] top-4 bottom-4 w-px bg-slate-100" />
 
               {group.items.map((activity) => {
                 const cfg = KIND_CONFIG[activity.kind];
@@ -362,13 +362,13 @@ export function CollaborationActivityFeed({
                     </div>
 
                     <div className="flex-1 min-w-0 pt-0.5">
-                      <p className="text-[12px] font-semibold text-[#1E1B2E] leading-snug truncate">
+                      <p className="text-[12px] font-semibold text-slate-900 leading-snug truncate">
                         {activity.title}
                       </p>
                       {(activity.subtitle || activity.actorName) && (
-                        <p className="text-[10px] text-stone-400 mt-0.5 truncate">
+                        <p className="text-[10px] text-slate-400 mt-0.5 truncate">
                           {activity.actorName && (
-                            <span className="font-medium text-stone-500">{activity.actorName}</span>
+                            <span className="font-medium text-slate-500">{activity.actorName}</span>
                           )}
                           {activity.actorName && activity.subtitle && " · "}
                           {activity.subtitle}
@@ -376,7 +376,7 @@ export function CollaborationActivityFeed({
                       )}
                     </div>
 
-                    <span className="text-[10px] text-stone-300 shrink-0 pt-0.5 font-medium">
+                    <span className="text-[10px] text-slate-300 shrink-0 pt-0.5 font-medium">
                       {relativeTime(activity.timestamp)}
                     </span>
                   </div>
@@ -387,8 +387,8 @@ export function CollaborationActivityFeed({
         ))}
       </div>
 
-      <div className="px-6 py-3 bg-stone-50 border-t border-stone-100">
-        <p className="text-[10px] text-stone-400 text-center">
+      <div className="px-6 py-3 bg-slate-50 border-t border-slate-100">
+        <p className="text-[10px] text-slate-400 text-center">
           Aktivitas diperbarui secara otomatis setiap kali ada perubahan di workspace ini
         </p>
       </div>

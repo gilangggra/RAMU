@@ -74,11 +74,11 @@ async function main() {
       assets: [
         {
           category: AssetCategory.WARDROBE_PROP,
-          subtype: "Material Deadstock",
-          name: "Sisa Kain Produksi & Material Deadstock Berkualitas",
-          description: "Material linen dan katun premium dari koleksi sebelumnya siap kolaborasi upcycling",
-          roles: [AssetRole.INPUT, AssetRole.COMPONENT],
-          attributes: { capacity: 50, unit: "kg/bulan" },
+          subtype: "Sampel Busana Koleksi",
+          name: "Koleksi Sampel Busana Ready-to-Wear (15 Looks)",
+          description: "Sampel busana lengkap siap fitting untuk pemotretan katalog editorial dan kampanye komersial",
+          roles: [AssetRole.INPUT, AssetRole.COMPONENT, AssetRole.CREATIVE_ELEMENT],
+          attributes: { sample_sizes: "S, M, L", total_looks: 15 },
         },
         {
           category: AssetCategory.PORTFOLIO_WORK,
@@ -114,10 +114,10 @@ async function main() {
       actorId: "00000000-0000-0000-0000-000000000006",
       email: "designer@ramu.id",
       displayName: "Atelier Nara",
-      actorType: ActorType.INDIVIDUAL,
-      sector: "Fashion Designer",
+      actorType: ActorType.BRAND,
+      sector: "Fashion Brand/UMKM",
       location: "Bandung, Jawa Barat",
-      description: "Perancang busana avant-garde dan pattern maker independen yang merancang siluet kontemporer dengan bahan silk organza dan tenun.",
+      description: "Label busana avant-garde independen yang merancang dan memproduksi siluet kontemporer dengan bahan silk organza dan tenun untuk pemotretan editorial dan runway.",
       contactEmail: "nara@ateliernara.design",
       aestheticStyles: ["High-Fashion", "Avant-Garde", "Minimalist"],
       compensationModels: ["PAID", "REVENUE_SHARE"],
@@ -130,22 +130,22 @@ async function main() {
           description: "Koleksi 12 busana siap pakai dengan eksplorasi draperi modern untuk editorial lookbook",
           roles: [AssetRole.INPUT, AssetRole.COMPONENT],
           attributes: {
-            starting_rate: "Mulai Rp 2,5 Jt / koleksi",
-            turnaround_time: "7 – 14 Hari Kerja",
+            starting_rate: "Mulai Rp 2,5 Jt / sesi",
+            turnaround_time: "Sesuai Jadwal Sesi",
             is_featured_cover: true,
             image_url: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop",
             service_packages: [
               {
-                title: "Desain Koleksi Busana & Tech-Pack",
-                subtitle: "Pengembangan konsep busana siap jahit dan spesifikasi garmen pabrik",
+                title: "Peminjaman Koleksi Kapsul & Editorial Pull",
+                subtitle: "Penyediaan busana sampel avant-garde untuk editorial majalah & photoshoot",
                 price: "Rp 3.500.000",
-                unit: "per koleksi",
+                unit: "per sesi",
                 popular: true,
                 features: [
-                  "Riset tren & moodboard konsep koleksi (5-8 outfit)",
-                  "Sketsa desain digital 2D (tampak depan & belakang)",
-                  "Lembar spesifikasi teknis lengkap ukuran & bahan",
-                  "Gratis 2x putaran revisi teknis",
+                  "Penyediaan 6-8 look busana sampel siap fitting on-set",
+                  "Peminjaman aksesori & statement piece eksklusif",
+                  "Pencantuman kredit resmi brand di seluruh publikasi",
+                  "Gratis 1x pendampingan fitting sebelum sesi pemotretan",
                 ],
               },
             ],
@@ -512,9 +512,9 @@ async function main() {
       neededRoles: {
         create: [
           {
-            roleLabel: "Fashion Designer",
-            assetCategory: AssetCategory.PORTFOLIO_WORK,
-            description: "Desainer pendamping untuk styling dan kurasi siluet potongan busana",
+            roleLabel: "Stylist & Wardrobe",
+            assetCategory: AssetCategory.SKILL_TALENT,
+            description: "Stylist busana pendamping untuk styling dan kurasi siluet potongan busana di lokasi",
             maxCollaborators: 1,
           },
           {

@@ -163,7 +163,10 @@ export default async function DirectoryDetailPage({
     actorTypeUpper === "COLLECTIVE" ||
     sectorLower.includes("brand") ||
     sectorLower.includes("label") ||
-    sectorLower.includes("umkm");
+    sectorLower.includes("umkm") ||
+    sectorLower.includes("designer") ||
+    sectorLower.includes("desain") ||
+    sectorLower.includes("atelier");
 
   // Studio: explicitly studio type, or named Studio Imaji, or sector contains studio and not photographer
   const isStudio =
@@ -175,9 +178,8 @@ export default async function DirectoryDetailPage({
   const isModel = !isBrand && !isStudio && (sectorLower.includes("model") || sectorLower.includes("talent"));
   const isMua = !isBrand && !isStudio && (sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair"));
   const isStylist = !isBrand && !isStudio && !isMua && (sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));
-  const isDesigner = !isBrand && !isStudio && (sectorLower.includes("designer") || sectorLower.includes("desain") || sectorLower.includes("atelier"));
   const isVideo = !isBrand && !isStudio && (sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema"));
-  const isPhotog = !isBrand && !isStudio && !isVideo && !isModel && !isMua && !isStylist && !isDesigner;
+  const isPhotog = !isBrand && !isStudio && !isVideo && !isModel && !isMua && !isStylist;
 
   // Role-Aware Primary Preview Image Resolution
   let previewImage: string | null = null;
@@ -378,16 +380,6 @@ export default async function DirectoryDetailPage({
     metric3Value = "Cinema 4K & DaVinci 10-Bit";
     metric4Label = "Proteksi Kerja";
     metric4Value = "SPK Digital & Hak Lisensi";
-  } else if (isDesigner) {
-    roleBadgeLabel = "Fashion Designer & Atelier";
-    cardOverlayBadge = "Atelier & Desainer Terverifikasi";
-    availabilityBadge = "Tersedia untuk Kolaborasi";
-    startingRate = "Mulai Rp 2,5 Jt / koleksi";
-    turnaroundTime = "7 – 14 Hari Kerja";
-    metric3Label = "Keahlian Desain";
-    metric3Value = "Pattern Making & Sampling";
-    metric4Label = "Proteksi HKI";
-    metric4Value = "NDA & SPK Hak Cipta Desain";
   } else if (isPhotog) {
     roleBadgeLabel = "Fotografer Mode & Komersial";
     cardOverlayBadge = "Fotografer Terkurasi";
@@ -430,7 +422,6 @@ export default async function DirectoryDetailPage({
       (isVideo && a.attributes && typeof a.attributes === "object" && ("primary_cinema_camera" in (a.attributes as any) || "stabilizer_gimbal" in (a.attributes as any))) ||
       (isMua && a.attributes && typeof a.attributes === "object" && ("makeup_styles" in (a.attributes as any) || "primary_kit_brands" in (a.attributes as any))) ||
       (isStylist && a.attributes && typeof a.attributes === "object" && ("styling_specialties" in (a.attributes as any) || "onset_equipment" in (a.attributes as any) || "wardrobe_archive_count" in (a.attributes as any))) ||
-      (isDesigner && a.attributes && typeof a.attributes === "object" && ("design_disciplines" in (a.attributes as any) || "primary_software" in (a.attributes as any))) ||
       (isBrand && a.attributes && typeof a.attributes === "object" && ("brand_gallery" in (a.attributes as any) || "sample_sizes_ready" in (a.attributes as any) || "design_dna" in (a.attributes as any)))
   );
   const specsAttrs = (specsAsset?.attributes && typeof specsAsset.attributes === "object")
@@ -504,19 +495,6 @@ export default async function DirectoryDetailPage({
       headerTags.push(specsAttrs.aesthetic_dna.length > 28 ? specsAttrs.aesthetic_dna.slice(0, 28) + "..." : specsAttrs.aesthetic_dna);
     }
     headerTags.push("Garment Steamer & Fitting Kit");
-  } else if (isDesigner) {
-    if (Array.isArray(specsAttrs.design_disciplines) && specsAttrs.design_disciplines.length > 0) {
-      headerTags.push(specsAttrs.design_disciplines[0]);
-    } else {
-      headerTags.push("Visual Identity & Fashion");
-    }
-    if (Array.isArray(specsAttrs.primary_software) && specsAttrs.primary_software.length > 0) {
-      headerTags.push(specsAttrs.primary_software.slice(0, 2).join(" & "));
-    }
-    if (specsAttrs.style_dna) {
-      headerTags.push(specsAttrs.style_dna.length > 28 ? specsAttrs.style_dna.slice(0, 28) + "..." : specsAttrs.style_dna);
-    }
-    headerTags.push("Deliverables Siap Rilis");
   } else {
     if (Array.isArray(specsAttrs.specialties) && specsAttrs.specialties.length > 0) {
       headerTags.push(...specsAttrs.specialties.slice(0, 3));
@@ -528,7 +506,7 @@ export default async function DirectoryDetailPage({
   const displayHeaderTags = Array.from(new Set(headerTags)).filter(Boolean).slice(0, 4);
 
   const pageContent = (
-    <div className="max-w-6xl mx-auto pb-24">
+    <div className="w-full max-w-7xl mx-auto pb-24">
       {isGuest && (
         <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -562,9 +540,9 @@ export default async function DirectoryDetailPage({
       <div className="mb-6">
         <Link
           href="/directory"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white border border-slate-200/80 text-xs font-semibold text-slate-600 hover:text-slate-900 shadow-2xs transition-all w-fit group"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
+          <ArrowLeft className="w-3.5 h-3.5 text-slate-400 group-hover:-translate-x-0.5 transition-transform" />
           <span>Kembali ke Direktori</span>
         </Link>
       </div>
@@ -572,7 +550,7 @@ export default async function DirectoryDetailPage({
       {/* ============================================================ */}
       {/* HERO SECTION: GLASS CARD CONTAINER                          */}
       {/* ============================================================ */}
-      <section className="rounded-[24px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] p-6 sm:p-8 lg:p-10 mb-8 relative overflow-hidden">
+      <section className="rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] p-6 sm:p-8 lg:p-10 mb-8 relative overflow-hidden">
         <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-12">
           {/* Left Column: Media Card with Badge & Verified Trust Strip */}
           <div className="w-full sm:w-72 md:w-80 shrink-0">
@@ -785,8 +763,6 @@ export default async function DirectoryDetailPage({
                                 ? "Booking MUA & Hair Artist"
                                 : isStylist
                                 ? "Booking Fashion Stylist"
-                                : isDesigner
-                                ? "Mulai Proyek Desain"
                                 : isVideo
                                 ? "Inisiasi Kerja Sama Video"
                                 : "Booking Fotografer"

@@ -54,12 +54,12 @@ export default async function SettingsLayout({
 
   return (
     <AppShell actor={actor} activeRoute="/settings">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="w-full max-w-7xl mx-auto space-y-6 pb-16">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             Pengaturan Akun
           </h1>
-          <p className="text-xs sm:text-sm text-stone-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 mt-1">
             Pusat konfigurasi rekening pencairan dana SPK, status ketersediaan, notifikasi, dan keamanan akun Anda.
           </p>
         </div>

@@ -52,7 +52,7 @@ export function ActorAvatar({
   return (
     <div
       className={`${className} overflow-hidden ${
-        showImage ? "bg-stone-100 border border-stone-200" : `${palette.bg} ${palette.border} border`
+        showImage ? "bg-slate-100 border border-slate-200/80" : `${palette.bg} ${palette.border} border`
       } flex items-center justify-center font-bold shrink-0 shadow-2xs`}
     >
       {showImage ? (

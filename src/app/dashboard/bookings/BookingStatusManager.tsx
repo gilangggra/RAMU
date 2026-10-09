@@ -36,6 +36,7 @@ import { SpkAgreementModal, BookingSpkData } from "@/components/bookings/SpkAgre
 import { BookingInvoiceModal } from "@/components/bookings/BookingInvoiceModal";
 import { BookingCallSheetModal } from "@/components/bookings/BookingCallSheetModal";
 import { toast } from "@/components/ui/Toast";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 
 function toDateInputValue(dateInput?: string | Date | null): string {
   if (!dateInput) return "";
@@ -100,41 +101,42 @@ export function BookingRescheduleModal({
     if (!res.success) {
       setErrorMessage(res.error || "Gagal mengajukan reschedule.");
     } else {
+      toast.success("Pengajuan penyesuaian jadwal berhasil dikirim!");
       onClose();
       router.refresh();
     }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in">
-      <div className="bg-white border border-stone-200 rounded-2xl shadow-xl max-w-lg w-full overflow-hidden space-y-0">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white border border-slate-200/90 rounded-[22px] shadow-2xl max-w-lg w-full overflow-hidden space-y-0">
         {/* Modal Header */}
-        <div className="p-5 border-b border-stone-100 flex items-start justify-between bg-stone-50/60">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-stone-900 text-white flex items-center justify-center shrink-0">
+        <div className="p-5 sm:p-6 border-b border-slate-100 flex items-start justify-between bg-sky-50/50">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-sky-100 text-[#0284c7] flex items-center justify-center shrink-0 border border-sky-200/60 shadow-2xs">
               <Calendar className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-stone-900 leading-tight">
-                Ajukan Perubahan Jadwal (Reschedule SPK)
+              <h3 className="text-sm font-bold text-[#0f172a] leading-tight">
+                Ajukan Penyesuaian Jadwal (Reschedule SPK)
               </h3>
-              <p className="text-[11px] text-stone-500 mt-0.5">
-                Usulkan jadwal baru kepada <span className="font-semibold text-stone-700">{partnerName}</span>.
+              <p className="text-[11px] text-[#475569] mt-0.5">
+                Usulkan jadwal baru kepada <span className="font-bold text-[#0f172a]">{partnerName}</span>.
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-md text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 transition-colors cursor-pointer"
+            className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 text-xs">
           {errorMessage && (
-            <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center justify-between">
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center justify-between">
               <span>{errorMessage}</span>
               <button
                 type="button"
@@ -147,11 +149,11 @@ export function BookingRescheduleModal({
           )}
 
           {/* Current schedule reminder */}
-          <div className="p-3 bg-stone-50 rounded-xl border border-stone-200/70 flex items-center gap-2.5 text-stone-600">
-            <Clock className="w-4 h-4 text-stone-400 shrink-0" />
+          <div className="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-200/80 flex items-center gap-2.5 text-slate-600">
+            <Clock className="w-4 h-4 text-slate-400 shrink-0" />
             <div className="text-[11px]">
-              <span className="text-stone-400">Jadwal saat ini: </span>
-              <span className="font-semibold text-stone-800">
+              <span className="text-slate-400">Jadwal saat ini: </span>
+              <span className="font-bold text-[#0f172a]">
                 {new Date(currentStartDate).toLocaleDateString("id-ID", {
                   day: "numeric",
                   month: "long",
@@ -164,7 +166,7 @@ export function BookingRescheduleModal({
           {/* Date Picker Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+              <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
                 Tanggal Mulai Baru <span className="text-rose-500">*</span>
               </label>
               <input
@@ -173,12 +175,12 @@ export function BookingRescheduleModal({
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 required
-                className="w-full px-3 py-2 rounded-lg bg-white border border-stone-200 text-stone-900 text-xs focus:ring-2 focus:ring-stone-900 focus:outline-hidden"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs font-medium focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE] focus:outline-hidden transition-all shadow-2xs"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+              <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
                 Tanggal Selesai (Opsional)
               </label>
               <input
@@ -186,31 +188,30 @@ export function BookingRescheduleModal({
                 min={startDate || todayStr}
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-white border border-stone-200 text-stone-900 text-xs focus:ring-2 focus:ring-stone-900 focus:outline-hidden"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs font-medium focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE] focus:outline-hidden transition-all shadow-2xs"
               />
             </div>
           </div>
 
           {/* Budget adjustment */}
           <div>
-            <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+            <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
               Penyesuaian Anggaran (Opsional)
             </label>
             <div className="relative">
-              <CircleDollarSign className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-2.5" />
-              <input
-                type="text"
+              <CircleDollarSign className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3 z-10 pointer-events-none" />
+              <CurrencyInput
                 value={budget}
-                onChange={(e) => setBudget(e.target.value)}
-                placeholder="Contoh: Rp 2.500.000 (jika ada penyesuaian sesi)"
-                className="w-full pl-8 pr-3 py-2 rounded-lg bg-white border border-stone-200 text-stone-900 text-xs focus:ring-2 focus:ring-stone-900 focus:outline-hidden"
+                onChange={(val) => setBudget(val)}
+                placeholder="Rp 2.500.000"
+                className="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs font-medium focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE] focus:outline-hidden transition-all shadow-2xs"
               />
             </div>
           </div>
 
           {/* Notes textarea */}
           <div>
-            <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+            <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
               Alasan / Catatan Penyesuaian
             </label>
             <textarea
@@ -218,38 +219,38 @@ export function BookingRescheduleModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Contoh: Mohon izin geser jadwal karena bentrok agenda studio, terima kasih..."
-              className="w-full px-3 py-2 rounded-lg bg-white border border-stone-200 text-stone-900 text-xs focus:ring-2 focus:ring-stone-900 focus:outline-hidden resize-none"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs font-medium focus:ring-2 focus:ring-[#4CC9FE]/20 focus:border-[#4CC9FE] focus:outline-hidden resize-none transition-all shadow-2xs"
             />
           </div>
 
           {/* Legal / Process notice */}
-          <p className="text-[10px] text-stone-400 leading-relaxed">
+          <p className="text-[10px] text-slate-400 leading-relaxed">
             Pengajuan ini akan mengembalikan status ke peninjauan ulang dan mengirimkan pemberitahuan resmi kepada mitra untuk disetujui.
           </p>
 
           {/* Footer Actions */}
-          <div className="pt-2 flex items-center justify-end gap-2 border-t border-stone-100">
+          <div className="pt-3 flex items-center justify-end gap-2.5 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="px-3.5 py-1.5 rounded-lg bg-white border border-stone-200 text-stone-700 text-xs font-medium hover:bg-stone-50 transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isLoading || !startDate}
-              className="px-4 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+              className="btn-primary-pill !text-xs !py-2 !px-5 text-white font-semibold shadow-md shadow-[#4CC9FE]/25 cursor-pointer flex items-center gap-1.5 disabled:opacity-50 active:scale-95 transition-all"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
                   <span>Mengirim...</span>
                 </>
               ) : (
                 <>
-                  <Calendar className="w-3.5 h-3.5" />
+                  <Calendar className="w-3.5 h-3.5 text-white" />
                   <span>Kirim Pengajuan Reschedule</span>
                 </>
               )}
@@ -294,43 +295,44 @@ export function BookingCancelModal({
 
     setIsLoading(false);
     if (!res.success) {
-      setErrorMessage(res.error || "Gagal membatalkan pesanan.");
+      setErrorMessage(res.error || "Gagal membatalkan pengajuan.");
     } else {
+      toast.success("Pengajuan kerja sama berhasil dibatalkan.");
       onClose();
       router.refresh();
     }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in">
-      <div className="bg-white border border-stone-200 rounded-2xl shadow-xl max-w-md w-full overflow-hidden space-y-0">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white border border-slate-200/90 rounded-[22px] shadow-2xl max-w-md w-full overflow-hidden space-y-0">
         {/* Header */}
-        <div className="p-5 border-b border-stone-100 flex items-start justify-between bg-rose-50/50">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center shrink-0 border border-rose-200/70">
+        <div className="p-5 sm:p-6 border-b border-rose-100 flex items-start justify-between bg-rose-50/60">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0 border border-rose-200/70 shadow-2xs">
               <AlertTriangle className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-stone-900 leading-tight">
-                Batalkan Pesanan SPK?
+              <h3 className="text-sm font-bold text-[#0f172a] leading-tight">
+                Batalkan Pengajuan Kolaborasi SPK?
               </h3>
-              <p className="text-[11px] text-stone-500 mt-0.5 font-mono">
+              <p className="text-[11px] text-slate-500 mt-0.5 font-mono">
                 {refCode}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-md text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 transition-colors cursor-pointer"
+            className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-5 space-y-4 text-xs">
+        <div className="p-5 sm:p-6 space-y-4 text-xs">
           {errorMessage && (
-            <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center justify-between">
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center justify-between">
               <span>{errorMessage}</span>
               <button
                 type="button"
@@ -342,12 +344,12 @@ export function BookingCancelModal({
             </div>
           )}
 
-          <p className="text-stone-600 leading-relaxed">
-            Pesanan dengan <span className="font-semibold text-stone-900">{partnerName}</span> akan dibatalkan. Riwayat pembatalan akan disimpan secara transparan untuk menjaga keandalan ekosistem.
+          <p className="text-[#475569] leading-relaxed">
+            Kerja sama dengan <span className="font-bold text-[#0f172a]">{partnerName}</span> akan dibatalkan. Riwayat pembatalan akan disimpan secara transparan untuk menjaga keandalan ekosistem.
           </p>
 
           <div>
-            <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+            <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
               Alasan Pembatalan (Opsional)
             </label>
             <textarea
@@ -355,16 +357,16 @@ export function BookingCancelModal({
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Contoh: Perubahan agenda pemotretan / sudah menemukan alternatif jadwal..."
-              className="w-full px-3 py-2 rounded-lg bg-white border border-stone-200 text-stone-900 text-xs focus:ring-2 focus:ring-rose-500 focus:outline-hidden resize-none"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs font-medium focus:ring-2 focus:ring-rose-500 focus:outline-hidden resize-none transition-all shadow-2xs"
             />
           </div>
 
-          <div className="pt-2 flex items-center justify-end gap-2 border-t border-stone-100">
+          <div className="pt-3 flex items-center justify-end gap-2.5 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="px-3.5 py-1.5 rounded-lg bg-white border border-stone-200 text-stone-700 text-xs font-medium hover:bg-stone-50 transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
             >
               Kembali
             </button>
@@ -372,17 +374,17 @@ export function BookingCancelModal({
               type="button"
               onClick={handleConfirmCancel}
               disabled={isLoading}
-              className="px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+              className="px-5 py-2 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
                   <span>Membatalkan...</span>
                 </>
               ) : (
                 <>
-                  <XCircle className="w-3.5 h-3.5" />
-                  <span>Ya, Batalkan Pesanan</span>
+                  <XCircle className="w-3.5 h-3.5 text-white" />
+                  <span>Ya, Batalkan Pengajuan</span>
                 </>
               )}
             </button>
@@ -433,24 +435,25 @@ export function BookingStatusManager({
     } else {
       setSuccessStatus(status);
       setConfirmAction(null);
+      toast.success(status === "ACCEPTED" ? "Kolaborasi berhasil disetujui!" : "Pengajuan kolaborasi ditolak.");
       router.refresh();
     }
   }
 
   if (successStatus === "ACCEPTED") {
     return (
-      <div className="p-2.5 rounded-lg bg-emerald-50/80 border border-emerald-200/80 text-emerald-800 text-xs font-medium flex items-center gap-2">
+      <div className="p-3 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 text-emerald-800 text-xs font-semibold flex items-center gap-2 shadow-2xs">
         <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-        <span>Pesanan berhasil diterima. Kontrak kerja (SPK) resmi aktif.</span>
+        <span>Kolaborasi berhasil diterima. Kontrak kerja (SPK) resmi aktif.</span>
       </div>
     );
   }
 
   if (successStatus === "DECLINED") {
     return (
-      <div className="p-2.5 rounded-lg bg-stone-100 text-stone-600 border border-stone-200/70 text-xs font-medium flex items-center gap-2">
-        <XCircle className="w-4 h-4 text-stone-400 shrink-0" />
-        <span>Pesanan telah ditolak.</span>
+      <div className="p-3 rounded-2xl bg-slate-100 text-slate-600 border border-slate-200/70 text-xs font-semibold flex items-center gap-2 shadow-2xs">
+        <XCircle className="w-4 h-4 text-slate-400 shrink-0" />
+        <span>Pengajuan kolaborasi telah ditolak.</span>
       </div>
     );
   }
@@ -458,45 +461,47 @@ export function BookingStatusManager({
   return (
     <div className="space-y-2">
       {errorMessage && (
-        <div className="p-2 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center justify-between">
+        <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center justify-between">
           <span>{errorMessage}</span>
           <button onClick={() => setErrorMessage(null)} className="text-rose-500 hover:text-rose-800 font-bold ml-2 cursor-pointer">×</button>
         </div>
       )}
 
       {confirmAction ? (
-        <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div className="p-3.5 rounded-2xl bg-white/70 backdrop-blur-md border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
           <div>
-            <div className="font-semibold text-stone-900">
-              {confirmAction === "ACCEPTED" ? "Konfirmasi Terima Pesanan?" : "Konfirmasi Tolak Pesanan?"}
+            <div className="font-bold text-[#0f172a]">
+              {confirmAction === "ACCEPTED" ? "Konfirmasi Terima Kolaborasi?" : "Konfirmasi Tolak Pengajuan?"}
             </div>
-            <p className="text-[11px] text-stone-500 mt-0.5">
+            <p className="text-[11px] text-[#475569] mt-0.5">
               {confirmAction === "ACCEPTED"
                 ? "Dengan menerima, jadwal terkunci dan Kontrak SPK resmi mengikat kedua pihak."
-                : "Permintaan pemesanan ini akan dibatalkan."}
+                : "Permintaan kolaborasi ini akan dibatalkan."}
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => handleStatusUpdate(confirmAction)}
               disabled={isLoading}
-              className={`px-3 py-1.5 rounded-lg text-white text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs ${
-                confirmAction === "ACCEPTED" ? "bg-stone-900 hover:bg-black" : "bg-rose-600 hover:bg-rose-700"
+              className={`px-4.5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                confirmAction === "ACCEPTED"
+                  ? "btn-primary-pill text-white shadow-md shadow-[#4CC9FE]/25"
+                  : "bg-rose-600 hover:bg-rose-700 text-white shadow-xs"
               }`}
             >
               {isLoading ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
               ) : confirmAction === "ACCEPTED" ? (
-                <CheckCircle2 className="w-3.5 h-3.5" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
               ) : (
-                <XCircle className="w-3.5 h-3.5" />
+                <XCircle className="w-3.5 h-3.5 text-white" />
               )}
               <span>{confirmAction === "ACCEPTED" ? "Ya, Terima" : "Ya, Tolak"}</span>
             </button>
             <button
               onClick={() => setConfirmAction(null)}
               disabled={isLoading}
-              className="px-3 py-1.5 rounded-lg bg-white border border-stone-200/80 text-stone-700 text-xs font-medium hover:bg-stone-50 transition-colors cursor-pointer shadow-2xs"
+              className="px-4 py-2 rounded-full bg-white border border-slate-200/80 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors cursor-pointer shadow-2xs"
             >
               Batal
             </button>
@@ -504,23 +509,24 @@ export function BookingStatusManager({
         </div>
       ) : (
         <div className="flex flex-wrap items-center gap-2">
+          {/* Primary Action Button (Project Blue + White Text) */}
           <button
             onClick={() => setConfirmAction("ACCEPTED")}
             disabled={isLoading}
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer shadow-2xs"
+            className="btn-primary-pill !text-xs !py-2 !px-4.5 text-white font-semibold shadow-md shadow-[#4CC9FE]/25 inline-flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all disabled:opacity-50"
           >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Terima Pesanan</span>
+            <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+            <span>Terima Kolaborasi</span>
           </button>
 
           {currentStartDate && (
             <button
               onClick={() => setShowRescheduleModal(true)}
               disabled={isLoading}
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-700 border border-stone-200/80 text-xs font-medium transition-colors disabled:opacity-50 cursor-pointer shadow-2xs"
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-full bg-white/80 hover:bg-white hover:text-[#0284c7] text-slate-700 border border-white/80 text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer shadow-2xs"
               title="Ajukan alternatif tanggal jika jadwal ini bentrok"
             >
-              <Calendar className="w-3.5 h-3.5 text-stone-500" />
+              <Calendar className="w-3.5 h-3.5 text-slate-500" />
               <span>Usul Tanggal Lain</span>
             </button>
           )}
@@ -528,7 +534,7 @@ export function BookingStatusManager({
           <button
             onClick={() => setConfirmAction("DECLINED")}
             disabled={isLoading}
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-600 hover:text-rose-600 border border-stone-200/80 text-xs font-medium transition-colors disabled:opacity-50 cursor-pointer shadow-2xs"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-full bg-white/80 hover:bg-white hover:text-rose-600 text-slate-600 border border-white/80 text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer shadow-2xs"
           >
             <XCircle className="w-3.5 h-3.5" />
             <span>Tolak</span>
@@ -579,17 +585,17 @@ export function BookingRequesterActions({
       <div className="flex flex-wrap items-center gap-2">
         <button
           onClick={() => setShowReschedule(true)}
-          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+          className="btn-primary-pill !text-xs !py-2 !px-4 text-white font-semibold shadow-md shadow-[#4CC9FE]/25 inline-flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
         >
-          <Calendar className="w-3.5 h-3.5 text-stone-300" />
+          <Calendar className="w-3.5 h-3.5 text-white" />
           <span>Ajukan Reschedule</span>
         </button>
         <button
           onClick={() => setShowCancel(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-rose-50 text-stone-600 hover:text-rose-600 border border-stone-200/80 text-xs font-medium shadow-2xs transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white/80 hover:bg-white hover:text-rose-600 text-slate-600 border border-white/80 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
         >
           <XCircle className="w-3.5 h-3.5" />
-          <span>Batalkan Pesanan</span>
+          <span>Batalkan Pengajuan</span>
         </button>
       </div>
 
@@ -630,11 +636,11 @@ export function ConvertBookingButton({ bookingId, collaborationId }: ConvertBook
     return (
       <Link
         href={`/collaborations/${collaborationId}`}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white font-semibold text-xs shadow-2xs transition-colors"
+        className="btn-primary-pill !text-xs !py-2 !px-4.5 text-white font-semibold shadow-md shadow-[#4CC9FE]/25 inline-flex items-center gap-1.5 active:scale-95 transition-all"
       >
-        <Handshake className="w-3.5 h-3.5 text-stone-300" />
-        <span>Buka Ruang Kolaborasi</span>
-        <ArrowUpRight className="w-3.5 h-3.5 opacity-70" />
+        <Handshake className="w-3.5 h-3.5 text-white" />
+        <span>Buka Workspace Kolaborasi</span>
+        <ArrowUpRight className="w-3.5 h-3.5 opacity-80" />
       </Link>
     );
   }
@@ -644,13 +650,13 @@ export function ConvertBookingButton({ bookingId, collaborationId }: ConvertBook
     try {
       const res = await convertBookingToCollaboration(bookingId);
       if (res.success && res.collaborationId) {
-        toast.success("Ruang kolaborasi berhasil dibuka!");
+        toast.success("Workspace kolaborasi berhasil dibuka!");
         router.push(`/collaborations/${res.collaborationId}`);
       } else {
-        toast.error(res.error || "Gagal membuka ruang kolaborasi.");
+        toast.error(res.error || "Gagal membuka workspace kolaborasi.");
       }
     } catch {
-      toast.error("Terjadi kesalahan teknis saat membuka ruang kolaborasi.");
+      toast.error("Terjadi kesalahan teknis saat membuka workspace kolaborasi.");
     } finally {
       setIsLoading(false);
     }
@@ -660,17 +666,17 @@ export function ConvertBookingButton({ bookingId, collaborationId }: ConvertBook
     <button
       onClick={handleConvert}
       disabled={isLoading}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-800 font-semibold text-xs border border-stone-200/80 shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+      className="btn-primary-pill !text-xs !py-2 !px-4.5 text-white font-semibold shadow-md shadow-[#4CC9FE]/25 inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95 transition-all"
     >
       {isLoading ? (
         <>
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
           <span>Mempersiapkan Workspace...</span>
         </>
       ) : (
         <>
-          <Handshake className="w-3.5 h-3.5 text-stone-500" />
-          <span>Inisiasi Ruang Kolaborasi</span>
+          <Handshake className="w-3.5 h-3.5 text-white" />
+          <span>Buka Workspace Kolaborasi</span>
         </>
       )}
     </button>
@@ -701,11 +707,11 @@ export function CompleteBookingButton({
     try {
       const res = await completeBookingRequestAction(bookingId, notes);
       if (res.success) {
-        toast.success("Pesanan berhasil ditandai selesai!");
+        toast.success("Kolaborasi berhasil diselesaikan!");
         setIsOpen(false);
         router.refresh();
       } else {
-        toast.error(res.error || "Gagal menyelesaikan pesanan.");
+        toast.error(res.error || "Gagal menyelesaikan kolaborasi.");
       }
     } catch {
       toast.error("Terjadi kesalahan teknis.");
@@ -718,43 +724,43 @@ export function CompleteBookingButton({
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-2xs transition-colors cursor-pointer"
+        className="w-full inline-flex items-center justify-center gap-1.5 px-4.5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer"
         title="Tandai pekerjaan tuntas dan terbitkan konfirmasi pemenuhan SPK"
       >
-        <CheckCircle2 className="w-3.5 h-3.5" />
-        <span>Selesaikan Pesanan &amp; Tuntaskan SPK</span>
+        <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+        <span>Selesaikan Proyek &amp; Tuntaskan SPK</span>
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white border border-stone-200 rounded-2xl shadow-xl max-w-md w-full overflow-hidden space-y-0">
-            <div className="p-5 border-b border-stone-100 flex items-start justify-between bg-emerald-50/60">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 border border-emerald-200/80">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white border border-slate-200 rounded-[22px] shadow-2xl max-w-md w-full overflow-hidden space-y-0">
+            <div className="p-5 sm:p-6 border-b border-emerald-100 flex items-start justify-between bg-emerald-50/60">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 border border-emerald-200/80 shadow-2xs">
                   <CheckCircle2 className="w-4 h-4 text-emerald-700" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-stone-900 leading-tight">
-                    Konfirmasi Penyelesaian Pesanan?
+                  <h3 className="text-sm font-bold text-[#0f172a] leading-tight">
+                    Konfirmasi Penyelesaian Kolaborasi?
                   </h3>
-                  <p className="text-[11px] text-stone-500 mt-0.5 font-mono">{refCode}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5 font-mono">{refCode}</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 rounded-md text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 transition-colors cursor-pointer"
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-5 space-y-4 text-xs">
-              <p className="text-stone-600 leading-relaxed">
-                Menandai pesanan bersama <strong className="text-stone-900">{partnerName}</strong> sebagai selesai mengonfirmasi bahwa deliverables (hasil foto/video/layanan) telah diterima dan kewajiban SPK telah terpenuhi.
+            <div className="p-5 sm:p-6 space-y-4 text-xs">
+              <p className="text-[#475569] leading-relaxed">
+                Menandai kolaborasi bersama <strong className="text-[#0f172a]">{partnerName}</strong> sebagai selesai mengonfirmasi bahwa deliverables (hasil karya / layanan) telah diterima dan kewajiban SPK telah terpenuhi.
               </p>
 
               <div>
-                <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+                <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
                   Catatan Penyelesaian (Opsional)
                 </label>
                 <textarea
@@ -762,16 +768,16 @@ export function CompleteBookingButton({
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Contoh: Seluruh file master telah diterima dalam kondisi baik..."
-                  className="w-full px-3 py-2 rounded-lg bg-white border border-stone-200 text-stone-900 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-hidden resize-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-hidden resize-none transition-all shadow-2xs"
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2 border-t border-stone-100">
+              <div className="pt-3 flex items-center justify-end gap-2.5 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
                   disabled={isLoading}
-                  className="px-3.5 py-1.5 rounded-lg bg-white border border-stone-200 text-stone-700 text-xs font-medium hover:bg-stone-50 transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
                 >
                   Batal
                 </button>
@@ -779,16 +785,16 @@ export function CompleteBookingButton({
                   type="button"
                   onClick={handleConfirm}
                   disabled={isLoading}
-                  className="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-5 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
                 >
                   {isLoading ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
                       <span>Menyelesaikan...</span>
                     </>
                   ) : (
                     <>
-                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                       <span>Ya, Konfirmasi Selesai</span>
                     </>
                   )}
@@ -801,7 +807,6 @@ export function CompleteBookingButton({
     </>
   );
 }
-
 
 // ==========================================
 // 6. CONTACT ACTIONS
@@ -829,8 +834,8 @@ export function BookingContactActions({
   const linkText = bookingId ? ` Tinjau draf SPK & jadwal resmi: https://ramu.id/dashboard/bookings/${bookingId}` : "";
 
   const defaultText = myRole === "target"
-    ? `Halo ${contactName}, saya menerima pesanan kerja sama Anda melalui platform RAMU${refText}.${linkText} Mari kita koordinasikan teknis produksi dan jadwalnya.`
-    : `Halo ${contactName}, saya telah mengajukan pesanan kerja sama resmi melalui platform RAMU${refText}.${linkText} Mohon konfirmasi jadwal dan pelaksanaan teknisnya.`;
+    ? `Halo ${contactName}, saya menerima pengajuan kolaborasi Anda melalui platform RAMU${refText}.${linkText} Mari kita koordinasikan teknis produksi dan jadwalnya.`
+    : `Halo ${contactName}, saya telah mengajukan kolaborasi resmi melalui platform RAMU${refText}.${linkText} Mohon konfirmasi jadwal dan pelaksanaan teknisnya.`;
 
   let waUrl = null;
   if (phone) {
@@ -842,13 +847,13 @@ export function BookingContactActions({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className="flex flex-wrap items-center gap-2">
       {partnerActorId && (
         <Link
           href={`/messages?with=${partnerActorId}`}
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-medium transition-colors shadow-2xs"
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white hover:text-[#0284c7] text-[#0f172a] text-xs font-semibold border border-white/80 transition-all shadow-xs"
         >
-          <MessageSquare className="w-3 h-3 text-stone-300" />
+          <MessageSquare className="w-3.5 h-3.5 text-[#0284c7]" />
           <span>Chat Resmi RAMU</span>
         </Link>
       )}
@@ -857,19 +862,19 @@ export function BookingContactActions({
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-700 text-xs font-medium border border-stone-200/80 transition-colors shadow-2xs"
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white hover:text-emerald-700 text-[#0f172a] text-xs font-semibold border border-white/80 transition-all shadow-xs"
           title="Gunakan WhatsApp untuk koordinasi on-set di hari pelaksanaan"
         >
-          <MessageCircle className="w-3 h-3 text-emerald-600" />
+          <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
           <span>WhatsApp (On-Set)</span>
         </a>
       )}
       {email && (
         <a
-          href={`mailto:${email}?subject=${encodeURIComponent("Konfirmasi Pesanan RAMU: " + contactName)}`}
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-700 text-xs font-medium border border-stone-200/80 transition-colors shadow-2xs"
+          href={`mailto:${email}?subject=${encodeURIComponent("Konfirmasi Kolaborasi RAMU: " + contactName)}`}
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white text-slate-700 text-xs font-semibold border border-white/80 transition-all shadow-xs"
         >
-          <Mail className="w-3 h-3 text-stone-400" />
+          <Mail className="w-3.5 h-3.5 text-slate-400" />
           <span>Email</span>
         </a>
       )}
@@ -891,10 +896,10 @@ export function ViewSpkButton({ booking }: ViewSpkButtonProps) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-700 hover:text-stone-900 text-xs font-semibold border border-stone-200/80 shadow-2xs transition-colors cursor-pointer"
+        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white hover:text-[#0284c7] text-[#0f172a] text-xs font-semibold border border-white/80 shadow-xs transition-all cursor-pointer"
         title="Buka Surat Perjanjian Kerja & Lembar Kesepakatan Resmi"
       >
-        <FileText className="w-3.5 h-3.5 text-stone-500" />
+        <FileText className="w-3.5 h-3.5 text-slate-500" />
         <span>Lihat SPK Resmi</span>
       </button>
 
@@ -921,7 +926,7 @@ export function ViewInvoiceButton({ booking }: ViewInvoiceButtonProps) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-700 hover:text-stone-900 text-xs font-semibold border border-stone-200/80 shadow-2xs transition-colors cursor-pointer"
+        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white hover:text-[#0284c7] text-[#0f172a] text-xs font-semibold border border-white/80 shadow-xs transition-all cursor-pointer"
         title="Buka Faktur Invoice DP, Invoice Pelunasan, atau Kwitansi Tanda Terima Resmi"
       >
         <CreditCard className="w-3.5 h-3.5 text-emerald-600" />
@@ -951,7 +956,7 @@ export function ViewCallSheetButton({ booking }: ViewCallSheetButtonProps) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-stone-50 text-stone-700 hover:text-stone-900 text-xs font-semibold border border-stone-200/80 shadow-2xs transition-colors cursor-pointer"
+        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white hover:text-[#0284c7] text-[#0f172a] text-xs font-semibold border border-white/80 shadow-xs transition-all cursor-pointer"
         title="Buka Lembar Panggilan Kerja On-Set, Rundown Jam Divisi & Siaran WhatsApp"
       >
         <Clock className="w-3.5 h-3.5 text-amber-600" />
@@ -978,7 +983,6 @@ interface BookingMilestoneTrackerProps {
 
 export function BookingMilestoneTracker({
   status,
-  dpPercentage = 50,
   collaborationId,
 }: BookingMilestoneTrackerProps) {
   const isCompleted = status === "COMPLETED";
@@ -989,50 +993,50 @@ export function BookingMilestoneTracker({
   const hasCollab = Boolean(collaborationId);
 
   return (
-    <div className="p-3 bg-stone-50/80 rounded-xl border border-stone-200/70 space-y-2">
-      <div className="flex items-center justify-between text-[10px] font-semibold text-stone-400 uppercase tracking-wider">
+    <div className="p-3.5 bg-white/50 backdrop-blur-md rounded-2xl border border-slate-200/60 space-y-2.5">
+      <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
         <span className="flex items-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-stone-500" />
+          <ShieldCheck className="w-3.5 h-3.5 text-[#0284c7]" />
           <span>Tahapan Transaksi &amp; SPK Terverifikasi</span>
         </span>
-        <span className="font-mono text-[9px] text-stone-400 font-medium">Standar Ekosistem RAMU</span>
+        <span className="font-mono text-[9px] text-slate-400 font-semibold">Standar Ekosistem RAMU</span>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 text-center text-xs">
+      <div className="grid grid-cols-3 gap-2.5 text-center text-xs">
         {/* Step 1: Kontrak */}
-        <div className={`p-2 rounded-lg border shadow-2xs ${isCancelled ? "bg-stone-100 text-stone-400 border-stone-200/60" : "bg-white border-stone-200/80"}`}>
-          <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-stone-800">
-            <CheckCircle2 className={`w-3 h-3 ${isCancelled ? "text-stone-400" : "text-emerald-600"}`} />
+        <div className={`p-2.5 rounded-xl border shadow-2xs transition-all ${isCancelled ? "bg-slate-100 text-slate-400 border-slate-200/60" : "bg-white border-slate-200/80"}`}>
+          <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-slate-800">
+            <CheckCircle2 className={`w-3 h-3 ${isCancelled ? "text-slate-400" : "text-emerald-600"}`} />
             <span>1. Kontrak SPK</span>
           </div>
-          <div className="text-[10px] text-stone-500 mt-0.5 font-medium">
+          <div className="text-[10px] text-slate-500 mt-0.5 font-medium">
             {isCancelled ? "Dibatalkan" : "Disahkan Digital"}
           </div>
         </div>
 
         {/* Step 2: DP / Jadwal */}
         <div
-          className={`p-2 rounded-lg border transition-all ${
+          className={`p-2.5 rounded-xl border transition-all ${
             isCompleted || hasCollab || isAccepted
-              ? "bg-white border-stone-200/80 shadow-2xs"
+              ? "bg-white border-slate-200/80 shadow-2xs"
               : isDeclined || isCancelled
-              ? "bg-stone-100 text-stone-400 border-stone-200/60"
+              ? "bg-slate-100 text-slate-400 border-slate-200/60"
               : isNegotiating
-              ? "bg-blue-50 border-blue-200/80 text-blue-900 shadow-2xs"
-              : "bg-white/60 border-stone-200/60 text-stone-400"
+              ? "bg-sky-50 border-[#4CC9FE]/40 text-[#0284c7] shadow-2xs"
+              : "bg-white/60 border-slate-200/60 text-slate-400"
           }`}
         >
-          <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-stone-800">
+          <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-slate-800">
             {isCompleted || hasCollab || isAccepted ? (
               <CheckCircle2 className="w-3 h-3 text-emerald-600" />
             ) : isCancelled ? (
               <XCircle className="w-3 h-3 text-rose-500" />
             ) : (
-              <span className="w-3 h-3 rounded-full bg-stone-200 text-stone-600 text-[8px] flex items-center justify-center font-bold">2</span>
+              <span className="w-3.5 h-3.5 rounded-full bg-slate-200 text-slate-600 text-[8px] flex items-center justify-center font-bold">2</span>
             )}
             <span>2. Jadwal &amp; DP</span>
           </div>
-          <div className="text-[10px] text-stone-500 mt-0.5 font-medium">
+          <div className="text-[10px] text-slate-500 mt-0.5 font-medium">
             {isCompleted
               ? "Tuntas Terlaksana"
               : hasCollab || isAccepted
@@ -1051,25 +1055,25 @@ export function BookingMilestoneTracker({
         {hasCollab ? (
           <Link
             href={`/collaborations/${collaborationId}`}
-            className={`p-2 rounded-lg border transition-all shadow-2xs hover:scale-[1.02] cursor-pointer block ${
+            className={`p-2.5 rounded-xl border transition-all shadow-2xs hover:scale-[1.01] cursor-pointer block ${
               isCompleted
                 ? "bg-emerald-50 text-emerald-900 border-emerald-300 hover:bg-emerald-100"
-                : "bg-stone-900 text-white border-stone-900 hover:bg-black"
+                : "btn-primary-pill !rounded-xl !p-2.5 text-white"
             }`}
             title="Buka Ruang Kerja Kolaborasi Resmi"
           >
-            <div className="flex items-center justify-center gap-1 text-[11px] font-semibold">
-              <CheckCircle2 className={`w-3 h-3 ${isCompleted ? "text-emerald-600" : "text-emerald-400"}`} />
+            <div className="flex items-center justify-center gap-1 text-[11px] font-bold">
+              <CheckCircle2 className="w-3 h-3 text-white" />
               <span>3. Workspace</span>
-              <ArrowUpRight className="w-2.5 h-2.5 opacity-70" />
+              <ArrowUpRight className="w-2.5 h-2.5 opacity-80" />
             </div>
-            <div className={`text-[10px] mt-0.5 font-medium text-center ${isCompleted ? "text-emerald-700" : "text-stone-300"}`}>
+            <div className="text-[10px] mt-0.5 font-medium text-center text-white/90">
               {isCompleted ? "Selesai & Diarsipkan" : "Tugas & Serah Terima"}
             </div>
           </Link>
         ) : isCompleted ? (
-          <div className="p-2 rounded-lg border transition-all bg-emerald-50 border-emerald-200 text-emerald-900 shadow-2xs">
-            <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-emerald-900">
+          <div className="p-2.5 rounded-xl border transition-all bg-emerald-50 border-emerald-200 text-emerald-900 shadow-2xs">
+            <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-emerald-900">
               <CheckCircle2 className="w-3 h-3 text-emerald-600" />
               <span>3. Tuntas</span>
             </div>
@@ -1078,12 +1082,12 @@ export function BookingMilestoneTracker({
             </div>
           </div>
         ) : (
-          <div className="p-2 rounded-lg border transition-all bg-white/60 border-stone-200/60 text-stone-400">
-            <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-stone-700">
-              <span className="w-3 h-3 rounded-full bg-stone-200 text-stone-600 text-[8px] flex items-center justify-center font-bold">3</span>
+          <div className="p-2.5 rounded-xl border transition-all bg-white/60 border-slate-200/60 text-slate-400">
+            <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-slate-700">
+              <span className="w-3.5 h-3.5 rounded-full bg-slate-200 text-slate-600 text-[8px] flex items-center justify-center font-bold">3</span>
               <span>3. Workspace</span>
             </div>
-            <div className="text-[10px] mt-0.5 font-medium text-stone-400 text-center">
+            <div className="text-[10px] mt-0.5 font-medium text-slate-400 text-center">
               {isCancelled ? "Tidak Dilanjutkan" : "Pelunasan & Luaran"}
             </div>
           </div>
@@ -1093,6 +1097,9 @@ export function BookingMilestoneTracker({
   );
 }
 
+// ==========================================
+// 9. REPORT DISPUTE BUTTON & MODAL
+// ==========================================
 export interface ReportDisputeButtonProps {
   bookingId: string;
   partnerName: string;
@@ -1143,7 +1150,7 @@ export function ReportDisputeButton({
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/90 font-semibold text-xs transition-colors cursor-pointer"
+        className="w-full inline-flex items-center justify-center gap-1.5 px-4.5 py-2.5 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/90 font-semibold text-xs transition-colors cursor-pointer"
         title="Laporkan kendala pembayaran, batas revisi, atau pelaksanaan untuk mediasi resmi RAMU"
       >
         <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
@@ -1151,39 +1158,39 @@ export function ReportDisputeButton({
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white border border-stone-200 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden">
-            <div className="p-5 border-b border-stone-100 flex items-start justify-between bg-amber-50/70">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 border border-amber-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white border border-slate-200 rounded-[22px] shadow-2xl max-w-lg w-full overflow-hidden">
+            <div className="p-5 sm:p-6 border-b border-amber-100 flex items-start justify-between bg-amber-50/70">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 border border-amber-200 shadow-2xs">
                   <AlertTriangle className="w-4 h-4 text-amber-700" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-stone-900 leading-tight">
+                  <h3 className="text-sm font-bold text-[#0f172a] leading-tight">
                     Pusat Mediasi Sengketa SPK RAMU
                   </h3>
-                  <p className="text-[11px] text-stone-500 font-mono mt-0.5">{refCode}</p>
+                  <p className="text-[11px] text-slate-500 font-mono mt-0.5">{refCode}</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 rounded-md text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 transition-colors cursor-pointer"
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleReport} className="p-5 space-y-4 text-xs">
-              <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 text-stone-600 leading-relaxed">
-                Pengajuan ini akan dicatat dalam audit trail RAMU dan diteruskan kepada mitra Anda (<strong className="text-stone-900">{partnerName}</strong>) serta tim kepatuhan untuk fasilitasi musyawarah mufakat sesuai Pasal 8 SPK.
+            <form onSubmit={handleReport} className="p-5 sm:p-6 space-y-4 text-xs">
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 leading-relaxed">
+                Pengajuan ini akan dicatat dalam audit trail RAMU dan diteruskan kepada mitra Anda (<strong className="text-[#0f172a]">{partnerName}</strong>) serta tim kepatuhan untuk fasilitasi musyawarah mufakat sesuai Pasal 8 SPK.
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-stone-700 block">Kategori Kendala *</label>
+                <label className="font-bold text-slate-700 block">Kategori Kendala *</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-lg border border-stone-200 bg-white text-xs text-stone-900 focus:outline-none focus:border-stone-900 font-medium cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 font-medium focus:outline-hidden focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 cursor-pointer shadow-2xs"
                 >
                   <option value="PAYMENT_BREACH">Kendala Finansial / Pelunasan Terlambat / DP Macet</option>
                   <option value="NO_SHOW">Ketidakhadiran di Lokasi (No-Show)</option>
@@ -1195,43 +1202,43 @@ export function ReportDisputeButton({
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-stone-700 block">Jelaskan Duduk Perkara &amp; Bukti *</label>
+                <label className="font-bold text-slate-700 block">Jelaskan Duduk Perkara &amp; Bukti *</label>
                 <textarea
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   required
                   rows={3}
                   placeholder="Ceritakan secara kronologis kendala yang dialami dan upaya komunikasi yang telah dilakukan..."
-                  className="w-full px-3 py-2 rounded-lg border border-stone-200 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 transition-colors"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all resize-none shadow-2xs"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-stone-700 block">Solusi yang Anda Harapkan (Opsional)</label>
+                <label className="font-bold text-slate-700 block">Solusi yang Anda Harapkan (Opsional)</label>
                 <input
                   type="text"
                   value={resolution}
                   onChange={(e) => setResolution(e.target.value)}
                   placeholder="Misal: Pengembalian DP 50%, jadwal ulang sesi, penyerahan revisi tuntas..."
-                  className="w-full px-3 py-2 rounded-lg border border-stone-200 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-900 transition-colors"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all shadow-2xs"
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2 border-t border-stone-100">
+              <div className="pt-3 flex items-center justify-end gap-2.5 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
                   disabled={isLoading}
-                  className="px-4 py-2 rounded-lg border border-stone-200 text-stone-600 hover:bg-stone-50 text-xs font-semibold cursor-pointer"
+                  className="px-4 py-2 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+                  className="px-5 py-2 rounded-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold shadow-xs cursor-pointer inline-flex items-center gap-1.5"
                 >
-                  {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />}
                   <span>Kirim Pengajuan Mediasi</span>
                 </button>
               </div>
@@ -1242,4 +1249,3 @@ export function ReportDisputeButton({
     </>
   );
 }
-

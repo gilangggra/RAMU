@@ -43,6 +43,7 @@ import {
 } from "@/app/messages/actions";
 import { ActorAvatar } from "@/components/ui/ActorAvatar";
 import { toast } from "@/components/ui/Toast";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 import { createClient } from "@/lib/supabase/client";
 
 export interface SuggestedPartnerItem {
@@ -1113,12 +1114,11 @@ export function MessengerClient({
                   <label className="font-semibold text-slate-700 uppercase tracking-wider text-[10px]">
                     Nilai Kompensasi / Anggaran (Rp) *
                   </label>
-                  <input
-                    type="text"
+                  <CurrencyInput
                     required
                     value={offerBudget}
-                    onChange={(e) => setOfferBudget(e.target.value)}
-                    placeholder="Contoh: Rp 2.500.000"
+                    onChange={(val) => setOfferBudget(val)}
+                    placeholder="Rp 2.500.000"
                     className="w-full p-2.5 bg-slate-50/80 border border-slate-200/80 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all"
                   />
                 </div>
