@@ -27,6 +27,7 @@ import {
 } from "@/components/settings/RatesForm";
 import { exportElementToPdf } from "@/lib/export/pdfExporter";
 import { createSpkAuditTrail } from "@/lib/spkFingerprint";
+import { RamuLogo } from "@/components/brand/RamuLogo";
 
 export interface BookingSpkData {
   id: string;
@@ -266,9 +267,7 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
 
           <div className="flex items-center justify-between border-b-2 border-slate-900 pb-5">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-slate-900 text-amber-400 flex items-center justify-center font-black text-2xl tracking-tighter shadow-xs">
-                R
-              </div>
+              <RamuLogo size={48} className="shrink-0" />
               <div>
                 <div className="text-xl font-black tracking-tight text-slate-950 flex items-center gap-2">
                   <span>RAMU INDONESIA</span>

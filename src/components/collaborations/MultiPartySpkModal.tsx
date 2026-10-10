@@ -23,6 +23,7 @@ import {
   Lock,
 } from "lucide-react";
 import { exportElementToPdf } from "@/lib/export/pdfExporter";
+import { RamuLogo } from "@/components/brand/RamuLogo";
 
 export interface SpkParticipant {
   id: string;
@@ -293,9 +294,7 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
         {/* 1. TOP HEADER BAR (Compact ~48px) */}
         <header className="print:hidden flex items-center justify-between px-5 py-2.5 border-b border-slate-100 bg-white shrink-0 z-10">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#4CC9FE] to-[#0284c7] flex items-center justify-center text-white font-bold text-xs shadow-2xs shrink-0">
-              R
-            </div>
+            <RamuLogo size={28} className="shrink-0" />
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h2 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
@@ -551,9 +550,7 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
               {/* DOCUMENT KOP / LETTERHEAD */}
               <div className="flex items-start justify-between border-b-2 border-slate-900 pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-lg tracking-tight shrink-0 shadow-xs">
-                    R
-                  </div>
+                  <RamuLogo size={44} className="shrink-0" />
                   <div>
                     <div className="text-base font-bold text-slate-900 flex items-center gap-2">
                       <span>RAMU INDONESIA</span>

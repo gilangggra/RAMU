@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { exportElementToPdf } from "@/lib/export/pdfExporter";
 import { BookingSpkData } from "@/components/bookings/SpkAgreementModal";
+import { RamuLogo } from "@/components/brand/RamuLogo";
 
 interface BookingInvoiceModalProps {
   isOpen: boolean;
@@ -223,9 +224,7 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings/${booking.id}`;
             {/* Header Surat */}
             <div className="flex items-start justify-between border-b-2 border-slate-900 pb-5">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-slate-900 text-amber-400 flex items-center justify-center font-black text-2xl tracking-tighter">
-                  R
-                </div>
+                <RamuLogo size={44} className="shrink-0" />
                 <div>
                   <div className="text-lg font-black text-slate-950 flex items-center gap-2">
                     <span>RAMU INDONESIA</span>

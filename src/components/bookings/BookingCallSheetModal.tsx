@@ -24,6 +24,7 @@ import {
 import { exportElementToPdf } from "@/lib/export/pdfExporter";
 import { BookingSpkData } from "@/components/bookings/SpkAgreementModal";
 import { toast } from "@/components/ui/Toast";
+import { RamuLogo } from "@/components/brand/RamuLogo";
 
 export interface RundownItem {
   id: string;
@@ -305,9 +306,7 @@ export function BookingCallSheetModal({
             <div className="flex items-start justify-between border-b-2 border-slate-900 pb-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded bg-slate-900 text-amber-400 font-bold text-xs flex items-center justify-center">
-                    R
-                  </span>
+                  <RamuLogo size={24} className="shrink-0" />
                   <span className="text-xs font-bold tracking-widest text-slate-400 uppercase">
                     RAMU CREATIVE ECOSYSTEM
                   </span>

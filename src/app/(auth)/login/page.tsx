@@ -2,6 +2,7 @@ import { LoginClientForm } from "@/components/auth/LoginClientForm";
 import Image from "next/image";
 import Link from "next/link";
 import { Sparkles, CheckCircle2, Zap, ArrowLeft, ShieldCheck } from "lucide-react";
+import { RamuLogo } from "@/components/brand/RamuLogo";
 
 interface LoginPageProps {
   searchParams: Promise<{ error?: string; message?: string; redirectTo?: string; redirect?: string }>;
@@ -123,9 +124,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 {/* Inset Creative Project Widget (Bottom) */}
                 <div className="mt-2 w-full bg-white/85 backdrop-blur-sm border border-[#E5E0CF] rounded-xl p-2.5 flex items-center justify-between gap-2 shadow-2xs">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#4CC9FE] to-sky-600 text-white flex items-center justify-center font-black text-[11px] shrink-0 shadow-xs">
-                      RM
-                    </div>
+                    <RamuLogo size={24} className="shrink-0" />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         <span className="text-[11px] font-black text-[#27213D] truncate">
