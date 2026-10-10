@@ -80,6 +80,7 @@ export interface CollaborationItem {
 interface CollaborationCatalogViewProps {
   collaborations: CollaborationItem[];
   currentActorId: string;
+  isAdmin?: boolean;
   initialTab?: string;
   initialSearch?: string;
   initialView?: "grid" | "list";
@@ -88,6 +89,7 @@ interface CollaborationCatalogViewProps {
 export function CollaborationCatalogView({
   collaborations,
   currentActorId,
+  isAdmin = false,
   initialTab = "all",
   initialSearch = "",
   initialView = "grid",
@@ -291,7 +293,7 @@ export function CollaborationCatalogView({
               >
                 Reset Pencarian
               </button>
-            ) : (
+            ) : !isAdmin ? (
               <>
                 <Link
                   href="/projects"
@@ -308,7 +310,7 @@ export function CollaborationCatalogView({
                   <span>Rekomendasi Mitra</span>
                 </Link>
               </>
-            )}
+            ) : null}
           </div>
         </div>
       ) : viewMode === "grid" ? (

@@ -98,6 +98,7 @@ interface Props {
   data: MultiPartySpkData;
   currentActorId: string;
   onSign: (collaborationId: string) => Promise<{ success: boolean; error?: string }>;
+  readOnly?: boolean;
 }
 
 function toRomanMonth(m: number): string {
@@ -129,7 +130,7 @@ function ArticleHead({ n, title }: { n: number | React.ReactNode; title: string 
   );
 }
 
-export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSign }: Props) {
+export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSign, readOnly = false }: Props) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [isSigning, setIsSigning] = useState(false);
@@ -496,7 +497,12 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
                 </div>
               )}
 
-              {!iSigned && !allSigned ? (
+              {readOnly ? (
+                <div className="w-full py-2.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Mode Audit Dokumen (Read-Only)</span>
+                </div>
+              ) : !iSigned && !allSigned ? (
                 <button
                   type="button"
                   onClick={() => setIsPadOpen(true)}

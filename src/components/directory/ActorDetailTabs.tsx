@@ -166,6 +166,7 @@ interface ActorDetailTabsProps {
   initialTab?: "portfolio" | "rates" | "specs" | "collaborations" | "about" | "reviews";
   bookedDates?: string[];
   availabilityData?: any;
+  isAdmin?: boolean;
 }
 
 export function ActorDetailTabs({
@@ -175,6 +176,7 @@ export function ActorDetailTabs({
   initialTab,
   bookedDates = [],
   availabilityData,
+  isAdmin = false,
 }: ActorDetailTabsProps) {
   const [activeTab, setActiveTab] = useState<"portfolio" | "rates" | "specs" | "collaborations" | "about" | "reviews">(initialTab || "portfolio");
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -934,7 +936,7 @@ export function ActorDetailTabs({
                     <p className="text-[11px] text-slate-300">Kirimkan portofolio dan konsep proposal singkat Anda melalui formulir kemitraan resmi RAMU.</p>
                   </div>
                   <div className="flex flex-wrap items-center gap-3 shrink-0">
-                    {!isCurrentActor && (
+                    {!isCurrentActor && !isAdmin && (
                       <button
                         type="button"
                         onClick={() => setIsBookingOpen(true)}
@@ -1120,7 +1122,7 @@ export function ActorDetailTabs({
 
                   {/* Action CTA */}
                   <div className="pt-5">
-                    {!isCurrentActor ? (
+                    {!isCurrentActor && !isAdmin ? (
                       <button
                         type="button"
                         onClick={() => {
@@ -1136,7 +1138,7 @@ export function ActorDetailTabs({
                         <Handshake className={`w-3.5 h-3.5 ${isHighlighted ? "text-white" : "text-[#0284c7]"}`} />
                         <span>Pilih Paket Ini</span>
                       </button>
-                    ) : (
+                    ) : isCurrentActor ? (
                       <button
                         type="button"
                         onClick={() => {
@@ -1147,7 +1149,7 @@ export function ActorDetailTabs({
                         <CreditCard className="w-3.5 h-3.5" />
                         <span>Ubah Tarif &amp; Kapasitas</span>
                       </button>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               );
@@ -1163,7 +1165,7 @@ export function ActorDetailTabs({
               selectedDate={selectedCalendarDate}
               onSelectDate={(dateStr) => {
                 setSelectedCalendarDate(dateStr);
-                if (!isCurrentActor) {
+                if (!isCurrentActor && !isAdmin) {
                   setIsBookingOpen(true);
                 }
               }}
@@ -1174,7 +1176,7 @@ export function ActorDetailTabs({
           <div className="py-4 text-center border-t border-slate-100">
             <p className="text-xs text-slate-500">
               Butuh alokasi khusus atau brief di luar 3 pilihan paket di atas?{" "}
-              {!isCurrentActor && (
+              {!isCurrentActor && !isAdmin && (
                 <button
                   type="button"
                   onClick={() => {
@@ -1640,7 +1642,7 @@ export function ActorDetailTabs({
                   )}
                 </div>
 
-                {!isCurrentActor && (
+                {!isCurrentActor && !isAdmin && (
                   <button
                     type="button"
                     onClick={() => setIsBookingOpen(true)}

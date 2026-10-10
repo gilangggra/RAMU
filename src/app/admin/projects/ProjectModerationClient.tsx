@@ -8,7 +8,7 @@ import {
   Check,
   AlertTriangle,
   Clock,
-  ExternalLink,
+  ArrowRight,
   Ban,
   X,
   Calendar,
@@ -265,11 +265,10 @@ export function ProjectModerationClient({ initialBriefs }: { initialBriefs: Brie
                         <div className="flex items-center justify-end gap-1.5 flex-wrap">
                           <Link
                             href={`/projects/${brief.id}`}
-                            target="_blank"
                             className="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold transition-colors inline-flex items-center gap-1 border border-slate-200/60"
                           >
                             <span>Detail</span>
-                            <ExternalLink className="w-2.5 h-2.5" />
+                            <ArrowRight className="w-2.5 h-2.5" />
                           </Link>
 
                           {/* Approval for IN_REVIEW */}

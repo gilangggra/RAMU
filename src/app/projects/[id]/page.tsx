@@ -13,6 +13,8 @@ import { InterestCard } from "@/components/projects/InterestCard";
 import { FormCollaborationButton } from "@/components/projects/FormCollaborationButton";
 import { BriefManageMenu } from "@/components/projects/BriefManageMenu";
 import { AppShell } from "@/components/layout/AppShell";
+import { AdminShell } from "@/components/admin/AdminShell";
+import { isUserAdmin } from "@/lib/admin";
 import { Navbar } from "@/components/landing/Navbar";
 import { ShareProjectButton } from "@/components/projects/ShareProjectButton";
 import { ActorAvatar } from "@/components/ui/ActorAvatar";
@@ -43,16 +45,32 @@ export default async function ProjectBriefDetailPage({
 
   const { id } = await params;
 
+  const profile = user
+    ? await prisma.profile.findUnique({
+        where: { id: user.id },
+        select: { role: true },
+      })
+    : null;
+
   let actor = null;
   if (user) {
     actor = await prisma.actor.findFirst({
       where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
       orderBy: { createdAt: "asc" },
     });
-    if (!actor) redirect("/onboarding");
   }
 
-  const isGuest = !actor;
+  const isAdmin =
+    isUserAdmin(user) ||
+    profile?.role === "SUPERADMIN" ||
+    actor?.sector === "Platform Administrator" ||
+    actor?.sector?.toLowerCase().includes("administrator");
+
+  if (user && !actor && !isAdmin) {
+    redirect("/onboarding");
+  }
+
+  const isGuest = !actor && !isAdmin;
   const brief = await getProjectBriefById(id);
 
   if (!brief) {
@@ -171,6 +189,17 @@ export default async function ProjectBriefDetailPage({
 
   const pageContent = (
     <div className="space-y-6 w-full max-w-7xl mx-auto pb-16">
+      {isAdmin && (
+        <div className="mb-4">
+          <Link
+            href="/admin/projects"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-[#111827] bg-white/80 hover:bg-white border border-slate-200/80 px-3.5 py-1.5 rounded-full transition-all shadow-2xs"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Kembali ke Moderasi Proyek &amp; Brief</span>
+          </Link>
+        </div>
+      )}
       {isGuest && (
         <div className="glass-card p-5 rounded-[22px] bg-amber-500/10 border-amber-400/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
           <div className="space-y-1">
@@ -282,7 +311,7 @@ export default async function ProjectBriefDetailPage({
         </div>
       )}
 
-      {matchContext && (
+      {matchContext && !isAdmin && (
         <div className="glass-card p-6 bg-gradient-to-r from-[#4CC9FE]/15 via-white/85 to-white/95 text-slate-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 border-[#4CC9FE]/40 rounded-[22px] shadow-sm">
           <div className="flex items-start gap-4">
             <div className="w-11 h-11 bg-[#4CC9FE]/20 text-[#0284c7] border border-[#4CC9FE]/30 flex items-center justify-center shrink-0 rounded-2xl">
@@ -590,9 +619,10 @@ export default async function ProjectBriefDetailPage({
                     userInterestId={userInterest?.id}
                     isInvited={Boolean(userInterest?.isInvited)}
                     actorAssets={actorAssets}
-                    initialOpen={isMatched}
-                    isMatched={isMatched}
+                    initialOpen={isMatched && !isAdmin}
+                    isMatched={isMatched && !isAdmin}
                     isGuest={isGuest}
+                    isAdmin={isAdmin}
                   />
                 );
               })}
@@ -737,6 +767,24 @@ export default async function ProjectBriefDetailPage({
       </div>
     </div>
   );
+
+  if (isAdmin) {
+    const adminName =
+      user?.user_metadata?.display_name ||
+      user?.user_metadata?.full_name ||
+      user?.user_metadata?.name ||
+      user?.email?.split("@")[0] ||
+      "Admin";
+
+    const adminAvatar =
+      user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null;
+
+    return (
+      <AdminShell adminName={adminName} adminAvatar={adminAvatar}>
+        {pageContent}
+      </AdminShell>
+    );
+  }
 
   if (isGuest || !actor) {
     return (

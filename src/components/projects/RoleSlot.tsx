@@ -49,6 +49,7 @@ interface RoleSlotProps {
   initialOpen?: boolean;
   isMatched?: boolean;
   isGuest?: boolean;
+  isAdmin?: boolean;
 }
 
 export function RoleSlot({
@@ -69,6 +70,7 @@ export function RoleSlot({
   initialOpen = false,
   isMatched = false,
   isGuest = false,
+  isAdmin = false,
 }: RoleSlotProps) {
   const [isOpen, setIsOpen] = useState(initialOpen);
   const [message, setMessage] = useState("");
@@ -121,7 +123,7 @@ export function RoleSlot({
     });
   }
 
-  const canApply = !isInitiator && !isFilled && !localStatus;
+  const canApply = !isAdmin && !isInitiator && !isFilled && !localStatus;
   const alreadyApplied = !isInitiator && !!localStatus && !isInvited;
   const isInvitedUser = !isInitiator && isInvited;
 
@@ -250,7 +252,7 @@ export function RoleSlot({
             </span>
           )}
 
-          {isGuest && !isFilled && (
+          {isGuest && !isFilled && !isAdmin && (
             <Link
               href={`/login?redirectTo=/projects/${briefId}`}
               className="btn-primary-pill inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold cursor-pointer"
@@ -269,6 +271,12 @@ export function RoleSlot({
               <span>{isOpen ? "Tutup Form Lamar" : "Lamar / Ajukan Kolaborasi"}</span>
               <span className="text-[10px]">{isOpen ? "▲" : "▼"}</span>
             </button>
+          )}
+
+          {isAdmin && !isFilled && (
+            <span className="text-[11px] font-semibold text-slate-500 bg-white/80 px-3 py-1 rounded-full border border-slate-200/80 shadow-2xs">
+              Slot Terbuka ({interestCount} Peminat)
+            </span>
           )}
 
           {alreadyApplied && (

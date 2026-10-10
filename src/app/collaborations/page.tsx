@@ -4,9 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { getCollaborationsForActor } from "@/application/collaborationService";
 import { AppShell } from "@/components/layout/AppShell";
+import { AdminShell } from "@/components/admin/AdminShell";
+import { isUserAdmin } from "@/lib/admin";
 import { CollaborationItem } from "@/components/collaborations/CollaborationCatalogView";
 import { WorkspaceUnifiedView } from "@/components/collaborations/WorkspaceUnifiedView";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 
 export const metadata = {
   title: "Workspace & Kontrak | RAMU",
@@ -33,7 +35,12 @@ export default async function CollaborationsPage({ searchParams }: Collaboration
 
   if (!user) redirect("/login");
 
-  const actor = await prisma.actor.findFirst({
+  const profile = await prisma.profile.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+
+  let actor = await prisma.actor.findFirst({
     where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
     include: {
       owner: {
@@ -45,12 +52,32 @@ export default async function CollaborationsPage({ searchParams }: Collaboration
     orderBy: { createdAt: "asc" },
   });
 
-  if (!actor) redirect("/onboarding");
+  const isAdmin =
+    isUserAdmin(user) ||
+    profile?.role === "SUPERADMIN" ||
+    actor?.sector === "Platform Administrator" ||
+    actor?.sector?.toLowerCase().includes("administrator");
+
+  if (!actor && !isAdmin) redirect("/onboarding");
+
+  if (!actor && isAdmin) {
+    actor = await prisma.actor.findFirst({
+      where: { status: { not: "ARCHIVED" } },
+      include: {
+        owner: {
+          select: {
+            avatarUrl: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+  }
 
   const params = await searchParams;
   const errorMessage = params?.error;
   const initialSection =
-    params?.section === "contracts" || params?.tab === "contracts"
+    !isAdmin && (params?.section === "contracts" || params?.tab === "contracts")
       ? "contracts"
       : "workspaces";
   const initialTab = params?.tab && params.tab !== "contracts" ? params.tab : "all";
@@ -60,21 +87,53 @@ export default async function CollaborationsPage({ searchParams }: Collaboration
   // Concurrent data fetching for collaborations and contract bookings
   const [rawCollaborations, acceptedBookings, incomingBookings, outgoingBookings] =
     await Promise.all([
-      getCollaborationsForActor(actor.id),
+      isAdmin
+        ? prisma.collaboration.findMany({
+            include: {
+              plan: {
+                include: {
+                  opportunity: {
+                    include: { pattern: true },
+                  },
+                },
+              },
+              participants: {
+                include: {
+                  actor: {
+                    include: {
+                      owner: {
+                        select: { avatarUrl: true },
+                      },
+                    },
+                  },
+                },
+              },
+              tasks: true,
+              milestones: true,
+            },
+            orderBy: { updatedAt: "desc" },
+          })
+        : actor
+        ? getCollaborationsForActor(actor.id)
+        : Promise.resolve([]),
       prisma.bookingRequest.findMany({
         where: { status: { in: ["ACCEPTED", "COMPLETED"] } },
         select: { id: true, details: true },
       }),
-      prisma.bookingRequest.findMany({
-        where: { targetId: actor.id },
-        include: { requester: true, target: true },
-        orderBy: { createdAt: "desc" },
-      }),
-      prisma.bookingRequest.findMany({
-        where: { requesterId: actor.id },
-        include: { requester: true, target: true },
-        orderBy: { createdAt: "desc" },
-      }),
+      !isAdmin && actor
+        ? prisma.bookingRequest.findMany({
+            where: { targetId: actor.id },
+            include: { requester: true, target: true },
+            orderBy: { createdAt: "desc" },
+          })
+        : Promise.resolve([]),
+      !isAdmin && actor
+        ? prisma.bookingRequest.findMany({
+            where: { requesterId: actor.id },
+            include: { requester: true, target: true },
+            orderBy: { createdAt: "desc" },
+          })
+        : Promise.resolve([]),
     ]);
 
   const bookingCollabIds = new Set(
@@ -167,33 +226,46 @@ export default async function CollaborationsPage({ searchParams }: Collaboration
   const partnerActorIds = new Set<string>();
   collaborations.forEach((c) => {
     c.participants.forEach((p) => {
-      if (p.actorId !== actor.id) {
+      if (!actor || p.actorId !== actor.id) {
         partnerActorIds.add(p.actorId);
       }
     });
   });
   const uniquePartnersCount = partnerActorIds.size;
 
-  return (
-    <AppShell actor={actor} activeRoute="/collaborations">
-      <div className="space-y-6 w-full max-w-7xl mx-auto">
-        {errorMessage && (
-          <div className="p-4 rounded-2xl bg-rose-50/90 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center justify-between gap-3 animate-fade-in shadow-2xs">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-              <span>{errorMessage}</span>
-            </div>
-            <Link
-              href="/collaborations"
-              className="text-slate-500 hover:text-slate-800 text-xs underline shrink-0 font-medium"
-            >
-              Tutup
-            </Link>
-          </div>
-        )}
+  const pageContent = (
+    <div className="space-y-6 w-full max-w-7xl mx-auto">
+      {isAdmin && (
+        <div className="mb-4">
+          <Link
+            href="/engine-insights"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-[#111827] bg-white/80 hover:bg-white border border-slate-200/80 px-3.5 py-1.5 rounded-full transition-all shadow-2xs"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Kembali ke Audit Kompatibilitas</span>
+          </Link>
+        </div>
+      )}
 
+      {errorMessage && (
+        <div className="p-4 rounded-2xl bg-rose-50/90 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center justify-between gap-3 animate-fade-in shadow-2xs">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+          <Link
+            href="/collaborations"
+            className="text-slate-500 hover:text-slate-800 text-xs underline shrink-0 font-medium"
+          >
+            Tutup
+          </Link>
+        </div>
+      )}
+
+      {actor && (
         <WorkspaceUnifiedView
           actor={actor}
+          isAdmin={isAdmin}
           collaborations={collaborations}
           incomingBookings={incomingBookings as any}
           outgoingBookings={outgoingBookings as any}
@@ -209,7 +281,31 @@ export default async function CollaborationsPage({ searchParams }: Collaboration
           totalMilestones={totalMilestones}
           uniquePartnersCount={uniquePartnersCount}
         />
-      </div>
+      )}
+    </div>
+  );
+
+  if (isAdmin) {
+    const adminName =
+      user?.user_metadata?.display_name ||
+      user?.user_metadata?.full_name ||
+      user?.user_metadata?.name ||
+      user?.email?.split("@")[0] ||
+      "Admin";
+
+    const adminAvatar =
+      user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null;
+
+    return (
+      <AdminShell adminName={adminName} adminAvatar={adminAvatar}>
+        {pageContent}
+      </AdminShell>
+    );
+  }
+
+  return (
+    <AppShell actor={actor!} activeRoute="/collaborations">
+      {pageContent}
     </AppShell>
   );
 }

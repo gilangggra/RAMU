@@ -686,13 +686,20 @@ export default async function DirectoryDetailPage({
                   </a>
                 )}
                 {actor.contactEmail && (
-                  <a
-                    href={`mailto:${actor.contactEmail}`}
-                    className="flex items-center gap-1.5 hover:text-slate-900 transition-colors lowercase font-normal"
-                  >
-                    <Mail className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{actor.contactEmail}</span>
-                  </a>
+                  isAdmin ? (
+                    <div className="flex items-center gap-1.5 text-slate-700 font-normal">
+                      <Mail className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{actor.contactEmail}</span>
+                    </div>
+                  ) : (
+                    <a
+                      href={`mailto:${actor.contactEmail}`}
+                      className="flex items-center gap-1.5 hover:text-slate-900 transition-colors lowercase font-normal"
+                    >
+                      <Mail className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{actor.contactEmail}</span>
+                    </a>
+                  )
                 )}
               </div>
 
@@ -755,105 +762,117 @@ export default async function DirectoryDetailPage({
               {/* Action CTAs */}
               <div>
                 {!isCurrentActor ? (
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      <ShareProfileButton actorId={actor.id} actorName={actor.name} />
-
-                      {!isGuest ? (
-                        <>
-                          <BookingButton
-                            targetId={actor.id}
-                            targetName={actor.name}
-                            targetSector={actor.sector}
-                            targetType={actor.actorType}
-                            label={
-                              isBrand
-                                ? "Ajukan Pitch Kolaborasi"
-                                : isStudio
-                                ? "Sewa Studio Sekarang"
-                                : isModel
-                                ? "Booking Model / Fitting"
-                                : isMua
-                                ? "Booking MUA & Hair Artist"
-                                : isStylist
-                                ? "Booking Fashion Stylist"
-                                : isVideo
-                                ? "Inisiasi Kerja Sama Video"
-                                : "Booking Fotografer"
-                            }
-                            termsConfig={customTermsConfig}
-                          />
-
-                          <Link
-                            href={`/messages?with=${actor.id}`}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/90 hover:bg-white text-[#0284c7] hover:text-[#0369a1] border border-[#4CC9FE]/40 hover:border-[#4CC9FE] text-xs font-bold rounded-full transition-all shadow-xs active:scale-95"
-                            title="Kirim pesan langsung & diskusikan brief di dalam platform RAMU"
-                          >
-                            <MessageSquare className="w-3.5 h-3.5 text-[#0284c7]" />
-                            <span>Chat &amp; Brief Proyek</span>
-                          </Link>
-                        </>
-                      ) : (
-                        <Link
-                          href={`/login?redirect=/directory/${actor.id}`}
-                          className="btn-primary-pill !text-xs !py-2.5 !px-6 shadow-md shadow-[#4CC9FE]/25 text-white font-bold flex items-center gap-2 active:scale-95 transition-all"
-                        >
-                          <span>Masuk untuk Kolaborasi</span>
-                          <ArrowUpRight className="w-3.5 h-3.5 text-white" />
-                        </Link>
-                      )}
-
-                      {isBrand && (
-                        <Link
-                          href={`/projects?tab=browse&search=${encodeURIComponent(actor.name)}`}
-                          className="inline-flex items-center gap-2 px-4 py-2.5 border border-slate-200/90 hover:border-[#4CC9FE] text-slate-700 hover:text-[#0284c7] text-xs font-semibold rounded-full bg-white/90 hover:bg-slate-50 transition-all shadow-xs"
-                        >
-                          <Search className="w-3.5 h-3.5 text-slate-400" />
-                          <span>Lihat Brief Proyek</span>
-                        </Link>
-                      )}
-
-                      {waLink && (
-                        <a
-                          href={waLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2.5 border border-emerald-600/30 hover:border-emerald-600 bg-emerald-50/70 hover:bg-emerald-100/70 text-emerald-800 text-xs font-semibold rounded-full transition-all shadow-xs active:scale-95"
-                          title={isStudio ? "Tanya ketersediaan jadwal studio via WhatsApp" : "Gunakan WhatsApp untuk konfirmasi darurat hari-H"}
-                        >
-                          <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>WhatsApp ({isStudio ? "Jadwal Studio" : "Darurat On-Set"})</span>
-                        </a>
-                      )}
-
-                      {actor.contactEmail && !waLink && (
-                        <a
-                          href={`mailto:${actor.contactEmail}?subject=${encodeURIComponent(`Penawaran Proyek Kolaborasi - ${actor.name}`)}`}
-                          className="inline-flex items-center gap-2 px-4 py-2.5 border border-slate-200/90 hover:border-[#4CC9FE] text-slate-700 hover:text-[#0284c7] text-xs font-semibold rounded-full bg-white/90 hover:bg-slate-50 transition-all shadow-xs"
-                        >
-                          <Mail className="w-3.5 h-3.5 text-slate-500" />
-                          <span>Kirim Email</span>
-                        </a>
-                      )}
-
-                      {!waLink && !actor.contactEmail && (
-                        <span
-                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-slate-100/80 border border-slate-200 text-[11px] font-semibold text-slate-600"
-                          title="Kreator mengaktifkan proteksi privasi. Silakan gunakan Chat atau Booking resmi RAMU."
-                        >
-                          <ShieldCheck className="w-3.5 h-3.5 text-[#0284c7]" />
-                          <span>Kontak Privat Terproteksi</span>
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span>
-                        Seluruh negosiasi, brief, dan SPK Kontrak Multi-Pihak resmi terlindungi aman dalam ekosistem RAMU.
+                  isAdmin ? (
+                    <div className="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                      <div className="flex items-center gap-2.5 text-slate-800 font-semibold">
+                        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>Mode Inspeksi Administrator: Informasi profil &amp; portofolio talenta ditampilkan untuk verifikasi platform.</span>
+                      </div>
+                      <span className="text-[11px] text-slate-500 font-medium">
+                        Fitur transaksi komersial &amp; ajakan kolaborasi dinonaktifkan pada sesi admin.
                       </span>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <ShareProfileButton actorId={actor.id} actorName={actor.name} />
+
+                        {!isGuest ? (
+                          <>
+                            <BookingButton
+                              targetId={actor.id}
+                              targetName={actor.name}
+                              targetSector={actor.sector}
+                              targetType={actor.actorType}
+                              label={
+                                isBrand
+                                  ? "Ajukan Pitch Kolaborasi"
+                                  : isStudio
+                                  ? "Sewa Studio Sekarang"
+                                  : isModel
+                                  ? "Booking Model / Fitting"
+                                  : isMua
+                                  ? "Booking MUA & Hair Artist"
+                                  : isStylist
+                                  ? "Booking Fashion Stylist"
+                                  : isVideo
+                                  ? "Inisiasi Kerja Sama Video"
+                                  : "Booking Fotografer"
+                              }
+                              termsConfig={customTermsConfig}
+                            />
+
+                            <Link
+                              href={`/messages?with=${actor.id}`}
+                              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/90 hover:bg-white text-[#0284c7] hover:text-[#0369a1] border border-[#4CC9FE]/40 hover:border-[#4CC9FE] text-xs font-bold rounded-full transition-all shadow-xs active:scale-95"
+                              title="Kirim pesan langsung & diskusikan brief di dalam platform RAMU"
+                            >
+                              <MessageSquare className="w-3.5 h-3.5 text-[#0284c7]" />
+                              <span>Chat &amp; Brief Proyek</span>
+                            </Link>
+                          </>
+                        ) : (
+                          <Link
+                            href={`/login?redirect=/directory/${actor.id}`}
+                            className="btn-primary-pill !text-xs !py-2.5 !px-6 shadow-md shadow-[#4CC9FE]/25 text-white font-bold flex items-center gap-2 active:scale-95 transition-all"
+                          >
+                            <span>Masuk untuk Kolaborasi</span>
+                            <ArrowUpRight className="w-3.5 h-3.5 text-white" />
+                          </Link>
+                        )}
+
+                        {isBrand && (
+                          <Link
+                            href={`/projects?tab=browse&search=${encodeURIComponent(actor.name)}`}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 border border-slate-200/90 hover:border-[#4CC9FE] text-slate-700 hover:text-[#0284c7] text-xs font-semibold rounded-full bg-white/90 hover:bg-slate-50 transition-all shadow-xs"
+                          >
+                            <Search className="w-3.5 h-3.5 text-slate-400" />
+                            <span>Lihat Brief Proyek</span>
+                          </Link>
+                        )}
+
+                        {waLink && (
+                          <a
+                            href={waLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 border border-emerald-600/30 hover:border-emerald-600 bg-emerald-50/70 hover:bg-emerald-100/70 text-emerald-800 text-xs font-semibold rounded-full transition-all shadow-xs active:scale-95"
+                            title={isStudio ? "Tanya ketersediaan jadwal studio via WhatsApp" : "Gunakan WhatsApp untuk konfirmasi darurat hari-H"}
+                          >
+                            <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>WhatsApp ({isStudio ? "Jadwal Studio" : "Darurat On-Set"})</span>
+                          </a>
+                        )}
+
+                        {actor.contactEmail && !waLink && (
+                          <a
+                            href={`mailto:${actor.contactEmail}?subject=${encodeURIComponent(`Penawaran Proyek Kolaborasi - ${actor.name}`)}`}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 border border-slate-200/90 hover:border-[#4CC9FE] text-slate-700 hover:text-[#0284c7] text-xs font-semibold rounded-full bg-white/90 hover:bg-slate-50 transition-all shadow-xs"
+                          >
+                            <Mail className="w-3.5 h-3.5 text-slate-500" />
+                            <span>Kirim Email</span>
+                          </a>
+                        )}
+
+                        {!waLink && !actor.contactEmail && (
+                          <span
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-slate-100/80 border border-slate-200 text-[11px] font-semibold text-slate-600"
+                            title="Kreator mengaktifkan proteksi privasi. Silakan gunakan Chat atau Booking resmi RAMU."
+                          >
+                            <ShieldCheck className="w-3.5 h-3.5 text-[#0284c7]" />
+                            <span>Kontak Privat Terproteksi</span>
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span>
+                          Seluruh negosiasi, brief, dan SPK Kontrak Multi-Pihak resmi terlindungi aman dalam ekosistem RAMU.
+                        </span>
+                      </div>
+                    </div>
+                  )
                 ) : (
                   <div className="flex flex-wrap items-center gap-3">
                     <ShareProfileButton actorId={actor.id} actorName={actor.name} />
@@ -875,7 +894,7 @@ export default async function DirectoryDetailPage({
         </div>
       </section>
 
-      {!isCurrentActor && !isGuest && (
+      {!isCurrentActor && !isGuest && !isAdmin && (
         <div className="mb-8">
           <ProfileCompatibilityBanner
             targetActor={actor}
@@ -894,10 +913,11 @@ export default async function DirectoryDetailPage({
           initialTab={initialTab}
           bookedDates={bookedDates}
           availabilityData={availabilityData}
+          isAdmin={isAdmin}
         />
       </div>
 
-      {!isCurrentActor && !isGuest && (
+      {!isCurrentActor && !isGuest && !isAdmin && (
         <ActorMobileActionBar
           actor={actor}
           termsConfig={customTermsConfig}

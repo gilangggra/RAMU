@@ -366,7 +366,7 @@ export default async function EngineInsightsPage() {
               href="/collaborations"
               className="text-xs font-bold text-[#E66A48] hover:underline inline-flex items-center gap-1.5"
             >
-              <span>Lihat Ruang Kolaborasi Anda</span>
+              <span>{isAdmin ? "Audit Ruang Kerja & Kontrak" : "Lihat Ruang Kolaborasi Anda"}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -380,7 +380,9 @@ export default async function EngineInsightsPage() {
               </div>
               <h4 className="text-sm font-bold text-slate-900">Belum Ada Luaran Ekosistem yang Dicatat</h4>
               <p className="text-xs text-slate-600 max-w-md mx-auto">
-                Buka ruang kerja kolaborasi aktif Anda dan catat luaran pertama melalui tab &quot;Luaran & Evaluasi&quot;.
+                {isAdmin
+                  ? "Buka ruang kerja kolaborasi untuk memantau luaran dan evaluasi ekosistem."
+                  : "Buka ruang kerja kolaborasi aktif Anda dan catat luaran pertama melalui tab \"Luaran & Evaluasi\"."}
               </p>
             </div>
           ) : (

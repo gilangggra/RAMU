@@ -11,13 +11,23 @@ export function isUserAdmin(user: User | null | undefined): boolean {
   const email = (user.email || "").toLowerCase().trim();
   const appRole = (user.app_metadata?.role || "").toLowerCase().trim();
   const isAppAdmin = user.app_metadata?.is_admin === true;
+  const userMetadataRole = (user.user_metadata?.role || "").toLowerCase().trim();
+  const isUserMetaAdmin =
+    user.user_metadata?.is_admin === true ||
+    userMetadataRole === "admin" ||
+    userMetadataRole === "superadmin" ||
+    userMetadataRole === "administrator" ||
+    userMetadataRole === "platform administrator";
 
   // Daftar email admin dari environment variable atau fallback bawaan
   const envAdminEmails = process.env.ADMIN_EMAILS
     ? process.env.ADMIN_EMAILS.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean)
     : ["bernadya@gmail.com", "admin@ramu.id"];
 
-  const isAdminEmail = envAdminEmails.includes(email);
+  const isAdminEmail =
+    envAdminEmails.includes(email) ||
+    email.startsWith("admin@") ||
+    email.includes("administrator");
 
   const isServerRoleAdmin =
     appRole === "platform administrator" ||
@@ -25,6 +35,6 @@ export function isUserAdmin(user: User | null | undefined): boolean {
     appRole === "admin" ||
     appRole === "superadmin";
 
-  return isAppAdmin || isServerRoleAdmin || isAdminEmail;
+  return isAppAdmin || isServerRoleAdmin || isAdminEmail || isUserMetaAdmin;
 }
 
