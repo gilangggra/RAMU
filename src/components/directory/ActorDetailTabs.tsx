@@ -300,31 +300,15 @@ export function ActorDetailTabs({
   );
 
   const sectorLower = actor.sector.toLowerCase();
-  const hasStudioSpaceAsset = actor.assets.some(
-    (a) => a.category === "STUDIO_SPACE" || a.subtype.toLowerCase().includes("studio")
-  );
-  const isBrand = actor.actorType === "BRAND" || (actor.actorType as string) === "MSME" || actor.actorType === "COLLECTIVE" || Boolean(brandAsset) || sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("umkm") || sectorLower.includes("designer") || sectorLower.includes("desain");
-  const isIndividualSector = !isBrand && (
-    sectorLower.includes("photographer") ||
-    sectorLower.includes("fotografi") ||
-    sectorLower.includes("model") ||
-    sectorLower.includes("talent") ||
-    sectorLower.includes("video") ||
-    sectorLower.includes("film") ||
-    sectorLower.includes("cinema") ||
-    sectorLower.includes("mua") ||
-    sectorLower.includes("makeup") ||
-    sectorLower.includes("hair") ||
-    sectorLower.includes("stylist") ||
-    sectorLower.includes("wardrobe")
-  );
+  const detectedRole = detectRoleCategory(actor.sector, actor.actorType);
 
-  const isStudio = !isIndividualSector && !isBrand && (hasStudioSpaceAsset || Boolean(studioAsset) || actor.actorType === "STUDIO" || sectorLower.includes("studio"));
-  const isModel = !isBrand && !isStudio && (Boolean(modelAsset) || sectorLower.includes("model") || sectorLower.includes("talent"));
-  const isMUA = !isBrand && !isStudio && !isModel && (Boolean(muaAsset) || sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair"));
-  const isStylist = !isBrand && !isStudio && !isModel && !isMUA && (Boolean(stylistAsset) || sectorLower.includes("stylist") || sectorLower.includes("wardrobe"));
-  const isVideographer = !isBrand && !isStudio && !isModel && !isMUA && !isStylist && (Boolean(videographerAsset) || sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema"));
-  const isPhotographer = !isBrand && !isStudio && !isModel && !isMUA && !isStylist && !isVideographer && (Boolean(photographerAsset) || sectorLower.includes("photographer") || sectorLower.includes("fotografi"));
+  const isModel = detectedRole === "MODEL" || sectorLower.includes("model") || sectorLower.includes("talent") || Boolean(modelAsset);
+  const isStudio = !isModel && (detectedRole === "STUDIO" || actor.actorType === "STUDIO" || (sectorLower.includes("studio") && !sectorLower.includes("photographer") && !sectorLower.includes("lensa")));
+  const isBrand = !isModel && !isStudio && (detectedRole === "BRAND" || actor.actorType === "BRAND" || (actor.actorType as string) === "MSME" || sectorLower.includes("brand") || sectorLower.includes("label") || sectorLower.includes("umkm"));
+  const isMUA = !isModel && !isStudio && !isBrand && (sectorLower.includes("mua") || sectorLower.includes("makeup") || sectorLower.includes("hair") || Boolean(muaAsset));
+  const isStylist = !isModel && !isStudio && !isBrand && (sectorLower.includes("stylist") || sectorLower.includes("wardrobe") || Boolean(stylistAsset));
+  const isVideographer = !isModel && !isStudio && !isBrand && !isMUA && !isStylist && (sectorLower.includes("video") || sectorLower.includes("film") || sectorLower.includes("cinema") || Boolean(videographerAsset));
+  const isPhotographer = !isModel && !isStudio && !isBrand && !isMUA && !isStylist && !isVideographer;
 
   const modelAttrs = modelAsset?.attributes as ModelAttributes | undefined;
   const studioAttrs = studioAsset?.attributes as StudioAttributes | undefined;
@@ -499,7 +483,6 @@ export function ActorDetailTabs({
   const customTermsConfig = (customServiceAsset?.attributes as any)?.terms_and_conditions || null;
   const hasCustomPackages = Boolean(customPackages && Array.isArray(customPackages) && customPackages.length > 0);
 
-  const detectedRole = detectRoleCategory(actor.sector, actor.actorType);
   const rolePreset = ROLE_PRESETS[detectedRole];
 
   let packages: ServicePackage[] = [];
@@ -840,6 +823,7 @@ export function ActorDetailTabs({
                 case "Revenue Share / Affiliate":
                   return <TrendingUp className="w-5 h-5 text-slate-700" />;
                 case "Barter / Trade for Content":
+                case "Resource Sharing / Content Exchange":
                   return <Repeat className="w-5 h-5 text-slate-700" />;
                 case "Co-Branding & Kolaborasi Koleksi":
                   return <Handshake className="w-5 h-5 text-slate-700" />;
@@ -854,23 +838,26 @@ export function ActorDetailTabs({
               <>
                 {/* Tipe Kerjasama */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {collabTypes.map((type, idx) => (
-                    <div key={idx} className="p-5 bg-white border border-slate-200/80 shadow-xs space-y-2 hover:border-[#0284c7] transition-colors">
-                      <div className="w-9 h-9 rounded bg-slate-100 flex items-center justify-center text-slate-700 mb-1">
-                        {renderCollabIcon(type)}
+                  {collabTypes.map((rawType, idx) => {
+                    const type = rawType === "Barter / Trade for Content" ? "Resource Sharing / Content Exchange" : rawType;
+                    return (
+                      <div key={idx} className="p-5 bg-white border border-slate-200/80 shadow-xs space-y-2 hover:border-[#0284c7] transition-colors">
+                        <div className="w-9 h-9 rounded bg-slate-100 flex items-center justify-center text-slate-700 mb-1">
+                          {renderCollabIcon(rawType)}
+                        </div>
+                        <h4 className="text-xs font-black uppercase tracking-wider text-slate-900">{type}</h4>
+                        <p className="text-[11px] text-slate-500 leading-relaxed">
+                          {type === "Paid Campaign" && "Kreator dibayar sesuai rate card. Cocok untuk campaign terstruktur dengan brief yang jelas."}
+                          {type === "Product Seeding / Gifting" && "Brand mengirimkan produk gratis kepada kreator pilihan untuk konten organik tanpa kewajiban posting."}
+                          {type === "Revenue Share / Affiliate" && "Kreator mendapatkan komisi dari setiap konversi/penjualan yang dihasilkan melalui kode unik mereka."}
+                          {type === "Resource Sharing / Content Exchange" && "Pertukaran nilai komplementer: brand menyediakan produk/jasa, kreator menyediakan konten berkualitas."}
+                          {type === "Co-Branding & Kolaborasi Koleksi" && "Kerjasama rilis koleksi bersama antara dua brand atau brand dan kreator untuk edisi terbatas."}
+                          {type === "Casting Open" && "Brand membuka casting terbuka untuk model, fotografer, atau kreator untuk proyek tertentu."}
+                          {!["Paid Campaign", "Product Seeding / Gifting", "Revenue Share / Affiliate", "Barter / Trade for Content", "Resource Sharing / Content Exchange", "Co-Branding & Kolaborasi Koleksi", "Casting Open"].includes(rawType) && "Jenis kerjasama terbuka sesuai kesepakatan bersama."}
+                        </p>
                       </div>
-                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-900">{type}</h4>
-                      <p className="text-[11px] text-slate-500 leading-relaxed">
-                        {type === "Paid Campaign" && "Kreator dibayar sesuai rate card. Cocok untuk campaign terstruktur dengan brief yang jelas."}
-                        {type === "Product Seeding / Gifting" && "Brand mengirimkan produk gratis kepada kreator pilihan untuk konten organik tanpa kewajiban posting."}
-                        {type === "Revenue Share / Affiliate" && "Kreator mendapatkan komisi dari setiap konversi/penjualan yang dihasilkan melalui kode unik mereka."}
-                        {type === "Barter / Trade for Content" && "Pertukaran nilai: brand menyediakan produk/jasa, kreator menyediakan konten berkualitas."}
-                        {type === "Co-Branding & Kolaborasi Koleksi" && "Kerjasama rilis koleksi bersama antara dua brand atau brand dan kreator untuk edisi terbatas."}
-                        {type === "Casting Open" && "Brand membuka casting terbuka untuk model, fotografer, atau kreator untuk proyek tertentu."}
-                        {!["Paid Campaign", "Product Seeding / Gifting", "Revenue Share / Affiliate", "Barter / Trade for Content", "Co-Branding & Kolaborasi Koleksi", "Casting Open"].includes(type) && "Jenis kerjasama terbuka sesuai kesepakatan bersama."}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Detail Info */}
@@ -1253,7 +1240,7 @@ export function ActorDetailTabs({
             <StylistSpecsCard attributes={(stylistAsset?.attributes as any) || {}} actorName={actor.name} isCurrentActor={isCurrentActor} actorAssets={actor.assets} />
           )}
 
-          {isBrand && !isStudio && !isModel && !isPhotographer && !isVideographer && !isMUA && !isStylist && (
+          {isBrand && (
             <BrandSpecsCard attributes={brandAttrs || {}} brandName={actor.name} isCurrentActor={isCurrentActor} actorAssets={actor.assets} />
           )}
 

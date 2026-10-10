@@ -22,8 +22,8 @@ export function YourResourcesCard({ actorName, sector, isBrand, assets, totalCou
   const totalAssets = totalCount ?? assets.length;
 
   return (
-    <div className="p-5 md:p-6 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+    <div className="p-5 md:p-6 rounded-[24px] bg-white/95 border border-stone-200/80 shadow-xs space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-100 pb-4">
         <div>
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-[#0284c7]" />
@@ -98,12 +98,12 @@ export function YourResourcesCard({ actorName, sector, isBrand, assets, totalCou
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                       />
                       <div className="absolute top-2 left-2 flex items-center gap-1.5">
-                        <span className="px-2 py-0.5 rounded text-xs font-medium uppercase tracking-wider bg-slate-900/90 text-white backdrop-blur-xs">
+                        <span className="px-2 py-0.5 rounded text-xs font-medium uppercase tracking-wider bg-slate-900 text-white">
                           {asset.subtype || asset.category}
                         </span>
                       </div>
                       <div className="absolute top-2 right-2">
-                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-slate-900/80 px-2 py-0.5 rounded-full backdrop-blur-xs">
+                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-slate-900 px-2 py-0.5 rounded-full">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                           Siap Pakai
                         </span>

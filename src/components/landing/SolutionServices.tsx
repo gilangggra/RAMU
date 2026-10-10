@@ -29,7 +29,7 @@ export function SolutionServices() {
       bullets: [
         "Monetisasi waktu kosong tanpa biaya overhead baru",
         "Katalog inventaris gear & studio terverifikasi",
-        "Mekanisme barter terukur bernilai ekuivalen",
+        "Mekanisme kolaborasi komplementer bernilai ekuivalen",
       ],
       accentColor: "bg-[#4CC9FE]/15 text-[#4CC9FE] border-[#4CC9FE]/30",
     },

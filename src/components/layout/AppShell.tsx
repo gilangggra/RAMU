@@ -267,7 +267,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
       {/* DESKTOP SIDEBAR */}
       <aside
         suppressHydrationWarning
-        className={`hidden md:flex flex-col fixed left-0 top-0 bottom-0 bg-white/70 backdrop-blur-2xl border-r border-white/80 shadow-[0_4px_24px_rgba(0,0,0,0.02)] z-40 ${
+        className={`hidden md:flex flex-col fixed left-0 top-0 bottom-0 bg-white/95 border-r border-stone-200/80 shadow-xs z-40 ${
           hasInteracted ? "transition-all duration-200 ease-in-out" : ""
         } ${isCollapsed ? "w-[60px]" : "w-64"}`}
       >
@@ -441,7 +441,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
       </aside>
 
       {/* MOBILE HEADER */}
-      <header className="md:hidden sticky top-0 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 py-2.5 flex items-center justify-between z-30">
+      <header className="md:hidden sticky top-0 bg-white/95 border-b border-stone-200/80 px-4 py-2.5 flex items-center justify-between z-30 shadow-2xs">
         <Link href="/dashboard" className="flex items-center gap-2">
           <RamuLogo size={22} className="shrink-0" theme="dark" />
           <span className="font-extrabold text-sm tracking-tight text-slate-900">RAMU</span>
@@ -467,8 +467,8 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
 
       {/* MOBILE SLIDE-OVER DRAWER MENU */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex flex-col justify-end">
-          <div className="bg-white/95 backdrop-blur-2xl border-t border-slate-200 p-5 rounded-t-[24px] max-h-[85vh] overflow-y-auto space-y-4 shadow-xl">
+        <div className="md:hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex flex-col justify-end">
+          <div className="bg-white border-t border-stone-200 p-5 rounded-t-[24px] max-h-[85vh] overflow-y-auto space-y-4 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
               <Link
                 href={`/directory/${actor.id}`}
@@ -549,7 +549,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
       </div>
 
       {/* MOBILE BOTTOM NAVIGATION BAR */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-2xl border-t border-white/80 px-3 py-1.5 flex items-center justify-around z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 border-t border-stone-200/80 px-3 py-1.5 flex items-center justify-around z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         {[
           { href: "/dashboard", label: "Dashboard", icon: <LayoutGrid className="w-4 h-4" /> },
           { href: "/projects", label: "Proyek", icon: <Megaphone className="w-4 h-4" /> },

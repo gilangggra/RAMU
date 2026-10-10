@@ -227,11 +227,13 @@ export async function getProjectBriefs(filter?: {
           { compensationModel: { contains: "Berbayar", mode: "insensitive" } },
         ],
       });
-    } else if (comp === "BARTER") {
+    } else if (comp === "BARTER" || comp === "RESOURCE_SHARING" || comp === "KOMPLEMENTER") {
       andConditions.push({
         OR: [
           { compensationModel: { equals: "BARTER", mode: "insensitive" } },
           { compensationModel: { contains: "Barter", mode: "insensitive" } },
+          { compensationModel: { contains: "Resource Sharing", mode: "insensitive" } },
+          { compensationModel: { contains: "Komplementer", mode: "insensitive" } },
           { compensationModel: { equals: "VOLUNTEER", mode: "insensitive" } },
           { compensationModel: { contains: "Gotong Royong", mode: "insensitive" } },
         ],

@@ -17,7 +17,7 @@ export function LandingFAQ() {
     },
     {
       q: "Apa perbedaan mendasar RAMU dengan platform freelance biasa (seperti Upwork/Fiverr)?",
-      a: "Platform freelance umum hanya memfasilitasi transaksi moneter jual-beli jasa standar. RAMU dirancang khusus untuk ekonomi kolaboratif komplementer industri kreatif: memungkinkan barter aset terukur (misal: studio kosong ditukar dengan foto katalog), pencocokan deterministik berbasis 4 pilar objektif tanpa bias, serta ruang kerja terpadu dari pra-produksi hingga rilis.",
+      a: "Platform freelance umum hanya memfasilitasi transaksi moneter jual-beli jasa standar. RAMU dirancang khusus untuk ekonomi kolaboratif komplementer industri kreatif: memungkinkan utilisasi dan sharing aset terukur (misal: utilisasi slot studio kosong untuk pemotretan lookbook bersama), pencocokan deterministik berbasis 4 pilar objektif tanpa bias, serta ruang kerja terpadu dari pra-produksi hingga rilis.",
     },
     {
       q: "Bagaimana jika salah satu mitra membatalkan jadwal pemotretan secara sepihak?",

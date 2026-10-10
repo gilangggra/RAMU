@@ -42,7 +42,7 @@ export function Differentiator() {
     {
       feature: "Pemanfaatan Kapasitas Idle",
       traditional: "Tidak terakomodasi (hanya model sewa tarif penuh)",
-      ramu: "Mekanisme barter & barter-royalti aset menganggur",
+      ramu: "Mekanisme komplementaritas & bagi hasil aset menganggur",
     },
     {
       feature: "Kesepakatan Hak Cipta & SPK",

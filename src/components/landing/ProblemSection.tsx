@@ -37,7 +37,7 @@ export function ProblemSection() {
       tag: "Kerentanan Hukum",
       metric: "Tanpa SPK",
       title: "Kolaborasi Informal Rawan Sengketa & Ghosting",
-      desc: "Kesepakatan barter via chat sosial media kerap berakhir dengan pembatalan sepihak, sengketa kepemilikan hak cipta karya komersial, atau kredit publikasi yang diabaikan.",
+      desc: "Kesepakatan kolaborasi informal via chat sosial media kerap berakhir dengan pembatalan sepihak, sengketa kepemilikan hak cipta karya komersial, atau kredit publikasi yang diabaikan.",
       impact: "Karya disalahgunakan, waktu terbuang, tidak ada perlindungan hukum.",
     },
     {
@@ -169,7 +169,7 @@ export function ProblemSection() {
               <ul className="space-y-2.5 text-xs sm:text-sm text-[#27213D]">
                 <li className="flex items-start gap-2">
                   <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                  <span><strong>Efisiensi 50% - 65% modal</strong> dengan barter kapasitas terukur.</span>
+                  <span><strong>Efisiensi 50% - 65% modal</strong> dengan kolaborasi kapasitas terukur.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-emerald-600 font-bold shrink-0">✓</span>

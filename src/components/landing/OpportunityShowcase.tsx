@@ -8,7 +8,7 @@ export function OpportunityShowcase() {
       id: "opp_capsule_01",
       title: "Autumn/Winter Editorial Lookbook",
       pattern: "Editorial Fashion",
-      compensation: "Barter Portofolio & Kredit",
+      compensation: "Co-Credit & Portofolio Bersama",
       slotsOpen: "1 Slot Tersedia",
       roles: [
         { role: "Fashion Brand", asset: "Koleksi Kapsul 12 Looks Baru", filled: true },

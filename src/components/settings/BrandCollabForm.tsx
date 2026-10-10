@@ -39,10 +39,10 @@ const COLLAB_TYPE_OPTIONS = [
     desc: "Kreator mendapatkan komisi dari setiap konversi/penjualan via kode unik mereka.",
   },
   {
-    id: "Barter / Trade for Content",
+    id: "Resource Sharing / Content Exchange",
     icon: Repeat,
-    title: "Barter / Trade for Content",
-    desc: "Pertukaran nilai: brand menyediakan produk/jasa, kreator menyediakan konten berkualitas.",
+    title: "Resource Sharing / Content Exchange",
+    desc: "Pertukaran nilai komplementer: brand menyediakan produk/jasa, kreator menyediakan konten berkualitas.",
   },
   {
     id: "Co-Branding & Kolaborasi Koleksi",
@@ -73,7 +73,11 @@ export function BrandCollabForm({
   initialCreatorRequirements,
   initialCollabNotes,
 }: BrandCollabFormProps) {
-  const [collabTypes, setCollabTypes] = useState<string[]>(initialCollabTypes);
+  const [collabTypes, setCollabTypes] = useState<string[]>(() =>
+    (initialCollabTypes || []).map((t) =>
+      t === "Barter / Trade for Content" ? "Resource Sharing / Content Exchange" : t
+    )
+  );
   const [budgetRange, setBudgetRange] = useState(initialBudgetRange);
   const [timeline, setTimeline] = useState(initialTimeline);
   const [creatorRequirements, setCreatorRequirements] = useState(initialCreatorRequirements);

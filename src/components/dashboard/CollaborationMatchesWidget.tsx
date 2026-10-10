@@ -33,8 +33,8 @@ interface CollaborationMatchesWidgetProps {
 
 export function CollaborationMatchesWidget({ matches }: CollaborationMatchesWidgetProps) {
   return (
-    <div className="p-5 md:p-6 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/80 pb-4">
+    <div className="p-5 md:p-6 rounded-[24px] bg-white/95 border border-stone-200/80 shadow-xs space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-100 pb-4">
         <div>
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-full bg-white/95 border border-white/80 shadow-2xs flex items-center justify-center">

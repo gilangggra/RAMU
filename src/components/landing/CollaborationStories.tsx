@@ -33,7 +33,7 @@ export function CollaborationStories() {
       title: "Fashion Film Kurasi Internasional",
       brand: "Wastra Tenun Atelier x Creative Director",
       quote:
-        "Kolaborasi ini bukan sekadar barter biasa, melainkan simbiosis mutualisme nyata. Kami mengkontribusikan gaun tenun handmade bernilai tinggi, sementara mitra kami mengkontribusikan kamera cinema dan sound design. Karya kami sukses menembus kurasi pameran visual.",
+        "Kolaborasi ini adalah wujud nyata komplementaritas resource dan simbiosis mutualisme. Kami mengkontribusikan gaun tenun handmade bernilai tinggi, sementara mitra kami mengkontribusikan kamera cinema dan sound design. Karya kami sukses menembus kurasi pameran visual.",
       author: "Tara Dewanto",
       role: "Head of Design, Atelier Wastra",
       savings: "Efisiensi 58% Anggaran",

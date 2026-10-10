@@ -187,7 +187,7 @@ export function BookingsClientView({
       {/* 2. METRIC ANALYTIC RIBBON (MATCHES DASHBOARD [24px] CARDS) */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {/* Tile 1 */}
-        <div className="p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-2.5 transition-all group hover:bg-white/80 hover:border-white">
+        <div className="p-5 rounded-[24px] bg-white/95 border border-stone-200/80 shadow-xs space-y-2.5 transition-all group hover:bg-white">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-600 truncate">Menunggu Konfirmasi</span>
             <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100/80 shadow-2xs">
@@ -213,7 +213,7 @@ export function BookingsClientView({
         </div>
 
         {/* Tile 2 */}
-        <div className="p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-2.5 transition-all group hover:bg-white/80 hover:border-white">
+        <div className="p-5 rounded-[24px] bg-white/95 border border-stone-200/80 shadow-xs space-y-2.5 transition-all group hover:bg-white">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-600 truncate">Kolaborasi Disetujui</span>
             <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100/80 shadow-2xs">
@@ -232,7 +232,7 @@ export function BookingsClientView({
         </div>
 
         {/* Tile 3 */}
-        <div className="p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-2.5 transition-all group hover:bg-white/80 hover:border-white">
+        <div className="p-5 rounded-[24px] bg-white/95 border border-stone-200/80 shadow-xs space-y-2.5 transition-all group hover:bg-white">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-600 truncate">Pengajuan Terkirim</span>
             <div className="w-8 h-8 rounded-xl bg-sky-50 text-[#0284c7] flex items-center justify-center shrink-0 border border-sky-100/80 shadow-2xs">
@@ -251,7 +251,7 @@ export function BookingsClientView({
         </div>
 
         {/* Tile 4 */}
-        <div className="p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-2.5 transition-all group hover:bg-white/80 hover:border-white">
+        <div className="p-5 rounded-[24px] bg-white/95 border border-stone-200/80 shadow-xs space-y-2.5 transition-all group hover:bg-white">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-600 truncate">Workspace Aktif</span>
             <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100/80 shadow-2xs">
@@ -271,7 +271,7 @@ export function BookingsClientView({
       </section>
 
       {/* 3. CONTROLS: SEGMENTED TABS, FILTER & SEARCH */}
-      <div className="bg-white/60 backdrop-blur-2xl p-3 sm:p-3.5 rounded-[22px] border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="bg-white/95 p-3 sm:p-3.5 rounded-[24px] border border-stone-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
         {/* Segmented Tab with Project Blue Active State */}
         <div className="inline-flex items-center gap-1.5 p-1 rounded-full bg-slate-100/80 border border-slate-200/60">
           <button
@@ -365,7 +365,7 @@ export function BookingsClientView({
 
       {/* 4. BOOKINGS LIST */}
       {currentList.length === 0 ? (
-        <div className="p-12 sm:p-14 bg-white/60 backdrop-blur-2xl border border-white/80 rounded-[22px] text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-3.5 max-w-xl mx-auto my-6">
+        <div className="p-12 sm:p-14 bg-white/95 border border-stone-200/80 rounded-[24px] text-center shadow-xs space-y-3.5 max-w-xl mx-auto my-6">
           <div className="w-14 h-14 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-[#0284c7] mx-auto shadow-2xs">
             <Inbox className="w-7 h-7" />
           </div>
@@ -416,7 +416,7 @@ export function BookingsClientView({
             return (
               <div
                 key={booking.id}
-                className="p-5 sm:p-6 bg-white/60 backdrop-blur-2xl border border-white/80 rounded-[22px] shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] hover:bg-white/80 hover:border-white transition-all space-y-4"
+                className="p-5 sm:p-6 bg-white/95 border border-stone-200/80 rounded-[24px] shadow-xs hover:bg-white transition-all space-y-4"
               >
                 {/* Header: Partner + Status + Ref + Detail */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
@@ -456,8 +456,8 @@ export function BookingsClientView({
                   </div>
                 </div>
 
-                {/* Key Info: Date, Budget, Details (Inner Panel 2xl) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 bg-white/50 backdrop-blur-md p-4 rounded-2xl border border-slate-200/60 text-xs">
+                {/* Key Info: Date, Budget, Details */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 bg-stone-50/70 p-4 rounded-2xl border border-stone-200/60 text-xs">
                   <div>
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
                       <Calendar className="w-3 h-3 text-slate-400" />
