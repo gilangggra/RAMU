@@ -68,8 +68,8 @@ export function RamuLogo({
     }
   }
 
-  // Aspect ratio of the official emblem: 296 width / 324 height = ~0.9136
-  const width = Math.round(height * (296 / 324));
+  // Square aspect ratio (1:1) for the official RAMU emblem
+  const width = height;
 
   const isWhite = theme === "white";
   const logoSrc = isWhite ? "/ramu-logo-white.png" : "/ramu-logo-transparent.png";
