@@ -16,11 +16,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <div className="min-h-screen bg-[#FFFDFC] text-[#27213D] relative flex flex-col justify-between selection:bg-[#4CC9FE]/30 selection:text-[#27213D] overflow-x-hidden p-4 sm:p-6 lg:p-8">
 
-      {/* Atmospheric Ambient Glows */}
+      {/* Atmospheric Ambient Glows Matching Landing Page */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute -top-32 left-1/4 w-[500px] h-[500px] bg-[#4CC9FE]/10 rounded-full blur-[140px]" />
-        <div className="absolute top-1/3 -right-40 w-[450px] h-[450px] bg-[#FFD45A]/8 rounded-full blur-[160px]" />
-        <div className="absolute -bottom-40 -left-40 w-[450px] h-[450px] bg-[#D9D2FF]/12 rounded-full blur-[150px]" />
+        <div className="absolute -top-24 right-10 w-[550px] h-[550px] bg-[#4CC9FE]/10 rounded-full blur-[140px]" />
+        <div className="absolute top-1/4 -left-20 w-[450px] h-[450px] bg-[#FFD45A]/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-10 right-1/4 w-[350px] h-[350px] bg-[#D9D2FF]/15 rounded-full blur-[100px]" />
         
         {/* Subtle dot grid pattern */}
         <div
@@ -69,18 +69,21 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               </p>
             </div>
 
-            {/* Creative Visual Canvas with Unified Pure White Background */}
+            {/* Creative Visual Canvas with Unified Pure White Background & Ambient Aura */}
             <div className="relative w-full max-w-md xl:max-w-lg mx-auto group">
+              {/* Ambient Background Aura matching Landing Page Hero */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#4CC9FE]/20 via-[#FFD45A]/15 to-[#D9D2FF]/25 rounded-[32px] blur-2xl transform scale-105 pointer-events-none" />
+
               <div className="relative rounded-2xl overflow-hidden border border-stone-200/80 shadow-md bg-white p-3.5 flex flex-col items-center justify-center">
                 
-                {/* Visual Artwork: Seamless Pure White Canvas */}
+                {/* Visual Artwork: Hero Creative Art from Landing Page */}
                 <div className="relative rounded-xl overflow-hidden bg-white w-full flex items-center justify-center py-1">
                   <Image
-                    src="/images/hero-creators.png"
-                    alt="RAMU Creative Collaboration Ecosystem"
-                    width={600}
-                    height={600}
-                    className="w-full max-h-[250px] xl:max-h-[280px] object-contain group-hover:scale-[1.01] transition-transform duration-500 ease-out"
+                    src="/images/hero-creative-art.png"
+                    alt="RAMU Ekosistem Kolaborasi Kreatif — Fashion Designer, Fotografer Sinema, Model, dan Daylight Studio"
+                    width={1024}
+                    height={1024}
+                    className="w-full max-h-[250px] xl:max-h-[280px] object-contain drop-shadow-xl group-hover:scale-[1.015] transition-transform duration-500 ease-out"
                     priority
                   />
                 </div>
@@ -149,19 +152,48 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               </div>
             </div>
 
-            {/* Creative Trust & Guarantee Checklist */}
-            <div className="flex items-center justify-between text-xs text-stone-500 font-medium px-1">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#4CC9FE]" />
-                <span className="text-[11px]">SPK Otomatis</span>
+            {/* Creative Trust & Guarantee Micro-Cards (SPK Otomatis, Proteksi Hak Cipta, Smart Matching Mesin) */}
+            <div className="grid grid-cols-3 gap-2.5 pt-1">
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/90 backdrop-blur-sm border border-stone-200/90 shadow-2xs hover:border-[#4CC9FE]/50 transition-all group">
+                <div className="w-7 h-7 rounded-lg bg-[#4CC9FE]/15 text-[#0284c7] flex items-center justify-center shrink-0 group-hover:bg-[#4CC9FE] group-hover:text-white transition-colors">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[10px] font-black text-[#27213D] leading-tight truncate">
+                    SPK Otomatis
+                  </div>
+                  <div className="text-[9px] text-[#716B7E] font-medium leading-tight truncate">
+                    Legal Terstandar
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span className="text-[11px]">Proteksi Hak Cipta</span>
+
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/90 backdrop-blur-sm border border-stone-200/90 shadow-2xs hover:border-emerald-300 transition-all group">
+                <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[10px] font-black text-[#27213D] leading-tight truncate">
+                    Proteksi Hak Cipta
+                  </div>
+                  <div className="text-[9px] text-[#716B7E] font-medium leading-tight truncate">
+                    Lisensi Komersial
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-amber-600" />
-                <span className="text-[11px]">Smart Matching Mesin</span>
+
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/90 backdrop-blur-sm border border-stone-200/90 shadow-2xs hover:border-amber-300 transition-all group">
+                <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                  <Zap className="w-3.5 h-3.5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[10px] font-black text-[#27213D] leading-tight truncate">
+                    Smart Matching Mesin
+                  </div>
+                  <div className="text-[9px] text-[#716B7E] font-medium leading-tight truncate">
+                    100% Deterministik
+                  </div>
+                </div>
               </div>
             </div>
 
