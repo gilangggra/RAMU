@@ -201,9 +201,9 @@ Dokumen sah digital: ${typeof window !== "undefined" ? window.location.origin : 
   )}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/70 backdrop-blur-xs overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/70 backdrop-blur-xs overflow-y-auto print:static print:inset-auto print:z-auto print:p-0 print:m-0 print:bg-transparent print:backdrop-blur-none print:overflow-visible print:block">
 
-      <div className="relative w-full max-w-4xl bg-white rounded-[22px] shadow-2xl border border-slate-300 overflow-hidden my-auto max-h-[94vh] flex flex-col font-sans">
+      <div className="relative w-full max-w-4xl bg-white rounded-[22px] shadow-2xl border border-slate-300 overflow-hidden my-auto max-h-[94vh] flex flex-col font-sans print:max-w-none print:w-full print:border-none print:shadow-none print:rounded-none print:max-h-none print:h-auto print:overflow-visible print:block print:my-0">
 
         <div className="print:hidden flex items-center justify-between px-6 py-3.5 border-b border-slate-200 bg-slate-100/80">
           <div className="flex items-center gap-2.5">
@@ -263,7 +263,7 @@ Dokumen sah digital: ${typeof window !== "undefined" ? window.location.origin : 
           </div>
         </div>
 
-        <div id="spk-printable-area" className="p-8 sm:p-12 overflow-y-auto space-y-6 text-slate-900 bg-white">
+        <div id="spk-printable-area" className="p-8 sm:p-12 overflow-y-auto space-y-6 text-slate-900 bg-white print:p-0 print:m-0 print:overflow-visible print:max-h-none print:h-auto print:space-y-4 print:text-black">
 
           <div className="flex items-center justify-between border-b-2 border-slate-900 pb-5">
             <div className="flex items-center gap-3">
@@ -589,7 +589,7 @@ Dokumen sah digital: ${typeof window !== "undefined" ? window.location.origin : 
             </div>
           </div>
 
-          <div className="pt-6 border-t-2 border-slate-900 space-y-4">
+          <div className="pt-6 border-t-2 border-slate-900 space-y-4 spk-signatures print:break-inside-avoid">
             <p className="text-[11px] text-slate-600 leading-relaxed">
               Demikian Draf Surat Perjanjian Kerja Sama Jasa ini disusun dan disetujui secara sadar, sukarela, dan tanpa paksaan oleh PARA PIHAK melalui persetujuan digital di platform RAMU sebagai kesepakatan acuan bersama dalam pelaksanaan proyek.
             </p>
@@ -637,7 +637,7 @@ Dokumen sah digital: ${typeof window !== "undefined" ? window.location.origin : 
             </div>
 
             {/* AUDIT TRAIL KRIPTOGRAFIS SHA-256 RESMI RAMU */}
-            <div className="pt-4 border-t border-slate-200 space-y-2.5">
+            <div className="pt-4 border-t border-slate-200 space-y-2.5 spk-audit-trail print:break-inside-avoid">
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/90 text-slate-700 space-y-2">
                 <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
                   <div className="flex items-center gap-2">

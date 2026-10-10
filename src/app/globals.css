@@ -291,3 +291,107 @@
   max-width: 100% !important;
 }
 
+/* ==========================================================================
+   OFFICIAL PRINT ENGINE STYLES (SPK, PKSK, INVOICE, CALL SHEET)
+   Ensures complete multi-page document pagination without viewport clipping
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 12mm 15mm 12mm;
+  }
+
+  /* 1. Global Viewport & Canvas Unlock */
+  html,
+  body {
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #000000 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 2. Hide Non-Document Elements (Navigation, Sidebars, Buttons, Modals Overlays) */
+  nav,
+  header.fixed,
+  header:not(.print-letterhead),
+  footer,
+  aside.print\:hidden,
+  .print\:hidden,
+  button,
+  .btn-primary-pill,
+  #toast-container,
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+
+  /* 3. Unlock Modal Wrappers & Backdrop */
+  .fixed,
+  .fixed.inset-0,
+  [role="dialog"] {
+    position: static !important;
+    inset: auto !important;
+    z-index: auto !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    overflow: visible !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* 4. Full Document Expansion for Printable Sheets */
+  #spk-printable-area,
+  #spk-collab-printable,
+  #invoice-printable-area,
+  #callsheet-printable-area,
+  .print-document-sheet {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    color: #000000 !important;
+  }
+
+  /* 5. Prevent Page Break Splitting inside Articles & Signatures */
+  .print-break-inside-avoid,
+  .spk-article,
+  .spk-signatures,
+  .spk-audit-trail,
+  table,
+  tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* 6. Clean Text Contrast */
+  h1, h2, h3, h4, p, span, div {
+    color: inherit;
+    text-shadow: none !important;
+  }
+}
+

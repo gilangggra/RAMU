@@ -243,10 +243,10 @@ export function BookingCallSheetModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-xs animate-fade-in overflow-y-auto">
-      <div className="bg-white border border-slate-200 rounded-[22px] shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden my-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-xs animate-fade-in overflow-y-auto print:static print:inset-auto print:z-auto print:p-0 print:m-0 print:bg-transparent print:backdrop-blur-none print:overflow-visible print:block">
+      <div className="bg-white border border-slate-200 rounded-[22px] shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden my-auto print:max-w-none print:w-full print:border-none print:shadow-none print:rounded-none print:max-h-none print:h-auto print:overflow-visible print:block print:my-0">
         {/* Top Action Toolbar */}
-        <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div className="print:hidden px-5 py-4 border-b border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-slate-900 text-amber-400 flex items-center justify-center font-bold text-xs">
               <Clock className="w-4 h-4" />
@@ -297,10 +297,10 @@ export function BookingCallSheetModal({
         </div>
 
         {/* Scrollable Document Container */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100/60">
+        <div id="callsheet-printable-area" className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100/60 print:p-0 print:m-0 print:overflow-visible print:bg-white print:max-h-none print:h-auto">
           <div
             ref={printRef}
-            className="bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-xs max-w-3xl mx-auto space-y-6 text-slate-900 text-xs"
+            className="bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-xs max-w-3xl mx-auto space-y-6 text-slate-900 text-xs print:border-none print:shadow-none print:p-0 print:m-0 print:max-w-none print:w-full print:rounded-none print:space-y-4"
           >
             {/* Header Document */}
             <div className="flex items-start justify-between border-b-2 border-slate-900 pb-4">

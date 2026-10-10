@@ -288,9 +288,9 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3 bg-slate-950/60 backdrop-blur-sm overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3 bg-slate-950/60 backdrop-blur-sm overflow-hidden print:static print:inset-auto print:z-auto print:p-0 print:m-0 print:bg-transparent print:backdrop-blur-none print:overflow-visible print:block">
       {/* MODAL WRAPPER (Fits perfectly within single screen without overflowing) */}
-      <div className="relative w-full max-w-6xl h-[88vh] max-h-[740px] min-h-[520px] bg-white rounded-[24px] shadow-2xl border border-slate-200/90 overflow-hidden flex flex-col font-sans animate-fade-in">
+      <div className="relative w-full max-w-6xl h-[88vh] max-h-[740px] min-h-[520px] bg-white rounded-[24px] shadow-2xl border border-slate-200/90 overflow-hidden flex flex-col font-sans animate-fade-in print:max-w-none print:w-full print:h-auto print:max-h-none print:min-h-0 print:border-none print:shadow-none print:rounded-none print:overflow-visible print:block print:my-0">
 
         {/* 1. TOP HEADER BAR (Compact ~48px) */}
         <header className="print:hidden flex items-center justify-between px-5 py-2.5 border-b border-slate-100 bg-white shrink-0 z-10">
@@ -509,7 +509,7 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
           </aside>
 
           {/* RIGHT PANEL: LEGAL DOCUMENT VIEWER (Full 10 Articles, internal smooth scroll) */}
-          <main className="flex-1 bg-white flex flex-col h-full overflow-hidden relative">
+          <main className="flex-1 bg-white flex flex-col h-full overflow-hidden relative print:w-full print:h-auto print:max-h-none print:overflow-visible print:block">
 
             {/* Sticky Article Quick Jumper */}
             <div className="print:hidden px-5 py-2 border-b border-slate-100 bg-white/95 backdrop-blur-xs flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
@@ -545,7 +545,7 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
             <div
               id="spk-collab-printable"
               ref={printableRef}
-              className="overflow-y-auto p-5 sm:p-8 space-y-6 bg-white flex-1 font-sans selection:bg-[#4CC9FE]/20"
+              className="overflow-y-auto p-5 sm:p-8 space-y-6 bg-white flex-1 font-sans selection:bg-[#4CC9FE]/20 print:p-0 print:m-0 print:overflow-visible print:max-h-none print:h-auto print:space-y-4 print:text-black"
             >
 
               {/* DOCUMENT KOP / LETTERHEAD */}
@@ -880,7 +880,7 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
 
         {/* 3. SIGNATURE PAD MODAL (Floating Canvas Sheet) */}
         {isPadOpen && (
-          <div className="fixed inset-0 z-60 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3">
+          <div className="print:hidden fixed inset-0 z-60 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3">
             <div className="bg-white border border-slate-200/90 w-full max-w-md shadow-2xl p-5 space-y-3.5 rounded-[22px] animate-fade-in">
               <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
                 <div className="flex items-center gap-2">

@@ -123,10 +123,10 @@ Dokumen sah digital: ${typeof window !== "undefined" ? window.location.origin : 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-xs overflow-y-auto animate-fade-in">
-      <div className="relative w-full max-w-3xl bg-white rounded-[22px] shadow-2xl border border-slate-300 overflow-hidden my-auto max-h-[94vh] flex flex-col font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-xs overflow-y-auto animate-fade-in print:static print:inset-auto print:z-auto print:p-0 print:m-0 print:bg-transparent print:backdrop-blur-none print:overflow-visible print:block">
+      <div className="relative w-full max-w-3xl bg-white rounded-[22px] shadow-2xl border border-slate-300 overflow-hidden my-auto max-h-[94vh] flex flex-col font-sans print:max-w-none print:w-full print:border-none print:shadow-none print:rounded-none print:max-h-none print:h-auto print:overflow-visible print:block print:my-0">
         {/* Top Control Bar */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 bg-slate-100/90 shrink-0">
+        <div className="print:hidden flex items-center justify-between px-5 py-3.5 border-b border-slate-200 bg-slate-100/90 shrink-0">
           <div className="flex items-center gap-2">
             <span className="p-1.5 rounded-lg bg-slate-900 text-amber-400">
               <FileText className="w-4 h-4" />
@@ -176,7 +176,7 @@ Dokumen sah digital: ${typeof window !== "undefined" ? window.location.origin : 
         </div>
 
         {/* Tab Selector Type */}
-        <div className="flex items-center gap-2 px-6 py-2.5 bg-slate-50 border-b border-slate-200 overflow-x-auto text-xs shrink-0">
+        <div className="print:hidden flex items-center gap-2 px-6 py-2.5 bg-slate-50 border-b border-slate-200 overflow-x-auto text-xs shrink-0">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-2">
             Format Dokumen:
           </span>
@@ -216,10 +216,10 @@ Dokumen sah digital: ${typeof window !== "undefined" ? window.location.origin : 
         </div>
 
         {/* Printable Document Sheet */}
-        <div className="overflow-y-auto p-6 sm:p-10 flex-1 bg-slate-100/40">
+        <div id="invoice-printable-area" className="overflow-y-auto p-6 sm:p-10 flex-1 bg-slate-100/40 print:p-0 print:m-0 print:overflow-visible print:bg-white print:max-h-none print:h-auto">
           <div
             ref={printRef}
-            className="max-w-2xl mx-auto bg-white border border-slate-300 rounded-xl p-8 sm:p-10 space-y-6 shadow-sm text-slate-900 print:border-none print:shadow-none"
+            className="max-w-2xl mx-auto bg-white border border-slate-300 rounded-xl p-8 sm:p-10 space-y-6 shadow-sm text-slate-900 print:border-none print:shadow-none print:p-0 print:m-0 print:max-w-none print:w-full print:rounded-none"
           >
             {/* Header Surat */}
             <div className="flex items-start justify-between border-b-2 border-slate-900 pb-5">
