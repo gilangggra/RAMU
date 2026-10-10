@@ -98,18 +98,6 @@ export default async function CollaborationDetailPage({
 
   const pageContent = (
     <div className="space-y-3.5 w-full max-w-7xl mx-auto pb-6">
-      {isAdmin && (
-        <div className="mb-2">
-          <Link
-            href="/engine-insights"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-[#111827] bg-white/80 hover:bg-white border border-slate-200/80 px-3.5 py-1.5 rounded-full transition-all shadow-2xs"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Kembali ke Audit Kompatibilitas</span>
-          </Link>
-        </div>
-      )}
-
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <Link
           href={isAdmin ? "/engine-insights" : "/collaborations"}
