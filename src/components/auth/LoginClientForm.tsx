@@ -9,7 +9,6 @@ import {
   Mail, 
   Lock, 
   ArrowRight, 
-  ArrowLeft,
   Eye, 
   EyeOff, 
   ShieldCheck 
@@ -53,14 +52,15 @@ export function LoginClientForm({ error, message, redirectTo = "/dashboard" }: L
         if (res?.error) {
           setFormError(res.error);
         }
-      } catch (err: any) {
-        if (err?.message?.includes("NEXT_REDIRECT")) {
+      } catch (err: unknown) {
+        if (err instanceof Error && err.message.includes("NEXT_REDIRECT")) {
           return;
         }
-        if (err?.message?.toLowerCase().includes("fetch failed")) {
+        const errMsg = err instanceof Error ? err.message : "";
+        if (errMsg.toLowerCase().includes("fetch failed")) {
           setFormError("Koneksi ke server terputus. Silakan muat ulang halaman dan coba kembali.");
         } else {
-          setFormError(err?.message || "Gagal masuk ke akun. Silakan periksa kredensial Anda.");
+          setFormError(errMsg || "Gagal masuk ke akun. Silakan periksa kredensial Anda.");
         }
       }
     });
@@ -202,25 +202,15 @@ export function LoginClientForm({ error, message, redirectTo = "/dashboard" }: L
         </button>
       </form>
 
-      {/* Footer Register Link & Back Action */}
-      <div className="pt-2 text-center space-y-2 border-t border-stone-100">
+      {/* Footer Register Link */}
+      <div className="pt-2 text-center border-t border-stone-100">
         <div className="text-xs text-[#716B7E]">
           Belum memiliki akun terdaftar?{" "}
           <Link
             href="/register"
             className="font-bold text-[#0284c7] hover:text-[#27213D] underline underline-offset-4 decoration-[#4CC9FE]/40 hover:decoration-[#4CC9FE] transition-colors"
           >
-            Daftar akun baru — Gratis →
-          </Link>
-        </div>
-
-        <div>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-400 hover:text-stone-700 transition-colors py-1 px-3 rounded-lg hover:bg-stone-100/70"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Batal &amp; kembali ke beranda</span>
+            Daftar akun baru →
           </Link>
         </div>
       </div>

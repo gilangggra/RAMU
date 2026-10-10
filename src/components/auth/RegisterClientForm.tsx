@@ -8,7 +8,6 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
-  ArrowLeft,
   Check,
   User,
   Building,
@@ -667,16 +666,9 @@ export function RegisterClientForm({ initialError, redirectTo }: RegisterClientF
 
               {/* Confirm Password */}
               <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <label htmlFor="confirmPassword" className="block text-[10px] font-bold uppercase tracking-wider text-stone-600">
-                    Konfirmasi Sandi *
-                  </label>
-                  {confirmPassword.length > 0 && (
-                    <span className={`text-[9px] font-bold ${password === confirmPassword ? "text-emerald-600" : "text-rose-500"}`}>
-                      {password === confirmPassword ? "✓ Cocok" : "✗ Beda"}
-                    </span>
-                  )}
-                </div>
+                <label htmlFor="confirmPassword" className="block text-[10px] font-bold uppercase tracking-wider text-stone-600">
+                  Konfirmasi Sandi *
+                </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
                     <Lock className="w-3.5 h-3.5" />
@@ -693,13 +685,7 @@ export function RegisterClientForm({ initialError, redirectTo }: RegisterClientF
                       if (formError) setFormError("");
                     }}
                     placeholder="Ulangi kata sandi"
-                    className={`w-full pl-9 pr-8 py-2 rounded-xl bg-stone-50/80 text-xs sm:text-sm text-[#27213D] placeholder-stone-400 focus:outline-none focus:bg-white focus:ring-2 transition-all font-medium border ${
-                      confirmPassword.length > 0
-                        ? password === confirmPassword
-                          ? "border-emerald-500/70 focus:border-emerald-500 focus:ring-emerald-500/20"
-                          : "border-rose-400 focus:border-rose-500 focus:ring-rose-500/20"
-                        : "border-stone-200 focus:border-[#4CC9FE] focus:ring-[#4CC9FE]/20"
-                    }`}
+                    className="w-full pl-9 pr-8 py-2 rounded-xl bg-stone-50/80 border border-stone-200 text-xs sm:text-sm text-[#27213D] placeholder-stone-400 focus:outline-none focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all font-medium"
                   />
                   <button
                     type="button"
@@ -733,8 +719,8 @@ export function RegisterClientForm({ initialError, redirectTo }: RegisterClientF
             </button>
           </form>
 
-          {/* Footer Login Link & Back Action */}
-          <div className="pt-1 text-center space-y-1.5 border-t border-stone-100">
+          {/* Footer Login Link */}
+          <div className="pt-1 text-center border-t border-stone-100">
             <div className="text-xs text-[#716B7E]">
               Sudah memiliki akun terdaftar?{" "}
               <Link
@@ -742,16 +728,6 @@ export function RegisterClientForm({ initialError, redirectTo }: RegisterClientF
                 className="font-bold text-[#0284c7] hover:text-[#27213D] underline underline-offset-4 decoration-[#4CC9FE]/40 hover:decoration-[#4CC9FE] transition-colors"
               >
                 Masuk ke akun Anda →
-              </Link>
-            </div>
-
-            <div>
-              <Link
-                href="/"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-400 hover:text-stone-700 transition-colors py-1 px-3 rounded-lg hover:bg-stone-100/70"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Batal &amp; kembali ke beranda</span>
               </Link>
             </div>
           </div>
