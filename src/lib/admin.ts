@@ -8,7 +8,10 @@ export function isUserAdmin(user: User | null | undefined): boolean {
   if (!user) return false;
   const email = (user.email || "").toLowerCase().trim();
   const metaRole = (user.user_metadata?.role || "").toLowerCase().trim();
-  const isAdminFlag = user.user_metadata?.is_admin === true;
+  const appRole = (user.app_metadata?.role || "").toLowerCase().trim();
+  const isAdminFlag =
+    user.user_metadata?.is_admin === true ||
+    user.app_metadata?.is_admin === true;
 
   return (
     isAdminFlag ||
@@ -16,6 +19,10 @@ export function isUserAdmin(user: User | null | undefined): boolean {
     metaRole === "administrator" ||
     metaRole === "admin" ||
     metaRole === "superadmin" ||
+    appRole === "platform administrator" ||
+    appRole === "administrator" ||
+    appRole === "admin" ||
+    appRole === "superadmin" ||
     email === "bernadya@gmail.com" ||
     email === "admin@ramu.id"
   );

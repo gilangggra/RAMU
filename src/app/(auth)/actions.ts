@@ -33,9 +33,7 @@ export async function login(formData: FormData) {
   }
 
   if (data.user) {
-    if (isUserAdmin(data.user)) {
-      redirectTo = "/admin";
-    }
+    let isAdminUser = isUserAdmin(data.user);
 
     try {
       const userMeta = data.user.user_metadata || {};
@@ -49,11 +47,27 @@ export async function login(formData: FormData) {
         oauthAvatar
       );
 
-      const existingActor = await prisma.actor.findFirst({
-        where: { ownerUserId: data.user.id },
-      });
+      const [existingActor, profile] = await Promise.all([
+        prisma.actor.findFirst({
+          where: { ownerUserId: data.user.id },
+        }),
+        prisma.profile.findUnique({
+          where: { id: data.user.id },
+          select: { role: true },
+        }),
+      ]);
 
-      if (!existingActor && !isUserAdmin(data.user)) {
+      if (
+        profile?.role === "SUPERADMIN" ||
+        existingActor?.sector === "Platform Administrator" ||
+        existingActor?.sector?.toLowerCase().includes("administrator")
+      ) {
+        isAdminUser = true;
+      }
+
+      if (isAdminUser) {
+        redirectTo = "/admin";
+      } else if (!existingActor) {
         revalidatePath("/", "layout");
         redirect("/onboarding");
       }
@@ -62,6 +76,10 @@ export async function login(formData: FormData) {
         throw e;
       }
       console.error("Gagal sinkronisasi profil saat login:", e);
+    }
+
+    if (isAdminUser) {
+      redirectTo = "/admin";
     }
   }
 
