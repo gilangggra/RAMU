@@ -57,7 +57,11 @@ export function LoginClientForm({ error, message, redirectTo = "/dashboard" }: L
         if (err?.message?.includes("NEXT_REDIRECT")) {
           return;
         }
-        setFormError(err?.message || "Gagal masuk ke akun. Silakan periksa kredensial Anda.");
+        if (err?.message?.toLowerCase().includes("fetch failed")) {
+          setFormError("Koneksi ke server terputus. Silakan muat ulang halaman dan coba kembali.");
+        } else {
+          setFormError(err?.message || "Gagal masuk ke akun. Silakan periksa kredensial Anda.");
+        }
       }
     });
   };

@@ -112,7 +112,7 @@ export async function devSupabaseFetch(
         ? input.toString()
         : input.url;
 
-    if (process.env.NODE_ENV === "development" && urlStr.includes("supabase.co")) {
+    if (urlStr.includes("supabase.co")) {
       console.warn("Standard fetch failed, falling back to IP route:", err?.message);
       return fallbackIpFetch(input, init, urlStr);
     }
