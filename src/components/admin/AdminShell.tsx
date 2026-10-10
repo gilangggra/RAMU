@@ -20,6 +20,7 @@ import {
   PanelLeftOpen,
   ShieldCheck,
   BarChart3,
+  Settings,
 } from "lucide-react";
 import { RamuLogo } from "@/components/brand/RamuLogo";
 
@@ -82,7 +83,14 @@ export function AdminShell({ adminName, adminAvatar, children }: AdminShellProps
     return pathname.startsWith(href);
   }
 
-  const renderNavLinks = (groupItems: any[]) => (
+  interface AdminNavItem {
+    href: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    exact?: boolean;
+  }
+
+  const renderNavLinks = (groupItems: AdminNavItem[]) => (
     <ul className="space-y-0.5">
       {groupItems.map(({ href, label, icon: Icon, exact }) => {
         const active = isActive(href, exact);
@@ -218,6 +226,13 @@ export function AdminShell({ adminName, adminAvatar, children }: AdminShellProps
               </div>
 
               <div className="flex items-center gap-1 shrink-0 ml-1">
+                <Link
+                  href="/admin/settings"
+                  title="Pengaturan Akun"
+                  className="p-1.5 rounded-full text-slate-400 hover:text-slate-800 hover:bg-white transition-colors shadow-2xs"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                </Link>
                 <form action={logout}>
                   <button
                     type="submit"
@@ -243,6 +258,13 @@ export function AdminShell({ adminName, adminAvatar, children }: AdminShellProps
               </div>
 
               <div className="flex flex-col items-center gap-1 border-t border-slate-200/70 pt-1.5 w-full">
+                <Link
+                  href="/admin/settings"
+                  title="Pengaturan Akun"
+                  className="p-1.5 rounded-full text-slate-400 hover:text-slate-800 hover:bg-white/80 transition-colors"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                </Link>
                 <form action={logout}>
                   <button
                     type="submit"
@@ -310,6 +332,14 @@ export function AdminShell({ adminName, adminAvatar, children }: AdminShellProps
             </div>
 
             <div className="pt-3 border-t border-slate-200 space-y-2">
+              <Link
+                href="/admin/settings"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-2.5 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-semibold border border-slate-200/80 flex items-center justify-center gap-2 transition-colors"
+              >
+                <Settings className="w-3.5 h-3.5 text-slate-600" />
+                <span>Pengaturan Akun</span>
+              </Link>
               <form action={logout}>
                 <button
                   type="submit"

@@ -101,6 +101,11 @@ export async function signup(formData: FormData) {
     return { error: "Nama, email, dan kata sandi wajib diisi." };
   }
 
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+  if (!EMAIL_REGEX.test(email)) {
+    return { error: "Format alamat email tidak valid (harus menyertakan domain lengkap, contoh: nama@domain.com)." };
+  }
+
   if (password.length < 6) {
     return { error: "Kata sandi minimal harus 6 karakter." };
   }

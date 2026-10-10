@@ -14,22 +14,40 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 
+export interface SettingsNavLink {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
 interface SettingsNavProps {
   isBrand?: boolean;
   actorId?: string;
+  /** Override daftar menu akun (default: menu role umum). */
+  accountLinks?: SettingsNavLink[];
+  /** Label grup menu akun (default: "Akun & Operasional"). */
+  sectionLabel?: string;
+  /** Tampilkan grup "Tampilan Publik" (default: true). */
+  showPublicLinks?: boolean;
 }
 
-export function SettingsNav({ isBrand, actorId }: SettingsNavProps = {}) {
-  const pathname = usePathname();
+const DEFAULT_ACCOUNT_LINKS: SettingsNavLink[] = [
+  { href: "/settings/profile", label: "Profil & Identitas", icon: UserCircle },
+  { href: "/settings/payout", label: "Rekening & Pencairan", icon: CreditCard },
+  { href: "/settings/availability", label: "Ketersediaan & Jam Kerja", icon: Clock },
+  { href: "/settings/legal", label: "Template SPK & Hak Cipta", icon: ShieldCheck },
+  { href: "/settings/notifications", label: "Notifikasi", icon: Bell },
+  { href: "/settings/security", label: "Keamanan Akun", icon: Lock },
+];
 
-  const accountLinks = [
-    { href: "/settings/profile", label: "Profil & Identitas", icon: UserCircle },
-    { href: "/settings/payout", label: "Rekening & Pencairan", icon: CreditCard },
-    { href: "/settings/availability", label: "Ketersediaan & Jam Kerja", icon: Clock },
-    { href: "/settings/legal", label: "Template SPK & Hak Cipta", icon: ShieldCheck },
-    { href: "/settings/notifications", label: "Notifikasi", icon: Bell },
-    { href: "/settings/security", label: "Keamanan Akun", icon: Lock },
-  ];
+export function SettingsNav({
+  isBrand: _isBrand,
+  actorId,
+  accountLinks = DEFAULT_ACCOUNT_LINKS,
+  sectionLabel = "Akun & Operasional",
+  showPublicLinks = true,
+}: SettingsNavProps = {}) {
+  const pathname = usePathname();
 
   const publicLinks = [
     ...(actorId ? [{ href: `/directory/${actorId}`, label: "Profil & Comp Card", icon: UserCircle, external: true }] : []),
@@ -41,7 +59,7 @@ export function SettingsNav({ isBrand, actorId }: SettingsNavProps = {}) {
       {/* Group 1: Private Account Settings */}
       <div className="space-y-1.5">
         <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-stone-400 select-none">
-          Akun &amp; Operasional
+          {sectionLabel}
         </div>
         <div className="flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible pb-1 lg:pb-0 scrollbar-none">
           {accountLinks.map((item) => {
@@ -67,6 +85,7 @@ export function SettingsNav({ isBrand, actorId }: SettingsNavProps = {}) {
       </div>
 
       {/* Group 2: Public Creative Showcase (Distinct) */}
+      {showPublicLinks && (
       <div className="space-y-1.5 pt-2 border-t border-stone-200/60">
         <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-stone-400 select-none">
           Tampilan Publik
@@ -90,6 +109,7 @@ export function SettingsNav({ isBrand, actorId }: SettingsNavProps = {}) {
           })}
         </div>
       </div>
+      )}
     </nav>
   );
 }

@@ -10,7 +10,6 @@ import {
   Mail,
   Smartphone,
   Save,
-  ShieldCheck,
 } from "lucide-react";
 import { updateNotificationSettingsAction } from "@/app/settings/actions";
 import {
@@ -24,21 +23,66 @@ export interface NotificationPreferencesData {
   notifyBooking?: boolean;
   notifyMessage?: boolean;
   notifyBriefDigest?: boolean;
+  [key: string]: boolean | string | undefined;
 }
+
+export interface NotificationAlertOption {
+  /** Nama field yang dikirim ke server action (mis. "notifyBooking"). */
+  key: string;
+  label: string;
+  description: string;
+}
+
+type NotificationSubmitAction = (
+  formData: FormData
+) => Promise<{ success: boolean; message?: string; error?: string }>;
+
+const DEFAULT_ALERTS: NotificationAlertOption[] = [
+  {
+    key: "notifyBooking",
+    label: "Pembaruan Pesanan & Surat Perjanjian Kerja (SPK)",
+    description: "Dapatkan email saat ada pesanan masuk, persetujuan kontrak kerja, atau permintaan reschedule dari mitra.",
+  },
+  {
+    key: "notifyMessage",
+    label: "Pesan Baru di Messenger RAMU",
+    description: "Email pemberitahuan jika Anda memiliki pesan obrolan yang belum dibaca lebih dari 15 menit.",
+  },
+  {
+    key: "notifyBriefDigest",
+    label: "Ringkasan Peluang Proyek Baru yang Kompatibel",
+    description: "Rangkuman mingguan brief proyek dan kampanye baru yang cocok dengan portofolio & sektor Anda.",
+  },
+];
 
 interface NotificationsFormProps {
   initialData?: NotificationPreferencesData | null;
+  /** Daftar opsi email alert (default: opsi role umum). */
+  alerts?: NotificationAlertOption[];
+  /** Server action penyimpan (default: updateNotificationSettingsAction). */
+  submitAction?: NotificationSubmitAction;
+  description?: string;
+  pushDescription?: string;
+  pushTestMessage?: string;
+  pushTestLink?: string;
 }
 
-export function NotificationsForm({ initialData }: NotificationsFormProps) {
-  const [notifyBooking, setNotifyBooking] = useState<boolean>(
-    initialData?.notifyBooking !== undefined ? initialData.notifyBooking : true
-  );
-  const [notifyMessage, setNotifyMessage] = useState<boolean>(
-    initialData?.notifyMessage !== undefined ? initialData.notifyMessage : true
-  );
-  const [notifyBriefDigest, setNotifyBriefDigest] = useState<boolean>(
-    initialData?.notifyBriefDigest !== undefined ? initialData.notifyBriefDigest : true
+export function NotificationsForm({
+  initialData,
+  alerts = DEFAULT_ALERTS,
+  submitAction = updateNotificationSettingsAction,
+  description = "Atur bagaimana dan kapan RAMU menghubungi Anda mengenai pesanan, jadwal reschedule, pesan, dan peluang proyek baru.",
+  pushDescription = "Terima notifikasi instan langsung di layar perangkat Anda saat ada tawaran booking baru, reschedule jadwal, atau pesan darurat on-set.",
+  pushTestMessage = "Anda akan menerima pemberitahuan instan saat ada pesanan atau pesan baru.",
+  pushTestLink = "/collaborations?section=contracts",
+}: NotificationsFormProps) {
+  const [values, setValues] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(
+      alerts.map((a) => {
+        const v = initialData?.[a.key];
+        return [a.key, typeof v === "boolean" ? v : true];
+      })
+    )
   );
 
   const [browserPermission, setBrowserPermission] = useState<"granted" | "denied" | "default" | "unsupported">("default");
@@ -46,11 +90,13 @@ export function NotificationsForm({ initialData }: NotificationsFormProps) {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
-    if (isBrowserNotificationSupported()) {
-      setBrowserPermission(getBrowserNotificationPermission());
-    } else {
-      setBrowserPermission("unsupported");
-    }
+    const perm = isBrowserNotificationSupported()
+      ? getBrowserNotificationPermission()
+      : "unsupported";
+    const timer = setTimeout(() => {
+      setBrowserPermission(perm);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   async function handleRequestBrowserPush() {
@@ -60,8 +106,8 @@ export function NotificationsForm({ initialData }: NotificationsFormProps) {
     if (granted) {
       showBrowserPushNotification({
         title: "Notifikasi RAMU Aktif",
-        message: "Anda akan menerima pemberitahuan instan saat ada pesanan atau pesan baru.",
-        link: "/collaborations?section=contracts",
+        message: pushTestMessage,
+        link: pushTestLink,
       });
       setMessage({ type: "success", text: "Push notification peramban berhasil diaktifkan!" });
     } else if (perm === "denied") {
@@ -75,11 +121,11 @@ export function NotificationsForm({ initialData }: NotificationsFormProps) {
     setMessage(null);
 
     const formData = new FormData();
-    formData.append("notifyBooking", String(notifyBooking));
-    formData.append("notifyMessage", String(notifyMessage));
-    formData.append("notifyBriefDigest", String(notifyBriefDigest));
+    for (const a of alerts) {
+      formData.append(a.key, String(values[a.key] ?? false));
+    }
 
-    const res = await updateNotificationSettingsAction(formData);
+    const res = await submitAction(formData);
     setIsLoading(false);
 
     if (res.success) {
@@ -100,7 +146,7 @@ export function NotificationsForm({ initialData }: NotificationsFormProps) {
           <span>Notifikasi &amp; Komunikasi</span>
         </h2>
         <p className="text-xs sm:text-sm text-[#716B7E] leading-relaxed">
-          Atur bagaimana dan kapan RAMU menghubungi Anda mengenai pesanan, jadwal reschedule, pesan, dan peluang proyek baru.
+          {description}
         </p>
       </div>
 
@@ -134,7 +180,7 @@ export function NotificationsForm({ initialData }: NotificationsFormProps) {
               </h3>
             </div>
             <p className="text-[11px] text-[#716B7E] leading-relaxed max-w-md pt-1">
-              Terima notifikasi instan langsung di layar perangkat Anda saat ada tawaran booking baru, reschedule jadwal, atau pesan darurat on-set.
+              {pushDescription}
             </p>
           </div>
 
@@ -174,56 +220,30 @@ export function NotificationsForm({ initialData }: NotificationsFormProps) {
           </h3>
         </div>
 
-        <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-stone-50/70 border border-stone-200/80 cursor-pointer hover:bg-stone-100/60 transition-colors">
-          <input
-            type="checkbox"
-            checked={notifyBooking}
-            onChange={(e) => setNotifyBooking(e.target.checked)}
-            className="mt-0.5 rounded text-[#4CC9FE] focus:ring-[#4CC9FE]/20 accent-[#4CC9FE]"
-          />
-          <div className="text-xs">
-            <span className="font-bold text-[#27213D] block">
-              Pembaruan Pesanan &amp; Surat Perjanjian Kerja (SPK)
-            </span>
-            <span className="text-[11px] text-[#716B7E] leading-relaxed block mt-0.5">
-              Dapatkan email saat ada pesanan masuk, persetujuan kontrak kerja, atau permintaan reschedule dari mitra.
-            </span>
-          </div>
-        </label>
-
-        <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-stone-50/70 border border-stone-200/80 cursor-pointer hover:bg-stone-100/60 transition-colors">
-          <input
-            type="checkbox"
-            checked={notifyMessage}
-            onChange={(e) => setNotifyMessage(e.target.checked)}
-            className="mt-0.5 rounded text-[#4CC9FE] focus:ring-[#4CC9FE]/20 accent-[#4CC9FE]"
-          />
-          <div className="text-xs">
-            <span className="font-bold text-[#27213D] block">
-              Pesan Baru di Messenger RAMU
-            </span>
-            <span className="text-[11px] text-[#716B7E] leading-relaxed block mt-0.5">
-              Email pemberitahuan jika Anda memiliki pesan obrolan yang belum dibaca lebih dari 15 menit.
-            </span>
-          </div>
-        </label>
-
-        <label className="flex items-start gap-3.5 p-4 rounded-2xl bg-stone-50/70 border border-stone-200/80 cursor-pointer hover:bg-stone-100/60 transition-colors">
-          <input
-            type="checkbox"
-            checked={notifyBriefDigest}
-            onChange={(e) => setNotifyBriefDigest(e.target.checked)}
-            className="mt-0.5 rounded text-[#4CC9FE] focus:ring-[#4CC9FE]/20 accent-[#4CC9FE]"
-          />
-          <div className="text-xs">
-            <span className="font-bold text-[#27213D] block">
-              Ringkasan Peluang Proyek Baru yang Kompatibel
-            </span>
-            <span className="text-[11px] text-[#716B7E] leading-relaxed block mt-0.5">
-              Rangkuman mingguan brief proyek dan kampanye baru yang cocok dengan portofolio &amp; sektor Anda.
-            </span>
-          </div>
-        </label>
+        {alerts.map((alert) => (
+          <label
+            key={alert.key}
+            className="flex items-start gap-3.5 p-4 rounded-2xl bg-stone-50/70 border border-stone-200/80 cursor-pointer hover:bg-stone-100/60 transition-colors"
+          >
+            <input
+              type="checkbox"
+              checked={values[alert.key] ?? false}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setValues((prev) => ({ ...prev, [alert.key]: checked }));
+              }}
+              className="mt-0.5 rounded text-[#4CC9FE] focus:ring-[#4CC9FE]/20 accent-[#4CC9FE]"
+            />
+            <div className="text-xs">
+              <span className="font-bold text-[#27213D] block">
+                {alert.label}
+              </span>
+              <span className="text-[11px] text-[#716B7E] leading-relaxed block mt-0.5">
+                {alert.description}
+              </span>
+            </div>
+          </label>
+        ))}
       </div>
 
       <div className="pt-2 flex justify-end">

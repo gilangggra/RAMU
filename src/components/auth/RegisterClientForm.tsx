@@ -109,8 +109,9 @@ export function RegisterClientForm({ initialError, redirectTo }: RegisterClientF
       setFormError("Nama profil / brand / studio wajib diisi.");
       return;
     }
-    if (!email.trim() || !email.includes("@")) {
-      setFormError("Format alamat email tidak valid.");
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+    if (!email.trim() || !EMAIL_REGEX.test(email.trim())) {
+      setFormError("Format alamat email tidak valid (harus menyertakan domain lengkap, contoh: nama@domain.com).");
       return;
     }
     if (password.length < 6) {
