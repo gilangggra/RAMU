@@ -115,7 +115,7 @@ Rekening Transfer:
 - No. Rekening: ${accountNumber}
 - A/N: ${accountHolder}
 
-Dokumen sah digital: https://ramu.id/dashboard/bookings/${booking.id}`;
+Dokumen sah digital: ${typeof window !== "undefined" ? window.location.origin : "https://ramu-gamma.vercel.app"}/dashboard/bookings/${booking.id}`;
 
     navigator.clipboard.writeText(text);
     setCopied(true);

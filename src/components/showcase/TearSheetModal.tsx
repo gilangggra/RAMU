@@ -237,7 +237,8 @@ export function TearSheetModal({
   };
 
   const handleShareWhatsApp = (certId: string, title: string, edition: string) => {
-    const text = `*SERTIFIKAT KEASLIAN PORTOFOLIO & PEER-VERIFIED CO-CREDIT (RAMU)*\n\nKarya: "${title}"\nEdisi: ${edition}\nID Sertifikat: #${certId}\nStatus: Anti-Catfishing Certified (5/5 Kru Terverifikasi Silang)\n\nSeluruh tim produksi (Fotografer, MUA, Stylist, Model, Studio) telah memvalidasi keterlibatan masing-masing di set produksi RAMU Ecosystem untuk menjamin karya orisinal 100% tanpa materi catfishing/curian.\n\nLihat rincian lengkap & profil kru: https://ramu.id/showcase`;
+    const showcaseUrl = typeof window !== "undefined" ? window.location.origin : "https://ramu-gamma.vercel.app";
+    const text = `*SERTIFIKAT KEASLIAN PORTOFOLIO & PEER-VERIFIED CO-CREDIT (RAMU)*\n\nKarya: "${title}"\nEdisi: ${edition}\nID Sertifikat: #${certId}\nStatus: Anti-Catfishing Certified (5/5 Kru Terverifikasi Silang)\n\nSeluruh tim produksi (Fotografer, MUA, Stylist, Model, Studio) telah memvalidasi keterlibatan masing-masing di set produksi RAMU Ecosystem untuk menjamin karya orisinal 100% tanpa materi catfishing/curian.\n\nLihat rincian lengkap & profil kru: ${showcaseUrl}/showcase`;
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank");
   };
@@ -358,13 +359,15 @@ export function TearSheetModal({
 
   const handleSendCrewReminderWA = () => {
     const pendingNames = pendingCredits.map((c) => c.name).join(", ");
-    const text = `Halo tim kreatif (${pendingNames})! Portofolio karya kolaborasi kita "${tearSheetData.title}" sudah tayang di RAMU. Yuk luangkan 10 detik untuk konfirmasi kreditmu di sini agar sertifikat anti-catfishing kita 100% aktif & karyanya otomatis tersambung ke profilmu: https://ramu.id/showcase`;
+    const showcaseUrl = typeof window !== "undefined" ? window.location.origin : "https://ramu-gamma.vercel.app";
+    const text = `Halo tim kreatif (${pendingNames})! Portofolio karya kolaborasi kita "${tearSheetData.title}" sudah tayang di RAMU. Yuk luangkan 10 detik untuk konfirmasi kreditmu di sini agar sertifikat anti-catfishing kita 100% aktif & karyanya otomatis tersambung ke profilmu: ${showcaseUrl}/showcase`;
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank");
   };
 
   const handleSharePitchWA = () => {
-    const text = `Halo, berikut adalah portofolio kurasi visual resmi kami di RAMU: "${tearSheetData.title}" (${item.category}). Diproduksi secara sinergis dengan seluruh tim terverifikasi (bebas catfishing). Cek detail konsep dan spesifikasi produksi: https://ramu.id/showcase`;
+    const showcaseUrl = typeof window !== "undefined" ? window.location.origin : "https://ramu-gamma.vercel.app";
+    const text = `Halo, berikut adalah portofolio kurasi visual resmi kami di RAMU: "${tearSheetData.title}" (${item.category}). Diproduksi secara sinergis dengan seluruh tim terverifikasi (bebas catfishing). Cek detail konsep dan spesifikasi produksi: ${showcaseUrl}/showcase`;
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank");
   };

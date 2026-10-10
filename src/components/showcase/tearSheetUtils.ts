@@ -381,7 +381,7 @@ ${creditsLines}${techLine}
 
 Production: ${item.actor.location || "Indonesia"}
 Collaboration engineered & verified via RAMU Ecosystem.
-Inisiasi kolaborasi serupa: ramu.id/showcase
+Inisiasi kolaborasi serupa: ramu-gamma.vercel.app/showcase
 
 #RAMUEcosystem #AntiCatfishing #PeerVerified #CoCredit #IndonesianCreative #EditorialTearsheet #FashionEditorial #RAMUSynergy`;
 }

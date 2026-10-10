@@ -180,7 +180,7 @@ Platform: RAMU Creative Ecosystem (PSE Terdaftar)
 - Pasal 7 (Kontingensi Cuaca): Rain-Check outdoor maksimal 14 hari tanpa penalti; Staging Fee 25% jika kru telah tiba di lokasi.
 - Pasal 9 (Safe Harbor): Platform RAMU berstatus intermediary (safe harbor & hold harmless).
 
-Dokumen sah digital: https://ramu.id/dashboard/bookings`;
+Dokumen sah digital: ${typeof window !== "undefined" ? window.location.origin : "https://ramu-gamma.vercel.app"}/dashboard/bookings`;
 
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -279,7 +279,7 @@ Dokumen sah digital: https://ramu.id/dashboard/bookings`;
                   Ekosistem Kolaborasi & Pelindung Transaksi Kreatif Nasional
                 </div>
                 <div className="text-[10px] text-slate-400">
-                  Layanan Penyelenggara Sistem Elektronik (PSE) &bull; www.ramu.id
+                  Layanan Penyelenggara Sistem Elektronik (PSE) &bull; ramu-gamma.vercel.app
                 </div>
               </div>
             </div>

@@ -244,7 +244,7 @@ export function SocialCreditGenerator({
 
       lines.push("━".repeat(48));
       if (includePlatformTag) {
-        lines.push("FACILITATED BY RAMU CREATIVE PLATFORM (ramu.id)");
+        lines.push("FACILITATED BY RAMU CREATIVE PLATFORM (ramu-gamma.vercel.app)");
       }
       lines.push("ALL RIGHTS RESERVED © 2026");
 

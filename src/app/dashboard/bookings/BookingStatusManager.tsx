@@ -831,7 +831,8 @@ export function BookingContactActions({
   bookingId,
 }: BookingContactActionsProps) {
   const refText = bookingRefCode ? ` [${bookingRefCode}]` : "";
-  const linkText = bookingId ? ` Tinjau draf SPK & jadwal resmi: https://ramu.id/dashboard/bookings/${bookingId}` : "";
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://ramu-gamma.vercel.app";
+  const linkText = bookingId ? ` Tinjau draf SPK & jadwal resmi: ${baseUrl}/dashboard/bookings/${bookingId}` : "";
 
   const defaultText = myRole === "target"
     ? `Halo ${contactName}, saya menerima pengajuan kolaborasi Anda melalui platform RAMU${refText}.${linkText} Mari kita koordinasikan teknis produksi dan jadwalnya.`

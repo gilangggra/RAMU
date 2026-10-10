@@ -263,20 +263,21 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
       "Anti-AI Clause: DILARANG melatih AI dengan karya ini.",
       "",
       `Status TTD: ${signedCount}/${total} pihak`,
-      `https://ramu.id/collaborations/${data.collaborationId}`,
+      `${typeof window !== "undefined" ? window.location.origin : "https://ramu-gamma.vercel.app"}/collaborations/${data.collaborationId}`,
     ].join("\n");
     navigator.clipboard.writeText(t);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   }
 
+  const currentOrigin = typeof window !== "undefined" ? window.location.origin : "https://ramu-gamma.vercel.app";
   const waText = encodeURIComponent(
     `*KESEPAKATAN KOLABORASI MULTI-PIHAK — RAMU*\n` +
     `No: ${spkNo}\n` +
     `Proyek: ${data.collaborationTitle}\n` +
     `Persetujuan: ${signedCount}/${total} pihak\n\n` +
     allParties.map((p, i) => `${i + 1}. ${p.name} (${p.roleLabel})`).join("\n") +
-    `\n\nKesepakatan Kolaborasi — https://ramu.id/collaborations/${data.collaborationId}`
+    `\n\nKesepakatan Kolaborasi — ${currentOrigin}/collaborations/${data.collaborationId}`
   );
 
   const scrollToArticle = (id: string) => {
@@ -562,7 +563,7 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
                       Ekosistem Kolaborasi &amp; Pelindung Transaksi Kreatif Nasional
                     </div>
                     <div className="text-[10px] text-slate-400">
-                      PSE Terdaftar &bull; www.ramu.id
+                      PSE Terdaftar &bull; ramu-gamma.vercel.app
                     </div>
                   </div>
                 </div>
