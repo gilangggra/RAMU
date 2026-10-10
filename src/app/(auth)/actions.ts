@@ -16,6 +16,13 @@ export async function login(formData: FormData) {
     return { error: "Email dan kata sandi wajib diisi." };
   }
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl || supabaseUrl.includes("placeholder") || supabaseUrl.includes("[PROJECT_REF]")) {
+    return {
+      error: "Konfigurasi Supabase (NEXT_PUBLIC_SUPABASE_URL) belum terpasang di Vercel. Silakan tambahkan Environment Variables di Vercel lalu lakukan Redeploy.",
+    };
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -111,6 +118,13 @@ export async function signup(formData: FormData) {
   const matched = ROLE_MAP[role] || { sector: "Photographer", actorType: "INDIVIDUAL" };
   const canonicalSector = matched.sector;
   const canonicalActorType = matched.actorType;
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl || supabaseUrl.includes("placeholder") || supabaseUrl.includes("[PROJECT_REF]")) {
+    return {
+      error: "Konfigurasi Supabase (NEXT_PUBLIC_SUPABASE_URL) belum terpasang di Vercel. Silakan tambahkan Environment Variables di Vercel lalu lakukan Redeploy.",
+    };
+  }
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
