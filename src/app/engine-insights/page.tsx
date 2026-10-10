@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { getGlobalLearningSignals } from "@/application/outcomeService";
 import { AppShell } from "@/components/layout/AppShell";
+import { AdminShell } from "@/components/admin/AdminShell";
+import { isUserAdmin } from "@/lib/admin";
 import {
   Package,
   Megaphone,
@@ -22,6 +24,11 @@ import {
   Zap,
 } from "lucide-react";
 
+export const metadata = {
+  title: "Audit Kompatibilitas | RAMU",
+  description: "Audit kompatibilitas rekomendasi dan evaluasi dampak nyata ekosistem kolaborasi RAMU.",
+};
+
 export default async function EngineInsightsPage() {
   const supabase = await createClient();
   const {
@@ -29,6 +36,11 @@ export default async function EngineInsightsPage() {
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+
+  const profile = await prisma.profile.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
 
   const actor = await prisma.actor.findFirst({
     where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
@@ -42,7 +54,15 @@ export default async function EngineInsightsPage() {
     orderBy: { createdAt: "asc" },
   });
 
-  if (!actor) redirect("/onboarding");
+  const isAdmin =
+    isUserAdmin(user) ||
+    profile?.role === "SUPERADMIN" ||
+    actor?.sector === "Platform Administrator" ||
+    actor?.sector?.toLowerCase().includes("administrator");
+
+  if (!isAdmin && !actor) {
+    redirect("/onboarding");
+  }
 
   const signals = await getGlobalLearningSignals();
 
@@ -57,32 +77,30 @@ export default async function EngineInsightsPage() {
     OTHER: { label: "Luaran Lainnya", icon: <Sparkles className="w-3.5 h-3.5" />, badge: "bg-slate-100 text-slate-700 border-slate-200" },
   };
 
-  return (
-    <AppShell actor={actor} activeRoute="/engine-insights">
-      <div className="space-y-6 w-full max-w-7xl mx-auto">
+  const content = (
+    <div className="space-y-6 w-full max-w-7xl mx-auto">
+      <section className="p-8 sm:p-10 rounded-[22px] bg-white/95 border border-slate-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] relative overflow-hidden space-y-6">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#E66A48]/5 rounded-full blur-3xl pointer-events-none" />
 
-        <section className="p-8 sm:p-10 rounded-[22px] bg-white/95 border border-slate-200/80 shadow-[0_10px_30px_rgba(39,33,61,0.04)] relative overflow-hidden space-y-6">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#E66A48]/5 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="space-y-4 max-w-3xl relative z-10">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4] flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#E66A48] animate-pulse" />
-                RAMU Intelligence • Evaluasi Rekomendasi Nyata
-              </span>
-              <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                Data Nyata &amp; Transparan
-              </span>
-            </div>
-
-            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
-              Audit Kecocokan Rekomendasi &amp; Hasil Nyata Ekosistem
-            </h1>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Pusat pemantauan dampak kolaborasi dan akurasi rekomendasi mitra kerja RAMU. Sistem memadukan analisis keselarasan gaya visual, keahlian, dan ketersediaan jadwal dengan pembuktian hasil karya nyata di lapangan serta evaluasi langsung dari para praktisi kreatif.
-            </p>
+        <div className="space-y-4 max-w-3xl relative z-10">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-[#FFF7ED] text-[#E66A48] border border-[#F9D8C4] flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E66A48] animate-pulse" />
+              Audit Kompatibilitas • Evaluasi Rekomendasi Nyata
+            </span>
+            <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+              Data Nyata &amp; Transparan
+            </span>
           </div>
+
+          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+            Audit Kompatibilitas &amp; Hasil Nyata Ekosistem
+          </h1>
+          <p className="text-sm text-slate-600 leading-relaxed">
+            Pusat pemantauan dampak kolaborasi dan akurasi rekomendasi mitra kerja RAMU. Sistem memadukan analisis keselarasan gaya visual, keahlian, dan ketersediaan jadwal dengan pembuktian hasil karya nyata di lapangan serta evaluasi langsung dari para praktisi kreatif.
+          </p>
+        </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2 relative z-10">
             <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70">
@@ -456,6 +474,29 @@ export default async function EngineInsightsPage() {
           </div>
         </section>
       </div>
+    );
+
+  if (isAdmin) {
+    const adminName =
+      user.user_metadata?.display_name ||
+      user.user_metadata?.full_name ||
+      user.user_metadata?.name ||
+      user.email?.split("@")[0] ||
+      "Admin";
+
+    const adminAvatar =
+      user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
+
+    return (
+      <AdminShell adminName={adminName} adminAvatar={adminAvatar}>
+        {content}
+      </AdminShell>
+    );
+  }
+
+  return (
+    <AppShell actor={actor!} activeRoute="/engine-insights">
+      {content}
     </AppShell>
   );
 }

@@ -19,8 +19,6 @@ import {
   PanelLeftOpen,
   Handshake,
   Target,
-  BarChart3,
-  ShieldCheck,
   MessageSquare,
   Search,
   Command,
@@ -28,7 +26,6 @@ import {
   PlusCircle,
   Compass,
   FileText,
-  ArrowLeftRight,
 } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { RamuLogo } from "@/components/brand/RamuLogo";
@@ -115,12 +112,6 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
     });
   };
 
-  const isAdmin =
-    actor.sector === "Platform Administrator" ||
-    actor.sector?.toLowerCase().includes("administrator") ||
-    actor.contactEmail?.toLowerCase().trim() === "bernadya@gmail.com" ||
-    actor.name?.toLowerCase().trim() === "bernadya";
-
   // Navigasi Terstruktur & Bersih: Menghilangkan tab redundan (profil publik sudah ada di footer)
   const navSections: NavSection[] = [
     {
@@ -139,17 +130,6 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
         { href: "/showcase", label: "Karya & Inspirasi", icon: <Compass className="w-4 h-4" /> },
       ],
     },
-    ...(isAdmin
-      ? [
-          {
-            title: "Administrator",
-            items: [
-              { href: "/admin", label: "Pusat Kendali Admin", icon: <ShieldCheck className="w-4 h-4" />, badge: "Panel" },
-              { href: "/engine-insights", label: "Audit Kompatibilitas", icon: <BarChart3 className="w-4 h-4" />, badge: "Engine" },
-            ],
-          },
-        ]
-      : []),
   ];
 
   // Global Command Palette Shortcut (Cmd+K / Ctrl+K)
@@ -365,18 +345,12 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
           {!isCollapsed ? (
             <div className="flex items-center justify-between p-2 rounded-2xl hover:bg-white/80 transition-all group">
               <Link
-                href={isAdmin ? "/settings" : `/directory/${actor.id}`}
+                href={`/directory/${actor.id}`}
                 className="flex items-center gap-2.5 min-w-0 flex-1"
-                title={isAdmin ? "Pengaturan Akun Administrator" : "Lihat Profil Publik Saya"}
+                title="Lihat Profil Publik Saya"
               >
                 <div className="relative shrink-0">
-                  <div
-                    className={`w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center font-bold text-xs ring-2 ring-white shadow-2xs border ${
-                      isAdmin
-                        ? "bg-slate-900 text-white border-slate-700"
-                        : "bg-slate-100 border-slate-300 text-slate-800"
-                    }`}
-                  >
+                  <div className="w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center font-bold text-xs ring-2 ring-white shadow-2xs border bg-slate-100 border-slate-300 text-slate-800">
                     {avatar && !avatarError ? (
                       <img
                         src={avatar}
@@ -397,21 +371,12 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                     {actor.name}
                   </p>
                   <p className="text-[10px] text-[#4B5563] font-medium truncate leading-tight mt-0.5">
-                    {isAdmin ? "Platform Admin" : actor.sector}
+                    {actor.sector}
                   </p>
                 </div>
               </Link>
 
               <div className="flex items-center gap-1 shrink-0 ml-1">
-                {isAdmin && (
-                  <Link
-                    href="/admin"
-                    title="Buka Panel Admin"
-                    className="p-1.5 rounded-full text-slate-400 hover:text-[#0284c7] hover:bg-[#4CC9FE]/10 transition-colors shadow-2xs"
-                  >
-                    <ArrowLeftRight className="w-3.5 h-3.5" />
-                  </Link>
-                )}
                 <Link
                   href="/settings"
                   title="Pengaturan Akun"
@@ -433,17 +398,11 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
           ) : (
             <div className="flex flex-col items-center gap-2 py-0.5">
               <Link
-                href={isAdmin ? "/settings" : `/directory/${actor.id}`}
+                href={`/directory/${actor.id}`}
                 className="w-9 h-9 rounded-xl flex items-center justify-center relative group hover:opacity-90 transition-opacity"
                 title={`${actor.name} (${actor.sector})`}
               >
-                <div
-                  className={`w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center font-bold text-xs ring-2 ring-white shadow-2xs border ${
-                    isAdmin
-                      ? "bg-slate-900 text-white border-slate-700"
-                      : "bg-slate-100 border-slate-300 text-slate-800"
-                  }`}
-                >
+                <div className="w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center font-bold text-xs ring-2 ring-white shadow-2xs border bg-slate-100 border-slate-300 text-slate-800">
                   {avatar && !avatarError ? (
                     <img
                       src={avatar}
@@ -459,15 +418,6 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
               </Link>
 
               <div className="flex flex-col items-center gap-1.5 border-t border-slate-200/70 pt-2 w-full">
-                {isAdmin && (
-                  <Link
-                    href="/admin"
-                    title="Buka Panel Admin"
-                    className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-[#0284c7] hover:bg-[#4CC9FE]/10 transition-colors shadow-2xs"
-                  >
-                    <ArrowLeftRight className="w-4 h-4" />
-                  </Link>
-                )}
                 <Link
                   href="/settings"
                   title="Pengaturan Akun"
@@ -521,7 +471,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
           <div className="bg-white/95 backdrop-blur-2xl border-t border-slate-200 p-5 rounded-t-[24px] max-h-[85vh] overflow-y-auto space-y-4 shadow-xl">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
               <Link
-                href={isAdmin ? "/settings" : `/directory/${actor.id}`}
+                href={`/directory/${actor.id}`}
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-2.5 min-w-0"
               >
@@ -540,7 +490,7 @@ export function AppShell({ actor, activeRoute, children }: AppShellProps) {
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-slate-900 truncate">{actor.name}</p>
                   <p className="text-[10px] text-slate-500 truncate">
-                    {isAdmin ? "Platform Admin" : actor.sector}
+                    {actor.sector}
                   </p>
                 </div>
               </Link>

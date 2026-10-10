@@ -18,16 +18,14 @@ import {
   X,
   PanelLeftClose,
   PanelLeftOpen,
-  ArrowLeftRight,
   ShieldCheck,
-  UserCheck,
+  BarChart3,
 } from "lucide-react";
 import { RamuLogo } from "@/components/brand/RamuLogo";
 
 interface AdminShellProps {
   adminName: string;
   adminAvatar?: string | null;
-  isDoubleRole?: boolean;
   children: React.ReactNode;
 }
 
@@ -61,6 +59,7 @@ const navItems = [
   {
     section: "Konfigurasi Engine",
     items: [
+      { href: "/engine-insights", label: "Audit Kompatibilitas", icon: BarChart3 },
       { href: "/admin/taxonomy", label: "Taksonomi & Estetika", icon: BookOpen },
       { href: "/admin/roles", label: "Blueprint Peran Kru", icon: Settings2 },
     ],
@@ -69,12 +68,11 @@ const navItems = [
     section: "Tata Kelola & Keamanan",
     items: [
       { href: "/admin/audit-logs", label: "Audit Trail", icon: ScrollText },
-      { href: "/admin/team", label: "Manajemen Akses Admin", icon: UserCheck },
     ],
   },
 ];
 
-export function AdminShell({ adminName, adminAvatar, isDoubleRole = false, children }: AdminShellProps) {
+export function AdminShell({ adminName, adminAvatar, children }: AdminShellProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -220,15 +218,6 @@ export function AdminShell({ adminName, adminAvatar, isDoubleRole = false, child
               </div>
 
               <div className="flex items-center gap-1 shrink-0 ml-1">
-                {isDoubleRole && (
-                  <Link
-                    href="/dashboard"
-                    title="Switch ke App User"
-                    className="p-1.5 rounded-full text-slate-400 hover:text-[#0284c7] hover:bg-[#4CC9FE]/10 transition-colors shadow-2xs"
-                  >
-                    <ArrowLeftRight className="w-3.5 h-3.5" />
-                  </Link>
-                )}
                 <form action={logout}>
                   <button
                     type="submit"
@@ -254,15 +243,6 @@ export function AdminShell({ adminName, adminAvatar, isDoubleRole = false, child
               </div>
 
               <div className="flex flex-col items-center gap-1 border-t border-slate-200/70 pt-1.5 w-full">
-                {isDoubleRole && (
-                  <Link
-                    href="/dashboard"
-                    title="Switch ke App User"
-                    className="p-1.5 rounded-full text-slate-400 hover:text-[#0284c7] hover:bg-[#4CC9FE]/10 transition-colors"
-                  >
-                    <ArrowLeftRight className="w-3.5 h-3.5" />
-                  </Link>
-                )}
                 <form action={logout}>
                   <button
                     type="submit"
@@ -330,16 +310,6 @@ export function AdminShell({ adminName, adminAvatar, isDoubleRole = false, child
             </div>
 
             <div className="pt-3 border-t border-slate-200 space-y-2">
-              {isDoubleRole && (
-                <Link
-                  href="/dashboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-2.5 rounded-full bg-[#4CC9FE]/10 hover:bg-[#4CC9FE]/20 text-[#0284c7] text-xs font-semibold border border-[#4CC9FE]/30 flex items-center justify-center gap-2 transition-colors"
-                >
-                  <ArrowLeftRight className="w-3.5 h-3.5" />
-                  <span>Switch ke App User</span>
-                </Link>
-              )}
               <form action={logout}>
                 <button
                   type="submit"

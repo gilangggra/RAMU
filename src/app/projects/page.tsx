@@ -534,10 +534,10 @@ export default async function ProjectsPage({
                 <Link
                   href="/engine-insights"
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white/80 hover:bg-white border border-white/80 rounded-full shadow-2xs transition-all"
-                  title="Lihat sinyal evaluasi dan audit komplementaritas engine"
+                  title="Lihat sinyal evaluasi dan audit kompatibilitas engine"
                 >
                   <BarChart3 className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Audit Engine</span>
+                  <span>Audit Kompatibilitas</span>
                   <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>

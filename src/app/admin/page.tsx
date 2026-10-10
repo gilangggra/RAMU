@@ -117,10 +117,10 @@ export default async function AdminDashboardPage() {
     {
       label: "Peluang Kolaborasi",
       value: totalOpportunities,
-      sub: "Dibentuk Matching Engine",
+      sub: "Audit Kompatibilitas",
       icon: Zap,
       iconColor: "text-sky-600",
-      href: "/admin/users",
+      href: "/engine-insights",
     },
   ];
 

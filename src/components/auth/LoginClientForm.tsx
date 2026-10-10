@@ -46,10 +46,14 @@ export function LoginClientForm({ error, message, redirectTo = "/dashboard" }: L
       return;
     }
 
+    const isAdminEmail =
+      email.trim().toLowerCase() === "bernadya@gmail.com" ||
+      email.trim().toLowerCase() === "admin@ramu.id";
+
     const formData = new FormData();
     formData.set("email", email.trim());
     formData.set("password", password);
-    formData.set("redirectTo", redirectTo);
+    formData.set("redirectTo", isAdminEmail ? "/admin" : redirectTo);
 
     startTransition(async () => {
       try {

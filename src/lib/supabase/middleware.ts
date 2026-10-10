@@ -74,5 +74,12 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Admin yang membuka /dashboard langsung di-redirect ke /admin
+  if (user && pathname.startsWith("/dashboard") && isUserAdmin(user)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/admin";
+    return NextResponse.redirect(url);
+  }
+
   return supabaseResponse;
 }

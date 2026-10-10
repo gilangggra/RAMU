@@ -42,6 +42,8 @@ import { OnboardingChecklistCard } from "@/components/dashboard/OnboardingCheckl
 import { CreativeSpotlightStrip } from "@/components/dashboard/CreativeSpotlightStrip";
 import { getNotificationsForActor } from "@/application/notificationService";
 
+import { isUserAdmin } from "@/lib/admin";
+
 export default async function DashboardPage() {
   const supabase = await createClient();
   const {
@@ -50,6 +52,11 @@ export default async function DashboardPage() {
 
   if (!user) {
     redirect("/login");
+  }
+
+  // Admin guard: Admin tidak menggunakan /dashboard (diarahkan langsung ke /admin)
+  if (isUserAdmin(user)) {
+    redirect("/admin");
   }
 
   const profile = await prisma.profile.findUnique({
@@ -64,6 +71,16 @@ export default async function DashboardPage() {
   });
 
   const primaryActor = profile?.actors?.[0];
+
+  if (
+    profile?.role === "SUPERADMIN" ||
+    primaryActor?.sector === "Platform Administrator" ||
+    primaryActor?.sector?.toLowerCase().includes("administrator") ||
+    primaryActor?.contactEmail?.toLowerCase().trim() === "bernadya@gmail.com" ||
+    primaryActor?.name?.toLowerCase().trim() === "bernadya"
+  ) {
+    redirect("/admin");
+  }
 
   if (!primaryActor) {
     redirect("/onboarding");

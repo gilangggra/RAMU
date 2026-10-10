@@ -15,8 +15,12 @@ export default async function AdminLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || !isUserAdmin(user)) {
-    redirect("/dashboard");
+  if (!user) {
+    redirect("/login");
+  }
+
+  if (!isUserAdmin(user)) {
+    redirect("/dashboard?error=unauthorized");
   }
 
   const adminName =
@@ -29,14 +33,8 @@ export default async function AdminLayout({
   const adminAvatar =
     user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
 
-  // Double role = admin yang juga punya profil kreator/actor
-  const actorCount = await prisma.actor.count({
-    where: { ownerUserId: user.id },
-  });
-  const isDoubleRole = actorCount > 0;
-
   return (
-    <AdminShell adminName={adminName} adminAvatar={adminAvatar} isDoubleRole={isDoubleRole}>
+    <AdminShell adminName={adminName} adminAvatar={adminAvatar}>
       {children}
     </AdminShell>
   );
