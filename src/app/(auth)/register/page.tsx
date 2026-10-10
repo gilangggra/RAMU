@@ -68,52 +68,87 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
               </p>
             </div>
 
-            {/* Main Visual Container matching Landing Page Hero (No artificial outer white box) */}
-            <div className="relative w-full max-w-[360px] xl:max-w-[390px] mx-auto group py-1">
+            {/* Creative Visual Showcase Box with Matching Warm Cream Background (#F9F7EA) */}
+            <div className="relative w-full max-w-md xl:max-w-lg mx-auto group">
               {/* Ambient Background Aura matching Landing Page Hero */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#4CC9FE]/25 via-[#FFD45A]/15 to-[#D9D2FF]/25 rounded-[36px] blur-3xl transform scale-105 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#4CC9FE]/20 via-[#FFD45A]/15 to-[#D9D2FF]/25 rounded-[32px] blur-2xl transform scale-105 pointer-events-none" />
 
-              {/* Creator Art Visual — Clean rounded border, zero white padding/letterboxing */}
-              <div className="relative rounded-[28px] overflow-hidden border border-stone-200/80 shadow-xl transition-transform duration-500 group-hover:scale-[1.015]">
-                <Image
-                  src="/images/hero-creative-art.png"
-                  alt="RAMU Ekosistem Kolaborasi Kreatif — Fashion Designer, Fotografer Sinema, Model, dan Daylight Studio"
-                  width={1024}
-                  height={1024}
-                  priority
-                  className="w-full h-auto object-cover block"
-                />
-              </div>
+              {/* Showcase Box: Matching Warm Cream #F9F7EA Background */}
+              <div className="relative rounded-2xl overflow-hidden border border-[#EBE6D6] shadow-md bg-[#F9F7EA] p-3.5 flex flex-col items-center justify-center">
+                
+                {/* Visual Artwork: Seamless Pure Cream Canvas */}
+                <div className="relative rounded-xl overflow-hidden bg-[#F9F7EA] w-full flex items-center justify-center py-1">
+                  <Image
+                    src="/images/hero-creative-art.png"
+                    alt="RAMU Ekosistem Kolaborasi Kreatif — Fashion Designer, Fotografer Sinema, Model, dan Daylight Studio"
+                    width={1024}
+                    height={1024}
+                    className="w-full max-h-[250px] xl:max-h-[280px] object-contain group-hover:scale-[1.015] transition-transform duration-500 ease-out"
+                    priority
+                  />
+                </div>
 
-              {/* Floating Glassmorphic Micro-Badge 1: Match Score (Top-Left) */}
-              <div className="hidden sm:flex absolute top-4 -left-3 xl:-left-5 bg-white/95 backdrop-blur-md border border-[#4CC9FE]/30 rounded-2xl px-3 py-2 shadow-xl shadow-[#4CC9FE]/10 items-center gap-2 pointer-events-none z-10 animate-float">
-                <div className="w-7 h-7 rounded-xl bg-[#4CC9FE]/15 text-[#4CC9FE] flex items-center justify-center shrink-0">
-                  <Sparkles className="w-3.5 h-3.5 text-[#4CC9FE]" />
-                </div>
-                <div>
-                  <div className="text-[8px] font-bold uppercase tracking-wider text-stone-400 leading-none">
-                    Ekosistem Terintegrasi
+                {/* Floating Synergy Match Badge (Top-Left) */}
+                <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md border border-sky-200/80 rounded-xl px-2.5 py-1.5 shadow-sm flex items-center gap-2 pointer-events-none">
+                  <div className="w-6 h-6 rounded-lg bg-sky-50 text-[#0284c7] flex items-center justify-center shrink-0">
+                    <Sparkles className="w-3.5 h-3.5 text-[#0284c7]" />
                   </div>
-                  <div className="text-xs font-black text-[#27213D] flex items-center gap-1 mt-0.5">
-                    <span>5 Peran Resmi</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <div>
+                    <div className="text-[8px] font-bold uppercase tracking-wider text-stone-400 leading-none">
+                      Ekosistem Terintegrasi
+                    </div>
+                    <div className="text-[11px] font-black text-[#27213D] flex items-center gap-1 mt-0.5">
+                      <span>5 Peran Resmi</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Floating Glassmorphic Micro-Badge 2: Idle Resource (Bottom-Right) */}
-              <div className="hidden sm:flex absolute -bottom-3 -right-3 xl:-right-5 bg-white/95 backdrop-blur-md border border-stone-200/80 rounded-2xl px-3 py-2 shadow-xl shadow-stone-900/10 items-center gap-2 pointer-events-none z-10 animate-float-delayed">
-                <div className="w-7 h-7 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
-                  <Zap className="w-3.5 h-3.5 text-amber-600" />
-                </div>
-                <div>
-                  <div className="text-[8px] font-bold uppercase tracking-wider text-stone-400 leading-none">
-                    Aktivasi Kapasitas
+                {/* Floating SPK Protection Badge (Top-Right) */}
+                <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md border border-emerald-200/80 rounded-xl px-2.5 py-1.5 shadow-sm flex items-center gap-1.5 pointer-events-none">
+                  <div className="w-5 h-5 rounded-md bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                    <ShieldCheck className="w-3 h-3 text-emerald-600" />
                   </div>
-                  <div className="text-xs font-black text-[#27213D] mt-0.5">
-                    Studio &amp; Gear Idle Aktif
+                  <div>
+                    <div className="text-[8px] font-bold uppercase tracking-wider text-stone-400 leading-none">
+                      Legalitas SPK
+                    </div>
+                    <div className="text-[10px] font-bold text-[#27213D] mt-0.5">
+                      Kontrak Digital Sah
+                    </div>
                   </div>
                 </div>
+
+                {/* Inset Creative Project Widget (Bottom) */}
+                <div className="mt-2 w-full bg-white/85 backdrop-blur-sm border border-[#E5E0CF] rounded-xl p-2.5 flex items-center justify-between gap-2 shadow-2xs">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#4CC9FE] to-sky-600 text-white flex items-center justify-center font-black text-[11px] shrink-0 shadow-xs">
+                      RM
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] font-black text-[#27213D] truncate">
+                          Kolaborasi Kreatif
+                        </span>
+                        <span className="px-1.5 py-0.2 rounded text-[8px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                          Aktif
+                        </span>
+                      </div>
+                      <p className="text-[9px] text-[#716B7E] font-medium truncate">
+                        Brand • Fotografer • Studio • Model • Stylist
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0 pl-3 border-l border-[#E5E0CF]">
+                    <span className="text-[8px] uppercase font-bold text-stone-400 block tracking-wider">Status</span>
+                    <span className="text-[11px] font-black text-emerald-600 flex items-center justify-end gap-1">
+                      <span>Terhubung</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    </span>
+                  </div>
+                </div>
+
               </div>
             </div>
 
