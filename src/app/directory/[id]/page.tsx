@@ -821,6 +821,16 @@ export default async function DirectoryDetailPage({
                           <span>Kirim Email</span>
                         </a>
                       )}
+
+                      {!waLink && !actor.contactEmail && (
+                        <span
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-slate-100/80 border border-slate-200 text-[11px] font-semibold text-slate-600"
+                          title="Kreator mengaktifkan proteksi privasi. Silakan gunakan Chat atau Booking resmi RAMU."
+                        >
+                          <ShieldCheck className="w-3.5 h-3.5 text-[#0284c7]" />
+                          <span>Kontak Privat Terproteksi</span>
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-1.5 text-xs text-slate-500">
