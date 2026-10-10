@@ -285,7 +285,6 @@ export function UserManagementClient({ initialActors }: { initialActors: ActorIt
                       <div className="flex items-center justify-end gap-1.5">
                         <Link
                           href={`/directory/${actor.id}`}
-                          target="_blank"
                           className="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold transition-colors inline-flex items-center gap-1 border border-slate-200/60"
                         >
                           <span>Profil</span>

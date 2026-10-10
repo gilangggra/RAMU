@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { getDirectoryActorById } from "@/application/directoryService";
 import { AppShell } from "@/components/layout/AppShell";
+import { AdminShell } from "@/components/admin/AdminShell";
+import { isUserAdmin } from "@/lib/admin";
 import {
   MapPin,
   Mail,
@@ -63,7 +65,8 @@ export default async function DirectoryDetailPage({
     });
   }
 
-  const isGuest = !currentActor;
+  const isAdmin = isUserAdmin(user);
+  const isGuest = !currentActor && !isAdmin;
 
   const { id } = await params;
   const sParams = searchParams ? await searchParams : {};
@@ -507,6 +510,17 @@ export default async function DirectoryDetailPage({
 
   const pageContent = (
     <div className="w-full max-w-7xl mx-auto pb-24">
+      {isAdmin && (
+        <div className="mb-4">
+          <Link
+            href="/admin/users"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-[#111827] bg-white/80 hover:bg-white border border-slate-200/80 px-3.5 py-1.5 rounded-full transition-all shadow-2xs"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Kembali ke Manajemen Talenta &amp; Studio</span>
+          </Link>
+        </div>
+      )}
       {isGuest && (
         <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -891,6 +905,24 @@ export default async function DirectoryDetailPage({
       )}
     </div>
   );
+
+  if (isAdmin) {
+    const adminName =
+      user?.user_metadata?.display_name ||
+      user?.user_metadata?.full_name ||
+      user?.user_metadata?.name ||
+      user?.email?.split("@")[0] ||
+      "Admin";
+
+    const adminAvatar =
+      user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null;
+
+    return (
+      <AdminShell adminName={adminName} adminAvatar={adminAvatar}>
+        {pageContent}
+      </AdminShell>
+    );
+  }
 
   if (isGuest || !currentActor) {
     return (
