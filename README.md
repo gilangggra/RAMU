@@ -1,120 +1,118 @@
 # RAMU — Creative Opportunity Engine
 
-> **Platform Kolaborasi Ekonomi Kreatif Berbasis Analisis Komplementaritas Deterministik**  
-> Dibangun untuk Kompetisi Web Development.
+> **Platform Kolaborasi Ekonomi Kreatif Berbasis Analisis Komplementaritas Resource Deterministik**
 
 ---
 
-## 💡 Tentang Proyek
+## 🌟 Tentang RAMU
 
-**RAMU (Creative Opportunity Engine)** bukan sekadar direktori pencarian partner (*"siapa yang cocok jadi partner saya?"*), melainkan sebuah mesin pembentuk peluang kolaborasi (*"apa yang dapat kita ciptakan bersama berdasarkan apa yang kita miliki?"*).
+**RAMU** adalah platform kolaborasi masa depan bagi ekosistem industri kreatif mode dan visual. Berbeda dari direktori talenta konvensional yang hanya mempertemukan pihak secara pasif, RAMU bertindak sebagai mesin pembentuk peluang (*Opportunity Engine*): mengidentifikasi bagaimana kapasitas menganggur (*idle capacity*), keahlian, dan aset fisik dapat saling melengkapi untuk menciptakan karya komersial terukur tanpa spekulasi.
 
-Sistem menganalisis aset, kapabilitas, kebutuhan, tujuan, dan batasan (*constraints*) dari berbagai pelaku ekonomi kreatif, mencocokkannya ke dalam pola peluang (*Opportunity Patterns*), menguji kelayakan eksekusinya, dan memberikan skor terukur dalam 6 dimensi objektif:
-1. **Complementarity**
-2. **Goal Alignment**
-3. **Need Coverage**
-4. **Asset Utilization**
-5. **Feasibility**
-6. **Actionability**
-
-Didukung dengan narasi penjelasan AI (Google Gemini) yang transparan dan *explainable*.
+Platform ini memfasilitasi kolaborasi terintegrasi antar 5 peran resmi dalam industri mode:
+* 👗 **Fashion Brand / UMKM**: Menyediakan sampel busana koleksi (*ready-to-wear* / wastra) dan visi kampanye.
+* 📷 **Fotografer**: Mengoptimalkan keahlian visual komersial, bodi kamera kelas profesional, dan pencahayaan studio.
+* 🏢 **Studio & Venue**: Mengaktifkan jadwal kosong (*idle time*) ruang daylight dan fasilitas *infinity cyclorama*.
+* 👠 **Model**: Memfasilitasi comp-card terverifikasi, portofolio editorial, dan dedikasi pose katalog.
+* 💄 **MUA & Stylist**: Menghadirkan kit tata rias berstandar higienis tinggi, konsep tata gaya, dan arsip aksesori.
 
 ---
 
-## 🏛️ Arsitektur Sistem (Modular Layered Architecture)
+## 🚀 Keunggulan & Fitur Utama
 
-Repositori ini menerapkan pemisahan tanggung jawab yang ketat:
+### 1. Mesin Analisis Komplementaritas Deterministik
+Sistem mengevaluasi potensi kolaborasi secara terukur dan transparan melalui **6 Dimensi Objektif**:
+* **Complementarity**: Menghitung seberapa presisi aset satu pihak mengisi kebutuhan pihak lainnya.
+* **Goal Alignment**: Memastikan keselarasan target pasar, visi artistik, dan tujuan kampanye.
+* **Need Coverage**: Mengukur kelengkapan seluruh elemen produksi yang dibutuhkan dalam satu brief.
+* **Asset Utilization**: Memaksimalkan utilitas peralatan, ruangan, dan sampel busana yang sedang idle.
+* **Feasibility**: Menguji kelayakan jadwal ketersediaan, kapasitas daya listrik, dan kebutuhan operasional.
+* **Actionability**: Menilai kesiapan proyek untuk segera masuk tahap pra-produksi dan eksekusi.
 
-```text
-src/
-├── app/                  # Next.js App Router (Routing, Pages, Layouts, API Routes)
-│   ├── (auth)/           # Authentication flows (Login, Register)
-│   ├── dashboard/        # Dashboard overview aktor & rekomendasi
-│   ├── assets/           # Manajemen aset, kapabilitas, kebutuhan, constraint
-│   ├── opportunities/    # Penjelajah & detail peluang kolaborasi
-│   ├── collaborations/   # Ruang kerja kolaborasi & tracking milestone
-│   └── api/              # RESTful API handlers
-│
-├── components/           # Reusable Presentation Components
-│   ├── ui/               # Primitif UI (Button, Card, Dialog, Badge, dll.)
-│   ├── assets/           # Komponen form & kartu aset
-│   ├── opportunities/    # Komponen kartu peluang, radar/bar score, narasi
-│   ├── collaborations/   # Komponen board task, timeline milestone
-│   └── dashboard/        # Komponen metrik & visualisasi dashboard
-│
-├── domain/               # Domain Business Logic (Pure TypeScript, Zero Framework Dependency)
-│   ├── actor/            # Entity & Value Object Aktor
-│   ├── asset/            # Entity Aset & Taksonomi Ekraf
-│   ├── goal/             # Entity Tujuan Aktor
-│   ├── need/             # Entity Kebutuhan Aktor
-│   ├── constraint/       # Entity Batasan (Waktu, Lokasi, Budget, Kapasitas)
-│   ├── opportunity/      # Agregat Peluang & Status
-│   ├── collaboration/    # Agregat Kolaborasi & Komitmen
-│   └── outcome/          # Agregat Hasil & Feedback
-│
-├── engine/               # Core Opportunity Engine (100% Deterministik)
-│   ├── complementarity/  # Evaluator komplementaritas aset
-│   ├── patterns/         # 15 Katalog Pola Peluang Kolaborasi
-│   ├── constraints/      # Evaluator kelayakan batasan
-│   ├── scoring/          # Kalkulator 6 Dimensi Scoring & Confidence
-│   └── explanation/      # Penyusun struktur penjelasan peluang
-│
-├── application/          # Application Use Cases & Orchestration
-│   ├── actors/           # Use cases pengelolaan profil aktor
-│   ├── assets/           # Use cases pendaftaran aset
-│   ├── opportunities/    # Use cases pembentukan & evaluasi peluang
-│   ├── collaborations/   # Use cases inisiasi & manajemen proyek kolaborasi
-│   └── outcomes/         # Use cases pencatatan hasil kolaborasi
-│
-├── infrastructure/       # External Services & Technical Implementations
-│   ├── database/         # Prisma Client & Migrations
-│   ├── repositories/     # Implementasi konkrit interface repository
-│   └── ai/               # Gemini AI Adapter & Mock AI Fallback
-│
-└── lib/                  # Shared Utilities & Helpers
-    ├── validation/       # Zod schemas untuk validasi input form & API
-    ├── auth/             # Session handler & auth middleware
-    └── utils/            # Helper formatting, classnames, dates
-```
+### 2. Standarisasi Perjanjian Kerja (SPK) Digital Otomatis
+Setiap kesepakatan kolaborasi dilindungi oleh kontrak digital terstandar yang memuat:
+* Pengaturan hak pakai karya (*usage rights*) digital, e-commerce, maupun cetak komersial.
+* Struktur termin kompensasi yang adil dan transparan.
+* Perlindungan hak moral dan atribusi kredit bagi seluruh kreator yang terlibat.
+* Klausul perlindungan hak cipta dan jaminan non-kompetisi sesuai durasi proyek.
 
-## 📚 Dokumentasi Lengkap Proyek
+### 3. Ekosistem Terkurasi & Profil Spesifikasi Mendalam
+Setiap profil talenta dan ruang produksi diverifikasi dengan data teknis autentik:
+* **Comp-Card Model**: Statistik fisik terstandar, ukuran busana & sepatu, serta dokumentasi polaroid resmi.
+* **Spesifikasi Teknis**: Rincian gear kamera, kemampuan *tethering on-set*, daya listrik studio, dan kit tata rias resmi.
+* **Struktur Paket Kolaborasi**: Kejelasan lingkup kerja, durasi pemotretan, jumlah looks, serta batas revisi.
 
-Dokumentasi komprehensif seluruh sistem RAMU tersedia pada berkas panduan master:
-
-👉 **[DOKUMENTASI_LENGKAP.md](./DOKUMENTASI_LENGKAP.md)**
-
-Dokumen tersebut memuat rincian mendalam mengenai:
-- 🎯 **5 Core Pillars Ekonomi Kolaboratif** (Resource Profile & Idle Activation, Collaboration Matching "Why This Match?", Project Workspace, Commercial Agreement Generator, dan Economic Outcome Dashboard).
-- ⚖️ **Collaboration Agreement Generator Multi-Pihak** lengkap dengan klausul Termin 50:50, Batas Revisi Minor 2x, Pengaturan Hak Pakai Karya (Usage Rights), Anti-AI Training, dan Konfirmasi Digital Multi-Pihak.
-- 💼 **Manajemen Paket Tarif Komersial** (Day Rate, Overtime Fee, Matriks Durasi & Lingkup Hak Pakai/Usage Rights).
-- 🗄️ **Arsitektur Data & Model Database Prisma / PostgreSQL**.
-- 🛠️ **Daftar Lengkap Server Actions & API**.
-- 🚀 **Panduan Instalasi, Setup Lingkungan & Seeding Dataset Golden Demo**.
+### 4. Aktivasi Kapasitas Idle & Efisiensi Biaya
+Mengurangi hambatan modal bagi brand independen dan memaksimalkan pendapatan bagi pemilik ruang dan peralatan dengan mengubah waktu senggang menjadi portofolio bernilai ekonomi.
 
 ---
 
-## 🚀 Memulai Pengembangan
+## 🔄 Alur Kolaborasi
 
-### 1. Prasyarat
-- Node.js v18.17+ atau v20+
-- npm v9+
-
-### 2. Instalasi & Setup Environment
-```bash
-# Salin konfigurasi environment
-cp .env.example .env.local
-
-# Install dependensi (jika baru clone)
-npm install
+```
+┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│   1. Registrasi  │ ──> │   2. Penemuan    │ ──> │    3. Evaluasi   │ ──> │   4. Penerbitan  │
+│   & Input Aset   │     │   & Matching     │     │   Brief Bersama  │     │   SPK & Eksekusi │
+└──────────────────┘     └──────────────────┘     └──────────────────┘     └──────────────────┘
 ```
 
-### 3. Menjalankan Development Server
-```bash
-npm run dev
-```
-Buka [http://localhost:3000](http://localhost:3000) pada browser Anda.
+1. **Registrasi & Kurasi Profil**: Masukkan keahlian, aset inventaris, atau ruang studio beserta ketersediaan waktu.
+2. **Matching Cerdas**: Sistem menghitung tingkat kompatibilitas dan merekomendasikan mitra yang saling melengkapi.
+3. **Penyusunan Brief & Kesepakatan**: Pihak-pihak terkait menyelaraskan konsep visual, moodboard, dan jadwal pemotretan.
+4. **Penerbitan Kontrak & Produksi**: SPK digital terbit secara otomatis untuk melindungi seluruh pihak selama proses produksi hingga rilis karya.
 
-### 4. Build Verifikasi
-```bash
-npm run build
-```
+---
+
+## 💻 Teknologi yang Digunakan
+
+* **Kerangka Aplikasi**: Next.js & React (Arsitektur Modern App Router dengan Engine Turbopack)
+* **Bahasa Pemrograman**: TypeScript
+* **Antarmuka & Desain**: Tailwind CSS & Vanilla Design System
+* **Basis Data & Layanan Backend**: Supabase PostgreSQL & Prisma ORM
+* **Keamanan & Autentikasi**: Supabase Authentication & Server-Side Security Policies
+
+---
+
+## 🛠️ Panduan Menjalankan Proyek
+
+### Prasyarat Lingkungan
+Pastikan perangkat Anda telah terpasang:
+* **Node.js**: Versi 18.17+ atau 20+
+* **npm**: Versi 9+
+
+### Langkah Pemasangan
+
+1. **Clone Repositori**:
+   ```bash
+   git clone https://github.com/gilangggra/RAMU.git
+   cd RAMU
+   ```
+
+2. **Pengaturan Variabel Lingkungan**:
+   Salin berkas contoh konfigurasi lingkungan:
+   ```bash
+   cp .env.example .env.local
+   ```
+   *Sesuaikan parameter koneksi basis data dan kunci API Supabase pada berkas `.env.local`.*
+
+3. **Instalasi Dependensi**:
+   ```bash
+   npm install
+   ```
+
+4. **Menjalankan Server Pengembangan**:
+   ```bash
+   npm run dev
+   ```
+   Aplikasi dapat diakses melalui peramban di [http://localhost:3000](http://localhost:3000).
+
+5. **Kompilasi Produksi**:
+   ```bash
+   npm run build
+   ```
+
+---
+
+## 📄 Hak Cipta & Lisensi
+
+Seluruh hak cipta, desain visual, dan arsitektur sistem dilindungi oleh **RAMU**.  
+Dikembangkan untuk memajukan ekosistem ekonomi kolaboratif industri kreatif Indonesia.
