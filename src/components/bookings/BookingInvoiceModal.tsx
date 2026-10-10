@@ -90,7 +90,14 @@ export function BookingInvoiceModal({
   const bankName = payoutAccount?.bankName || "BCA / Mandiri Resmi Penyedia Jasa";
   const accountNumber = payoutAccount?.accountNumber || "Sesuai rincian profil / SPK";
   const accountHolder = payoutAccount?.accountHolder || booking.target.name;
-  const npwpNik = payoutAccount?.taxIdentifier || "Tercatat dalam SPK resmi";
+  const rawTax = payoutAccount?.npwpOrNik || payoutAccount?.taxIdentifier || "";
+
+  function maskTaxId(val?: string | null): string {
+    if (!val) return "";
+    const clean = val.replace(/[^0-9]/g, "");
+    if (clean.length < 8) return val;
+    return `${clean.slice(0, 6)}******${clean.slice(-4)}`;
+  }
 
   function handlePrint() {
     printElement(printRef.current || "invoice-printable-area", docCode.replace(/[\/\\]/g, "-"));
@@ -274,7 +281,9 @@ Dokumen sah digital: ${typeof window !== "undefined" ? window.location.origin : 
                 <h4 className="font-bold text-slate-900 text-sm">{booking.target.name}</h4>
                 <p className="text-slate-600">{booking.target.sector}</p>
                 {booking.target.location && <p className="text-slate-500">{booking.target.location}</p>}
-                <p className="text-slate-500 font-mono text-[11px]">NPWP / NIK: {npwpNik}</p>
+                <p className="text-slate-500 font-mono text-[11px]">
+                  NPWP / NIK: {rawTax ? maskTaxId(rawTax) : "Tercatat dalam SPK resmi"}
+                </p>
               </div>
 
               <div className="space-y-1 text-right">
@@ -367,6 +376,14 @@ Dokumen sah digital: ${typeof window !== "undefined" ? window.location.origin : 
                   <strong>{accountHolder}</strong>
                 </div>
               </div>
+              {rawTax ? (
+                <div className="pt-2 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-1 text-[10px] text-slate-500">
+                  <span>Wajib Pajak (e-Bupot PPh 21/23):</span>
+                  <span className="font-mono font-semibold text-slate-800">
+                    {maskTaxId(rawTax)} <span className="text-[9px] text-emerald-600 font-sans font-bold">(Tersensor Aman)</span>
+                  </span>
+                </div>
+              ) : null}
               <p className="text-[10px] text-slate-500 pt-1 border-t border-slate-200/60 leading-relaxed">
                 Mohon cantumkan berita transfer: <code className="font-bold">{spkNomorResmi}</code> agar mutasi rekening mudah diverifikasi.
               </p>

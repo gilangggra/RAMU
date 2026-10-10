@@ -213,7 +213,10 @@ export async function getDirectoryActors(params: DirectoryFilterParams = {}) {
         },
       },
       assets: {
-        where: { status: "ACTIVE" },
+        where: {
+          status: "ACTIVE",
+          subtype: { not: "OPERATIONAL_SETTINGS" },
+        },
         orderBy: { createdAt: "desc" },
         take: 10,
         select: {
@@ -237,7 +240,12 @@ export async function getDirectoryActors(params: DirectoryFilterParams = {}) {
       },
       _count: {
         select: {
-          assets: { where: { status: "ACTIVE" } },
+          assets: {
+            where: {
+              status: "ACTIVE",
+              subtype: { not: "OPERATIONAL_SETTINGS" },
+            },
+          },
           goals: { where: { status: "ACTIVE" } },
           needs: { where: { status: "ACTIVE" } },
           opportunityParticipations: true,
@@ -259,11 +267,13 @@ export async function getDirectoryActorById(id: string) {
         select: {
           displayName: true,
           avatarUrl: true,
-          email: true,
         },
       },
       assets: {
-        where: { status: "ACTIVE" },
+        where: {
+          status: "ACTIVE",
+          subtype: { not: "OPERATIONAL_SETTINGS" },
+        },
         orderBy: { createdAt: "desc" },
       },
       goals: {
@@ -331,7 +341,12 @@ export async function getDirectoryActorById(id: string) {
       },
       _count: {
         select: {
-          assets: { where: { status: "ACTIVE" } },
+          assets: {
+            where: {
+              status: "ACTIVE",
+              subtype: { not: "OPERATIONAL_SETTINGS" },
+            },
+          },
           goals: { where: { status: "ACTIVE" } },
           needs: { where: { status: "ACTIVE" } },
           feedbacks: true,
@@ -347,6 +362,16 @@ export async function getDirectoryActorById(id: string) {
       actor.sector?.toLowerCase().includes("admin"))
   ) {
     return null;
+  }
+
+  if (actor?.assets) {
+    actor.assets = actor.assets.map((asset) => {
+      if (asset.attributes && typeof asset.attributes === "object") {
+        const { payoutAccount, ...safeAttrs } = asset.attributes as Record<string, any>;
+        return { ...asset, attributes: safeAttrs };
+      }
+      return asset;
+    });
   }
 
   return actor;
