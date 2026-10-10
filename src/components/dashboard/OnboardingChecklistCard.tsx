@@ -132,9 +132,9 @@ export function OnboardingChecklistCard({
   const isAllDone = completedCount === tasks.length;
 
   return (
-    <section className="w-full rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] relative overflow-hidden text-[#0f172a]">
+    <section className="w-full rounded-[24px] bg-white/95 border border-stone-200/80 shadow-xs relative overflow-hidden text-[#0f172a]">
       {/* Header Bar */}
-      <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/80">
+      <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 bg-[#FAF8F5]">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-9 h-9 rounded-full bg-white/95 text-slate-700 flex items-center justify-center shrink-0 border border-white/80 shadow-2xs">
             {isAllDone ? <ShieldCheck className="w-4 h-4 text-[#0284c7]" /> : <Layers className="w-4 h-4 text-slate-700" />}

@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/infrastructure/database/prisma";
 import { clearRecommendationsCache } from "@/application/projectBriefService";
 
-const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+const AVATAR_MAX_BYTES = 4 * 1024 * 1024;
 const AVATAR_ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const AVATAR_EXTENSIONS: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -60,7 +60,7 @@ export async function updateProfileBasicInfo(formData: FormData) {
         throw new Error("Format foto profil harus JPG, PNG, atau WebP.");
       }
       if (avatarFile.size > AVATAR_MAX_BYTES) {
-        throw new Error("Ukuran foto profil maksimal 5 MB.");
+        throw new Error("Ukuran foto profil maksimal 4 MB.");
       }
       const bytes = await avatarFile.arrayBuffer();
       const buffer = Buffer.from(bytes);
@@ -161,9 +161,14 @@ export async function updateProfileBasicInfo(formData: FormData) {
     let canonicalSector = sector;
     let newActorType = actor.actorType;
     const sLower = (sector || "").toLowerCase();
-    const isAdmin = sLower.includes("admin") || sLower.includes("administrator");
+    const isActorAlreadyAdmin = (actor.sector || "").toLowerCase().includes("administrator");
+    const requestedAdmin = sLower.includes("admin") || sLower.includes("administrator");
 
-    if (!isAdmin) {
+    if (requestedAdmin && !isActorAlreadyAdmin) {
+      // User biasa tidak diizinkan mengubah sektor menjadi Administrator
+      canonicalSector = "Photographer";
+      newActorType = "INDIVIDUAL";
+    } else if (!requestedAdmin) {
       if (
         sLower.includes("brand") ||
         sLower.includes("label") ||

@@ -492,16 +492,17 @@ export function ProfileSlideOverDrawer({
     "Paid Campaign",
     "Product Seeding / Gifting",
     "Revenue Share / Affiliate",
-    "Barter / Trade for Content",
+    "Resource Sharing / Content Exchange",
     "Co-Branding & Kolaborasi Koleksi",
     "Casting Open",
   ];
 
-  const [brandCollabTypes, setBrandCollabTypes] = useState<string[]>(
-    Array.isArray(brandCollabAttrs.collab_types) && brandCollabAttrs.collab_types.length > 0
+  const [brandCollabTypes, setBrandCollabTypes] = useState<string[]>(() => {
+    const raw = Array.isArray(brandCollabAttrs.collab_types) && brandCollabAttrs.collab_types.length > 0
       ? brandCollabAttrs.collab_types
-      : ["Paid Campaign", "Product Seeding / Gifting"]
-  );
+      : ["Paid Campaign", "Product Seeding / Gifting"];
+    return raw.map((t: string) => (t === "Barter / Trade for Content" ? "Resource Sharing / Content Exchange" : t));
+  });
   const [brandBudgetRange, setBrandBudgetRange] = useState<string>(
     brandCollabAttrs.budget_range || "Sesuai brief & scope proyek"
   );

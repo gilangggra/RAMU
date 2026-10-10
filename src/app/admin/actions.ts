@@ -14,14 +14,20 @@ export async function getAuthenticatedAdmin() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || !isUserAdmin(user)) {
+  if (!user) {
     throw new Error("Akses ditolak: Anda tidak memiliki wewenang administrator.");
   }
 
   const profile = await prisma.profile.findUnique({
     where: { id: user.id },
-    select: { id: true, displayName: true, email: true },
+    select: { id: true, displayName: true, email: true, role: true },
   });
+
+  const hasAdminPrivilege = isUserAdmin(user) || profile?.role === "SUPERADMIN";
+
+  if (!hasAdminPrivilege) {
+    throw new Error("Akses ditolak: Anda tidak memiliki wewenang administrator.");
+  }
 
   return {
     user,

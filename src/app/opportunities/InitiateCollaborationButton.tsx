@@ -193,7 +193,7 @@ export function InitiateCollaborationButton({
                     className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all"
                   >
                     <option value="Bagi Hasil & Fee Produksi Terverifikasi">Bagi Hasil &amp; Fee Produksi</option>
-                    <option value="Barter Komplementer (Resource Sharing)">Barter Kapasitas Idle &amp; Co-Credit</option>
+                    <option value="Kolaborasi Komplementer (Resource Sharing)">Optimasi Kapasitas Idle &amp; Co-Credit</option>
                     <option value="Fee Tetap Per Peran (Fixed Role Fee)">Fee Tetap Per Peran Kerja</option>
                     <option value="Proporsional Sesuai SPK">Proporsional Sesuai SPK Platform</option>
                   </select>

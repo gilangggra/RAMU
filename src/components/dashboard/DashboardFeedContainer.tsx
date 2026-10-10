@@ -28,19 +28,19 @@ export function DashboardFeedContainer({
 }: DashboardFeedContainerProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("briefs");
 
-  const tabs: { key: TabKey; label: string; icon: any; badge?: number }[] = [
-    { key: "briefs", label: "Brief Proyek", icon: Briefcase },
-    { key: "matches", label: "Rekomendasi Match", icon: Handshake },
-    { key: "resources", label: "Resource & Studio", icon: Layers },
-    ...(outcomeSection ? [{ key: "outcomes" as TabKey, label: "Dampak & Luaran SPK", icon: TrendingUp }] : []),
-    ...(bookingsSection ? [{ key: "bookings" as TabKey, label: "Pesanan Masuk", icon: Inbox, badge: pendingBookingCount }] : []),
+  const tabs: { key: TabKey; label: string; shortLabel: string; icon: any; badge?: number }[] = [
+    { key: "briefs", label: "Brief Proyek", shortLabel: "Brief", icon: Briefcase },
+    { key: "matches", label: "Rekomendasi", shortLabel: "Rekomendasi", icon: Handshake },
+    { key: "resources", label: "Resource & Studio", shortLabel: "Resource", icon: Layers },
+    ...(outcomeSection ? [{ key: "outcomes" as TabKey, label: "Luaran SPK", shortLabel: "SPK", icon: TrendingUp }] : []),
+    ...(bookingsSection ? [{ key: "bookings" as TabKey, label: "Pesanan Masuk", shortLabel: "Pesanan", icon: Inbox, badge: pendingBookingCount }] : []),
   ];
 
   return (
     <div className="space-y-4">
-      {/* FILTER TABS (Clean Modern Tab Bar) */}
-      <div className="flex items-center justify-between gap-3 border-b border-white/80 pb-3 overflow-x-auto no-scrollbar">
-        <div className="inline-flex items-center p-1.5 rounded-full bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_4px_24px_rgba(0,0,0,0.02)] shrink-0 gap-1">
+      {/* FILTER TABS (Clean Responsive Segmented Tab Bar - Zero Clipping) */}
+      <div className="w-full">
+        <div className="p-1 sm:p-1.5 rounded-full bg-white/95 border border-stone-200/80 shadow-xs flex items-center gap-1 overflow-x-auto scrollbar-none">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.key;
@@ -49,16 +49,21 @@ export function DashboardFeedContainer({
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs transition-all cursor-pointer ${
+                className={`flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap min-w-max sm:min-w-0 ${
                   isActive
-                    ? "bg-white/95 text-[#111827] font-bold shadow-xs border border-white/80"
-                    : "text-[#4B5563] hover:text-[#111827] font-medium hover:bg-white/50"
+                    ? "bg-[#4CC9FE] text-white shadow-xs shadow-[#4CC9FE]/30"
+                    : "text-[#716B7E] hover:text-[#27213D] hover:bg-stone-100/70 font-semibold"
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? "text-[#0284c7]" : "text-slate-400"}`} />
-                <span>{tab.label}</span>
+                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? "text-white" : "text-[#716B7E]"}`} />
+                <span className="hidden xl:inline">{tab.label}</span>
+                <span className="xl:hidden">{tab.shortLabel}</span>
                 {Boolean(tab.badge && tab.badge > 0) && (
-                  <span className="px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-amber-500 text-white leading-none">
+                  <span
+                    className={`px-1.5 py-0.5 text-[10px] font-bold rounded-full leading-none shrink-0 ${
+                      isActive ? "bg-white text-[#0284c7]" : "bg-amber-500 text-white"
+                    }`}
+                  >
                     {tab.badge}
                   </span>
                 )}

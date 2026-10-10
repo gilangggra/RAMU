@@ -249,6 +249,7 @@ export default async function DashboardPage() {
 
   const rawOpportunities = userOpportunities.length > 0 ? userOpportunities : fallbackOpportunities;
   const canonicalActors = complementaryActors.length > 0 ? complementaryActors : fallbackActors;
+
   const inventoryResourceCount = nonPortfolioAssets.length;
 
   const pendingCoCredits: PendingCoCredit[] = [];
@@ -453,7 +454,7 @@ export default async function DashboardPage() {
       <div className="w-full space-y-6">
 
         {/* 1. EXECUTIVE WELCOME HEADER & TOP KPI METRICS */}
-        <section className="bg-white/60 backdrop-blur-2xl border border-white/80 rounded-[24px] p-5 sm:p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-5">
+        <section className="bg-white/95 border border-stone-200/80 rounded-[24px] p-5 sm:p-6 shadow-xs space-y-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
@@ -607,12 +608,12 @@ export default async function DashboardPage() {
         {/* 2. 3-COLUMN STRUCTURED WORKSPACE */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
-          {/* LEFT COLUMN: IDENTITY & BUSINESS PROFILE (3 Cols) */}
-          <aside className="lg:col-span-3 space-y-4 lg:sticky lg:top-6">
+          {/* LEFT COLUMN: IDENTITY & BUSINESS PROFILE (3 Cols on Desktop, follows Feed on Mobile) */}
+          <aside className="lg:col-span-3 space-y-4 lg:sticky lg:top-6 order-2 lg:order-1">
             {/* Identity Card */}
-            <div className="rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] overflow-hidden">
+            <div className="rounded-[24px] bg-white/95 border border-stone-200/80 shadow-xs overflow-hidden">
               <div className="h-18 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 relative">
-                <span className="absolute top-2.5 right-2.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/15 backdrop-blur-md text-white border border-white/20">
+                <span className="absolute top-2.5 right-2.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/20 text-white border border-white/20">
                   {primaryActor.sector}
                 </span>
               </div>
@@ -687,8 +688,8 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            {/* Business Status & Readiness Summary (Replaced duplicate Navigasi Cepat!) */}
-            <div className="p-4 sm:p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-3 text-xs">
+            {/* Business Status & Readiness Summary */}
+            <div className="p-5 rounded-[24px] bg-white/95 border border-stone-200/80 shadow-xs space-y-3 text-xs">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                 <span className="font-bold text-slate-900 text-xs">Status Kemitraan</span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
@@ -730,8 +731,8 @@ export default async function DashboardPage() {
             </div>
           </aside>
 
-          {/* CENTER COLUMN: FEED & ACTIONS (6 Cols) */}
-          <main className="lg:col-span-6 space-y-4 min-w-0">
+          {/* CENTER COLUMN: FEED & ACTIONS (Primary Focus on Mobile, 6 Cols on Desktop) */}
+          <main className="lg:col-span-6 space-y-4 min-w-0 order-1 lg:order-2">
 
             {/* URGENT BOOKING ALERT BANNER (If pending bookings exist) */}
             {pendingBookingCount > 0 && (
@@ -775,7 +776,7 @@ export default async function DashboardPage() {
             )}
 
             {/* Action Prompt Box */}
-            <div className="p-4 sm:p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-3">
+            <div className="p-5 rounded-[24px] bg-white/95 border border-stone-200/80 shadow-xs space-y-3">
               <div className="flex items-center gap-3">
                 <ActorAvatar
                   name={primaryActor.name}
@@ -878,7 +879,7 @@ export default async function DashboardPage() {
 
                   {/* Empty state or Brief cards */}
                   {briefStats.recentOpenBriefs.length === 0 ? (
-                    <div className="p-8 rounded-[22px] bg-white/50 backdrop-blur-xl border border-dashed border-white/90 text-center space-y-2.5 shadow-xs">
+                    <div className="p-8 rounded-[22px] bg-stone-50/80 border border-dashed border-stone-200 text-center space-y-2.5 shadow-2xs">
                       <div className="w-10 h-10 rounded-full bg-white/95 border border-white/90 shadow-xs flex items-center justify-center mx-auto text-slate-400">
                         <Megaphone className="w-4 h-4" />
                       </div>
@@ -903,7 +904,7 @@ export default async function DashboardPage() {
                         return (
                           <article
                             key={brief.id}
-                            className="p-5 sm:p-6 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] hover:bg-white/75 hover:border-white transition-all space-y-3.5 group"
+                            className="p-5 sm:p-6 rounded-[24px] bg-white/95 border border-stone-200/80 shadow-xs hover:border-[#4CC9FE]/60 transition-all space-y-3.5 group"
                           >
                             {/* Creator Info Header */}
                             <div className="flex items-start justify-between gap-3">
@@ -985,7 +986,7 @@ export default async function DashboardPage() {
                 </div>
               }
               bookingsSection={
-                <div className="p-5 sm:p-6 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-4">
+                <div className="p-5 sm:p-6 rounded-[24px] bg-white/95 border border-stone-200/80 shadow-xs space-y-4">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div className="flex items-center gap-2">
                       <Inbox className="w-4 h-4 text-slate-700" />
@@ -1009,7 +1010,7 @@ export default async function DashboardPage() {
                   </div>
 
                   {recentBookings.length === 0 ? (
-                    <div className="p-8 rounded-[22px] bg-white/50 backdrop-blur-xl border border-dashed border-white/90 text-center space-y-2.5 shadow-xs">
+                    <div className="p-8 rounded-[22px] bg-stone-50/80 border border-dashed border-stone-200 text-center space-y-2.5 shadow-2xs">
                       <div className="w-10 h-10 rounded-full bg-white/95 border border-white/90 shadow-xs flex items-center justify-center mx-auto text-slate-400">
                         <Inbox className="w-4 h-4" />
                       </div>
@@ -1080,10 +1081,10 @@ export default async function DashboardPage() {
             <CreativeSpotlightStrip />
           </main>
 
-          {/* RIGHT COLUMN: REKOMENDASI & AGENDA (3 Cols) */}
-          <aside className="lg:col-span-3 space-y-4 lg:sticky lg:top-6">
+          {/* RIGHT COLUMN: REKOMENDASI & AGENDA (3 Cols on Desktop, tertiary on Mobile) */}
+          <aside className="lg:col-span-3 space-y-4 lg:sticky lg:top-6 order-3 lg:order-3">
             {/* Card 1: Rekomendasi Rekan Kolaborator */}
-            <div className="p-4 sm:p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-3.5">
+            <div className="p-5 rounded-[24px] bg-white/95 border border-stone-200/80 shadow-xs space-y-3.5">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-full bg-white/95 border border-white/80 shadow-2xs flex items-center justify-center">
@@ -1143,7 +1144,7 @@ export default async function DashboardPage() {
             </div>
 
             {/* Card 2: Agenda & Jadwal Produksi */}
-            <div className="p-4 sm:p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-3.5">
+            <div className="p-5 rounded-[24px] bg-white/95 border border-stone-200/80 shadow-xs space-y-3.5">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-full bg-white/95 border border-white/80 shadow-2xs flex items-center justify-center">
@@ -1159,7 +1160,7 @@ export default async function DashboardPage() {
               </div>
 
               {agendaItems.length === 0 ? (
-                <div className="p-4 rounded-[20px] bg-white/50 backdrop-blur-xl border border-dashed border-white/90 text-center space-y-2">
+                <div className="p-4 rounded-[20px] bg-stone-50/80 border border-dashed border-stone-200 text-center space-y-2">
                   <div className="w-8 h-8 rounded-full bg-white/95 border border-white/80 shadow-2xs flex items-center justify-center mx-auto text-slate-400">
                     <Calendar className="w-4 h-4" />
                   </div>
@@ -1217,7 +1218,7 @@ export default async function DashboardPage() {
             </div>
 
             {/* Card 3: Jaminan Perlindungan SPK RAMU */}
-            <div className="p-4 sm:p-5 rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] space-y-2.5">
+            <div className="p-5 rounded-[24px] bg-white/95 border border-stone-200/80 shadow-xs space-y-2.5">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-full bg-white/95 border border-white/80 shadow-2xs flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />

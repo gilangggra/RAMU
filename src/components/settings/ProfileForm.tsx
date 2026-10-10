@@ -70,11 +70,11 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-      <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/50">
-        <h2 className="text-xl font-bold text-slate-900">Profil Dasar</h2>
-        <p className="text-sm text-slate-500 mt-1">
-          Informasi ini akan ditampilkan secara publik di Direktori dan Showcase.
+    <div className="bg-white rounded-2xl sm:rounded-[28px] border border-stone-200/80 shadow-xs overflow-hidden">
+      <div className="p-6 sm:p-8 border-b border-stone-100 bg-[#FAF8F5]/70">
+        <h2 className="text-xl font-black text-[#27213D] tracking-tight">Profil Dasar &amp; Identitas</h2>
+        <p className="text-xs sm:text-sm text-[#716B7E] mt-1">
+          Informasi ini akan ditampilkan secara publik di Direktori Talenta dan Portofolio Showcase.
         </p>
       </div>
 
@@ -92,7 +92,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
           </div>
         )}
 
-        <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/80 border border-slate-200/80 flex flex-col sm:flex-row items-center gap-5">
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#FAF8F5] border border-stone-200/80 flex flex-col sm:flex-row items-center gap-5">
           <input
             type="file"
             name="avatarFile"
@@ -109,7 +109,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
 
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="w-20 h-20 rounded-2xl overflow-hidden border border-slate-200 bg-white hover:border-slate-900 transition-all flex items-center justify-center cursor-pointer shrink-0 group relative shadow-xs"
+            className="w-20 h-20 rounded-2xl overflow-hidden border border-stone-200 bg-white hover:border-[#4CC9FE] transition-all flex items-center justify-center cursor-pointer shrink-0 group relative shadow-xs"
           >
             {avatarPreview ? (
               <img
@@ -118,34 +118,34 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-slate-100 flex items-center justify-center font-bold text-lg text-slate-700">
-                {initialData.name ? initialData.name.charAt(0).toUpperCase() : <User className="w-6 h-6 text-slate-400" />}
+              <div className="w-full h-full bg-stone-100 flex items-center justify-center font-bold text-lg text-stone-700">
+                {initialData.name ? initialData.name.charAt(0).toUpperCase() : <User className="w-6 h-6 text-stone-400" />}
               </div>
             )}
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold">
+            <div className="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold">
               Ubah Foto
             </div>
           </div>
 
           <div className="flex-1 text-center sm:text-left space-y-1">
-            <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Foto Profil</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
+            <h3 className="text-xs font-bold text-[#27213D] uppercase tracking-wider">Foto Profil</h3>
+            <p className="text-xs text-[#716B7E] leading-relaxed">
               Format JPG, PNG, atau WebP. Maksimal ukuran 5 MB.
             </p>
             <div className="flex items-center justify-center sm:justify-start gap-2.5 pt-1">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-50 shadow-xs transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-stone-200 text-xs font-semibold text-stone-700 hover:text-[#27213D] hover:bg-stone-50 shadow-xs transition-all cursor-pointer"
               >
-                <Camera className="w-3.5 h-3.5 text-slate-500" />
+                <Camera className="w-3.5 h-3.5 text-stone-500" />
                 <span>{avatarPreview ? "Ganti Foto" : "Unggah Foto"}</span>
               </button>
               {avatarPreview && (
                 <button
                   type="button"
                   onClick={handleRemovePhoto}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Hapus</span>
@@ -157,7 +157,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label htmlFor="name" className="text-xs font-bold text-[#111827] uppercase tracking-wider">
+            <label htmlFor="name" className="text-xs font-bold text-[#27213D] uppercase tracking-wider">
               Nama Lengkap / Stage Name <span className="text-rose-500">*</span>
             </label>
             <input
@@ -166,13 +166,13 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               name="name"
               defaultValue={initialData.name}
               required
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-sm font-medium text-slate-800"
+              className="w-full px-4 py-2.5 rounded-xl bg-stone-50/70 border border-stone-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-xs sm:text-sm font-medium text-[#27213D]"
               placeholder="Misal: Budi Santoso"
             />
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="sector" className="text-xs font-bold text-[#111827] uppercase tracking-wider">
+            <label htmlFor="sector" className="text-xs font-bold text-[#27213D] uppercase tracking-wider">
               Sektor / Peran Ekosistem <span className="text-rose-500">*</span>
             </label>
             <select
@@ -180,7 +180,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               name="sector"
               defaultValue={initialData.sector}
               required
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-sm font-medium text-slate-800"
+              className="w-full px-4 py-2.5 rounded-xl bg-stone-50/70 border border-stone-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-xs sm:text-sm font-medium text-[#27213D]"
             >
               <option value="Fashion Brand/UMKM">Fashion Brand/UMKM</option>
               <option value="Photographer">Photographer</option>
@@ -194,7 +194,7 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <label htmlFor="description" className="text-xs font-bold text-[#111827] uppercase tracking-wider">
+            <label htmlFor="description" className="text-xs font-bold text-[#27213D] uppercase tracking-wider">
               Bio / Deskripsi Singkat
             </label>
             <textarea
@@ -202,13 +202,13 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               name="description"
               defaultValue={initialData.description || ""}
               rows={4}
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-sm text-slate-800 resize-none"
+              className="w-full px-4 py-2.5 rounded-xl bg-stone-50/70 border border-stone-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-xs sm:text-sm text-[#27213D] resize-none"
               placeholder="Ceritakan tentang diri Anda, fokus karya, dan visi kreatif..."
             />
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <label htmlFor="location" className="text-xs font-bold text-[#111827] uppercase tracking-wider">
+            <label htmlFor="location" className="text-xs font-bold text-[#27213D] uppercase tracking-wider">
               Lokasi / Basis
             </label>
             <input
@@ -216,13 +216,13 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               id="location"
               name="location"
               defaultValue={initialData.location || ""}
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-sm font-medium text-slate-800"
+              className="w-full px-4 py-2.5 rounded-xl bg-stone-50/70 border border-stone-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-xs sm:text-sm font-medium text-[#27213D]"
               placeholder="Misal: Jakarta, Indonesia"
             />
           </div>
           
           <div className="space-y-2">
-            <label htmlFor="contactEmail" className="text-xs font-bold text-[#111827] uppercase tracking-wider">
+            <label htmlFor="contactEmail" className="text-xs font-bold text-[#27213D] uppercase tracking-wider">
               Email Publik
             </label>
             <input
@@ -230,13 +230,13 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               id="contactEmail"
               name="contactEmail"
               defaultValue={initialData.contactEmail || ""}
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-sm font-medium text-slate-800"
+              className="w-full px-4 py-2.5 rounded-xl bg-stone-50/70 border border-stone-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-xs sm:text-sm font-medium text-[#27213D]"
               placeholder="email@contoh.com"
             />
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="contactPhone" className="text-xs font-bold text-[#111827] uppercase tracking-wider">
+            <label htmlFor="contactPhone" className="text-xs font-bold text-[#27213D] uppercase tracking-wider">
               No. WhatsApp / Telepon
             </label>
             <input
@@ -244,14 +244,14 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               id="contactPhone"
               name="contactPhone"
               defaultValue={initialData.contactPhone || ""}
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-sm font-medium text-slate-800"
+              className="w-full px-4 py-2.5 rounded-xl bg-stone-50/70 border border-stone-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-xs sm:text-sm font-medium text-[#27213D]"
               placeholder="+62..."
             />
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="instagram" className="text-xs font-bold text-[#111827] uppercase tracking-wider flex items-center gap-1.5">
-              <InstagramIcon className="w-3.5 h-3.5 text-slate-500" />
+            <label htmlFor="instagram" className="text-xs font-bold text-[#27213D] uppercase tracking-wider flex items-center gap-1.5">
+              <InstagramIcon className="w-3.5 h-3.5 text-stone-500" />
               <span>Akun Instagram (Opsional)</span>
             </label>
             <input
@@ -259,13 +259,13 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               id="instagram"
               name="instagram"
               defaultValue={initialSocials.instagram?.handle || ""}
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition-all text-sm font-medium text-slate-800"
+              className="w-full px-4 py-2.5 rounded-xl bg-stone-50/70 border border-stone-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-xs sm:text-sm font-medium text-[#27213D]"
               placeholder="@username atau https://instagram.com/..."
             />
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="websiteUrl" className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
+            <label htmlFor="websiteUrl" className="text-xs font-bold text-[#27213D] uppercase tracking-wider">
               Website / Portofolio Eksternal (Opsional)
             </label>
             <input
@@ -273,17 +273,17 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
               id="websiteUrl"
               name="websiteUrl"
               defaultValue={initialSocials.website?.url || ""}
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition-all text-sm font-medium text-slate-800"
+              className="w-full px-4 py-2.5 rounded-xl bg-stone-50/70 border border-stone-200 focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all text-xs sm:text-sm font-medium text-[#27213D]"
               placeholder="https://portofolioanda.com"
             />
           </div>
         </div>
 
-        <div className="pt-4 border-t border-slate-100 flex justify-end">
+        <div className="pt-4 border-t border-stone-100 flex justify-end">
           <button
             type="submit"
             disabled={isPending}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-xs cursor-pointer"
+            className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#4CC9FE] hover:bg-[#38bbf5] active:scale-[0.99] text-white font-bold text-xs sm:text-sm shadow-md shadow-[#4CC9FE]/25 hover:shadow-lg hover:shadow-[#4CC9FE]/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
           >
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             <span>{isPending ? "Menyimpan..." : "Simpan Perubahan"}</span>

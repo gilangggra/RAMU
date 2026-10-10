@@ -163,7 +163,7 @@ function TagInputWithSuggestions({
                   className={`text-[11px] font-semibold px-3 py-1 rounded-full border transition-all cursor-pointer ${
                     isSelected
                       ? "btn-primary-pill text-white font-bold border-transparent shadow-xs"
-                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:text-slate-900"
+                      : "bg-white text-[#716B7E] border-stone-200 hover:border-[#4CC9FE]/60 hover:text-[#27213D]"
                   }`}
                 >
                   {isSelected ? "✓ " : "+ "}

@@ -87,11 +87,11 @@ export function PayoutForm({ initialData }: PayoutFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
       {/* Header Info */}
       <div className="space-y-1">
-        <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-          <CreditCard className="w-5 h-5 text-slate-700" />
+        <h2 className="text-xl font-black text-[#27213D] flex items-center gap-2 tracking-tight">
+          <CreditCard className="w-5 h-5 text-[#0284c7]" />
           <span>Rekening Pencairan Dana (Payout Account)</span>
         </h2>
-        <p className="text-xs text-slate-500 leading-relaxed">
+        <p className="text-xs text-[#716B7E] leading-relaxed">
           Rekening resmi penerima transfer dana muka (DP) dan pelunasan transaksi kolaborasi SPK RAMU langsung dari klien.
         </p>
       </div>
@@ -114,29 +114,29 @@ export function PayoutForm({ initialData }: PayoutFormProps) {
       )}
 
       {/* Security Callout */}
-      <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 flex items-start gap-3 text-xs text-slate-600">
+      <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-stone-200/80 flex items-start gap-3 text-xs text-[#716B7E]">
         <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <span className="font-semibold text-slate-900">Perlindungan Kontrak &amp; Pembayaran Langsung</span>
-          <p className="text-[11px] text-slate-500 leading-relaxed">
+          <span className="font-bold text-[#27213D]">Perlindungan Kontrak &amp; Pembayaran Langsung</span>
+          <p className="text-[11px] text-[#716B7E] leading-relaxed">
             Data rekening ini akan otomatis tertera pada Surat Perjanjian Kerja (SPK) digital yang disahkan kedua belah pihak. RAMU tidak memotong fee perantara tersembunyi.
           </p>
         </div>
       </div>
 
       {/* Banking Fields Card */}
-      <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4">
+      <div className="p-5 sm:p-6 rounded-2xl sm:rounded-[24px] bg-white border border-stone-200/80 shadow-xs space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-800 mb-1.5 flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5 text-slate-400" />
+            <label className="block text-xs font-bold text-[#27213D] mb-1.5 flex items-center gap-1.5">
+              <Building2 className="w-3.5 h-3.5 text-stone-400" />
               <span>Nama Bank <span className="text-rose-500">*</span></span>
             </label>
             <select
               value={bankName}
               onChange={(e) => setBankName(e.target.value)}
               required
-              className="w-full px-3 py-2 rounded-xl bg-slate-50/60 border border-slate-200 text-slate-900 text-xs font-medium focus:bg-white focus:ring-2 focus:ring-slate-900 focus:outline-hidden transition-all"
+              className="w-full px-3 py-2 rounded-xl bg-stone-50/70 border border-stone-200 text-[#27213D] text-xs font-medium focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all cursor-pointer"
             >
               {POPULAR_BANKS.map((b) => (
                 <option key={b} value={b}>
@@ -147,8 +147,8 @@ export function PayoutForm({ initialData }: PayoutFormProps) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-800 mb-1.5 flex items-center gap-1.5">
-              <CreditCard className="w-3.5 h-3.5 text-slate-400" />
+            <label className="block text-xs font-bold text-[#27213D] mb-1.5 flex items-center gap-1.5">
+              <CreditCard className="w-3.5 h-3.5 text-stone-400" />
               <span>Nomor Rekening <span className="text-rose-500">*</span></span>
             </label>
             <input
@@ -157,14 +157,14 @@ export function PayoutForm({ initialData }: PayoutFormProps) {
               placeholder="Contoh: 8271039182"
               value={accountNumber}
               onChange={(e) => setAccountNumber(e.target.value.replace(/[^0-9]/g, ""))}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50/60 border border-slate-200 text-slate-900 text-xs font-mono font-medium focus:bg-white focus:ring-2 focus:ring-slate-900 focus:outline-hidden transition-all"
+              className="w-full px-3 py-2 rounded-xl bg-stone-50/70 border border-stone-200 text-[#27213D] text-xs font-mono font-medium focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-800 mb-1.5 flex items-center gap-1.5">
-            <User className="w-3.5 h-3.5 text-slate-400" />
+          <label className="block text-xs font-bold text-[#27213D] mb-1.5 flex items-center gap-1.5">
+            <User className="w-3.5 h-3.5 text-stone-400" />
             <span>Nama Pemilik Rekening (Sesuai Buku Tabungan) <span className="text-rose-500">*</span></span>
           </label>
           <input
@@ -173,15 +173,15 @@ export function PayoutForm({ initialData }: PayoutFormProps) {
             placeholder="Contoh: PT LENSA KREATIF / AHMAD FADILLAH"
             value={accountHolder}
             onChange={(e) => setAccountHolder(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl bg-slate-50/60 border border-slate-200 text-slate-900 text-xs font-medium focus:bg-white focus:ring-2 focus:ring-slate-900 focus:outline-hidden transition-all"
+            className="w-full px-3 py-2 rounded-xl bg-stone-50/70 border border-stone-200 text-[#27213D] text-xs font-medium focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all"
           />
         </div>
       </div>
 
       {/* Settlement Terms */}
-      <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4">
+      <div className="p-5 sm:p-6 rounded-2xl sm:rounded-[24px] bg-white border border-stone-200/80 shadow-xs space-y-4">
         <div>
-          <label className="block text-xs font-semibold text-slate-800 mb-1.5">
+          <label className="block text-xs font-bold text-[#27213D] mb-1.5">
             Skema Uang Muka (DP) Bawaan pada SPK
           </label>
           <div className="grid grid-cols-3 gap-2.5">
@@ -196,14 +196,14 @@ export function PayoutForm({ initialData }: PayoutFormProps) {
                 onClick={() => setDefaultDpPercentage(option.val)}
                 className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                   defaultDpPercentage === option.val
-                    ? "bg-slate-900 text-white border-slate-900 shadow-xs"
-                    : "bg-slate-50/60 border-slate-200 text-slate-700 hover:bg-slate-100"
+                    ? "bg-[#4CC9FE] text-white border-[#4CC9FE] shadow-sm shadow-[#4CC9FE]/20"
+                    : "bg-stone-50/70 border-stone-200 text-[#27213D] hover:bg-stone-100"
                 }`}
               >
                 <div className="font-bold text-xs">{option.label}</div>
                 <div
                   className={`text-[10px] mt-0.5 leading-tight ${
-                    defaultDpPercentage === option.val ? "text-slate-300" : "text-slate-400"
+                    defaultDpPercentage === option.val ? "text-sky-100" : "text-stone-400"
                   }`}
                 >
                   {option.desc}
@@ -214,8 +214,8 @@ export function PayoutForm({ initialData }: PayoutFormProps) {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-800 mb-1.5 flex items-center gap-1.5">
-            <FileText className="w-3.5 h-3.5 text-slate-400" />
+          <label className="block text-xs font-bold text-[#27213D] mb-1.5 flex items-center gap-1.5">
+            <FileText className="w-3.5 h-3.5 text-stone-400" />
             <span>Instruksi Tambahan Pembayaran (Opsional)</span>
           </label>
           <textarea
@@ -223,31 +223,31 @@ export function PayoutForm({ initialData }: PayoutFormProps) {
             value={paymentInstructions}
             onChange={(e) => setPaymentInstructions(e.target.value)}
             placeholder="Contoh: Cantumkan kode referensi SPK pada berita transfer. Bukti transfer mohon diunggah di ruang kolaborasi..."
-            className="w-full px-3 py-2 rounded-xl bg-slate-50/60 border border-slate-200 text-slate-900 text-xs focus:bg-white focus:ring-2 focus:ring-slate-900 focus:outline-hidden transition-all resize-none"
+            className="w-full px-3 py-2 rounded-xl bg-stone-50/70 border border-stone-200 text-[#27213D] text-xs focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all resize-none"
           />
         </div>
       </div>
 
       {/* Tax & Fiscal Compliance Card */}
-      <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div className="p-5 sm:p-6 rounded-2xl sm:rounded-[24px] bg-white border border-stone-200/80 shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
           <div className="space-y-0.5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-slate-700" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#27213D] flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-[#0284c7]" />
               <span>Kepatuhan Pajak &amp; Bukti Potong (PPh 21 / PPh 23)</span>
             </h3>
-            <p className="text-[11px] text-slate-500">
+            <p className="text-[11px] text-[#716B7E]">
               Diperlukan untuk mempermudah brand klien menerbitkan bukti potong resmi (e-Bupot) tanpa kendala administratif.
             </p>
           </div>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-50 text-[#0284c7] border border-sky-200/60">
             Fiskal Nasional
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-800 mb-1.5">
+            <label className="block text-xs font-bold text-[#27213D] mb-1.5">
               NPWP / NIK Wajib Pajak (16 Digit)
             </label>
             <input
@@ -255,21 +255,21 @@ export function PayoutForm({ initialData }: PayoutFormProps) {
               placeholder="Contoh: 3171012345678901"
               value={npwpOrNik}
               onChange={(e) => setNpwpOrNik(e.target.value.replace(/[^0-9]/g, "").slice(0, 16))}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50/60 border border-slate-200 text-slate-900 text-xs font-mono font-medium focus:bg-white focus:ring-2 focus:ring-slate-900 focus:outline-hidden transition-all"
+              className="w-full px-3 py-2 rounded-xl bg-stone-50/70 border border-stone-200 text-[#27213D] text-xs font-mono font-medium focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all"
             />
-            <p className="text-[10px] text-slate-400 mt-1">
+            <p className="text-[10px] text-stone-400 mt-1">
               Bagi perorangan, NIK e-KTP berfungsi sebagai NPWP 16 digit terintegrasi.
             </p>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-800 mb-1.5">
+            <label className="block text-xs font-bold text-[#27213D] mb-1.5">
               Klasifikasi Wajib Pajak
             </label>
             <select
               value={taxClassification}
               onChange={(e) => setTaxClassification(e.target.value as any)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50/60 border border-slate-200 text-slate-900 text-xs font-medium focus:bg-white focus:ring-2 focus:ring-slate-900 focus:outline-hidden transition-all cursor-pointer"
+              className="w-full px-3 py-2 rounded-xl bg-stone-50/70 border border-stone-200 text-[#27213D] text-xs font-medium focus:bg-white focus:border-[#4CC9FE] focus:ring-2 focus:ring-[#4CC9FE]/20 transition-all cursor-pointer"
             >
               <option value="INDIVIDUAL_FREELANCE">Tenaga Ahli Lepas / Perorangan (PPh 21)</option>
               <option value="UMKM_PP55">Pelaku Usaha UMKM (PPh Final 0.5% PP 55)</option>
@@ -279,7 +279,7 @@ export function PayoutForm({ initialData }: PayoutFormProps) {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-800 mb-1.5">
+          <label className="block text-xs font-bold text-[#27213D] mb-1.5">
             Default Skema Penawaran Tarif SPK
           </label>
           <div className="grid grid-cols-2 gap-3">
@@ -288,12 +288,12 @@ export function PayoutForm({ initialData }: PayoutFormProps) {
               onClick={() => setTaxScheme("NETT")}
               className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                 taxScheme === "NETT"
-                  ? "bg-slate-900 text-white border-slate-900 shadow-xs"
-                  : "bg-slate-50/70 border-slate-200 text-slate-700 hover:bg-slate-100/70"
+                  ? "bg-[#4CC9FE] text-white border-[#4CC9FE] shadow-sm shadow-[#4CC9FE]/20"
+                  : "bg-stone-50/70 border-stone-200 text-[#27213D] hover:bg-stone-100/70"
               }`}
             >
               <div className="font-bold text-xs">Nett (Bersih)</div>
-              <div className={`text-[10px] mt-0.5 leading-tight ${taxScheme === "NETT" ? "text-slate-300" : "text-slate-400"}`}>
+              <div className={`text-[10px] mt-0.5 leading-tight ${taxScheme === "NETT" ? "text-sky-100" : "text-stone-400"}`}>
                 Kreator menerima honorarium utuh, pajak PPh ditanggung/dibayar oleh pihak Klien.
               </div>
             </button>
@@ -303,12 +303,12 @@ export function PayoutForm({ initialData }: PayoutFormProps) {
               onClick={() => setTaxScheme("GROSS")}
               className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                 taxScheme === "GROSS"
-                  ? "bg-slate-900 text-white border-slate-900 shadow-xs"
-                  : "bg-slate-50/70 border-slate-200 text-slate-700 hover:bg-slate-100/70"
+                  ? "bg-[#4CC9FE] text-white border-[#4CC9FE] shadow-sm shadow-[#4CC9FE]/20"
+                  : "bg-stone-50/70 border-stone-200 text-[#27213D] hover:bg-stone-100/70"
               }`}
             >
               <div className="font-bold text-xs">Gross (Termasuk Pajak)</div>
-              <div className={`text-[10px] mt-0.5 leading-tight ${taxScheme === "GROSS" ? "text-slate-300" : "text-slate-400"}`}>
+              <div className={`text-[10px] mt-0.5 leading-tight ${taxScheme === "GROSS" ? "text-sky-100" : "text-stone-400"}`}>
                 Tarif sudah termasuk pajak, Klien berhak memotong PPh dan wajib menyerahkan bukti e-Bupot.
               </div>
             </button>
@@ -320,7 +320,7 @@ export function PayoutForm({ initialData }: PayoutFormProps) {
         <button
           type="submit"
           disabled={isLoading}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#4CC9FE] hover:bg-[#38bbf5] active:scale-[0.99] text-white text-xs sm:text-sm font-bold shadow-md shadow-[#4CC9FE]/25 hover:shadow-lg hover:shadow-[#4CC9FE]/30 transition-all cursor-pointer disabled:opacity-50"
         >
           {isLoading ? (
             <>
@@ -329,7 +329,7 @@ export function PayoutForm({ initialData }: PayoutFormProps) {
             </>
           ) : (
             <>
-              <Lock className="w-3.5 h-3.5 text-slate-300" />
+              <Lock className="w-3.5 h-3.5 text-white" />
               <span>Simpan Rekening Pencairan</span>
             </>
           )}
@@ -338,3 +338,4 @@ export function PayoutForm({ initialData }: PayoutFormProps) {
     </form>
   );
 }
+

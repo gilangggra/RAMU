@@ -1,146 +1,150 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, Camera, Palette, Users, Video, Building, Star } from "lucide-react";
+import { ArrowRight, Camera, Sparkles, Users, Video, Building, Wand2 } from "lucide-react";
 
 const categories = [
   {
     id: "cat-fashion-brand",
     label: "Fashion Brand & UMKM",
+    subtitle: "Koleksi Pakaian & Sampel Look",
     icon: Building,
-    count: "84 brand",
-    accent: "#3e8363",
+    count: "84+ Brand",
+    tag: "Aset Busana",
     href: "/directory?sector=Fashion%20Brand/UMKM",
-    img: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=500&auto=format&fit=crop",
+    img: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: "cat-photographer",
     label: "Fotografer Editorial",
+    subtitle: "Analog 35mm, Digital & Komersial",
     icon: Camera,
-    count: "121 kreator",
-    accent: "#FFD45A",
+    count: "120+ Fotografer",
+    tag: "Kamera & Lighting",
     href: "/directory?sector=Photographer",
-    img: "https://images.unsplash.com/photo-1567721913486-6585f069b3e8?q=80&w=500&auto=format&fit=crop",
+    img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: "cat-studio",
+    label: "Daylight Studio & Venue",
+    subtitle: "Loft Alami, Cyclorama & Ruang Rias",
+    icon: Building,
+    count: "42+ Studio",
+    tag: "Kapasitas Idle",
+    href: "/directory?actorType=STUDIO",
+    img: "https://images.unsplash.com/photo-1600508774634-4e11d34730e2?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: "cat-model",
     label: "Model Profesional",
+    subtitle: "Editorial, Komersial & Runway",
     icon: Users,
-    count: "97 kreator",
-    accent: "#D9D2FF",
+    count: "95+ Model",
+    tag: "Talenta & Karakter",
     href: "/directory?sector=Model",
-    img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=500&auto=format&fit=crop",
+    img: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: "cat-stylist",
+    label: "Fashion Stylist & MUA",
+    subtitle: "Kurasi Wardrobe & Tata Rias Editorial",
+    icon: Wand2,
+    count: "64+ Stylist/MUA",
+    tag: "Keahlian Spesifik",
+    href: "/directory?sector=Fashion%20Stylist",
+    img: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: "cat-videographer",
-    label: "Videografer",
+    label: "Videografer & Sinema",
+    subtitle: "Fashion Film 4K & Konten Kampanye",
     icon: Video,
-    count: "63 kreator",
-    accent: "#F7C8D0",
+    count: "58+ Kreator",
+    tag: "Gear Sinematik",
     href: "/directory?sector=Videographer",
-    img: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=500&auto=format&fit=crop",
-  },
-  {
-    id: "cat-studio",
-    label: "Studio & Venue",
-    icon: Building,
-    count: "39 ruang",
-    accent: "#BFE9DD",
-    href: "/directory?actorType=STUDIO",
-    img: "https://images.unsplash.com/photo-1616627547584-bf28cee262db?q=80&w=500&auto=format&fit=crop",
-  },
-  {
-    id: "cat-creative-dir",
-    label: "Creative Director",
-    icon: Star,
-    count: "28 kreator",
-    accent: "#C9DDF8",
-    href: "/directory?sector=Creative%20Director",
-    img: "https://images.unsplash.com/photo-1504703395950-b89145a5425b?q=80&w=500&auto=format&fit=crop",
+    img: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=800&auto=format&fit=crop",
   },
 ];
 
 export function CreatorDirectory() {
   return (
-    <section id="creator-directory" className="py-24 md:py-36 bg-[#FFFDFC] relative overflow-hidden">
-
+    <section id="creator-directory" className="py-24 md:py-32 bg-white relative">
       <div className="max-w-7xl mx-auto px-6 md:px-10">
 
-        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8 mb-14">
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-14">
           <div>
-            <div className="inline-flex items-center gap-3 mb-5">
-              <span className="w-8 h-px bg-[#3e8363]" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#3e8363]">
-                Direktori Terverifikasi
+            <div className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full bg-stone-100 border border-stone-200 text-stone-600 mb-4">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-600">
+                Direktori Komprehensif
               </span>
             </div>
-            <h2 className="text-4xl md:text-[3.5rem] font-light text-[#1E1B2E] tracking-tight leading-[1.05]">
-              Semua peran dalam{" "}
-              <em className="font-serif not-italic text-stone-400">satu ekosistem.</em>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-[#1E1B2E] tracking-tight leading-[1.1]">
+              Semua peran &amp; aset dalam <br />
+              <span className="font-serif italic font-normal text-amber-700/90">satu ekosistem terpadu.</span>
             </h2>
           </div>
 
           <Link
             href="/directory"
-            className="group inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#1E1B2E] text-white text-xs font-semibold uppercase tracking-widest hover:bg-[#3e8363] transition-all shrink-0"
+            className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-[#1E1B2E] text-white text-xs font-bold uppercase tracking-wider hover:bg-stone-800 transition-all shadow-md shrink-0"
           >
-            <span>Buka Direktori</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <span>Buka Direktori Lengkap</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-amber-300" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-          {categories.map((cat, i) => {
+        {/* Grid Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {categories.map((cat) => {
             const Icon = cat.icon;
-            const isBig = i === 0 || i === 4;
             return (
               <Link
                 key={cat.id}
                 id={cat.id}
                 href={cat.href}
-                className={`group relative rounded-[24px] overflow-hidden bg-white border border-stone-100 shadow-sm hover:shadow-xl hover:shadow-stone-200/60 transition-all duration-500 flex flex-col ${
-                  isBig ? "row-span-2" : "row-span-1"
-                }`}
-                style={{ minHeight: isBig ? "360px" : "170px" }}
+                className="group relative rounded-3xl overflow-hidden bg-stone-900 border border-stone-200/50 shadow-sm hover:shadow-2xl hover:shadow-stone-900/15 transition-all duration-500 flex flex-col justify-end min-h-[300px]"
               >
-
+                {/* Background Image with Zoom Effect */}
                 <img
                   src={cat.img}
                   alt={cat.label}
-                  className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+                  className="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:scale-105 group-hover:opacity-95 transition-all duration-700"
+                  loading="lazy"
                 />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/80 transition-all duration-500" />
+                {/* Dark Vignette Overlay for readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/40 to-transparent group-hover:from-stone-950/95 transition-all duration-300" />
 
-                <div className="relative z-10 p-5 flex flex-col h-full">
-
+                {/* Card Content */}
+                <div className="relative z-10 p-6 flex flex-col justify-between h-full">
+                  
+                  {/* Top Badges */}
                   <div className="flex items-center justify-between">
-                    <div
-                      className="w-9 h-9 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: cat.accent + "30", border: `1px solid ${cat.accent}50` }}
-                    >
-                      <Icon className="w-4 h-4" style={{ color: cat.accent }} />
-                    </div>
-                    <div
-                      className="w-2 h-2 rounded-full"
-                      style={{ backgroundColor: cat.accent }}
-                    />
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-white border border-white/20">
+                      {cat.tag}
+                    </span>
+                    <span className="text-[10px] font-semibold text-amber-300 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-amber-300/30">
+                      {cat.count}
+                    </span>
                   </div>
 
-                  <div className="mt-auto">
-                    <div
-                      className="text-[9px] font-bold uppercase tracking-[0.2em] mb-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                      style={{ color: cat.accent }}
-                    >
-                      {cat.count}
+                  {/* Bottom Titles */}
+                  <div className="mt-auto pt-12">
+                    <div className="flex items-center gap-2 mb-1.5 text-stone-300 text-xs font-light">
+                      <Icon className="w-3.5 h-3.5 text-amber-300" />
+                      <span>{cat.subtitle}</span>
                     </div>
-                    <h3 className="text-sm sm:text-base font-medium text-white tracking-tight leading-snug">
+                    <h3 className="text-xl font-bold text-white tracking-tight leading-snug">
                       {cat.label}
                     </h3>
-                    <div className="flex items-center gap-1.5 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span className="text-[10px] font-semibold uppercase tracking-widest text-stone-300">Jelajahi</span>
-                      <ArrowRight className="w-3 h-3 text-stone-300" />
+                    
+                    <div className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold text-amber-300 uppercase tracking-wider opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0 transition-all duration-300">
+                      <span>Jelajahi Profil</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </div>
                   </div>
+
                 </div>
               </Link>
             );

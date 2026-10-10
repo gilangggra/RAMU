@@ -57,11 +57,7 @@ export async function login(formData: FormData) {
         }),
       ]);
 
-      if (
-        profile?.role === "SUPERADMIN" ||
-        existingActor?.sector === "Platform Administrator" ||
-        existingActor?.sector?.toLowerCase().includes("administrator")
-      ) {
+      if (profile?.role === "SUPERADMIN") {
         isAdminUser = true;
       }
 
