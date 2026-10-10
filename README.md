@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="public/ramu-logo.png" alt="RAMU Logo" width="100" />
+</p>
+
 # RAMU — Creative Opportunity Engine
 
 > **Platform Kolaborasi Ekonomi Kreatif Berbasis Analisis Komplementaritas Resource Deterministik**
