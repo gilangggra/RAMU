@@ -317,8 +317,14 @@
     print-color-adjust: exact !important;
   }
 
-  /* 2. Hide Non-Document Elements (Navigation, Sidebars, Buttons, Modals Overlays) */
+  /* 2. When a printable modal is open, HIDE ALL OTHER DIRECT CHILDREN of body */
+  body:has(.print-modal-root) > *:not(.print-modal-root) {
+    display: none !important;
+  }
+
+  /* 3. Hide Non-Document Elements (Navigation, Sidebars, Buttons, Modals Overlays) */
   nav,
+  aside,
   header.fixed,
   header:not(.print-letterhead),
   footer,
@@ -331,7 +337,8 @@
     display: none !important;
   }
 
-  /* 3. Unlock Modal Wrappers & Backdrop */
+  /* 4. Unlock Print Modal Wrapper */
+  .print-modal-root,
   .fixed,
   .fixed.inset-0,
   [role="dialog"] {
@@ -355,7 +362,23 @@
     border-radius: 0 !important;
   }
 
-  /* 4. Full Document Expansion for Printable Sheets */
+  .print-modal-root > div {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 5. Full Document Expansion for Printable Sheets */
   #spk-printable-area,
   #spk-collab-printable,
   #invoice-printable-area,
@@ -377,7 +400,7 @@
     color: #000000 !important;
   }
 
-  /* 5. Prevent Page Break Splitting inside Articles & Signatures */
+  /* 6. Prevent Page Break Splitting inside Articles & Signatures */
   .print-break-inside-avoid,
   .spk-article,
   .spk-signatures,
@@ -388,7 +411,7 @@
     page-break-inside: avoid !important;
   }
 
-  /* 6. Clean Text Contrast */
+  /* 7. Clean Text Contrast */
   h1, h2, h3, h4, p, span, div {
     color: inherit;
     text-shadow: none !important;

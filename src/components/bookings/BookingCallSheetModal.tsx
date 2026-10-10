@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   Clock,
   MapPin,
@@ -20,8 +21,10 @@ import {
   ExternalLink,
   Plus,
   Trash2,
+  Printer,
 } from "lucide-react";
 import { exportElementToPdf } from "@/lib/export/pdfExporter";
+import { printElement } from "@/lib/export/printDocument";
 import { BookingSpkData } from "@/components/bookings/SpkAgreementModal";
 import { toast } from "@/components/ui/Toast";
 import { RamuLogo } from "@/components/brand/RamuLogo";
@@ -158,6 +161,12 @@ export function BookingCallSheetModal({
     "Look 3: Detail Close-up Accessories & Footwear",
   ]);
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   if (!isOpen) return null;
 
   function handleAddRundown() {
@@ -225,25 +234,34 @@ export function BookingCallSheetModal({
       toast.error("Gagal menyalin teks.");
     }
   }
+  function handlePrint() {
+    printElement(printRef.current || "callsheet-printable-area", `CALL-SHEET-${booking.id.slice(0, 8).toUpperCase()}`);
+  }
 
   async function handleExportPdf() {
-    if (!printRef.current) return;
+    const el = printRef.current || document.getElementById("callsheet-printable-area");
+    if (!el) {
+      handlePrint();
+      return;
+    }
     setIsExportingPdf(true);
     try {
-      await exportElementToPdf(printRef.current, {
+      await exportElementToPdf(el, {
         filename: `CALL-SHEET-${booking.id.slice(0, 8).toUpperCase()}.pdf`,
       });
       toast.success("Lembar Call Sheet berhasil diunduh dalam format PDF!");
     } catch (e) {
       console.error("Gagal ekspor PDF:", e);
-      window.print();
+      handlePrint();
     } finally {
       setIsExportingPdf(false);
     }
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-xs animate-fade-in overflow-y-auto print:static print:inset-auto print:z-auto print:p-0 print:m-0 print:bg-transparent print:backdrop-blur-none print:overflow-visible print:block">
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="print-modal-root fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-xs animate-fade-in overflow-y-auto print:static print:inset-auto print:z-auto print:p-0 print:m-0 print:bg-transparent print:backdrop-blur-none print:overflow-visible print:block">
       <div className="bg-white border border-slate-200 rounded-[22px] shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden my-auto print:max-w-none print:w-full print:border-none print:shadow-none print:rounded-none print:max-h-none print:h-auto print:overflow-visible print:block print:my-0">
         {/* Top Action Toolbar */}
         <div className="print:hidden px-5 py-4 border-b border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-3 shrink-0">
@@ -279,9 +297,18 @@ export function BookingCallSheetModal({
             </button>
 
             <button
+              onClick={handlePrint}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+              title="Cetak Lembar Call Sheet A4"
+            >
+              <Printer className="w-3.5 h-3.5 text-slate-500" />
+              <span className="hidden sm:inline">Cetak</span>
+            </button>
+
+            <button
               onClick={handleExportPdf}
               disabled={isExportingPdf}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5 text-slate-300" />
               <span>{isExportingPdf ? "Mencetak..." : "Unduh PDF A4"}</span>
@@ -547,6 +574,7 @@ export function BookingCallSheetModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

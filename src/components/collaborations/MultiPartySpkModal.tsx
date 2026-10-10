@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   FileText,
@@ -23,6 +24,7 @@ import {
   Lock,
 } from "lucide-react";
 import { exportElementToPdf } from "@/lib/export/pdfExporter";
+import { printElement } from "@/lib/export/printDocument";
 import { RamuLogo } from "@/components/brand/RamuLogo";
 
 export interface SpkParticipant {
@@ -139,6 +141,11 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isDrawingRef = useRef(false);
   const printableRef = useRef<HTMLDivElement | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -230,9 +237,16 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
     }
   }
 
+  function handlePrint() {
+    printElement("spk-collab-printable", `SPK-MultiPihak-${shortId}`);
+  }
+
   async function handleExportPdf() {
     const el = printableRef.current || document.getElementById("spk-collab-printable");
-    if (!el) return;
+    if (!el) {
+      handlePrint();
+      return;
+    }
     setIsExportingPdf(true);
     try {
       const cleanTitle = (data.collaborationTitle || "Proyek").replace(/[^a-zA-Z0-9]/g, "-").slice(0, 30);
@@ -241,7 +255,7 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
       });
     } catch (err) {
       console.error("Gagal ekspor PDF otomatis, beralih ke print dialog:", err);
-      window.print();
+      handlePrint();
     } finally {
       setIsExportingPdf(false);
     }
@@ -287,8 +301,10 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3 bg-slate-950/60 backdrop-blur-sm overflow-hidden print:static print:inset-auto print:z-auto print:p-0 print:m-0 print:bg-transparent print:backdrop-blur-none print:overflow-visible print:block">
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="print-modal-root fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3 bg-slate-950/60 backdrop-blur-sm overflow-hidden print:static print:inset-auto print:z-auto print:p-0 print:m-0 print:bg-transparent print:backdrop-blur-none print:overflow-visible print:block">
       {/* MODAL WRAPPER (Fits perfectly within single screen without overflowing) */}
       <div className="relative w-full max-w-6xl h-[88vh] max-h-[740px] min-h-[520px] bg-white rounded-[24px] shadow-2xl border border-slate-200/90 overflow-hidden flex flex-col font-sans animate-fade-in print:max-w-none print:w-full print:h-auto print:max-h-none print:min-h-0 print:border-none print:shadow-none print:rounded-none print:overflow-visible print:block print:my-0">
 
@@ -326,7 +342,7 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
 
             <button
               type="button"
-              onClick={() => window.print()}
+              onClick={handlePrint}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors cursor-pointer shadow-2xs"
               title="Cetak Dokumen"
             >
@@ -962,6 +978,7 @@ export function MultiPartySpkModal({ isOpen, onClose, data, currentActorId, onSi
         )}
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

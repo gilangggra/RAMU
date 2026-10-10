@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   FileText,
   Printer,
@@ -26,6 +27,7 @@ import {
   getMilestoneSchemeLabel,
 } from "@/components/settings/RatesForm";
 import { exportElementToPdf } from "@/lib/export/pdfExporter";
+import { printElement } from "@/lib/export/printDocument";
 import { createSpkAuditTrail } from "@/lib/spkFingerprint";
 import { RamuLogo } from "@/components/brand/RamuLogo";
 
@@ -72,6 +74,11 @@ function toRomanMonth(month: number): string {
 export function SpkAgreementModal({ isOpen, onClose, booking }: SpkAgreementModalProps) {
   const [copied, setCopied] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -141,7 +148,7 @@ export function SpkAgreementModal({ isOpen, onClose, booking }: SpkAgreementModa
     try {
       const el = document.getElementById("spk-printable-area");
       if (!el) {
-        window.print();
+        handlePrint();
         return;
       }
       const clientName = (booking.requester.name || "Klien").replace(/[^a-zA-Z0-9]/g, "-").slice(0, 20);
@@ -151,14 +158,14 @@ export function SpkAgreementModal({ isOpen, onClose, booking }: SpkAgreementModa
       });
     } catch (err) {
       console.error("Gagal ekspor PDF otomatis, beralih ke print dialog:", err);
-      window.print();
+      handlePrint();
     } finally {
       setIsExportingPdf(false);
     }
   }
 
   function handlePrint() {
-    window.print();
+    printElement("spk-printable-area", `SPK-RAMU-${booking.requester.name || "Klien"}-${booking.target.name || "Talenta"}-${shortId}`);
   }
 
   function handleCopySummary() {
@@ -200,8 +207,10 @@ Dokumen sah digital: ${typeof window !== "undefined" ? window.location.origin : 
       `Dokumen kesepakatan kolaborasi terverifikasi di RAMU.`
   )}`;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/70 backdrop-blur-xs overflow-y-auto print:static print:inset-auto print:z-auto print:p-0 print:m-0 print:bg-transparent print:backdrop-blur-none print:overflow-visible print:block">
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="print-modal-root fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/70 backdrop-blur-xs overflow-y-auto print:static print:inset-auto print:z-auto print:p-0 print:m-0 print:bg-transparent print:backdrop-blur-none print:overflow-visible print:block">
 
       <div className="relative w-full max-w-4xl bg-white rounded-[22px] shadow-2xl border border-slate-300 overflow-hidden my-auto max-h-[94vh] flex flex-col font-sans print:max-w-none print:w-full print:border-none print:shadow-none print:rounded-none print:max-h-none print:h-auto print:overflow-visible print:block print:my-0">
 
@@ -684,6 +693,7 @@ Dokumen sah digital: ${typeof window !== "undefined" ? window.location.origin : 
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

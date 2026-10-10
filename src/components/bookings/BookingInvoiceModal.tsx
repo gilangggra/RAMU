@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   FileText,
   Download,
@@ -17,6 +18,7 @@ import {
   Share2,
 } from "lucide-react";
 import { exportElementToPdf } from "@/lib/export/pdfExporter";
+import { printElement } from "@/lib/export/printDocument";
 import { BookingSpkData } from "@/components/bookings/SpkAgreementModal";
 import { RamuLogo } from "@/components/brand/RamuLogo";
 
@@ -36,7 +38,12 @@ export function BookingInvoiceModal({
   const [docType, setDocType] = useState<"INVOICE_DP" | "INVOICE_PELUNASAN" | "KWITANSI">(initialType);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -85,16 +92,24 @@ export function BookingInvoiceModal({
   const accountHolder = payoutAccount?.accountHolder || booking.target.name;
   const npwpNik = payoutAccount?.taxIdentifier || "Tercatat dalam SPK resmi";
 
+  function handlePrint() {
+    printElement(printRef.current || "invoice-printable-area", docCode.replace(/[\/\\]/g, "-"));
+  }
+
   async function handleExportPdf() {
-    if (!printRef.current) return;
+    const el = printRef.current || document.getElementById("invoice-printable-area");
+    if (!el) {
+      handlePrint();
+      return;
+    }
     setIsExportingPdf(true);
     try {
-      await exportElementToPdf(printRef.current, {
+      await exportElementToPdf(el, {
         filename: `${docCode.replace(/[\/\\]/g, "-")}.pdf`,
       });
     } catch (e) {
       console.error("Gagal ekspor PDF:", e);
-      window.print();
+      handlePrint();
     } finally {
       setIsExportingPdf(false);
     }
@@ -122,8 +137,10 @@ Dokumen sah digital: ${typeof window !== "undefined" ? window.location.origin : 
     setTimeout(() => setCopied(false), 2500);
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-xs overflow-y-auto animate-fade-in print:static print:inset-auto print:z-auto print:p-0 print:m-0 print:bg-transparent print:backdrop-blur-none print:overflow-visible print:block">
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="print-modal-root fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-xs overflow-y-auto animate-fade-in print:static print:inset-auto print:z-auto print:p-0 print:m-0 print:bg-transparent print:backdrop-blur-none print:overflow-visible print:block">
       <div className="relative w-full max-w-3xl bg-white rounded-[22px] shadow-2xl border border-slate-300 overflow-hidden my-auto max-h-[94vh] flex flex-col font-sans print:max-w-none print:w-full print:border-none print:shadow-none print:rounded-none print:max-h-none print:h-auto print:overflow-visible print:block print:my-0">
         {/* Top Control Bar */}
         <div className="print:hidden flex items-center justify-between px-5 py-3.5 border-b border-slate-200 bg-slate-100/90 shrink-0">
@@ -151,7 +168,7 @@ Dokumen sah digital: ${typeof window !== "undefined" ? window.location.origin : 
             </button>
             <button
               type="button"
-              onClick={() => window.print()}
+              onClick={handlePrint}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors cursor-pointer shadow-xs"
             >
               <Printer className="w-3.5 h-3.5" />
@@ -394,6 +411,7 @@ Dokumen sah digital: ${typeof window !== "undefined" ? window.location.origin : 
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
