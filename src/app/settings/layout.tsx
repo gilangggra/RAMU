@@ -55,11 +55,16 @@ export default async function SettingsLayout({
   return (
     <AppShell actor={actor} activeRoute="/settings">
       <div className="w-full max-w-7xl mx-auto space-y-6 pb-16">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            Pengaturan Akun
+        <div className="space-y-1.5">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 text-[#0284c7] border border-sky-200/60 text-[10px] font-bold uppercase tracking-wider w-fit">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#4CC9FE] animate-pulse" />
+            <span>Workspace &amp; Account Settings</span>
+          </div>
+
+          <h1 className="text-2xl sm:text-3xl font-black text-[#27213D] tracking-tight">
+            Pengaturan Akun &amp; Operasional
           </h1>
-          <p className="text-xs sm:text-sm text-slate-600 mt-1">
+          <p className="text-xs sm:text-sm text-[#716B7E]">
             Pusat konfigurasi rekening pencairan dana SPK, status ketersediaan, notifikasi, dan keamanan akun Anda.
           </p>
         </div>
@@ -78,3 +83,4 @@ export default async function SettingsLayout({
     </AppShell>
   );
 }
+
