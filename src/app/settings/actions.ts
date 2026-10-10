@@ -1118,3 +1118,189 @@ export async function updateNotificationSettingsAction(formData: FormData) {
     return { success: false, error: error.message || "Gagal menyimpan preferensi notifikasi." };
   }
 }
+
+export async function updatePrivacySettingsAction(formData: FormData) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized: Silakan login terlebih dahulu.");
+
+    const actor = await prisma.actor.findFirst({
+      where: { ownerUserId: user.id, status: { not: "ARCHIVED" } },
+    });
+    if (!actor) throw new Error("Profil aktor tidak ditemukan.");
+
+    const hideContactPhone = formData.get("hideContactPhone") === "true";
+    const hideContactEmail = formData.get("hideContactEmail") === "true";
+    const verifiedOnlyInquiry = formData.get("verifiedOnlyInquiry") === "true";
+
+    const asset = await getOrCreateServiceAsset(actor.id, actor.name);
+    const attrs = (asset.attributes && typeof asset.attributes === "object")
+      ? (asset.attributes as Record<string, any>)
+      : {};
+
+    const updatedAttrs = {
+      ...attrs,
+      privacySettings: {
+        hideContactPhone,
+        hideContactEmail,
+        verifiedOnlyInquiry,
+        updatedAt: new Date().toISOString(),
+      },
+    };
+
+    await prisma.asset.update({
+      where: { id: asset.id },
+      data: { attributes: updatedAttrs },
+    });
+
+    revalidatePath("/settings");
+    revalidatePath("/settings/security");
+    revalidatePath("/directory");
+    revalidatePath(`/directory/${actor.id}`);
+
+    return { success: true, message: "Preferensi privasi dan visibilitas kontak berhasil disimpan." };
+  } catch (error: any) {
+    console.error("Error updating privacy settings:", error);
+    return { success: false, error: error.message || "Gagal menyimpan preferensi privasi." };
+  }
+}
+
+export async function exportUserDataAction() {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized: Silakan login terlebih dahulu.");
+
+    const profile = await prisma.profile.findUnique({
+      where: { id: user.id },
+    });
+
+    if (!profile) throw new Error("Data pengguna tidak ditemukan.");
+
+    const actors = await prisma.actor.findMany({
+      where: { ownerUserId: user.id },
+      include: {
+        assets: {
+          where: { status: "ACTIVE" },
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            subtype: true,
+            roles: true,
+            description: true,
+            attributes: true,
+            createdAt: true,
+          },
+        },
+        goals: true,
+        needs: true,
+        constraints: true,
+        bookingRequestsSent: {
+          take: 50,
+          select: {
+            id: true,
+            targetId: true,
+            status: true,
+            startDate: true,
+            endDate: true,
+            budget: true,
+            createdAt: true,
+          },
+        },
+        bookingRequestsReceived: {
+          take: 50,
+          select: {
+            id: true,
+            requesterId: true,
+            status: true,
+            startDate: true,
+            endDate: true,
+            budget: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      compliance: "UU PDP No. 27 Tahun 2022 (Hak Akses dan Portabilitas Data Pribadi)",
+      platform: "RAMU - Ekosistem Kolaborasi Kreatif & Komersial",
+      account: {
+        id: profile.id,
+        email: profile.email,
+        displayName: profile.displayName,
+        avatarUrl: profile.avatarUrl,
+        bio: profile.bio,
+        role: profile.role,
+        registeredAt: profile.createdAt,
+      },
+      actors: actors.map((act) => ({
+        id: act.id,
+        name: act.name,
+        actorType: act.actorType,
+        sector: act.sector,
+        location: act.location,
+        contactEmail: act.contactEmail,
+        contactPhone: act.contactPhone,
+        websiteUrl: act.websiteUrl,
+        isVerified: act.isVerified,
+        registeredAt: act.createdAt,
+        assets: act.assets,
+        goals: act.goals,
+        needs: act.needs,
+        bookingsSent: act.bookingRequestsSent,
+        bookingsReceived: act.bookingRequestsReceived,
+      })),
+    };
+
+    return { success: true, data: exportData };
+  } catch (error: any) {
+    console.error("Error exporting user data:", error);
+    return { success: false, error: error.message || "Gagal mengunduh salinan data pribadi." };
+  }
+}
+
+export async function requestAccountDeletionAction() {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized: Silakan login terlebih dahulu.");
+
+    const actor = await prisma.actor.findFirst({
+      where: { ownerUserId: user.id },
+    });
+
+    if (actor) {
+      await prisma.actor.update({
+        where: { id: actor.id },
+        data: {
+          status: "ARCHIVED",
+          archivedAt: new Date(),
+        },
+      });
+
+      // Clear operational sensitive assets (payout, NIK, NPWP) in compliance with PDP erasure
+      await prisma.asset.deleteMany({
+        where: {
+          actorId: actor.id,
+          subtype: "OPERATIONAL_SETTINGS",
+        },
+      });
+    }
+
+    revalidatePath("/directory");
+    revalidatePath("/settings");
+
+    return {
+      success: true,
+      message: "Profil publik Anda telah dinonaktifkan dari direktori RAMU dan data sensitif rekening telah dihapus.",
+    };
+  } catch (error: any) {
+    console.error("Error requesting account deletion:", error);
+    return { success: false, error: error.message || "Gagal memproses permohonan penghapusan." };
+  }
+}
+

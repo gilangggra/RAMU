@@ -256,7 +256,23 @@ export async function getDirectoryActors(params: DirectoryFilterParams = {}) {
     orderBy: sortBy === "name" ? [{ name: "asc" }] : [{ createdAt: "desc" }],
   });
 
-  return actors;
+  const sanitizedActors = actors.map((actor) => {
+    const sanitizedAssets = actor.assets?.map((asset) => {
+      if (asset.attributes && typeof asset.attributes === "object") {
+        const { payoutAccount, ...safeAttrs } = asset.attributes as Record<string, any>;
+        return { ...asset, attributes: safeAttrs };
+      }
+      return asset;
+    });
+
+    return {
+      ...actor,
+      contactPhone: null, // Keep phone numbers private on public directory listings
+      assets: sanitizedAssets,
+    };
+  });
+
+  return sanitizedActors;
 }
 
 export async function getDirectoryActorById(id: string) {
@@ -364,14 +380,35 @@ export async function getDirectoryActorById(id: string) {
     return null;
   }
 
-  if (actor?.assets) {
-    actor.assets = actor.assets.map((asset) => {
-      if (asset.attributes && typeof asset.attributes === "object") {
-        const { payoutAccount, ...safeAttrs } = asset.attributes as Record<string, any>;
-        return { ...asset, attributes: safeAttrs };
-      }
-      return asset;
+  if (actor) {
+    if (actor.assets) {
+      actor.assets = actor.assets.map((asset) => {
+        if (asset.attributes && typeof asset.attributes === "object") {
+          const { payoutAccount, ...safeAttrs } = asset.attributes as Record<string, any>;
+          return { ...asset, attributes: safeAttrs };
+        }
+        return asset;
+      });
+    }
+
+    // Check user-configured privacy preferences
+    const operationalAsset = await prisma.asset.findFirst({
+      where: {
+        actorId: actor.id,
+        subtype: "OPERATIONAL_SETTINGS",
+      },
+      select: { attributes: true },
     });
+
+    const privacy = (operationalAsset?.attributes as any)?.privacySettings;
+    if (privacy) {
+      if (privacy.hideContactPhone) {
+        actor.contactPhone = null;
+      }
+      if (privacy.hideContactEmail) {
+        actor.contactEmail = null;
+      }
+    }
   }
 
   return actor;
